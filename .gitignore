@@ -4,3 +4,5 @@ node_modules/
 meta-automation-ref/
 .vercel/
 evidence/extra-x402-calls.json
+
+bounties-ref/
