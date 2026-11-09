@@ -1,5 +1,7 @@
 # Praman Desk
 
+**Hosted demo (no wallet required):** <https://praman-desk.vercel.app>
+
 Procurement, invoice reconciliation, and document provenance verification bought from [Telegraph](https://anjoman.ai/docs) miners (`x402`, Ethereum Sepolia) and cross-checked against the official GLEIF LEI registry and deterministic 3-way arithmetic.
 
 Built for **Telegraph Hackathon Season II** across:
