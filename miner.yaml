@@ -1,0 +1,135 @@
+version: "1"
+kind: miner
+slug: praman-compliance-miner
+protocol: generic
+name: Praman Desk Compliance & Procurement Auditor
+description: >-
+  Autonomous compliance auditor, 3-way invoice vs ledger reconciliation,
+  procurement purchase order verification, statutory entity checks via GLEIF,
+  and cryptographic SHA-256 e-Invoice provenance verification. Reconciles
+  quantities, unit prices, line totals, taxes, currency conversions, and
+  vendor legal registrations with deterministic ground-truth guarantees.
+base_url: https://praman-desk.vercel.app
+
+auth:
+  type: none
+
+endpoints:
+  - path: /api/miner/po-verify
+    external_path: /api/miner/po-verify
+    method: GET
+    intents:
+      - PURCHASE_ORDER_VERIFY_GENERAL
+    description: >-
+      Verifies purchase order arithmetic and line totals. Checks line_total = quantity * unit_price,
+      sum of lines = subtotal, and subtotal + tax + shipping = grand_total.
+      Accepts canonical parameters (po_number, vendor, items) or verbatim question string (?question=...).
+    params:
+      query:
+        optional:
+          - name: po_number
+            type: string
+            intents: ["*"]
+            description: "Purchase order identifier"
+          - name: vendor
+            type: string
+            intents: ["*"]
+            description: "Vendor entity name"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Full verbatim purchase order text or audit query"
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Legacy query alias for question"
+
+  - path: /api/miner/invoice-reconcile
+    external_path: /api/miner/invoice-reconcile
+    method: GET
+    intents:
+      - INVOICE_LEDGER_RECONCILE_GENERAL
+    description: >-
+      Performs 3-way invoice vs ledger reconciliation. Identifies mathematical discrepancies,
+      tax rate mismatches, unit price variances, and currency conversion adjustments.
+      Returns boolean reconciled status, numerical discrepancy amount, and detailed findings.
+    params:
+      query:
+        optional:
+          - name: invoice
+            type: string
+            intents: ["*"]
+            description: "Invoice identifier, amount, or payload"
+          - name: ledger
+            type: string
+            intents: ["*"]
+            description: "ERP ledger entry or general ledger reference"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Verbatim reconciliation problem text"
+
+  - path: /api/miner/vendor-verify
+    external_path: /api/miner/vendor-verify
+    method: GET
+    intents:
+      - VENDOR_VERIFY_GENERAL
+    description: >-
+      Verifies vendor corporate existence, active statutory status, and LEI registration
+      against the Global Legal Entity Identifier Foundation (GLEIF) primary registry.
+      Returns boolean valid status, legal name, jurisdiction, and official registrar link.
+    params:
+      query:
+        optional:
+          - name: vendor
+            type: string
+            intents: ["*"]
+            description: "Legal company name or business trading name"
+          - name: lei
+            type: string
+            intents: ["*"]
+            description: "20-character ISO 17442 Legal Entity Identifier"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Vendor inquiry question"
+
+  - path: /api/miner/doc-authenticity
+    external_path: /api/miner/doc-authenticity
+    method: GET
+    intents:
+      - DOCUMENT_AUTHENTICITY_GENERAL
+    description: >-
+      Verifies document provenance, e-Invoice canonical representation, and SHA-256 cryptographic digest.
+      Confirms integrity of digital invoices, bills of lading, and procurement receipts.
+    params:
+      query:
+        optional:
+          - name: document
+            type: string
+            intents: ["*"]
+            description: "Document body, e-invoice text, or SHA-256 hash"
+          - name: hash
+            type: string
+            intents: ["*"]
+            description: "Expected SHA-256 cryptographic digest"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Document verification inquiry"
+
+semantics:
+  supported_intents:
+    - PURCHASE_ORDER_VERIFY_GENERAL
+    - INVOICE_LEDGER_RECONCILE_GENERAL
+    - VENDOR_VERIFY_GENERAL
+    - DOCUMENT_AUTHENTICITY_GENERAL
+
+docs:
+  repository: https://github.com/VishAlgoDev/praman-desk
+  web_app: https://praman-desk.vercel.app
+
+rate_limit_per_sec: 20
+cache_ttl_sec: 60
+circuit_threshold: 5
+circuit_cooldown_seconds: 30
