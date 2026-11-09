@@ -1,0 +1,12 @@
+{
+  "previousRegistrationId": "5163",
+  "registrationId": "5163",
+  "txHash": "0x8bc5c05cf13b81b0f6f8ea2fdd1d0dc7348e4603b2a92d7a71868fe9c7de10e3",
+  "blockNumber": 12098545,
+  "miner": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/miner.yaml",
+  "yamlHash": "0xb595b1a4ef78388c5f31b33ba91d7fbb2b87ff38c3c7216efa9e8fcf1a8ec361",
+  "status": "active",
+  "updatedAt": "2026-11-09T15:55:03.726Z"
+}

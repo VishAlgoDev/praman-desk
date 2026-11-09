@@ -406,7 +406,7 @@
   <header>
     <div>
       <h1>Praman Desk</h1>
-      <p class="sub">Commercial procurement, invoice reconciliation, and document provenance verification bought from Telegraph miners (<span class="mono">x402</span>, Ethereum Sepolia) and cross-checked against GLEIF and deterministic 3-way arithmetic.</p>
+      <p class="sub">Autonomous Pre-Payment Spend Guard &amp; Counterparty Clearing Desk for AI Agents, DAOs, and ERPs on Telegraph Protocol (Ethereum Sepolia). Deterministic 3-way reconciliation and primary global entity verification against GLEIF (200+ jurisdictions).</p>
     </div>
     <div class="wallet-box" id="wallet-box">Loading Sepolia wallet...</div>
   </header>
@@ -418,122 +418,145 @@
   </section>
 
   <nav role="tablist" aria-label="Praman Desk sections">
-    <button role="tab" aria-selected="true" data-tab="audit">Compliance audit (Mission 04)</button>
+    <button role="tab" aria-selected="true" data-tab="audit">Spend Guard (Missions 04 &amp; 15)</button>
     <button role="tab" aria-selected="false" data-tab="ledger">On-chain receipt ledger (5)</button>
     <button role="tab" aria-selected="false" data-tab="eval">Evaluator pool &amp; bounties (41)</button>
-    <button role="tab" aria-selected="false" data-tab="miner">Replacement miner API (4)</button>
+    <button role="tab" aria-selected="false" data-tab="miner">Active Miner #5165 (Sepolia)</button>
   </nav>
 
-  <!-- TAB 1: COMPLIANCE AUDIT -->
+  <!-- TAB 1: SPEND GUARD & COMPLIANCE AUDIT -->
   <div id="tab-audit">
     <section class="panel">
+      <!-- QUICK GLOBAL COUNTERPARTY & GLEIF INSPECTOR -->
+      <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+          <h3 style="margin:0; font-size:14px; font-weight:600;">⚡ Instant Global Counterparty Lookup (Live GLEIF API)</h3>
+          <span class="hint" style="margin:0;">200+ jurisdictions &bull; keyless primary registry &bull; real-time validation</span>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <input type="text" id="quick-vendor-input" placeholder="Type any corporate entity (e.g. Apple Inc., SAP SE, Stripe, Amazon, Infosys)..." style="flex:1; min-width:240px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
+          <button type="button" class="primary" id="btn-quick-verify" style="padding:7px 14px; font-size:13px;">Verify Entity</button>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+          <span class="hint" style="margin:0; font-size:12px;">Quick test:</span>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Apple Inc.">Apple Inc.</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="SAP SE">SAP SE</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Stripe, Inc.">Stripe, Inc.</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Microsoft">Microsoft (Lapsed)</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Siemens AG">Siemens AG</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Infosys Limited">Infosys Limited</button>
+        </div>
+        <div id="quick-vendor-result" style="margin-top:10px;" hidden></div>
+      </div>
+
       <div class="preset-bar">
-        <span class="hint" style="margin:0; font-weight:600; color:var(--ink)">Sample audit cases:</span>
-        <button type="button" data-preset="discrepancy">Case 1: Rust-rejected GRN over-billing + altered e-Invoice face</button>
-        <button type="button" data-preset="clean">Case 2: Clean 3-way match (SAP SE / DE143593636)</button>
-        <button type="button" data-preset="cap">Case 3: Unauthorized PO cap override</button>
+        <span class="hint" style="margin:0; font-weight:600; color:var(--ink)">Spend audit presets:</span>
+        <button type="button" data-preset="saas">Case 1: Clean 3-way match (Stripe, Inc. / USD $27,062.50)</button>
+        <button type="button" data-preset="variance">Case 2: Quantity over-billing variance (Apple Inc. / USD $995 unapproved)</button>
+        <button type="button" data-preset="europe">Case 3: Cross-border EU VAT license (SAP SE / EUR €59,500)</button>
+        <button type="button" data-preset="tampered">Case 4: Cryptographic digest tamper ($1,416 QR vs $1,888 PDF face)</button>
       </div>
 
       <form id="audit-form" novalidate>
-        <h2>1. Vendor, Purchase Order, Invoice &amp; Document Inputs</h2>
+        <h2>1. Counterparty, Purchase Order, Invoice &amp; Provenance Inputs</h2>
         <div class="grid">
           <div class="field">
             <label for="f-vendor">Vendor legal name</label>
             <span id="hint-vendor" class="hint">Exact registered corporate name</span>
-            <input type="text" id="f-vendor" name="vendor" value="Infosys Limited" required minlength="2" aria-describedby="hint-vendor" aria-errormessage="err-vendor">
+            <input type="text" id="f-vendor" name="vendor" value="Stripe, Inc." required minlength="2" aria-describedby="hint-vendor" aria-errormessage="err-vendor">
             <div id="err-vendor" class="error-msg">Enter a legal entity name (at least 2 characters).</div>
           </div>
 
           <div class="field">
-            <label for="f-vat">VAT / GSTIN / Tax ID</label>
-            <span id="hint-vat" class="hint">EU VAT (DE143593636) or 15-char GSTIN</span>
-            <input type="text" id="f-vat" name="vatNumber" value="29AAACI4798L1Z0" required pattern="[A-Za-z0-9]{8,20}" aria-describedby="hint-vat" aria-errormessage="err-vat">
-            <div id="err-vat" class="error-msg">Enter an 8 to 20 character alphanumeric VAT or GSTIN.</div>
+            <label for="f-vat">Tax ID / EIN / VAT (Optional)</label>
+            <span id="hint-vat" class="hint">US EIN (12-3456789), EU/UK VAT, or GSTIN</span>
+            <input type="text" id="f-vat" name="vatNumber" value="12-3456789" pattern="[A-Za-z0-9-]{0,20}" aria-describedby="hint-vat" aria-errormessage="err-vat">
+            <div id="err-vat" class="error-msg">Enter a valid tax identifier format or leave blank.</div>
           </div>
 
           <div class="field">
             <label for="f-lei">GLEIF LEI (20-char ISO 17442)</label>
             <span id="hint-lei" class="hint">Checked live against api.gleif.org</span>
-            <input type="text" id="f-lei" name="lei" value="335800TYLGG93MM7PR89" pattern="[A-Za-z0-9]{20}" aria-describedby="hint-lei" aria-errormessage="err-lei">
-            <div id="err-lei" class="error-msg">LEI must be 20 alphanumeric characters.</div>
+            <input type="text" id="f-lei" name="lei" value="549300V5Q3M4X6N7B890" pattern="[A-Za-z0-9]{0,20}" aria-describedby="hint-lei" aria-errormessage="err-lei">
+            <div id="err-lei" class="error-msg">LEI must be 20 alphanumeric characters if provided.</div>
           </div>
 
           <div class="field">
             <label for="f-po">Purchase Order ID</label>
             <span id="hint-po" class="hint">ERP PO reference number</span>
-            <input type="text" id="f-po" name="poNumber" value="PO-ERP-2026-7741" required aria-describedby="hint-po" aria-errormessage="err-po">
+            <input type="text" id="f-po" name="poNumber" value="PO-2026-104" required aria-describedby="hint-po" aria-errormessage="err-po">
             <div id="err-po" class="error-msg">Purchase Order reference is required.</div>
           </div>
 
           <div class="field">
             <label for="f-po-amt">PO amount</label>
             <span id="hint-po-amt" class="hint">Committed purchase order value</span>
-            <input type="number" id="f-po-amt" name="poAmount" value="18500000" required min="1" step="0.01" aria-describedby="hint-po-amt" aria-errormessage="err-po-amt">
+            <input type="number" id="f-po-amt" name="poAmount" value="27062.50" required min="1" step="0.01" aria-describedby="hint-po-amt" aria-errormessage="err-po-amt">
             <div id="err-po-amt" class="error-msg">Enter a positive PO amount.</div>
           </div>
 
           <div class="field">
             <label for="f-po-cap">Single-signatory approval cap</label>
-            <span id="hint-po-cap" class="hint">Max value without CFO/MD dual sign-off</span>
-            <input type="number" id="f-po-cap" name="approvalCap" value="10000000" required min="1" step="0.01" aria-describedby="hint-po-cap" aria-errormessage="err-po-cap">
+            <span id="hint-po-cap" class="hint">Max value without executive dual sign-off</span>
+            <input type="number" id="f-po-cap" name="approvalCap" value="50000.00" required min="1" step="0.01" aria-describedby="hint-po-cap" aria-errormessage="err-po-cap">
             <div id="err-po-cap" class="error-msg">Enter a positive approval cap.</div>
           </div>
 
           <div class="field">
             <label for="f-inv-id">Supplier invoice ID</label>
             <span id="hint-inv-id" class="hint">Invoice identifier to reconcile</span>
-            <input type="text" id="f-inv-id" name="invoiceId" value="INV-STL-902" required aria-describedby="hint-inv-id" aria-errormessage="err-inv-id">
+            <input type="text" id="f-inv-id" name="invoiceId" value="INV-2026-081" required aria-describedby="hint-inv-id" aria-errormessage="err-inv-id">
             <div id="err-inv-id" class="error-msg">Invoice ID is required.</div>
           </div>
 
           <div class="field">
             <label for="f-billed-qty">Invoice billed quantity</label>
             <span id="hint-billed-qty" class="hint">Units billed by supplier</span>
-            <input type="number" id="f-billed-qty" name="billedQty" value="76.5" required min="0.01" step="0.01" aria-describedby="hint-billed-qty">
+            <input type="number" id="f-billed-qty" name="billedQty" value="100" required min="0.01" step="0.01" aria-describedby="hint-billed-qty">
           </div>
 
           <div class="field">
-            <label for="f-acc-qty">GRN net accepted quantity</label>
-            <span id="hint-acc-qty" class="hint">Units accepted into ledger after QC</span>
-            <input type="number" id="f-acc-qty" name="acceptedQty" value="75.0" required min="0" step="0.01" aria-describedby="hint-acc-qty">
+            <label for="f-acc-qty">Accepted receipt quantity</label>
+            <span id="hint-acc-qty" class="hint">Units accepted into ledger after verification</span>
+            <input type="number" id="f-acc-qty" name="acceptedQty" value="100" required min="0" step="0.01" aria-describedby="hint-acc-qty">
           </div>
 
           <div class="field">
             <label for="f-rate">Contract unit rate</label>
             <span id="hint-rate" class="hint">Agreed price per unit before tax</span>
-            <input type="number" id="f-rate" name="unitPrice" value="58000" required min="0.01" step="0.01" aria-describedby="hint-rate">
+            <input type="number" id="f-rate" name="unitPrice" value="250" required min="0.01" step="0.01" aria-describedby="hint-rate">
           </div>
 
           <div class="field">
-            <label for="f-tax">Tax / GST / VAT rate (%)</label>
-            <span id="hint-tax" class="hint">Applicable indirect tax percentage</span>
-            <input type="number" id="f-tax" name="taxRatePct" value="18" required min="0" max="100" step="0.1" aria-describedby="hint-tax">
+            <label for="f-tax">Tax rate (%)</label>
+            <span id="hint-tax" class="hint">Applicable sales/VAT tax percentage</span>
+            <input type="number" id="f-tax" name="taxRatePct" value="8.25" required min="0" max="100" step="0.01" aria-describedby="hint-tax">
           </div>
 
           <div class="field">
             <label for="f-curr">Currency</label>
-            <span id="hint-curr" class="hint">ISO currency code (INR, USD, EUR)</span>
-            <input type="text" id="f-curr" name="currency" value="INR" required pattern="[A-Z]{3}" aria-describedby="hint-curr" aria-errormessage="err-curr">
-            <div id="err-curr" class="error-msg">Use a 3-letter uppercase ISO currency code.</div>
+            <span id="hint-curr" class="hint">ISO currency code (USD, EUR, GBP, INR)</span>
+            <input type="text" id="f-curr" name="currency" value="USD" required pattern="[A-Za-z]{3}" aria-describedby="hint-curr" aria-errormessage="err-curr">
+            <div id="err-curr" class="error-msg">Use a 3-letter currency code (e.g. USD, EUR).</div>
           </div>
 
           <div class="field" style="grid-column: span 2">
-            <label for="f-irn">Document SHA-256 / e-Invoice IRN (64-hex)</label>
-            <span id="hint-irn" class="hint">64-character hex digest of the signed document or NIC e-Invoice IRN</span>
+            <label for="f-irn">Document SHA-256 Digest (64-hex)</label>
+            <span id="hint-irn" class="hint">64-character hexadecimal digest of the signed invoice or spend receipt</span>
             <input type="text" id="f-irn" name="irnOrSha256" class="mono" value="64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012" required pattern="[0-9a-fA-F]{64}" aria-describedby="hint-irn" aria-errormessage="err-irn">
             <div id="err-irn" class="error-msg">Digest must be an exact 64-character hexadecimal string.</div>
           </div>
 
           <div class="field">
-            <label for="f-qr-amt">Signed QR payload value</label>
-            <span id="hint-qr-amt" class="hint">Amount encoded in signed QR/hash</span>
-            <input type="number" id="f-qr-amt" name="signedQrAmount" value="1416000" required min="0" step="0.01" aria-describedby="hint-qr-amt">
+            <label for="f-qr-amt">Signed payload value</label>
+            <span id="hint-qr-amt" class="hint">Amount authenticated by cryptographic signature</span>
+            <input type="number" id="f-qr-amt" name="signedQrAmount" value="27062.50" required min="0" step="0.01" aria-describedby="hint-qr-amt">
           </div>
 
           <div class="field">
-            <label for="f-face-amt">Rendered PDF face value</label>
-            <span id="hint-face-amt" class="hint">Amount printed on submitted PDF</span>
-            <input type="number" id="f-face-amt" name="pdfFaceAmount" value="1888000" required min="0" step="0.01" aria-describedby="hint-face-amt">
+            <label for="f-face-amt">Invoice printed face amount</label>
+            <span id="hint-face-amt" class="hint">Amount printed on received invoice face</span>
+            <input type="number" id="f-face-amt" name="pdfFaceAmount" value="27062.50" required min="0" step="0.01" aria-describedby="hint-face-amt">
           </div>
         </div>
 
@@ -580,16 +603,33 @@
     <div id="eval-results"></div>
   </div>
 
-  <!-- TAB 4: REPLACEMENT MINER ENDPOINTS -->
+  <!-- TAB 4: ACTIVE TELEGRAPH MINER #5165 -->
   <div id="tab-miner" hidden>
     <section class="panel">
-      <h2>Track 1 (Providers) — Schema-Compliant Compliance Miner Endpoints</h2>
+      <h2>Track 1 (Providers) — Active Telegraph Miner #5165 (Sepolia Diamond)</h2>
       <p class="hint" style="margin:0; font-size:13px">
-        While testing live paid calls on the network, we observed that Miner <code>#7454</code> (TradeWire PO Verify) is hardcoded to the City of Chicago registry and throws a <code>parameter "question" length 0</code> warning on typed asks, Miner <code>#7455</code> (TradeWire Invoice Reconcile) leaves <code>reconciled: null</code> and <code>discrepancy: rejected</code>, and Miner <code>#9002</code> (TxLens Vendor Verify) returns string <code>verdict</code> instead of boolean <code>valid</code>. These hosted endpoints accept both canonical typed parameters and <code>?question=</code> queries while returning strict V3/V4 schema fields.
+        Registered on the Telegraph Diamond Contract (<a href="https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" target="_blank" rel="noopener" class="mono">0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b</a>) with active Registration ID <strong>#5165</strong> backed by 0.22 MACHINA bond. Manifest pinned to immutable commit <a href="https://github.com/VishAlgoDev/praman-desk/blob/52285a1097f2ddfbb399abc506a042066cdae5e0/miner.yaml" target="_blank" rel="noopener" class="mono">52285a1</a>.
       </p>
-      <div class="actions" style="margin-top:12px">
+
+      <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:12px; margin-top:12px; font-size:13px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div>
+            <strong>Diamond Miner ID:</strong> <code class="mono">#5165</code> &bull; 
+            <strong>Slug:</strong> <code class="mono">praman-compliance-miner</code>
+          </div>
+          <div>
+            <a href="https://sepolia.etherscan.io/tx/0x7b6ddf151dedd6b74e557c527f5e1ce283314117b8fb3b14b4ba0052c7e72c81" target="_blank" rel="noopener">Registration Tx (Etherscan) ↗</a>
+          </div>
+        </div>
+        <p style="margin:8px 0 0; color:var(--muted); font-size:12.5px;">
+          These hosted endpoints accept both canonical typed parameters and free-text <code>?question=</code> queries while returning strict V3/V4 schemas with live keyless GLEIF validation and deterministic 3-way arithmetic.
+        </p>
+      </div>
+
+      <div class="actions" style="margin-top:14px">
         <button type="button" class="secondary" data-test-miner="/api/miner/invoice-reconcile">Test /api/miner/invoice-reconcile</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=Infosys%20Limited&lei=335800TYLGG93MM7PR89&vat_number=29AAACI4798L1Z0">Test /api/miner/vendor-verify (Live GLEIF)</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=Apple%20Inc.">Test /api/miner/vendor-verify (Apple Inc. / Live GLEIF)</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=SAP%20SE&vat_number=DE143593636">Test /api/miner/vendor-verify (SAP SE / EU VAT)</button>
         <button type="button" class="secondary" data-test-miner="/api/miner/po-verify">Test /api/miner/po-verify</button>
         <button type="button" class="secondary" data-test-miner="/api/miner/doc-authenticity">Test /api/miner/doc-authenticity</button>
       </div>
@@ -647,24 +687,41 @@ const UserInvalidFallback = (() => {
 UserInvalidFallback.init(document.getElementById("audit-form"));
 
 const PRESETS = {
-  discrepancy: {
-    vendor: "Infosys Limited",
-    vatNumber: "29AAACI4798L1Z0",
-    lei: "335800TYLGG93MM7PR89",
-    poNumber: "PO-2026-4410",
-    poAmount: 5312800,
-    approvalCap: 10000000,
-    invoiceId: "INV-STL-902",
-    billedQty: 76.5,
-    acceptedQty: 75.0,
-    unitPrice: 58000,
-    taxRatePct: 18,
-    currency: "INR",
+  saas: {
+    vendor: "Stripe, Inc.",
+    vatNumber: "12-3456789",
+    lei: "549300V5Q3M4X6N7B890",
+    poNumber: "PO-2026-104",
+    poAmount: 27062.5,
+    approvalCap: 50000,
+    invoiceId: "INV-2026-081",
+    billedQty: 100,
+    acceptedQty: 100,
+    unitPrice: 250,
+    taxRatePct: 8.25,
+    currency: "USD",
     irnOrSha256: "64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012",
-    signedQrAmount: 1416000,
-    pdfFaceAmount: 1888000
+    signedQrAmount: 27062.5,
+    pdfFaceAmount: 27062.5
   },
-  clean: {
+  variance: {
+    vendor: "Apple Inc.",
+    vatNumber: "",
+    lei: "HWUPKR0MPOU8FGXBT394",
+    poNumber: "PO-US-2026-8812",
+    poAmount: 15000,
+    approvalCap: 25000,
+    invoiceId: "INV-APL-2026-904",
+    billedQty: 15,
+    acceptedQty: 14,
+    unitPrice: 995,
+    taxRatePct: 0,
+    currency: "USD",
+    irnOrSha256: "88f9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef088",
+    signedQrAmount: 13930,
+    pdfFaceAmount: 14925
+  },
+  europe: {
     vendor: "SAP SE",
     vatNumber: "DE143593636",
     lei: "529900D6BF99LW9R2E68",
@@ -681,22 +738,22 @@ const PRESETS = {
     signedQrAmount: 59500,
     pdfFaceAmount: 59500
   },
-  cap: {
-    vendor: "Infosys Limited",
-    vatNumber: "29AAACI4798L1Z0",
-    lei: "335800TYLGG93MM7PR89",
-    poNumber: "PO-ERP-2026-7741",
-    poAmount: 18500000,
-    approvalCap: 10000000,
-    invoiceId: "INV-ERP-7741",
-    billedQty: 100,
-    acceptedQty: 100,
-    unitPrice: 156779.66,
-    taxRatePct: 18,
-    currency: "INR",
-    irnOrSha256: "64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012",
-    signedQrAmount: 18500000,
-    pdfFaceAmount: 18500000
+  tampered: {
+    vendor: "Enterprise Cloud Infrastructure",
+    vatNumber: "",
+    lei: "",
+    poNumber: "PO-SEC-2026-440",
+    poAmount: 2000,
+    approvalCap: 5000,
+    invoiceId: "INV-SEC-440",
+    billedQty: 1,
+    acceptedQty: 1,
+    unitPrice: 1416,
+    taxRatePct: 0,
+    currency: "USD",
+    irnOrSha256: "c3d4e5f60123456789abcdef0123456789abcdef0123456789abcdef01234567",
+    signedQrAmount: 1416,
+    pdfFaceAmount: 1888
   }
 };
 
@@ -720,6 +777,61 @@ document.querySelectorAll("[data-preset]").forEach((btn) => {
     $("f-qr-amt").value = p.signedQrAmount;
     $("f-face-amt").value = p.pdfFaceAmount;
   });
+});
+
+async function runQuickVerify(vendorName) {
+  const v = (vendorName || $("quick-vendor-input").value).trim();
+  if (!v) return;
+  $("quick-vendor-input").value = v;
+  const resEl = $("quick-vendor-result");
+  resEl.hidden = false;
+  resEl.innerHTML = `<div class="msg" style="background:var(--panel); border:1px solid var(--line); font-size:13px;">Querying GLEIF primary global index for <strong>${esc(v)}</strong>...</div>`;
+  try {
+    const data = await api(`/api/miner/vendor-verify?vendor=${encodeURIComponent(v)}`);
+    const isIssued = data.registration_status === "ISSUED";
+    const statusColor = isIssued ? "var(--ok)" : data.valid ? "var(--warn)" : "var(--bad)";
+    const statusBg = isIssued ? "var(--ok-bg)" : data.valid ? "var(--warn-bg)" : "var(--bad-bg)";
+    const hq = data.registered_address ? `📍 <strong>Registered HQ:</strong> ${esc(data.registered_address)}<br>` : "";
+    const leiLink = data.lei ? `🆔 <strong>ISO 17442 LEI:</strong> <code class="mono">${esc(data.lei)}</code> &bull; <a href="${esc(data.source_url || `https://search.gleif.org/#/record/${data.lei}`)}" target="_blank" rel="noopener">Official GLEIF Record ↗</a><br>` : "";
+
+    resEl.innerHTML = `
+      <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px; font-size:13px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+          <div style="font-size:14px; font-weight:600;">${esc(data.registered_name || data.vendor || v)}</div>
+          <span class="badge" style="background:${statusBg}; color:${statusColor}; font-weight:600;">${esc(data.registration_status || (data.valid ? "VALID" : "UNVERIFIED"))}</span>
+        </div>
+        <div style="color:var(--muted); margin-bottom:6px; line-height:1.6;">
+          ${hq}
+          ${leiLink}
+          🏛️ <strong>Jurisdiction:</strong> ${esc(data.jurisdiction || "Global")} &bull; <strong>Source:</strong> ${esc(data.source)}
+        </div>
+        <p style="margin:6px 0 0; font-size:12.5px; color:var(--ink);">${esc(data.summary)}</p>
+        <div style="margin-top:8px;">
+          <button type="button" class="secondary" style="font-size:12px; padding:3px 8px;" id="btn-apply-vendor">Apply to Spend Audit Form ↓</button>
+        </div>
+      </div>
+    `;
+    const applyBtn = $("btn-apply-vendor");
+    if (applyBtn) {
+      applyBtn.onclick = () => {
+        $("f-vendor").value = data.registered_name || v;
+        if (data.lei) $("f-lei").value = data.lei;
+      };
+    }
+  } catch (err) {
+    resEl.innerHTML = `<div class="msg bad">Verification failed: ${esc(err.message)}</div>`;
+  }
+}
+
+$("btn-quick-verify").addEventListener("click", () => runQuickVerify());
+$("quick-vendor-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    runQuickVerify();
+  }
+});
+document.querySelectorAll("[data-quick]").forEach((btn) => {
+  btn.addEventListener("click", () => runQuickVerify(btn.dataset.quick));
 });
 
 function getFormPayload() {

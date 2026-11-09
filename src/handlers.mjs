@@ -129,19 +129,31 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
   const vatTrim = String(vat_number || '').trim().toUpperCase();
   const leiTrim = String(lei || '').trim().toUpperCase();
 
-  // Check syntax of EU VAT, Indian GSTIN, or 20-char LEI
+  // Multi-jurisdiction tax/entity identifier regexes
   const euVatRegex = /^[A-Z]{2}[0-9A-Z]{8,12}$/;
+  const ukVatRegex = /^GB[0-9]{9}$/;
+  const usEinRegex = /^[0-9]{2}-?[0-9]{7}$/;
   const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
   const leiRegex = /^[0-9A-Z]{18}[0-9]{2}$/;
 
-  const taxFormatValid = gstinRegex.test(vatTrim) || euVatRegex.test(vatTrim) || leiRegex.test(vatTrim);
-  const taxFormatType = gstinRegex.test(vatTrim)
+  const hasVat = Boolean(vatTrim);
+  const taxFormatValid = hasVat
+    ? (gstinRegex.test(vatTrim) || euVatRegex.test(vatTrim) || ukVatRegex.test(vatTrim) || usEinRegex.test(vatTrim) || leiRegex.test(vatTrim))
+    : true;
+
+  const taxFormatType = !hasVat
+    ? 'Not provided (LEI verification)'
+    : gstinRegex.test(vatTrim)
     ? 'Indian GSTIN (15-char)'
+    : ukVatRegex.test(vatTrim)
+    ? 'UK VAT (GB)'
+    : usEinRegex.test(vatTrim)
+    ? 'US Employer ID (EIN)'
     : leiRegex.test(vatTrim)
     ? 'ISO 17442 LEI (20-char)'
     : euVatRegex.test(vatTrim)
-    ? `VAT / Tax ID (${vatTrim.slice(0, 2)})`
-    : 'Unrecognized tax identifier format';
+    ? `EU VAT (${vatTrim.slice(0, 2)})`
+    : 'Custom / Unverified format';
 
   // Query live keyless GLEIF API
   let gleifRecord = null;
@@ -157,12 +169,19 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
       }
     }
     if (!gleifRecord && vendorTrim) {
-      gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(vendorTrim)}&page[size]=1`;
+      gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(vendorTrim)}&page[size]=10`;
       const res = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' } });
       if (res.ok) {
         const json = await res.json();
         if (Array.isArray(json.data) && json.data.length > 0) {
-          gleifRecord = json.data[0];
+          const norm = vendorTrim.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const exact = json.data.find(d => (d.attributes?.entity?.legalName?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '') === norm);
+          const prefixIssued = json.data.find(d => {
+            const n = (d.attributes?.entity?.legalName?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            return n.startsWith(norm) && d.attributes?.registration?.status === 'ISSUED';
+          });
+          const anyIssued = json.data.find(d => d.attributes?.registration?.status === 'ISSUED');
+          gleifRecord = exact || prefixIssued || anyIssued || json.data[0];
         }
       }
     }
@@ -187,35 +206,46 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
     : null;
 
   const isIssued = reg?.status === 'ISSUED';
-  const valid = Boolean((gleifRecord && isIssued && taxFormatValid) || (gleifRecord && isIssued && !vatTrim));
+  const valid = Boolean((gleifRecord && isIssued && taxFormatValid) || (gleifRecord && isIssued && !hasVat));
+
+  let taxSummary = '';
+  if (!hasVat) {
+    taxSummary = `Tax/VAT ID not specified; identity verified via official GLEIF LEI (${attr?.lei || 'N/A'}).`;
+  } else if (taxFormatValid) {
+    taxSummary = `Tax ID ${vatTrim} matches valid ${taxFormatType} format.`;
+  } else {
+    taxSummary = `Tax ID ${vatTrim} did not match standard national formats (EIN/VAT/GSTIN/LEI).`;
+  }
+
+  const summary = gleifRecord
+    ? `${entity?.legalName?.name || vendorTrim} is ${reg?.status} in GLEIF (LEI ${attr?.lei}, jurisdiction ${entity?.jurisdiction}). ${taxSummary}`
+    : `No active GLEIF LEI record matched "${vendorTrim}". ${taxSummary}`;
 
   return {
     vendor: vendorTrim,
     vat_number: vatTrim || leiTrim || null,
     valid,
-    registered_name: entity?.legalName?.name || (taxFormatValid ? vendorTrim : null),
+    registered_name: entity?.legalName?.name || (taxFormatValid && hasVat ? vendorTrim : null),
     registered_address: addressStr,
     lei: attr?.lei || (leiRegex.test(leiTrim) ? leiTrim : null),
-    registration_status: reg?.status || (taxFormatValid ? 'FORMAT_VALID_UNREGISTERED_LEI' : 'NOT_FOUND'),
+    registration_status: reg?.status || (taxFormatValid && hasVat ? 'FORMAT_VALID_UNREGISTERED_LEI' : 'NOT_FOUND'),
     jurisdiction: entity?.jurisdiction || (vatTrim.length >= 2 ? vatTrim.slice(0, 2) : null),
     tax_format: taxFormatType,
-    tax_format_valid: taxFormatValid,
+    tax_format_valid: hasVat ? taxFormatValid : null,
     source: gleifRecord ? 'GLEIF Global LEI Index (api.gleif.org)' : 'Deterministic Tax Checksum & GLEIF Search',
     source_url: attr?.lei ? `https://search.gleif.org/#/record/${attr.lei}` : gleifUrl,
-    summary: gleifRecord
-      ? `${entity?.legalName?.name} is ${reg?.status} in GLEIF (LEI ${attr?.lei}, jurisdiction ${entity?.jurisdiction}). Tax ID ${vatTrim || 'N/A'} (${taxFormatType}) format valid: ${taxFormatValid}.`
-      : `No active GLEIF LEI record matched "${vendorTrim}". Tax ID ${vatTrim || 'N/A'} (${taxFormatType}) format valid: ${taxFormatValid}.`
+    summary
   };
 }
 
 export function reconcileInvoicePrimary({
-  invoiceId = 'INV-STL-902',
-  poNumber = 'PO-2026-4410',
-  billedQty = 76.5,
-  acceptedQty = 75.0,
-  unitPrice = 58000,
-  taxRatePct = 18,
-  currency = 'INR',
+  invoiceId = 'INV-2026-081',
+  poNumber = 'PO-2026-104',
+  billedQty = 100,
+  acceptedQty = 100,
+  unitPrice = 250,
+  taxRatePct = 8.25,
+  currency = 'USD',
   rawInvoice = '',
   rawLedger = ''
 }) {
@@ -238,11 +268,11 @@ export function reconcileInvoicePrimary({
 
   const discrepancyStr = reconciled
     ? '0.00 (Exact 3-way match)'
-    : `${currency} ${Math.abs(deltaTotal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${qtyVariance > 0 ? `+${qtyVariance} units over-billed vs accepted GRN` : `${qtyVariance} unit variance`})`;
+    : `${currency} ${Math.abs(deltaTotal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${qtyVariance > 0 ? `+${qtyVariance} units over-billed vs accepted receipt` : `${qtyVariance} unit variance`})`;
 
   const explanation = reconciled
-    ? `Reconciled. Invoice ${invoiceId} (${bQty} units @ ${currency} ${rate.toLocaleString('en-US')} + ${taxPct}% tax = ${currency} ${invoiceTotal.toLocaleString('en-US')}) matches accepted ledger/GRN total (${currency} ${ledgerTotal.toLocaleString('en-US')}).`
-    : `Discrepancy found. Invoice ${invoiceId} bills ${bQty} units (${currency} ${invoiceTotal.toLocaleString('en-US')} incl. ${taxPct}% tax), whereas accepted GRN/ledger records ${aQty} net accepted units (${currency} ${ledgerTotal.toLocaleString('en-US')}), resulting in an over-billing variance of ${currency} ${Math.abs(deltaTotal).toLocaleString('en-US')}.`;
+    ? `Reconciled. Invoice ${invoiceId} (${bQty} units @ ${currency} ${rate.toLocaleString('en-US')} + ${taxPct}% tax = ${currency} ${invoiceTotal.toLocaleString('en-US')}) matches accepted receipt/ledger total (${currency} ${ledgerTotal.toLocaleString('en-US')}).`
+    : `Discrepancy detected. Invoice ${invoiceId} bills ${bQty} units (${currency} ${invoiceTotal.toLocaleString('en-US')} incl. ${taxPct}% tax), whereas accepted receipt/ledger records ${aQty} net accepted units (${currency} ${ledgerTotal.toLocaleString('en-US')}), resulting in an unapproved variance of ${currency} ${Math.abs(deltaTotal).toLocaleString('en-US')}.`;
 
   return {
     reconciled,
@@ -261,17 +291,17 @@ export function reconcileInvoicePrimary({
       ledger_total: ledgerTotal,
       delta_total: deltaTotal,
       canonical_invoice: rawInvoice || `${invoiceId}: ${bQty} units @ ${currency} ${rate} + ${taxPct}% tax = ${currency} ${invoiceTotal}`,
-      canonical_ledger: rawLedger || `GRN/Ledger (${poNumber}): ${aQty} units net accepted @ ${currency} ${rate} + ${taxPct}% tax = ${currency} ${ledgerTotal}`
+      canonical_ledger: rawLedger || `Receipt/Ledger (${poNumber}): ${aQty} units net accepted @ ${currency} ${rate} + ${taxPct}% tax = ${currency} ${ledgerTotal}`
     }
   };
 }
 
 export function verifyPurchaseOrderPrimary({
-  poNumber = 'PO-ERP-2026-7741',
-  vendor = 'V-10492 (Apex Structural Steels)',
-  poAmount = 18500000,
-  approvalCap = 10000000,
-  currency = 'INR',
+  poNumber = 'PO-2026-7741',
+  vendor = 'Enterprise Cloud Infrastructure',
+  poAmount = 25000,
+  approvalCap = 50000,
+  currency = 'USD',
   dualSignoffPresent = false
 }) {
   const amt = parseNumber(poAmount);
@@ -285,8 +315,8 @@ export function verifyPurchaseOrderPrimary({
     : 'invalid_po';
 
   const explanation = verified
-    ? `Purchase Order ${poNumber} for ${vendor} (${currency} ${amt.toLocaleString('en-US')}) is within authorized approval parameters.`
-    : `Purchase Order ${poNumber} for ${vendor} (${currency} ${amt.toLocaleString('en-US')}) exceeds single-signatory approval cap of ${currency} ${cap.toLocaleString('en-US')} by ${currency} ${(amt - cap).toLocaleString('en-US')} without joint CFO/MD countersignature.`;
+    ? `Purchase Order ${poNumber} for ${vendor} (${currency} ${amt.toLocaleString('en-US')}) is within authorized spend authority.`
+    : `Purchase Order ${poNumber} for ${vendor} (${currency} ${amt.toLocaleString('en-US')}) exceeds authorized delegation cap of ${currency} ${cap.toLocaleString('en-US')} by ${currency} ${(amt - cap).toLocaleString('en-US')} without required executive dual-signoff.`;
 
   return {
     po_number: String(poNumber),
@@ -302,11 +332,11 @@ export function verifyPurchaseOrderPrimary({
 }
 
 export function verifyDocumentAuthenticityPrimary({
-  documentRef = 'GST NIC e-Invoice IRN 64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012',
+  documentRef = 'Cryptographic e-Invoice / Spend Receipt',
   irnOrSha256 = '64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012',
-  signedQrAmount = 1416000,
-  pdfFaceAmount = 1888000,
-  currency = 'INR'
+  signedQrAmount = 27062.5,
+  pdfFaceAmount = 27062.5,
+  currency = 'USD'
 }) {
   const hashClean = String(irnOrSha256 || '').trim().toLowerCase();
   const isHex64 = /^[0-9a-f]{64}$/.test(hashClean);
@@ -323,8 +353,8 @@ export function verifyDocumentAuthenticityPrimary({
     : 'Tampered / Altered Face Value';
 
   const evidence = authentic
-    ? `64-hex SHA-256/IRN digest (${hashClean.slice(0, 12)}...${hashClean.slice(-8)}) is structurally valid and signed QR payload (${currency} ${qrAmt.toLocaleString('en-US')}) matches PDF face value (${currency} ${faceAmt.toLocaleString('en-US')}).`
-    : `Cryptographic mismatch: signed NIC QR payload for IRN ${hashClean.slice(0, 16)}... attests ${currency} ${qrAmt.toLocaleString('en-US')}, whereas rendered PDF face states ${currency} ${faceAmt.toLocaleString('en-US')} (unexplained inflation of ${currency} ${Math.abs(amountDelta).toLocaleString('en-US')}).`;
+    ? `64-hex SHA-256 digest (${hashClean.slice(0, 12)}...${hashClean.slice(-8)}) is structurally valid and signed cryptographic payload (${currency} ${qrAmt.toLocaleString('en-US')}) matches invoice face value (${currency} ${faceAmt.toLocaleString('en-US')}).`
+    : `Cryptographic mismatch: signed digest payload for ${hashClean.slice(0, 16)}... attests ${currency} ${qrAmt.toLocaleString('en-US')}, whereas invoice face states ${currency} ${faceAmt.toLocaleString('en-US')} (unexplained variance of ${currency} ${Math.abs(amountDelta).toLocaleString('en-US')}).`;
 
   return {
     document: documentRef,
@@ -632,38 +662,38 @@ export async function handleApiRequest(req, res) {
       const body = await readJsonBody(req);
       const [vendorCheck, invoiceCheck, poCheck, docCheck] = await Promise.all([
         verifyVendorPrimary({
-          vendor: body.vendor || 'Infosys Limited',
-          vat_number: body.vatNumber || 'DE143593636',
-          lei: body.lei || '335800TYLGG93MM7PR89'
+          vendor: body.vendor || 'Apple Inc.',
+          vat_number: body.vatNumber || '',
+          lei: body.lei || 'HWUPKR0MPOU8FGXBT394'
         }),
         Promise.resolve(
           reconcileInvoicePrimary({
-            invoiceId: body.invoiceId || 'INV-STL-902',
-            poNumber: body.poNumber || 'PO-2026-4410',
-            billedQty: body.billedQty ?? 76.5,
-            acceptedQty: body.acceptedQty ?? 75.0,
-            unitPrice: body.unitPrice ?? 58000,
-            taxRatePct: body.taxRatePct ?? 18,
-            currency: body.currency || 'INR'
+            invoiceId: body.invoiceId || 'INV-2026-081',
+            poNumber: body.poNumber || 'PO-2026-104',
+            billedQty: body.billedQty ?? 100,
+            acceptedQty: body.acceptedQty ?? 100,
+            unitPrice: body.unitPrice ?? 250,
+            taxRatePct: body.taxRatePct ?? 8.25,
+            currency: body.currency || 'USD'
           })
         ),
         Promise.resolve(
           verifyPurchaseOrderPrimary({
-            poNumber: body.poNumber || 'PO-ERP-2026-7741',
-            vendor: body.vendor || 'Infosys Limited',
-            poAmount: body.poAmount ?? 18500000,
-            approvalCap: body.approvalCap ?? 10000000,
-            currency: body.currency || 'INR',
+            poNumber: body.poNumber || 'PO-2026-7741',
+            vendor: body.vendor || 'Apple Inc.',
+            poAmount: body.poAmount ?? 27062.5,
+            approvalCap: body.approvalCap ?? 50000,
+            currency: body.currency || 'USD',
             dualSignoffPresent: Boolean(body.dualSignoffPresent)
           })
         ),
         Promise.resolve(
           verifyDocumentAuthenticityPrimary({
-            documentRef: body.documentRef || 'GST NIC e-Invoice IRN 64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012',
+            documentRef: body.documentRef || 'Cryptographic e-Invoice / Spend Receipt',
             irnOrSha256: body.irnOrSha256 || '64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012',
-            signedQrAmount: body.signedQrAmount ?? 1416000,
-            pdfFaceAmount: body.pdfFaceAmount ?? 1888000,
-            currency: body.currency || 'INR'
+            signedQrAmount: body.signedQrAmount ?? 27062.5,
+            pdfFaceAmount: body.pdfFaceAmount ?? 27062.5,
+            currency: body.currency || 'USD'
           })
         )
       ]);
@@ -697,33 +727,33 @@ export async function handleApiRequest(req, res) {
 
       // Run primary checks first
       const vendorPrimary = await verifyVendorPrimary({
-        vendor: body.vendor || 'Infosys Limited',
-        vat_number: body.vatNumber || '29AAACI4798L1Z0',
-        lei: body.lei || '335800TYLGG93MM7PR89'
+        vendor: body.vendor || 'Apple Inc.',
+        vat_number: body.vatNumber || '',
+        lei: body.lei || 'HWUPKR0MPOU8FGXBT394'
       });
       const invoicePrimary = reconcileInvoicePrimary({
-        invoiceId: body.invoiceId || 'INV-STL-902',
-        poNumber: body.poNumber || 'PO-2026-4410',
-        billedQty: body.billedQty ?? 76.5,
-        acceptedQty: body.acceptedQty ?? 75.0,
-        unitPrice: body.unitPrice ?? 58000,
-        taxRatePct: body.taxRatePct ?? 18,
-        currency: body.currency || 'INR'
+        invoiceId: body.invoiceId || 'INV-2026-081',
+        poNumber: body.poNumber || 'PO-2026-104',
+        billedQty: body.billedQty ?? 100,
+        acceptedQty: body.acceptedQty ?? 100,
+        unitPrice: body.unitPrice ?? 250,
+        taxRatePct: body.taxRatePct ?? 8.25,
+        currency: body.currency || 'USD'
       });
       const poPrimary = verifyPurchaseOrderPrimary({
-        poNumber: body.poNumber || 'PO-ERP-2026-7741',
-        vendor: body.vendor || 'Infosys Limited',
-        poAmount: body.poAmount ?? 18500000,
-        approvalCap: body.approvalCap ?? 10000000,
-        currency: body.currency || 'INR',
+        poNumber: body.poNumber || 'PO-2026-7741',
+        vendor: body.vendor || 'Apple Inc.',
+        poAmount: body.poAmount ?? 27062.5,
+        approvalCap: body.approvalCap ?? 50000,
+        currency: body.currency || 'USD',
         dualSignoffPresent: Boolean(body.dualSignoffPresent)
       });
       const docPrimary = verifyDocumentAuthenticityPrimary({
-        documentRef: body.documentRef || 'GST NIC e-Invoice IRN 64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012',
+        documentRef: body.documentRef || 'Cryptographic e-Invoice / Spend Receipt',
         irnOrSha256: body.irnOrSha256 || '64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012',
-        signedQrAmount: body.signedQrAmount ?? 1416000,
-        pdfFaceAmount: body.pdfFaceAmount ?? 1888000,
-        currency: body.currency || 'INR'
+        signedQrAmount: body.signedQrAmount ?? 27062.5,
+        pdfFaceAmount: body.pdfFaceAmount ?? 27062.5,
+        currency: body.currency || 'USD'
       });
 
       if (!account) {
