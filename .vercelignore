@@ -1,0 +1,5 @@
+meta-automation-ref
+node_modules
+.env
+.git
+evidence/extra-x402-calls.json

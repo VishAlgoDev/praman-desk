@@ -1,0 +1,624 @@
+{
+  "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "submittedAt": "2026-11-09T05:24:09.225Z",
+  "receipts": [
+    {
+      "timestamp": "2026-11-09T05:24:04.808Z",
+      "intentId": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "bountyIssue": 80,
+      "file": "document_authenticity_general.jsonl",
+      "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+      "bodySha256": "8fda594cdd161204848c9b091f389cb43b5ed4490c65461dd0f4beb72a210310",
+      "nonce": "2b51056b718b8f3d0a3d0524d25b0c5a",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 10,
+        "accepted": 10,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 10,
+        "state_counts": {
+          "admitted": 10,
+          "eligible": 30
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-09T05:24:05.404Z",
+      "intentId": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "bountyIssue": 120,
+      "file": "invoice_ledger_reconcile_general.jsonl",
+      "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+      "bodySha256": "450a9208f632d54f9fc3e0af0fb4fe981f2887ce0b1db3a48ea8efe30d84bce7",
+      "nonce": "adab1afb570d3fe72950c14255bfc83f",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 10,
+        "accepted": 10,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 10,
+        "state_counts": {
+          "admitted": 10
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-09T05:24:06.190Z",
+      "intentId": "PURCHASE_ORDER_VERIFY_GENERAL",
+      "bountyIssue": 122,
+      "file": "purchase_order_verify_general.jsonl",
+      "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+      "bodySha256": "3ad30696e1e21be2a5c54a8717018e29be12a10575259f6c49759ed23596fea0",
+      "nonce": "d0f1a61d21aa1367116ac7a8a99a8ed7",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 8,
+        "accepted": 8,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 8,
+        "state_counts": {
+          "admitted": 8
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-09T05:24:06.798Z",
+      "intentId": "VENDOR_VERIFY_GENERAL",
+      "bountyIssue": 105,
+      "file": "vendor_verify_general.jsonl",
+      "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+      "bodySha256": "4fa84600d929bab787b288de70b3a4e6784f7e5485698a0da4d818898a6c006e",
+      "nonce": "8fc8039fc80f0988f13472ba39a73187",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "VENDOR_VERIFY_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 6,
+        "accepted": 6,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 6,
+        "state_counts": {
+          "admitted": 6,
+          "eligible": 145,
+          "rejected": 5
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-09T05:24:07.592Z",
+      "intentId": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+      "bountyIssue": null,
+      "file": "contract_obligation_audit_general.jsonl",
+      "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+      "bodySha256": "ff9976d383ccb5dbad1ffeb7672820ff0b8bd83bb852a1fa29af2f166093080c",
+      "nonce": "a9d44c04f6afd7ebd8e5cb9cf8420994",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 6,
+        "accepted": 6,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 6,
+        "state_counts": {
+          "admitted": 6,
+          "eligible": 163,
+          "rejected": 48
+        }
+      }
+    },
+    {
+      "timestamp": "2026-11-09T05:24:08.333Z",
+      "intentId": "REGULATORY_FILING_MONITOR_GENERAL",
+      "bountyIssue": 104,
+      "file": "regulatory_filing_monitor_general.jsonl",
+      "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+      "bodySha256": "5e82b2f0b3c2641989912c9ed2a4db880eb9f7da695c92e36183ca3ced5d05ad",
+      "nonce": "c474f9836d4b2cd6922752afc37c9e6f",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 1,
+        "accepted": 1,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 1,
+        "state_counts": {
+          "admitted": 1,
+          "eligible": 54
+        }
+      }
+    }
+  ],
+  "summaryByIntent": {
+    "REGULATORY_FILING_MONITOR_GENERAL": {
+      "total": 1,
+      "statuses": {
+        "admitted": 1
+      },
+      "provenance": {
+        "unverified": 1
+      },
+      "reasons": {}
+    },
+    "CONTRACT_OBLIGATION_AUDIT_GENERAL": {
+      "total": 6,
+      "statuses": {
+        "admitted": 6
+      },
+      "provenance": {
+        "attested": 6
+      },
+      "reasons": {}
+    },
+    "VENDOR_VERIFY_GENERAL": {
+      "total": 6,
+      "statuses": {
+        "admitted": 6
+      },
+      "provenance": {
+        "attested": 6
+      },
+      "reasons": {}
+    },
+    "PURCHASE_ORDER_VERIFY_GENERAL": {
+      "total": 8,
+      "statuses": {
+        "admitted": 8
+      },
+      "provenance": {
+        "attested": 8
+      },
+      "reasons": {}
+    },
+    "INVOICE_LEDGER_RECONCILE_GENERAL": {
+      "total": 10,
+      "statuses": {
+        "admitted": 10
+      },
+      "provenance": {
+        "attested": 10
+      },
+      "reasons": {}
+    },
+    "DOCUMENT_AUTHENTICITY_GENERAL": {
+      "total": 10,
+      "statuses": {
+        "admitted": 10
+      },
+      "provenance": {
+        "attested": 10
+      },
+      "reasons": {}
+    }
+  },
+  "rows": [
+    {
+      "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+      "row_hash": "66b7c6a1f1d3c17a04a7c9b7cec1489efb30199d9209e268f8f23987aa992750",
+      "case_id": "ff4e6a8ad8e543039edaf2f50573994f5ed88bca6e981ba20acc73af50622469",
+      "status": "admitted",
+      "provenance_class": "unverified",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:09.826449Z",
+      "updated_at": "2026-11-09T05:24:09.828163Z"
+    },
+    {
+      "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+      "row_hash": "dd138a108b5f5cf96b57c33d26379d3919733753545e51cee24e47d1067e39fd",
+      "case_id": "7ed452b4091b8ed5c40c853fc27bec656ae9cc870d1a45c0ea5af166f7986c27",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:09.067783Z",
+      "updated_at": "2026-11-09T05:24:09.069405Z"
+    },
+    {
+      "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+      "row_hash": "b1a6715c74479aa79fedef07ca1d0af7f7470046e733c1d06f15ec1f3b6dbce5",
+      "case_id": "21f900b452c6e877120cc95e4d01cb2b1e3f02476684eb680d11d2c48d54817d",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:09.06655Z",
+      "updated_at": "2026-11-09T05:24:09.069405Z"
+    },
+    {
+      "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+      "row_hash": "672ef5ffe3662825dd5df1d2dc17ddf4b11a60e40110c7b83dc08daa82071309",
+      "case_id": "560d543d6b04d01224255b0f0592c7652e52b3349fadfa45db87aa7770b2553a",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:09.065033Z",
+      "updated_at": "2026-11-09T05:24:09.069405Z"
+    },
+    {
+      "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+      "row_hash": "d63c7e92a85bcd048b5510adf82749c48e610859a8b9d7203a7e2f4fc7bf5e7a",
+      "case_id": "bfabfbe3968b849e8c88da832158b89166486b841f2e059130d07a389b5615f5",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:09.063538Z",
+      "updated_at": "2026-11-09T05:24:09.069405Z"
+    },
+    {
+      "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+      "row_hash": "4ab3ba94285d10a0af8bb93d4a1fdb96606ed01e6722a2a5e9f3f6af8dadb5a6",
+      "case_id": "a4f77919d069ba4e44ba864f12aeb3f10557a2b94858a9af0b13356cc4b1d820",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:09.061817Z",
+      "updated_at": "2026-11-09T05:24:09.069405Z"
+    },
+    {
+      "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+      "row_hash": "9937080a98405aa21dc5f2adf79eb67555b7e1710684c0b46ad2bd2ee6c5e379",
+      "case_id": "cb1e32baa267ddf589af96d5bee81ac9df3d1b875f1e740b527ca9034dc157ca",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:09.059753Z",
+      "updated_at": "2026-11-09T05:24:09.069405Z"
+    },
+    {
+      "intent_id": "VENDOR_VERIFY_GENERAL",
+      "row_hash": "4fa8ee12603d071209d6c2b1136bac4416480ad61327ff957affba9dd61288f7",
+      "case_id": "950131635cf810092671fed83a458197eac6076e19c3a47fe848669b4b7d9222",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:08.472198Z",
+      "updated_at": "2026-11-09T05:24:08.473482Z"
+    },
+    {
+      "intent_id": "VENDOR_VERIFY_GENERAL",
+      "row_hash": "cf3a0048e8613de0ec7e48dc3c04e9020cc1599fa8ab860b3f9746693b8b643f",
+      "case_id": "f173237060f1346f6ac067f842de0e14675474491eaa7297956d05ecf1d1ec44",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:08.470621Z",
+      "updated_at": "2026-11-09T05:24:08.473482Z"
+    },
+    {
+      "intent_id": "VENDOR_VERIFY_GENERAL",
+      "row_hash": "f1fbcf3882002ea80301ef7348284de2a392ff76d554d508585881512eef63df",
+      "case_id": "371cb43abc001fd4ee59e641845eafc3e4c62f7cca0f20bce5ad24d1b6e6eada",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:08.468982Z",
+      "updated_at": "2026-11-09T05:24:08.473482Z"
+    },
+    {
+      "intent_id": "VENDOR_VERIFY_GENERAL",
+      "row_hash": "4a3142392bd31d1abc9ada370cfda6f01d09e56bc203e67114ed754aa3657723",
+      "case_id": "596f9140084404508f5e6505fe88003e42cbcea1f3cdfebebbecd342533c1069",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:08.467414Z",
+      "updated_at": "2026-11-09T05:24:08.473482Z"
+    },
+    {
+      "intent_id": "VENDOR_VERIFY_GENERAL",
+      "row_hash": "2d420a1040f5bb5be28891260617ba1909d76656d213793c167c3a45eabdac0d",
+      "case_id": "7d0cf9fd525cd33817b326ac74713f788711c707c46f64af556a46ed195802ef",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:08.465814Z",
+      "updated_at": "2026-11-09T05:24:08.473482Z"
+    },
+    {
+      "intent_id": "VENDOR_VERIFY_GENERAL",
+      "row_hash": "94709eab9786098f1e8fa5320e1816b401afbd1a9ac2031655a0abdcde476f8d",
+      "case_id": "deab5414c30b4f25dfe7d0615191d8b67ee3f725ba8b1818f45dc1a1684b8de7",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:08.462371Z",
+      "updated_at": "2026-11-09T05:24:08.473482Z"
+    },
+    {
+      "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+      "row_hash": "b997d71b5f2ebc13c2b61b09fcf6e7fe5bdf08bf1e7cfee853590fcd4e61b386",
+      "case_id": "79766c4e245561371a46ee4c3b0d3d35e1f1935e873aa3e34c849273980889f6",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.671815Z",
+      "updated_at": "2026-11-09T05:24:07.673094Z"
+    },
+    {
+      "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+      "row_hash": "b6d8bad2695849d16d922e1dc1f87bcd19122d930fdf76b0f61d967560f63d8a",
+      "case_id": "a1656ae746c619d3b689d351a601751c9f740b06771e6eec9c05c557a4e7fcfa",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.67035Z",
+      "updated_at": "2026-11-09T05:24:07.673094Z"
+    },
+    {
+      "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+      "row_hash": "4acc9804a2721056dcda633ce35e1def05777eeb1e386aaf328421b249d24c52",
+      "case_id": "112fb934967a11dc7e66e91009689b0b075abb20497cd85b9b2769a08b25c74a",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.668774Z",
+      "updated_at": "2026-11-09T05:24:07.673094Z"
+    },
+    {
+      "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+      "row_hash": "5601a9e59e079dd39a458530232f41f655c61715303ec6b22535722b09151d4e",
+      "case_id": "7b68f3016f947c03731d1b9a9f6762efcd94bfca32b325d4eaaeabf21a3f9193",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.667637Z",
+      "updated_at": "2026-11-09T05:24:07.673094Z"
+    },
+    {
+      "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+      "row_hash": "ccaa24a117bf7be9c4b11b57168df9513edc66179ddae5336a2ccd6ff40c41df",
+      "case_id": "1a556706af0b291734bff41d895c2090acc1b895db02b4f2b09fd51599593bac",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.666347Z",
+      "updated_at": "2026-11-09T05:24:07.673094Z"
+    },
+    {
+      "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+      "row_hash": "3125630b4daa610c6e1ddfc3a91820933488439fb5e6d7d03330c455e120fbac",
+      "case_id": "ed658a862a47973705ba221618d2228a86065a459d61367e3145638aaf6dedf0",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.66512Z",
+      "updated_at": "2026-11-09T05:24:07.673094Z"
+    },
+    {
+      "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+      "row_hash": "bf98a8069d9c232f0671e8cb913597aef7d9ed0c3402353e8a50211299f21a97",
+      "case_id": "4fa42e40ddbbc8150cc2eda92cbc1cc2d6fca0be9d0a941eb2337e1b5afcb718",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.664071Z",
+      "updated_at": "2026-11-09T05:24:07.673094Z"
+    },
+    {
+      "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+      "row_hash": "8f85a8ebc8bd23a50d0edc93c291302f42fdfe4dd00422561bb52be819a35dbb",
+      "case_id": "8272968e451e08d6b703f7e4043c887f0873467bc790cb9a5c0b91e3ba2f6e71",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.66162Z",
+      "updated_at": "2026-11-09T05:24:07.673094Z"
+    },
+    {
+      "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "row_hash": "4311f51d0a5f29c47030e86edec8008861c171171fb05d6f4595a5e687e04258",
+      "case_id": "82bdcd66cd8ed05dc08f345079811a868e225c012ca387734a124655ea451e35",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.093778Z",
+      "updated_at": "2026-11-09T05:24:07.095041Z"
+    },
+    {
+      "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "row_hash": "4bcd08f97cb85211e458224e5d1ef83ad4f1e04f231d7dd0449e749e2efcffab",
+      "case_id": "0022d1b79fff7e7734273cf0007cfc780491ba2092f7fd4919153104e2e26a01",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.092567Z",
+      "updated_at": "2026-11-09T05:24:07.095041Z"
+    },
+    {
+      "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "row_hash": "7dbb4a5501eff40f1940532656e97932e493cf6811dd81c731eaa9e38fb8a512",
+      "case_id": "08e52f8a5b950f5760c0b65e71a34c491f10efd6aa87a9f1603e30a382c97e2e",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.091242Z",
+      "updated_at": "2026-11-09T05:24:07.095041Z"
+    },
+    {
+      "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "row_hash": "072d53d692f75cab5de48962118987dacd7f911ea14e3a4857be3c115b310b33",
+      "case_id": "9c5a98ca376dc8ededd892ef0bd2ff3730be336bbc8d63860ed765e4de4828f4",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.089805Z",
+      "updated_at": "2026-11-09T05:24:07.095041Z"
+    },
+    {
+      "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "row_hash": "74e607fd731f430511f1bb9a5bae221990ef2937cc9970e907e3e72b84bfbd46",
+      "case_id": "a176e4792dd114429e8941f9c225552cbbf3a0f917cff719024e4ff00c14915e",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.088296Z",
+      "updated_at": "2026-11-09T05:24:07.095041Z"
+    },
+    {
+      "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "row_hash": "d798dfe9ed08da545c0a3dcce739ab13fe825fcf58dfee3ae86d8027b54f7182",
+      "case_id": "59262ba0dd9a286dc0508e051f3cafcdd21b68958395cae64e8d7374ebcaf89a",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.086919Z",
+      "updated_at": "2026-11-09T05:24:07.095041Z"
+    },
+    {
+      "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "row_hash": "ca07ee3adc38c6f3ff361942319b4a461b01f623077c966438844004721127bc",
+      "case_id": "b25f753029e6560536101e4f00fdecaac7fa30c494aa30e4e059a7d2f60db9d3",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.085568Z",
+      "updated_at": "2026-11-09T05:24:07.095041Z"
+    },
+    {
+      "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "row_hash": "8ad20a09ef1b2f45105b9b1677d7fd1fb05c321e5683584d8cb94a46e23ab963",
+      "case_id": "638537623212bbe1226e2fe62ebf3466a4591f963cd7be555b401021cfe661a9",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.084405Z",
+      "updated_at": "2026-11-09T05:24:07.095041Z"
+    },
+    {
+      "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "row_hash": "48567f0e86f4c916dcb97d2e2db5ccda2d301b80fcc2bdde6c5880927166d04d",
+      "case_id": "b924bc80d5e282d705986c477aacf47bae943281f9f0bfb42633cf5e484e5bfc",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.083308Z",
+      "updated_at": "2026-11-09T05:24:07.095041Z"
+    },
+    {
+      "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "row_hash": "964b255b31be28d2a6b52150b2d09b3bf3a52bdbcd6003b66a586e206c0b209f",
+      "case_id": "79838943cdd7cd118f3f66c18bf3509ac7fb8f43cd3089ce2e54fe6e191791bb",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:07.081199Z",
+      "updated_at": "2026-11-09T05:24:07.095041Z"
+    },
+    {
+      "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "row_hash": "f74cf1804459a44f8b68232cb3071c355efcfb2926d4f9b8faad2807f15ad46e",
+      "case_id": "d698a6611bd544c52dfc44fb9dd8ed09c5f6254edc6fba3a362a188c52655ef5",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:06.47351Z",
+      "updated_at": "2026-11-09T05:24:06.47488Z"
+    },
+    {
+      "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "row_hash": "8b834576694e03e111a4433428bcc47f0b34b6e2892d4cabc7ea463760d8ae1f",
+      "case_id": "2a87864b0bb849aa12db512926d52ffc10c32ad7276a20658ea34256f79016da",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:06.472385Z",
+      "updated_at": "2026-11-09T05:24:06.47488Z"
+    },
+    {
+      "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "row_hash": "e308e8d780150014f457754bf4c80ade9c5236f9bef49586a7ea85c7ae3bd5dd",
+      "case_id": "97efddbd436dc931ae7d149a587041df548351fde270f5e77ec10cd770caf598",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:06.471296Z",
+      "updated_at": "2026-11-09T05:24:06.47488Z"
+    },
+    {
+      "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "row_hash": "3f5a1ccec535845cda57a8c98520ad670122b7ea9b724fcda533f58d8a86c638",
+      "case_id": "040786c9127a4af27f9ba045fa24a5635ea094b0a9cdb6c17c1851b33f52f4a4",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:06.469736Z",
+      "updated_at": "2026-11-09T05:24:06.47488Z"
+    },
+    {
+      "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "row_hash": "209a137afb2652939261e4b9e2fc001983d149eeeb69f302efd2820b2259b241",
+      "case_id": "9f0bcff9a647a8adf6d29cf4a3ef390abd60b7f8afb3147104a5da4ceb0dde86",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:06.468439Z",
+      "updated_at": "2026-11-09T05:24:06.47488Z"
+    },
+    {
+      "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "row_hash": "60d85f6677bc5774611dbb2aca9d41f6a735400f4aa85b15e727189511aeb639",
+      "case_id": "6099fd504b89ed91a77f9a2261fd93b0cacdb0ddbaa79318956e216c1c497dc3",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:06.466947Z",
+      "updated_at": "2026-11-09T05:24:06.47488Z"
+    },
+    {
+      "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "row_hash": "986af5ca3b387e0e67f07a36d99cf45ff5bea7daa5c48c98a80dec20c198d5b8",
+      "case_id": "1fc9d1624c35398b27c97cad5cc796bcaa8ace44ec91d04e81466e9a0d5d2a3e",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:06.465529Z",
+      "updated_at": "2026-11-09T05:24:06.47488Z"
+    },
+    {
+      "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "row_hash": "58a9cd80a2f11932e4d82d263108c1fd2aefc36042887430917e95cf26cb29ef",
+      "case_id": "d3ff1aee45937449643c8d884d7620ed672a850d55bf31ac871f6069163a1445",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:06.464266Z",
+      "updated_at": "2026-11-09T05:24:06.47488Z"
+    },
+    {
+      "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "row_hash": "f7b222b80a55ea4ab7b572591e6c37536c112d65b420b1580eeb734dc5e8573e",
+      "case_id": "b573d6fea3328b9dbc4b350e3a0cea66c98fd4e4a6603cc5ec752e25fb40a0a4",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:06.463007Z",
+      "updated_at": "2026-11-09T05:24:06.47488Z"
+    },
+    {
+      "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "row_hash": "ba48dba2c15ba2b18616670770353e586887668a79e058ed5b3168fd38d0018c",
+      "case_id": "28e73d919e09183b3200d53f043b74ccb0cdc3bb70dab11e72900c6c1c8c2294",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-09T05:24:06.460995Z",
+      "updated_at": "2026-11-09T05:24:06.47488Z"
+    }
+  ]
+}

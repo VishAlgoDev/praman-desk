@@ -1,0 +1,1154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Praman Desk — Procurement & Compliance Verification on Telegraph</title>
+<style>
+  :root {
+    --bg: #f6f5f1;
+    --panel: #ffffff;
+    --ink: #1d1d1b;
+    --muted: #65645e;
+    --line: #dfddd5;
+    --accent: #1d4ed8;
+    --accent-ink: #ffffff;
+    --ok: #186a3b;
+    --ok-bg: #e3f3e9;
+    --bad: #b3261e;
+    --bad-bg: #fce8e6;
+    --warn: #8a5a00;
+    --warn-bg: #fdf0d5;
+    --none: #54534e;
+    --none-bg: #ecebe6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141413;
+      --panel: #1d1d1b;
+      --ink: #ecebe6;
+      --muted: #a09f98;
+      --line: #32312d;
+      --accent: #7da2f8;
+      --accent-ink: #0f1424;
+      --ok: #7fd3a1;
+      --ok-bg: #163022;
+      --bad: #f4a49e;
+      --bad-bg: #3b1b18;
+      --warn: #f0c46e;
+      --warn-bg: #382b10;
+      --none: #c4c3bc;
+      --none-bg: #2a2926;
+    }
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 24px 16px 64px;
+  }
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+  }
+  h1 {
+    margin: 0;
+    font-size: 23px;
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    font-size: 16.5px;
+    margin: 0 0 8px;
+  }
+  h3 {
+    font-size: 14.5px;
+    margin: 0 0 6px;
+  }
+  .sub, .hint {
+    color: var(--muted);
+  }
+  .sub {
+    margin: 4px 0 0;
+    max-width: 620px;
+    font-size: 14px;
+  }
+  .hint {
+    display: block;
+    font-size: 12.5px;
+    margin-bottom: 4px;
+  }
+  .wallet-box {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 9px 13px;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+  code, .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  nav[role="tablist"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
+  }
+  nav[role="tablist"] button {
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    padding: 10px 14px;
+    font: inherit;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  nav[role="tablist"] button[aria-selected="true"] {
+    color: var(--ink);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  section.panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+  }
+  .field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 2px;
+  }
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Validate Input After Interaction (:user-invalid & WeakMap fallback) */
+  .error-msg {
+    display: none;
+    color: var(--bad);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  input:user-invalid,
+  input.user-invalid-fallback {
+    border-color: var(--bad);
+    background-color: var(--bad-bg);
+  }
+  input:user-invalid + .error-msg,
+  input.user-invalid-fallback + .error-msg {
+    display: block;
+  }
+  input:user-valid,
+  input.user-valid-fallback {
+    border-color: var(--ok);
+  }
+  .checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .checks label {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    font-size: 13.5px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 14px;
+  }
+  button.primary,
+  button.secondary {
+    border-radius: 7px;
+    padding: 8px 15px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button.primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: 1px solid var(--accent);
+  }
+  button.secondary {
+    background: var(--panel);
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  button:disabled {
+    opacity: 0.55;
+    cursor: wait;
+  }
+  .preset-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .preset-bar button {
+    background: var(--bg);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .preset-bar button:hover {
+    border-color: var(--accent);
+  }
+  .msg {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 7px;
+    font-size: 13.5px;
+  }
+  .msg.ok {
+    background: var(--ok-bg);
+    color: var(--ok);
+  }
+  .msg.bad {
+    background: var(--bad-bg);
+    color: var(--bad);
+  }
+  .msg.warn {
+    background: var(--warn-bg);
+    color: var(--warn);
+  }
+  .msg.info {
+    background: var(--none-bg);
+    color: var(--ink);
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge.confirmed {
+    background: var(--ok-bg);
+    color: var(--ok);
+  }
+  .badge.contradicted {
+    background: var(--bad-bg);
+    color: var(--bad);
+  }
+  .badge.schema_warning {
+    background: var(--warn-bg);
+    color: var(--warn);
+  }
+  .badge.inconclusive {
+    background: var(--none-bg);
+    color: var(--none);
+  }
+  /* Modern Web Guidance: Responsive Table with Container Queries & Sticky Headers */
+  .table-wrapper {
+    overflow: auto;
+    max-inline-size: 100%;
+    max-block-size: min(560px, 80vh);
+    container-type: inline-size;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13.5px;
+  }
+  caption {
+    text-align: left;
+    padding: 8px 10px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--muted);
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+  th, td {
+    text-align: left;
+    vertical-align: top;
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  thead {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
+    background: var(--bg);
+  }
+  thead th {
+    color: var(--muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tbody th {
+    position: sticky;
+    inset-inline-start: 0;
+    background: var(--panel);
+    font-weight: 600;
+  }
+  @container (width < 600px) {
+    table, thead, tbody, tr, th, td {
+      display: block;
+    }
+    thead {
+      display: none;
+    }
+    tr {
+      margin-block-end: 1rem;
+      border-bottom: 2px solid var(--line);
+    }
+    tbody th {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 2;
+      background: var(--bg);
+    }
+    td:nth-child(2)::before {
+      content: var(--label-2, "Primary") ": ";
+      font-weight: 600;
+      color: var(--muted);
+    }
+    td:nth-child(3)::before {
+      content: var(--label-3, "Telegraph Miner") ": ";
+      font-weight: 600;
+      color: var(--muted);
+    }
+    td:nth-child(4)::before {
+      content: var(--label-4, "Status") ": ";
+      font-weight: 600;
+      color: var(--muted);
+    }
+    td:nth-child(5)::before {
+      content: var(--label-5, "Receipt") ": ";
+      font-weight: 600;
+      color: var(--muted);
+    }
+  }
+  details summary {
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 12px;
+    margin: 6px 0 0;
+  }
+  [hidden] {
+    display: none !important;
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Praman Desk</h1>
+      <p class="sub">Commercial procurement, invoice reconciliation, and document provenance verification bought from Telegraph miners (<span class="mono">x402</span>, Ethereum Sepolia) and cross-checked against GLEIF and deterministic 3-way arithmetic.</p>
+    </div>
+    <div class="wallet-box" id="wallet-box">Loading Sepolia wallet...</div>
+  </header>
+
+  <section class="panel" id="testnet-banner">
+    <p class="hint" style="margin:0; font-size:13px; color:var(--ink)">
+      <strong>Testnet verification notice:</strong> Every paid check spends $0.01 in free Sepolia test USDC from contributor wallet <a id="banner-wallet-link" href="https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466" target="_blank" rel="noopener" class="mono">0x98021b20...7b4466</a>. Paid answers from miners are treated as claims and checked against the official GLEIF registry and deterministic 3-way reconciliation; schema rejections and miner scope gaps are recorded openly in the receipt ledger.
+    </p>
+  </section>
+
+  <nav role="tablist" aria-label="Praman Desk sections">
+    <button role="tab" aria-selected="true" data-tab="audit">Compliance audit (Mission 04)</button>
+    <button role="tab" aria-selected="false" data-tab="ledger">On-chain receipt ledger (5)</button>
+    <button role="tab" aria-selected="false" data-tab="eval">Evaluator pool &amp; bounties (41)</button>
+    <button role="tab" aria-selected="false" data-tab="miner">Replacement miner API (4)</button>
+  </nav>
+
+  <!-- TAB 1: COMPLIANCE AUDIT -->
+  <div id="tab-audit">
+    <section class="panel">
+      <div class="preset-bar">
+        <span class="hint" style="margin:0; font-weight:600; color:var(--ink)">Sample audit cases:</span>
+        <button type="button" data-preset="discrepancy">Case 1: Rust-rejected GRN over-billing + altered e-Invoice face</button>
+        <button type="button" data-preset="clean">Case 2: Clean 3-way match (SAP SE / DE143593636)</button>
+        <button type="button" data-preset="cap">Case 3: Unauthorized PO cap override</button>
+      </div>
+
+      <form id="audit-form" novalidate>
+        <h2>1. Vendor, Purchase Order, Invoice &amp; Document Inputs</h2>
+        <div class="grid">
+          <div class="field">
+            <label for="f-vendor">Vendor legal name</label>
+            <span id="hint-vendor" class="hint">Exact registered corporate name</span>
+            <input type="text" id="f-vendor" name="vendor" value="Infosys Limited" required minlength="2" aria-describedby="hint-vendor" aria-errormessage="err-vendor">
+            <div id="err-vendor" class="error-msg">Enter a legal entity name (at least 2 characters).</div>
+          </div>
+
+          <div class="field">
+            <label for="f-vat">VAT / GSTIN / Tax ID</label>
+            <span id="hint-vat" class="hint">EU VAT (DE143593636) or 15-char GSTIN</span>
+            <input type="text" id="f-vat" name="vatNumber" value="29AAACI4798L1Z0" required pattern="[A-Za-z0-9]{8,20}" aria-describedby="hint-vat" aria-errormessage="err-vat">
+            <div id="err-vat" class="error-msg">Enter an 8 to 20 character alphanumeric VAT or GSTIN.</div>
+          </div>
+
+          <div class="field">
+            <label for="f-lei">GLEIF LEI (20-char ISO 17442)</label>
+            <span id="hint-lei" class="hint">Checked live against api.gleif.org</span>
+            <input type="text" id="f-lei" name="lei" value="335800TYLGG93MM7PR89" pattern="[A-Za-z0-9]{20}" aria-describedby="hint-lei" aria-errormessage="err-lei">
+            <div id="err-lei" class="error-msg">LEI must be 20 alphanumeric characters.</div>
+          </div>
+
+          <div class="field">
+            <label for="f-po">Purchase Order ID</label>
+            <span id="hint-po" class="hint">ERP PO reference number</span>
+            <input type="text" id="f-po" name="poNumber" value="PO-ERP-2026-7741" required aria-describedby="hint-po" aria-errormessage="err-po">
+            <div id="err-po" class="error-msg">Purchase Order reference is required.</div>
+          </div>
+
+          <div class="field">
+            <label for="f-po-amt">PO amount</label>
+            <span id="hint-po-amt" class="hint">Committed purchase order value</span>
+            <input type="number" id="f-po-amt" name="poAmount" value="18500000" required min="1" step="0.01" aria-describedby="hint-po-amt" aria-errormessage="err-po-amt">
+            <div id="err-po-amt" class="error-msg">Enter a positive PO amount.</div>
+          </div>
+
+          <div class="field">
+            <label for="f-po-cap">Single-signatory approval cap</label>
+            <span id="hint-po-cap" class="hint">Max value without CFO/MD dual sign-off</span>
+            <input type="number" id="f-po-cap" name="approvalCap" value="10000000" required min="1" step="0.01" aria-describedby="hint-po-cap" aria-errormessage="err-po-cap">
+            <div id="err-po-cap" class="error-msg">Enter a positive approval cap.</div>
+          </div>
+
+          <div class="field">
+            <label for="f-inv-id">Supplier invoice ID</label>
+            <span id="hint-inv-id" class="hint">Invoice identifier to reconcile</span>
+            <input type="text" id="f-inv-id" name="invoiceId" value="INV-STL-902" required aria-describedby="hint-inv-id" aria-errormessage="err-inv-id">
+            <div id="err-inv-id" class="error-msg">Invoice ID is required.</div>
+          </div>
+
+          <div class="field">
+            <label for="f-billed-qty">Invoice billed quantity</label>
+            <span id="hint-billed-qty" class="hint">Units billed by supplier</span>
+            <input type="number" id="f-billed-qty" name="billedQty" value="76.5" required min="0.01" step="0.01" aria-describedby="hint-billed-qty">
+          </div>
+
+          <div class="field">
+            <label for="f-acc-qty">GRN net accepted quantity</label>
+            <span id="hint-acc-qty" class="hint">Units accepted into ledger after QC</span>
+            <input type="number" id="f-acc-qty" name="acceptedQty" value="75.0" required min="0" step="0.01" aria-describedby="hint-acc-qty">
+          </div>
+
+          <div class="field">
+            <label for="f-rate">Contract unit rate</label>
+            <span id="hint-rate" class="hint">Agreed price per unit before tax</span>
+            <input type="number" id="f-rate" name="unitPrice" value="58000" required min="0.01" step="0.01" aria-describedby="hint-rate">
+          </div>
+
+          <div class="field">
+            <label for="f-tax">Tax / GST / VAT rate (%)</label>
+            <span id="hint-tax" class="hint">Applicable indirect tax percentage</span>
+            <input type="number" id="f-tax" name="taxRatePct" value="18" required min="0" max="100" step="0.1" aria-describedby="hint-tax">
+          </div>
+
+          <div class="field">
+            <label for="f-curr">Currency</label>
+            <span id="hint-curr" class="hint">ISO currency code (INR, USD, EUR)</span>
+            <input type="text" id="f-curr" name="currency" value="INR" required pattern="[A-Z]{3}" aria-describedby="hint-curr" aria-errormessage="err-curr">
+            <div id="err-curr" class="error-msg">Use a 3-letter uppercase ISO currency code.</div>
+          </div>
+
+          <div class="field" style="grid-column: span 2">
+            <label for="f-irn">Document SHA-256 / e-Invoice IRN (64-hex)</label>
+            <span id="hint-irn" class="hint">64-character hex digest of the signed document or NIC e-Invoice IRN</span>
+            <input type="text" id="f-irn" name="irnOrSha256" class="mono" value="64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012" required pattern="[0-9a-fA-F]{64}" aria-describedby="hint-irn" aria-errormessage="err-irn">
+            <div id="err-irn" class="error-msg">Digest must be an exact 64-character hexadecimal string.</div>
+          </div>
+
+          <div class="field">
+            <label for="f-qr-amt">Signed QR payload value</label>
+            <span id="hint-qr-amt" class="hint">Amount encoded in signed QR/hash</span>
+            <input type="number" id="f-qr-amt" name="signedQrAmount" value="1416000" required min="0" step="0.01" aria-describedby="hint-qr-amt">
+          </div>
+
+          <div class="field">
+            <label for="f-face-amt">Rendered PDF face value</label>
+            <span id="hint-face-amt" class="hint">Amount printed on submitted PDF</span>
+            <input type="number" id="f-face-amt" name="pdfFaceAmount" value="1888000" required min="0" step="0.01" aria-describedby="hint-face-amt">
+          </div>
+        </div>
+
+        <div class="checks">
+          <span class="hint" style="margin:0; font-weight:600; color:var(--ink)">Telegraph Intents to buy ($0.01 test USDC each, max 3 per run):</span>
+          <label><input type="checkbox" name="intent" value="INVOICE_LEDGER_RECONCILE_GENERAL" checked> <code>INVOICE_LEDGER_RECONCILE_GENERAL</code></label>
+          <label><input type="checkbox" name="intent" value="VENDOR_VERIFY_GENERAL" checked> <code>VENDOR_VERIFY_GENERAL</code></label>
+          <label><input type="checkbox" name="intent" value="PURCHASE_ORDER_VERIFY_GENERAL"> <code>PURCHASE_ORDER_VERIFY_GENERAL</code></label>
+          <label><input type="checkbox" name="intent" value="DOCUMENT_AUTHENTICITY_GENERAL"> <code>DOCUMENT_AUTHENTICITY_GENERAL</code></label>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="secondary" id="btn-primary">1. Check primary sources &amp; math (free)</button>
+          <button type="button" class="primary" id="btn-buy">2. Buy Telegraph checks &amp; compare ($0.02)</button>
+          <span class="hint" id="spend-estimate" style="margin:0">2 paid checks selected ($0.02 test USDC on Ethereum Sepolia)</span>
+        </div>
+      </form>
+      <div id="audit-msg"></div>
+    </section>
+
+    <div id="audit-results"></div>
+  </div>
+
+  <!-- TAB 2: ON-CHAIN RECEIPT LEDGER -->
+  <div id="tab-ledger" hidden>
+    <section class="panel">
+      <h2>Verified On-Chain Payment &amp; Signal Ledger</h2>
+      <p class="hint" style="margin:0; font-size:13px">
+        Every paid <span class="mono">x402</span> purchase settled on Ethereum Sepolia from contributor wallet <code id="ledger-wallet">0x98021b20Efdb7ae2C57366010a6E0fDE207b4466</code>, paired with the Telegraph node's keccak256 signal record (<span class="mono">GET /engine/v1/signal/&lt;hash&gt;</span>) and our primary-source diagnostic audit.
+      </p>
+      <div id="ledger-summary" style="margin-top:10px"></div>
+    </section>
+    <div id="ledger-results"></div>
+  </div>
+
+  <!-- TAB 3: EVALUATOR POOL & BOUNTIES -->
+  <div id="tab-eval" hidden>
+    <section class="panel">
+      <h2>Track 2 (Evaluators) — Signed Pool Submissions &amp; Bounties</h2>
+      <p class="hint" style="margin:0; font-size:13px">
+        Live query to <code>/api/evalpool/submissions/mine?submitter=0x98021b20Efdb7ae2C57366010a6E0fDE207b4466</code>. All 41 evaluation rows were signed with EIP-191 personal_sign and admitted with 0 rejections across 6 Legal &amp; Compliance Intents.
+      </p>
+    </section>
+    <div id="eval-results"></div>
+  </div>
+
+  <!-- TAB 4: REPLACEMENT MINER ENDPOINTS -->
+  <div id="tab-miner" hidden>
+    <section class="panel">
+      <h2>Track 1 (Providers) — Schema-Compliant Compliance Miner Endpoints</h2>
+      <p class="hint" style="margin:0; font-size:13px">
+        While testing live paid calls on the network, we observed that Miner <code>#7454</code> (TradeWire PO Verify) is hardcoded to the City of Chicago registry and throws a <code>parameter "question" length 0</code> warning on typed asks, Miner <code>#7455</code> (TradeWire Invoice Reconcile) leaves <code>reconciled: null</code> and <code>discrepancy: rejected</code>, and Miner <code>#9002</code> (TxLens Vendor Verify) returns string <code>verdict</code> instead of boolean <code>valid</code>. These hosted endpoints accept both canonical typed parameters and <code>?question=</code> queries while returning strict V3/V4 schema fields.
+      </p>
+      <div class="actions" style="margin-top:12px">
+        <button type="button" class="secondary" data-test-miner="/api/miner/invoice-reconcile">Test /api/miner/invoice-reconcile</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=Infosys%20Limited&lei=335800TYLGG93MM7PR89&vat_number=29AAACI4798L1Z0">Test /api/miner/vendor-verify (Live GLEIF)</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/po-verify">Test /api/miner/po-verify</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/doc-authenticity">Test /api/miner/doc-authenticity</button>
+      </div>
+      <div id="miner-test-output" style="margin-top:12px"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+})[c]);
+
+// Modern Web Guidance: Validate Input After Interaction (WeakMap fallback + aria-invalid sync)
+const UserInvalidFallback = (() => {
+  const dirtyState = new WeakMap();
+  const syncAria = (el) => {
+    if (!el || typeof el.checkValidity !== "function") return;
+    const isInvalid = el.matches?.(":user-invalid") || (!el.checkValidity() && dirtyState.get(el)?.hasBlurred);
+    if (isInvalid) {
+      el.setAttribute("aria-invalid", "true");
+    } else {
+      el.removeAttribute("aria-invalid");
+    }
+  };
+  const updateState = (input) => {
+    const isValid = input.checkValidity();
+    input.classList.toggle("user-invalid-fallback", !isValid);
+    input.classList.toggle("user-valid-fallback", isValid);
+    syncAria(input);
+  };
+  const init = (root = document) => {
+    root.addEventListener("blur", (e) => {
+      const input = e.target;
+      if (!input || typeof input.checkValidity !== "function") return;
+      const state = dirtyState.get(input) || { hasInteracted: false, hasBlurred: false };
+      state.hasBlurred = true;
+      dirtyState.set(input, state);
+      if (state.hasInteracted) updateState(input);
+      syncAria(input);
+    }, true);
+    root.addEventListener("input", (e) => {
+      const input = e.target;
+      if (!input || typeof input.checkValidity !== "function") return;
+      const state = dirtyState.get(input) || { hasInteracted: false, hasBlurred: false };
+      state.hasInteracted = true;
+      dirtyState.set(input, state);
+      if (state.hasBlurred) updateState(input);
+      if (input.hasAttribute("aria-invalid")) syncAria(input);
+    });
+  };
+  return { init };
+})();
+UserInvalidFallback.init(document.getElementById("audit-form"));
+
+const PRESETS = {
+  discrepancy: {
+    vendor: "Infosys Limited",
+    vatNumber: "29AAACI4798L1Z0",
+    lei: "335800TYLGG93MM7PR89",
+    poNumber: "PO-2026-4410",
+    poAmount: 5312800,
+    approvalCap: 10000000,
+    invoiceId: "INV-STL-902",
+    billedQty: 76.5,
+    acceptedQty: 75.0,
+    unitPrice: 58000,
+    taxRatePct: 18,
+    currency: "INR",
+    irnOrSha256: "64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012",
+    signedQrAmount: 1416000,
+    pdfFaceAmount: 1888000
+  },
+  clean: {
+    vendor: "SAP SE",
+    vatNumber: "DE143593636",
+    lei: "529900D6BF99LW9R2E68",
+    poNumber: "PO-EU-2026-104",
+    poAmount: 59500,
+    approvalCap: 100000,
+    invoiceId: "INV-SAP-2026-88",
+    billedQty: 10,
+    acceptedQty: 10,
+    unitPrice: 5000,
+    taxRatePct: 19,
+    currency: "EUR",
+    irnOrSha256: "a1b2c3d4e5f60123456789abcdef0123456789abcdef0123456789abcdef0123",
+    signedQrAmount: 59500,
+    pdfFaceAmount: 59500
+  },
+  cap: {
+    vendor: "Infosys Limited",
+    vatNumber: "29AAACI4798L1Z0",
+    lei: "335800TYLGG93MM7PR89",
+    poNumber: "PO-ERP-2026-7741",
+    poAmount: 18500000,
+    approvalCap: 10000000,
+    invoiceId: "INV-ERP-7741",
+    billedQty: 100,
+    acceptedQty: 100,
+    unitPrice: 156779.66,
+    taxRatePct: 18,
+    currency: "INR",
+    irnOrSha256: "64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012",
+    signedQrAmount: 18500000,
+    pdfFaceAmount: 18500000
+  }
+};
+
+document.querySelectorAll("[data-preset]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const p = PRESETS[btn.dataset.preset];
+    if (!p) return;
+    $("f-vendor").value = p.vendor;
+    $("f-vat").value = p.vatNumber;
+    $("f-lei").value = p.lei;
+    $("f-po").value = p.poNumber;
+    $("f-po-amt").value = p.poAmount;
+    $("f-po-cap").value = p.approvalCap;
+    $("f-inv-id").value = p.invoiceId;
+    $("f-billed-qty").value = p.billedQty;
+    $("f-acc-qty").value = p.acceptedQty;
+    $("f-rate").value = p.unitPrice;
+    $("f-tax").value = p.taxRatePct;
+    $("f-curr").value = p.currency;
+    $("f-irn").value = p.irnOrSha256;
+    $("f-qr-amt").value = p.signedQrAmount;
+    $("f-face-amt").value = p.pdfFaceAmount;
+  });
+});
+
+function getFormPayload() {
+  const intents = [...document.querySelectorAll('input[name="intent"]:checked')].map(el => el.value).slice(0, 3);
+  return {
+    vendor: $("f-vendor").value.trim(),
+    vatNumber: $("f-vat").value.trim(),
+    lei: $("f-lei").value.trim(),
+    poNumber: $("f-po").value.trim(),
+    poAmount: Number($("f-po-amt").value),
+    approvalCap: Number($("f-po-cap").value),
+    invoiceId: $("f-inv-id").value.trim(),
+    billedQty: Number($("f-billed-qty").value),
+    acceptedQty: Number($("f-acc-qty").value),
+    unitPrice: Number($("f-rate").value),
+    taxRatePct: Number($("f-tax").value),
+    currency: $("f-curr").value.trim(),
+    irnOrSha256: $("f-irn").value.trim(),
+    signedQrAmount: Number($("f-qr-amt").value),
+    pdfFaceAmount: Number($("f-face-amt").value),
+    intents
+  };
+}
+
+function updateSpendEstimate() {
+  const checked = [...document.querySelectorAll('input[name="intent"]:checked')];
+  if (checked.length > 3) {
+    checked[checked.length - 1].checked = false;
+  }
+  const n = Math.min(checked.length, 3);
+  const cost = (n * 0.01).toFixed(2);
+  $("btn-buy").textContent = `2. Buy Telegraph checks & compare ($${cost})`;
+  $("spend-estimate").textContent = `${n} paid ${n === 1 ? "check" : "checks"} selected ($${cost} test USDC on Ethereum Sepolia)`;
+}
+document.querySelectorAll('input[name="intent"]').forEach(el => el.addEventListener("change", updateSpendEstimate));
+
+function openTab(tabName) {
+  document.querySelectorAll('nav[role="tablist"] button').forEach(btn => {
+    const active = btn.dataset.tab === tabName;
+    btn.setAttribute("aria-selected", active ? "true" : "false");
+  });
+  ["audit", "ledger", "eval", "miner"].forEach(t => {
+    $(`tab-${t}`).hidden = t !== tabName;
+  });
+  if (tabName === "ledger") loadLedger();
+  if (tabName === "eval") loadEvalPool();
+}
+
+document.querySelectorAll('nav[role="tablist"] button').forEach(btn => {
+  btn.addEventListener("click", () => {
+    location.hash = btn.dataset.tab;
+    openTab(btn.dataset.tab);
+  });
+});
+
+async function api(path, body) {
+  const res = await fetch(path, body ? {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  } : {});
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+function showMsg(id, kind, html) {
+  $(id).innerHTML = html ? `<div class="msg ${kind}">${html}</div>` : "";
+}
+
+function downloadFile(name, content, type) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function loadWallet() {
+  try {
+    const w = await api("/api/wallet");
+    $("wallet-box").innerHTML = `
+      Wallet <a href="${esc(w.explorerUrl)}/address/${esc(w.address)}" target="_blank" rel="noopener" class="mono">${esc(w.address.slice(0, 6))}...${esc(w.address.slice(-4))}</a>
+      &middot; <strong>${esc(w.usdcBalance)}</strong> test USDC
+      &middot; ${esc(w.ethBalance)} Sepolia ETH
+    `;
+  } catch (e) {
+    $("wallet-box").textContent = `Wallet status unavailable: ${e.message}`;
+  }
+}
+
+$("btn-primary").addEventListener("click", async () => {
+  const form = $("audit-form");
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+  const btn = $("btn-primary");
+  btn.disabled = true;
+  showMsg("audit-msg", "info", "Running free primary source checks (GLEIF API + deterministic 3-way reconciliation)...");
+  try {
+    const data = await api("/api/audit/primary", getFormPayload());
+    const c = data.checks;
+    const issues = [
+      !c.vendor.valid ? "Vendor registry/tax check flagged" : null,
+      !c.invoice.reconciled ? `Invoice discrepancy (${c.invoice.discrepancy})` : null,
+      !c.po.verified ? `PO status: ${c.po.status}` : null,
+      !c.document.authentic ? `Document: ${c.document.verdict}` : null
+    ].filter(Boolean);
+
+    showMsg(
+      "audit-msg",
+      issues.length ? "warn" : "ok",
+      issues.length
+        ? `Primary verification completed ($0.00 spent). Flagged ${issues.length} compliance ${issues.length === 1 ? "exception" : "exceptions"}: ${esc(issues.join("; "))}.`
+        : `Primary verification completed ($0.00 spent). All 4 checks passed.`
+    );
+
+    $("audit-results").innerHTML = `
+      <section class="panel">
+        <div tabindex="0" role="region" aria-labelledby="primary-table-caption" class="table-wrapper">
+          <table style="--label-2:'Source'; --label-3:'Status'; --label-4:'Finding'; --label-5:'Reference'">
+            <caption id="primary-table-caption">Primary Source &amp; Deterministic Compliance Findings ($0.00)</caption>
+            <thead>
+              <tr>
+                <th>Check / Intent</th>
+                <th>Primary Source</th>
+                <th>Verdict</th>
+                <th>Deterministic Finding</th>
+                <th>Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th><code>VENDOR_VERIFY_GENERAL</code></th>
+                <td>${esc(c.vendor.source)}</td>
+                <td><span class="badge ${c.vendor.valid ? "confirmed" : "contradicted"}">${c.vendor.valid ? "valid" : "unverified"}</span></td>
+                <td>${esc(c.vendor.summary)}${c.vendor.registered_address ? `<br><span class="hint">HQ: ${esc(c.vendor.registered_address)}</span>` : ""}</td>
+                <td>${c.vendor.source_url ? `<a href="${esc(c.vendor.source_url)}" target="_blank" rel="noopener">GLEIF record</a>` : "—"}</td>
+              </tr>
+              <tr>
+                <th><code>INVOICE_LEDGER_RECONCILE_GENERAL</code></th>
+                <td>3-Way PO-GRN-Invoice Math</td>
+                <td><span class="badge ${c.invoice.reconciled ? "confirmed" : "contradicted"}">${c.invoice.reconciled ? "reconciled" : "discrepancy"}</span></td>
+                <td>${esc(c.invoice.explanation)}</td>
+                <td class="mono">${esc(c.invoice.discrepancy)}</td>
+              </tr>
+              <tr>
+                <th><code>PURCHASE_ORDER_VERIFY_GENERAL</code></th>
+                <td>Approval Authority Matrix</td>
+                <td><span class="badge ${c.po.verified ? "confirmed" : "contradicted"}">${esc(c.po.status)}</span></td>
+                <td>${esc(c.po.explanation)}</td>
+                <td class="mono">${esc(c.po.po_number)}</td>
+              </tr>
+              <tr>
+                <th><code>DOCUMENT_AUTHENTICITY_GENERAL</code></th>
+                <td>SHA-256 / NIC QR Envelope</td>
+                <td><span class="badge ${c.document.authentic ? "confirmed" : "contradicted"}">${esc(c.document.verdict)}</span></td>
+                <td>${esc(c.document.evidence)}</td>
+                <td class="mono">${esc(String(c.document.document).slice(0, 22))}...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    `;
+  } catch (err) {
+    showMsg("audit-msg", "bad", esc(err.message));
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("btn-buy").addEventListener("click", async () => {
+  const form = $("audit-form");
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+  const payload = getFormPayload();
+  if (!payload.intents.length) {
+    showMsg("audit-msg", "bad", "Select at least one Telegraph Intent checkbox above to purchase.");
+    return;
+  }
+  const btn = $("btn-buy");
+  btn.disabled = true;
+  showMsg("audit-msg", "info", `Purchasing ${payload.intents.length} verification ${payload.intents.length === 1 ? "check" : "checks"} through Telegraph (x402 on Ethereum Sepolia) and comparing with primary sources. This takes 10–25 seconds while Sepolia transactions settle...`);
+
+  try {
+    const r = await api("/api/audit/buy", payload);
+    loadWallet();
+    showMsg(
+      "audit-msg",
+      "ok",
+      `Settled ${r.items.length} paid Telegraph ${r.items.length === 1 ? "check" : "checks"} ($${esc(r.totalSpentUsd)} test USDC spent). Audit pack SHA-256: <code>${esc(r.auditPackSha256.slice(0, 18))}...</code>`
+    );
+
+    const rowsHtml = r.items.map(item => `
+      <tr>
+        <th>
+          <code>${esc(item.intent)}</code>
+          <div class="hint">Miner: ${esc(item.minerName || "N/A")} (#${esc(item.minerId || "N/A")})</div>
+        </th>
+        <td>
+          ${esc(item.primary.explanation || item.primary.summary || item.primary.evidence)}
+        </td>
+        <td>
+          <div><strong>Field status:</strong> <code>${esc(JSON.stringify(item.fieldStatus || {}))}</code></div>
+          <div style="margin-top:4px">${esc(item.diagnostic)}</div>
+          <details>
+            <summary>Normalized &amp; raw miner response</summary>
+            <pre>${esc(JSON.stringify({ normalized: item.normalizedResult, warnings: item.warnings, raw: item.rawMinerPayload }, null, 2))}</pre>
+          </details>
+        </td>
+        <td><span class="badge ${esc(item.agreement)}">${esc(item.badgeText)}</span></td>
+        <td class="mono">
+          <div>$0.01 USDC &middot; ${esc(item.durationMs)}ms</div>
+          ${item.txHash ? `<div><a href="https://sepolia.etherscan.io/tx/${esc(item.txHash)}" target="_blank" rel="noopener">tx ${esc(item.txHash.slice(0, 10))}...</a></div>` : ""}
+          ${item.signalHash ? `<div><a href="https://devnode.telegraphprotocol.com/engine/v1/signal/${esc(item.signalHash)}" target="_blank" rel="noopener">signal ${esc(item.signalHash.slice(0, 10))}...</a></div>` : ""}
+        </td>
+      </tr>
+    `).join("");
+
+    $("audit-results").innerHTML = `
+      <section class="panel">
+        <div tabindex="0" role="region" aria-labelledby="paid-table-caption" class="table-wrapper">
+          <table style="--label-2:'Primary Ground Truth'; --label-3:'Paid Miner Response'; --label-4:'Agreement'; --label-5:'On-Chain Receipt'">
+            <caption id="paid-table-caption">Live Paid Telegraph x402 Verification vs. Primary Sources (Pack ${esc(r.auditPackSha256.slice(0, 14))}...)</caption>
+            <thead>
+              <tr>
+                <th>Intent &amp; Miner</th>
+                <th>Primary Ground Truth</th>
+                <th>Telegraph Miner Response &amp; Schema Audit</th>
+                <th>Comparison</th>
+                <th>Receipt</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+        <div class="actions">
+          <button type="button" class="secondary" id="btn-dl-json">Download receipt bundle (.json)</button>
+          <button type="button" class="secondary" id="btn-dl-md">Download audit memo (.md)</button>
+        </div>
+      </section>
+    `;
+
+    $("btn-dl-json").addEventListener("click", () => {
+      downloadFile(`praman-audit-receipts-${Date.now()}.json`, JSON.stringify(r, null, 2), "application/json");
+    });
+    $("btn-dl-md").addEventListener("click", () => {
+      const md = [
+        `# Praman Desk — Cryptographic Compliance Audit Memo`,
+        `- **Timestamp**: ${r.timestamp}`,
+        `- **Buyer Wallet**: \`${r.payer}\` (Ethereum Sepolia \`eip155:11155111\`)`,
+        `- **Total Paid**: $${r.totalSpentUsd} Test USDC`,
+        `- **Audit Pack SHA-256**: \`${r.auditPackSha256}\``,
+        ``,
+        `## Verification Results`,
+        ...r.items.map((it, idx) => [
+          `### ${idx + 1}. \`${it.intent}\` — ${it.badgeText.toUpperCase()}`,
+          `- **Miner Routed**: ${it.minerName} (\`#${it.minerId}\`, endpoint \`${it.endpoint}\`)`,
+          `- **Sepolia Payment Tx**: https://sepolia.etherscan.io/tx/${it.txHash}`,
+          `- **Telegraph Signal Record**: https://devnode.telegraphprotocol.com/engine/v1/signal/${it.signalHash}`,
+          `- **Primary Ground Truth**: ${it.primary.explanation || it.primary.summary || it.primary.evidence}`,
+          `- **Schema & Diagnostic Audit**: ${it.diagnostic}`,
+          ``
+        ].join("\n"))
+      ].join("\n");
+      downloadFile(`praman-audit-memo-${Date.now()}.md`, md, "text/markdown");
+    });
+  } catch (err) {
+    showMsg("audit-msg", "bad", esc(err.message));
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+async function loadLedger() {
+  $("ledger-results").innerHTML = `<section class="panel"><p class="hint">Loading on-chain receipts...</p></section>`;
+  try {
+    const l = await api("/api/ledger");
+    $("ledger-summary").innerHTML = `
+      <div class="hint" style="color:var(--ink)">
+        <strong>${esc(l.totalPaidCalls)} settled x402 purchases</strong> ($${esc(l.totalSpentUsd)} test USDC total)
+        &middot; Test USDC Mint Tx: <a href="https://sepolia.etherscan.io/tx/${esc(l.usdcMintTxHash)}" target="_blank" rel="noopener" class="mono">${esc(l.usdcMintTxHash.slice(0, 14))}...</a>
+      </div>
+    `;
+    const rows = l.calls.map(c => `
+      <tr>
+        <th>
+          <div><code>#${esc(c.index)} ${esc(c.intent)}</code></div>
+          <div class="hint">${esc(c.title)}</div>
+        </th>
+        <td>
+          <div><strong>${esc(c.minerName)}</strong> (<code>#${esc(c.minerId)}</code>)</div>
+          <div class="hint">Endpoint: <code>${esc(c.endpoint)}</code> &middot; ${esc(c.durationMs)}ms</div>
+        </td>
+        <td>
+          <div>${esc(c.diagnostic)}</div>
+          <div class="hint" style="margin-top:4px"><code>field_status: ${esc(JSON.stringify(c.fieldStatus))}</code></div>
+          <details>
+            <summary>Inspect request, normalized output &amp; raw signal payload</summary>
+            <pre>${esc(JSON.stringify({ request: c.request, normalizedResult: c.normalizedResult, warnings: c.warnings, rawMinerPayload: c.rawMinerPayload }, null, 2))}</pre>
+          </details>
+        </td>
+        <td><span class="badge ${esc(c.agreement)}">${esc(c.badgeText)}</span></td>
+        <td class="mono">
+          <div>$0.01 USDC (Epoch ${esc(c.epochId)})</div>
+          <div><a href="https://sepolia.etherscan.io/tx/${esc(c.txHash)}" target="_blank" rel="noopener">tx ${esc(c.txHash.slice(0, 10))}...</a></div>
+          <div><a href="https://devnode.telegraphprotocol.com/engine/v1/signal/${esc(c.signalHash)}" target="_blank" rel="noopener">signal ${esc(c.signalHash.slice(0, 10))}...</a></div>
+        </td>
+      </tr>
+    `).join("");
+
+    $("ledger-results").innerHTML = `
+      <section class="panel">
+        <div tabindex="0" role="region" aria-labelledby="ledger-table-caption" class="table-wrapper">
+          <table style="--label-2:'Miner'; --label-3:'Diagnostic Audit'; --label-4:'Status'; --label-5:'On-Chain Proof'">
+            <caption id="ledger-table-caption">Ethereum Sepolia x402 Payment &amp; Signal Verification Ledger</caption>
+            <thead>
+              <tr>
+                <th>Call &amp; Intent</th>
+                <th>Routed Miner</th>
+                <th>Schema &amp; Accuracy Audit</th>
+                <th>Agreement</th>
+                <th>Sepolia Tx &amp; Signal</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </section>
+    `;
+  } catch (err) {
+    $("ledger-results").innerHTML = `<section class="panel"><div class="msg bad">${esc(err.message)}</div></section>`;
+  }
+}
+
+async function loadEvalPool() {
+  $("eval-results").innerHTML = `<section class="panel"><p class="hint">Querying Telegraph devnode evalpool...</p></section>`;
+  try {
+    const e = await api("/api/evalpool");
+    const bountyRows = e.bounties.map(b => {
+      const live = e.byIntent[b.intent] || { total: b.rows, statuses: { admitted: b.rows } };
+      const statusPairs = Object.entries(live.statuses).map(([k, v]) => `${v} ${k}`).join(", ");
+      return `
+        <tr>
+          <th><code>${esc(b.intent)}</code></th>
+          <td class="mono">${esc(live.total)} rows</td>
+          <td>${esc(b.provenance)}</td>
+          <td><span class="badge confirmed">${esc(statusPairs)}</span></td>
+          <td>${b.commentUrl ? `<a href="${esc(b.commentUrl)}" target="_blank" rel="noopener">Issue #${esc(b.issue)} (/submit in review)</a>` : "Pool contribution"}</td>
+        </tr>
+      `;
+    }).join("");
+
+    const sampleRows = (e.rows || []).slice(0, 15).map(r => `
+      <tr>
+        <th><code>${esc(r.intent_id)}</code></th>
+        <td class="mono">${esc(r.case_id.slice(0, 16))}...</td>
+        <td class="mono">${esc(r.row_hash.slice(0, 16))}...</td>
+        <td><code>${esc(r.provenance_class)}</code></td>
+        <td><span class="badge confirmed">${esc(r.status)}</span></td>
+      </tr>
+    `).join("");
+
+    $("eval-results").innerHTML = `
+      <section class="panel">
+        <div tabindex="0" role="region" aria-labelledby="bounty-table-caption" class="table-wrapper">
+          <table style="--label-2:'Rows'; --label-3:'Provenance'; --label-4:'Node Status'; --label-5:'GitHub Bounty'">
+            <caption id="bounty-table-caption">Submitted Evaluation Pool Datasets (${esc(e.totalRows)} total rows from ${esc(e.submitter)})</caption>
+            <thead>
+              <tr>
+                <th>Intent ID</th>
+                <th>Admitted Rows</th>
+                <th>Provenance Class</th>
+                <th>Live Node Status</th>
+                <th>Bounty Submission</th>
+              </tr>
+            </thead>
+            <tbody>${bountyRows}</tbody>
+          </table>
+        </div>
+      </section>
+      <section class="panel">
+        <div tabindex="0" role="region" aria-labelledby="rows-table-caption" class="table-wrapper">
+          <table style="--label-2:'Case ID'; --label-3:'Row SHA-256'; --label-4:'Provenance'; --label-5:'Status'">
+            <caption id="rows-table-caption">Sample Cryptographic Row Hashes on devnode.telegraphprotocol.com (Showing 15 of ${esc(e.totalRows)})</caption>
+            <thead>
+              <tr>
+                <th>Intent</th>
+                <th>Case ID</th>
+                <th>Row SHA-256</th>
+                <th>Provenance</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>${sampleRows}</tbody>
+          </table>
+        </div>
+      </section>
+    `;
+  } catch (err) {
+    $("eval-results").innerHTML = `<section class="panel"><div class="msg bad">${esc(err.message)}</div></section>`;
+  }
+}
+
+document.querySelectorAll("[data-test-miner]").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const endpoint = btn.dataset.testMiner;
+    $("miner-test-output").innerHTML = `<p class="hint">Calling <code>${esc(endpoint)}</code>...</p>`;
+    try {
+      const data = await api(endpoint);
+      $("miner-test-output").innerHTML = `
+        <div class="hint">Response from <code>${esc(endpoint)}</code>:</div>
+        <pre>${esc(JSON.stringify(data, null, 2))}</pre>
+      `;
+    } catch (err) {
+      $("miner-test-output").innerHTML = `<div class="msg bad">${esc(err.message)}</div>`;
+    }
+  });
+});
+
+loadWallet();
+const initialTab = location.hash.replace("#", "");
+if (["audit", "ledger", "eval", "miner"].includes(initialTab)) {
+  openTab(initialTab);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,933 @@
+{
+  "generatedAt": "2026-11-09T05:51:29.137Z",
+  "walletAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "usdcMintTxHash": "0xe3cd664f19587d7d56ba19a365d5be316a8b03b7cfbe5524508bc34689098f88",
+  "sepoliaEthBalance": "0.049999999914292586",
+  "testUsdcBalanceAfter": "9.95",
+  "minerDiscovery": {
+    "DOCUMENT_AUTHENTICITY_GENERAL": {
+      "count": 10,
+      "sampleMiners": [
+        {
+          "id": "9002",
+          "name": "TxLens",
+          "slug": "txlens"
+        },
+        {
+          "id": "302",
+          "name": "ChainSight — Universal Intelligence & Data Oracle",
+          "slug": "chainsight-oracle"
+        },
+        {
+          "id": "20260828",
+          "name": "PREFLIGHT Infrastructure Signals",
+          "slug": "a1-preflight"
+        }
+      ]
+    },
+    "PURCHASE_ORDER_VERIFY_GENERAL": {
+      "count": 10,
+      "sampleMiners": [
+        {
+          "id": "9002",
+          "name": "TxLens",
+          "slug": "txlens"
+        },
+        {
+          "id": "20260828",
+          "name": "PREFLIGHT Infrastructure Signals",
+          "slug": "a1-preflight"
+        },
+        {
+          "id": "7454",
+          "name": "TradeWire Purchase Order Verify",
+          "slug": "tradewire-purchase-order-verify"
+        }
+      ]
+    },
+    "INVOICE_LEDGER_RECONCILE_GENERAL": {
+      "count": 10,
+      "sampleMiners": [
+        {
+          "id": "9002",
+          "name": "TxLens",
+          "slug": "txlens"
+        },
+        {
+          "id": "20260828",
+          "name": "PREFLIGHT Infrastructure Signals",
+          "slug": "a1-preflight"
+        },
+        {
+          "id": "7455",
+          "name": "TradeWire Invoice Ledger Reconcile",
+          "slug": "tradewire-invoice-ledger-reconcile"
+        }
+      ]
+    },
+    "CONTRACT_OBLIGATION_AUDIT_GENERAL": {
+      "count": 10,
+      "sampleMiners": [
+        {
+          "id": "9002",
+          "name": "TxLens",
+          "slug": "txlens"
+        },
+        {
+          "id": "302",
+          "name": "ChainSight — Universal Intelligence & Data Oracle",
+          "slug": "chainsight-oracle"
+        },
+        {
+          "id": "20260828",
+          "name": "PREFLIGHT Infrastructure Signals",
+          "slug": "a1-preflight"
+        }
+      ]
+    }
+  },
+  "paidCalls": [
+    {
+      "step": 1,
+      "title": "RERA Form-3 & e-Invoice Cryptographic Seal Verification",
+      "request": {
+        "query": "[DOCUMENT_AUTHENTICITY_GENERAL] Verify document authenticity for GST NIC e-Invoice IRN 64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012 where signed QR payload states InvoiceValue INR 14,16,000 but PDF face states INR 18,88,000."
+      },
+      "httpStatus": 200,
+      "paymentResponse": {
+        "success": true,
+        "payer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "transaction": "0x6e3f77449af4ae6c2346b0df1d4d6049e979cd9d333829d78d2fc6cf240295bc",
+        "network": "eip155:11155111"
+      },
+      "telegraphReceipt": {
+        "receipt_hash": "0x1a02b7861243e49ecd9d9e6f20559158bd00bff3a58ba26bfca8c81a418b9865",
+        "rail": "x402",
+        "payer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "miner": "5079",
+        "intent": "DOCUMENT_AUTHENTICITY_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2048,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x6e3f77449af4ae6c2346b0df1d4d6049e979cd9d333829d78d2fc6cf240295bc",
+        "timestamp": 1794203467
+      },
+      "response": {
+        "miner_id": "74351",
+        "miner_name": "FactWire Public Document Provenance",
+        "endpoint": "/document-authenticity",
+        "result": {
+          "document": "GST NIC e-Invoice IRN 64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012 where signed QR payload states InvoiceValue INR 14,16,000 but PDF face states INR 18,88,000.",
+          "authentic": null,
+          "verdict": "Inconclusive",
+          "evidence": null
+        },
+        "result_shape": "intent",
+        "format_version": 4,
+        "field_status": {
+          "document": "ok",
+          "authentic": "missing",
+          "verdict": "ok",
+          "evidence": "missing"
+        },
+        "input": {
+          "document": "GST NIC e-Invoice IRN 64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012"
+        },
+        "input_schema_version": 4,
+        "cost_usd": 0.01,
+        "duration_ms": 118,
+        "timestamp": "2026-11-09T05:51:03.227102692Z",
+        "reasoning": "Intent: The user is asking to verify the authenticity of a document (GST NIC e-Invoice) by comparing a signed QR payload value with the value stated on the PDF face. This directly aligns with the DOCUMENT_AUTHENTICITY_GENERAL intent, which checks for genuineness and alteration. The discrepancy in monetary values also suggests a verification of purchase details, making COMMERCE_PURCHASE_VERIFY_GENERAL a relevant secondary intent.\nMiner: request built from the miner's intent_mapping",
+        "intent": "DOCUMENT_AUTHENTICITY_GENERAL",
+        "signal_hash": "0x222eee39d4f16fb00b056c8581e84de1f57fefa0038076fa5e0412647ee5ee2e",
+        "warnings": [
+          "parameter \"document\" length 0 violates the miner's declared limit (lte 8000): One public document reference or supported metadata claim, at most 8000 characters."
+        ]
+      },
+      "signalVerification": {
+        "signal_hash": "0x222eee39d4f16fb00b056c8581e84de1f57fefa0038076fa5e0412647ee5ee2e",
+        "kind": "direct_result",
+        "signal": {
+          "id": "a7d79228-5412-4f37-9f32-dc2a4356818c",
+          "signal_hash": "0x222eee39d4f16fb00b056c8581e84de1f57fefa0038076fa5e0412647ee5ee2e",
+          "kind": "direct_result",
+          "wallet_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+          "miner_slug": "zk-docproof",
+          "subnet_id": "74351",
+          "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+          "tx_hash": "0x6e3f77449af4ae6c2346b0df1d4d6049e979cd9d333829d78d2fc6cf240295bc",
+          "result_id": "c221bd5f-e41b-4aac-bfab-8e5896ee211a",
+          "created_at": "2026-11-09T05:51:07.455337Z"
+        },
+        "payload": {
+          "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+          "miner_slug": "zk-docproof",
+          "subnet_id": "74351",
+          "wallet_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+          "request": "[DOCUMENT_AUTHENTICITY_GENERAL] Verify document authenticity for GST NIC e-Invoice IRN 64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012 where signed QR payload states InvoiceValue INR 14,16,000 but PDF face states INR 18,88,000.",
+          "response": {
+            "answer": "Inconclusive. No complete supported source claim was supplied. Provide a DOI or supported HTTPS source link, an explicit JSON metadata/transcription claim, or a complete sentence stating that the article/document at a source URL is titled a quoted title, or that the official document was published on an ISO date or contains a quoted passage. Broader prose, scientific truth and legal compliance have not been verified. Document-byte authenticity has not been established.",
+            "as_of": "2026-11-09T05:51:03.219Z",
+            "assessment_method": "Deterministic comparison of fetched public-source records; no model-generated facts, labels or confidence.",
+            "document": "GST NIC e-Invoice IRN 64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012 where signed QR payload states InvoiceValue INR 14,16,000 but PDF face states INR 18,88,000.",
+            "evidence": [],
+            "intent": "DOCUMENT_AUTHENTICITY_GENERAL",
+            "metadata_verdict": "Inconclusive",
+            "retrieval_version": "document-public-evidence-v10-source-pacing",
+            "scope": "Authenticity of the referenced official public version only. No private-document, signature, seal, authorship, scientific-accuracy or legal-effect certification.",
+            "summary": "Inconclusive. No complete supported source claim was supplied. Provide a DOI or supported HTTPS source link, an explicit JSON metadata/transcription claim, or a complete sentence stating that the article/document at a source URL is titled a quoted title, or that the official document was published on an ISO date or contains a quoted passage. Broader prose, scientific truth and legal compliance have not been verified. Document-byte authenticity has not been established.",
+            "verdict": "Inconclusive"
+          },
+          "timestamp": "2026-11-09T05:51:03.227102692Z"
+        },
+        "result": {
+          "id": "c221bd5f-e41b-4aac-bfab-8e5896ee211a",
+          "type": "direct",
+          "source": "user",
+          "status": "success",
+          "created_at": "2026-11-09T05:51:07.450046Z",
+          "signal_hash": "0x222eee39d4f16fb00b056c8581e84de1f57fefa0038076fa5e0412647ee5ee2e",
+          "routing_mode": "auto",
+          "question": {
+            "hash": "c71c079e2fa142edec09dd5f871a76adf3e9495c97e1a04e9abe774c7a3a212e",
+            "text": "[DOCUMENT_AUTHENTICITY_GENERAL] Verify document authenticity for GST NIC e-Invoice IRN 64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012 where signed QR payload states InvoiceValue INR 14,16,000 but PDF face states INR 18,88,000.",
+            "category": "",
+            "interest_score": 0,
+            "affected_pct": 0,
+            "audience_pct": 0,
+            "source_url": ""
+          },
+          "routing": {
+            "subnet_id": "74351",
+            "subnet_name": "FactWire Public Document Provenance",
+            "miner_slug": "zk-docproof",
+            "reasoning": "Intent: The user is asking to verify the authenticity of a document (GST NIC e-Invoice) by comparing a signed QR payload value with the value stated on the PDF face. This directly aligns with the DOCUMENT_AUTHENTICITY_GENERAL intent, which checks for genuineness and alteration. The discrepancy in monetary values also suggests a verification of purchase details, making COMMERCE_PURCHASE_VERIFY_GENERAL a relevant secondary intent.\nMiner: request built from the miner's intent_mapping",
+            "intent": "DOCUMENT_AUTHENTICITY_GENERAL"
+          },
+          "execution": {
+            "result": {
+              "answer": "Inconclusive. No complete supported source claim was supplied. Provide a DOI or supported HTTPS source link, an explicit JSON metadata/transcription claim, or a complete sentence stating that the article/document at a source URL is titled a quoted title, or that the official document was published on an ISO date or contains a quoted passage. Broader prose, scientific truth and legal compliance have not been verified. Document-byte authenticity has not been established.",
+              "as_of": "2026-11-09T05:51:03.219Z",
+              "assessment_method": "Deterministic comparison of fetched public-source records; no model-generated facts, labels or confidence.",
+              "document": "GST NIC e-Invoice IRN 64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012 where signed QR payload states InvoiceValue INR 14,16,000 but PDF face states INR 18,88,000.",
+              "evidence": [],
+              "intent": "DOCUMENT_AUTHENTICITY_GENERAL",
+              "metadata_verdict": "Inconclusive",
+              "retrieval_version": "document-public-evidence-v10-source-pacing",
+              "scope": "Authenticity of the referenced official public version only. No private-document, signature, seal, authorship, scientific-accuracy or legal-effect certification.",
+              "summary": "Inconclusive. No complete supported source claim was supplied. Provide a DOI or supported HTTPS source link, an explicit JSON metadata/transcription claim, or a complete sentence stating that the article/document at a source URL is titled a quoted title, or that the official document was published on an ISO date or contains a quoted passage. Broader prose, scientific truth and legal compliance have not been verified. Document-byte authenticity has not been established.",
+              "verdict": "Inconclusive"
+            },
+            "cost_usd": 0.01,
+            "duration_ms": 118,
+            "timestamp": "2026-11-09T05:51:03.227102692Z"
+          }
+        },
+        "verification": {
+          "algorithm": "keccak256",
+          "commitment": "payload",
+          "verified": true
+        }
+      }
+    },
+    {
+      "step": 2,
+      "title": "ERP Purchase Order & RERA 70% Escrow Budget Verification",
+      "request": {
+        "query": "[PURCHASE_ORDER_VERIFY_GENERAL] Verify ERP Purchase Order PO-ERP-2026-7741 for INR 1,85,00,000 under Vendor V-10492 where Level-2 VP approval cap is INR 1,00,00,000 and CFO/MD joint sign-off is missing."
+      },
+      "httpStatus": 200,
+      "paymentResponse": {
+        "success": true,
+        "payer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "transaction": "0x8e1b1b80314f9847133105ced374879744aa52ed525d8ecf02322d02404e341b",
+        "network": "eip155:11155111"
+      },
+      "telegraphReceipt": {
+        "receipt_hash": "0x147965552e6bb29aae62bacb7cdfcee00b659c4f023c229cb368926efec2b07a",
+        "rail": "x402",
+        "payer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "miner": "4493",
+        "intent": "PURCHASE_ORDER_VERIFY_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2048,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x8e1b1b80314f9847133105ced374879744aa52ed525d8ecf02322d02404e341b",
+        "timestamp": 1794203490
+      },
+      "response": {
+        "miner_id": "7454",
+        "miner_name": "TradeWire Purchase Order Verify",
+        "endpoint": "/po-verify",
+        "result": {
+          "po_number": "PO-ERP-2026-7741",
+          "verified": null,
+          "status": "unknown",
+          "amount": null,
+          "vendor": null
+        },
+        "result_shape": "intent",
+        "format_version": 4,
+        "field_status": {
+          "po_number": "ok",
+          "verified": "missing",
+          "status": "ok",
+          "amount": "missing",
+          "vendor": "missing"
+        },
+        "input": {
+          "po_number": "PO-ERP-2026-7741",
+          "vendor": "V-10492"
+        },
+        "input_schema_version": 4,
+        "cost_usd": 0.01,
+        "duration_ms": 58,
+        "timestamp": "2026-11-09T05:51:28.985837865Z",
+        "reasoning": "Intent: The query explicitly asks to verify a Purchase Order (PO-ERP-2026-7741) against specific criteria including amount, vendor, and approval levels. This directly matches the description of PURCHASE_ORDER_VERIFY_GENERAL. The mention of vendor V-10492 and the details about approval caps and missing sign-offs also touch upon vendor verification and compliance, making VENDOR_VERIFY_GENERAL a relevant secondary intent.\nMiner: The intent is PURCHASE_ORDER_VERIFY_GENERAL, and the TradeWire Purchase Order Verify miner has a single endpoint /po-verify which is described as 'Verify one purchase order, as a query parameter (?question=...)'. This endpoint perfectly matches the required intent and the question format.",
+        "intent": "PURCHASE_ORDER_VERIFY_GENERAL",
+        "signal_hash": "0xb1e4d01ca78dfe5a3334a5ddef0247c3a05c7ebba17ec19a37f9e7d74ac44378",
+        "warnings": [
+          "parameter \"question\" length 0 violates the miner's declared limit (lte 8000): question is the purchase order to verify, with its figures. A single document, not a batch."
+        ]
+      },
+      "signalVerification": {
+        "signal_hash": "0xb1e4d01ca78dfe5a3334a5ddef0247c3a05c7ebba17ec19a37f9e7d74ac44378",
+        "kind": "direct_result",
+        "signal": {
+          "id": "c218dcff-ff0a-4b9a-9fd0-d4e7721796c3",
+          "signal_hash": "0xb1e4d01ca78dfe5a3334a5ddef0247c3a05c7ebba17ec19a37f9e7d74ac44378",
+          "kind": "direct_result",
+          "wallet_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+          "miner_slug": "tradewire-purchase-order-verify",
+          "subnet_id": "7454",
+          "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+          "tx_hash": "0x8e1b1b80314f9847133105ced374879744aa52ed525d8ecf02322d02404e341b",
+          "result_id": "cafdd09c-ade6-4cb0-bb64-5c1794549d8b",
+          "created_at": "2026-11-09T05:51:30.50517Z"
+        },
+        "payload": {
+          "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+          "miner_slug": "tradewire-purchase-order-verify",
+          "subnet_id": "7454",
+          "wallet_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+          "request": "[PURCHASE_ORDER_VERIFY_GENERAL] Verify ERP Purchase Order PO-ERP-2026-7741 for INR 1,85,00,000 under Vendor V-10492 where Level-2 VP approval cap is INR 1,00,00,000 and CFO/MD joint sign-off is missing.",
+          "response": {
+            "amount": null,
+            "answered_from": "public_registry",
+            "arithmetic_only": false,
+            "as_of": "2026-11-09T05:51:28.982Z",
+            "attribution": "City of Chicago, Procurement Services, Contracts (FMPS)",
+            "checks_passed": [],
+            "disclaimer": "This site provides applications using data that has been modified for use from its original source, www.cityofchicago.org, the official website of the City of Chicago. The City of Chicago makes no claims as to the content, accuracy, timeliness, or completeness of any of the data provided at this site. The data provided at this site is subject to change at any time. It is understood that the data provided at this site is being used at one’s own risk.",
+            "discrepancies": [],
+            "intent": "PURCHASE_ORDER_VERIFY_GENERAL",
+            "license_url": "https://www.chicago.gov/city/en/narr/foia/data_disclaimer.html",
+            "po_number": "PO-ERP-2026-7741",
+            "requested_vendor": null,
+            "status": "unknown",
+            "summary": "Cannot verify. A PO number and vendor are required to check existence against a public source. Internal arithmetic alone does not verify a purchase order.",
+            "vendor": null,
+            "verdict": "Cannot verify",
+            "verification_scope": "City of Chicago public PO/contract registry only"
+          },
+          "timestamp": "2026-11-09T05:51:28.985837865Z"
+        },
+        "result": {
+          "id": "cafdd09c-ade6-4cb0-bb64-5c1794549d8b",
+          "type": "direct",
+          "source": "user",
+          "status": "success",
+          "created_at": "2026-11-09T05:51:30.502894Z",
+          "signal_hash": "0xb1e4d01ca78dfe5a3334a5ddef0247c3a05c7ebba17ec19a37f9e7d74ac44378",
+          "routing_mode": "auto",
+          "question": {
+            "hash": "1933c9df7ded01748f85e8b189d8972ceb74c4626509a09bf1c27e78090e5162",
+            "text": "[PURCHASE_ORDER_VERIFY_GENERAL] Verify ERP Purchase Order PO-ERP-2026-7741 for INR 1,85,00,000 under Vendor V-10492 where Level-2 VP approval cap is INR 1,00,00,000 and CFO/MD joint sign-off is missing.",
+            "category": "",
+            "interest_score": 0,
+            "affected_pct": 0,
+            "audience_pct": 0,
+            "source_url": ""
+          },
+          "routing": {
+            "subnet_id": "7454",
+            "subnet_name": "TradeWire Purchase Order Verify",
+            "miner_slug": "tradewire-purchase-order-verify",
+            "reasoning": "Intent: The query explicitly asks to verify a Purchase Order (PO-ERP-2026-7741) against specific criteria including amount, vendor, and approval levels. This directly matches the description of PURCHASE_ORDER_VERIFY_GENERAL. The mention of vendor V-10492 and the details about approval caps and missing sign-offs also touch upon vendor verification and compliance, making VENDOR_VERIFY_GENERAL a relevant secondary intent.\nMiner: The intent is PURCHASE_ORDER_VERIFY_GENERAL, and the TradeWire Purchase Order Verify miner has a single endpoint /po-verify which is described as 'Verify one purchase order, as a query parameter (?question=...)'. This endpoint perfectly matches the required intent and the question format.",
+            "intent": "PURCHASE_ORDER_VERIFY_GENERAL"
+          },
+          "execution": {
+            "result": {
+              "amount": null,
+              "answered_from": "public_registry",
+              "arithmetic_only": false,
+              "as_of": "2026-11-09T05:51:28.982Z",
+              "attribution": "City of Chicago, Procurement Services, Contracts (FMPS)",
+              "checks_passed": [],
+              "disclaimer": "This site provides applications using data that has been modified for use from its original source, www.cityofchicago.org, the official website of the City of Chicago. The City of Chicago makes no claims as to the content, accuracy, timeliness, or completeness of any of the data provided at this site. The data provided at this site is subject to change at any time. It is understood that the data provided at this site is being used at one’s own risk.",
+              "discrepancies": [],
+              "intent": "PURCHASE_ORDER_VERIFY_GENERAL",
+              "license_url": "https://www.chicago.gov/city/en/narr/foia/data_disclaimer.html",
+              "po_number": "PO-ERP-2026-7741",
+              "requested_vendor": null,
+              "status": "unknown",
+              "summary": "Cannot verify. A PO number and vendor are required to check existence against a public source. Internal arithmetic alone does not verify a purchase order.",
+              "vendor": null,
+              "verdict": "Cannot verify",
+              "verification_scope": "City of Chicago public PO/contract registry only"
+            },
+            "cost_usd": 0.01,
+            "duration_ms": 58,
+            "timestamp": "2026-11-09T05:51:28.985837865Z"
+          }
+        },
+        "verification": {
+          "algorithm": "keccak256",
+          "commitment": "payload",
+          "verified": true
+        }
+      }
+    },
+    {
+      "step": 3,
+      "intent": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "title": "3-Way PO-GRN-Invoice Settlement Reconciliation",
+      "request": {
+        "intent": "INVOICE_LEDGER_RECONCILE_GENERAL",
+        "params": {
+          "invoice": "INV-STL-902: 76.50 MT Fe-550D TMT steel @ INR 58,000/MT + 18% GST = INR 52,35,660",
+          "ledger": "GL-4402 (GRN-2026-889): 75.00 MT net accepted @ INR 58,000/MT + 18% GST = INR 51,33,000 (1.50 MT rejected for rust)"
+        }
+      },
+      "httpStatus": 200,
+      "paymentResponse": {
+        "success": true,
+        "payer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "transaction": "0x113577b25d97768fe5ca21493020cd2d9c83b80f030f1073da8f43e9cd551ae7",
+        "network": "eip155:11155111"
+      },
+      "telegraphReceipt": {
+        "receipt_hash": "0xcd37c5067dee1675cea2a3763983c9841adf3affaeabdd185422f6346cc7f64e",
+        "rail": "x402",
+        "payer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "miner": "4491",
+        "intent": "INVOICE_LEDGER_RECONCILE_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2048,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x113577b25d97768fe5ca21493020cd2d9c83b80f030f1073da8f43e9cd551ae7",
+        "timestamp": 1794206529
+      },
+      "response": {
+        "miner_id": "7455",
+        "miner_name": "TradeWire Invoice Ledger Reconcile",
+        "endpoint": "/invoice-reconcile",
+        "result": {
+          "reconciled": null,
+          "discrepancy": null,
+          "explanation": "Discrepancy found. The invoice total of INR 52,35,660 exceeds the ledger amount of INR 51,33,000 by INR 1,02,660, due to 1.50 MT rejected for rust; both use the same rate of INR 58,000/MT and 18% GST."
+        },
+        "result_shape": "intent",
+        "format_version": 4,
+        "field_status": {
+          "reconciled": "missing",
+          "discrepancy": "rejected",
+          "explanation": "ok"
+        },
+        "input": {
+          "invoice": "INV-STL-902: 76.50 MT Fe-550D TMT steel @ INR 58,000/MT + 18% GST = INR 52,35,660",
+          "ledger": "GL-4402 (GRN-2026-889): 75.00 MT net accepted @ INR 58,000/MT + 18% GST = INR 51,33,000 (1.50 MT rejected for rust)"
+        },
+        "input_schema_version": 4,
+        "cost_usd": 0.01,
+        "duration_ms": 3567,
+        "timestamp": "2026-11-09T06:42:05.497539861Z",
+        "reasoning": "Intent: intent given by the caller\nMiner: The intent is INVOICE_LEDGER_RECONCILE_GENERAL, and the TradeWire Invoice Ledger Reconcile miner has an endpoint at /invoice-reconcile that is described as serving this intent. The question is passed as a query parameter named 'question' to this GET endpoint.",
+        "intent": "INVOICE_LEDGER_RECONCILE_GENERAL",
+        "signal_hash": "0xe288451aeb90347d776549013ee58d464102251307a4a65db0e170d0aed7b679",
+        "warnings": [
+          "parameter \"question\" length 0 violates the miner's declared limit (lte 8000): question is the invoice and the purchase order or ledger to reconcile it against. A single pair, not a batch."
+        ]
+      },
+      "signalVerification": {
+        "signal_hash": "0xe288451aeb90347d776549013ee58d464102251307a4a65db0e170d0aed7b679",
+        "kind": "direct_result",
+        "signal": {
+          "id": "c05f2352-b7a4-4e7e-a47b-ea2925536c03",
+          "signal_hash": "0xe288451aeb90347d776549013ee58d464102251307a4a65db0e170d0aed7b679",
+          "kind": "direct_result",
+          "wallet_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+          "miner_slug": "tradewire-invoice-ledger-reconcile",
+          "subnet_id": "7455",
+          "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+          "tx_hash": "0x113577b25d97768fe5ca21493020cd2d9c83b80f030f1073da8f43e9cd551ae7",
+          "result_id": "ecbcb003-7525-416c-a757-900924fa1747",
+          "created_at": "2026-11-09T06:42:09.485601Z"
+        },
+        "payload": {
+          "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+          "miner_slug": "tradewire-invoice-ledger-reconcile",
+          "subnet_id": "7455",
+          "wallet_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+          "request": "[intent] INVOICE_LEDGER_RECONCILE_GENERAL → {\"invoice\":\"INV-STL-902: 76.50 MT Fe-550D TMT steel @ INR 58,000/MT + 18% GST = INR 52,35,660\",\"ledger\":\"GL-4402 (GRN-2026-889): 75.00 MT net accepted @ INR 58,000/MT + 18% GST = INR 51,33,000 (1.50 MT rejected for rust)\"}",
+          "response": {
+            "answered_from": "model",
+            "as_of": "2026-11-09T06:42:05.494Z",
+            "attribution": "Verdict produced with MiniMax (MiniMax-M2.5-highspeed) under a commercial MiniMax plan held by zkasuran.",
+            "checks_passed": [],
+            "confidence": 0.95,
+            "discrepancies": [],
+            "intent": "INVOICE_LEDGER_RECONCILE",
+            "model": "MiniMax-M2.5-highspeed",
+            "source": "MiniMax language model over the supplied figures, with deterministic arithmetic",
+            "summary": "Discrepancy found. The invoice total of INR 52,35,660 exceeds the ledger amount of INR 51,33,000 by INR 1,02,660, due to 1.50 MT rejected for rust; both use the same rate of INR 58,000/MT and 18% GST.",
+            "verdict": "Discrepancy Found"
+          },
+          "timestamp": "2026-11-09T06:42:05.497539861Z"
+        },
+        "result": {
+          "id": "ecbcb003-7525-416c-a757-900924fa1747",
+          "type": "direct",
+          "source": "user",
+          "status": "success",
+          "created_at": "2026-11-09T06:42:09.47938Z",
+          "signal_hash": "0xe288451aeb90347d776549013ee58d464102251307a4a65db0e170d0aed7b679",
+          "routing_mode": "auto",
+          "question": {
+            "hash": "a8041f70f422a72081b85da9062c828d86ec2aa353d4f32eaa3de4dd0c271685",
+            "text": "[intent] INVOICE_LEDGER_RECONCILE_GENERAL → {\"invoice\":\"INV-STL-902: 76.50 MT Fe-550D TMT steel @ INR 58,000/MT + 18% GST = INR 52,35,660\",\"ledger\":\"GL-4402 (GRN-2026-889): 75.00 MT net accepted @ INR 58,000/MT + 18% GST = INR 51,33,000 (1.50 MT rejected for rust)\"}",
+            "category": "",
+            "interest_score": 0,
+            "affected_pct": 0,
+            "audience_pct": 0,
+            "source_url": ""
+          },
+          "routing": {
+            "subnet_id": "7455",
+            "subnet_name": "TradeWire Invoice Ledger Reconcile",
+            "miner_slug": "tradewire-invoice-ledger-reconcile",
+            "reasoning": "Intent: intent given by the caller\nMiner: The intent is INVOICE_LEDGER_RECONCILE_GENERAL, and the TradeWire Invoice Ledger Reconcile miner has an endpoint at /invoice-reconcile that is described as serving this intent. The question is passed as a query parameter named 'question' to this GET endpoint.",
+            "intent": "INVOICE_LEDGER_RECONCILE_GENERAL"
+          },
+          "execution": {
+            "result": {
+              "answered_from": "model",
+              "as_of": "2026-11-09T06:42:05.494Z",
+              "attribution": "Verdict produced with MiniMax (MiniMax-M2.5-highspeed) under a commercial MiniMax plan held by zkasuran.",
+              "checks_passed": [],
+              "confidence": 0.95,
+              "discrepancies": [],
+              "intent": "INVOICE_LEDGER_RECONCILE",
+              "model": "MiniMax-M2.5-highspeed",
+              "source": "MiniMax language model over the supplied figures, with deterministic arithmetic",
+              "summary": "Discrepancy found. The invoice total of INR 52,35,660 exceeds the ledger amount of INR 51,33,000 by INR 1,02,660, due to 1.50 MT rejected for rust; both use the same rate of INR 58,000/MT and 18% GST.",
+              "verdict": "Discrepancy Found"
+            },
+            "cost_usd": 0.01,
+            "duration_ms": 3567,
+            "timestamp": "2026-11-09T06:42:05.497539861Z"
+          }
+        },
+        "verification": {
+          "algorithm": "keccak256",
+          "commitment": "payload",
+          "verified": true
+        }
+      }
+    },
+    {
+      "step": 4,
+      "intent": "VENDOR_VERIFY_GENERAL",
+      "title": "Vendor Legal Entity & VAT/Tax ID Verification",
+      "request": {
+        "intent": "VENDOR_VERIFY_GENERAL",
+        "params": {
+          "vendor": "SAP SE",
+          "vat_number": "DE143593636"
+        }
+      },
+      "httpStatus": 200,
+      "paymentResponse": {
+        "success": true,
+        "payer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "transaction": "0xae5eee4ed51f4817c62aba52ac7338b9c84791ffb526f77852f313501a7f34a1",
+        "network": "eip155:11155111"
+      },
+      "telegraphReceipt": {
+        "receipt_hash": "0x04de2332b5ec91a13c07b78c0f48608677bf09404ec532e8a3c448a539ba4562",
+        "rail": "x402",
+        "payer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "miner": "5078",
+        "intent": "VENDOR_VERIFY_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2048,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0xae5eee4ed51f4817c62aba52ac7338b9c84791ffb526f77852f313501a7f34a1",
+        "timestamp": 1794206550
+      },
+      "response": {
+        "miner_id": "9002",
+        "miner_name": "TxLens",
+        "endpoint": "/vendor-verify",
+        "result": {
+          "vendor": "SAP SE",
+          "vat_number": "DE143593636",
+          "valid": null,
+          "registered_name": "SAP SE",
+          "registered_address": null
+        },
+        "result_shape": "intent",
+        "format_version": 3,
+        "field_status": {
+          "vendor": "ok",
+          "vat_number": "ok",
+          "valid": "rejected",
+          "registered_name": "ok",
+          "registered_address": "missing"
+        },
+        "input": {
+          "vendor": "SAP SE",
+          "vat_number": "DE143593636"
+        },
+        "input_schema_version": 3,
+        "cost_usd": 0.01,
+        "duration_ms": 585,
+        "timestamp": "2026-11-09T06:42:28.468906238Z",
+        "reasoning": "Intent: intent given by the caller\nMiner: The intent VENDOR_VERIFY_GENERAL is served by the /vendor-verify endpoint. The question provides the necessary parameters 'vendor' and 'vat_number' which are used directly in the GET request.",
+        "intent": "VENDOR_VERIFY_GENERAL",
+        "signal_hash": "0xb29ff58909b0a2f534e7507edfa18012248c7f19519b160c0522d5d89ab7051c"
+      },
+      "signalVerification": {
+        "signal_hash": "0xb29ff58909b0a2f534e7507edfa18012248c7f19519b160c0522d5d89ab7051c",
+        "kind": "direct_result",
+        "signal": {
+          "id": "041c4106-efb9-4b64-ba31-976c38a7aa21",
+          "signal_hash": "0xb29ff58909b0a2f534e7507edfa18012248c7f19519b160c0522d5d89ab7051c",
+          "kind": "direct_result",
+          "wallet_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+          "miner_slug": "txlens",
+          "subnet_id": "9002",
+          "intent_id": "VENDOR_VERIFY_GENERAL",
+          "tx_hash": "0xae5eee4ed51f4817c62aba52ac7338b9c84791ffb526f77852f313501a7f34a1",
+          "result_id": "30cc6e87-8443-4555-8de5-63b8ba060ac8",
+          "created_at": "2026-11-09T06:42:30.004404Z"
+        },
+        "payload": {
+          "intent_id": "VENDOR_VERIFY_GENERAL",
+          "miner_slug": "txlens",
+          "subnet_id": "9002",
+          "wallet_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+          "request": "[intent] VENDOR_VERIFY_GENERAL → {\"vat_number\":\"DE143593636\",\"vendor\":\"SAP SE\"}",
+          "response": {
+            "answer": "Looks legitimate. The vendor name SAP SE is a well‑known German software company, and the VAT number DE143593636 follows the correct German format of DE plus nine digits. No conflicting information or suspicious details are present in the supplied data.",
+            "canonical": "vendor-verify:vendor: SAP SE\nvat_number: DE143593636",
+            "checked_at": "2026-11-09T06:42:28.391Z",
+            "confidence": 0.8,
+            "cost_usd": 0,
+            "status": "ok",
+            "summary": "Looks legitimate. The vendor name SAP SE is a well‑known German software company, and the VAT number DE143593636 follows the correct German format of DE plus nine digits. No conflicting information or suspicious details are present in the supplied data.",
+            "verdict": "Looks legitimate"
+          },
+          "timestamp": "2026-11-09T06:42:28.468906238Z"
+        },
+        "result": {
+          "id": "30cc6e87-8443-4555-8de5-63b8ba060ac8",
+          "type": "direct",
+          "source": "user",
+          "status": "success",
+          "created_at": "2026-11-09T06:42:30.001104Z",
+          "signal_hash": "0xb29ff58909b0a2f534e7507edfa18012248c7f19519b160c0522d5d89ab7051c",
+          "routing_mode": "auto",
+          "question": {
+            "hash": "111a69a851c1c241a0b6475caa00848d7eb8c0b62dd7eec0e9af94bb6cca9406",
+            "text": "[intent] VENDOR_VERIFY_GENERAL → {\"vat_number\":\"DE143593636\",\"vendor\":\"SAP SE\"}",
+            "category": "",
+            "interest_score": 0,
+            "affected_pct": 0,
+            "audience_pct": 0,
+            "source_url": ""
+          },
+          "routing": {
+            "subnet_id": "9002",
+            "subnet_name": "TxLens",
+            "miner_slug": "txlens",
+            "reasoning": "Intent: intent given by the caller\nMiner: The intent VENDOR_VERIFY_GENERAL is served by the /vendor-verify endpoint. The question provides the necessary parameters 'vendor' and 'vat_number' which are used directly in the GET request.",
+            "intent": "VENDOR_VERIFY_GENERAL"
+          },
+          "execution": {
+            "result": {
+              "answer": "Looks legitimate. The vendor name SAP SE is a well‑known German software company, and the VAT number DE143593636 follows the correct German format of DE plus nine digits. No conflicting information or suspicious details are present in the supplied data.",
+              "canonical": "vendor-verify:vendor: SAP SE\nvat_number: DE143593636",
+              "checked_at": "2026-11-09T06:42:28.391Z",
+              "confidence": 0.8,
+              "cost_usd": 0,
+              "status": "ok",
+              "summary": "Looks legitimate. The vendor name SAP SE is a well‑known German software company, and the VAT number DE143593636 follows the correct German format of DE plus nine digits. No conflicting information or suspicious details are present in the supplied data.",
+              "verdict": "Looks legitimate"
+            },
+            "cost_usd": 0.01,
+            "duration_ms": 585,
+            "timestamp": "2026-11-09T06:42:28.468906238Z"
+          }
+        },
+        "verification": {
+          "algorithm": "keccak256",
+          "commitment": "payload",
+          "verified": true
+        }
+      }
+    },
+    {
+      "step": 5,
+      "intent": "REGULATORY_FILING_MONITOR_GENERAL",
+      "title": "Regulatory Filing & Registration Monitor",
+      "request": {
+        "intent": "REGULATORY_FILING_MONITOR_GENERAL",
+        "params": {
+          "entity": "Apple Inc.",
+          "period": "2025-FY"
+        }
+      },
+      "httpStatus": 200,
+      "paymentResponse": {
+        "success": true,
+        "payer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "transaction": "0x0fea9687b604e07c6714321491eee6314b136e098f6eb3b7044f4b4e7d15e6b8",
+        "network": "eip155:11155111"
+      },
+      "telegraphReceipt": {
+        "receipt_hash": "0x7b788ab66b4ede0fefc71d48be44743f6983c95537ca9816405be5cae71dd61d",
+        "rail": "x402",
+        "payer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "miner": "5078",
+        "intent": "REGULATORY_FILING_MONITOR_GENERAL",
+        "amount_uusdc": "10000",
+        "epoch_id": 2048,
+        "settlement": "onchain",
+        "chain": "eip155:11155111",
+        "tx_hash": "0x0fea9687b604e07c6714321491eee6314b136e098f6eb3b7044f4b4e7d15e6b8",
+        "timestamp": 1794206569
+      },
+      "response": {
+        "miner_id": "9002",
+        "miner_name": "TxLens",
+        "endpoint": "/regulatory-filing-monitor",
+        "result": {
+          "entity": "Apple Inc.",
+          "filing_count": null,
+          "filings": [
+            "10-K",
+            "8-K",
+            "8-K/A",
+            "10-Q",
+            "8-K"
+          ],
+          "urls": null
+        },
+        "result_shape": "intent",
+        "format_version": 1,
+        "field_status": {
+          "entity": "ok",
+          "filing_count": "missing",
+          "filings": "ok",
+          "urls": "unavailable"
+        },
+        "input": {
+          "entity": "Apple Inc.",
+          "period": "2025-FY"
+        },
+        "input_schema_version": 1,
+        "cost_usd": 0.01,
+        "duration_ms": 452,
+        "timestamp": "2026-11-09T06:42:39.033226746Z",
+        "reasoning": "Intent: intent given by the caller\nMiner: The user is asking a question that has been classified as REGULATORY_FILING_MONITOR_GENERAL. The TxLens miner has an endpoint /regulatory-filing-monitor that explicitly serves this intent. The endpoint description states that the 'company' parameter can be used for 'company, product, drug, device, or concern', and that the 'whole question as query' is also accepted. Since the provided parameters are embedded within the question text and specify an entity and period relevant to regulatory filings, the entire question is passed as the 'query' parameter to this endpoint.",
+        "intent": "REGULATORY_FILING_MONITOR_GENERAL",
+        "signal_hash": "0xfd2a9f82debd6fd041923463e36e0c2fb900cec37dcd1916d22d035b5da0352e"
+      },
+      "signalVerification": {
+        "signal_hash": "0xfd2a9f82debd6fd041923463e36e0c2fb900cec37dcd1916d22d035b5da0352e",
+        "kind": "direct_result",
+        "signal": {
+          "id": "6cead2f1-d3bd-45de-9423-c52945b5ee09",
+          "signal_hash": "0xfd2a9f82debd6fd041923463e36e0c2fb900cec37dcd1916d22d035b5da0352e",
+          "kind": "direct_result",
+          "wallet_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+          "miner_slug": "txlens",
+          "subnet_id": "9002",
+          "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+          "tx_hash": "0x0fea9687b604e07c6714321491eee6314b136e098f6eb3b7044f4b4e7d15e6b8",
+          "result_id": "0f1945ef-e22d-413a-af2d-871fee4e0c84",
+          "created_at": "2026-11-09T06:42:49.03754Z"
+        },
+        "payload": {
+          "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+          "miner_slug": "txlens",
+          "subnet_id": "9002",
+          "wallet_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+          "request": "[intent] REGULATORY_FILING_MONITOR_GENERAL → {\"entity\":\"Apple Inc.\",\"period\":\"2025-FY\"}",
+          "response": {
+            "answer": "The most recent SEC filing from Apple Inc. (AAPL) is a 10-K for the period ending 2026-09-26, filed 2026-11-03. Other recent filings: 8-K for the period ending 2026-11-02, filed 2026-11-02 (items 2.02,9.01); 8-K/A for the period ending 2026-04-17, filed 2026-09-01 (items 5.02); 10-Q for the period ending 2026-06-27, filed 2026-07-31. This reports what has actually been filed or published, not a prediction of future regulatory action.",
+            "attribution": "SEC EDGAR (sec.gov), the numbers each company filed in its own 10-K and 10-Q reports, via the public XBRL API. Federal Register (federalregister.gov), the official daily journal of the US federal government, via its public API.",
+            "canonical": "regulatory-filing-monitor:regulatory_filing_monitor_general request with these parameters (use exactly these values): {\"entity\":\"apple inc.\",\"period\":\"2025-fy\"}",
+            "checked_at": "2026-11-09T06:42:38.954Z",
+            "company": {
+              "cik": 320193,
+              "name": "Apple Inc.",
+              "ticker": "AAPL"
+            },
+            "confidence": 0.9,
+            "documents": [],
+            "query": "REGULATORY_FILING_MONITOR_GENERAL request with these parameters (use exactly these values): {\"entity\":\"Apple Inc.\",\"period\":\"2025-FY\"}",
+            "sec_filings": [
+              {
+                "description": "10-K",
+                "filed": "2026-11-03",
+                "form": "10-K",
+                "items": null,
+                "period": "2026-09-26",
+                "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000026/aapl-20260926.htm"
+              },
+              {
+                "description": "8-K",
+                "filed": "2026-11-02",
+                "form": "8-K",
+                "items": "2.02,9.01",
+                "period": "2026-11-02",
+                "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000024/aapl-20261102.htm"
+              },
+              {
+                "description": "8-K/A",
+                "filed": "2026-09-01",
+                "form": "8-K/A",
+                "items": "5.02",
+                "period": "2026-04-17",
+                "url": "https://www.sec.gov/Archives/edgar/data/320193/000114036126035325/ef20081427_8ka.htm"
+              },
+              {
+                "description": "10-Q",
+                "filed": "2026-07-31",
+                "form": "10-Q",
+                "items": null,
+                "period": "2026-06-27",
+                "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000020/aapl-20260627.htm"
+              },
+              {
+                "description": "8-K",
+                "filed": "2026-07-30",
+                "form": "8-K",
+                "items": "2.02,9.01",
+                "period": "2026-07-30",
+                "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000018/aapl-20260730.htm"
+              }
+            ],
+            "source": "SEC EDGAR and Federal Register",
+            "status": "ok",
+            "summary": "The most recent SEC filing from Apple Inc. (AAPL) is a 10-K for the period ending 2026-09-26, filed 2026-11-03. Other recent filings: 8-K for the period ending 2026-11-02, filed 2026-11-02 (items 2.02,9.01); 8-K/A for the period ending 2026-04-17, filed 2026-09-01 (items 5.02); 10-Q for the period ending 2026-06-27, filed 2026-07-31. This reports what has actually been filed or published, not a prediction of future regulatory action.",
+            "total_matches": 0
+          },
+          "timestamp": "2026-11-09T06:42:39.033226746Z"
+        },
+        "result": {
+          "id": "0f1945ef-e22d-413a-af2d-871fee4e0c84",
+          "type": "direct",
+          "source": "user",
+          "status": "success",
+          "created_at": "2026-11-09T06:42:49.034478Z",
+          "signal_hash": "0xfd2a9f82debd6fd041923463e36e0c2fb900cec37dcd1916d22d035b5da0352e",
+          "routing_mode": "auto",
+          "question": {
+            "hash": "31276191942cb8a6889b15b39735bb7056e9fd0423dcb917894fabacb7e936fa",
+            "text": "[intent] REGULATORY_FILING_MONITOR_GENERAL → {\"entity\":\"Apple Inc.\",\"period\":\"2025-FY\"}",
+            "category": "",
+            "interest_score": 0,
+            "affected_pct": 0,
+            "audience_pct": 0,
+            "source_url": ""
+          },
+          "routing": {
+            "subnet_id": "9002",
+            "subnet_name": "TxLens",
+            "miner_slug": "txlens",
+            "reasoning": "Intent: intent given by the caller\nMiner: The user is asking a question that has been classified as REGULATORY_FILING_MONITOR_GENERAL. The TxLens miner has an endpoint /regulatory-filing-monitor that explicitly serves this intent. The endpoint description states that the 'company' parameter can be used for 'company, product, drug, device, or concern', and that the 'whole question as query' is also accepted. Since the provided parameters are embedded within the question text and specify an entity and period relevant to regulatory filings, the entire question is passed as the 'query' parameter to this endpoint.",
+            "intent": "REGULATORY_FILING_MONITOR_GENERAL"
+          },
+          "execution": {
+            "result": {
+              "answer": "The most recent SEC filing from Apple Inc. (AAPL) is a 10-K for the period ending 2026-09-26, filed 2026-11-03. Other recent filings: 8-K for the period ending 2026-11-02, filed 2026-11-02 (items 2.02,9.01); 8-K/A for the period ending 2026-04-17, filed 2026-09-01 (items 5.02); 10-Q for the period ending 2026-06-27, filed 2026-07-31. This reports what has actually been filed or published, not a prediction of future regulatory action.",
+              "attribution": "SEC EDGAR (sec.gov), the numbers each company filed in its own 10-K and 10-Q reports, via the public XBRL API. Federal Register (federalregister.gov), the official daily journal of the US federal government, via its public API.",
+              "canonical": "regulatory-filing-monitor:regulatory_filing_monitor_general request with these parameters (use exactly these values): {\"entity\":\"apple inc.\",\"period\":\"2025-fy\"}",
+              "checked_at": "2026-11-09T06:42:38.954Z",
+              "company": {
+                "cik": 320193,
+                "name": "Apple Inc.",
+                "ticker": "AAPL"
+              },
+              "confidence": 0.9,
+              "documents": [],
+              "query": "REGULATORY_FILING_MONITOR_GENERAL request with these parameters (use exactly these values): {\"entity\":\"Apple Inc.\",\"period\":\"2025-FY\"}",
+              "sec_filings": [
+                {
+                  "description": "10-K",
+                  "filed": "2026-11-03",
+                  "form": "10-K",
+                  "items": null,
+                  "period": "2026-09-26",
+                  "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000026/aapl-20260926.htm"
+                },
+                {
+                  "description": "8-K",
+                  "filed": "2026-11-02",
+                  "form": "8-K",
+                  "items": "2.02,9.01",
+                  "period": "2026-11-02",
+                  "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000024/aapl-20261102.htm"
+                },
+                {
+                  "description": "8-K/A",
+                  "filed": "2026-09-01",
+                  "form": "8-K/A",
+                  "items": "5.02",
+                  "period": "2026-04-17",
+                  "url": "https://www.sec.gov/Archives/edgar/data/320193/000114036126035325/ef20081427_8ka.htm"
+                },
+                {
+                  "description": "10-Q",
+                  "filed": "2026-07-31",
+                  "form": "10-Q",
+                  "items": null,
+                  "period": "2026-06-27",
+                  "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000020/aapl-20260627.htm"
+                },
+                {
+                  "description": "8-K",
+                  "filed": "2026-07-30",
+                  "form": "8-K",
+                  "items": "2.02,9.01",
+                  "period": "2026-07-30",
+                  "url": "https://www.sec.gov/Archives/edgar/data/320193/000032019326000018/aapl-20260730.htm"
+                }
+              ],
+              "source": "SEC EDGAR and Federal Register",
+              "status": "ok",
+              "summary": "The most recent SEC filing from Apple Inc. (AAPL) is a 10-K for the period ending 2026-09-26, filed 2026-11-03. Other recent filings: 8-K for the period ending 2026-11-02, filed 2026-11-02 (items 2.02,9.01); 8-K/A for the period ending 2026-04-17, filed 2026-09-01 (items 5.02); 10-Q for the period ending 2026-06-27, filed 2026-07-31. This reports what has actually been filed or published, not a prediction of future regulatory action.",
+              "total_matches": 0
+            },
+            "cost_usd": 0.01,
+            "duration_ms": 452,
+            "timestamp": "2026-11-09T06:42:39.033226746Z"
+          }
+        },
+        "verification": {
+          "algorithm": "keccak256",
+          "commitment": "payload",
+          "verified": true
+        }
+      }
+    }
+  ],
+  "updatedAt": "2026-11-09T06:43:42.831Z"
+}

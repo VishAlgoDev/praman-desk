@@ -1,0 +1,21 @@
+{
+  "name": "praman-desk",
+  "version": "1.0.0",
+  "description": "Praman Desk — Procurement, invoice, and document verification bought through Telegraph (x402, Ethereum Sepolia) and cross-checked against GLEIF and deterministic 3-way reconciliation.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "wallet:init": "node scripts/init-wallet.mjs",
+    "eval:status": "node scripts/check-eval-status.mjs",
+    "eval:generate": "node scripts/generate-eval-datasets.mjs",
+    "eval:submit": "node scripts/submit-eval.mjs",
+    "app:demo": "node compliance-auditor-app/audit-demo.mjs",
+    "web": "node web/server.mjs",
+    "bounty:claim-and-submit": "node scripts/bounty-submit-helper.mjs"
+  },
+  "dependencies": {
+    "@x402/evm": "^2.30.0",
+    "@x402/fetch": "^2.30.0",
+    "viem": "^2.57.17"
+  }
+}
