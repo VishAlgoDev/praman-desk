@@ -1,10 +1,17 @@
 {
   "name": "praman-desk",
   "version": "1.0.0",
-  "description": "Praman Desk — Procurement, invoice, and document verification bought through Telegraph (x402, Ethereum Sepolia) and cross-checked against GLEIF and deterministic 3-way reconciliation.",
+  "description": "Praman Desk — Autonomous Pre-Payment Spend Guard & Counterparty Clearing Desk (MCP Server + WebAssembly Deterministic Comparator + Telegraph Protocol Paid Miner / Evaluator Network).",
   "type": "module",
+  "main": "mcp/server.mjs",
+  "bin": {
+    "praman-spend-guard": "./mcp/server.mjs"
+  },
   "private": true,
   "scripts": {
+    "mcp:start": "node mcp/server.mjs",
+    "mcp:test": "node mcp/test-mcp.mjs",
+    "comparator:test": "node comparator/test-comparator.mjs",
     "wallet:init": "node scripts/init-wallet.mjs",
     "eval:status": "node scripts/check-eval-status.mjs",
     "eval:generate": "node scripts/generate-eval-datasets.mjs",
@@ -14,6 +21,7 @@
     "bounty:claim-and-submit": "node scripts/bounty-submit-helper.mjs"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@x402/evm": "^2.30.0",
     "@x402/fetch": "^2.30.0",
     "viem": "^2.57.17"

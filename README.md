@@ -65,13 +65,67 @@ Receipts are preserved in [`evidence/nov14-milestone-receipt.json`](evidence/nov
 
 ---
 
+### 4. Track 2 (Evaluator Modules): Standalone WebAssembly Deterministic Comparator
+Hosted live at: <https://praman-desk.vercel.app/comparator.wasm>
+
+Authored in AssemblyScript and compiled to standalone `wasm32-unknown-unknown`:
+- **Module Size:** Exactly `648 bytes` (zero WASI, zero external imports).
+- **Exports:** `imw_score_deterministic(truth, miner, spec_ptr)`, `imw_alloc(size)`, `imw_free(ptr, size)`, `memory`.
+- **Cryptographic Hashes:**
+  - SHA-256: `0x2f8adcebe930ec976bfad899d6b2d374ed07650efea92ae85cc89c1d5060cfb2`
+  - Keccak-256: `0x437d1aed1f0235a7a51260d9ff5ed8d8b74737a1a6f3f338500c342a622dd255`
+- **Scoring Rules Implemented:**
+  - **Code 0 (Exact):** 10,000 bp if identical, 0 otherwise.
+  - **Code 1 (AbsTol):** Linearly decays from 10,000 bp at error 0 to 5,000 bp at `error == tol`, reaching 0 bp at `error >= 2 * tol`. Supports negative scale values.
+  - **Code 2 (RelTol):** Percentage tolerance evaluated with 128-bit multi-precision restoring division to avoid 64-bit integer overflow even at Wei scale ($10^{18}$).
+  - **Code 3 (PassFail):** 10,000 bp if matches, 0 otherwise.
+- **Verification Suite:** Passed `1,043 / 1,043` automated test vectors (`npm run comparator:test`) with 100% determinism.
+
+---
+
+## Model Context Protocol (MCP) Server: `praman-spend-guard`
+
+Any autonomous AI agent (Eliza, LangChain, Cursor, Windsurf, Claude Code, Vercel AI SDK) can invoke Praman Desk over standard MCP (stdio) before releasing treasury funds.
+
+### Adding to Agent Configuration (`mcpServers`)
+
+```json
+{
+  "mcpServers": {
+    "praman-spend-guard": {
+      "command": "node",
+      "args": ["c:/Users/Public/My Agent/telegraph-h2/mcp/server.mjs"]
+    }
+  }
+}
+```
+
+### Available MCP Tools
+
+1. `verify_counterparty`: Real-time GLEIF global legal entity lookup and multi-jurisdiction tax syntax (EIN, VAT, GSTIN, LEI) validation.
+2. `reconcile_invoice`: Deterministic 3-way mathematical reconciliation (invoice vs PO vs receipt) detecting unapproved variances.
+3. `verify_spend_authorization`: Enforces organizational spend delegation caps and dual-signoff policies.
+4. `verify_receipt_provenance`: Cryptographic SHA-256 digest auditing against invoice face amounts.
+5. `clear_spend`: Composite autonomous pre-payment spend clearance gate producing a final `APPROVE_PAYMENT`, `REQUEST_EXECUTIVE_APPROVAL`, or `REJECT_AND_HOLD` gate decision with risk level and flags.
+6. `compare_evaluator_scoring`: Evaluates miner predictions against ground truth using the standalone 648-byte AssemblyScript WASM comparator module.
+
+---
+
 ## Local Development & Quickstart
 
 ```bash
 git clone https://github.com/VishAlgoDev/praman-desk.git
 cd praman-desk
 npm install
-npm run web   # launches local server at http://127.0.0.1:3402
+
+# Run the 1,043-vector WASM comparator test suite
+npm run comparator:test
+
+# Run the MCP server stdio integration test suite
+npm run mcp:test
+
+# Launch the interactive local Web UI & API
+npm run web   # launches at http://127.0.0.1:3402
 ```
 
 To run a quick CLI test of the live keyless GLEIF registry:
