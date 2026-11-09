@@ -1,5 +1,6 @@
 version: "1"
 kind: miner
+id: 5163
 slug: praman-compliance-miner
 protocol: generic
 name: Praman Desk Compliance & Procurement Auditor
@@ -127,7 +128,6 @@ semantics:
 
 docs:
   repository: https://github.com/VishAlgoDev/praman-desk
-  web_app: https://praman-desk.vercel.app
 
 rate_limit_per_sec: 20
 cache_ttl_sec: 60
