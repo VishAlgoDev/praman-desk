@@ -69,15 +69,15 @@ Receipts are preserved in [`evidence/nov14-milestone-receipt.json`](evidence/nov
 Hosted live at: <https://praman-desk.vercel.app/comparator.wasm>
 
 Authored in AssemblyScript and compiled to standalone `wasm32-unknown-unknown`:
-- **Module Size:** Exactly `648 bytes` (zero WASI, zero external imports).
+- **Module Size:** Exactly `651 bytes` (zero WASI, zero external imports).
 - **Exports:** `imw_score_deterministic(truth, miner, spec_ptr)`, `imw_alloc(size)`, `imw_free(ptr, size)`, `memory`.
 - **Cryptographic Hashes:**
-  - SHA-256: `0x2f8adcebe930ec976bfad899d6b2d374ed07650efea92ae85cc89c1d5060cfb2`
-  - Keccak-256: `0x437d1aed1f0235a7a51260d9ff5ed8d8b74737a1a6f3f338500c342a622dd255`
+  - SHA-256: `0x9dfe09265391c579d1b9467a5f33a7e8e82e09fa0a3a205527185edaf74f8114`
+  - Keccak-256: `0x4eddfdd368d15c36d96ae6109acd66ae00a5ca4ff261806df8596905be78f345`
 - **Scoring Rules Implemented:**
   - **Code 0 (Exact):** 10,000 bp if identical, 0 otherwise.
   - **Code 1 (AbsTol):** Linearly decays from 10,000 bp at error 0 to 5,000 bp at `error == tol`, reaching 0 bp at `error >= 2 * tol`. Supports negative scale values.
-  - **Code 2 (RelTol):** Percentage tolerance evaluated with 128-bit multi-precision restoring division to avoid 64-bit integer overflow even at Wei scale ($10^{18}$).
+  - **Code 2 (RelTol):** Percentage tolerance evaluated with 128-bit multi-precision restoring division with quotient saturation to prevent 64-bit integer overflow even at Wei scale ($10^{18}$) or astronomical relative variance.
   - **Code 3 (PassFail):** 10,000 bp if matches, 0 otherwise.
 - **Verification Suite:** Passed `1,043 / 1,043` automated test vectors (`npm run comparator:test`) with 100% determinism.
 

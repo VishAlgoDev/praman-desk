@@ -37,9 +37,10 @@ function mul10000_div(u: u64, d: u64): u64 {
     if (rem_hi > 0 || rem_lo >= d) {
       if (rem_lo < d) rem_hi--;
       rem_lo -= d;
-      if (i < 64) {
-        quot |= (<u64>1 << i);
+      if (i >= 64) {
+        return <u64>-1; // Quotient overflows 64 bits, saturate to u64.MAX_VALUE
       }
+      quot |= (<u64>1 << i);
     }
   }
   return quot;

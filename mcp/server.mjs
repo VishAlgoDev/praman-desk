@@ -395,12 +395,12 @@ const TOOLS = [
       type: 'object',
       properties: {
         ground_truth: {
-          type: 'number',
-          description: 'Ground truth value (integer/wei scale).',
+          description: 'Ground truth value (integer number or wei-scale string, e.g. "1000000000000000000").',
+          oneOf: [{ type: 'number' }, { type: 'string' }],
         },
         miner_output: {
-          type: 'number',
-          description: 'Miner evaluated value.',
+          description: 'Miner evaluated value (integer number or wei-scale string).',
+          oneOf: [{ type: 'number' }, { type: 'string' }],
         },
         rule_code: {
           type: 'number',
@@ -408,8 +408,8 @@ const TOOLS = [
           default: 0,
         },
         tolerance: {
-          type: 'number',
-          description: 'Tolerance delta or basis points (e.g. 500 for 5%).',
+          description: 'Tolerance delta or basis points (number or string, e.g. 500 for 5%).',
+          oneOf: [{ type: 'number' }, { type: 'string' }],
           default: 0,
         },
       },
@@ -519,7 +519,7 @@ export async function startServer() {
             tolerance: args.tolerance ?? 0,
             score_basis_points: score,
             score_percentage: `${(score / 100).toFixed(2)}%`,
-            engine: 'AssemblyScript Standalone WASM (648 bytes, 0 imports)',
+            engine: 'AssemblyScript Standalone WASM (651 bytes, 0 imports, saturating division)',
           };
           break;
 
