@@ -3,7 +3,7 @@
 **Autonomous Pre-Payment Spend Guard & Counterparty Clearing Desk for AI Agents, DAOs, and ERPs**
 
 - **Live Hosted Application (No wallet required):** <https://praman-desk.vercel.app>
-- **Active On-Chain Miner (Sepolia Diamond):** ID `#5165` (`praman-compliance-miner`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
+- **Active On-Chain Miner (Sepolia Diamond):** ID `#5179` (`praman-compliance-miner`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
 - **Live Evaluator Portfolio:** 41 cryptographically signed evaluation rows across 6 intents on `devnode.telegraphprotocol.com`
 
 ---
@@ -23,10 +23,10 @@ In 2026, autonomous AI agents (built on Eliza, Coinbase AgentKit, LangChain, or 
 
 ## Telegraph Hackathon Season II Architecture
 
-### 1. Track 1 (Providers): Active Telegraph Miner `#5165`
+### 1. Track 1 (Providers): Active Telegraph Miner `#5179`
 Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) with `0.22 MACHINA` bond.
-- **Manifest Pinned to Immutable Commit:** [`52285a1`](https://github.com/VishAlgoDev/praman-desk/blob/52285a1097f2ddfbb399abc506a042066cdae5e0/miner.yaml)
-- **Registration Update Tx:** [`0x7b6ddf151dedd6b74e557c527f5e1ce283314117b8fb3b14b4ba0052c7e72c81`](https://sepolia.etherscan.io/tx/0x7b6ddf151dedd6b74e557c527f5e1ce283314117b8fb3b14b4ba0052c7e72c81)
+- **Manifest Pinned to Immutable Commit:** [`f0085a8`](https://github.com/VishAlgoDev/praman-desk/blob/f0085a81167e9e892f39b52b93701845d77b5eb4/miner.yaml)
+- **Registration Update Tx:** [`0x5096c50db458c4f181122d9dcdb9e36cf5f1501a8f10846af4ab35eefaab70db`](https://sepolia.etherscan.io/tx/0x5096c50db458c4f181122d9dcdb9e36cf5f1501a8f10846af4ab35eefaab70db)
 - **Hosted Endpoints:**
   - `GET /api/miner/vendor-verify`: Queries the Global Legal Entity Identifier Foundation (GLEIF) in real time across 200+ jurisdictions. Checks active `ISSUED` status, legal entity address, and cross-checks national tax formats (US EIN, EU/UK VAT, Indian GSTIN).
   - `GET /api/miner/invoice-reconcile`: Performs 3-way mathematical reconciliation (Invoice vs. GRN/Receipt vs. General Ledger). Returns boolean `reconciled` and exact numerical `discrepancy`.

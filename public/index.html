@@ -421,7 +421,7 @@
     <button role="tab" aria-selected="true" data-tab="audit">Spend Guard (Missions 02 &amp; 04)</button>
     <button role="tab" aria-selected="false" data-tab="ledger">On-chain receipt ledger (5)</button>
     <button role="tab" aria-selected="false" data-tab="eval">Evaluator pool &amp; bounties (41)</button>
-    <button role="tab" aria-selected="false" data-tab="miner">Active Miner #5165 (Sepolia)</button>
+    <button role="tab" aria-selected="false" data-tab="miner">Active Miner #5179 (Sepolia)</button>
   </nav>
 
   <!-- TAB 1: SPEND GUARD & COMPLIANCE AUDIT -->
@@ -603,22 +603,22 @@
     <div id="eval-results"></div>
   </div>
 
-  <!-- TAB 4: ACTIVE TELEGRAPH MINER #5165 -->
+  <!-- TAB 4: ACTIVE TELEGRAPH MINER #5179 -->
   <div id="tab-miner" hidden>
     <section class="panel">
-      <h2>Track 1 (Providers) — Active Telegraph Miner #5165 (Sepolia Diamond)</h2>
+      <h2>Track 1 (Providers) — Active Telegraph Miner #5179 (Sepolia Diamond)</h2>
       <p class="hint" style="margin:0; font-size:13px">
-        Registered on the Telegraph Diamond Contract (<a href="https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" target="_blank" rel="noopener" class="mono">0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b</a>) with active Registration ID <strong>#5165</strong> backed by 0.22 MACHINA bond. Manifest pinned to immutable commit <a href="https://github.com/VishAlgoDev/praman-desk/blob/52285a1097f2ddfbb399abc506a042066cdae5e0/miner.yaml" target="_blank" rel="noopener" class="mono">52285a1</a>.
+        Registered on the Telegraph Diamond Contract (<a href="https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" target="_blank" rel="noopener" class="mono">0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b</a>) with active Registration ID <strong>#5179</strong> backed by 0.22 MACHINA bond. Manifest pinned to immutable commit <a href="https://github.com/VishAlgoDev/praman-desk/blob/f0085a81167e9e892f39b52b93701845d77b5eb4/miner.yaml" target="_blank" rel="noopener" class="mono">f0085a8</a>.
       </p>
 
       <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:12px; margin-top:12px; font-size:13px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <div>
-            <strong>Diamond Miner ID:</strong> <code class="mono">#5165</code> &bull; 
+            <strong>Diamond Miner ID:</strong> <code class="mono">#5179</code> &bull; 
             <strong>Slug:</strong> <code class="mono">praman-compliance-miner</code>
           </div>
           <div>
-            <a href="https://sepolia.etherscan.io/tx/0x7b6ddf151dedd6b74e557c527f5e1ce283314117b8fb3b14b4ba0052c7e72c81" target="_blank" rel="noopener">Registration Tx (Etherscan) ↗</a>
+            <a href="https://sepolia.etherscan.io/tx/0x5096c50db458c4f181122d9dcdb9e36cf5f1501a8f10846af4ab35eefaab70db" target="_blank" rel="noopener">Registration Tx (Etherscan) ↗</a>
           </div>
         </div>
         <p style="margin:8px 0 0; color:var(--muted); font-size:12.5px;">
@@ -631,7 +631,7 @@
         <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=Apple%20Inc.">Test /api/miner/vendor-verify (Apple Inc. / Live GLEIF)</button>
         <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=SAP%20SE&vat_number=DE143593636">Test /api/miner/vendor-verify (SAP SE / EU VAT)</button>
         <button type="button" class="secondary" data-test-miner="/api/miner/po-verify">Test /api/miner/po-verify</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/doc-authenticity">Test /api/miner/doc-authenticity</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/doc-authenticity?signedQrAmount=1416000&pdfFaceAmount=1888000&document=GST%20e-Invoice%2064a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012">Test /api/miner/doc-authenticity</button>
       </div>
       <div id="miner-test-output" style="margin-top:12px"></div>
     </section>
