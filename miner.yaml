@@ -86,6 +86,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legal company name or business trading name"
+          - name: vat_number
+            type: string
+            intents: ["*"]
+            description: "VAT, EIN, GSTIN, or LEI tax identifier"
           - name: lei
             type: string
             intents: ["*"]
