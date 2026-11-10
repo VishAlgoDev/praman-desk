@@ -197,7 +197,7 @@ const TOOLS = [
         },
         lei: {
           type: 'string',
-          description: '20-character ISO 17442 Legal Entity Identifier (e.g. "HW68BizSO13i7YAUSK53").',
+          description: '20-character ISO 17442 Legal Entity Identifier (e.g. "HWUPKR0MPOU8FGXBT394").',
         },
       },
       required: ['vendor'],

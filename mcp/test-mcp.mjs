@@ -41,11 +41,11 @@ async function runTests() {
   }
   console.log('   PASS: All 6 tools registered.\n');
 
-  // Test 2: verify_counterparty (Stripe)
-  console.log('3. Testing tool: verify_counterparty (Stripe)...');
+  // Test 2: verify_counterparty (STRIPE, LLC)
+  console.log('3. Testing tool: verify_counterparty (STRIPE, LLC)...');
   const resVendor = await client.callTool({
     name: 'verify_counterparty',
-    arguments: { vendor: 'Stripe' },
+    arguments: { vendor: 'STRIPE, LLC' },
   });
   const vendorParsed = JSON.parse(resVendor.content[0].text);
   console.log(`   Result: ${vendorParsed.vendor} | LEI: ${vendorParsed.lei} | Status: ${vendorParsed.registration_status}`);

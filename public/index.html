@@ -441,7 +441,7 @@
           <span class="hint" style="margin:0; font-size:12px;">Quick test:</span>
           <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Apple Inc.">Apple Inc.</button>
           <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="SAP SE">SAP SE</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Stripe, Inc.">Stripe, Inc.</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="STRIPE, LLC">STRIPE, LLC</button>
           <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Microsoft">Microsoft (Lapsed)</button>
           <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Siemens AG">Siemens AG</button>
           <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Infosys Limited">Infosys Limited</button>
@@ -451,7 +451,7 @@
 
       <div class="preset-bar">
         <span class="hint" style="margin:0; font-weight:600; color:var(--ink)">Spend audit presets:</span>
-        <button type="button" data-preset="saas">Case 1: Clean 3-way match (Stripe, Inc. / USD $27,062.50)</button>
+        <button type="button" data-preset="saas">Case 1: Clean 3-way match (STRIPE, LLC / USD $27,062.50)</button>
         <button type="button" data-preset="variance">Case 2: Quantity over-billing variance (Apple Inc. / USD $995 unapproved)</button>
         <button type="button" data-preset="europe">Case 3: Cross-border EU VAT license (SAP SE / EUR €59,500)</button>
         <button type="button" data-preset="tampered">Case 4: Cryptographic digest tamper ($1,416 QR vs $1,888 PDF face)</button>
@@ -463,21 +463,21 @@
           <div class="field">
             <label for="f-vendor">Vendor legal name</label>
             <span id="hint-vendor" class="hint">Exact registered corporate name</span>
-            <input type="text" id="f-vendor" name="vendor" value="Stripe, Inc." required minlength="2" aria-describedby="hint-vendor" aria-errormessage="err-vendor">
+            <input type="text" id="f-vendor" name="vendor" value="STRIPE, LLC" required minlength="2" aria-describedby="hint-vendor" aria-errormessage="err-vendor">
             <div id="err-vendor" class="error-msg">Enter a legal entity name (at least 2 characters).</div>
           </div>
 
           <div class="field">
             <label for="f-vat">Tax ID / EIN / VAT (Optional)</label>
-            <span id="hint-vat" class="hint">US EIN (12-3456789), EU/UK VAT, or GSTIN</span>
-            <input type="text" id="f-vat" name="vatNumber" value="12-3456789" pattern="[A-Za-z0-9-]{0,20}" aria-describedby="hint-vat" aria-errormessage="err-vat">
+            <span id="hint-vat" class="hint">US EIN (XX-XXXXXXX), EU/UK VAT, or GSTIN</span>
+            <input type="text" id="f-vat" name="vatNumber" value="" pattern="[A-Za-z0-9-]{0,20}" aria-describedby="hint-vat" aria-errormessage="err-vat">
             <div id="err-vat" class="error-msg">Enter a valid tax identifier format or leave blank.</div>
           </div>
 
           <div class="field">
             <label for="f-lei">GLEIF LEI (20-char ISO 17442)</label>
             <span id="hint-lei" class="hint">Checked live against api.gleif.org</span>
-            <input type="text" id="f-lei" name="lei" value="549300V5Q3M4X6N7B890" pattern="[A-Za-z0-9]{0,20}" aria-describedby="hint-lei" aria-errormessage="err-lei">
+            <input type="text" id="f-lei" name="lei" value="549300CLHGIPTCYHQ143" pattern="[A-Za-z0-9]{0,20}" aria-describedby="hint-lei" aria-errormessage="err-lei">
             <div id="err-lei" class="error-msg">LEI must be 20 alphanumeric characters if provided.</div>
           </div>
 
@@ -688,9 +688,9 @@ UserInvalidFallback.init(document.getElementById("audit-form"));
 
 const PRESETS = {
   saas: {
-    vendor: "Stripe, Inc.",
-    vatNumber: "12-3456789",
-    lei: "549300V5Q3M4X6N7B890",
+    vendor: "STRIPE, LLC",
+    vatNumber: "",
+    lei: "549300CLHGIPTCYHQ143",
     poNumber: "PO-2026-104",
     poAmount: 27062.5,
     approvalCap: 50000,

@@ -29,6 +29,8 @@ const server = http.createServer(async (req, res) => {
       ? 'application/javascript; charset=utf-8'
       : ext === '.json'
       ? 'application/json; charset=utf-8'
+      : ext === '.wasm'
+      ? 'application/wasm'
       : 'text/plain; charset=utf-8';
 
   res.statusCode = 200;

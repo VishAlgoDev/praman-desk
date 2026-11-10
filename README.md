@@ -34,7 +34,7 @@ Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9
   - `GET /api/miner/doc-authenticity`: Cryptographic SHA-256 digest provenance check. Flags variances between signed digital payloads and printed face totals.
 
 ### 2. Track 2 (Evaluators): 41 Signed Dataset Rows Across 6 Intents
-All 41 evaluation cases were signed with EIP-191 `personal_sign` from contributor address [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) and admitted with zero rejections on the Telegraph node:
+All 41 evaluation cases were signed with EIP-191 `personal_sign` from contributor address [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) and admitted with zero rejections on the Telegraph node (`41/41` `eligible` on devnode: `40` attested rows + `1` keyless live GLEIF API truth-source):
 - **`DOCUMENT_AUTHENTICITY_GENERAL`** (10 rows, Bounty [#80](https://github.com/telegraphprotocol/bounties/issues/80))
 - **`INVOICE_LEDGER_RECONCILE_GENERAL`** (10 rows, 1st contributor on network, Bounty [#120](https://github.com/telegraphprotocol/bounties/issues/120))
 - **`PURCHASE_ORDER_VERIFY_GENERAL`** (8 rows, 1st contributor on network, Bounty [#122](https://github.com/telegraphprotocol/bounties/issues/122))
@@ -89,12 +89,14 @@ Any autonomous AI agent (Eliza, LangChain, Cursor, Windsurf, Claude Code, Vercel
 
 ### Adding to Agent Configuration (`mcpServers`)
 
+Replace `/path/to/praman-desk` with your local clone path:
+
 ```json
 {
   "mcpServers": {
     "praman-spend-guard": {
       "command": "node",
-      "args": ["c:/Users/Public/My Agent/telegraph-h2/mcp/server.mjs"]
+      "args": ["/path/to/praman-desk/mcp/server.mjs"]
     }
   }
 }
@@ -107,7 +109,7 @@ Any autonomous AI agent (Eliza, LangChain, Cursor, Windsurf, Claude Code, Vercel
 3. `verify_spend_authorization`: Enforces organizational spend delegation caps and dual-signoff policies.
 4. `verify_receipt_provenance`: Cryptographic SHA-256 digest auditing against invoice face amounts.
 5. `clear_spend`: Composite autonomous pre-payment spend clearance gate producing a final `APPROVE_PAYMENT`, `REQUEST_EXECUTIVE_APPROVAL`, or `REJECT_AND_HOLD` gate decision with risk level and flags.
-6. `compare_evaluator_scoring`: Evaluates miner predictions against ground truth using the standalone 648-byte AssemblyScript WASM comparator module.
+6. `compare_evaluator_scoring`: Evaluates miner predictions against ground truth using the standalone 651-byte AssemblyScript WASM comparator module.
 
 ---
 
