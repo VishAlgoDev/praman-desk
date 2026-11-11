@@ -3,8 +3,8 @@
 **Autonomous Pre-Payment Spend Guard & Counterparty Clearing Desk for AI Agents, DAOs, and ERPs**
 
 - **Live Hosted Application (No wallet required):** <https://praman-desk.vercel.app>
-- **Active On-Chain Miner (Sepolia Diamond):** ID `#5179` (`praman-compliance-miner`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
-- **Live Evaluator Portfolio:** 41 cryptographically signed evaluation rows across 6 intents on `devnode.telegraphprotocol.com`
+- **Active On-Chain Miner (Sepolia Diamond):** ID `#5186` (`praman-compliance-miner`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
+- **Live Evaluator Portfolio:** 57 cryptographically signed evaluation rows across 8 intents on `devnode.telegraphprotocol.com`
 
 ---
 
@@ -16,29 +16,35 @@ In 2026, autonomous AI agents (built on Eliza, Coinbase AgentKit, LangChain, or 
 1. **Phantom Vendors & Shell Companies:** Paying invoices from unregistered or fraudulent counterparties.
 2. **Arithmetic & Quantity Slippage:** Discrepancies between billed quantities, received goods receipts, and contract unit rates.
 3. **Double-Billing & Tampered Receipts:** Altered PDF face totals vs. cryptographically signed payload digests.
+4. **Sanctions & Regulatory Exposure:** Transacting with OFAC Specially Designated Nationals (SDNs) or non-compliant entities.
 
-**Praman Desk** acts as a deterministic, pre-payment spend guard. Before executing any transfer or milestone payout, an agent or treasury calls Telegraph Protocol to verify the vendor's global legal status, reconcile the 3-way invoice math, and audit cryptographic document provenance.
+**Praman Desk** acts as a deterministic, pre-payment spend guard. Before executing any transfer or milestone payout, an agent or treasury calls Telegraph Protocol to verify the vendor's global legal status, reconcile the 3-way invoice math, screen sanctions lists, monitor regulatory filings, and audit cryptographic document provenance.
 
 ---
 
 ## Telegraph Hackathon Season II Architecture
 
-### 1. Track 1 (Providers): Active Telegraph Miner `#5179`
-Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) with `0.22 MACHINA` bond.
-- **Manifest Pinned to Immutable Commit:** [`f0085a8`](https://github.com/VishAlgoDev/praman-desk/blob/f0085a81167e9e892f39b52b93701845d77b5eb4/miner.yaml)
-- **Registration Update Tx:** [`0x5096c50db458c4f181122d9dcdb9e36cf5f1501a8f10846af4ab35eefaab70db`](https://sepolia.etherscan.io/tx/0x5096c50db458c4f181122d9dcdb9e36cf5f1501a8f10846af4ab35eefaab70db)
+### 1. Track 1 (Providers): Active Telegraph Miner `#5186`
+Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) supporting **7 full-spectrum compliance & procurement intents** backed by MACHINA bond.
+- **Manifest Pinned to Immutable Commit:** [`1866680`](https://github.com/VishAlgoDev/praman-desk/blob/1866680fd44ec7de4fe96677f41719ad9b6ff17b/miner.yaml)
+- **Registration Update Tx:** [`0x6f98357046e6fcdf1ecbf4439d44d18702078bbe9e0b3e968025940d98dcaca6`](https://sepolia.etherscan.io/tx/0x6f98357046e6fcdf1ecbf4439d44d18702078bbe9e0b3e968025940d98dcaca6)
 - **Hosted Endpoints:**
-  - `GET /api/miner/vendor-verify`: Queries the Global Legal Entity Identifier Foundation (GLEIF) in real time across 200+ jurisdictions. Checks active `ISSUED` status, legal entity address, and cross-checks national tax formats (US EIN, EU/UK VAT, Indian GSTIN).
-  - `GET /api/miner/invoice-reconcile`: Performs 3-way mathematical reconciliation (Invoice vs. GRN/Receipt vs. General Ledger). Returns boolean `reconciled` and exact numerical `discrepancy`.
-  - `GET /api/miner/po-verify`: Validates purchase order delegation caps, authorized vendor references, and dual-signoff enforcement.
-  - `GET /api/miner/doc-authenticity`: Cryptographic SHA-256 digest provenance check. Flags variances between signed digital payloads and printed face totals.
+  - `GET /api/miner/vendor-verify`: Queries the Global Legal Entity Identifier Foundation (GLEIF) in real time across 200+ jurisdictions (`VENDOR_VERIFY_GENERAL`).
+  - `GET /api/miner/invoice-reconcile`: Performs 3-way mathematical reconciliation (Invoice vs. GRN/Receipt vs. General Ledger) (`INVOICE_LEDGER_RECONCILE_GENERAL`).
+  - `GET /api/miner/po-verify`: Validates purchase order delegation caps, authorized vendor references, and dual-signoff enforcement (`PURCHASE_ORDER_VERIFY_GENERAL`).
+  - `GET /api/miner/doc-authenticity`: Cryptographic SHA-256 digest provenance check (`DOCUMENT_AUTHENTICITY_GENERAL`).
+  - `GET /api/miner/corporate-registry`: Verifies official statutory registration, active status, and jurisdiction details via GLEIF ISO 17442 (`CORPORATE_REGISTRY_LOOKUP_GENERAL`).
+  - `GET /api/miner/sanctions-screen`: Fast in-memory fuzzy bigram search over official US Treasury OFAC `sdn.csv` and `alt.csv` lists (`SANCTIONS_SCREENING_MATCH_GENERAL`).
+  - `GET /api/miner/regulatory-filing`: Live SEC EDGAR EFTS 10-K/10-Q/8-K query indexing and US Federal Register API (`REGULATORY_FILING_MONITOR_GENERAL`).
 
-### 2. Track 2 (Evaluators): 41 Signed Dataset Rows Across 6 Intents
-All 41 evaluation cases were signed with EIP-191 `personal_sign` from contributor address [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) and admitted with zero rejections on the Telegraph node (`41/41` `eligible` on devnode: `40` attested rows + `1` keyless live GLEIF API truth-source):
+### 2. Track 2 (Evaluators): 57 Signed Dataset Rows Across 8 Intents
+All 57 evaluation cases were signed with EIP-191 `personal_sign` from contributor address [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) and admitted with zero rejections on the Telegraph node:
 - **`DOCUMENT_AUTHENTICITY_GENERAL`** (10 rows, Bounty [#80](https://github.com/telegraphprotocol/bounties/issues/80))
 - **`INVOICE_LEDGER_RECONCILE_GENERAL`** (10 rows, 1st contributor on network, Bounty [#120](https://github.com/telegraphprotocol/bounties/issues/120))
 - **`PURCHASE_ORDER_VERIFY_GENERAL`** (8 rows, 1st contributor on network, Bounty [#122](https://github.com/telegraphprotocol/bounties/issues/122))
 - **`VENDOR_VERIFY_GENERAL`** (6 rows, Bounty [#105](https://github.com/telegraphprotocol/bounties/issues/105))
+- **`CORPORATE_REGISTRY_LOOKUP_GENERAL`** (8 rows)
+- **`SANCTIONS_SCREENING_MATCH_GENERAL`** (8 rows)
 - **`CONTRACT_OBLIGATION_AUDIT_GENERAL`** (6 rows)
 - **`REGULATORY_FILING_MONITOR_GENERAL`** (1 keyless truth-source via live GLEIF API, Bounty [#104](https://github.com/telegraphprotocol/bounties/issues/104))
 

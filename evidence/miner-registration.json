@@ -1,12 +1,12 @@
 {
-  "previousRegistrationId": "5179",
-  "registrationId": "5185",
-  "txHash": "0x21167e60bad30c52c214d6364a3ae6d61d4978137eec41d393c36c039cc0eeff",
-  "blockNumber": 12110413,
+  "previousRegistrationId": "5185",
+  "registrationId": "5186",
+  "txHash": "0x6f98357046e6fcdf1ecbf4439d44d18702078bbe9e0b3e968025940d98dcaca6",
+  "blockNumber": 12110605,
   "miner": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
   "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
-  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/47e6d9f80b2799ffde90ae2ba5947a872bed7301/miner.yaml",
-  "yamlHash": "0x80c122377da89e10c8aecbab932ef9b9faaa035402c966f3d872508b8aec7113",
+  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/1866680fd44ec7de4fe96677f41719ad9b6ff17b/miner.yaml",
+  "yamlHash": "0xf390946ffb64075e89a4abe2036ebca8bfe26cf10ab240bde148cb76dc3dfb3f",
   "status": "active",
-  "updatedAt": "2026-11-11T07:57:13.521Z"
+  "updatedAt": "2026-11-11T08:36:28.004Z"
 }

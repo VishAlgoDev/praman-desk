@@ -17,7 +17,7 @@ const walletClient = createWalletClient({ account, chain: sepolia, transport: ht
 
 const DIAMOND_ADDRESS = '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b';
 const MACHINA = '0xd68305cA83C7AF42A4F720144E7416fB53F8AaF4';
-const COMMIT_HASH = '47e6d9f80b2799ffde90ae2ba5947a872bed7301';
+const COMMIT_HASH = '1866680fd44ec7de4fe96677f41719ad9b6ff17b';
 const PINNED_URL = `https://raw.githubusercontent.com/VishAlgoDev/praman-desk/${COMMIT_HASH}/miner.yaml`;
 
 const erc20Abi = parseAbi([
@@ -71,13 +71,13 @@ async function main() {
     console.log(`MACHINA allowance approved successfully.`);
   }
 
-  // Use old registration ID 5179
+  // Use old registration ID 5185
   const updateTx = await walletClient.writeContract({
     address: DIAMOND_ADDRESS,
     abi: diamondAbi,
     functionName: 'updateMiner',
     args: [
-      5179n,
+      5185n,
       PINNED_URL,
       yamlHash,
       address,
@@ -114,9 +114,9 @@ async function main() {
     if (regTopic) newRegId = Number(regTopic).toString();
   }
 
-  console.log(`\nNew Registration ID: ${newRegId || '5165'}`);
+  console.log(`\nNew Registration ID: ${newRegId || '5185'}`);
   const evidence = {
-    previousRegistrationId: '5179',
+    previousRegistrationId: '5185',
     registrationId: newRegId || '5180',
     txHash: updateTx,
     blockNumber: Number(receipt.blockNumber),
