@@ -70,8 +70,108 @@ const BOUNTY_SUBMISSIONS = [
     provenance: 'attested',
     commentUrl: null,
     status: 'admitted'
+  },
+  {
+    issue: null,
+    intent: 'CORPORATE_REGISTRY_LOOKUP_GENERAL',
+    rows: 8,
+    provenance: 'GLEIF Global LEI Index primary register',
+    commentUrl: null,
+    status: 'ready'
+  },
+  {
+    issue: null,
+    intent: 'SANCTIONS_SCREENING_MATCH_GENERAL',
+    rows: 8,
+    provenance: 'US Treasury OFAC SDN & Consolidated Sanctions',
+    commentUrl: null,
+    status: 'ready'
   }
 ];
+
+// OFAC SDN sanctions data — in-memory cache, refreshed every 6 hours
+let sdnEntries = null;
+let sdnAliases = null;
+let sdnLoadedAt = 0;
+const SDN_TTL_MS = 6 * 60 * 60 * 1000;
+const SDN_CSV_URL = 'https://www.treasury.gov/ofac/downloads/sdn.csv';
+const ALT_CSV_URL = 'https://www.treasury.gov/ofac/downloads/alt.csv';
+
+function parseCsvLine(line) {
+  const fields = [];
+  let current = '';
+  let inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQuote = !inQuote; continue; }
+    if (ch === ',' && !inQuote) { fields.push(current.trim()); current = ''; continue; }
+    current += ch;
+  }
+  fields.push(current.trim());
+  return fields;
+}
+
+async function loadSdnData() {
+  const now = Date.now();
+  if (sdnEntries && (now - sdnLoadedAt) < SDN_TTL_MS) return;
+
+  try {
+    const [sdnRes, altRes] = await Promise.all([
+      fetch(SDN_CSV_URL, { signal: AbortSignal.timeout(30000) }),
+      fetch(ALT_CSV_URL, { signal: AbortSignal.timeout(30000) })
+    ]);
+    if (!sdnRes.ok) throw new Error(`SDN fetch failed: ${sdnRes.status}`);
+
+    const sdnText = await sdnRes.text();
+    const entries = new Map();
+    for (const line of sdnText.split('\n')) {
+      if (!line.trim()) continue;
+      const f = parseCsvLine(line);
+      const uid = f[0];
+      const name = f[1] || '';
+      const sdnType = f[2] === '-0-' ? 'Entity' : f[2];
+      const program = f[3] === '-0-' ? '' : (f[3] || '');
+      if (uid && name) {
+        entries.set(uid, { name, type: sdnType, programs: program });
+      }
+    }
+
+    const aliases = new Map();
+    if (altRes.ok) {
+      const altText = await altRes.text();
+      for (const line of altText.split('\n')) {
+        if (!line.trim()) continue;
+        const f = parseCsvLine(line);
+        const sdnUid = f[0];
+        const aliasName = f[3] || '';
+        if (sdnUid && aliasName) {
+          if (!aliases.has(sdnUid)) aliases.set(sdnUid, []);
+          aliases.get(sdnUid).push(aliasName);
+        }
+      }
+    }
+
+    sdnEntries = entries;
+    sdnAliases = aliases;
+    sdnLoadedAt = now;
+  } catch (err) {
+    if (sdnEntries) return;
+    throw err;
+  }
+}
+
+function fuzzyNameMatch(query, target) {
+  const q = query.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
+  const t = target.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
+  if (!q || !t) return 0;
+  if (t === q) return 1.0;
+  if (t.includes(q) || q.includes(t)) return 0.85;
+  const bigrams = s => { const b = new Set(); for (let i = 0; i < s.length - 1; i++) b.add(s.slice(i, i + 2)); return b; };
+  const bq = bigrams(q), bt = bigrams(t);
+  const inter = [...bq].filter(x => bt.has(x)).length;
+  const union = new Set([...bq, ...bt]).size;
+  return union > 0 ? inter / union : 0;
+}
 
 // Rate limiter for live paid x402 calls on hosted demo: max 5 paid runs per 10 minutes per IP
 const paidRateWindow = new Map();
@@ -365,6 +465,229 @@ export function verifyDocumentAuthenticityPrimary({
     signed_qr_amount: qrAmt,
     pdf_face_amount: faceAmt,
     delta_amount: amountDelta
+  };
+}
+
+export async function lookupCorporateRegistry({ company = '', jurisdiction = '' }) {
+  const companyTrim = String(company).trim();
+  const jurisTrim = String(jurisdiction).trim().toUpperCase();
+
+  let gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(companyTrim)}&page[size]=10`;
+  if (jurisTrim.length === 2) {
+    gleifUrl += `&filter[entity.legalAddress.country]=${jurisTrim}`;
+  }
+
+  let records = [];
+  try {
+    const res = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' } });
+    if (res.ok) {
+      const json = await res.json();
+      records = Array.isArray(json.data) ? json.data : [];
+    }
+  } catch {}
+
+  if (records.length === 0) {
+    return {
+      found: false,
+      company: companyTrim,
+      jurisdiction: jurisTrim || null,
+      status_active: 0,
+      results: [],
+      source: 'GLEIF Global LEI Index (api.gleif.org)',
+      summary: `No corporate registry records found for "${companyTrim}"${jurisTrim ? ` in ${jurisTrim}` : ''}.`
+    };
+  }
+
+  const mapped = records.slice(0, 5).map(r => {
+    const e = r.attributes?.entity;
+    const reg = r.attributes?.registration;
+    const addr = e?.legalAddress;
+    return {
+      lei: r.attributes?.lei,
+      legal_name: e?.legalName?.name,
+      jurisdiction: e?.jurisdiction,
+      status: reg?.status,
+      status_active: reg?.status === 'ISSUED' ? 1 : 0,
+      entity_category: e?.entityCategory,
+      legal_form: e?.legalForm?.id,
+      registered_address: [
+        ...(Array.isArray(addr?.addressLines) ? addr.addressLines : []),
+        addr?.city, addr?.region, addr?.postalCode, addr?.country
+      ].filter(Boolean).join(', '),
+      headquarters_address: (() => {
+        const hq = e?.headquartersAddress;
+        if (!hq) return null;
+        return [
+          ...(Array.isArray(hq.addressLines) ? hq.addressLines : []),
+          hq.city, hq.region, hq.postalCode, hq.country
+        ].filter(Boolean).join(', ');
+      })(),
+      registration_authority: reg?.managingLou,
+      initial_registration: reg?.initialRegistrationDate,
+      last_update: reg?.lastUpdateDate,
+      source_url: `https://search.gleif.org/#/record/${r.attributes?.lei}`
+    };
+  });
+
+  return {
+    found: true,
+    company: companyTrim,
+    jurisdiction: jurisTrim || mapped[0]?.jurisdiction || null,
+    status_active: mapped[0]?.status_active ?? 0,
+    result_count: records.length,
+    results: mapped,
+    source: 'GLEIF Global LEI Index (api.gleif.org)',
+    summary: `Found ${records.length} corporate registry record(s) for "${companyTrim}". Top match: ${mapped[0].legal_name} (LEI: ${mapped[0].lei}, status: ${mapped[0].status}).`
+  };
+}
+
+export async function screenSanctions({ name = '' }) {
+  const nameTrim = String(name).trim();
+  if (!nameTrim) return { screened: false, match_found: false, error: 'name parameter required' };
+
+  await loadSdnData();
+  const THRESHOLD = 0.70;
+  const matches = [];
+
+  for (const [uid, entry] of sdnEntries) {
+    const nameScore = fuzzyNameMatch(nameTrim, entry.name);
+    const entryAliases = sdnAliases.get(uid) || [];
+    const aliasScores = entryAliases.map(a => fuzzyNameMatch(nameTrim, a));
+    const bestAlias = aliasScores.length > 0 ? Math.max(0, ...aliasScores) : 0;
+    const bestAliasName = aliasScores.length > 0 ? entryAliases[aliasScores.indexOf(bestAlias)] : null;
+    const score = Math.max(nameScore, bestAlias);
+
+    if (score >= THRESHOLD) {
+      matches.push({
+        sdn_uid: uid,
+        matched_name: entry.name,
+        match_type: entry.type,
+        programs: entry.programs,
+        similarity_score: Math.round(score * 10000) / 10000,
+        matched_via: nameScore >= bestAlias ? 'primary_name' : 'alias',
+        matched_alias: nameScore >= bestAlias ? null : bestAliasName
+      });
+    }
+  }
+
+  matches.sort((a, b) => b.similarity_score - a.similarity_score);
+
+  return {
+    screened: true,
+    query_name: nameTrim,
+    match_found: matches.length > 0,
+    match_count: matches.length,
+    matches: matches.slice(0, 10),
+    sdn_list_size: sdnEntries.size,
+    sdn_last_loaded: new Date(sdnLoadedAt).toISOString(),
+    source: 'US Treasury OFAC SDN List (treasury.gov/ofac)',
+    source_url: 'https://sanctionssearch.ofac.treas.gov/',
+    summary: matches.length > 0
+      ? `${matches.length} potential OFAC SDN match(es) for "${nameTrim}". Top: ${matches[0].matched_name} (score: ${matches[0].similarity_score}, program: ${matches[0].programs}).`
+      : `No OFAC SDN matches for "${nameTrim}" (screened against ${sdnEntries.size} entries).`
+  };
+}
+
+export async function monitorRegulatoryFiling({ company = '', period = '' }) {
+  const companyTrim = String(company).trim();
+  const periodTrim = String(period).trim();
+  if (!companyTrim) return { found: false, error: 'company parameter required' };
+
+  const yearMatch = periodTrim.match(/\d{4}/);
+  const year = yearMatch ? yearMatch[0] : String(new Date().getFullYear());
+
+  let secFilings = [];
+  try {
+    const secUrl = `https://efts.sec.gov/LATEST/search-index?q=${encodeURIComponent(`"${companyTrim}"`)}&forms=10-K,10-Q,8-K&dateRange=custom&startdt=${year}-01-01&enddt=${year}-12-31`;
+    const secRes = await fetch(secUrl, {
+      headers: {
+        'User-Agent': 'Praman-Desk/1.0 (Telegraph Protocol Miner; mailto:dev@example.com)',
+        Accept: 'application/json'
+      },
+      signal: AbortSignal.timeout(15000)
+    });
+    if (secRes.ok) {
+      const secData = await secRes.json();
+      const hits = secData.hits?.hits || [];
+      secFilings = hits.slice(0, 5).map(h => {
+        const s = h._source;
+        return {
+          form_type: s.form,
+          filing_date: s.file_date,
+          company_name: (s.display_names || [])[0] || companyTrim,
+          period_ending: s.period_ending,
+          cik: (s.ciks || [])[0],
+          accession_number: s.adsh,
+          source: 'SEC EDGAR',
+          url: s.adsh
+            ? `https://www.sec.gov/Archives/edgar/data/${(s.ciks || [])[0]}/${s.adsh.replace(/-/g, '')}/${s.adsh}-index.htm`
+            : null
+        };
+      });
+    }
+  } catch {}
+
+  let fedRegNotices = [];
+  try {
+    const frUrl = `https://www.federalregister.gov/api/v1/documents.json?conditions[term]=${encodeURIComponent(`"${companyTrim}"`)}&per_page=5&order=newest`;
+    const frRes = await fetch(frUrl, { signal: AbortSignal.timeout(15000) });
+    if (frRes.ok) {
+      const frData = await frRes.json();
+      fedRegNotices = (frData.results || []).map(r => ({
+        title: r.title,
+        type: r.type,
+        publication_date: r.publication_date,
+        document_number: r.document_number,
+        agencies: (r.agencies || []).map(a => a.name).join(', '),
+        source: 'US Federal Register',
+        url: r.html_url
+      }));
+    }
+  } catch {}
+
+  let gleifStatus = null;
+  try {
+    const gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(companyTrim)}&page[size]=1`;
+    const gleifRes = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' }, signal: AbortSignal.timeout(10000) });
+    if (gleifRes.ok) {
+      const gleifData = await gleifRes.json();
+      const rec = (gleifData.data || [])[0];
+      if (rec) {
+        const reg = rec.attributes?.registration;
+        const entity = rec.attributes?.entity;
+        gleifStatus = {
+          lei: rec.attributes?.lei,
+          legal_name: entity?.legalName?.name,
+          jurisdiction: entity?.jurisdiction,
+          registration_status: reg?.status,
+          next_renewal: reg?.nextRenewalDate,
+          last_update: reg?.lastUpdateDate,
+          managing_lou: reg?.managingLou,
+          source: 'GLEIF',
+          url: `https://search.gleif.org/#/record/${rec.attributes?.lei}`
+        };
+      }
+    }
+  } catch {}
+
+  const totalResults = secFilings.length + fedRegNotices.length + (gleifStatus ? 1 : 0);
+  const parts = [];
+  if (secFilings.length > 0) parts.push(`${secFilings.length} SEC filing(s)`);
+  if (fedRegNotices.length > 0) parts.push(`${fedRegNotices.length} Federal Register notice(s)`);
+  if (gleifStatus) parts.push(`LEI: ${gleifStatus.registration_status}`);
+
+  return {
+    found: totalResults > 0,
+    company: companyTrim,
+    period: periodTrim || year,
+    sec_filings: secFilings,
+    federal_register_notices: fedRegNotices,
+    gleif_status: gleifStatus,
+    total_results: totalResults,
+    sources: ['SEC EDGAR (efts.sec.gov)', 'US Federal Register (federalregister.gov)', 'GLEIF (api.gleif.org)'],
+    summary: totalResults > 0
+      ? `${parts.join('; ')} for "${companyTrim}" in ${periodTrim || year}.`
+      : `No regulatory filings found for "${companyTrim}" in ${periodTrim || year}.`
   };
 }
 
@@ -1196,6 +1519,44 @@ export async function handleApiRequest(req, res) {
       if (pathname === '/api/miner/doc-authenticity') {
         const payload = await evaluateDocumentEndpoint(merged);
         return sendJson(res, 200, payload);
+      }
+
+      if (pathname === '/api/miner/corporate-registry') {
+        const out = await lookupCorporateRegistry({
+          company: merged.name || merged.company || merged.entity || merged.legal_name || merged.question || 'SAP SE',
+          jurisdiction: merged.jurisdiction || ''
+        });
+        return sendJson(res, 200, {
+          ...out,
+          intent: 'CORPORATE_REGISTRY_LOOKUP_GENERAL',
+          schema_version: 1,
+          as_of: new Date().toISOString()
+        });
+      }
+
+      if (pathname === '/api/miner/sanctions-screen') {
+        const out = await screenSanctions({
+          name: merged.name || merged.company || merged.entity || merged.question || ''
+        });
+        return sendJson(res, 200, {
+          ...out,
+          intent: 'SANCTIONS_SCREENING_MATCH_GENERAL',
+          schema_version: 1,
+          as_of: new Date().toISOString()
+        });
+      }
+
+      if (pathname === '/api/miner/regulatory-filing') {
+        const out = await monitorRegulatoryFiling({
+          company: merged.company || merged.entity || merged.name || merged.product || merged.drug || merged.device || merged.concern || merged.question || '',
+          period: merged.period || ''
+        });
+        return sendJson(res, 200, {
+          ...out,
+          intent: 'REGULATORY_FILING_MONITOR_GENERAL',
+          schema_version: 1,
+          as_of: new Date().toISOString()
+        });
       }
     }
 

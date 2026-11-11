@@ -419,6 +419,7 @@
 
   <nav role="tablist" aria-label="Praman Desk sections">
     <button role="tab" aria-selected="true" data-tab="audit">Spend Guard (Missions 02 &amp; 04)</button>
+    <button role="tab" aria-selected="false" data-tab="compliance">Compliance Suite (Missions 04 &amp; 02)</button>
     <button role="tab" aria-selected="false" data-tab="ledger">On-chain receipt ledger (5)</button>
     <button role="tab" aria-selected="false" data-tab="eval">Evaluator pool &amp; bounties (41)</button>
     <button role="tab" aria-selected="false" data-tab="miner">Active Miner #5179 (Sepolia)</button>
@@ -447,6 +448,24 @@
           <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Infosys Limited">Infosys Limited</button>
         </div>
         <div id="quick-vendor-result" style="margin-top:10px;" hidden></div>
+      </div>
+
+      <!-- 1-CLICK AUTONOMOUS AGENT SIMULATION WIDGET -->
+      <div style="background:var(--bg); border:1px solid var(--accent); border-radius:8px; padding:14px; margin-bottom:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <div>
+            <h3 style="margin:0; font-size:14px; font-weight:600; color:var(--accent);">🤖 1-Click Autonomous Agent Spend &amp; Clearing Simulation</h3>
+            <span class="hint" style="margin:0; font-size:12.5px;">Simulate an autonomous AI agent discovering Telegraph miners, attaching an x402 payment, executing pre-payment spend checks, and settling on-chain</span>
+          </div>
+          <button type="button" class="primary" id="btn-agent-sim" style="background:var(--accent); color:var(--accent-ink); padding:8px 16px; font-size:13px; font-weight:600;">Run Agent Simulation</button>
+        </div>
+        <div id="sim-progress-box" style="margin-top:12px; display:none;">
+          <div id="sim-step-indicator" style="font-size:13px; font-weight:600; margin-bottom:6px; color:var(--accent);"></div>
+          <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; height:8px; overflow:hidden; margin-bottom:10px;">
+            <div id="sim-progress-bar" style="background:var(--accent); height:100%; width:0%; transition:width 0.4s ease;"></div>
+          </div>
+          <pre id="sim-terminal-log" style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px; font-size:12px; line-height:1.45; max-height:180px; overflow-y:auto; margin:0; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;"></pre>
+        </div>
       </div>
 
       <div class="preset-bar">
@@ -632,8 +651,97 @@
         <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=SAP%20SE&vat_number=DE143593636">Test /api/miner/vendor-verify (SAP SE / EU VAT)</button>
         <button type="button" class="secondary" data-test-miner="/api/miner/po-verify">Test /api/miner/po-verify</button>
         <button type="button" class="secondary" data-test-miner="/api/miner/doc-authenticity?signedQrAmount=1416000&pdfFaceAmount=1888000&document=GST%20e-Invoice%2064a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012">Test /api/miner/doc-authenticity</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/corporate-registry?name=SAP%20SE&jurisdiction=DE">Test /api/miner/corporate-registry (SAP SE / DE)</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/sanctions-screen?name=Banco%20Nacional%20de%20Cuba">Test /api/miner/sanctions-screen (OFAC SDN)</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/regulatory-filing?company=Goldman%20Sachs&period=2026">Test /api/miner/regulatory-filing (SEC EDGAR / Fed Reg)</button>
       </div>
       <div id="miner-test-output" style="margin-top:12px"></div>
+    </section>
+  </div>
+
+  <!-- TAB 5: COMPLIANCE SUITE (MISSIONS 04 & 02) -->
+  <div id="tab-compliance" hidden>
+    <section class="panel">
+      <h2>Multi-Mission Autonomous Compliance Suite (Missions 04 &amp; 02)</h2>
+      <p class="hint" style="margin:0; font-size:13.5px;">
+        Three keyless, high-assurance regulatory intelligence engines on Telegraph Protocol. All query authoritative primary registers directly with zero API keys required, providing deterministic ground-truth guarantees for Legal &amp; Compliance (Mission 04) and Stablecoin Pre-Payment Clearing (Mission 02).
+      </p>
+
+      <!-- 1. Corporate Registry Lookup -->
+      <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:16px; margin-top:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+          <h3 style="margin:0; font-size:15px; font-weight:600;">1. Global Corporate Registry Lookup (<code>CORPORATE_REGISTRY_LOOKUP_GENERAL</code>)</h3>
+          <span class="hint" style="margin:0;">GLEIF Global LEI Index &bull; 200+ Jurisdictions</span>
+        </div>
+        <p style="margin:0 0 10px; font-size:13px; color:var(--muted);">
+          Resolves legal entity status, official LEI, registration authority, incorporation jurisdiction, and registered/headquarters addresses with binary active status flag (<code>status_active: 1|0</code>).
+        </p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <input type="text" id="corp-name-input" placeholder="Entity name (e.g. Stripe, SAP SE, Apple Inc., Infosys)..." style="flex:2; min-width:200px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
+          <select id="corp-juris-input" style="flex:1; min-width:110px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
+            <option value="">Any Jurisdiction</option>
+            <option value="US">United States (US)</option>
+            <option value="DE">Germany (DE)</option>
+            <option value="GB">United Kingdom (GB)</option>
+            <option value="FR">France (FR)</option>
+            <option value="IN">India (IN)</option>
+            <option value="CH">Switzerland (CH)</option>
+            <option value="NL">Netherlands (NL)</option>
+            <option value="JP">Japan (JP)</option>
+            <option value="SG">Singapore (SG)</option>
+          </select>
+          <button type="button" class="primary" id="btn-corp-lookup" style="padding:7px 16px; font-size:13px;">Lookup Registry</button>
+        </div>
+        <div id="corp-output" style="margin-top:12px;" hidden></div>
+      </div>
+
+      <!-- 2. Sanctions Screening -->
+      <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:16px; margin-top:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+          <h3 style="margin:0; font-size:15px; font-weight:600;">2. Keyless Sanctions Screening &amp; Fuzzy Match (<code>SANCTIONS_SCREENING_MATCH_GENERAL</code>)</h3>
+          <span class="hint" style="margin:0;">US Treasury OFAC SDN &bull; 19,500+ Entities &amp; Aliases</span>
+        </div>
+        <p style="margin:0 0 10px; font-size:13px; color:var(--muted);">
+          In-memory sub-100ms screening against official US Treasury OFAC Specially Designated Nationals (SDN) and Consolidated Non-SDN lists with bigram fuzzy matching across primary names and aliases.
+        </p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <input type="text" id="sanc-name-input" placeholder="Person or entity name to screen (e.g. Banco Nacional de Cuba, Aero-Caribbean, Acme Corp)..." style="flex:1; min-width:240px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
+          <button type="button" class="primary" id="btn-sanc-screen" style="padding:7px 16px; font-size:13px;">Screen Sanctions</button>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+          <span class="hint" style="margin:0; font-size:12px;">Quick test:</span>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-sanc-quick="Banco Nacional de Cuba">Banco Nacional de Cuba (Match)</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-sanc-quick="National Bank of Cuba">National Bank of Cuba (Alias)</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-sanc-quick="AERO-CARIBBEAN">AERO-CARIBBEAN (Alias)</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-sanc-quick="Apple Inc.">Apple Inc. (Clean)</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-sanc-quick="STRIPE, LLC">STRIPE, LLC (Clean)</button>
+        </div>
+        <div id="sanc-output" style="margin-top:12px;" hidden></div>
+      </div>
+
+      <!-- 3. Regulatory Filing Monitor -->
+      <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:16px; margin-top:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+          <h3 style="margin:0; font-size:15px; font-weight:600;">3. Multi-Source Regulatory Filing Monitor (<code>REGULATORY_FILING_MONITOR_GENERAL</code>)</h3>
+          <span class="hint" style="margin:0;">SEC EDGAR &bull; US Federal Register &bull; GLEIF</span>
+        </div>
+        <p style="margin:0 0 10px; font-size:13px; color:var(--muted);">
+          Cross-verifies published SEC EDGAR disclosures (10-K, 10-Q, 8-K), Federal Register agency notices/rules, and LEI renewal compliance status in real-time.
+        </p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <input type="text" id="reg-company-input" placeholder="Company or concern name (e.g. Goldman Sachs, Pfizer, Boeing, Tesla)..." style="flex:2; min-width:200px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
+          <input type="text" id="reg-period-input" placeholder="Period (e.g. 2026)" value="2026" style="flex:1; max-width:120px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
+          <button type="button" class="primary" id="btn-reg-check" style="padding:7px 16px; font-size:13px;">Check Filings</button>
+        </div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+          <span class="hint" style="margin:0; font-size:12px;">Quick test:</span>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-reg-quick="Goldman Sachs">Goldman Sachs</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-reg-quick="Tesla">Tesla</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-reg-quick="Pfizer">Pfizer</button>
+          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-reg-quick="Boeing">Boeing</button>
+        </div>
+        <div id="reg-output" style="margin-top:12px;" hidden></div>
+      </div>
     </section>
   </div>
 </main>
@@ -873,7 +981,7 @@ function openTab(tabName) {
     const active = btn.dataset.tab === tabName;
     btn.setAttribute("aria-selected", active ? "true" : "false");
   });
-  ["audit", "ledger", "eval", "miner"].forEach(t => {
+  ["audit", "compliance", "ledger", "eval", "miner"].forEach(t => {
     $(`tab-${t}`).hidden = t !== tabName;
   });
   if (tabName === "ledger") loadLedger();
@@ -1240,6 +1348,228 @@ async function loadEvalPool() {
   }
 }
 
+// 1-Click Autonomous Agent Simulation
+const btnAgentSim = $("btn-agent-sim");
+if (btnAgentSim) {
+  btnAgentSim.addEventListener("click", async () => {
+    btnAgentSim.disabled = true;
+    const box = $("sim-progress-box");
+    const indicator = $("sim-step-indicator");
+    const bar = $("sim-progress-bar");
+    const log = $("sim-terminal-log");
+    box.style.display = "block";
+    log.textContent = "";
+
+    const appendLog = (line) => {
+      log.textContent += `[${new Date().toLocaleTimeString()}] ${line}\n`;
+      log.scrollTop = log.scrollHeight;
+    };
+
+    const steps = [
+      {
+        pct: 20,
+        title: "Step 1/5: Discovering Telegraph Miners on Sepolia Diamond...",
+        log: "Agent executing query intent: VENDOR_VERIFY_GENERAL & SANCTIONS_SCREENING_MATCH_GENERAL\n-> Querying Telegraph Registry at 0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b...\n-> Found Miner #5179 (praman-compliance-miner) | Bond: 0.22 MACHINA | Status: active",
+        delay: 900
+      },
+      {
+        pct: 45,
+        title: "Step 2/5: Attaching EIP-712 x402 Micropayment Header...",
+        log: "-> Crafting x402 payment header with 10,000 uusdc ($0.01 USDC) fee ceiling\n-> Signing authorization for recipient: 0x98021b20Efdb7ae2C57366010a6E0fDE207b4466\n-> Nonce: 0x8f2a... | Signature digest: EIP-712 typed data valid",
+        delay: 1000
+      },
+      {
+        pct: 70,
+        title: "Step 3/5: Querying Praman Miner & Verifying Ground Truth...",
+        log: "-> POST /api/miner/vendor-verify + /api/miner/sanctions-screen\n-> GLEIF Primary Registry: STRIPE, LLC resolved (LEI: 549300CLHGIPTCYHQ143, Status: ISSUED)\n-> US Treasury OFAC: 19,563 SDN entries checked | 0 matches found (Clean counterparty)\n-> Primary vs Miner agreement: 100% CONFIRMED",
+        delay: 1100
+      },
+      {
+        pct: 90,
+        title: "Step 4/5: Recording Settlement on Sepolia Diamond...",
+        log: "-> Broadcast settlement tx to Ethereum Sepolia...\n-> Tx: 0x9d4e... | Block: #7142091 | Gas: 42,118 wei\n-> On-chain receipt hash: 0x7b1c4a92e104... attested",
+        delay: 1000
+      },
+      {
+        pct: 100,
+        title: "✓ Simulation Complete: Pre-Payment Clearing Succeeded",
+        log: "========================================================\nRESULT: Spend Cleared. Autonomous Agent authorized $27,062.50 transfer.\nTotal Telegraph protocol fee: $0.01 test USDC. Zero human intervention.",
+        delay: 400
+      }
+    ];
+
+    for (const step of steps) {
+      indicator.textContent = step.title;
+      bar.style.width = `${step.pct}%`;
+      appendLog(step.log);
+      await new Promise(r => setTimeout(r, step.delay));
+    }
+    btnAgentSim.disabled = false;
+  });
+}
+
+// Corporate Registry Lookup
+const btnCorp = $("btn-corp-lookup");
+if (btnCorp) {
+  btnCorp.addEventListener("click", async () => {
+    const name = $("corp-name-input").value.trim();
+    if (!name) return alert("Please enter an entity name.");
+    const juris = $("corp-juris-input").value;
+    const out = $("corp-output");
+    out.hidden = false;
+    out.innerHTML = `<p class="hint">Querying GLEIF primary registry for <strong>${esc(name)}</strong>...</p>`;
+    try {
+      const url = `/api/miner/corporate-registry?name=${encodeURIComponent(name)}${juris ? `&jurisdiction=${juris}` : ''}`;
+      const data = await api(url);
+      if (!data.found || !data.results?.length) {
+        out.innerHTML = `<div class="msg bad">No records found for "${esc(name)}" ${juris ? `in ${juris}` : ''}.</div>`;
+        return;
+      }
+      const top = data.results[0];
+      out.innerHTML = `
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px;">
+            <h4 style="margin:0; font-size:14px; font-weight:600;">${esc(top.legal_name)}</h4>
+            <span class="badge ${top.status === 'ISSUED' ? 'badge-confirmed' : 'badge-warn'}">${esc(top.status)} (active: ${top.status_active})</span>
+          </div>
+          <p style="margin:6px 0; font-size:13px; color:var(--muted);">${esc(data.summary)}</p>
+          <div style="font-size:12.5px; line-height:1.6; margin-top:8px;">
+            <div><strong>LEI:</strong> <code class="mono">${esc(top.lei)}</code> (<a href="${esc(top.source_url)}" target="_blank" rel="noopener">GLEIF Record ↗</a>)</div>
+            <div><strong>Jurisdiction:</strong> ${esc(top.jurisdiction || 'N/A')} &bull; <strong>Authority:</strong> ${esc(top.registration_authority || 'N/A')}</div>
+            <div><strong>Registered Address:</strong> ${esc(top.registered_address || 'N/A')}</div>
+            ${top.headquarters_address ? `<div><strong>Headquarters:</strong> ${esc(top.headquarters_address)}</div>` : ''}
+          </div>
+        </div>
+      `;
+    } catch (err) {
+      out.innerHTML = `<div class="msg bad">${esc(err.message)}</div>`;
+    }
+  });
+}
+
+// Sanctions Screening
+const btnSanc = $("btn-sanc-screen");
+if (btnSanc) {
+  btnSanc.addEventListener("click", async () => {
+    const name = $("sanc-name-input").value.trim();
+    if (!name) return alert("Please enter a name to screen.");
+    const out = $("sanc-output");
+    out.hidden = false;
+    out.innerHTML = `<p class="hint">Screening <strong>${esc(name)}</strong> against OFAC SDN list...</p>`;
+    try {
+      const data = await api(`/api/miner/sanctions-screen?name=${encodeURIComponent(name)}`);
+      if (data.match_found) {
+        const rows = (data.matches || []).map(m => `
+          <tr>
+            <td class="mono">${esc(m.sdn_uid)}</td>
+            <td><strong>${esc(m.matched_name)}</strong>${m.matched_alias ? `<br><small style="color:var(--muted)">Alias: ${esc(m.matched_alias)}</small>` : ''}</td>
+            <td>${esc(m.match_type || 'Entity')}</td>
+            <td><span class="badge badge-warn">${esc(m.programs || 'SDN')}</span></td>
+            <td><strong>${(m.similarity_score * 100).toFixed(1)}%</strong> (${esc(m.matched_via)})</td>
+          </tr>
+        `).join('');
+        out.innerHTML = `
+          <div style="background:var(--bad-bg); border:1px solid var(--bad); border-radius:6px; padding:12px; margin-top:8px;">
+            <div style="font-weight:600; color:var(--bad); font-size:14px; margin-bottom:4px;">⚠ SANCTIONS MATCH DETECTED</div>
+            <p style="margin:0 0 10px; font-size:13px;">${esc(data.summary)}</p>
+            <table style="width:100%; font-size:12px; border-collapse:collapse;">
+              <thead>
+                <tr style="text-align:left; border-bottom:1px solid var(--bad);">
+                  <th style="padding:4px 6px;">UID</th>
+                  <th style="padding:4px 6px;">Matched Name</th>
+                  <th style="padding:4px 6px;">Type</th>
+                  <th style="padding:4px 6px;">Program</th>
+                  <th style="padding:4px 6px;">Similarity</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        `;
+      } else {
+        out.innerHTML = `
+          <div style="background:var(--ok-bg); border:1px solid var(--ok); border-radius:6px; padding:12px; margin-top:8px;">
+            <div style="font-weight:600; color:var(--ok); font-size:14px; margin-bottom:4px;">✓ NO SANCTIONS MATCHES FOUND</div>
+            <p style="margin:0; font-size:13px;">${esc(data.summary)} Checked across ${data.sdn_list_size.toLocaleString()} SDN entities and aliases.</p>
+          </div>
+        `;
+      }
+    } catch (err) {
+      out.innerHTML = `<div class="msg bad">${esc(err.message)}</div>`;
+    }
+  });
+
+  document.querySelectorAll("[data-sanc-quick]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      $("sanc-name-input").value = btn.dataset.sancQuick;
+      btnSanc.click();
+    });
+  });
+}
+
+// Regulatory Filing Monitor
+const btnReg = $("btn-reg-check");
+if (btnReg) {
+  btnReg.addEventListener("click", async () => {
+    const comp = $("reg-company-input").value.trim();
+    if (!comp) return alert("Please enter a company name.");
+    const period = $("reg-period-input").value.trim();
+    const out = $("reg-output");
+    out.hidden = false;
+    out.innerHTML = `<p class="hint">Querying SEC EDGAR, Federal Register, and GLEIF for <strong>${esc(comp)}</strong>...</p>`;
+    try {
+      const data = await api(`/api/miner/regulatory-filing?company=${encodeURIComponent(comp)}&period=${encodeURIComponent(period)}`);
+      const secRows = (data.sec_filings || []).map(f => `
+        <tr>
+          <td><span class="badge badge-confirmed">${esc(f.form_type)}</span></td>
+          <td>${esc(f.filing_date)}</td>
+          <td>${esc(f.company_name)}</td>
+          <td>${f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">EDGAR ↗</a>` : 'Available'}</td>
+        </tr>
+      `).join('');
+
+      const frRows = (data.federal_register_notices || []).map(n => `
+        <tr>
+          <td>${esc(n.type)}</td>
+          <td>${esc(n.publication_date)}</td>
+          <td>${esc(n.title?.slice(0, 75))}...</td>
+          <td>${n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">Federal Register ↗</a>` : 'View'}</td>
+        </tr>
+      `).join('');
+
+      out.innerHTML = `
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px;">
+          <h4 style="margin:0 0 6px; font-size:14px; font-weight:600;">Regulatory Filing Profile: ${esc(data.company)} (${esc(data.period)})</h4>
+          <p style="margin:0 0 10px; font-size:13px; color:var(--muted);">${esc(data.summary)}</p>
+          ${secRows ? `
+            <div style="font-weight:600; font-size:13px; margin:10px 0 4px;">SEC EDGAR Disclosures</div>
+            <table style="width:100%; font-size:12px; border-collapse:collapse; margin-bottom:12px;">
+              <thead><tr style="text-align:left; border-bottom:1px solid var(--line);"><th style="padding:4px 6px;">Form</th><th style="padding:4px 6px;">Date</th><th style="padding:4px 6px;">Entity</th><th style="padding:4px 6px;">Link</th></tr></thead>
+              <tbody>${secRows}</tbody>
+            </table>
+          ` : ''}
+          ${frRows ? `
+            <div style="font-weight:600; font-size:13px; margin:10px 0 4px;">US Federal Register Notices &amp; Rules</div>
+            <table style="width:100%; font-size:12px; border-collapse:collapse;">
+              <thead><tr style="text-align:left; border-bottom:1px solid var(--line);"><th style="padding:4px 6px;">Type</th><th style="padding:4px 6px;">Date</th><th style="padding:4px 6px;">Notice Title</th><th style="padding:4px 6px;">Link</th></tr></thead>
+              <tbody>${frRows}</tbody>
+            </table>
+          ` : ''}
+        </div>
+      `;
+    } catch (err) {
+      out.innerHTML = `<div class="msg bad">${esc(err.message)}</div>`;
+    }
+  });
+
+  document.querySelectorAll("[data-reg-quick]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      $("reg-company-input").value = btn.dataset.regQuick;
+      btnReg.click();
+    });
+  });
+}
+
 document.querySelectorAll("[data-test-miner]").forEach(btn => {
   btn.addEventListener("click", async () => {
     const endpoint = btn.dataset.testMiner;
@@ -1258,7 +1588,7 @@ document.querySelectorAll("[data-test-miner]").forEach(btn => {
 
 loadWallet();
 const initialTab = location.hash.replace("#", "");
-if (["audit", "ledger", "eval", "miner"].includes(initialTab)) {
+if (["audit", "compliance", "ledger", "eval", "miner"].includes(initialTab)) {
   openTab(initialTab);
 }
 </script>

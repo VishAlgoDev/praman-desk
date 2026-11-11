@@ -7,9 +7,10 @@ name: Praman Desk Compliance & Procurement Auditor
 description: >-
   Autonomous compliance auditor, 3-way invoice vs ledger reconciliation,
   procurement purchase order verification, statutory entity checks via GLEIF,
-  and cryptographic SHA-256 e-Invoice provenance verification. Reconciles
-  quantities, unit prices, line totals, taxes, currency conversions, and
-  vendor legal registrations with deterministic ground-truth guarantees.
+  cryptographic SHA-256 e-Invoice provenance verification, global corporate
+  registry lookups across 200+ jurisdictions, US Treasury OFAC sanctions
+  screening with fuzzy alias matching, and SEC EDGAR / Federal Register
+  regulatory filing monitoring. Deterministic ground-truth guarantees without API keys.
 base_url: https://praman-desk.vercel.app
 
 auth:
@@ -123,12 +124,96 @@ endpoints:
             intents: ["*"]
             description: "Document verification inquiry"
 
+  # --- NEW COMPLIANCE INTENTS (H2 EXPANSION) ---
+
+  - path: /api/miner/corporate-registry
+    external_path: /api/miner/corporate-registry
+    method: GET
+    intents:
+      - CORPORATE_REGISTRY_LOOKUP_GENERAL
+    description: >-
+      Looks up corporate registry records for a legal entity via the GLEIF Global LEI Index.
+      Returns company legal name, LEI, active status (status_active 1 or 0), jurisdiction,
+      registered and headquarters address, entity category, legal form, creation date,
+      and last update. Supports 200+ jurisdictions worldwide.
+    params:
+      query:
+        optional:
+          - name: name
+            type: string
+            intents: ["*"]
+            description: "Legal entity name to search (also accepted as company, entity, legal_name)"
+          - name: company
+            type: string
+            intents: ["*"]
+            description: "Alias for name"
+          - name: jurisdiction
+            type: string
+            intents: ["*"]
+            description: "ISO 3166-1 alpha-2 country code (e.g., US, GB, DE)"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Corporate registry inquiry"
+
+  - path: /api/miner/sanctions-screen
+    external_path: /api/miner/sanctions-screen
+    method: GET
+    intents:
+      - SANCTIONS_SCREENING_MATCH_GENERAL
+    description: >-
+      Screens a person or entity name against the US Treasury OFAC SDN
+      (Specially Designated Nationals) sanctions list with fuzzy matching
+      against primary names and known aliases. Returns match details,
+      similarity scores, and associated sanctions programs. List is cached
+      and refreshed every 6 hours from official OFAC data.
+    params:
+      query:
+        optional:
+          - name: name
+            type: string
+            intents: ["*"]
+            description: "Person or entity name to screen (required)"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Sanctions screening inquiry"
+
+  - path: /api/miner/regulatory-filing
+    external_path: /api/miner/regulatory-filing
+    method: GET
+    intents:
+      - REGULATORY_FILING_MONITOR_GENERAL
+    description: >-
+      Monitors regulatory filing status for legal entities using three
+      authoritative keyless sources: SEC EDGAR full-text search for 10-K,
+      10-Q, 8-K filings; US Federal Register for regulatory notices and
+      rules; and GLEIF for LEI registration status and renewal dates.
+    params:
+      query:
+        optional:
+          - name: company
+            type: string
+            intents: ["*"]
+            description: "Legal entity or company name to check filings for"
+          - name: period
+            type: string
+            intents: ["*"]
+            description: "Filing period filter (e.g., 2026, Q3 2026)"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Regulatory filing inquiry"
+
 semantics:
   supported_intents:
     - PURCHASE_ORDER_VERIFY_GENERAL
     - INVOICE_LEDGER_RECONCILE_GENERAL
     - VENDOR_VERIFY_GENERAL
     - DOCUMENT_AUTHENTICITY_GENERAL
+    - CORPORATE_REGISTRY_LOOKUP_GENERAL
+    - SANCTIONS_SCREENING_MATCH_GENERAL
+    - REGULATORY_FILING_MONITOR_GENERAL
 
 docs:
   repository: https://github.com/VishAlgoDev/praman-desk
