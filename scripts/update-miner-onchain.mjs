@@ -16,7 +16,7 @@ const { account, address } = loadOrCreateWallet();
 const walletClient = createWalletClient({ account, chain: sepolia, transport: http(RPC) });
 
 const DIAMOND_ADDRESS = '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b';
-const COMMIT_HASH = '52285a1097f2ddfbb399abc506a042066cdae5e0';
+const COMMIT_HASH = '47e6d9f80b2799ffde90ae2ba5947a872bed7301';
 const PINNED_URL = `https://raw.githubusercontent.com/VishAlgoDev/praman-desk/${COMMIT_HASH}/miner.yaml`;
 
 const diamondAbi = parseAbi([
@@ -28,7 +28,10 @@ const SUPPORTED_INTENTS = [
   'PURCHASE_ORDER_VERIFY_GENERAL',
   'INVOICE_LEDGER_RECONCILE_GENERAL',
   'VENDOR_VERIFY_GENERAL',
-  'DOCUMENT_AUTHENTICITY_GENERAL'
+  'DOCUMENT_AUTHENTICITY_GENERAL',
+  'CORPORATE_REGISTRY_LOOKUP_GENERAL',
+  'SANCTIONS_SCREENING_MATCH_GENERAL',
+  'REGULATORY_FILING_MONITOR_GENERAL'
 ];
 
 async function main() {
@@ -39,13 +42,13 @@ async function main() {
   const yamlHash = '0x' + crypto.createHash('sha256').update(Buffer.from(yamlText)).digest('hex');
   console.log(`YAML length: ${yamlText.length}, SHA-256: ${yamlHash}`);
 
-  // Use old registration ID 5164
+  // Use old registration ID 5179
   const updateTx = await walletClient.writeContract({
     address: DIAMOND_ADDRESS,
     abi: diamondAbi,
     functionName: 'updateMiner',
     args: [
-      5164n,
+      5179n,
       PINNED_URL,
       yamlHash,
       address,
@@ -84,8 +87,8 @@ async function main() {
 
   console.log(`\nNew Registration ID: ${newRegId || '5165'}`);
   const evidence = {
-    previousRegistrationId: '5164',
-    registrationId: newRegId || '5165',
+    previousRegistrationId: '5179',
+    registrationId: newRegId || '5180',
     txHash: updateTx,
     blockNumber: Number(receipt.blockNumber),
     miner: address,
