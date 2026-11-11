@@ -192,10 +192,14 @@ endpoints:
     params:
       query:
         optional:
-          - name: company
+          - name: entity
             type: string
             intents: ["*"]
             description: "Legal entity or company name to check filings for"
+          - name: company
+            type: string
+            intents: ["*"]
+            description: "Alias for entity"
           - name: period
             type: string
             intents: ["*"]
