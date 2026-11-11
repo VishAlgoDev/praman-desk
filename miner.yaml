@@ -1,6 +1,6 @@
 version: "1"
 kind: miner
-id: 5179
+id: 5185
 slug: praman-compliance-miner
 protocol: generic
 name: Praman Desk Compliance & Procurement Auditor

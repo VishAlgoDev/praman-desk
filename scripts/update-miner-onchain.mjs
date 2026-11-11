@@ -16,8 +16,15 @@ const { account, address } = loadOrCreateWallet();
 const walletClient = createWalletClient({ account, chain: sepolia, transport: http(RPC) });
 
 const DIAMOND_ADDRESS = '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b';
+const MACHINA = '0xd68305cA83C7AF42A4F720144E7416fB53F8AaF4';
 const COMMIT_HASH = '47e6d9f80b2799ffde90ae2ba5947a872bed7301';
 const PINNED_URL = `https://raw.githubusercontent.com/VishAlgoDev/praman-desk/${COMMIT_HASH}/miner.yaml`;
+
+const erc20Abi = parseAbi([
+  'function balanceOf(address account) external view returns (uint256)',
+  'function allowance(address owner, address spender) external view returns (uint256)',
+  'function approve(address spender, uint256 amount) external returns (bool)'
+]);
 
 const diamondAbi = parseAbi([
   'function updateMiner(uint256 oldRegistrationId, string yamlUrl, bytes32 yamlHash, address feeAddress, uint256 minPriceUsdc, string[] supportedIntents) external returns (uint256 registrationId)',
@@ -41,6 +48,28 @@ async function main() {
   const yamlText = await yamlRes.text();
   const yamlHash = '0x' + crypto.createHash('sha256').update(Buffer.from(yamlText)).digest('hex');
   console.log(`YAML length: ${yamlText.length}, SHA-256: ${yamlHash}`);
+
+  // Check & ensure MACHINA bond allowance for Diamond contract
+  const neededAllowance = 100000000000000000n; // 0.10 MACHINA
+  const currentAllowance = await client.readContract({
+    address: MACHINA,
+    abi: erc20Abi,
+    functionName: 'allowance',
+    args: [address, DIAMOND_ADDRESS]
+  });
+  console.log(`Current Diamond MACHINA allowance: ${currentAllowance}`);
+  if (currentAllowance < neededAllowance) {
+    console.log(`Approving Diamond contract to spend MACHINA bond...`);
+    const approveTx = await walletClient.writeContract({
+      address: MACHINA,
+      abi: erc20Abi,
+      functionName: 'approve',
+      args: [DIAMOND_ADDRESS, 1000000000000000000n] // 1.0 MACHINA
+    });
+    console.log(`Approve Tx Hash: ${approveTx}`);
+    await client.waitForTransactionReceipt({ hash: approveTx });
+    console.log(`MACHINA allowance approved successfully.`);
+  }
 
   // Use old registration ID 5179
   const updateTx = await walletClient.writeContract({

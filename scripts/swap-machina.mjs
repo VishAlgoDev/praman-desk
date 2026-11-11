@@ -27,14 +27,14 @@ async function main() {
   const initialMachina = await client.readContract({ address: MACHINA, abi: erc20Abi, functionName: 'balanceOf', args: [address] });
   console.log(`Initial MACHINA balance: ${formatUnits(initialMachina, 18)}`);
 
-  const targetMachina = 220000000000000000n; // 0.22 MACHINA (covers 4 intents)
+  const targetMachina = 100000000000000000n; // 0.10 MACHINA (covers 7 intents with buffer)
   if (initialMachina >= targetMachina) {
     console.log('Already hold sufficient MACHINA bond!');
     return;
   }
 
   const shortfall = targetMachina - initialMachina;
-  const maxUsdcIn = 2500000n; // $2.50 max USDC (quoter said $1.30)
+  const maxUsdcIn = 2000000n; // $2.00 max USDC
 
   // Step 1: Check & Approve USDC for SwapRouter
   const allowance = await client.readContract({ address: USDC, abi: erc20Abi, functionName: 'allowance', args: [address, ROUTER] });

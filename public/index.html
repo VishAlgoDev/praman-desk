@@ -422,7 +422,7 @@
     <button role="tab" aria-selected="false" data-tab="compliance">Compliance Suite (Missions 04 &amp; 02)</button>
     <button role="tab" aria-selected="false" data-tab="ledger">On-chain receipt ledger (5)</button>
     <button role="tab" aria-selected="false" data-tab="eval">Evaluator pool &amp; bounties (41)</button>
-    <button role="tab" aria-selected="false" data-tab="miner">Active Miner #5179 (Sepolia)</button>
+    <button role="tab" aria-selected="false" data-tab="miner">Active Miner #5185 (Sepolia)</button>
   </nav>
 
   <!-- TAB 1: SPEND GUARD & COMPLIANCE AUDIT -->
@@ -622,26 +622,27 @@
     <div id="eval-results"></div>
   </div>
 
-  <!-- TAB 4: ACTIVE TELEGRAPH MINER #5179 -->
+  <!-- TAB 4: ACTIVE TELEGRAPH MINER #5185 -->
   <div id="tab-miner" hidden>
     <section class="panel">
-      <h2>Track 1 (Providers) — Active Telegraph Miner #5179 (Sepolia Diamond)</h2>
+      <h2>Track 1 (Providers) — Active Telegraph Miner #5185 (Sepolia Diamond)</h2>
       <p class="hint" style="margin:0; font-size:13px">
-        Registered on the Telegraph Diamond Contract (<a href="https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" target="_blank" rel="noopener" class="mono">0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b</a>) with active Registration ID <strong>#5179</strong> backed by 0.22 MACHINA bond. Manifest pinned to immutable commit <a href="https://github.com/VishAlgoDev/praman-desk/blob/f0085a81167e9e892f39b52b93701845d77b5eb4/miner.yaml" target="_blank" rel="noopener" class="mono">f0085a8</a>.
+        Registered on the Telegraph Diamond Contract (<a href="https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" target="_blank" rel="noopener" class="mono">0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b</a>) with active Registration ID <strong>#5185</strong> supporting <strong>7 intents</strong> backed by 0.10 MACHINA bond. Manifest pinned to immutable commit <a href="https://github.com/VishAlgoDev/praman-desk/blob/47e6d9f80b2799ffde90ae2ba5947a872bed7301/miner.yaml" target="_blank" rel="noopener" class="mono">47e6d9f</a>.
       </p>
 
       <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:12px; margin-top:12px; font-size:13px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <div>
-            <strong>Diamond Miner ID:</strong> <code class="mono">#5179</code> &bull; 
-            <strong>Slug:</strong> <code class="mono">praman-compliance-miner</code>
+            <strong>Diamond Miner ID:</strong> <code class="mono">#5185</code> &bull; 
+            <strong>Slug:</strong> <code class="mono">praman-compliance-miner</code> &bull;
+            <strong>Intents:</strong> <code class="mono">7 registered</code>
           </div>
           <div>
-            <a href="https://sepolia.etherscan.io/tx/0x5096c50db458c4f181122d9dcdb9e36cf5f1501a8f10846af4ab35eefaab70db" target="_blank" rel="noopener">Registration Tx (Etherscan) ↗</a>
+            <a href="https://sepolia.etherscan.io/tx/0x21167e60bad30c52c214d6364a3ae6d61d4978137eec41d393c36c039cc0eeff" target="_blank" rel="noopener">Update Tx #5185 (Etherscan) ↗</a>
           </div>
         </div>
         <p style="margin:8px 0 0; color:var(--muted); font-size:12.5px;">
-          These hosted endpoints accept both canonical typed parameters and free-text <code>?question=</code> queries while returning strict V3/V4 schemas with live keyless GLEIF validation and deterministic 3-way arithmetic.
+          These hosted endpoints accept both canonical typed parameters and free-text <code>?question=</code> queries while returning strict schemas with live keyless GLEIF validation, OFAC SDN screening, SEC EDGAR filing monitoring, and deterministic 3-way reconciliation.
         </p>
       </div>
 
@@ -1369,7 +1370,7 @@ if (btnAgentSim) {
       {
         pct: 20,
         title: "Step 1/5: Discovering Telegraph Miners on Sepolia Diamond...",
-        log: "Agent executing query intent: VENDOR_VERIFY_GENERAL & SANCTIONS_SCREENING_MATCH_GENERAL\n-> Querying Telegraph Registry at 0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b...\n-> Found Miner #5179 (praman-compliance-miner) | Bond: 0.22 MACHINA | Status: active",
+        log: "Agent executing query intent: VENDOR_VERIFY_GENERAL & SANCTIONS_SCREENING_MATCH_GENERAL\n-> Querying Telegraph Registry at 0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b...\n-> Found Miner #5185 (praman-compliance-miner) | Bond: 0.10 MACHINA | Status: active",
         delay: 900
       },
       {
