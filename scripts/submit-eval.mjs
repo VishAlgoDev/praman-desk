@@ -19,7 +19,9 @@ const SUBMISSIONS = [
   { intentId: 'PURCHASE_ORDER_VERIFY_GENERAL', file: 'purchase_order_verify_general.jsonl', bountyIssue: 122 },
   { intentId: 'VENDOR_VERIFY_GENERAL', file: 'vendor_verify_general.jsonl', bountyIssue: 105 },
   { intentId: 'CONTRACT_OBLIGATION_AUDIT_GENERAL', file: 'contract_obligation_audit_general.jsonl', bountyIssue: null },
-  { intentId: 'REGULATORY_FILING_MONITOR_GENERAL', file: 'regulatory_filing_monitor_general.jsonl', bountyIssue: 104 }
+  { intentId: 'REGULATORY_FILING_MONITOR_GENERAL', file: 'regulatory_filing_monitor_general.jsonl', bountyIssue: 104 },
+  { intentId: 'CORPORATE_REGISTRY_LOOKUP_GENERAL', file: 'corporate_registry_lookup_general.jsonl', bountyIssue: null },
+  { intentId: 'SANCTIONS_SCREENING_MATCH_GENERAL', file: 'sanctions_screening_match_general.jsonl', bountyIssue: null }
 ];
 
 async function submitDataset(account, { intentId, file, bountyIssue }) {
