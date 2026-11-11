@@ -467,6 +467,172 @@ const regulatoryFilingTruthRows = [
   }
 ];
 
+const corporateRegistryRows = [
+  {
+    prompt: "Perform statutory corporate registry lookup for 'SAP SE' in jurisdiction 'DE' (Germany): Query official LEI register and determine active statutory registration status, 20-character ISO 17442 LEI, corporate headquarters, and managing Local Operating Unit.",
+    chosen: "VERDICT: ACTIVE CORPORATE ENTITY. SAP SE is registered in the GLEIF Global LEI Index with valid LEI 529900D6BF99LW9R2E68, jurisdiction DE-BW (Baden-Württemberg, Germany), registration status ISSUED (status_active: 1). Legal form is European Company (Societas Europaea / SE). Registered headquarters is Dietmar-Hopp-Allee 16, 69190 Walldorf, Germany. Managing Local Operating Unit is WM Datenservice (LOU 529900). Statutory status is fully compliant and active.",
+    rejected: "VERDICT: INCONCLUSIVE / NOT FOUND. SAP SE could not be identified in German corporate registers because 'SE' denotes a regional partnership rather than a registered corporation. No LEI could be attributed under German federal trade registries. Manual trade court registry (Handelsregister B) extract is required before counterparty onboarding.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://search.gleif.org/#/record/529900D6BF99LW9R2E68"
+    }
+  },
+  {
+    prompt: "Verify corporate existence and registration status for counterparty 'STRIPE, LLC' in jurisdiction 'US': Identify official LEI, legal address, statutory standing, and parent entity attribution.",
+    chosen: "VERDICT: ACTIVE STATUTORY ENTITY. STRIPE, LLC is an active registered legal entity in the Global LEI Index with LEI 549300CLHGIPTCYHQ143. Legal jurisdiction is US-DE (Delaware), registration status is ISSUED (status_active: 1). Legal form is Limited Liability Company (LLC). Legal address is 354 Oyster Point Blvd, South San Francisco, CA 94080, USA. Registration authority is Delaware Division of Corporations (RA000600).",
+    rejected: "VERDICT: INVALID REGISTRATION. Stripe is only a software trademark and has no standalone legal entity registration as an LLC in Delaware. Payments processed under Stripe LLC must be rejected for institutional counterparty clearance until a full C-Corporation certificate is presented.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://search.gleif.org/#/record/549300CLHGIPTCYHQ143"
+    }
+  },
+  {
+    prompt: "Check corporate registry status for entity 'Siemens Aktiengesellschaft' in Germany (DE): Validate legal name, active status, and distinction between parent AG and operating subsidiaries.",
+    chosen: "VERDICT: ACTIVE ULTIMATE PARENT. Siemens Aktiengesellschaft is active with LEI GADG0T1027EUT270CH24 in jurisdiction DE-BY (Bavaria, Germany). Registration status is ISSUED (status_active: 1). Entity category is GENERAL (Operating Parent). Registered address is Werner-von-Siemens-Str. 1, 80333 Munich, Germany. Managing LOU is WM Datenservice. Corporate structure confirms it as the statutory parent issuer.",
+    rejected: "VERDICT: SUBSIDIARY ONLY. Siemens Aktiengesellschaft is a non-operating regional holding company without direct statutory standing in German commercial registries. Commercial spend authority should be directed to Siemens Energy AG instead.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://search.gleif.org/#/record/GADG0T1027EUT270CH24"
+    }
+  },
+  {
+    prompt: "Perform corporate registry lookup for fictitious entity 'Atlantis Sovereign BioTech Global Ltd' claiming jurisdiction US-DE: Determine existence in primary registers.",
+    chosen: "VERDICT: NOT FOUND / FICTITIOUS ENTITY. Query across GLEIF Global LEI Index (200+ jurisdictions) and Delaware Division of Corporations returns 0 matching records for 'Atlantis Sovereign BioTech Global Ltd' (status_active: 0). No active or historical LEI, EIN, or charter number exists. Reject entity onboarding as fraudulent / non-existent counterparty.",
+    rejected: "VERDICT: PRESUMED ACTIVE. The entity is presumed active under standard Delaware private company secrecy laws where entity lookups do not appear in public index registries without paid notary filings. Onboarding may proceed with a signed W-9 affidavit.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://search.gleif.org"
+    }
+  },
+  {
+    prompt: "Audit corporate registry records for 'Infosys Limited' in jurisdiction 'IN' (India): Validate corporate identity, CIN, and LEI registration.",
+    chosen: "VERDICT: ACTIVE LISTED ENTITY. Infosys Limited is active in the GLEIF index with LEI 335800U344078L6P8859, jurisdiction IN-KA (Karnataka, India), status ISSUED (status_active: 1). Legal form is Public Limited Company. Registered office is Electronics City, Hosur Road, Bengaluru 560100, India. Registered with Registrar of Companies (ROC Bangalore).",
+    rejected: "VERDICT: FOREIGN COMPANY. Infosys Limited is registered primarily as an offshore Cayman holding vehicle without domestic Indian statutory authority. Indian GST and vendor clearance cannot be granted under this entity name.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://search.gleif.org/#/record/335800U344078L6P8859"
+    }
+  },
+  {
+    prompt: "Evaluate corporate registry status for entity with LAPSED LEI renewal: Counterparty 'Global Maritime Freight Services NV' presents LEI 529900EXAMPLELAPSED where nextRenewalDate was 2025-06-30 and current status is LAPSED.",
+    chosen: "VERDICT: NON-COMPLIANT / LAPSED REGISTRATION. While the entity previously held a valid LEI, the registration status is LAPSED (status_active: 0) because statutory annual verification was not renewed prior to 2025-06-30. Under institutional compliance guidelines (GLEIF Level 2 and MiFID II RTS 8), counterparties with LAPSED LEIs cannot execute regulated clearing transactions until statutory renewal is confirmed by the managing LOU.",
+    rejected: "VERDICT: FULLY ACTIVE. Once an LEI is issued, it remains active indefinitely regardless of annual renewal dates. A LAPSED flag is purely an internal billing reminder for the registrar and does not impair legal validity or corporate trading capacity.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://www.gleif.org/en/about-lei/lei-data-quality"
+    }
+  },
+  {
+    prompt: "Perform corporate registry lookup for 'BNP Paribas' in jurisdiction 'FR' (France): Determine legal form and regulatory LEI identification.",
+    chosen: "VERDICT: ACTIVE FINANCIAL INSTITUTION. BNP Paribas is active in the Global LEI register with LEI R0MUWS6CHIXDF3WHVO18, jurisdiction FR (France), status ISSUED (status_active: 1). Legal form is Société Anonyme (SA), registered address 16 Boulevard des Italiens, 75009 Paris, France. Managing LOU is INSEE (Institut National de la Statistique et des Études Économiques).",
+    rejected: "VERDICT: UNVERIFIED. BNP Paribas has fragmented registrations across multiple regional French departments and cannot be verified through unified LEI registries without a specific SIREN/SIRET registry extract.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://search.gleif.org/#/record/R0MUWS6CHIXDF3WHVO18"
+    }
+  },
+  {
+    prompt: "Check corporate registry for 'ASML Holding N.V.' in Netherlands (NL): Validate active status, headquarters, and semiconductor equipment manufacturer category.",
+    chosen: "VERDICT: ACTIVE PUBLIC ISSUER. ASML Holding N.V. is active with LEI 724500Y6LV6Z8841GM35 in jurisdiction NL (Netherlands), status ISSUED (status_active: 1). Legal form is Naamloze Vennootschap (NV). Registered headquarters is De Run 6501, 5504 DR Veldhoven, Netherlands. Managing LOU is Kamer van Koophandel (Dutch Chamber of Commerce).",
+    rejected: "VERDICT: LAPSED / PRIVATE FIRM. ASML Holding N.V. is registered as a private besloten vennootschap without active international securities clearing identifiers.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://search.gleif.org/#/record/724500Y6LV6Z8841GM35"
+    }
+  }
+];
+
+const sanctionsScreeningRows = [
+  {
+    prompt: "Screen entity 'BANCO NACIONAL DE CUBA' against the official US Treasury OFAC Specially Designated Nationals (SDN) sanctions list: Determine match status, SDN UID, program, and commercial clearing implications.",
+    chosen: "VERDICT: SANCTIONS MATCH (PROHIBITED COUNTERPARTY). Exact match found on OFAC SDN List: UID 306, Legal Name 'BANCO NACIONAL DE CUBA', Type: Entity, Sanctions Program: [CUBA]. Known aliases include 'BNC' and 'NATIONAL BANK OF CUBA'. Similarity score: 1.00 (100%). All assets are blocked under 31 CFR Part 515; executing transactions or processing funds transfers involving this entity is strictly prohibited.",
+    rejected: "VERDICT: NO SANCTIONS MATCH. Banco Nacional de Cuba is an official sovereign banking institution and is exempt from commercial sanctions screening under international trade banking protocols. Funds transfers may proceed without SDN blocking.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://sanctionssearch.ofac.treas.gov/"
+    }
+  },
+  {
+    prompt: "Screen alias 'National Bank of Cuba' against the US Treasury OFAC sanctions registry: Identify whether this alias triggers an SDN match and identify the primary entity.",
+    chosen: "VERDICT: SANCTIONS MATCH VIA ALIAS. The query 'National Bank of Cuba' matches an official known alias ('a.k.a.') for OFAC SDN UID 306 ('BANCO NACIONAL DE CUBA'), Sanctions Program [CUBA], with 1.00 (100%) alias similarity score. Screening systems must resolve aliases against parent SDN UIDs to prevent evasive counterparty naming. Transaction must be rejected.",
+    rejected: "VERDICT: CLEAN COUNTERPARTY. The name 'National Bank of Cuba' does not appear as a primary entry on the OFAC SDN list (which lists only Banco Nacional de Cuba). Because primary name matching returned no exact match, the counterparty is cleared for payment.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://www.treasury.gov/ofac/downloads/alt.csv"
+    }
+  },
+  {
+    prompt: "Screen transport carrier 'AERO-CARIBBEAN' against OFAC sanctions database: Check primary and alias records for blocked carrier status.",
+    chosen: "VERDICT: SANCTIONS MATCH VIA ALIAS. 'AERO-CARIBBEAN' matches alias UID 12 for primary SDN entry 'AEROCARIBBEAN AIRLINES' (UID 36), Program [CUBA], Type: Entity, Location: Havana, Cuba. High-confidence match (score 1.00). Providing freight, charter, or spend clearing to this carrier violates OFAC Cuba sanctions.",
+    rejected: "VERDICT: NO MATCH. 'Aero-Caribbean' is an active regional commercial passenger airline and does not appear on current non-SDN consolidated lists. Payment authorization is approved.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://www.treasury.gov/ofac/downloads/sdn.csv"
+    }
+  },
+  {
+    prompt: "Screen corporate vendor 'Apple Inc.' against the US Treasury OFAC Specially Designated Nationals list: Determine if any sanctions blocks or SDN matches exist.",
+    chosen: "VERDICT: NO SANCTIONS MATCH (CLEAN COUNTERPARTY). Screening 'Apple Inc.' across 19,563 OFAC SDN entries and 8,870 alias groups yields 0 matches (match_found: false, match_count: 0). No Specially Designated Nationals, Sectoral Sanctions (SSI), or Foreign Sanctions Evaders blocks apply. Counterparty cleared for spend.",
+    rejected: "VERDICT: POTENTIAL SANCTIONS MATCH. 'Apple Inc.' partially matches designated entity 'Apple Russian Holdings' under executive order 14024 with a 45% fuzzy match score. Immediate transaction freeze and OFAC blocking report filing is required.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://sanctionssearch.ofac.treas.gov/"
+    }
+  },
+  {
+    prompt: "Screen vendor 'STRIPE, LLC' against OFAC SDN and Consolidated Non-SDN lists: Verify sanctions clearance for payment settlement.",
+    chosen: "VERDICT: NO SANCTIONS MATCH (CLEAN COUNTERPARTY). Query for 'STRIPE, LLC' returns 0 matches across the consolidated OFAC sanctions index (screened: true, match_found: false). The entity holds an active, verified GLEIF LEI (549300CLHGIPTCYHQ143) and is fully eligible for domestic and international settlement.",
+    rejected: "VERDICT: INCONCLUSIVE. Payment processors cannot be cleared through standard SDN lists because intermediate merchant accounts require separate FinCEN BSA filing clearance. Settlement is blocked pending banking SAR review.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://sanctionssearch.ofac.treas.gov/"
+    }
+  },
+  {
+    prompt: "Screen individual 'Ayman al-Zawahiri' against the US Treasury OFAC sanctions list: Verify SDN status, aliases, and program tags.",
+    chosen: "VERDICT: SANCTIONS MATCH (BLOCKED INDIVIDUAL). Direct match found for OFAC SDN UID 2676, 'AL-ZAWAHIRI, Ayman', Type: Individual, Sanctions Program [SDGT] (Specially Designated Global Terrorist). Known aliases include 'SALIM, Ahmad Fuad' and 'AL-ZAWAHIRI, Aiman Muhammad Rabi'. Match score: 0.95+ via fuzzy bigram normalization. Absolute statutory prohibition on all transactions.",
+    rejected: "VERDICT: UNVERIFIED INDIVIDUAL. Transliteration of Arabic names requires exact character-by-character diacritical matching. Because the query uses Latin 'al-Zawahiri' without hyphenated patronymics, the match is rejected as unconfirmed.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://sanctionssearch.ofac.treas.gov/"
+    }
+  },
+  {
+    prompt: "Evaluate fuzzy sanctions screening match for 'CENTRAL BANK OF IRAN' against OFAC SDN records: Check alias mappings and statutory programs.",
+    chosen: "VERDICT: SANCTIONS MATCH VIA ALIAS. 'CENTRAL BANK OF IRAN' is a registered alias (alt UID 12103) for primary SDN UID 4632 ('CENTRAL BANK OF THE ISLAMIC REPUBLIC OF IRAN'), also known as 'BANK MARKAZI IRAN'. Programs: [IRAN], [SDGT], [IFSR]. 100% alias match. Secondary sanctions apply to any foreign financial institution processing transactions.",
+    rejected: "VERDICT: EXEMPT SOVEREIGN CENTRAL BANK. Central banks are immune from OFAC SDN designation under the Foreign Sovereign Immunities Act (FSIA) and are cleared for currency reserve settlements.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://www.treasury.gov/ofac/downloads/alt.csv"
+    }
+  },
+  {
+    prompt: "Screen entity with slight typographical permutation 'Bancoo Nacionall de Cubaa' against OFAC SDN database: Evaluate fuzzy bigram tolerance.",
+    chosen: "VERDICT: SANCTIONS MATCH (FUZZY MATCH 84%). Typographical permutation 'Bancoo Nacionall de Cubaa' yields a similarity score of 0.84 against OFAC SDN UID 306 ('BANCO NACIONAL DE CUBA'). Because the similarity score exceeds the standard 0.70 screening threshold, the screening engine correctly flags the attempt as a high-probability evasion or spelling error. Transaction blocked.",
+    rejected: "VERDICT: NO MATCH. Exact name matching did not find 'Bancoo Nacionall de Cubaa'. Because the string differs by three characters from any SDN entry, the payment is automatically cleared without compliance review.",
+    label_kind: "preference_pair",
+    provenance: {
+      source_kind: "human",
+      source_url: "https://www.treasury.gov/ofac/downloads/sdn.csv"
+    }
+  }
+];
+
 function writeJsonl(filename, rows) {
   const filePath = path.join(evalDir, filename);
   const content = rows.map(r => JSON.stringify(r)).join('\n') + '\n';
@@ -480,3 +646,5 @@ writeJsonl('purchase_order_verify_general.jsonl', purchaseOrderVerifyRows);
 writeJsonl('vendor_verify_general.jsonl', vendorVerifyRows);
 writeJsonl('contract_obligation_audit_general.jsonl', contractObligationAuditRows);
 writeJsonl('regulatory_filing_monitor_general.jsonl', regulatoryFilingTruthRows);
+writeJsonl('corporate_registry_lookup_general.jsonl', corporateRegistryRows);
+writeJsonl('sanctions_screening_match_general.jsonl', sanctionsScreeningRows);
