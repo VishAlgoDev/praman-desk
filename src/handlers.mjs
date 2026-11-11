@@ -872,7 +872,9 @@ async function readJsonBody(req) {
     req.on('data', chunk => {
       data += chunk;
       if (data.length > 256 * 1024) {
-        reject(new Error('Request body too large'));
+        const err = new Error('Request body too large');
+        err.statusCode = 413;
+        reject(err);
       }
     });
     req.on('end', () => {
@@ -880,7 +882,9 @@ async function readJsonBody(req) {
       try {
         resolve(JSON.parse(data));
       } catch (e) {
-        reject(new Error('Invalid JSON body'));
+        const err = new Error('Invalid JSON body');
+        err.statusCode = 400;
+        reject(err);
       }
     });
     req.on('error', reject);
@@ -1435,7 +1439,14 @@ export async function handleApiRequest(req, res) {
 
     // 6. Replacement Compliance Miner Endpoints (/api/miner/*)
     if (pathname.startsWith('/api/miner/')) {
-      const body = req.method === 'POST' ? await readJsonBody(req) : {};
+      let body = {};
+      if (req.method === 'POST') {
+        try {
+          body = await readJsonBody(req);
+        } catch (err) {
+          return sendJson(res, err.statusCode || 400, { error: err.message || 'Invalid JSON body' });
+        }
+      }
       const q = Object.fromEntries(urlObj.searchParams.entries());
       const merged = { ...q, ...body, ...(body.params || {}) };
 
@@ -1562,6 +1573,7 @@ export async function handleApiRequest(req, res) {
 
     return sendJson(res, 404, { error: `Unknown endpoint: ${req.method} ${pathname}` });
   } catch (err) {
-    return sendJson(res, 500, { error: err.message || 'Internal server error' });
+    const status = err.statusCode || (err.message === 'Invalid JSON body' ? 400 : 500);
+    return sendJson(res, status, { error: err.message || 'Internal server error' });
   }
 }
