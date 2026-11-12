@@ -1,0 +1,60 @@
+{
+  "network": "Ethereum Sepolia (Chain ID 11155111)",
+  "diamond_contract": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b",
+  "buyer_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "deployed_url": "https://praman-desk.vercel.app",
+  "deployment_id": "dpl_FuE7FfyqbqKHGqvoqhrvmDYFV3Cc",
+  "verified_at": "2026-11-12T14:46:00Z",
+  "settlements": [
+    {
+      "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "entity": "Tesla Inc",
+      "jurisdiction": "US-TX",
+      "http_status": 200,
+      "miner_id": "20260828",
+      "miner_name": "PREFLIGHT Infrastructure Signals",
+      "tx_hash": "0xa2bdda9481da53e29c5392bbc1e5cd271d655c26e58f8913bbd2da3f8379da5f",
+      "receipt_hash": "0x743d138edf22c06890652f3df1c15e66fc5cd67eae8b2b1492a12c7e9cdf95d1",
+      "signal_hash": "0x0f76159882f652a9899b869529260da26d7080bcbdb724a630e4b778ce993abf",
+      "agreement": "confirmed",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0xa2bdda9481da53e29c5392bbc1e5cd271d655c26e58f8913bbd2da3f8379da5f"
+    },
+    {
+      "intent": "REGULATORY_FILING_MONITOR_GENERAL",
+      "entity": "Tesla Inc",
+      "period": "2026",
+      "http_status": 200,
+      "miner_id": "20260828",
+      "miner_name": "PREFLIGHT Infrastructure Signals",
+      "tx_hash": "0x21b2284fd4c3dc3be959d2a8ba36a4fa6e1af85779a8ae18911a108fc33670d3",
+      "signal_hash": "0x9157d80de8a693413cf3cfb8e34b15348b84b6cab3e55febaf7f305fb3bb01b2",
+      "agreement": "confirmed",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0x21b2284fd4c3dc3be959d2a8ba36a4fa6e1af85779a8ae18911a108fc33670d3"
+    },
+    {
+      "intent": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "entity": "Tesla Inc",
+      "po_amount": 50000,
+      "invoice_amount": 50000,
+      "http_status": 200,
+      "miner_id": "7455",
+      "miner_name": "TradeWire Invoice Ledger Reconcile",
+      "tx_hash": "0xb34c210d867aac5d62e2d58dfd6d32a995fa6fbedd04cef266b697320447a10a",
+      "signal_hash": "0x9ee552c77ad3b828d234a1d13650e81909087c31fa49f5eab74eec8a40afc649",
+      "wasm_deterministic_score": 10000,
+      "agreement": "contradicted",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0xb34c210d867aac5d62e2d58dfd6d32a995fa6fbedd04cef266b697320447a10a"
+    },
+    {
+      "intent": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "document": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "http_status": 200,
+      "miner_id": "20260828",
+      "miner_name": "PREFLIGHT Infrastructure Signals",
+      "tx_hash": "0x900e915cc89caf1928a8998485392a5d3891fc0a298b2a3995f9c0a65362aa6c",
+      "signal_hash": "0x3ec6e8efce4770c9bcdc0c630f62d3b8edd51b80bf29371a72c32375c39b1f25",
+      "agreement": "inconclusive",
+      "explorer_url": "https://sepolia.etherscan.io/tx/0x900e915cc89caf1928a8998485392a5d3891fc0a298b2a3995f9c0a65362aa6c"
+    }
+  ]
+}
