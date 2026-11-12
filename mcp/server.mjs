@@ -22,36 +22,28 @@ import {
   reconcileInvoicePrimary,
   verifyPurchaseOrderPrimary,
   verifyDocumentAuthenticityPrimary,
+  screenSanctions,
+  lookupCorporateRegistry,
+  monitorRegulatoryFiling,
 } from '../src/handlers.mjs';
+import { getWasmInstance } from '../comparator/wasm-buffer.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
 
-// Initialize WASM Comparator
-let wasmExports = null;
-let specPtr = null;
-let wasmView = null;
+// Initialize WASM Comparator via Inlined Module
+let wasmEngine = null;
 
 async function initWasmComparator() {
-  if (wasmExports) return;
-  const wasmPath = path.join(rootDir, 'comparator', 'comparator.wasm');
-  if (fs.existsSync(wasmPath)) {
-    const wasmBytes = fs.readFileSync(wasmPath);
-    const wasmModule = await WebAssembly.instantiate(wasmBytes, {});
-    wasmExports = wasmModule.instance.exports;
-    specPtr = wasmExports.imw_alloc(16);
-    wasmView = new DataView(wasmExports.memory.buffer);
-  }
+  if (wasmEngine) return;
+  wasmEngine = await getWasmInstance();
 }
 
 function runWasmScore(truth, miner, code, tolerance) {
-  if (!wasmExports) {
+  if (!wasmEngine) {
     throw new Error('WASM comparator not initialized');
   }
-  wasmView.setInt32(specPtr, Number(code), true);
-  wasmView.setInt32(specPtr + 4, 0, true);
-  wasmView.setBigInt64(specPtr + 8, BigInt(tolerance), true);
-  return Number(wasmExports.imw_score_deterministic(BigInt(truth), BigInt(miner), specPtr));
+  return wasmEngine.scoreDeterministic(truth, miner, code, tolerance);
 }
 
 // Composite Spend Clearance Engine
@@ -71,6 +63,12 @@ export async function clearSpendComposite({
   dual_signoff_present = false,
 }) {
   const flags = [];
+
+  // 0. OFAC SDN Sanctions Screening (Critical Mandatory Gate)
+  const sanctionsResult = await screenSanctions({ name: vendor });
+  if (sanctionsResult.matches && sanctionsResult.matches.length > 0) {
+    flags.push(`CRITICAL_OFAC_SANCTIONS_MATCH: ${sanctionsResult.summary}`);
+  }
 
   // 1. Counterparty check
   const vendorResult = await verifyVendorPrimary({
@@ -136,6 +134,7 @@ export async function clearSpendComposite({
   }
 
   // Determine Gate Decision
+  const isSanctioned = Boolean(sanctionsResult.matches && sanctionsResult.matches.length > 0);
   const hasCriticalFailure = !reconResult.reconciled || (docResult && !docResult.authentic);
   const requiresDualSignoff = poResult.status === 'approval_cap_exceeded' && !dual_signoff_present;
 
@@ -143,7 +142,11 @@ export async function clearSpendComposite({
   let risk_level = 'LOW';
   let action = 'APPROVE_PAYMENT';
 
-  if (hasCriticalFailure) {
+  if (isSanctioned) {
+    cleared = false;
+    risk_level = 'CRITICAL_SANCTIONS_BLOCK';
+    action = 'REJECT_AND_FREEZE';
+  } else if (hasCriticalFailure) {
     cleared = false;
     risk_level = 'CRITICAL_BLOCK';
     action = 'REJECT_AND_HOLD';
@@ -172,6 +175,7 @@ export async function clearSpendComposite({
       timestamp: new Date().toISOString(),
     },
     counterparty: vendorResult,
+    sanctions: sanctionsResult,
     reconciliation: reconResult,
     spend_authorization: poResult,
     provenance: docResult,
@@ -416,6 +420,65 @@ const TOOLS = [
       required: ['ground_truth', 'miner_output'],
     },
   },
+  {
+    name: 'screen_sanctions',
+    description:
+      'Screen counterparty entity or individual name against the US Treasury OFAC Specially Designated Nationals (SDN) sanctions list with fuzzy bigram matching across primary names and aliases.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        name: {
+          type: 'string',
+          description: 'Entity or person name to screen (e.g. "Apple Inc.", "Bank Rossiya", "Al-Qaida").',
+        },
+        threshold: {
+          type: 'number',
+          description: 'Similarity threshold from 0.0 to 1.0 (default 0.70).',
+          default: 0.70,
+        },
+      },
+      required: ['name'],
+    },
+  },
+  {
+    name: 'lookup_corporate_registry',
+    description:
+      'Query the official GLEIF Global LEI Index across 200+ jurisdictions to verify legal entity registration status, LEI, registered and headquarters addresses.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        company: {
+          type: 'string',
+          description: 'Company or legal entity name (e.g. "Stripe", "SAP SE", "Tesla Inc").',
+        },
+        jurisdiction: {
+          type: 'string',
+          description: 'ISO 3166-1 alpha-2 country code (e.g. "US", "DE", "GB").',
+        },
+      },
+      required: ['company'],
+    },
+  },
+  {
+    name: 'monitor_regulatory_filings',
+    description:
+      'Monitor authoritative regulatory filings across SEC EDGAR (10-K, 10-Q, 8-K), US Federal Register notices, and GLEIF renewal records for a corporation.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        company: {
+          type: 'string',
+          description: 'Company name to check filings for (e.g. "Tesla Inc", "Pfizer", "Goldman Sachs").',
+        },
+        period: {
+          type: 'string',
+          description: 'Filing period or year (e.g. "2026", "2025").',
+          default: '2026',
+        },
+      },
+      required: ['company'],
+    },
+  },
 ];
 
 // Start MCP Server
@@ -521,6 +584,27 @@ export async function startServer() {
             score_percentage: `${(score / 100).toFixed(2)}%`,
             engine: 'AssemblyScript Standalone WASM (651 bytes, 0 imports, saturating division)',
           };
+          break;
+
+        case 'screen_sanctions':
+          result = await screenSanctions({
+            name: args.name || args.vendor || args.company,
+            threshold: args.threshold,
+          });
+          break;
+
+        case 'lookup_corporate_registry':
+          result = await lookupCorporateRegistry({
+            company: args.company || args.name || args.vendor,
+            jurisdiction: args.jurisdiction,
+          });
+          break;
+
+        case 'monitor_regulatory_filings':
+          result = await monitorRegulatoryFiling({
+            company: args.company || args.name || args.vendor || args.entity,
+            period: args.period,
+          });
           break;
 
         default:

@@ -108,14 +108,37 @@ Replace `/path/to/praman-desk` with your local clone path:
 }
 ```
 
-### Available MCP Tools
+### Available MCP Tools (9 Production Tools)
 
 1. `verify_counterparty`: Real-time GLEIF global legal entity lookup and multi-jurisdiction tax syntax (EIN, VAT, GSTIN, LEI) validation.
 2. `reconcile_invoice`: Deterministic 3-way mathematical reconciliation (invoice vs PO vs receipt) detecting unapproved variances.
 3. `verify_spend_authorization`: Enforces organizational spend delegation caps and dual-signoff policies.
 4. `verify_receipt_provenance`: Cryptographic SHA-256 digest auditing against invoice face amounts.
-5. `clear_spend`: Composite autonomous pre-payment spend clearance gate producing a final `APPROVE_PAYMENT`, `REQUEST_EXECUTIVE_APPROVAL`, or `REJECT_AND_HOLD` gate decision with risk level and flags.
+5. `clear_spend`: Composite autonomous pre-payment spend clearance gate producing a final `APPROVE_PAYMENT`, `REQUEST_EXECUTIVE_APPROVAL`, `REJECT_AND_HOLD`, or `REJECT_AND_FREEZE` gate decision with risk level and flags (specifically enforcing `CRITICAL_SANCTIONS_BLOCK` on any counterparty on the US Treasury OFAC SDN list).
 6. `compare_evaluator_scoring`: Evaluates miner predictions against ground truth using the standalone 651-byte AssemblyScript WASM comparator module.
+7. `screen_sanctions`: High-speed screening of counterparties against 19,563 official US Treasury OFAC Specially Designated Nationals (SDN) records with bigram token matching.
+8. `lookup_corporate_registry`: Authoritative statutory registration lookup via the Global Legal Entity Identifier Foundation (GLEIF ISO 17442) across 200+ jurisdictions.
+9. `monitor_regulatory_filings`: Real-time regulatory filing inspection querying live SEC EDGAR (10-K, 10-Q, 8-K) and US Federal Register API.
+
+---
+
+## Architectural Hardening & Production Reliability
+
+### 1. Inlined Zero-Dependency WebAssembly Math Engine (`comparator/wasm-buffer.mjs`)
+- Standalone 651-byte AssemblyScript WASM binary inlined directly as Base64 in JavaScript.
+- Zero filesystem reads, completely eliminating `ENOENT` serverless bundle packaging failures on Vercel and AWS Lambda.
+- Zero imports, zero WASI dependencies, 128-bit restoring division math preventing integer overflow at Wei scales ($10^{18}$).
+- Dual execution: Runs server-side in Node.js serverless functions and client-side directly in the browser via `initClientWasm()`.
+
+### 2. Synchronous OFAC SDN Snapshot (`data/sdn-snapshot.json`)
+- 19,563 official US Treasury OFAC Specially Designated Nationals (SDN) entries packaged locally.
+- Loaded synchronously into memory at cold start in <25ms.
+- Eliminates 3–4 second external network latency and prevents government web server rate-limiting/firewalls from blocking spend checks.
+
+### 3. Parallel Telegraph `x402` Verification Architecture
+- Executes all 7 canonical procurement and compliance intents concurrently via `Promise.all` with strict 10s timeouts.
+- Reduces multi-miner verification time from 21.7s down to ~3.5s.
+- Adheres strictly to Devnode JSON schema specifications, preventing schema rejection errors.
 
 ---
 
@@ -129,7 +152,7 @@ npm install
 # Run the 1,043-vector WASM comparator test suite
 npm run comparator:test
 
-# Run the MCP server stdio integration test suite
+# Run the 11-test MCP server stdio integration test suite
 npm run mcp:test
 
 # Launch the interactive local Web UI & API

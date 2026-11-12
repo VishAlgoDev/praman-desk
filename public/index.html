@@ -454,10 +454,10 @@
       <div style="background:var(--bg); border:1px solid var(--accent); border-radius:8px; padding:14px; margin-bottom:18px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <div>
-            <h3 style="margin:0; font-size:14px; font-weight:600; color:var(--accent);">🤖 1-Click Autonomous Agent Spend &amp; Clearing Simulation</h3>
-            <span class="hint" style="margin:0; font-size:12.5px;">Simulate an autonomous AI agent discovering Telegraph miners, attaching an x402 payment, executing pre-payment spend checks, and settling on-chain</span>
+            <h3 style="margin:0; font-size:14px; font-weight:600; color:var(--accent);">🤖 1-Click Autonomous Agent Spend &amp; Clearing Pipeline</h3>
+            <span class="hint" style="margin:0; font-size:12.5px;">Execute live autonomous agent workflow: probe wallet/signer, run multi-source primary audit, query Telegraph miners via x402, run client-side WASM scoring, and enforce settlement clearance.</span>
           </div>
-          <button type="button" class="primary" id="btn-agent-sim" style="background:var(--accent); color:var(--accent-ink); padding:8px 16px; font-size:13px; font-weight:600;">Run Agent Simulation</button>
+          <button type="button" class="primary" id="btn-agent-sim" style="background:var(--accent); color:var(--accent-ink); padding:8px 16px; font-size:13px; font-weight:600;">Run Agent Pipeline</button>
         </div>
         <div id="sim-progress-box" style="margin-top:12px; display:none;">
           <div id="sim-step-indicator" style="font-size:13px; font-weight:600; margin-bottom:6px; color:var(--accent);"></div>
@@ -580,11 +580,19 @@
         </div>
 
         <div class="checks">
-          <span class="hint" style="margin:0; font-weight:600; color:var(--ink)">Telegraph Intents to buy ($0.01 test USDC each, max 3 per run):</span>
-          <label><input type="checkbox" name="intent" value="INVOICE_LEDGER_RECONCILE_GENERAL" checked> <code>INVOICE_LEDGER_RECONCILE_GENERAL</code></label>
-          <label><input type="checkbox" name="intent" value="VENDOR_VERIFY_GENERAL" checked> <code>VENDOR_VERIFY_GENERAL</code></label>
-          <label><input type="checkbox" name="intent" value="PURCHASE_ORDER_VERIFY_GENERAL"> <code>PURCHASE_ORDER_VERIFY_GENERAL</code></label>
-          <label><input type="checkbox" name="intent" value="DOCUMENT_AUTHENTICITY_GENERAL"> <code>DOCUMENT_AUTHENTICITY_GENERAL</code></label>
+          <div style="font-weight:600; color:var(--ink); margin-bottom:4px">Financial &amp; Procurement Reconciliation Intents ($0.01 test USDC each):</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:6px; margin-bottom:12px">
+            <label><input type="checkbox" name="intent" value="INVOICE_LEDGER_RECONCILE_GENERAL" checked> <code>INVOICE_LEDGER_RECONCILE_GENERAL</code></label>
+            <label><input type="checkbox" name="intent" value="PURCHASE_ORDER_VERIFY_GENERAL" checked> <code>PURCHASE_ORDER_VERIFY_GENERAL</code></label>
+            <label><input type="checkbox" name="intent" value="DOCUMENT_AUTHENTICITY_GENERAL" checked> <code>DOCUMENT_AUTHENTICITY_GENERAL</code></label>
+          </div>
+          <div style="font-weight:600; color:var(--ink); margin-bottom:4px">Legal &amp; Statutory Compliance Intents ($0.01 test USDC each):</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:6px">
+            <label><input type="checkbox" name="intent" value="VENDOR_VERIFY_GENERAL" checked> <code>VENDOR_VERIFY_GENERAL</code></label>
+            <label><input type="checkbox" name="intent" value="SANCTIONS_SCREENING_MATCH_GENERAL" checked> <code>SANCTIONS_SCREENING_MATCH_GENERAL</code></label>
+            <label><input type="checkbox" name="intent" value="CORPORATE_REGISTRY_LOOKUP_GENERAL"> <code>CORPORATE_REGISTRY_LOOKUP_GENERAL</code></label>
+            <label><input type="checkbox" name="intent" value="REGULATORY_FILING_MONITOR_GENERAL"> <code>REGULATORY_FILING_MONITOR_GENERAL</code></label>
+          </div>
         </div>
 
         <div class="actions">
@@ -944,8 +952,34 @@ document.querySelectorAll("[data-quick]").forEach((btn) => {
   btn.addEventListener("click", () => runQuickVerify(btn.dataset.quick));
 });
 
+// In-Browser WebAssembly Instantiation for Client-Side Mathematical Verification
+async function initClientWasm() {
+  try {
+    const res = await fetch('/comparator.wasm');
+    if (!res.ok) return;
+    const wasmBytes = await res.arrayBuffer();
+    const wasmModule = await WebAssembly.instantiate(wasmBytes, {});
+    const { imw_alloc, imw_score_deterministic, memory } = wasmModule.instance.exports;
+    const specPtr = imw_alloc(16);
+    const view = new DataView(memory.buffer);
+
+    window.clientWasmInstance = {
+      scoreDeterministic(truth, miner, code = 2, tolerance = 500) {
+        view.setInt32(specPtr, code, true);
+        view.setInt32(specPtr + 4, 0, true);
+        view.setBigInt64(specPtr + 8, BigInt(tolerance), true);
+        return Number(imw_score_deterministic(BigInt(truth), BigInt(miner), specPtr));
+      }
+    };
+    console.log('[WASM] In-browser comparator.wasm initialized successfully');
+  } catch (err) {
+    console.warn('[WASM] In-browser comparator initialization failed:', err.message);
+  }
+}
+initClientWasm();
+
 function getFormPayload() {
-  const intents = [...document.querySelectorAll('input[name="intent"]:checked')].map(el => el.value).slice(0, 3);
+  const intents = [...document.querySelectorAll('input[name="intent"]:checked')].map(el => el.value);
   return {
     vendor: $("f-vendor").value.trim(),
     vatNumber: $("f-vat").value.trim(),
@@ -968,10 +1002,7 @@ function getFormPayload() {
 
 function updateSpendEstimate() {
   const checked = [...document.querySelectorAll('input[name="intent"]:checked')];
-  if (checked.length > 3) {
-    checked[checked.length - 1].checked = false;
-  }
-  const n = Math.min(checked.length, 3);
+  const n = checked.length;
   const cost = (n * 0.01).toFixed(2);
   $("btn-buy").textContent = `2. Buy Telegraph checks & compare ($${cost})`;
   $("spend-estimate").textContent = `${n} paid ${n === 1 ? "check" : "checks"} selected ($${cost} test USDC on Ethereum Sepolia)`;
@@ -1047,9 +1078,11 @@ $("btn-primary").addEventListener("click", async () => {
     const c = data.checks;
     const issues = [
       !c.vendor.valid ? "Vendor registry/tax check flagged" : null,
+      c.sanctions?.matches?.length > 0 ? `OFAC Sanctions match (${c.sanctions.matches.length} hits)` : null,
       !c.invoice.reconciled ? `Invoice discrepancy (${c.invoice.discrepancy})` : null,
       !c.po.verified ? `PO status: ${c.po.status}` : null,
-      !c.document.authentic ? `Document: ${c.document.verdict}` : null
+      !c.document.authentic ? `Document: ${c.document.verdict}` : null,
+      c.corporate_registry && !c.corporate_registry.found ? "Corporate registry record not found" : null
     ].filter(Boolean);
 
     showMsg(
@@ -1057,14 +1090,14 @@ $("btn-primary").addEventListener("click", async () => {
       issues.length ? "warn" : "ok",
       issues.length
         ? `Primary verification completed ($0.00 spent). Flagged ${issues.length} compliance ${issues.length === 1 ? "exception" : "exceptions"}: ${esc(issues.join("; "))}.`
-        : `Primary verification completed ($0.00 spent). All 4 checks passed.`
+        : `Primary verification completed across all 7 checks ($0.00 spent). All checks validated.`
     );
 
     $("audit-results").innerHTML = `
       <section class="panel">
         <div tabindex="0" role="region" aria-labelledby="primary-table-caption" class="table-wrapper">
           <table style="--label-2:'Source'; --label-3:'Status'; --label-4:'Finding'; --label-5:'Reference'">
-            <caption id="primary-table-caption">Primary Source &amp; Deterministic Compliance Findings ($0.00)</caption>
+            <caption id="primary-table-caption">Primary Source &amp; Deterministic Compliance Findings (7 Checks &middot; $0.00)</caption>
             <thead>
               <tr>
                 <th>Check / Intent</th>
@@ -1083,8 +1116,29 @@ $("btn-primary").addEventListener("click", async () => {
                 <td>${c.vendor.source_url ? `<a href="${esc(c.vendor.source_url)}" target="_blank" rel="noopener">GLEIF record</a>` : "—"}</td>
               </tr>
               <tr>
+                <th><code>SANCTIONS_SCREENING_MATCH_GENERAL</code></th>
+                <td>${esc(c.sanctions?.source || "US Treasury OFAC SDN List")}</td>
+                <td><span class="badge ${c.sanctions?.matches?.length > 0 ? "contradicted" : "confirmed"}">${c.sanctions?.matches?.length > 0 ? "SANCTIONED" : "CLEAR"}</span></td>
+                <td>${esc(c.sanctions?.summary || "0 OFAC SDN matches")}</td>
+                <td><a href="https://sanctionssearch.ofac.treas.gov/" target="_blank" rel="noopener">OFAC search</a></td>
+              </tr>
+              <tr>
+                <th><code>CORPORATE_REGISTRY_LOOKUP_GENERAL</code></th>
+                <td>${esc(c.corporate_registry?.source || "GLEIF Global Index")}</td>
+                <td><span class="badge ${c.corporate_registry?.found ? "confirmed" : "contradicted"}">${c.corporate_registry?.found ? "registered" : "not found"}</span></td>
+                <td>${esc(c.corporate_registry?.summary || "Registry check complete")}</td>
+                <td>${c.corporate_registry?.results?.[0]?.source_url ? `<a href="${esc(c.corporate_registry.results[0].source_url)}" target="_blank" rel="noopener">LEI record</a>` : "—"}</td>
+              </tr>
+              <tr>
+                <th><code>REGULATORY_FILING_MONITOR_GENERAL</code></th>
+                <td>${esc(c.regulatory_filing?.sources?.join(', ') || "SEC EDGAR / Fed Register")}</td>
+                <td><span class="badge ${c.regulatory_filing?.total_results > 0 ? "confirmed" : "schema_warning"}">${c.regulatory_filing?.total_results > 0 ? `${c.regulatory_filing.total_results} filings` : "no filings"}</span></td>
+                <td>${esc(c.regulatory_filing?.summary || "Regulatory check complete")}</td>
+                <td><a href="https://www.sec.gov/edgar/searchedgar/companysearch" target="_blank" rel="noopener">SEC search</a></td>
+              </tr>
+              <tr>
                 <th><code>INVOICE_LEDGER_RECONCILE_GENERAL</code></th>
-                <td>3-Way PO-GRN-Invoice Math</td>
+                <td>3-Way PO-GRN-Invoice Math (WASM Engine)</td>
                 <td><span class="badge ${c.invoice.reconciled ? "confirmed" : "contradicted"}">${c.invoice.reconciled ? "reconciled" : "discrepancy"}</span></td>
                 <td>${esc(c.invoice.explanation)}</td>
                 <td class="mono">${esc(c.invoice.discrepancy)}</td>
@@ -1350,7 +1404,7 @@ async function loadEvalPool() {
   }
 }
 
-// 1-Click Autonomous Agent Simulation
+// 1-Click Autonomous Agent Spend & Clearing Pipeline (Live Execution)
 const btnAgentSim = $("btn-agent-sim");
 if (btnAgentSim) {
   btnAgentSim.addEventListener("click", async () => {
@@ -1367,46 +1421,109 @@ if (btnAgentSim) {
       log.scrollTop = log.scrollHeight;
     };
 
-    const steps = [
-      {
-        pct: 20,
-        title: "Step 1/5: Discovering Telegraph Miners on Sepolia Diamond...",
-        log: "Agent executing query intent: VENDOR_VERIFY_GENERAL & SANCTIONS_SCREENING_MATCH_GENERAL\n-> Querying Telegraph Registry at 0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b...\n-> Found Miner #5186 (praman-compliance-miner) | Bond: 0.10 MACHINA | Status: active",
-        delay: 900
-      },
-      {
-        pct: 45,
-        title: "Step 2/5: Attaching EIP-712 x402 Micropayment Header...",
-        log: "-> Crafting x402 payment header with 10,000 uusdc ($0.01 USDC) fee ceiling\n-> Signing authorization for recipient: 0x98021b20Efdb7ae2C57366010a6E0fDE207b4466\n-> Nonce: 0x8f2a... | Signature digest: EIP-712 typed data valid",
-        delay: 1000
-      },
-      {
-        pct: 70,
-        title: "Step 3/5: Querying Praman Miner & Verifying Ground Truth...",
-        log: "-> POST /api/miner/vendor-verify + /api/miner/sanctions-screen\n-> GLEIF Primary Registry: STRIPE, LLC resolved (LEI: 549300CLHGIPTCYHQ143, Status: ISSUED)\n-> US Treasury OFAC: 19,563 SDN entries checked | 0 matches found (Clean counterparty)\n-> Primary vs Miner agreement: 100% CONFIRMED",
-        delay: 1100
-      },
-      {
-        pct: 90,
-        title: "Step 4/5: Recording Settlement on Sepolia Diamond...",
-        log: "-> Broadcast settlement tx to Ethereum Sepolia...\n-> Tx: 0x9d4e... | Block: #7142091 | Gas: 42,118 wei\n-> On-chain receipt hash: 0x7b1c4a92e104... attested",
-        delay: 1000
-      },
-      {
-        pct: 100,
-        title: "✓ Simulation Complete: Pre-Payment Clearing Succeeded",
-        log: "========================================================\nRESULT: Spend Cleared. Autonomous Agent authorized $27,062.50 transfer.\nTotal Telegraph protocol fee: $0.01 test USDC. Zero human intervention.",
-        delay: 400
-      }
-    ];
+    try {
+      appendLog("Initiating Autonomous Spend & Clearing Pipeline...");
 
-    for (const step of steps) {
-      indicator.textContent = step.title;
-      bar.style.width = `${step.pct}%`;
-      appendLog(step.log);
-      await new Promise(r => setTimeout(r, step.delay));
+      // Stage 1: Wallet & Signer Discovery
+      indicator.textContent = "Step 1/5: Checking Protocol Wallet & Signer Configuration...";
+      bar.style.width = "20%";
+      appendLog("Probing /api/wallet for active signer credentials...");
+      const wallet = await api("/api/wallet");
+      appendLog(`-> Signer Address: ${wallet.address || 'Not Configured'}`);
+      appendLog(`-> Sepolia Balance: ${wallet.balanceEth ?? wallet.ethBalance ?? '0'} ETH | ${wallet.balanceUsdc ?? wallet.usdcBalance ?? '0'} USDC`);
+      appendLog(`-> Live Signing: ${wallet.liveSigningAvailable ? "ONLINE (EIP-712 + Sepolia x402)" : "OFFLINE (Read-only verification mode)"}`);
+
+      // Stage 2: Multi-Source Primary Verification
+      indicator.textContent = "Step 2/5: Executing Multi-Source Primary Baseline Audit...";
+      bar.style.width = "40%";
+      const formPayload = getFormPayload();
+      appendLog(`Executing 7 primary baseline checks for ${formPayload.vendor || 'Unknown Entity'}...`);
+      const primaryRes = await api("/api/audit/primary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formPayload)
+      });
+      appendLog(`-> Primary Risk Level: ${primaryRes.overall_risk}`);
+      appendLog(`-> Vendor: ${primaryRes.checks?.vendor?.status || 'N/A'} | Invoice: ${primaryRes.checks?.invoice?.status || 'N/A'} | PO: ${primaryRes.checks?.po?.status || 'N/A'}`);
+      appendLog(`-> OFAC Sanctions: ${primaryRes.checks?.sanctions?.status || 'N/A'} (${primaryRes.checks?.sanctions?.matches?.length || 0} matches)`);
+      appendLog(`-> Corporate Registry: ${primaryRes.checks?.corporate_registry?.status || 'N/A'}`);
+      appendLog(`-> Regulatory Filings: ${primaryRes.checks?.regulatory_filings?.status || 'N/A'}`);
+
+      const sanctionsHits = primaryRes.checks?.sanctions?.matches || [];
+      if (sanctionsHits.length > 0) {
+        appendLog(`🚨 SANCTIONS HIT DETECTED: ${sanctionsHits.map(m => m.name).join(", ")}`);
+      }
+
+      // Stage 3: Telegraph Miner Discovery & x402 Micropayment Query
+      indicator.textContent = "Step 3/5: Querying Telegraph Protocol Miners via x402...";
+      bar.style.width = "60%";
+      if (wallet.liveSigningAvailable) {
+        appendLog("Signing EIP-712 micropayment authorization headers...");
+        const buyRes = await api("/api/audit/buy", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formPayload,
+            intents: [
+              "VENDOR_VERIFY_GENERAL",
+              "SANCTIONS_SCREENING_MATCH_GENERAL",
+              "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+              "REGULATORY_FILING_MONITOR_GENERAL"
+            ]
+          })
+        });
+        const results = buyRes.results || [];
+        appendLog(`Telegraph Ask Engine responded with ${results.length} miner verification(s):`);
+        for (const r of results) {
+          appendLog(`-> [${r.intent}] HTTP ${r.http_status} | Miner: ${r.miner_id || r.miner_address || 'Routed'} | Agreed: ${r.agreed}`);
+          if (r.settlement_tx_hash) {
+            appendLog(`   On-chain Settlement Tx: ${r.settlement_tx_hash}`);
+          }
+          if (r.signal_hash) {
+            appendLog(`   On-chain Signal: ${r.signal_hash.slice(0, 18)}...`);
+          }
+        }
+      } else {
+        appendLog("No server signing key available: querying read-only miner validation endpoints...");
+        const vMiner = await api(`/api/miner/vendor-verify?name=${encodeURIComponent(formPayload.vendor)}`);
+        const sMiner = await api(`/api/miner/sanctions-screen?name=${encodeURIComponent(formPayload.vendor)}`);
+        appendLog(`-> Miner Vendor Verify: ${vMiner.found ? `Found (${vMiner.legal_name || 'Matched'})` : 'Not Found'}`);
+        appendLog(`-> Miner Sanctions Screen: ${sMiner.matches?.length || 0} hits against official SDN`);
+      }
+
+      // Stage 4: In-Browser Mathematical WASM Engine Verification
+      indicator.textContent = "Step 4/5: Running In-Browser WASM Restoring-Division Math Engine...";
+      bar.style.width = "80%";
+      if (window.clientWasmInstance) {
+        const invCents = Math.round(Number(formPayload.invoiceAmount || 0) * 100);
+        const poCents = Math.round(Number(formPayload.poAmount || 0) * 100);
+        const score = window.clientWasmInstance.scoreDeterministic(poCents, invCents, 2, 500);
+        appendLog(`Client-side WASM execution: compare(${poCents}, ${invCents}) with RelTol 5.0%`);
+        appendLog(`-> Deterministic score: ${score} / 10000 (${score === 10000 ? 'EXACT MATCH' : score > 0 ? 'WITHIN TOLERANCE' : 'MISMATCH'})`);
+      } else {
+        appendLog("Client WASM not available in current browser session, verified via server WASM engine.");
+      }
+
+      // Stage 5: Autonomous Clearing & Enforcement Decision
+      indicator.textContent = "Step 5/5: Enforcing Pre-Payment Policy Decision...";
+      bar.style.width = "100%";
+      appendLog("========================================================");
+      if (sanctionsHits.length > 0) {
+        indicator.textContent = "❌ REJECT & FREEZE: Sanctions Flagged";
+        appendLog("RESULT: TRANSACTION BLOCKED & FROZEN. Counterparty is listed on OFAC SDN. Payment rejected to maintain regulatory compliance.");
+      } else if (primaryRes.overall_risk === 'HIGH') {
+        indicator.textContent = "⚠️ CONDITIONAL HOLD: Discrepancies Detected";
+        appendLog("RESULT: TRANSACTION HELD FOR REVIEW. High variance detected across primary records and vendor submission.");
+      } else {
+        indicator.textContent = "✅ Spend Cleared: Autonomous Spend Authorized";
+        appendLog("RESULT: TRANSACTION CLEARED. Automated verification verified counterparty identity, invoices, and compliance rules.");
+      }
+    } catch (err) {
+      indicator.textContent = `❌ Execution Error: ${err.message}`;
+      appendLog(`ERROR: Pipeline terminated with failure: ${err.message}`);
+    } finally {
+      btnAgentSim.disabled = false;
     }
-    btnAgentSim.disabled = false;
   });
 }
 

@@ -36,10 +36,10 @@ async function runTests() {
   for (const t of toolsResult.tools) {
     console.log(`   - ${t.name}: ${t.description.slice(0, 65)}...`);
   }
-  if (toolsResult.tools.length !== 6) {
-    throw new Error(`Expected 6 tools, found ${toolsResult.tools.length}`);
+  if (toolsResult.tools.length !== 9) {
+    throw new Error(`Expected 9 tools, found ${toolsResult.tools.length}`);
   }
-  console.log('   PASS: All 6 tools registered.\n');
+  console.log('   PASS: All 9 tools registered.\n');
 
   // Test 2: verify_counterparty (STRIPE, LLC)
   console.log('3. Testing tool: verify_counterparty (STRIPE, LLC)...');
@@ -158,8 +158,68 @@ async function runTests() {
   }
   console.log('   PASS: compare_evaluator_scoring executed standalone WASM.\n');
 
+  // Test 8: screen_sanctions (OFAC SDN Match)
+  console.log('9. Testing tool: screen_sanctions (Banco Nacional de Cuba)...');
+  const resSanc = await client.callTool({
+    name: 'screen_sanctions',
+    arguments: { name: 'Banco Nacional de Cuba' },
+  });
+  const sancParsed = JSON.parse(resSanc.content[0].text);
+  console.log(`   Matches found: ${sancParsed.match_count} | Top match: ${sancParsed.matches?.[0]?.matched_name}`);
+  if (!sancParsed.matches || sancParsed.matches.length === 0) {
+    throw new Error('Expected OFAC SDN sanctions hit for Banco Nacional de Cuba');
+  }
+  console.log('   PASS: screen_sanctions flagged sanctioned entity.\n');
+
+  // Test 9: lookup_corporate_registry (GLEIF Live LEI)
+  console.log('10. Testing tool: lookup_corporate_registry (Tesla Inc)...');
+  const resCorp = await client.callTool({
+    name: 'lookup_corporate_registry',
+    arguments: { company: 'Tesla Inc', jurisdiction: 'US' },
+  });
+  const corpParsed = JSON.parse(resCorp.content[0].text);
+  console.log(`   Found: ${corpParsed.found} | LEI: ${corpParsed.results?.[0]?.lei} | Name: ${corpParsed.results?.[0]?.legal_name}`);
+  if (!corpParsed.found || !corpParsed.results?.[0]?.lei) {
+    throw new Error('Expected GLEIF corporate registry match for Tesla Inc');
+  }
+  console.log('   PASS: lookup_corporate_registry resolved GLEIF LEI.\n');
+
+  // Test 10: monitor_regulatory_filings (SEC EDGAR)
+  console.log('11. Testing tool: monitor_regulatory_filings (Tesla Inc)...');
+  const resFiling = await client.callTool({
+    name: 'monitor_regulatory_filings',
+    arguments: { company: 'Tesla Inc', period: '2026' },
+  });
+  const filingParsed = JSON.parse(resFiling.content[0].text);
+  console.log(`   Filings count: ${filingParsed.total_results} | Sources: ${filingParsed.sources?.join(', ')}`);
+  if (typeof filingParsed.total_results !== 'number') {
+    throw new Error('Expected numeric total_results for regulatory filings');
+  }
+  console.log('   PASS: monitor_regulatory_filings queried SEC EDGAR.\n');
+
+  // Test 11: clear_spend with Sanctioned Counterparty (Critical Gate Block Test)
+  console.log('12. Testing tool: clear_spend (CRITICAL SANCTIONS BLOCK on Banco Nacional de Cuba)...');
+  const resSancBlock = await client.callTool({
+    name: 'clear_spend',
+    arguments: {
+      vendor: 'Banco Nacional de Cuba',
+      invoice_id: 'INV-SANC-999',
+      po_number: 'PO-SANC-999',
+      billed_qty: 10,
+      accepted_qty: 10,
+      unit_price: 1000,
+      approval_cap: 50000,
+    },
+  });
+  const sancBlockParsed = JSON.parse(resSancBlock.content[0].text);
+  console.log(`   Gate Decision: Cleared=${sancBlockParsed.gate_decision.cleared}, Action=${sancBlockParsed.gate_decision.action}, Risk=${sancBlockParsed.gate_decision.risk_level}`);
+  if (sancBlockParsed.gate_decision.cleared !== false || sancBlockParsed.gate_decision.risk_level !== 'CRITICAL_SANCTIONS_BLOCK' || sancBlockParsed.gate_decision.action !== 'REJECT_AND_FREEZE') {
+    throw new Error('CRITICAL FLAW: clear_spend failed to block payment to sanctioned entity!');
+  }
+  console.log('   PASS: clear_spend successfully enforced REJECT_AND_FREEZE on sanctioned counterparty.\n');
+
   await client.close();
-  console.log('=== All 7 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 11 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {

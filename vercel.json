@@ -1,4 +1,9 @@
 {
+  "functions": {
+    "api/index.mjs": {
+      "includeFiles": "data/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
