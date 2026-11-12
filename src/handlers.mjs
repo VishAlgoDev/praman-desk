@@ -219,12 +219,12 @@ function checkPaidRateLimit(ip) {
 }
 
 export function getWalletAccount() {
-  let pk = process.env.PRIVATE_KEY || process.env.WALLET_PRIVATE_KEY;
+  let pk = process.env.PRIVATE_KEY || process.env.WALLET_PRIVATE_KEY || process.env.CONTRIBUTOR_PRIVATE_KEY;
   if (!pk) {
     const envPath = path.join(rootDir, '.env');
     if (fs.existsSync(envPath)) {
       const envContent = fs.readFileSync(envPath, 'utf8');
-      const m = envContent.match(/(?:PRIVATE_KEY|WALLET_PRIVATE_KEY)\s*=\s*(0x[0-9a-fA-F]{64})/);
+      const m = envContent.match(/(?:PRIVATE_KEY|WALLET_PRIVATE_KEY|CONTRIBUTOR_PRIVATE_KEY)\s*=\s*(0x[0-9a-fA-F]{64})/);
       if (m) pk = m[1];
     }
   }
