@@ -61,8 +61,8 @@ const BOUNTY_SUBMISSIONS = [
   {
     issue: 104,
     intent: 'REGULATORY_FILING_MONITOR_GENERAL',
-    rows: 1,
-    provenance: 'truth_source (GLEIF API)',
+    rows: 6,
+    provenance: '5 attested + 1 truth_source (SEC EDGAR, FedReg, GLEIF)',
     commentUrl: 'https://github.com/telegraphprotocol/bounties/issues/104#issuecomment-6733169440',
     status: 'review'
   },
@@ -249,6 +249,26 @@ function parseNumber(val) {
   return Number.isFinite(n) ? n : 0;
 }
 
+async function fetchJsonWithRetry(url, options = {}, attempts = 2, timeoutMs = 6500) {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const res = await fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(timeoutMs)
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) {
+        return null;
+      }
+    } catch {
+      // Retry on transient cold-TLS or network timeout
+    }
+  }
+  return null;
+}
+
 // ============================================================================
 // 1. Primary Source & Deterministic Compliance Verifiers (Free + Miner Core)
 // ============================================================================
@@ -265,6 +285,7 @@ const JURISDICTION_COUNTRY_MAP = {
   CA: 'CA', CANADA: 'CA',
   IN: 'IN', INDIA: 'IN',
   SG: 'SG', SINGAPORE: 'SG',
+  HK: 'HK', 'HONG KONG': 'HK',
   AU: 'AU', AUSTRALIA: 'AU',
   JP: 'JP', JAPAN: 'JP',
   CH: 'CH', SWITZERLAND: 'CH',
@@ -347,10 +368,34 @@ function resolvePeriodRange(period = '') {
   return { startdt: start.toISOString().slice(0, 10), enddt, label: period.trim() || 'last 12 months' };
 }
 
-export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = '' }) {
+export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = '', country = '' }) {
   const vendorTrim = String(vendor || '').trim();
   const vatTrim = String(vat_number || '').trim().toUpperCase();
+  const vatClean = vatTrim.replace(/[\s.-]+/g, '');
   const leiTrim = String(lei || '').trim().toUpperCase();
+  const countryCode = resolveJurisdictionCountryCode(country);
+
+  if (!vendorTrim && !vatTrim && !leiTrim) {
+    return {
+      vendor: '',
+      vat_number: null,
+      valid: false,
+      vat_valid: false,
+      tax_id_valid: false,
+      status: 'missing_parameters',
+      registered_name: null,
+      registered_address: null,
+      lei: null,
+      registration_status: 'MISSING_PARAMETERS',
+      jurisdiction: countryCode || null,
+      tax_format: 'None',
+      tax_format_valid: false,
+      source: 'GLEIF + VATComply',
+      source_url: null,
+      evidence_urls: [],
+      summary: 'No vendor name or VAT number supplied.'
+    };
+  }
 
   // Multi-jurisdiction tax/entity identifier regexes
   const euVatRegex = /^[A-Z]{2}[0-9A-Z]{8,12}$/;
@@ -360,48 +405,86 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
   const leiRegex = LEI_PATTERN;
 
   const hasVat = Boolean(vatTrim);
+  const isEuOrUkVat = hasVat && (euVatRegex.test(vatClean) || ukVatRegex.test(vatClean));
   const taxFormatValid = hasVat
-    ? (gstinRegex.test(vatTrim) || euVatRegex.test(vatTrim) || ukVatRegex.test(vatTrim) || usEinRegex.test(vatTrim) || leiRegex.test(vatTrim))
+    ? (gstinRegex.test(vatClean) || isEuOrUkVat || usEinRegex.test(vatTrim) || leiRegex.test(vatClean))
     : true;
 
   const taxFormatType = !hasVat
     ? 'Not provided (LEI verification)'
-    : gstinRegex.test(vatTrim)
+    : gstinRegex.test(vatClean)
     ? 'Indian GSTIN (15-char)'
-    : ukVatRegex.test(vatTrim)
+    : ukVatRegex.test(vatClean)
     ? 'UK VAT (GB)'
     : usEinRegex.test(vatTrim)
     ? 'US Employer ID (EIN)'
-    : leiRegex.test(vatTrim)
+    : leiRegex.test(vatClean)
     ? 'ISO 17442 LEI (20-char)'
-    : euVatRegex.test(vatTrim)
-    ? `EU VAT (${vatTrim.slice(0, 2)})`
+    : euVatRegex.test(vatClean)
+    ? `EU VAT (${vatClean.slice(0, 2)})`
     : 'Custom / Unverified format';
 
-  // Query live keyless GLEIF API
-  let gleifRecord = null;
-  let gleifUrl = null;
-  try {
-    if (leiRegex.test(leiTrim) || leiRegex.test(vatTrim)) {
-      const targetLei = leiRegex.test(leiTrim) ? leiTrim : vatTrim;
-      gleifUrl = `https://api.gleif.org/api/v1/lei-records/${encodeURIComponent(targetLei)}`;
-      const res = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' } });
-      if (res.ok) {
-        const json = await res.json();
-        gleifRecord = json.data;
+  // Query live keyless VATComply (EU VIES / UK VAT) + EU Commission VIES fallback + GLEIF API concurrently
+  const EU_VIES_PREFIXES = new Set([
+    'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR',
+    'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO',
+    'SE', 'SI', 'SK', 'XI'
+  ]);
+  const vatUrl = isEuOrUkVat
+    ? `https://api.vatcomply.com/vat?vat_number=${encodeURIComponent(vatClean)}`
+    : null;
+  const vatPrefix = vatClean.slice(0, 2);
+  const vatNumPart = vatClean.slice(2);
+  const viesRestUrl = isEuOrUkVat && EU_VIES_PREFIXES.has(vatPrefix) && vatNumPart
+    ? `https://ec.europa.eu/taxation_customs/vies/rest-api/ms/${encodeURIComponent(vatPrefix)}/vat/${encodeURIComponent(vatNumPart)}`
+    : null;
+
+  const queryVatComply = async () => {
+    if (!vatUrl) return null;
+    const vj = await fetchJsonWithRetry(vatUrl, {}, 2, 7000);
+    if (vj && typeof vj.valid === 'boolean') {
+      return { ...vj, _registry: 'VIES / VATComply (api.vatcomply.com)', _url: vatUrl };
+    }
+    if (viesRestUrl) {
+      const eu = await fetchJsonWithRetry(viesRestUrl, {}, 1, 7000);
+      if (eu && typeof eu.isValid === 'boolean') {
+        return {
+          valid: eu.isValid,
+          vat_number: eu.vatNumber || vatNumPart,
+          country_code: eu.countryCode || vatPrefix,
+          name: eu.name || '---',
+          address: eu.address || '---',
+          _registry: 'EU Commission VIES (ec.europa.eu)',
+          _url: viesRestUrl
+        };
       }
     }
-    if (!gleifRecord && vendorTrim) {
-      gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(vendorTrim)}&page[size]=10`;
-      const res = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' } });
-      if (res.ok) {
-        const json = await res.json();
-        gleifRecord = selectBestGleifRecord(json.data, vendorTrim);
-      }
+    return null;
+  };
+
+  const queryGleif = async () => {
+    let record = null;
+    let url = null;
+    if (leiRegex.test(leiTrim) || leiRegex.test(vatClean)) {
+      const targetLei = leiRegex.test(leiTrim) ? leiTrim : vatClean;
+      url = `https://api.gleif.org/api/v1/lei-records/${encodeURIComponent(targetLei)}`;
+      const json = await fetchJsonWithRetry(url, { headers: { Accept: 'application/vnd.api+json' } }, 2, 5500);
+      if (json?.data) record = json.data;
     }
-  } catch {
-    // GLEIF network fallback
-  }
+    if (!record && vendorTrim) {
+      url = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(vendorTrim)}&page[size]=10`;
+      if (countryCode) {
+        url += `&filter[entity.legalAddress.country]=${encodeURIComponent(countryCode)}`;
+      }
+      const json = await fetchJsonWithRetry(url, { headers: { Accept: 'application/vnd.api+json' } }, 2, 5500);
+      if (json?.data) record = selectBestGleifRecord(json.data, vendorTrim);
+    }
+    return { record, url };
+  };
+
+  const [vatRegistryResult, gleifRes] = await Promise.all([queryVatComply(), queryGleif()]);
+  const gleifRecord = gleifRes.record;
+  const gleifUrl = gleifRes.url;
 
   const attr = gleifRecord?.attributes;
   const entity = attr?.entity;
@@ -409,35 +492,84 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
   const addressStr = formatGleifAddress(entity?.headquartersAddress || entity?.legalAddress);
 
   const isIssued = reg?.status === 'ISSUED';
-  const valid = Boolean((gleifRecord && isIssued && taxFormatValid) || (gleifRecord && isIssued && !hasVat));
+  const hasVatRegistryBool = Boolean(vatRegistryResult && typeof vatRegistryResult.valid === 'boolean');
+  const vatRegistryUnavailable = isEuOrUkVat && !hasVatRegistryBool;
+
+  let valid = false;
+  if (hasVatRegistryBool) {
+    valid = vatRegistryResult.valid && (!gleifRecord || isIssued);
+  } else if (vatRegistryUnavailable) {
+    // Fail closed when an EU/UK VAT ID was supplied but live VIES/VATComply lookup failed or timed out
+    valid = false;
+  } else {
+    valid = Boolean((gleifRecord && isIssued && taxFormatValid) || (gleifRecord && isIssued && !hasVat));
+  }
+
+  const vatVerified = hasVatRegistryBool ? vatRegistryResult.valid : null;
+  const taxIdVerified = hasVatRegistryBool
+    ? vatRegistryResult.valid
+    : (hasVat && !isEuOrUkVat) ? taxFormatValid : null;
+
+  const vatName = vatRegistryResult?.name && vatRegistryResult.name !== '---'
+    ? String(vatRegistryResult.name).trim()
+    : null;
+  const vatAddr = vatRegistryResult?.address && vatRegistryResult.address !== '---'
+    ? String(vatRegistryResult.address).replace(/\r?\n+/g, ', ').trim()
+    : null;
 
   let taxSummary = '';
   if (!hasVat) {
     taxSummary = `Tax/VAT ID not specified; identity verified via official GLEIF LEI (${attr?.lei || 'N/A'}).`;
+  } else if (vatRegistryResult && vatRegistryResult.valid === true) {
+    taxSummary = `Live VIES/VATComply registry confirmed ${vatClean} as VALID (${taxFormatType}).`;
+  } else if (vatRegistryResult && vatRegistryResult.valid === false) {
+    taxSummary = `Live VIES/VATComply registry REJECTED ${vatClean} as INVALID (${taxFormatType}).`;
+  } else if (vatRegistryUnavailable) {
+    taxSummary = `Live VIES/VATComply registry lookup was unavailable or timed out for ${vatClean}; cannot confirm active ${taxFormatType} registration.`;
   } else if (taxFormatValid) {
     taxSummary = `Tax ID ${vatTrim} matches valid ${taxFormatType} format.`;
   } else {
     taxSummary = `Tax ID ${vatTrim} did not match standard national formats (EIN/VAT/GSTIN/LEI).`;
   }
 
-  const summary = gleifRecord
-    ? `${entity?.legalName?.name || vendorTrim} is ${reg?.status} in GLEIF (LEI ${attr?.lei}, jurisdiction ${entity?.jurisdiction}). ${taxSummary}`
-    : `No active GLEIF LEI record matched "${vendorTrim}". ${taxSummary}`;
+  const gleifSummary = gleifRecord
+    ? `${entity?.legalName?.name || vendorTrim} is ${reg?.status} in GLEIF (LEI ${attr?.lei}, jurisdiction ${entity?.jurisdiction}).`
+    : `No active GLEIF LEI record matched "${vendorTrim || vatClean}".`;
+
+  const evidenceUrls = [];
+  if (attr?.lei) evidenceUrls.push(`https://search.gleif.org/#/record/${attr.lei}`);
+  else if (gleifUrl) evidenceUrls.push(gleifUrl);
+  if (vatRegistryResult?._url) evidenceUrls.push(vatRegistryResult._url);
+  else if (vatUrl) evidenceUrls.push(vatUrl);
+
+  const sources = [];
+  if (gleifRecord) sources.push('GLEIF Global LEI Index (api.gleif.org)');
+  if (vatRegistryResult?._registry) sources.push(vatRegistryResult._registry);
+  else if (vatRegistryResult) sources.push('VIES / VATComply (api.vatcomply.com)');
+  if (!sources.length) sources.push('GLEIF + VATComply');
 
   return {
-    vendor: vendorTrim,
+    vendor: vendorTrim || vatName || vatClean,
     vat_number: vatTrim || leiTrim || null,
     valid,
-    registered_name: entity?.legalName?.name || (taxFormatValid && hasVat ? vendorTrim : null),
-    registered_address: addressStr,
+    vat_valid: vatVerified,
+    tax_id_valid: taxIdVerified,
+    status: vatRegistryUnavailable ? 'vat_registry_unavailable' : (valid ? 'verified' : 'unverified'),
+    registered_name: entity?.legalName?.name || vatName || null,
+    registered_address: addressStr || vatAddr || null,
     lei: attr?.lei || (leiRegex.test(leiTrim) ? leiTrim : null),
-    registration_status: reg?.status || (taxFormatValid && hasVat ? 'FORMAT_VALID_UNREGISTERED_LEI' : 'NOT_FOUND'),
-    jurisdiction: entity?.jurisdiction || (vatTrim.length >= 2 ? vatTrim.slice(0, 2) : null),
+    registration_status: vatRegistryResult?.valid === false
+      ? 'VAT_INVALID'
+      : vatRegistryUnavailable
+      ? 'VAT_REGISTRY_UNAVAILABLE'
+      : reg?.status || (vatRegistryResult?.valid ? 'VIES_VAT_ACTIVE' : taxFormatValid && hasVat ? 'FORMAT_VALID_UNREGISTERED_LEI' : 'NOT_FOUND'),
+    jurisdiction: entity?.jurisdiction || vatRegistryResult?.country_code || (vatClean.length >= 2 && isEuOrUkVat ? vatClean.slice(0, 2) : countryCode || null),
     tax_format: taxFormatType,
     tax_format_valid: hasVat ? taxFormatValid : null,
-    source: gleifRecord ? 'GLEIF Global LEI Index (api.gleif.org)' : 'Deterministic Tax Checksum & GLEIF Search',
-    source_url: attr?.lei ? `https://search.gleif.org/#/record/${attr.lei}` : gleifUrl,
-    summary
+    source: sources.join(' + '),
+    source_url: attr?.lei ? `https://search.gleif.org/#/record/${attr.lei}` : (vatRegistryResult?._url || vatUrl || gleifUrl),
+    evidence_urls: evidenceUrls,
+    summary: `${gleifSummary} ${taxSummary}`
   };
 }
 
@@ -497,6 +629,71 @@ export function reconcileInvoicePrimary({
       canonical_ledger: rawLedger || `Receipt/Ledger (${poNumber}): ${aQty} units net accepted @ ${currency} ${rate} + ${taxPct}% tax = ${currency} ${ledgerTotal}`
     }
   };
+}
+
+function parseInlinePoMath(rawText = '') {
+  const text = String(rawText || '').trim();
+  if (!text) return null;
+
+  // Match inline line-item equations such as "10 units at $250 = $2500", "5 x 120 = 600", "4 * 50 -> 200"
+  const lineRegex = /(\d+(?:,\d{3})*(?:\.\d+)?)\s*(?:x|\*|units?\s*(?:at|@)|items?\s*(?:at|@)|@)\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)\s*(?:=|equals|->|total[:\s]*)\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/gi;
+  const lineMatches = [...text.matchAll(lineRegex)];
+  if (lineMatches.length > 0) {
+    let expectedTotalCents = 0;
+    let claimedTotalCents = 0;
+    const mismatches = [];
+    for (const m of lineMatches) {
+      const qty = parseNumber(m[1]);
+      const unitPrice = parseNumber(m[2]);
+      const claimed = parseNumber(m[3]);
+      const expectedCents = Math.round(qty * unitPrice * 100);
+      const claimedCents = Math.round(claimed * 100);
+      expectedTotalCents += expectedCents;
+      claimedTotalCents += claimedCents;
+      if (expectedCents !== claimedCents) {
+        mismatches.push(`${qty} x ${unitPrice} = ${(expectedCents / 100).toFixed(2)} (claimed ${(claimedCents / 100).toFixed(2)})`);
+      }
+    }
+    const discrepancy = Math.round(Math.abs(claimedTotalCents - expectedTotalCents)) / 100;
+    const verified = mismatches.length === 0;
+    return {
+      verified,
+      status: verified ? 'verified_math' : 'arithmetic_mismatch',
+      computedTotal: Math.round(expectedTotalCents) / 100,
+      claimedTotal: Math.round(claimedTotalCents) / 100,
+      discrepancy,
+      explanation: verified
+        ? `Inline purchase order arithmetic verified across ${lineMatches.length} line item(s): total ${(expectedTotalCents / 100).toFixed(2)}.`
+        : `Inline purchase order arithmetic discrepancy (${discrepancy.toFixed(2)}): ${mismatches.join('; ')}.`
+    };
+  }
+
+  // Match subtotal + tax (+ shipping) vs total
+  const subMatch = text.match(/subtotal\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
+  const taxMatch = text.match(/\btax\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
+  const shipMatch = text.match(/shipping\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
+  const totalMatch = text.match(/\b(?:grand_?)?total\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
+  if (subMatch && totalMatch) {
+    const subCents = Math.round(parseNumber(subMatch[1]) * 100);
+    const taxCents = taxMatch ? Math.round(parseNumber(taxMatch[1]) * 100) : 0;
+    const shipCents = shipMatch ? Math.round(parseNumber(shipMatch[1]) * 100) : 0;
+    const expectedCents = subCents + taxCents + shipCents;
+    const claimedCents = Math.round(parseNumber(totalMatch[1]) * 100);
+    const discrepancy = Math.abs(claimedCents - expectedCents) / 100;
+    const verified = expectedCents === claimedCents;
+    return {
+      verified,
+      status: verified ? 'verified_math' : 'arithmetic_mismatch',
+      computedTotal: expectedCents / 100,
+      claimedTotal: claimedCents / 100,
+      discrepancy,
+      explanation: verified
+        ? `PO summary math verified: subtotal + tax + shipping equals ${(expectedCents / 100).toFixed(2)}.`
+        : `PO summary math mismatch: computed ${(expectedCents / 100).toFixed(2)} vs stated total ${(claimedCents / 100).toFixed(2)} (variance ${discrepancy.toFixed(2)}).`
+    };
+  }
+
+  return null;
 }
 
 export function verifyPurchaseOrderPrimary({
@@ -578,27 +775,19 @@ export async function lookupCorporateRegistry({ company = '', jurisdiction = '' 
   const countryCode = resolveJurisdictionCountryCode(jurisdiction);
 
   let records = [];
-  try {
-    if (LEI_PATTERN.test(companyUpper)) {
-      const directUrl = `https://api.gleif.org/api/v1/lei-records/${encodeURIComponent(companyUpper)}`;
-      const res = await fetch(directUrl, { headers: { Accept: 'application/vnd.api+json' }, signal: AbortSignal.timeout(10000) });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.data) records = [json.data];
-      }
+  if (LEI_PATTERN.test(companyUpper)) {
+    const directUrl = `https://api.gleif.org/api/v1/lei-records/${encodeURIComponent(companyUpper)}`;
+    const json = await fetchJsonWithRetry(directUrl, { headers: { Accept: 'application/vnd.api+json' } }, 2, 6500);
+    if (json?.data) records = [json.data];
+  }
+  if (records.length === 0 && companyTrim) {
+    let gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(companyTrim)}&page[size]=10`;
+    if (countryCode) {
+      gleifUrl += `&filter[entity.legalAddress.country]=${encodeURIComponent(countryCode)}`;
     }
-    if (records.length === 0 && companyTrim) {
-      let gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(companyTrim)}&page[size]=10`;
-      if (countryCode) {
-        gleifUrl += `&filter[entity.legalAddress.country]=${encodeURIComponent(countryCode)}`;
-      }
-      const res = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' }, signal: AbortSignal.timeout(10000) });
-      if (res.ok) {
-        const json = await res.json();
-        records = Array.isArray(json.data) ? json.data : [];
-      }
-    }
-  } catch {}
+    const json = await fetchJsonWithRetry(gleifUrl, { headers: { Accept: 'application/vnd.api+json' } }, 2, 6500);
+    if (Array.isArray(json?.data)) records = json.data;
+  }
 
   if (records.length === 0) {
     return {
@@ -1026,12 +1215,14 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
 // ============================================================================
 
 export function loadStoredLedger() {
-  const p = path.join(evidenceDir, 'nov14-milestone-receipt.json');
-  if (!fs.existsSync(p)) {
-    return { walletAddress: CONTRIBUTOR_ADDRESS, paidCalls: [] };
-  }
-  const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
-  const normalizedCalls = (raw.paidCalls || []).map((c, idx) => {
+  const seenTx = new Set();
+  const normalizedCalls = [];
+  let walletAddress = CONTRIBUTOR_ADDRESS;
+  let usdcMintTxHash = null;
+  let sepoliaEthBalance = null;
+  let testUsdcBalanceAfter = null;
+
+  const normalizePaidCall = (c, fallbackTimestamp) => {
     const res = c.response || {};
     const sigPayload = c.signalVerification?.payload?.response || {};
     const intent = res.intent || c.intent || (c.step === 1 ? 'DOCUMENT_AUTHENTICITY_GENERAL' : 'PURCHASE_ORDER_VERIFY_GENERAL');
@@ -1044,7 +1235,7 @@ export function loadStoredLedger() {
     } else if (intent === 'INVOICE_LEDGER_RECONCILE_GENERAL') {
       primaryRef = reconcileInvoicePrimary({});
     } else if (intent === 'VENDOR_VERIFY_GENERAL') {
-      primaryRef = { valid: true, vendor: 'SAP SE', vat_number: 'DE143593636' };
+      primaryRef = { valid: true, vendor: 'SAP SE', vat_number: 'DE143454214' };
     } else {
       primaryRef = { valid: true };
     }
@@ -1054,11 +1245,15 @@ export function loadStoredLedger() {
       raw_payload: sigPayload
     });
 
+    const txHash = c.telegraphReceipt?.tx_hash || c.paymentResponse?.transaction || c.tx_hash || null;
+    if (txHash && seenTx.has(String(txHash).toLowerCase())) return null;
+    if (txHash) seenTx.add(String(txHash).toLowerCase());
+
     return {
-      index: idx + 1,
+      index: normalizedCalls.length + 1,
       intent,
-      title: c.title,
-      timestamp: res.timestamp || c.signalVerification?.signal?.created_at || raw.generatedAt,
+      title: c.title || `${intent} — On-Chain Signal`,
+      timestamp: res.timestamp || c.signalVerification?.signal?.created_at || fallbackTimestamp,
       minerId: res.miner_id || c.signalVerification?.signal?.subnet_id,
       minerName: res.miner_name || c.signalVerification?.result?.routing?.subnet_name,
       minerSlug: c.signalVerification?.signal?.miner_slug,
@@ -1066,10 +1261,10 @@ export function loadStoredLedger() {
       costUsd: res.cost_usd ?? 0.01,
       amountUusdc: c.telegraphReceipt?.amount_uusdc || '10000',
       durationMs: res.duration_ms,
-      txHash: c.telegraphReceipt?.tx_hash || c.paymentResponse?.transaction,
+      txHash,
       receiptHash: c.telegraphReceipt?.receipt_hash,
       signalHash: res.signal_hash,
-      epochId: c.telegraphReceipt?.epoch_id,
+      epochId: c.telegraphReceipt?.epoch_id ?? null,
       request: c.request,
       normalizedResult: res.result,
       fieldStatus: res.field_status,
@@ -1079,16 +1274,332 @@ export function loadStoredLedger() {
       badgeText: evaluation.badgeText,
       diagnostic: evaluation.diagnostic
     };
-  });
+  };
+
+  const milestonePath = path.join(evidenceDir, 'nov14-milestone-receipt.json');
+  if (fs.existsSync(milestonePath)) {
+    try {
+      const raw = JSON.parse(fs.readFileSync(milestonePath, 'utf8'));
+      walletAddress = raw.walletAddress || walletAddress;
+      usdcMintTxHash = raw.usdcMintTxHash || usdcMintTxHash;
+      sepoliaEthBalance = raw.sepoliaEthBalance || sepoliaEthBalance;
+      testUsdcBalanceAfter = raw.testUsdcBalanceAfter || testUsdcBalanceAfter;
+      for (const c of raw.paidCalls || []) {
+        const entry = normalizePaidCall(c, raw.generatedAt);
+        if (entry) normalizedCalls.push(entry);
+      }
+    } catch {}
+  }
+
+  const extraPath = path.join(evidenceDir, 'extra-x402-calls.json');
+  if (fs.existsSync(extraPath)) {
+    try {
+      const extraRaw = JSON.parse(fs.readFileSync(extraPath, 'utf8'));
+      const arr = Array.isArray(extraRaw) ? extraRaw : (extraRaw.paidCalls || []);
+      for (const c of arr) {
+        const entry = normalizePaidCall(c, null);
+        if (entry) normalizedCalls.push(entry);
+      }
+    } catch {}
+  }
+
+  const prodPath = path.join(evidenceDir, 'production-settlement-receipts.json');
+  if (fs.existsSync(prodPath)) {
+    try {
+      const prod = JSON.parse(fs.readFileSync(prodPath, 'utf8'));
+      walletAddress = prod.buyer_address || walletAddress;
+      for (const s of prod.settlements || []) {
+        const txHash = s.tx_hash || s.txHash || null;
+        if (txHash && seenTx.has(String(txHash).toLowerCase())) continue;
+        if (txHash) seenTx.add(String(txHash).toLowerCase());
+
+        const agr = s.agreement || 'confirmed';
+        const diagParts = [
+          `Production Sepolia x402 settlement via Miner #${s.miner_id || 'unknown'} (${s.miner_name || 'Telegraph Miner'}) for ${s.entity || s.document || s.intent}.`
+        ];
+        if (s.wasm_deterministic_score != null) {
+          diagParts.push(`WASM deterministic score: ${s.wasm_deterministic_score}/10000.`);
+        }
+        diagParts.push(`Verification outcome: ${agr}.`);
+
+        normalizedCalls.push({
+          index: normalizedCalls.length + 1,
+          intent: s.intent,
+          title: `Production x402 — ${s.entity || s.document || s.intent}`,
+          timestamp: prod.verified_at || null,
+          minerId: s.miner_id || null,
+          minerName: s.miner_name || 'Telegraph Network Miner',
+          minerSlug: null,
+          endpoint: s.endpoint || '/engine/v1/ask',
+          costUsd: 0.01,
+          amountUusdc: '10000',
+          durationMs: s.duration_ms ?? null,
+          txHash,
+          receiptHash: s.receipt_hash || null,
+          signalHash: s.signal_hash || null,
+          epochId: s.epoch_id ?? null,
+          request: {
+            entity: s.entity || null,
+            jurisdiction: s.jurisdiction || null,
+            period: s.period || null,
+            po_amount: s.po_amount ?? null,
+            invoice_amount: s.invoice_amount ?? null,
+            document: s.document || null
+          },
+          normalizedResult: {
+            agreement: agr,
+            wasm_deterministic_score: s.wasm_deterministic_score ?? null
+          },
+          fieldStatus: { settlement: 'verified_sepolia' },
+          warnings: [],
+          rawMinerPayload: s,
+          agreement: agr,
+          badgeText: agr === 'contradicted' ? 'contradicted (WASM 10000)' : agr,
+          diagnostic: diagParts.join(' ')
+        });
+      }
+    } catch {}
+  }
 
   return {
-    walletAddress: raw.walletAddress || CONTRIBUTOR_ADDRESS,
-    usdcMintTxHash: raw.usdcMintTxHash,
-    sepoliaEthBalance: raw.sepoliaEthBalance,
-    testUsdcBalanceAfter: raw.testUsdcBalanceAfter,
+    walletAddress,
+    usdcMintTxHash,
+    sepoliaEthBalance,
+    testUsdcBalanceAfter,
     totalPaidCalls: normalizedCalls.length,
     totalSpentUsd: (normalizedCalls.length * 0.01).toFixed(2),
     calls: normalizedCalls
+  };
+}
+
+const DEFAULT_FIVE_JURISDICTION_PORTFOLIO = [
+  { name: 'Tesla, Inc.', jurisdiction: 'US', vatNumber: '' },
+  { name: 'HSBC Holdings plc', jurisdiction: 'GB', vatNumber: '' },
+  { name: 'SAP SE', jurisdiction: 'DE', vatNumber: 'DE143454214' },
+  { name: 'AIA Group Limited', jurisdiction: 'HK', vatNumber: '' },
+  { name: 'DBS Group Holdings Ltd', jurisdiction: 'SG', vatNumber: '' }
+];
+
+const TRADITIONAL_LAW_FIRM_BENCHMARK = {
+  US: { feeUsd: 950, scope: 'Delaware/US corporate good-standing extract, SEC EDGAR 10-K/8-K & OFAC counsel clearance' },
+  GB: { feeUsd: 800, scope: 'UK Companies House / LEI verification & UK/OFAC sanctions memorandum' },
+  DE: { feeUsd: 900, scope: 'German Handelsregister / LEI extract & EU VIES VAT confirmation' },
+  HK: { feeUsd: 850, scope: 'Hong Kong registry search, HKMA regulatory check & sanctions clearance' },
+  SG: { feeUsd: 750, scope: 'Singapore ACRA/LEI standing check & MAS/OFAC compliance review' }
+};
+
+export async function runFiveJurisdictionDiligencePack(body = {}) {
+  const tStart = performance.now();
+  const entitiesInput = Array.isArray(body.entities) && body.entities.length > 0
+    ? body.entities.slice(0, 8)
+    : DEFAULT_FIVE_JURISDICTION_PORTFOLIO;
+
+  const storedLedger = loadStoredLedger();
+  const receiptByIntent = new Map();
+  for (const call of storedLedger.calls || []) {
+    if (!receiptByIntent.has(call.intent) && call.txHash) {
+      receiptByIntent.set(call.intent, {
+        intent: call.intent,
+        txHash: call.txHash,
+        signalHash: call.signalHash || null,
+        minerId: call.minerId || null,
+        explorerUrl: `https://sepolia.etherscan.io/tx/${call.txHash}`
+      });
+    }
+  }
+
+  const jurisdictions = await Promise.all(entitiesInput.map(async (item) => {
+    const name = String(item.name || item.company || '').trim();
+    const juris = String(item.jurisdiction || '').trim().toUpperCase() || 'US';
+    const vatNumber = String(item.vatNumber || item.vat_number || '').trim();
+    const countryCode = resolveJurisdictionCountryCode(juris) || juris.slice(0, 2);
+
+    const hkmaPromise = countryCode === 'HK'
+      ? (async () => {
+          const hkUrl = 'https://api.hkma.gov.hk/public/market-data-and-statistics/daily-monetary-statistics/daily-figures-interbank-liquidity?pagesize=1';
+          try {
+            const hr = await fetch(hkUrl, { signal: AbortSignal.timeout(3500) });
+            if (hr.ok) {
+              const hj = await hr.json();
+              const rec = hj?.result?.records?.[0] || null;
+              return {
+                source: 'Hong Kong Monetary Authority (api.hkma.gov.hk)',
+                url: hkUrl,
+                httpStatus: hr.status,
+                verified: Boolean(hj?.header?.success),
+                latestRecordDate: rec?.end_of_date || null,
+                hiborOvernight: rec?.hibor_overnight ?? null
+              };
+            }
+          } catch {}
+          return {
+            source: 'Hong Kong Monetary Authority (api.hkma.gov.hk)',
+            url: hkUrl,
+            httpStatus: null,
+            verified: false
+          };
+        })()
+      : Promise.resolve(null);
+
+    const [corp, sanctions, filings, vendor, hkmaLiveAnchor] = await Promise.all([
+      lookupCorporateRegistry({ company: name, jurisdiction: countryCode }),
+      screenSanctions({ name }),
+      monitorRegulatoryFiling({ company: name, period: 'last 12 months' }),
+      vatNumber ? verifyVendorPrimary({ vendor: name, vat_number: vatNumber, country: countryCode }) : Promise.resolve(null),
+      hkmaPromise
+    ]);
+
+    const itemPayload = {
+      inputName: name,
+      jurisdiction: countryCode,
+      legalName: corp.legal_name || vendor?.registered_name || name,
+      lei: corp.registration_id || vendor?.lei || null,
+      registryFound: Boolean(corp.found),
+      registryActive: Boolean(corp.active),
+      registeredAddress: corp.registered_address || vendor?.registered_address || null,
+      vatChecked: Boolean(vatNumber),
+      vatValid: vendor ? vendor.vat_valid : null,
+      sanctionsMatched: Boolean(sanctions.matched),
+      sanctionsScore: sanctions.match_score ?? 0,
+      filingsCount: filings.filing_count ?? 0,
+      topFilings: (filings.filings || []).slice(0, 3),
+      hkmaLiveAnchor
+    };
+
+    const proofHash = '0x' + crypto.createHash('sha256').update(JSON.stringify(itemPayload)).digest('hex');
+
+    const bench = TRADITIONAL_LAW_FIRM_BENCHMARK[countryCode] || {
+      feeUsd: 850,
+      scope: `${countryCode} local corporate registry extract, sanctions screening & filing check`
+    };
+
+    return {
+      ...itemPayload,
+      proofHash,
+      sources: [
+        corp.results?.[0]?.source_url || null,
+        vendor?.evidence_urls?.[1] || null,
+        hkmaLiveAnchor?.url || null,
+        (filings.urls || [])[0] || null
+      ].filter(Boolean),
+      matchedSepoliaReceipts: [
+        receiptByIntent.get('CORPORATE_REGISTRY_LOOKUP_GENERAL'),
+        receiptByIntent.get('SANCTIONS_SCREENING_MATCH_GENERAL'),
+        receiptByIntent.get('REGULATORY_FILING_MONITOR_GENERAL'),
+        vatNumber ? receiptByIntent.get('VENDOR_VERIFY_GENERAL') : null
+      ].filter(Boolean),
+      benchmarkLineItem: {
+        jurisdiction: countryCode,
+        scope: bench.scope,
+        illustrativeFeeUsd: bench.feeUsd.toFixed(2)
+      }
+    };
+  }));
+
+  const durationMs = Math.round(performance.now() - tStart);
+  const packSha256 = '0x' + crypto.createHash('sha256').update(JSON.stringify(jurisdictions)).digest('hex');
+
+  const totalChecks = jurisdictions.reduce((sum, j) => sum + 3 + (j.vatChecked ? 1 : 0) + (j.hkmaLiveAnchor ? 1 : 0), 0);
+  const machineInvoiceItems = jurisdictions.map((j) => {
+    const checkCount = 3 + (j.vatChecked ? 1 : 0);
+    return {
+      jurisdiction: j.jurisdiction,
+      entity: j.legalName,
+      checks: checkCount,
+      telegraphEquivalentX402Usd: (checkCount * 0.01).toFixed(2),
+      previewPrimaryApiUsd: '0.00',
+      proofHash: j.proofHash
+    };
+  });
+
+  const traditionalTotalUsd = jurisdictions.reduce(
+    (sum, j) => sum + parseFloat(j.benchmarkLineItem.illustrativeFeeUsd),
+    0
+  );
+  const telegraphEquivalentUsd = jurisdictions.reduce(
+    (sum, j) => sum + (3 + (j.vatChecked ? 1 : 0)) * 0.01,
+    0
+  );
+
+  const liveReceipts = [];
+  let actualLiveSpendUsd = '0.00';
+  let resolvedMode = 'preview_with_stored_x402_proofs';
+
+  if (body.mode === 'buy_x402') {
+    const account = getWalletAccount();
+    if (account) {
+      const fetchWithPayment = wrapFetchWithPaymentFromConfig(fetch, {
+        schemes: [{ network: 'eip155:11155111', client: new ExactEvmScheme(account) }],
+        spendControls: {
+          allowedAssets: [{
+            network: 'eip155:11155111',
+            asset: TEST_USDC,
+            maxAmountPerPayment: '10000'
+          }]
+        }
+      });
+      const lead = jurisdictions[0];
+      const askBatch = [
+        { intent: 'CORPORATE_REGISTRY_LOOKUP_GENERAL', params: { company: lead.legalName, jurisdiction: lead.jurisdiction } },
+        { intent: 'SANCTIONS_SCREENING_MATCH_GENERAL', params: { name: lead.legalName } },
+        { intent: 'REGULATORY_FILING_MONITOR_GENERAL', params: { entity: lead.legalName, period: 'last 12 months' } }
+      ];
+      let liveUusdc = 0;
+      for (const askPayload of askBatch) {
+        try {
+          const askRes = await fetchWithPayment(`${NODE_URL}/engine/v1/ask`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(askPayload),
+            signal: AbortSignal.timeout(10000)
+          });
+          const askBody = await askRes.json().catch(() => ({}));
+          const rec = decodeBase64Json(askRes.headers.get('x-telegraph-receipt'));
+          const pay = decodeBase64Json(askRes.headers.get('payment-response') || askRes.headers.get('x-payment-response'));
+          const amt = rec?.amount_uusdc ? Number(rec.amount_uusdc) : (askRes.ok ? 10000 : 0);
+          liveUusdc += amt;
+          liveReceipts.push({
+            intent: askPayload.intent,
+            httpStatus: askRes.status,
+            minerId: askBody.miner_id || null,
+            txHash: rec?.tx_hash || pay?.transaction || null,
+            signalHash: askBody.signal_hash || null
+          });
+        } catch (err) {
+          liveReceipts.push({ intent: askPayload.intent, httpStatus: 504, error: err.message });
+        }
+      }
+      actualLiveSpendUsd = (liveUusdc / 1e6).toFixed(2);
+      resolvedMode = 'live_onchain_x402_settlement';
+    }
+  }
+
+  return {
+    generatedAt: new Date().toISOString(),
+    packSha256,
+    mode: resolvedMode,
+    durationMs,
+    jurisdictions,
+    liveReceipts,
+    machineInvoice: {
+      title: 'Machine-Executed Compliance Diligence Receipt (Praman Desk x Telegraph Protocol)',
+      actualPreviewSpendUsd: '0.00',
+      actualLiveSpendUsd,
+      equivalentTelegraphX402Usd: telegraphEquivalentUsd.toFixed(2),
+      storedSepoliaLedgerTotalUsd: storedLedger.totalSpentUsd,
+      totalChecksExecuted: totalChecks,
+      turnaroundTime: `${(durationMs / 1000).toFixed(2)}s`,
+      settlementNetwork: 'Ethereum Sepolia (Test USDC via x402 @ $0.01/check)',
+      lineItems: machineInvoiceItems
+    },
+    traditionalBenchmarkInvoice: {
+      title: 'Illustrative Cross-Border Law Firm Diligence Benchmark (5 Jurisdictions)',
+      isBenchmarkEstimate: true,
+      disclaimer: 'Illustrative legal industry fee benchmark for comparison purposes only; not a live law-firm quote.',
+      estimatedTurnaround: '5-10 business days',
+      totalUsd: traditionalTotalUsd.toFixed(2),
+      lineItems: jurisdictions.map(j => j.benchmarkLineItem)
+    }
   };
 }
 
@@ -1227,20 +1738,51 @@ async function evaluateDocumentEndpoint(merged) {
   const urlMatch = docText.match(/https?:\/\/[^\s"'<>)]+/i);
   if (urlMatch && isSafePublicHttpUrl(urlMatch[0])) {
     const targetUrl = urlMatch[0];
+    const textWithoutUrl = docText.replace(targetUrl, ' ');
+    const inlineExpectedMatch = textWithoutUrl.match(/\b(?:0x)?([0-9a-fA-F]{64})\b/);
+    const explicitExpectedRaw = merged.expected_sha256 || merged.sha256 || merged.hash || (inlineExpectedMatch ? inlineExpectedMatch[1] : '');
+    const cleanExpected = String(explicitExpectedRaw || '').replace(/^0x/i, '').trim().toLowerCase();
+    const expectedHash = /^[0-9a-f]{64}$/.test(cleanExpected) ? cleanExpected : '';
+
     try {
       const r = await fetch(targetUrl, { method: 'GET', signal: AbortSignal.timeout(4000) });
       const buf = Buffer.from(await r.arrayBuffer());
       const sha = crypto.createHash('sha256').update(buf).digest('hex');
       const contentType = r.headers.get('content-type') || 'unknown';
-      const isPdfMagic = buf.slice(0, 5).toString('utf8') === '%PDF-';
       if (r.ok && buf.length > 0) {
+        if (expectedHash) {
+          const matchesDigest = sha === expectedHash;
+          return {
+            document: targetUrl,
+            authentic: matchesDigest,
+            verdict: matchesDigest ? 'Authentic' : 'Forged',
+            confidence: 0.99,
+            sha256: sha,
+            expected_sha256: expectedHash,
+            byte_length: buf.length,
+            anomalies: matchesDigest ? [] : ['sha256_digest_mismatch'],
+            evidence: [
+              `HTTP ${r.status} (${contentType}, ${buf.length} bytes) retrieved from ${targetUrl}`,
+              matchesDigest
+                ? `SHA-256 digest 0x${sha} matches expected reference digest.`
+                : `Cryptographic mismatch: computed SHA-256 0x${sha} does not match reference digest 0x${expectedHash}.`
+            ],
+            intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
+            schema_version: 4,
+            as_of: new Date().toISOString()
+          };
+        }
+
         return {
           document: targetUrl,
-          authentic: true,
-          verdict: isPdfMagic || contentType.includes('json') || contentType.includes('xml') ? 'Authentic' : 'Likely authentic',
+          authentic: false,
+          verdict: 'Inconclusive',
+          confidence: 0.5,
+          sha256: sha,
+          byte_length: buf.length,
+          anomalies: ['uncorroborated_remote_document_no_reference_digest'],
           evidence: [
-            `HTTP ${r.status} (${contentType}, ${buf.length} bytes) retrieved from ${targetUrl}`,
-            `SHA-256: 0x${sha}`
+            `Fetched HTTP ${r.status} (${contentType}, ${buf.length} bytes, SHA-256: 0x${sha}) from ${targetUrl}, but no reference cryptographic digest or primary registry signature was provided to corroborate document authenticity.`
           ],
           intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
           schema_version: 4,
@@ -1251,6 +1793,7 @@ async function evaluateDocumentEndpoint(merged) {
         document: targetUrl,
         authentic: false,
         verdict: 'Inconclusive',
+        confidence: 0.25,
         evidence: [`Target URL returned HTTP ${r.status} (${buf.length} bytes).`],
         intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
         schema_version: 4,
@@ -1261,6 +1804,7 @@ async function evaluateDocumentEndpoint(merged) {
         document: targetUrl,
         authentic: false,
         verdict: 'Inconclusive',
+        confidence: 0.25,
         evidence: [`Unable to fetch target document URL cleanly: ${err.message}`],
         intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
         schema_version: 4,
@@ -1558,7 +2102,7 @@ export async function handleApiRequest(req, res) {
             intent: 'VENDOR_VERIFY_GENERAL',
             params: {
               vendor: vendorPrimary.vendor,
-              vat_number: vendorPrimary.vat_number || 'DE143593636'
+              vat_number: vendorPrimary.vat_number || 'DE143454214'
             }
           };
         }
@@ -1835,6 +2379,21 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // 5b. GET / POST /api/audit/diligence-pack (Mission 04 5-Jurisdiction Diligence Pack)
+    if (pathname === '/api/audit/diligence-pack' && (req.method === 'POST' || req.method === 'GET')) {
+      const body = req.method === 'POST' ? await readJsonBody(req) : {};
+      if (body.mode === 'buy_x402') {
+        const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'local';
+        if (!checkPaidRateLimit(ip)) {
+          return sendJson(res, 429, {
+            error: 'Rate limit reached: maximum 5 paid x402 runs per 10 minutes on the hosted demo wallet.'
+          });
+        }
+      }
+      const pack = await runFiveJurisdictionDiligencePack(body);
+      return sendJson(res, 200, pack);
+    }
+
     // 6. Replacement Compliance Miner Endpoints (/api/miner/*)
     if (pathname.startsWith('/api/miner/')) {
       let body = {};
@@ -1884,20 +2443,80 @@ export async function handleApiRequest(req, res) {
       }
 
       if (pathname === '/api/miner/po-verify') {
-        const out = verifyPurchaseOrderPrimary({
-          poNumber: merged.po_number || merged.poNumber || 'PO-ERP-2026-7741',
-          vendor: merged.vendor || 'V-10492',
-          poAmount: merged.amount ?? merged.poAmount ?? 18500000,
-          approvalCap: merged.approval_cap ?? merged.approvalCap ?? 10000000,
-          dualSignoffPresent: merged.dual_signoff ?? merged.dualSignoffPresent ?? false
-        });
+        const poNumber = String(merged.po_number || merged.poNumber || '').trim();
+        const vendor = String(merged.vendor || merged.vendor_name || '').trim();
+        const rawAmount = merged.amount ?? merged.poAmount ?? merged.po_amount;
+        const rawCap = merged.approval_cap ?? merged.approvalCap ?? merged.budget_cap;
+        const hasExplicitAmounts = rawAmount !== undefined && rawAmount !== null && String(rawAmount).trim() !== '';
+
+        if (hasExplicitAmounts) {
+          const parsedAmt = parseNumber(rawAmount);
+          const parsedCap = rawCap !== undefined && rawCap !== null && String(rawCap).trim() !== ''
+            ? parseNumber(rawCap)
+            : parsedAmt;
+          const out = verifyPurchaseOrderPrimary({
+            poNumber: poNumber || 'PO-UNSPECIFIED',
+            vendor: vendor || 'Unspecified Vendor',
+            poAmount: parsedAmt,
+            approvalCap: parsedCap,
+            currency: merged.currency || 'USD',
+            dualSignoffPresent: merged.dual_signoff ?? merged.dualSignoffPresent ?? false
+          });
+          return sendJson(res, 200, {
+            po_number: out.po_number,
+            verified: out.verified,
+            status: out.status,
+            amount: out.amount,
+            approval_cap: out.approval_cap,
+            vendor: out.vendor,
+            explanation: out.explanation,
+            summary: out.explanation,
+            intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+            schema_version: 4,
+            as_of: new Date().toISOString()
+          });
+        }
+
+        const rawText = [merged.question, merged.description, merged.items, poNumber].filter(Boolean).join(' ');
+        const inlineMath = parseInlinePoMath(rawText);
+        if (inlineMath) {
+          return sendJson(res, 200, {
+            po_number: poNumber || 'PO-INLINE',
+            verified: inlineMath.verified,
+            status: inlineMath.status,
+            amount: inlineMath.computedTotal,
+            discrepancy: inlineMath.discrepancy,
+            vendor: vendor || null,
+            explanation: inlineMath.explanation,
+            summary: inlineMath.explanation,
+            intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+            schema_version: 4,
+            as_of: new Date().toISOString()
+          });
+        }
+
+        let vendorContext = null;
+        if (vendor) {
+          try {
+            const corp = await lookupCorporateRegistry({ company: vendor });
+            if (corp.found) {
+              vendorContext = { lei: corp.registration_id, legal_name: corp.legal_name, active: corp.active };
+            }
+          } catch {}
+        }
+
+        const msg = 'Insufficient financial evidence: PO number supplied without line-item quantities, unit prices, or authorized cap.';
         return sendJson(res, 200, {
-          po_number: out.po_number,
-          verified: out.verified,
-          status: out.status,
-          amount: out.amount,
-          vendor: out.vendor,
-          explanation: out.explanation,
+          po_number: poNumber || null,
+          verified: false,
+          status: 'insufficient_evidence',
+          amount: null,
+          approval_cap: null,
+          budget_delta: null,
+          vendor: vendor || null,
+          vendor_context: vendorContext,
+          explanation: msg,
+          summary: msg,
           intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
           schema_version: 4,
           as_of: new Date().toISOString()
@@ -1905,19 +2524,30 @@ export async function handleApiRequest(req, res) {
       }
 
       if (pathname === '/api/miner/vendor-verify') {
+        const vendorParam = String(
+          merged.vendor || merged.vendor_name || merged.name || merged.company || merged.question || ''
+        ).trim();
         const out = await verifyVendorPrimary({
-          vendor: merged.vendor || merged.question || 'SAP SE',
+          vendor: vendorParam,
           vat_number: merged.vat_number || merged.vatNumber || '',
-          lei: merged.lei || ''
+          lei: merged.lei || '',
+          country: merged.country || merged.jurisdiction || ''
         });
         return sendJson(res, 200, {
           vendor: out.vendor,
           vat_number: out.vat_number,
           valid: out.valid,
+          vat_valid: out.vat_valid,
+          tax_id_valid: out.tax_id_valid,
+          status: out.status || (out.valid ? 'verified' : 'unverified'),
           registered_name: out.registered_name,
           registered_address: out.registered_address,
+          registration_status: out.registration_status,
+          jurisdiction: out.jurisdiction,
           lei: out.lei,
           source: out.source,
+          source_url: out.source_url,
+          evidence_urls: out.evidence_urls,
           summary: out.summary,
           intent: 'VENDOR_VERIFY_GENERAL',
           schema_version: 3,

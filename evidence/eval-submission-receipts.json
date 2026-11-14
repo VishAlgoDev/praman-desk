@@ -1,6 +1,6 @@
 {
   "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
-  "submittedAt": "2026-11-11T08:00:29.052Z",
+  "submittedAt": "2026-11-14T17:51:37.427Z",
   "receipts": [
     {
       "timestamp": "2026-11-11T08:00:25.742Z",
@@ -120,29 +120,6 @@
       }
     },
     {
-      "timestamp": "2026-11-11T08:00:27.609Z",
-      "intentId": "REGULATORY_FILING_MONITOR_GENERAL",
-      "bountyIssue": 104,
-      "file": "regulatory_filing_monitor_general.jsonl",
-      "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
-      "bodySha256": "5e82b2f0b3c2641989912c9ed2a4db880eb9f7da695c92e36183ca3ced5d05ad",
-      "nonce": "cb3af38fdbaead142b7b6c312196fcdf",
-      "httpStatus": 200,
-      "response": {
-        "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
-        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
-        "signed": true,
-        "received": 1,
-        "accepted": 0,
-        "duplicate": 1,
-        "rejected": 0,
-        "curated": 0,
-        "state_counts": {
-          "eligible": 55
-        }
-      }
-    },
-    {
       "timestamp": "2026-11-11T08:00:28.098Z",
       "intentId": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
       "bountyIssue": null,
@@ -191,13 +168,49 @@
           "superseded": 1
         }
       }
+    },
+    {
+      "timestamp": "2026-11-14T17:51:36.512Z",
+      "intentId": "REGULATORY_FILING_MONITOR_GENERAL",
+      "bountyIssue": 104,
+      "file": "regulatory_filing_monitor_general.jsonl",
+      "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+      "bodySha256": "fc925d5dd42f8878406df52d6420a52a7e010d150b5518b1b2d607fe4c95193e",
+      "nonce": "af6bb6f74b13f601a343003df3028ddc",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 6,
+        "accepted": 5,
+        "duplicate": 1,
+        "rejected": 0,
+        "curated": 5,
+        "state_counts": {
+          "admitted": 5,
+          "eligible": 57
+        }
+      }
     }
   ],
   "summaryByIntent": {
+    "REGULATORY_FILING_MONITOR_GENERAL": {
+      "total": 6,
+      "statuses": {
+        "admitted": 5,
+        "eligible": 1
+      },
+      "provenance": {
+        "attested": 5,
+        "unverified": 1
+      },
+      "reasons": {}
+    },
     "SANCTIONS_SCREENING_MATCH_GENERAL": {
       "total": 8,
       "statuses": {
-        "admitted": 8
+        "eligible": 8
       },
       "provenance": {
         "attested": 8
@@ -207,20 +220,10 @@
     "CORPORATE_REGISTRY_LOOKUP_GENERAL": {
       "total": 8,
       "statuses": {
-        "admitted": 8
+        "eligible": 8
       },
       "provenance": {
         "attested": 8
-      },
-      "reasons": {}
-    },
-    "REGULATORY_FILING_MONITOR_GENERAL": {
-      "total": 1,
-      "statuses": {
-        "eligible": 1
-      },
-      "provenance": {
-        "unverified": 1
       },
       "reasons": {}
     },
@@ -277,164 +280,214 @@
   },
   "rows": [
     {
-      "intent_id": "SANCTIONS_SCREENING_MATCH_GENERAL",
-      "row_hash": "6c9165363fa396a1a6d389e7aa1744ebfad9c29df8712fbe0e573d2f6fce9a9f",
-      "case_id": "fdc9cb9384a6c6710bf2c926fa204321a5028641c8c75ce7f2033eb19faf05c7",
+      "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+      "row_hash": "b9a965351fd4a5d725b35710a19f0cc2a97a54b9121227a73a7690bc4b3c5181",
+      "case_id": "6f854a110fb35e155111923a0737e0c6e44a6dff3a43aa4cfba80136469de2a6",
       "status": "admitted",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-14T17:51:36.612431Z",
+      "updated_at": "2026-11-14T17:51:36.614805Z"
+    },
+    {
+      "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+      "row_hash": "393f97253a123019dfaa0e8ac05754be4d3e9e63fa88bbe060a5ec5401a8aa03",
+      "case_id": "3e2f79048121cd49444f83a80d4fdac453b20d1b1f63e270787db3fc80a0e64a",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-14T17:51:36.610725Z",
+      "updated_at": "2026-11-14T17:51:36.614805Z"
+    },
+    {
+      "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+      "row_hash": "779ef108551d0d57bdcad293c8cff7ced9f2d01d551ddf82f57a41a0edaa6363",
+      "case_id": "092172be27c3b7b0d3928895d90816e7b1a79e3bf40c05377c5c6f7345ec03e7",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-14T17:51:36.609173Z",
+      "updated_at": "2026-11-14T17:51:36.614805Z"
+    },
+    {
+      "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+      "row_hash": "d8182c75d8d085e3f5627a5e9f6b539fc965996d2e9ced4bded6709188a4bfc5",
+      "case_id": "777fcec34bc19311ded883c3ea6bbc5bd2d903ff3a4d186c76915188638ce57c",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-14T17:51:36.607545Z",
+      "updated_at": "2026-11-14T17:51:36.614805Z"
+    },
+    {
+      "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+      "row_hash": "95874fe7cd84b35b41ee9ad947892c8a6ea9dbd749cf32e901dc086e1a5b503a",
+      "case_id": "5fc0ae1f98cca9fa68f254a1913fba7159fc6815110050bffd8e80b523d350a3",
+      "status": "admitted",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
+      "created_at": "2026-11-14T17:51:36.605712Z",
+      "updated_at": "2026-11-14T17:51:36.614805Z"
+    },
+    {
+      "intent_id": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "row_hash": "6c9165363fa396a1a6d389e7aa1744ebfad9c29df8712fbe0e573d2f6fce9a9f",
+      "case_id": "fdc9cb9384a6c6710bf2c926fa204321a5028641c8c75ce7f2033eb19faf05c7",
+      "status": "eligible",
+      "provenance_class": "attested",
+      "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:28.421588Z",
-      "updated_at": "2026-11-11T08:00:28.422933Z"
+      "updated_at": "2026-11-11T09:45:02.578936Z"
     },
     {
       "intent_id": "SANCTIONS_SCREENING_MATCH_GENERAL",
       "row_hash": "a6685f650918e76eb58a7c289d3213493517f3f23ed32f9760b9b2c45ef650cc",
       "case_id": "637dbb81c120f23ab6eec3c23debc81206399dff5f45321b2735a23c3b9f7734",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:28.419893Z",
-      "updated_at": "2026-11-11T08:00:28.422933Z"
+      "updated_at": "2026-11-11T09:45:02.578936Z"
     },
     {
       "intent_id": "SANCTIONS_SCREENING_MATCH_GENERAL",
       "row_hash": "718b3fcf2ee2a929a31db23f99523495ae4fb79b1b2f575784ef26df797274fa",
       "case_id": "07cfeb45ef2e97c4237dd9417241ffe70b717f0913cefd7a574964108f80a59e",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:28.418467Z",
-      "updated_at": "2026-11-11T08:00:28.422933Z"
+      "updated_at": "2026-11-11T09:45:02.578936Z"
     },
     {
       "intent_id": "SANCTIONS_SCREENING_MATCH_GENERAL",
       "row_hash": "47d2a1b44aa62535fd5baec34f0992590692d5c63494b831ab137a5049595a60",
       "case_id": "b7cc22474dcd477e6577d0591222661524f90b9f8bc55ad37a69310a9ac2564f",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:28.416883Z",
-      "updated_at": "2026-11-11T08:00:28.422933Z"
+      "updated_at": "2026-11-11T09:45:02.578936Z"
     },
     {
       "intent_id": "SANCTIONS_SCREENING_MATCH_GENERAL",
       "row_hash": "0f6728f6359530119236eb1697661efcd1ffda21dabcea930a95bce57a6fd517",
       "case_id": "9083a3cdd1d0cde61b2903e7ff24b2959640573a9d1196820eef453a6ff5cac2",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:28.41536Z",
-      "updated_at": "2026-11-11T08:00:28.422933Z"
+      "updated_at": "2026-11-11T09:45:02.578936Z"
     },
     {
       "intent_id": "SANCTIONS_SCREENING_MATCH_GENERAL",
       "row_hash": "853ef61111d0a2d97abd4e2866ca88fdc98f2bfefebf262f4be2b16119bf73c2",
       "case_id": "f8070996b6a3aafb4074b3c07e47898ce6902ea62c986dcea67b43b2a488ddbc",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:28.414002Z",
-      "updated_at": "2026-11-11T08:00:28.422933Z"
+      "updated_at": "2026-11-11T09:45:02.578936Z"
     },
     {
       "intent_id": "SANCTIONS_SCREENING_MATCH_GENERAL",
       "row_hash": "b5f98def3727c34ac23cdb38ecc983201b556693bf45862550d9c3ca7664765a",
       "case_id": "ed38a250ca791b2934688ded8e1c5b1a0c5dfb828b40da103fa66a286f6809f8",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:28.412655Z",
-      "updated_at": "2026-11-11T08:00:28.422933Z"
+      "updated_at": "2026-11-11T09:45:02.578936Z"
     },
     {
       "intent_id": "SANCTIONS_SCREENING_MATCH_GENERAL",
       "row_hash": "17b382f85a43ce24642486f54ff3c26f55eec08a2cc45135e40f1c97f212039f",
       "case_id": "b9e7c43384a93a89dbe4c1d27a7d177bd534bc526fa04635405e14f4d388360f",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:28.410263Z",
-      "updated_at": "2026-11-11T08:00:28.422933Z"
+      "updated_at": "2026-11-11T09:45:02.578936Z"
     },
     {
       "intent_id": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
       "row_hash": "5460f148d7e4b3b1964c760ee9e4126907bda654b5d1f71912db7ee279a670a3",
       "case_id": "3b03f062c1e596fa4a6ac863e84007420d1718f90f8bf32d8e26ea7bc47cf0eb",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:27.942083Z",
-      "updated_at": "2026-11-11T08:00:27.94379Z"
+      "updated_at": "2026-11-11T09:45:02.168155Z"
     },
     {
       "intent_id": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
       "row_hash": "0e106355692387f78b474593dffcf4e0f987c950dcc0decf0ad15390ca21e8b8",
       "case_id": "73a1094bde3d7ebe85d47c9d2c25271b364754c614da6a3a315f5c76d29dc9a9",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:27.940985Z",
-      "updated_at": "2026-11-11T08:00:27.94379Z"
+      "updated_at": "2026-11-11T09:45:02.168155Z"
     },
     {
       "intent_id": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
       "row_hash": "12b2ff5df7ebafd12e31a45b2339d5d0f6e141cb9de4d461dcd1499749f00374",
       "case_id": "c22954cb4f08985f4f26eea30e82642320fcb6ad4f9ccda1d1265e600b679b42",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:27.939543Z",
-      "updated_at": "2026-11-11T08:00:27.94379Z"
+      "updated_at": "2026-11-11T09:45:02.168155Z"
     },
     {
       "intent_id": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
       "row_hash": "034eae99a2dcce5d9853e2c01412f5fc090c32b7967c57749fdc9b83e1ceceec",
       "case_id": "45e627b565102996ab92df2c02fac08e81a6ebba51fbcda323f0acb1c255420e",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:27.938435Z",
-      "updated_at": "2026-11-11T08:00:27.94379Z"
+      "updated_at": "2026-11-11T09:45:02.168155Z"
     },
     {
       "intent_id": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
       "row_hash": "c3d4ebda474f65887fc5bebd9eeefcb1ae3b6e7f5e9ff592508e93a14fe87c46",
       "case_id": "4ac2bbdb102ccb32b450b5fac04038bffb4f2fc885878cc0c9a54261c9b8d50b",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:27.937356Z",
-      "updated_at": "2026-11-11T08:00:27.94379Z"
+      "updated_at": "2026-11-11T09:45:02.168155Z"
     },
     {
       "intent_id": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
       "row_hash": "5530272b39bd594502f67b225ba2d46d160d41f52d5dabe827bcf73ba782806b",
       "case_id": "6e7a205f094b9ea1fcdf65309239b6083787ee3ce3699bc5a790fed202ab9bea",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:27.93617Z",
-      "updated_at": "2026-11-11T08:00:27.94379Z"
+      "updated_at": "2026-11-11T09:45:02.168155Z"
     },
     {
       "intent_id": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
       "row_hash": "670b841f1221bef4b60d45b3368a65a46e57f74dc4ebb11d7f0f573a11bbdd8e",
       "case_id": "5c7553fcb384332d80168cb3f2170f2f2ae47eef1a66a50ba597b2806412d90b",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:27.935024Z",
-      "updated_at": "2026-11-11T08:00:27.94379Z"
+      "updated_at": "2026-11-11T09:45:02.168155Z"
     },
     {
       "intent_id": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
       "row_hash": "c420520d077a8487feb26399a95fe78162b46a11cb784d27544fe8dfc052b7e7",
       "case_id": "4e60600bf157d3c8db9cfb012d00c273d6f767b1af51cb8b9681e7a1982ba74a",
-      "status": "admitted",
+      "status": "eligible",
       "provenance_class": "attested",
       "quality_rules_version": "evalpool-quality-v1",
       "created_at": "2026-11-11T08:00:27.931711Z",
-      "updated_at": "2026-11-11T08:00:27.94379Z"
+      "updated_at": "2026-11-11T09:45:02.168155Z"
     },
     {
       "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",

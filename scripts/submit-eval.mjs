@@ -80,11 +80,32 @@ async function main() {
   const { account, address } = loadOrCreateWallet();
   console.log(`Using Contributor Address: ${address}`);
 
-  const receipts = [];
-  for (const item of SUBMISSIONS) {
-    const receipt = await submitDataset(account, item);
-    receipts.push(receipt);
+  const onlyArg = process.argv.find(a => a.startsWith('--only='))?.split('=')[1];
+  const targets = onlyArg ? SUBMISSIONS.filter(s => s.intentId === onlyArg) : SUBMISSIONS;
+  if (onlyArg && targets.length === 0) {
+    throw new Error(`No submission matches --only=${onlyArg}`);
   }
+
+  const outPath = path.join(evidenceDir, 'eval-submission-receipts.json');
+  let priorReceipts = [];
+  if (onlyArg && fs.existsSync(outPath)) {
+    try {
+      priorReceipts = JSON.parse(fs.readFileSync(outPath, 'utf8')).receipts || [];
+    } catch {}
+  }
+
+  const newReceipts = [];
+  for (const item of targets) {
+    const receipt = await submitDataset(account, item);
+    newReceipts.push(receipt);
+  }
+
+  const receipts = onlyArg
+    ? [
+        ...priorReceipts.filter(r => !targets.some(t => t.intentId === r.intentId)),
+        ...newReceipts
+      ]
+    : newReceipts;
 
   // Query /api/evalpool/submissions/mine to verify row states
   console.log(`\n=== Verifying Submitted Rows via /api/evalpool/submissions/mine ===`);
@@ -107,7 +128,6 @@ async function main() {
   }
   console.log(JSON.stringify(byIntent, null, 2));
 
-  const outPath = path.join(evidenceDir, 'eval-submission-receipts.json');
   fs.writeFileSync(
     outPath,
     JSON.stringify({ submitter: address, submittedAt: new Date().toISOString(), receipts, summaryByIntent: byIntent, rows: mineJson.rows }, null, 2),

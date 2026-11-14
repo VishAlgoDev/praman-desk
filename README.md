@@ -4,7 +4,38 @@
 
 - **Live Hosted Application (No wallet required):** <https://praman-desk.vercel.app>
 - **Active On-Chain Miner (Sepolia Diamond):** ID `#5186` (`praman-compliance-miner`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
-- **Live Evaluator Portfolio:** 57 cryptographically signed evaluation rows across 8 intents on `devnode.telegraphprotocol.com`
+- **Live Evaluator Portfolio:** 62 cryptographically signed evaluation rows across 8 intents on `devnode.telegraphprotocol.com` (57 `eligible`, 5 newly `admitted`)
+
+---
+
+## 2-Minute Quickstart (Zero Setup Required)
+
+Test the live hosted endpoints immediately with `curl` (zero API keys, zero wallet needed):
+
+```bash
+# 1. Overnight 5-Jurisdiction Legal Diligence Pack (US, GB, DE, HK, SG) + Machine vs Law-Firm Benchmark
+curl -s https://praman-desk.vercel.app/api/audit/diligence-pack
+
+# 2. Corporate Registry Lookup (GLEIF Global LEI Index across 200+ jurisdictions)
+curl -s "https://praman-desk.vercel.app/api/miner/corporate-registry?company=SAP%20SE&jurisdiction=DE"
+
+# 3. Counterparty & Live VIES EU VAT Verification (GLEIF + VATComply)
+curl -s "https://praman-desk.vercel.app/api/miner/vendor-verify?vendor=SAP%20SE&vat_number=DE143454214"
+
+# 4. US Treasury OFAC SDN Sanctions Screening (<25ms cold-start in-memory lookup)
+curl -s "https://praman-desk.vercel.app/api/miner/sanctions-screen?name=Banco%20Nacional%20de%20Cuba"
+
+# 5. Regulatory Filing Monitor (SEC EDGAR 10-K/10-Q/8-K + US Federal Register + GLEIF)
+curl -s "https://praman-desk.vercel.app/api/miner/regulatory-filing?entity=Tesla%20Inc&period=last%2012%20months"
+```
+
+**MCP (stdio) one-liner for Claude Code / Cursor / Windsurf / AI agents:**
+```bash
+npx -y --package=git+https://github.com/VishAlgoDev/praman-desk.git praman-spend-guard-mcp
+# or after git clone: node mcp/server.mjs
+```
+
+**Sepolia Testnet Disclosure:** Every paid `x402` verification call spends `$0.01` in free Sepolia test USDC from contributor wallet `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`. Preview/read-only endpoints and the 5-Jurisdiction Diligence Pack preview cost `$0.00`.
 
 ---
 
@@ -37,8 +68,8 @@ Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9
   - `GET /api/miner/sanctions-screen`: Fast in-memory fuzzy bigram search over official US Treasury OFAC `sdn.csv` and `alt.csv` lists (`SANCTIONS_SCREENING_MATCH_GENERAL`).
   - `GET /api/miner/regulatory-filing`: Live SEC EDGAR EFTS 10-K/10-Q/8-K query indexing and US Federal Register API (`REGULATORY_FILING_MONITOR_GENERAL`).
 
-### 2. Track 2 (Evaluators): 57 Signed Dataset Rows Across 8 Intents
-All 57 evaluation cases were signed with EIP-191 `personal_sign` from contributor address [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) and admitted with zero rejections on the Telegraph node:
+### 2. Track 2 (Evaluators): 62 Signed Dataset Rows Across 8 Intents
+All 62 evaluation cases were signed with EIP-191 `personal_sign` from contributor address [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) and admitted with zero rejections on the Telegraph node (57 `eligible` + 5 newly `admitted`):
 - **`DOCUMENT_AUTHENTICITY_GENERAL`** (10 rows, Bounty [#80](https://github.com/telegraphprotocol/bounties/issues/80))
 - **`INVOICE_LEDGER_RECONCILE_GENERAL`** (10 rows, 1st contributor on network, Bounty [#120](https://github.com/telegraphprotocol/bounties/issues/120))
 - **`PURCHASE_ORDER_VERIFY_GENERAL`** (8 rows, 1st contributor on network, Bounty [#122](https://github.com/telegraphprotocol/bounties/issues/122))
@@ -46,7 +77,7 @@ All 57 evaluation cases were signed with EIP-191 `personal_sign` from contributo
 - **`CORPORATE_REGISTRY_LOOKUP_GENERAL`** (8 rows)
 - **`SANCTIONS_SCREENING_MATCH_GENERAL`** (8 rows)
 - **`CONTRACT_OBLIGATION_AUDIT_GENERAL`** (6 rows)
-- **`REGULATORY_FILING_MONITOR_GENERAL`** (1 keyless truth-source via live GLEIF API, Bounty [#104](https://github.com/telegraphprotocol/bounties/issues/104))
+- **`REGULATORY_FILING_MONITOR_GENERAL`** (6 rows: 5 SEC EDGAR / Federal Register attested pairs + 1 live GLEIF truth-source, Bounty [#104](https://github.com/telegraphprotocol/bounties/issues/104))
 
 ### 3. Track 3 (Apps & Agents): Autonomous Spend Guard Web UI & API
 - **Hosted UI:** Real-time interactive dashboard at <https://praman-desk.vercel.app> featuring:
@@ -55,9 +86,9 @@ All 57 evaluation cases were signed with EIP-191 `personal_sign` from contributo
 
 ---
 
-## Settled On-Chain `x402` Purchases (Ethereum Sepolia)
+## Settled On-Chain `x402` Purchases (9 Unique Ethereum Sepolia Settlements)
 
-All verification transactions were purchased from contributor wallet [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) in test USDC:
+All verification transactions were purchased from contributor wallet [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) in test USDC across [`evidence/nov14-milestone-receipt.json`](evidence/nov14-milestone-receipt.json) (5 calls) and [`evidence/production-settlement-receipts.json`](evidence/production-settlement-receipts.json) (4 calls):
 
 | # | Intent | Miner Routed | Sepolia Payment Tx | Telegraph Node Signal (`GET /engine/v1/signal/<hash>`) | Diagnostic Audit & Scope Finding |
 |---|---|---|---|---|---|
@@ -86,6 +117,7 @@ Authored in AssemblyScript and compiled to standalone `wasm32-unknown-unknown`:
   - **Code 2 (RelTol):** Percentage tolerance evaluated with 128-bit multi-precision restoring division with quotient saturation to prevent 64-bit integer overflow even at Wei scale ($10^{18}$) or astronomical relative variance.
   - **Code 3 (PassFail):** 10,000 bp if matches, 0 otherwise.
 - **Verification Suite:** Passed `1,043 / 1,043` automated test vectors (`npm run comparator:test`) with 100% determinism.
+- **Devnode Comparator Scope Note:** Devnode currently routes `INVOICE_LEDGER_RECONCILE_GENERAL`, `PURCHASE_ORDER_VERIFY_GENERAL`, and `DOCUMENT_AUTHENTICITY_GENERAL` through the `GENERIC` `judgment` family (`count: 0`, `generic_fallback: true` on `/api/wasm`), so `comparator.wasm` serves as Praman Desk's deterministic client/server arithmetic engine alongside the 62 signed Eval Pool rows.
 
 ---
 

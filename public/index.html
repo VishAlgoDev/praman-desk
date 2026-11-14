@@ -399,6 +399,52 @@
   [hidden] {
     display: none !important;
   }
+  .diligence-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .invoice-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 13px;
+  }
+  .invoice-card.machine {
+    border-color: var(--ok);
+  }
+  .invoice-card.benchmark {
+    border-color: var(--warn);
+  }
+  @media print {
+    body {
+      background: #ffffff !important;
+      color: #111827 !important;
+      padding: 0;
+    }
+    nav[role="tablist"],
+    #testnet-banner,
+    .no-print,
+    button {
+      display: none !important;
+    }
+    #tab-compliance {
+      display: block !important;
+    }
+    .panel,
+    .invoice-card {
+      background: #ffffff !important;
+      color: #111827 !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: none !important;
+      break-inside: avoid;
+    }
+    .badge {
+      border: 1px solid #94a3b8;
+    }
+  }
 </style>
 </head>
 <body>
@@ -420,8 +466,8 @@
   <nav role="tablist" aria-label="Praman Desk sections">
     <button role="tab" aria-selected="true" data-tab="audit">Spend Guard (Missions 02 &amp; 04)</button>
     <button role="tab" aria-selected="false" data-tab="compliance">Compliance Suite (Missions 04 &amp; 02)</button>
-    <button role="tab" aria-selected="false" data-tab="ledger">On-chain receipt ledger (5)</button>
-    <button role="tab" aria-selected="false" data-tab="eval">Evaluator pool &amp; bounties (41)</button>
+    <button role="tab" aria-selected="false" data-tab="ledger" id="tab-btn-ledger">On-chain receipt ledger (9)</button>
+    <button role="tab" aria-selected="false" data-tab="eval" id="tab-btn-eval">Evaluator pool &amp; bounties (62)</button>
     <button role="tab" aria-selected="false" data-tab="miner">Active Miner #5186 (Sepolia)</button>
   </nav>
 
@@ -624,7 +670,7 @@
     <section class="panel">
       <h2>Track 2 (Evaluators) — Signed Pool Submissions &amp; Bounties</h2>
       <p class="hint" style="margin:0; font-size:13px">
-        Live query to <code>/api/evalpool/submissions/mine?submitter=0x98021b20Efdb7ae2C57366010a6E0fDE207b4466</code>. All 41 evaluation rows were signed with EIP-191 personal_sign and admitted with 0 rejections across 6 Legal &amp; Compliance Intents.
+        Live query to <code>/api/evalpool/submissions/mine?submitter=0x98021b20Efdb7ae2C57366010a6E0fDE207b4466</code>. <span id="eval-summary-copy">62 signed evaluation rows across 8 Legal &amp; Compliance Intents (dynamic node count refreshed on load).</span>
       </p>
     </section>
     <div id="eval-results"></div>
@@ -658,12 +704,12 @@
       <div class="actions" style="margin-top:14px">
         <button type="button" class="secondary" data-test-miner="/api/miner/invoice-reconcile">Test /api/miner/invoice-reconcile</button>
         <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=Apple%20Inc.">Test /api/miner/vendor-verify (Apple Inc. / Live GLEIF)</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=SAP%20SE&vat_number=DE143593636">Test /api/miner/vendor-verify (SAP SE / EU VAT)</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/po-verify">Test /api/miner/po-verify</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=SAP%20SE&vat_number=DE143454214">Test /api/miner/vendor-verify (SAP SE / EU VAT)</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/po-verify?po_number=PO-2026-7741&vendor=STRIPE%2C%20LLC&amount=27062.50&approval_cap=30000">Test /api/miner/po-verify (Canonical PO)</button>
         <button type="button" class="secondary" data-test-miner="/api/miner/doc-authenticity?signedQrAmount=1416000&pdfFaceAmount=1888000&document=GST%20e-Invoice%2064a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012">Test /api/miner/doc-authenticity</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/corporate-registry?name=SAP%20SE&jurisdiction=DE">Test /api/miner/corporate-registry (SAP SE / DE)</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/corporate-registry?company=SAP%20SE&jurisdiction=DE">Test /api/miner/corporate-registry (SAP SE / DE)</button>
         <button type="button" class="secondary" data-test-miner="/api/miner/sanctions-screen?name=Banco%20Nacional%20de%20Cuba">Test /api/miner/sanctions-screen (OFAC SDN)</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/regulatory-filing?company=Goldman%20Sachs&period=2026">Test /api/miner/regulatory-filing (SEC EDGAR / Fed Reg)</button>
+        <button type="button" class="secondary" data-test-miner="/api/miner/regulatory-filing?entity=Tesla%20Inc&period=last%2012%20months">Test /api/miner/regulatory-filing (SEC EDGAR / Fed Reg)</button>
       </div>
       <div id="miner-test-output" style="margin-top:12px"></div>
     </section>
@@ -676,6 +722,30 @@
       <p class="hint" style="margin:0; font-size:13.5px;">
         Three keyless, high-assurance regulatory intelligence engines on Telegraph Protocol. All query authoritative primary registers directly with zero API keys required, providing deterministic ground-truth guarantees for Legal &amp; Compliance (Mission 04) and Stablecoin Pre-Payment Clearing (Mission 02).
       </p>
+
+      <!-- 0. Mission 04 Flagship: Overnight 5-Jurisdiction Diligence Pack & Invoice Comparison -->
+      <div style="background:var(--bg); border:1px solid var(--accent); border-radius:8px; padding:16px; margin-top:16px;" id="diligence-pack-panel">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
+          <h3 style="margin:0; font-size:15px; font-weight:600; color:var(--accent);">⚖️ Overnight 5-Jurisdiction Diligence Pack (Mission 04)</h3>
+          <span class="hint" style="margin:0;">US &middot; GB &middot; DE &middot; HK &middot; SG &bull; GLEIF + VIES + OFAC + SEC/FedReg + HKMA</span>
+        </div>
+        <p style="margin:0 0 10px; font-size:13px; color:var(--muted);">
+          Generates a cross-border diligence pack with per-item cryptographic SHA-256 proofs, links Sepolia x402 verification receipts, and prints the machine invoice alongside an illustrative traditional law-firm benchmark.
+        </p>
+        <div style="margin-bottom:10px;" class="no-print">
+          <label for="diligence-entities-input" style="font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">Portfolio Entities (one per line: Name | Jurisdiction | Optional EU/UK VAT):</label>
+          <textarea id="diligence-entities-input" rows="5" style="width:100%; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; font-size:12px; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink);">Tesla, Inc. | US |
+HSBC Holdings plc | GB |
+SAP SE | DE | DE143454214
+AIA Group Limited | HK |
+DBS Group Holdings Ltd | SG |</textarea>
+        </div>
+        <div class="actions no-print" style="margin-top:8px;">
+          <button type="button" class="primary" id="btn-run-diligence-pack">Generate 5-Jurisdiction Diligence Pack (US &middot; GB &middot; DE &middot; HK &middot; SG)</button>
+          <button type="button" class="secondary" id="btn-print-diligence-pack" hidden>Print / Save PDF Invoice Comparison</button>
+        </div>
+        <div id="diligence-pack-output" style="margin-top:12px;" hidden></div>
+      </div>
 
       <!-- 1. Corporate Registry Lookup -->
       <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:16px; margin-top:16px;">
@@ -841,7 +911,7 @@ const PRESETS = {
   },
   europe: {
     vendor: "SAP SE",
-    vatNumber: "DE143593636",
+    vatNumber: "DE143454214",
     lei: "529900D6BF99LW9R2E68",
     poNumber: "PO-EU-2026-104",
     poAmount: 59500,
@@ -1278,10 +1348,13 @@ async function loadLedger() {
   $("ledger-results").innerHTML = `<section class="panel"><p class="hint">Loading on-chain receipts...</p></section>`;
   try {
     const l = await api("/api/ledger");
+    if ($("tab-btn-ledger")) {
+      $("tab-btn-ledger").textContent = `On-chain receipt ledger (${l.totalPaidCalls})`;
+    }
     $("ledger-summary").innerHTML = `
       <div class="hint" style="color:var(--ink)">
         <strong>${esc(l.totalPaidCalls)} settled x402 purchases</strong> ($${esc(l.totalSpentUsd)} test USDC total)
-        &middot; Test USDC Mint Tx: <a href="https://sepolia.etherscan.io/tx/${esc(l.usdcMintTxHash)}" target="_blank" rel="noopener" class="mono">${esc(l.usdcMintTxHash.slice(0, 14))}...</a>
+        ${l.usdcMintTxHash ? `&middot; Test USDC Mint Tx: <a href="https://sepolia.etherscan.io/tx/${esc(l.usdcMintTxHash)}" target="_blank" rel="noopener" class="mono">${esc(l.usdcMintTxHash.slice(0, 14))}...</a>` : ""}
       </div>
     `;
     const rows = l.calls.map(c => `
@@ -1292,7 +1365,7 @@ async function loadLedger() {
         </th>
         <td>
           <div><strong>${esc(c.minerName)}</strong> (<code>#${esc(c.minerId)}</code>)</div>
-          <div class="hint">Endpoint: <code>${esc(c.endpoint)}</code> &middot; ${esc(c.durationMs)}ms</div>
+          <div class="hint">Endpoint: <code>${esc(c.endpoint)}</code>${c.durationMs != null ? ` &middot; ${esc(c.durationMs)}ms` : ""}</div>
         </td>
         <td>
           <div>${esc(c.diagnostic)}</div>
@@ -1304,9 +1377,9 @@ async function loadLedger() {
         </td>
         <td><span class="badge ${esc(c.agreement)}">${esc(c.badgeText)}</span></td>
         <td class="mono">
-          <div>$0.01 USDC (Epoch ${esc(c.epochId)})</div>
-          <div><a href="https://sepolia.etherscan.io/tx/${esc(c.txHash)}" target="_blank" rel="noopener">tx ${esc(c.txHash.slice(0, 10))}...</a></div>
-          <div><a href="https://devnode.telegraphprotocol.com/engine/v1/signal/${esc(c.signalHash)}" target="_blank" rel="noopener">signal ${esc(c.signalHash.slice(0, 10))}...</a></div>
+          <div>$0.01 USDC (${c.epochId ? `Epoch ${esc(c.epochId)}` : "Sepolia x402"})</div>
+          ${c.txHash ? `<div><a href="https://sepolia.etherscan.io/tx/${esc(c.txHash)}" target="_blank" rel="noopener">tx ${esc(c.txHash.slice(0, 10))}...</a></div>` : ""}
+          ${c.signalHash ? `<div><a href="https://devnode.telegraphprotocol.com/engine/v1/signal/${esc(c.signalHash)}" target="_blank" rel="noopener">signal ${esc(c.signalHash.slice(0, 10))}...</a></div>` : ""}
         </td>
       </tr>
     `).join("");
@@ -1339,6 +1412,13 @@ async function loadEvalPool() {
   $("eval-results").innerHTML = `<section class="panel"><p class="hint">Querying Telegraph devnode evalpool...</p></section>`;
   try {
     const e = await api("/api/evalpool");
+    if ($("tab-btn-eval")) {
+      $("tab-btn-eval").textContent = `Evaluator pool & bounties (${e.totalRows})`;
+    }
+    if ($("eval-summary-copy")) {
+      const intentCount = Object.keys(e.byIntent || {}).length;
+      $("eval-summary-copy").textContent = `${e.totalRows} signed evaluation rows across ${intentCount} Legal & Compliance Intents on devnode.`;
+    }
     const bountyRows = e.bounties.map(b => {
       const live = e.byIntent[b.intent] || { total: b.rows, statuses: { admitted: b.rows } };
       const statusPairs = Object.entries(live.statuses).map(([k, v]) => `${v} ${k}`).join(", ");
@@ -1705,7 +1785,138 @@ document.querySelectorAll("[data-test-miner]").forEach(btn => {
   });
 });
 
+// Overnight 5-Jurisdiction Diligence Pack (Mission 04)
+const btnDiligence = $("btn-run-diligence-pack");
+const btnPrintDiligence = $("btn-print-diligence-pack");
+if (btnPrintDiligence) {
+  btnPrintDiligence.addEventListener("click", () => window.print());
+}
+if (btnDiligence) {
+  btnDiligence.addEventListener("click", async () => {
+    btnDiligence.disabled = true;
+    const out = $("diligence-pack-output");
+    out.hidden = false;
+    out.innerHTML = `<p class="hint">Running parallel registry, EU VAT, OFAC sanctions, SEC EDGAR, and HKMA regulatory diligence across 5 jurisdictions...</p>`;
+    try {
+      const rawLines = ($("diligence-entities-input")?.value || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+      const entities = rawLines.map(line => {
+        const [name, jurisdiction, vatNumber] = line.split("|").map(x => (x || "").trim());
+        return { name, jurisdiction: jurisdiction || "US", vatNumber: vatNumber || "" };
+      }).filter(e => e.name);
+
+      const pack = await api("/api/audit/diligence-pack", { mode: "preview", entities });
+      const rows = (pack.jurisdictions || []).map(j => {
+        const receipt = (j.matchedSepoliaReceipts || [])[0];
+        const vatLabel = j.vatChecked
+          ? `<div style="margin-top:3px"><span class="badge ${j.vatValid ? "confirmed" : "contradicted"}">VAT ${j.vatValid ? "VALID" : "INVALID"}</span></div>`
+          : "";
+        const hkmaLabel = j.hkmaLiveAnchor?.verified
+          ? `<div style="margin-top:3px" class="hint">HKMA Live (${esc(j.hkmaLiveAnchor.latestRecordDate || "200 OK")})</div>`
+          : "";
+        return `
+          <tr>
+            <th>
+              <div><span class="badge confirmed">${esc(j.jurisdiction)}</span> <strong>${esc(j.legalName)}</strong></div>
+              <div class="hint mono">${j.lei ? `LEI: ${esc(j.lei)}` : "No LEI"}</div>
+            </th>
+            <td>
+              <span class="badge ${j.registryActive ? "confirmed" : "contradicted"}">${j.registryActive ? "ACTIVE" : (j.registryFound ? "INACTIVE" : "NOT FOUND")}</span>
+              ${vatLabel}
+              <div class="hint" style="margin-top:3px">${esc(j.registeredAddress || "—")}</div>
+            </td>
+            <td>
+              <span class="badge ${j.sanctionsMatched ? "contradicted" : "confirmed"}">${j.sanctionsMatched ? "FLAGGED" : "CLEAR (0 hits)"}</span>
+            </td>
+            <td>
+              <div><strong>${esc(j.filingsCount)}</strong> EDGAR / FedReg docs</div>
+              ${hkmaLabel}
+            </td>
+            <td class="mono">
+              <div>proof ${esc((j.proofHash || "").slice(0, 14))}...</div>
+              ${receipt?.txHash ? `<div><a href="${esc(receipt.explorerUrl)}" target="_blank" rel="noopener">Sepolia x402 ${esc(receipt.txHash.slice(0, 10))}...</a></div>` : ""}
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      const mi = pack.machineInvoice || {};
+      const tb = pack.traditionalBenchmarkInvoice || {};
+      const mLines = (mi.lineItems || []).map(li => `
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding:4px 0;">
+          <span><code>${esc(li.jurisdiction)}</code> ${esc(li.entity)} (${esc(li.checks)} checks)</span>
+          <span class="mono">$${esc(li.telegraphEquivalentX402Usd)} x402 eq.</span>
+        </div>
+      `).join("");
+      const bLines = (tb.lineItems || []).map(li => `
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding:4px 0;">
+          <span><code>${esc(li.jurisdiction)}</code> ${esc(li.scope)}</span>
+          <span class="mono">$${esc(li.illustrativeFeeUsd)}</span>
+        </div>
+      `).join("");
+
+      out.innerHTML = `
+        <div class="msg ok" style="margin-bottom:12px;">
+          <strong>5-Jurisdiction Diligence Pack Verified</strong> &middot; Turnaround: <strong>${esc(mi.turnaroundTime)}</strong> &middot; Pack SHA-256: <code class="mono">${esc(pack.packSha256)}</code>
+        </div>
+        <div tabindex="0" role="region" aria-labelledby="diligence-table-caption" class="table-wrapper">
+          <table style="--label-2:'Registry & VAT'; --label-3:'Sanctions'; --label-4:'Filings & Regulator'; --label-5:'Proof & Sepolia'">
+            <caption id="diligence-table-caption">Cross-Border Counterparty Diligence Summary (${esc((pack.jurisdictions || []).length)} Jurisdictions)</caption>
+            <thead>
+              <tr>
+                <th>Jurisdiction &amp; Entity</th>
+                <th>Registry &amp; VAT</th>
+                <th>OFAC Sanctions</th>
+                <th>Filings &amp; Regulator</th>
+                <th>SHA-256 Proof &amp; x402</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <div class="diligence-grid">
+          <div class="invoice-card machine">
+            <h4 style="margin:0 0 6px; color:var(--ok);">${esc(mi.title)}</h4>
+            <div class="hint" style="margin-bottom:8px;">Preview primary spend: <strong>$${esc(mi.actualPreviewSpendUsd)}</strong> &bull; Telegraph x402 equivalent (${esc(mi.totalChecksExecuted)} checks): <strong>$${esc(mi.equivalentTelegraphX402Usd)} test USDC</strong> &bull; Stored Sepolia ledger total: <strong>$${esc(mi.storedSepoliaLedgerTotalUsd)}</strong></div>
+            ${mLines}
+            <div style="display:flex; justify-content:space-between; font-weight:700; padding-top:8px;">
+              <span>Total Machine Turnaround (${esc(mi.turnaroundTime)})</span>
+              <span class="mono">$${esc(mi.equivalentTelegraphX402Usd)} Testnet Eq.</span>
+            </div>
+          </div>
+          <div class="invoice-card benchmark">
+            <h4 style="margin:0 0 6px; color:var(--warn);">${esc(tb.title)}</h4>
+            <div class="hint" style="margin-bottom:8px;"><em>${esc(tb.disclaimer)}</em> Turnaround: <strong>${esc(tb.estimatedTurnaround)}</strong>.</div>
+            ${bLines}
+            <div style="display:flex; justify-content:space-between; font-weight:700; padding-top:8px;">
+              <span>Illustrative Counsel Total</span>
+              <span class="mono">$${esc(tb.totalUsd)}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      if (btnPrintDiligence) btnPrintDiligence.hidden = false;
+    } catch (err) {
+      out.innerHTML = `<div class="msg bad">Diligence pack error: ${esc(err.message)}</div>`;
+    } finally {
+      btnDiligence.disabled = false;
+    }
+  });
+}
+
+async function refreshTabCounts() {
+  try {
+    const [l, e] = await Promise.all([api("/api/ledger"), api("/api/evalpool")]);
+    if ($("tab-btn-ledger") && l?.totalPaidCalls != null) {
+      $("tab-btn-ledger").textContent = `On-chain receipt ledger (${l.totalPaidCalls})`;
+    }
+    if ($("tab-btn-eval") && e?.totalRows != null) {
+      $("tab-btn-eval").textContent = `Evaluator pool & bounties (${e.totalRows})`;
+    }
+  } catch {}
+}
+
 loadWallet();
+refreshTabCounts();
 const initialTab = location.hash.replace("#", "");
 if (["audit", "compliance", "ledger", "eval", "miner"].includes(initialTab)) {
   openTab(initialTab);

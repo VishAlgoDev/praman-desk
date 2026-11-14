@@ -70,7 +70,72 @@ async function run() {
     console.log('doc-authenticity status:', doc.status, 'authentic:', doc.json.authentic);
     if (doc.status !== 200) throw new Error('doc-authenticity failed');
 
-    console.log('\nALL 7 ENDPOINTS VERIFIED SUCCESSFULLY!');
+    // 5. Phase 1 Regression Guards
+    console.log('\n--- Checking Phase 1 Regression Guards ---');
+    const badVat = await check('/api/miner/vendor-verify?vendor=SAP%20SE&vat_number=DE999999999');
+    console.log('Fake EU VAT guard:', badVat.json.valid, badVat.json.vat_valid, badVat.json.registration_status);
+    if (badVat.status !== 200 || badVat.json.valid !== false) {
+      throw new Error(`Expected valid: false for fake EU VAT DE999999999, got ${badVat.json.valid}`);
+    }
+
+    const goodVat = await check('/api/miner/vendor-verify?vendor=SAP%20SE&vat_number=DE143454214');
+    console.log('Valid SAP SE EU VAT:', goodVat.json.valid, goodVat.json.vat_valid, goodVat.json.lei);
+    if (goodVat.status !== 200 || goodVat.json.valid !== true || goodVat.json.vat_valid !== true || goodVat.json.lei !== '529900D6BF99LW9R2E68') {
+      throw new Error(`Expected valid SAP SE LEI & active EU VAT DE143454214, got valid=${goodVat.json.valid}, vat_valid=${goodVat.json.vat_valid}`);
+    }
+
+    const emptyVendor = await check('/api/miner/vendor-verify');
+    console.log('Empty vendor-verify guard:', emptyVendor.json.valid, emptyVendor.json.status);
+    if (emptyVendor.status !== 200 || emptyVendor.json.valid !== false || emptyVendor.json.status !== 'missing_parameters') {
+      throw new Error('Expected valid: false / missing_parameters on empty vendor-verify');
+    }
+
+    const barePo = await check('/api/miner/po-verify?po_number=PO-99999&vendor=Acme');
+    console.log('Bare PO guard:', barePo.json.verified, barePo.json.status, barePo.json.amount);
+    if (barePo.status !== 200 || barePo.json.verified !== false || barePo.json.amount !== null || barePo.json.status !== 'insufficient_evidence') {
+      throw new Error('Expected insufficient_evidence and null amount on bare PO without financial figures');
+    }
+
+    const inlinePoGood = await check('/api/miner/po-verify?po_number=PO-102&question=10%20units%20at%20%24250%20%3D%20%242500');
+    console.log('Inline PO math good:', inlinePoGood.json.verified, inlinePoGood.json.status, inlinePoGood.json.amount);
+    if (inlinePoGood.status !== 200 || inlinePoGood.json.verified !== true || inlinePoGood.json.amount !== 2500) {
+      throw new Error('Expected inline PO arithmetic match for 10 units at $250 = $2500');
+    }
+
+    const inlinePoBad = await check('/api/miner/po-verify?po_number=PO-103&question=10%20units%20at%20%24250%20%3D%20%243100');
+    console.log('Inline PO math bad:', inlinePoBad.json.verified, inlinePoBad.json.status, inlinePoBad.json.discrepancy);
+    if (inlinePoBad.status !== 200 || inlinePoBad.json.verified !== false || inlinePoBad.json.status !== 'arithmetic_mismatch') {
+      throw new Error('Expected arithmetic_mismatch for 10 units at $250 = $3100');
+    }
+
+    const urlDoc = await check('/api/miner/doc-authenticity?document=https://example.com');
+    console.log('Uncorroborated URL doc guard:', urlDoc.json.authentic, urlDoc.json.verdict);
+    if (urlDoc.status !== 200 || urlDoc.json.authentic !== false || urlDoc.json.verdict !== 'Inconclusive') {
+      throw new Error('Expected authentic: false and verdict: Inconclusive for uncorroborated URL');
+    }
+
+    // 6. Phase 2 Mission 04 Diligence Pack & Deduplicated Ledger
+    console.log('\n--- Checking Mission 04 5-Jurisdiction Diligence Pack & Ledger ---');
+    const pack = await check('/api/audit/diligence-pack', 'POST', { mode: 'preview' });
+    console.log('Diligence Pack jurisdictions:', pack.json.jurisdictions?.length, 'packSha256:', pack.json.packSha256?.slice(0, 18), 'durationMs:', pack.json.durationMs);
+    if (
+      pack.status !== 200 ||
+      pack.json.jurisdictions?.length !== 5 ||
+      !/^0x[0-9a-f]{64}$/i.test(pack.json.packSha256 || '') ||
+      !pack.json.machineInvoice ||
+      !pack.json.traditionalBenchmarkInvoice
+    ) {
+      throw new Error('5-Jurisdiction Diligence Pack schema check failed');
+    }
+
+    const ledger = await check('/api/ledger');
+    const uniqueTxs = new Set((ledger.json.calls || []).map(c => String(c.txHash || '').toLowerCase()).filter(Boolean));
+    console.log('Ledger totalPaidCalls:', ledger.json.totalPaidCalls, 'uniqueTxs:', uniqueTxs.size, 'totalSpentUsd:', ledger.json.totalSpentUsd);
+    if (ledger.status !== 200 || ledger.json.totalPaidCalls < 9 || uniqueTxs.size !== ledger.json.totalPaidCalls) {
+      throw new Error(`Ledger deduplication check failed (total=${ledger.json.totalPaidCalls}, unique=${uniqueTxs.size})`);
+    }
+
+    console.log('\nALL 7 ENDPOINTS, REGRESSION GUARDS, DILIGENCE PACK & LEDGER VERIFIED SUCCESSFULLY!');
   } finally {
     server.close();
   }
