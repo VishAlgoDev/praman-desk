@@ -27,24 +27,30 @@ async function run() {
   try {
     // 1. Corporate Registry
     console.log('\n--- Checking /api/miner/corporate-registry ---');
-    const corp = await check('/api/miner/corporate-registry?name=SAP%20SE&jurisdiction=DE');
-    console.log('Status:', corp.status, 'found:', corp.json.found, 'active:', corp.json.status_active);
+    const corp = await check('/api/miner/corporate-registry?company=SAP%20SE&jurisdiction=DE');
+    console.log('Status:', corp.status, 'found:', corp.json.found, 'active:', corp.json.active, 'legal_name:', corp.json.legal_name, 'reg_id:', corp.json.registration_id);
     console.log('Summary:', corp.json.summary);
-    if (corp.status !== 200 || !corp.json.found) throw new Error('Corporate registry check failed');
+    if (corp.status !== 200 || !corp.json.found || corp.json.active !== true || !corp.json.legal_name || !corp.json.registration_id) {
+      throw new Error('Corporate registry schema check failed');
+    }
 
     // 2. Sanctions Screen
     console.log('\n--- Checking /api/miner/sanctions-screen ---');
     const sanc = await check('/api/miner/sanctions-screen?name=Banco%20Nacional%20de%20Cuba');
-    console.log('Status:', sanc.status, 'matched:', sanc.json.match_found, 'count:', sanc.json.match_count);
+    console.log('Status:', sanc.status, 'matched:', sanc.json.matched, 'match_score:', sanc.json.match_score, 'lists:', sanc.json.lists);
     console.log('Top match:', sanc.json.matches?.[0]?.matched_name, 'score:', sanc.json.matches?.[0]?.similarity_score);
-    if (sanc.status !== 200 || !sanc.json.match_found) throw new Error('Sanctions screen check failed');
+    if (sanc.status !== 200 || sanc.json.matched !== true || !Array.isArray(sanc.json.lists) || typeof sanc.json.match_score !== 'number') {
+      throw new Error('Sanctions screen schema check failed');
+    }
 
     // 3. Regulatory Filing
     console.log('\n--- Checking /api/miner/regulatory-filing ---');
-    const reg = await check('/api/miner/regulatory-filing?company=Goldman%20Sachs&period=2026');
-    console.log('Status:', reg.status, 'found:', reg.json.found, 'results:', reg.json.total_results);
+    const reg = await check('/api/miner/regulatory-filing?entity=Goldman%20Sachs&period=last%2012%20months');
+    console.log('Status:', reg.status, 'found:', reg.json.found, 'entity:', reg.json.entity, 'filing_count:', reg.json.filing_count);
     console.log('Summary:', reg.json.summary);
-    if (reg.status !== 200 || !reg.json.found) throw new Error('Regulatory filing check failed');
+    if (reg.status !== 200 || !reg.json.found || typeof reg.json.filing_count !== 'number' || !Array.isArray(reg.json.filings) || !Array.isArray(reg.json.urls)) {
+      throw new Error('Regulatory filing schema check failed');
+    }
 
     // 4. Verify existing 4 endpoints
     console.log('\n--- Checking Existing 4 Endpoints ---');

@@ -253,6 +253,100 @@ function parseNumber(val) {
 // 1. Primary Source & Deterministic Compliance Verifiers (Free + Miner Core)
 // ============================================================================
 
+const LEI_PATTERN = /^[0-9A-Z]{18}[0-9]{2}$/;
+
+const JURISDICTION_COUNTRY_MAP = {
+  US: 'US', USA: 'US', 'UNITED STATES': 'US', 'UNITED STATES OF AMERICA': 'US',
+  UK: 'GB', GB: 'GB', 'UNITED KINGDOM': 'GB', ENGLAND: 'GB',
+  DE: 'DE', GERMANY: 'DE', DEUTSCHLAND: 'DE',
+  FR: 'FR', FRANCE: 'FR',
+  NO: 'NO', NORWAY: 'NO', NORGE: 'NO',
+  NL: 'NL', NETHERLANDS: 'NL',
+  CA: 'CA', CANADA: 'CA',
+  IN: 'IN', INDIA: 'IN',
+  SG: 'SG', SINGAPORE: 'SG',
+  AU: 'AU', AUSTRALIA: 'AU',
+  JP: 'JP', JAPAN: 'JP',
+  CH: 'CH', SWITZERLAND: 'CH',
+  IE: 'IE', IRELAND: 'IE',
+  SE: 'SE', SWEDEN: 'SE',
+  FI: 'FI', FINLAND: 'FI',
+  PL: 'PL', POLAND: 'PL',
+  ES: 'ES', SPAIN: 'ES',
+  IT: 'IT', ITALY: 'IT'
+};
+
+function resolveJurisdictionCountryCode(jurisdiction = '') {
+  const upper = String(jurisdiction || '').trim().toUpperCase();
+  if (!upper) return '';
+  if (JURISDICTION_COUNTRY_MAP[upper]) return JURISDICTION_COUNTRY_MAP[upper];
+  // Handle ISO 3166-2 subdivision codes such as "US-TX" or "DE-BW"
+  const prefix = upper.split(/[-_\s]/)[0];
+  if (prefix.length === 2 && /^[A-Z]{2}$/.test(prefix)) return prefix;
+  return '';
+}
+
+function formatGleifAddress(addr) {
+  if (!addr) return null;
+  const str = [
+    ...(Array.isArray(addr.addressLines) ? addr.addressLines : []),
+    addr.city,
+    addr.region,
+    addr.postalCode,
+    addr.country
+  ]
+    .filter(Boolean)
+    .join(', ');
+  return str || null;
+}
+
+function selectBestGleifRecord(records, queryName = '') {
+  if (!Array.isArray(records) || records.length === 0) return null;
+  const norm = String(queryName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const isActiveRecord = (d) =>
+    d.attributes?.entity?.status === 'ACTIVE' && d.attributes?.registration?.status === 'ISSUED';
+  const normName = (d) =>
+    (d.attributes?.entity?.legalName?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  const exactActive = norm ? records.find(d => normName(d) === norm && isActiveRecord(d)) : null;
+  const exact = norm ? records.find(d => normName(d) === norm) : null;
+  const prefixIssued = norm
+    ? records.find(d => normName(d).startsWith(norm) && d.attributes?.registration?.status === 'ISSUED')
+    : null;
+  const anyActive = records.find(d => isActiveRecord(d));
+  const anyIssued = records.find(d => d.attributes?.registration?.status === 'ISSUED');
+  return exactActive || exact || prefixIssued || anyActive || anyIssued || records[0];
+}
+
+function resolvePeriodRange(period = '') {
+  const now = new Date();
+  const enddt = now.toISOString().slice(0, 10);
+  const p = String(period || '').trim().toLowerCase();
+
+  const relMatch = p.match(/(?:last|past)\s+(\d+)\s+(day|days|week|weeks|month|months|year|years)/);
+  if (relMatch) {
+    const qty = Math.max(1, parseInt(relMatch[1], 10));
+    const unit = relMatch[2];
+    const start = new Date(now);
+    if (unit.startsWith('day')) start.setUTCDate(start.getUTCDate() - qty);
+    else if (unit.startsWith('week')) start.setUTCDate(start.getUTCDate() - qty * 7);
+    else if (unit.startsWith('month')) start.setUTCMonth(start.getUTCMonth() - qty);
+    else if (unit.startsWith('year')) start.setUTCFullYear(start.getUTCFullYear() - qty);
+    return { startdt: start.toISOString().slice(0, 10), enddt, label: period.trim() };
+  }
+
+  const yearMatch = p.match(/\b(19\d{2}|20\d{2})\b/);
+  if (yearMatch) {
+    const year = yearMatch[1];
+    return { startdt: `${year}-01-01`, enddt: `${year}-12-31`, label: year };
+  }
+
+  // Default: rolling 12 months
+  const start = new Date(now);
+  start.setUTCFullYear(start.getUTCFullYear() - 1);
+  return { startdt: start.toISOString().slice(0, 10), enddt, label: period.trim() || 'last 12 months' };
+}
+
 export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = '' }) {
   const vendorTrim = String(vendor || '').trim();
   const vatTrim = String(vat_number || '').trim().toUpperCase();
@@ -263,7 +357,7 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
   const ukVatRegex = /^GB[0-9]{9}$/;
   const usEinRegex = /^[0-9]{2}-?[0-9]{7}$/;
   const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-  const leiRegex = /^[0-9A-Z]{18}[0-9]{2}$/;
+  const leiRegex = LEI_PATTERN;
 
   const hasVat = Boolean(vatTrim);
   const taxFormatValid = hasVat
@@ -302,16 +396,7 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
       const res = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' } });
       if (res.ok) {
         const json = await res.json();
-        if (Array.isArray(json.data) && json.data.length > 0) {
-          const norm = vendorTrim.toLowerCase().replace(/[^a-z0-9]/g, '');
-          const exact = json.data.find(d => (d.attributes?.entity?.legalName?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '') === norm);
-          const prefixIssued = json.data.find(d => {
-            const n = (d.attributes?.entity?.legalName?.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-            return n.startsWith(norm) && d.attributes?.registration?.status === 'ISSUED';
-          });
-          const anyIssued = json.data.find(d => d.attributes?.registration?.status === 'ISSUED');
-          gleifRecord = exact || prefixIssued || anyIssued || json.data[0];
-        }
+        gleifRecord = selectBestGleifRecord(json.data, vendorTrim);
       }
     }
   } catch {
@@ -321,18 +406,7 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
   const attr = gleifRecord?.attributes;
   const entity = attr?.entity;
   const reg = attr?.registration;
-  const hq = entity?.headquartersAddress || entity?.legalAddress;
-  const addressStr = hq
-    ? [
-        ...(Array.isArray(hq.addressLines) ? hq.addressLines : []),
-        hq.city,
-        hq.region,
-        hq.postalCode,
-        hq.country
-      ]
-        .filter(Boolean)
-        .join(', ')
-    : null;
+  const addressStr = formatGleifAddress(entity?.headquartersAddress || entity?.legalAddress);
 
   const isIssued = reg?.status === 'ISSUED';
   const valid = Boolean((gleifRecord && isIssued && taxFormatValid) || (gleifRecord && isIssued && !hasVat));
@@ -499,19 +573,30 @@ export function verifyDocumentAuthenticityPrimary({
 
 export async function lookupCorporateRegistry({ company = '', jurisdiction = '' }) {
   const companyTrim = String(company).trim();
+  const companyUpper = companyTrim.toUpperCase();
   const jurisTrim = String(jurisdiction).trim().toUpperCase();
-
-  let gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(companyTrim)}&page[size]=10`;
-  if (jurisTrim.length === 2) {
-    gleifUrl += `&filter[entity.legalAddress.country]=${jurisTrim}`;
-  }
+  const countryCode = resolveJurisdictionCountryCode(jurisdiction);
 
   let records = [];
   try {
-    const res = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' } });
-    if (res.ok) {
-      const json = await res.json();
-      records = Array.isArray(json.data) ? json.data : [];
+    if (LEI_PATTERN.test(companyUpper)) {
+      const directUrl = `https://api.gleif.org/api/v1/lei-records/${encodeURIComponent(companyUpper)}`;
+      const res = await fetch(directUrl, { headers: { Accept: 'application/vnd.api+json' }, signal: AbortSignal.timeout(10000) });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data) records = [json.data];
+      }
+    }
+    if (records.length === 0 && companyTrim) {
+      let gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(companyTrim)}&page[size]=10`;
+      if (countryCode) {
+        gleifUrl += `&filter[entity.legalAddress.country]=${encodeURIComponent(countryCode)}`;
+      }
+      const res = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' }, signal: AbortSignal.timeout(10000) });
+      if (res.ok) {
+        const json = await res.json();
+        records = Array.isArray(json.data) ? json.data : [];
+      }
     }
   } catch {}
 
@@ -519,7 +604,12 @@ export async function lookupCorporateRegistry({ company = '', jurisdiction = '' 
     return {
       found: false,
       company: companyTrim,
+      legal_name: null,
+      registration_id: null,
+      active: false,
       jurisdiction: jurisTrim || null,
+      registered_address: null,
+      incorporated: null,
       status_active: 0,
       results: [],
       source: 'GLEIF Global LEI Index (api.gleif.org)',
@@ -527,30 +617,29 @@ export async function lookupCorporateRegistry({ company = '', jurisdiction = '' 
     };
   }
 
-  const mapped = records.slice(0, 5).map(r => {
+  const bestRecord = selectBestGleifRecord(records, companyTrim);
+  const orderedRecords = bestRecord
+    ? [bestRecord, ...records.filter(r => r !== bestRecord)]
+    : records;
+
+  const mapped = orderedRecords.slice(0, 5).map(r => {
     const e = r.attributes?.entity;
     const reg = r.attributes?.registration;
-    const addr = e?.legalAddress;
+    const entityActive = e?.status ? e.status === 'ACTIVE' : reg?.status === 'ISSUED';
+    const rawDate = e?.creationDate || reg?.initialRegistrationDate || null;
     return {
       lei: r.attributes?.lei,
-      legal_name: e?.legalName?.name,
-      jurisdiction: e?.jurisdiction,
-      status: reg?.status,
-      status_active: reg?.status === 'ISSUED' ? 1 : 0,
+      legal_name: e?.legalName?.name || null,
+      jurisdiction: e?.jurisdiction || null,
+      entity_status: e?.status || null,
+      status: reg?.status || null,
+      active: Boolean(entityActive),
+      status_active: entityActive ? 1 : 0,
       entity_category: e?.entityCategory,
       legal_form: e?.legalForm?.id,
-      registered_address: [
-        ...(Array.isArray(addr?.addressLines) ? addr.addressLines : []),
-        addr?.city, addr?.region, addr?.postalCode, addr?.country
-      ].filter(Boolean).join(', '),
-      headquarters_address: (() => {
-        const hq = e?.headquartersAddress;
-        if (!hq) return null;
-        return [
-          ...(Array.isArray(hq.addressLines) ? hq.addressLines : []),
-          hq.city, hq.region, hq.postalCode, hq.country
-        ].filter(Boolean).join(', ');
-      })(),
+      registered_address: formatGleifAddress(e?.legalAddress),
+      headquarters_address: formatGleifAddress(e?.headquartersAddress),
+      incorporated: rawDate ? String(rawDate).slice(0, 10) : null,
       registration_authority: reg?.managingLou,
       initial_registration: reg?.initialRegistrationDate,
       last_update: reg?.lastUpdateDate,
@@ -558,21 +647,38 @@ export async function lookupCorporateRegistry({ company = '', jurisdiction = '' 
     };
   });
 
+  const top = mapped[0];
   return {
     found: true,
     company: companyTrim,
-    jurisdiction: jurisTrim || mapped[0]?.jurisdiction || null,
-    status_active: mapped[0]?.status_active ?? 0,
+    legal_name: top.legal_name,
+    registration_id: top.lei || null,
+    active: top.active,
+    jurisdiction: top.jurisdiction || jurisTrim || null,
+    registered_address: top.registered_address,
+    incorporated: top.incorporated,
+    status_active: top.status_active,
     result_count: records.length,
     results: mapped,
     source: 'GLEIF Global LEI Index (api.gleif.org)',
-    summary: `Found ${records.length} corporate registry record(s) for "${companyTrim}". Top match: ${mapped[0].legal_name} (LEI: ${mapped[0].lei}, status: ${mapped[0].status}).`
+    summary: `Found ${records.length} corporate registry record(s) for "${companyTrim}". Top match: ${top.legal_name} (LEI: ${top.lei}, active: ${top.active}, LEI status: ${top.status}).`
   };
 }
 
 export async function screenSanctions({ name = '' }) {
   const nameTrim = String(name).trim();
-  if (!nameTrim) return { screened: false, match_found: false, error: 'name parameter required' };
+  if (!nameTrim) {
+    return {
+      screened: false,
+      name: '',
+      matched: false,
+      matches: [],
+      lists: ['US Treasury OFAC SDN'],
+      match_score: 0,
+      match_found: false,
+      error: 'name parameter required'
+    };
+  }
 
   await loadSdnData();
   const THRESHOLD = 0.70;
@@ -601,17 +707,24 @@ export async function screenSanctions({ name = '' }) {
 
   matches.sort((a, b) => b.similarity_score - a.similarity_score);
 
+  const isMatched = matches.length > 0;
+  const topScore = matches[0]?.similarity_score ?? 0;
+
   return {
     screened: true,
-    query_name: nameTrim,
-    match_found: matches.length > 0,
-    match_count: matches.length,
+    name: nameTrim,
+    matched: isMatched,
     matches: matches.slice(0, 10),
+    lists: ['US Treasury OFAC SDN'],
+    match_score: topScore,
+    query_name: nameTrim,
+    match_found: isMatched,
+    match_count: matches.length,
     sdn_list_size: sdnEntries.size,
     sdn_last_loaded: new Date(sdnLoadedAt).toISOString(),
     source: 'US Treasury OFAC SDN List (treasury.gov/ofac)',
     source_url: 'https://sanctionssearch.ofac.treas.gov/',
-    summary: matches.length > 0
+    summary: isMatched
       ? `${matches.length} potential OFAC SDN match(es) for "${nameTrim}". Top: ${matches[0].matched_name} (score: ${matches[0].similarity_score}, program: ${matches[0].programs}).`
       : `No OFAC SDN matches for "${nameTrim}" (screened against ${sdnEntries.size} entries).`
   };
@@ -620,14 +733,22 @@ export async function screenSanctions({ name = '' }) {
 export async function monitorRegulatoryFiling({ company = '', period = '' }) {
   const companyTrim = String(company).trim();
   const periodTrim = String(period).trim();
-  if (!companyTrim) return { found: false, error: 'company parameter required' };
+  if (!companyTrim) {
+    return {
+      found: false,
+      entity: '',
+      filing_count: 0,
+      filings: [],
+      urls: [],
+      error: 'company parameter required'
+    };
+  }
 
-  const yearMatch = periodTrim.match(/\d{4}/);
-  const year = yearMatch ? yearMatch[0] : String(new Date().getFullYear());
+  const range = resolvePeriodRange(periodTrim);
 
   let secFilings = [];
   try {
-    const secUrl = `https://efts.sec.gov/LATEST/search-index?q=${encodeURIComponent(`"${companyTrim}"`)}&forms=10-K,10-Q,8-K&dateRange=custom&startdt=${year}-01-01&enddt=${year}-12-31`;
+    const secUrl = `https://efts.sec.gov/LATEST/search-index?q=${encodeURIComponent(`"${companyTrim}"`)}&forms=10-K,10-Q,8-K&dateRange=custom&startdt=${range.startdt}&enddt=${range.enddt}`;
     const secRes = await fetch(secUrl, {
       headers: {
         'User-Agent': 'Praman-Desk/1.0 (Telegraph Protocol Miner; mailto:dev@example.com)',
@@ -638,7 +759,7 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
     if (secRes.ok) {
       const secData = await secRes.json();
       const hits = secData.hits?.hits || [];
-      secFilings = hits.slice(0, 5).map(h => {
+      secFilings = hits.slice(0, 10).map(h => {
         const s = h._source;
         return {
           form_type: s.form,
@@ -658,7 +779,7 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
 
   let fedRegNotices = [];
   try {
-    const frUrl = `https://www.federalregister.gov/api/v1/documents.json?conditions[term]=${encodeURIComponent(`"${companyTrim}"`)}&per_page=5&order=newest`;
+    const frUrl = `https://www.federalregister.gov/api/v1/documents.json?conditions[term]=${encodeURIComponent(`"${companyTrim}"`)}&conditions[publication_date][gte]=${range.startdt}&conditions[publication_date][lte]=${range.enddt}&per_page=5&order=newest`;
     const frRes = await fetch(frUrl, { signal: AbortSignal.timeout(15000) });
     if (frRes.ok) {
       const frData = await frRes.json();
@@ -676,11 +797,11 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
 
   let gleifStatus = null;
   try {
-    const gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(companyTrim)}&page[size]=1`;
+    const gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(companyTrim)}&page[size]=5`;
     const gleifRes = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' }, signal: AbortSignal.timeout(10000) });
     if (gleifRes.ok) {
       const gleifData = await gleifRes.json();
-      const rec = (gleifData.data || [])[0];
+      const rec = selectBestGleifRecord(gleifData.data, companyTrim);
       if (rec) {
         const reg = rec.attributes?.registration;
         const entity = rec.attributes?.entity;
@@ -699,24 +820,45 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
     }
   } catch {}
 
-  const totalResults = secFilings.length + fedRegNotices.length + (gleifStatus ? 1 : 0);
+  // Combine filings chronologically (newest first) into flat lists matching Telegraph schema
+  const combinedFilings = [
+    ...secFilings.map(f => ({
+      date: f.filing_date || '',
+      title: `SEC Form ${f.form_type} (${f.filing_date}) - ${f.company_name}`,
+      url: f.url || ''
+    })),
+    ...fedRegNotices.map(r => ({
+      date: r.publication_date || '',
+      title: `${r.title} (${r.publication_date})`,
+      url: r.url || ''
+    }))
+  ].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+
+  const filings = combinedFilings.map(item => item.title);
+  const urls = combinedFilings.map(item => item.url);
+  const filingCount = combinedFilings.length;
+
   const parts = [];
   if (secFilings.length > 0) parts.push(`${secFilings.length} SEC filing(s)`);
   if (fedRegNotices.length > 0) parts.push(`${fedRegNotices.length} Federal Register notice(s)`);
   if (gleifStatus) parts.push(`LEI: ${gleifStatus.registration_status}`);
 
   return {
-    found: totalResults > 0,
+    found: filingCount > 0,
+    entity: companyTrim,
+    filing_count: filingCount,
+    filings,
+    urls,
     company: companyTrim,
-    period: periodTrim || year,
+    period: range.label,
     sec_filings: secFilings,
     federal_register_notices: fedRegNotices,
     gleif_status: gleifStatus,
-    total_results: totalResults,
+    total_results: filingCount,
     sources: ['SEC EDGAR (efts.sec.gov)', 'US Federal Register (federalregister.gov)', 'GLEIF (api.gleif.org)'],
-    summary: totalResults > 0
-      ? `${parts.join('; ')} for "${companyTrim}" in ${periodTrim || year}.`
-      : `No regulatory filings found for "${companyTrim}" in ${periodTrim || year}.`
+    summary: filingCount > 0 || gleifStatus
+      ? `${parts.join('; ')} for "${companyTrim}" (${range.startdt} to ${range.enddt}).`
+      : `No regulatory filings found for "${companyTrim}" (${range.startdt} to ${range.enddt}).`
   };
 }
 
@@ -823,9 +965,13 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
 
   if (intent === 'SANCTIONS_SCREENING_MATCH_GENERAL') {
     const primaryMatchCount = primary.match_count ?? (primary.matches?.length || 0);
-    const primarySanctioned = primaryMatchCount > 0;
+    const primarySanctioned = Boolean(primary.matched != null ? primary.matched : primaryMatchCount > 0);
     const minerMatchCount = result.match_count ?? (result.matches?.length || 0);
-    const minerSanctioned = Boolean(result.sanctioned || minerMatchCount > 0 || (result.matches && result.matches.length > 0));
+    const minerSanctioned = Boolean(
+      result.matched != null
+        ? result.matched
+        : (result.sanctioned || minerMatchCount > 0 || (result.matches && result.matches.length > 0))
+    );
 
     const agrees = primarySanctioned === minerSanctioned;
     return {
@@ -840,21 +986,23 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
   }
 
   if (intent === 'CORPORATE_REGISTRY_LOOKUP_GENERAL') {
-    const primaryFound = Boolean(primary.found);
-    const minerFound = Boolean(result.found != null ? result.found : (result.legal_name || result.registration_id || result.lei));
-    const agrees = primaryFound === minerFound;
+    const primaryActive = primary.active != null ? Boolean(primary.active) : Boolean(primary.found);
+    const minerActive = result.active != null
+      ? Boolean(result.active)
+      : Boolean(result.found != null ? result.found : (result.legal_name || result.registration_id || result.lei));
+    const agrees = primaryActive === minerActive;
     return {
       agreement: agrees ? 'confirmed' : 'contradicted',
-      badgeText: agrees ? (primaryFound ? 'confirmed registry' : 'confirmed not found') : 'contradicted',
+      badgeText: agrees ? (primaryActive ? 'confirmed registry' : 'confirmed inactive') : 'contradicted',
       diagnostic: agrees
-        ? `Miner #${minerRes.miner_id || '5186'} (${minerRes.miner_name || 'miner'}) verified corporate registration (${primaryFound ? 'LEI: ' + (primary.results?.[0]?.lei || result.registration_id || result.lei || 'found') + ' / ' + (result.legal_name || primary.results?.[0]?.legal_name || 'verified') : 'unregistered'}).`
-        : `Contradiction: primary check found=${primaryFound}, miner returned found=${minerFound}.`
+        ? `Miner #${minerRes.miner_id || '5186'} (${minerRes.miner_name || 'miner'}) verified corporate status (${primaryActive ? 'LEI: ' + (primary.registration_id || primary.results?.[0]?.lei || result.registration_id || result.lei || 'found') + ' / ' + (result.legal_name || primary.legal_name || 'verified') : 'inactive or unregistered'}).`
+        : `Contradiction: primary check active=${primaryActive}, miner returned active=${minerActive}.`
     };
   }
 
   if (intent === 'REGULATORY_FILING_MONITOR_GENERAL') {
-    const primaryCount = primary.total_results ?? (primary.sec_filings?.length || 0);
-    const minerCount = result.total_results ?? (result.sec_filings?.length || (Array.isArray(result.filings) ? result.filings.length : (result.findings?.length || 0)));
+    const primaryCount = primary.filing_count ?? primary.total_results ?? (primary.sec_filings?.length || 0);
+    const minerCount = result.filing_count ?? result.total_results ?? (result.sec_filings?.length || (Array.isArray(result.filings) ? result.filings.length : (result.findings?.length || 0)));
     const minerFound = Boolean(result.found != null ? result.found : (minerCount > 0 || result.findings || result.sec_filings));
     const agrees = (primaryCount > 0) === (minerCount > 0) || (Boolean(primary.found) === minerFound);
     return {
@@ -1784,7 +1932,7 @@ export async function handleApiRequest(req, res) {
 
       if (pathname === '/api/miner/corporate-registry') {
         const out = await lookupCorporateRegistry({
-          company: merged.name || merged.company || merged.entity || merged.legal_name || merged.question || 'SAP SE',
+          company: merged.company || merged.name || merged.entity || merged.legal_name || merged.question || 'SAP SE',
           jurisdiction: merged.jurisdiction || ''
         });
         return sendJson(res, 200, {
