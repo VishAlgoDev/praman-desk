@@ -74,5 +74,11 @@ All remediation work, newly discovered defects, regressions, security issues, pr
 - **ND-16 (`extractAmountList` Trailing Currency & Zero-Paid Ledger Regression on Issue `#1`)**:
   - `extractAmountList` only matched prefix currency tags (`INR 102660.00`) and filtered out `n === 0` (`> 0`). Consequently, Lucian's Issue `#1` scenario (`"Invoice total 102660.00 INR; reference ID 48291"` vs `"Ledger paid 0.00 INR; reference ID 48291"`) returned `insufficient_evidence` instead of `reconciled: false, discrepancy: 102660`.
   - Fix: Match both prefix and suffix currency tags (`INR|USD|EUR|GBP|USDC|USDT`), permit `n >= 0` for explicit currency-tagged or financial-labeled totals (such as `$0.00` paid), while continuing to reject bare numeric IDs (`Document reference 48291`).
+- **ND-17 (Intermittent Vercel SEC EDGAR `HTTP 403` on Cold Start / `www.sec.gov` Tickers Fetch)**:
+  - Live `deep-audit.mjs` (`task-9349`) hit `SEC EFTS HTTP 403` from Vercel `iad1` because `resolveSecCik()` fetched `www.sec.gov/files/company_tickers.json` live on cold start and fell back to `efts.sec.gov` when `www.sec.gov` returned `403`, while `User-Agent` used parenthesized format.
+  - Fix: Bundle all `10,404` SEC issuers in `data/sec-tickers.json` (`498 KB`, packaged via `vercel.json` `includeFiles: "data/**"`) for zero-network CIK resolution, use official `<AppName> <Email>` SEC User-Agent formatting (`PramanDesk vishalkarad98@gmail.com`), and add a retry path on `data.sec.gov/submissions/`.
+- **ND-17 (`evaluateMinerAgreement` `field_status` & Strict Discrepancy Check on Issue `#1`)**:
+  - Reading Lucian's (`@epistemedeus`) follow-up comment on `VishAlgoDev/praman-desk#1` showed `INVOICE_LEDGER_RECONCILE_GENERAL` in `evaluateMinerAgreement` still used `parseNumber` instead of `parseStrictNumber` and failed to reject `field_status.reconciled === "missing" | "rejected" | "unavailable"` or `field_status.discrepancy === "missing" | "unavailable"`.
+  - Fix: Switched `evaluateMinerAgreement` to `parseStrictNumber` and blocked `confirmed` whenever `field_status.reconciled` or `field_status.discrepancy` is `'rejected' | 'missing' | 'unavailable'` (leaving `'ok'`/`'verified'` allowed). Added automated unit assertions covering all 5 of Lucian's Issue `#1` test cases.
 
 

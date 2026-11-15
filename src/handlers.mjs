@@ -1753,11 +1753,28 @@ export async function screenSanctions({ name = '', threshold = 0.70 }) {
 }
 
 const SEC_HEADERS = {
-  'User-Agent': 'PramanDeskCompliance/1.0 (admin@praman-desk.vercel.app)',
-  Accept: 'application/json'
+  'User-Agent': 'PramanDesk vishalkarad98@gmail.com',
+  Accept: 'application/json',
+  'Accept-Encoding': 'gzip, deflate'
 };
+const SEC_TICKERS_PATH = path.join(rootDir, 'data', 'sec-tickers.json');
 let secTickersCache = null;
 let secTickersLoadedAt = 0;
+
+async function fetchSecWithRetry(url, timeoutMs = 10000) {
+  let res = await fetch(url, { headers: SEC_HEADERS, signal: AbortSignal.timeout(timeoutMs) });
+  if (res.status === 403 || res.status === 429) {
+    res = await fetch(url, {
+      headers: {
+        'User-Agent': 'PramanDeskAudit ops@praman-desk.vercel.app',
+        Accept: 'application/json',
+        'Accept-Encoding': 'gzip, deflate'
+      },
+      signal: AbortSignal.timeout(timeoutMs)
+    });
+  }
+  return res;
+}
 
 async function resolveSecCik(companyQuery) {
   const cleanQ = String(companyQuery || '').trim();
@@ -1766,17 +1783,28 @@ async function resolveSecCik(companyQuery) {
     return { cik: explicitCik[1].padStart(10, '0'), title: cleanQ };
   }
   const now = Date.now();
+  if (!secTickersCache && fs.existsSync(SEC_TICKERS_PATH)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(SEC_TICKERS_PATH, 'utf8'));
+      if (Array.isArray(parsed)) {
+        secTickersCache = parsed.map(x => Array.isArray(x) ? { cik_str: x[0], ticker: x[1], title: x[2] } : x);
+        secTickersLoadedAt = now;
+      }
+    } catch {}
+  }
   if (!secTickersCache || now - secTickersLoadedAt > 6 * 3600 * 1000) {
-    const r = await fetch('https://www.sec.gov/files/company_tickers.json', {
-      headers: SEC_HEADERS,
-      signal: AbortSignal.timeout(8000)
-    });
-    if (!r.ok) {
-      return { error: `SEC tickers HTTP ${r.status}` };
+    try {
+      const r = await fetchSecWithRetry('https://www.sec.gov/files/company_tickers.json', 8000);
+      if (r.ok) {
+        const raw = await r.json();
+        secTickersCache = Object.values(raw || {});
+        secTickersLoadedAt = now;
+      } else if (!secTickersCache) {
+        return { error: `SEC tickers HTTP ${r.status}` };
+      }
+    } catch (err) {
+      if (!secTickersCache) return { error: `SEC tickers error: ${err.message}` };
     }
-    const raw = await r.json();
-    secTickersCache = Object.values(raw || {});
-    secTickersLoadedAt = now;
   }
   const qUpper = cleanQ.toUpperCase();
   if (/^[A-Z]{1,5}$/.test(qUpper)) {
@@ -1846,7 +1874,7 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
           const cikInfo = await resolveSecCik(companyTrim).catch(() => null);
           if (cikInfo?.cik) {
             const subUrl = `https://data.sec.gov/submissions/CIK${cikInfo.cik}.json`;
-            const subRes = await fetch(subUrl, { headers: SEC_HEADERS, signal: AbortSignal.timeout(10000) });
+            const subRes = await fetchSecWithRetry(subUrl, 10000);
             if (subRes.ok) {
               const sub = await subRes.json();
               const recent = sub?.filings?.recent;
@@ -1884,7 +1912,7 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
           // 2. Fallback to EFTS full-text search for non-SEC / unrecognized entities
           const formsParam = formsFilter.length > 0 ? formsFilter.join(',') : '10-K,10-Q,8-K';
           const secUrl = `https://efts.sec.gov/LATEST/search-index?q=${encodeURIComponent(`"${companyTrim}"`)}&forms=${encodeURIComponent(formsParam)}&dateRange=custom&startdt=${range.startdt}&enddt=${range.enddt}`;
-          const secRes = await fetch(secUrl, { headers: SEC_HEADERS, signal: AbortSignal.timeout(12000) });
+          const secRes = await fetchSecWithRetry(secUrl, 12000);
           if (!secRes.ok) {
             return { hits: [], total: 0, mode: 'efts_error', upstreamStatus: secRes.status, error: `SEC EFTS HTTP ${secRes.status}` };
           }
@@ -2108,9 +2136,10 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
   if (intent === 'INVOICE_LEDGER_RECONCILE_GENERAL') {
     const expText = String(result.explanation || '').toLowerCase();
     const hasBoolReconciled = typeof result.reconciled === 'boolean';
-    const hasNumericDiscrepancy = result.discrepancy !== undefined && result.discrepancy !== null && Number.isFinite(parseNumber(result.discrepancy));
-    const primaryDelta = Math.round(Math.abs(primary.details?.delta_total ?? parseNumber(primary.discrepancy)) * 100);
-    const minerDiscrepancyVal = hasNumericDiscrepancy ? Math.round(Math.abs(parseNumber(result.discrepancy)) * 100) : 0;
+    const parsedDisc = parseStrictNumber(result.discrepancy);
+    const hasNumericDiscrepancy = typeof result.discrepancy !== 'boolean' && result.discrepancy !== undefined && result.discrepancy !== null && Number.isFinite(parsedDisc);
+    const primaryDelta = Math.round(Math.abs(primary.details?.delta_total ?? (Number.isFinite(parseStrictNumber(primary.discrepancy)) ? parseStrictNumber(primary.discrepancy) : 0)) * 100);
+    const minerDiscrepancyVal = hasNumericDiscrepancy ? Math.round(Math.abs(parsedDisc) * 100) : 0;
 
     let wasmScore = 0;
     if (hasNumericDiscrepancy) {
@@ -2128,8 +2157,10 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
     const mentionsDiscrepancy = expText.includes('discrepancy') || expText.includes('exceeds') || (hasNumericDiscrepancy && wasmScore >= 5000);
     const primaryHasDiscrepancy = !primary.reconciled;
     const textAgrees = mentionsDiscrepancy === primaryHasDiscrepancy;
+    const badStatus = (s) => s === 'rejected' || s === 'missing' || s === 'unavailable';
+    const hasMissingFieldStatus = badStatus(fieldStatus.reconciled) || badStatus(fieldStatus.discrepancy);
 
-    if (!hasBoolReconciled || !hasNumericDiscrepancy || fieldStatus.discrepancy === 'rejected' || warnings.length > 0) {
+    if (!hasBoolReconciled || !hasNumericDiscrepancy || hasMissingFieldStatus || warnings.length > 0) {
       return {
         agreement: hasBoolReconciled && textAgrees ? 'schema_warning' : 'inconclusive',
         badgeText: hasNumericDiscrepancy && textAgrees ? `math ok (${wasmScore} bp) / schema warning` : 'inconclusive / missing fields',
