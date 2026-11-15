@@ -34,6 +34,25 @@ async function run() {
       throw new Error('Corporate registry schema check failed');
     }
 
+    const corpNl = await check('/api/miner/corporate-registry?query=Is%20Siemens%20AG%20an%20active%20company%20in%20Germany%3F');
+    console.log('NL Siemens AG DE -> found:', corpNl.json.found, 'verdict:', corpNl.json.verdict, 'active:', corpNl.json.active, 'legal_name:', corpNl.json.legal_name, 'reg_id:', corpNl.json.registration_id, 'jurisdiction:', corpNl.json.jurisdiction);
+    if (
+      corpNl.status !== 200 ||
+      corpNl.json.found !== true ||
+      corpNl.json.verdict !== 'found' ||
+      corpNl.json.active !== true ||
+      corpNl.json.registration_id !== 'W38RGI023J3WT1HWRP32' ||
+      corpNl.json.entity_status !== 'ACTIVE'
+    ) {
+      throw new Error(`NL corporate registry parity check failed: ${JSON.stringify(corpNl.json)}`);
+    }
+
+    const corpDelaware = await check('/api/miner/corporate-registry?query=Look%20up%20Apple%20Inc%20in%20Delaware');
+    console.log('NL Apple Delaware -> found:', corpDelaware.json.found, 'legal_name:', corpDelaware.json.legal_name, 'jurisdiction:', corpDelaware.json.jurisdiction);
+    if (corpDelaware.status !== 200 || !corpDelaware.json.found || !String(corpDelaware.json.jurisdiction || '').startsWith('US')) {
+      throw new Error(`Delaware country mapping check failed: ${JSON.stringify(corpDelaware.json)}`);
+    }
+
     // 2. Sanctions Screen
     console.log('\n--- Checking /api/miner/sanctions-screen ---');
     const sanc = await check('/api/miner/sanctions-screen?name=Banco%20Nacional%20de%20Cuba');
@@ -50,6 +69,20 @@ async function run() {
     console.log('Summary:', reg.json.summary);
     if (reg.status !== 200 || !reg.json.found || typeof reg.json.filing_count !== 'number' || !Array.isArray(reg.json.filings) || !Array.isArray(reg.json.urls)) {
       throw new Error('Regulatory filing schema check failed');
+    }
+
+    const regNl = await check('/api/miner/regulatory-filing?query=How%20many%20Federal%20Register%20documents%20mention%20Boeing%20in%20the%20last%2012%20months%3F');
+    console.log('NL Boeing FR -> found:', regNl.json.found, 'verdict:', regNl.json.verdict, 'entity:', regNl.json.entity, 'filing_count:', regNl.json.filing_count, 'by_type:', JSON.stringify(regNl.json.by_type));
+    if (
+      regNl.status !== 200 ||
+      regNl.json.found !== true ||
+      regNl.json.verdict !== 'found' ||
+      regNl.json.entity !== 'Boeing' ||
+      regNl.json.filing_count < 100 ||
+      !regNl.json.by_type ||
+      Object.keys(regNl.json.by_type).length === 0
+    ) {
+      throw new Error(`NL Federal Register parity check failed: ${JSON.stringify(regNl.json)}`);
     }
 
     // 4. Verify existing 4 endpoints

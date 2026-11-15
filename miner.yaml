@@ -70,6 +70,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Verbatim reconciliation problem text"
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Legacy query alias for question"
 
   - path: /api/miner/vendor-verify
     external_path: /api/miner/vendor-verify
@@ -99,6 +103,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Vendor inquiry question"
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Legacy query alias for question"
 
   - path: /api/miner/doc-authenticity
     external_path: /api/miner/doc-authenticity
@@ -123,6 +131,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Document verification inquiry"
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Legacy query alias for question"
 
   # --- NEW COMPLIANCE INTENTS (H2 EXPANSION) ---
 
@@ -155,6 +167,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Corporate registry inquiry"
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Legacy query alias for question"
 
   - path: /api/miner/sanctions-screen
     external_path: /api/miner/sanctions-screen
@@ -178,6 +194,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Sanctions screening inquiry"
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Legacy query alias for question"
 
   - path: /api/miner/regulatory-filing
     external_path: /api/miner/regulatory-filing
@@ -208,6 +228,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Regulatory filing inquiry"
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Legacy query alias for question"
 
 semantics:
   supported_intents:
