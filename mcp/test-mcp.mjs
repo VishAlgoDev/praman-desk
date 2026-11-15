@@ -261,10 +261,35 @@ async function runTests() {
   if (m2NegParsed.cleared !== false || m2NegParsed.action !== 'REJECT_INVALID_SETTLEMENT') {
     throw new Error(`Expected REJECT_INVALID_SETTLEMENT for negative amount, got ${JSON.stringify(m2NegParsed)}`);
   }
-  console.log('   PASS: screen_stablecoin_settlement enforced Mission 02 live Sepolia RPC + OFAC freeze + amount bounds.\n');
+
+  const m2OmitOrig = await client.callTool({
+    name: 'screen_stablecoin_settlement',
+    arguments: {
+      recipient_address: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      amount_usdc: 1500,
+      beneficiary_name: 'Apple Inc.',
+    },
+  });
+  const m2OmitParsed = JSON.parse(m2OmitOrig.content[0].text);
+  if (m2OmitParsed.cleared !== false || m2OmitParsed.action !== 'HOLD_TRAVEL_RULE') {
+    throw new Error(`Expected HOLD_TRAVEL_RULE when originator_name omitted on >=$1000, got ${JSON.stringify(m2OmitParsed)}`);
+  }
+
+  const sancHighThresh = await client.callTool({
+    name: 'screen_sanctions',
+    arguments: {
+      name: 'Viktor Bout',
+      threshold: 0.99,
+    },
+  });
+  const sancHighParsed = JSON.parse(sancHighThresh.content[0].text);
+  if (sancHighParsed.matched !== false) {
+    throw new Error(`Expected threshold=0.99 to filter comma/middle-name match (0.88-0.96), got ${JSON.stringify(sancHighParsed)}`);
+  }
+  console.log('   PASS: screen_stablecoin_settlement & screen_sanctions threshold enforced live RPC, FATF Travel Rule, & bounds.\n');
 
   await client.close();
-  console.log('=== All 12 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 14 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {

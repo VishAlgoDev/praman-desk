@@ -20,7 +20,7 @@ function createRng(seed = 20261115) {
   };
 }
 
-const CLEAN_ENTITIES = [
+const CLEAN_ENTITIES_TRAIN = [
   'Apple Inc.',
   'SAP SE',
   'Siemens Aktiengesellschaft',
@@ -37,7 +37,6 @@ const CLEAN_ENTITIES = [
   'Novartis AG',
   'BNP Paribas SA',
   'Nestle S.A.',
-  'Sony Group Corporation',
   'ASML Holding N.V.',
   'Taiwan Semiconductor Manufacturing Company',
   'Shopify Inc.',
@@ -66,16 +65,30 @@ const CLEAN_ENTITIES = [
   'Commonwealth Bank of Australia',
   'Royal Bank of Canada',
   'Toronto-Dominion Bank',
+  'AliExpress Logistics Services Ltd',
+  'Muhammad Ali Memorial Foundation',
+  'Kieran Patel',
+  'Bank of Nova Scotia',
+  'Standard Chartered PLC'
+];
+
+const CLEAN_ENTITIES_VAL = [
+  'Sony Group Corporation',
   'Zurich Insurance Group AG',
   'Allianz SE',
   'Munich Reinsurance Company',
   'Deutsche Post AG',
   'Maersk A/S',
-  'AliExpress Logistics Services Ltd',
-  'Muhammad Ali Memorial Foundation',
-  'Kieran Patel',
   'Elena Rostova-Miller',
-  'David Chen'
+  'David Chen',
+  'Banco Santander SA',
+  'Alibaba Group Holding Limited',
+  'AliPay US Corp',
+  'Cuba Libre Hospitality Group Inc',
+  'Schneider Electric SE',
+  'ABB Ltd',
+  'Hermes International SCA',
+  'Nintendo Co., Ltd.'
 ];
 
 const QUERY_TEMPLATES = [
@@ -147,36 +160,62 @@ function makeResponse(formatIdx, { queryName, isMatch, uid, matchedName, program
   ].join('\n');
 }
 
+function cleanProgramTag(rawProg, fallback = 'SDGT') {
+  const cleaned = String(rawProg || '')
+    .split(';')[0]
+    .replace(/[\[\]]/g, '')
+    .trim();
+  return cleaned || fallback;
+}
+
 function buildPairs() {
   const sdnRaw = JSON.parse(fs.readFileSync(sdnPath, 'utf8'));
   const entries = (sdnRaw.entries || []).filter(
     (e) => Array.isArray(e) && e.length >= 4 && e[1] && e[1].length >= 5 && e[1].length <= 65 && /^[A-Za-z0-9 ,.'-]+$/.test(e[1])
   );
-  const commaEntries = entries.filter((e) => e[1].includes(','));
-  const rng = createRng(20261115);
+  // Disjoint partition across entries BEFORE filtering comma/alias subsets so train and val share zero SDN UIDs
+  const splitIdx = Math.floor(entries.length * 0.85);
+  const trainEntries = entries.slice(0, splitIdx);
+  const valEntries = entries.slice(splitIdx);
+  const trainComma = trainEntries.filter((e) => e[1].includes(','));
+  const valComma = valEntries.filter((e) => e[1].includes(','));
+  const extractAliasPool = (list) => list.flatMap((e) => {
+    const validAliases = (Array.isArray(e[4]) ? e[4] : []).filter((a) => a && a.length >= 5 && a.length <= 65 && /^[A-Za-z0-9 ,.'-]+$/.test(a) && a !== e[1]);
+    return validAliases.length ? [{ entry: e, alias: validAliases[0] }] : [];
+  });
+  const trainAlias = extractAliasPool(trainEntries);
+  const valAlias = extractAliasPool(valEntries);
 
+  const rng = createRng(20261115);
   const pick = (arr) => arr[Math.floor(rng() * arr.length)];
   const pairs = [];
   const usedWorse = new Set();
 
-  // Balanced 5-format distribution with balanced class polarity (~50% clean better, ~50% match better):
+  // Balanced 5-format distribution with disjoint train/val entity sets (zero leakage):
   // - 45% (450): clean_vs_false_positive (better = CLEAR, worse = false MATCH)
-  // - 25% (250): sdn_vs_false_negative (better = MATCH, worse = false CLEAR)
-  // - 20% (200): comma_name_vs_miss (better = MATCH, worse = false CLEAR)
+  // - 20% (200): sdn_vs_false_negative (better = MATCH, worse = false CLEAR)
+  // - 15% (150): comma_name_vs_miss (better = MATCH, worse = false CLEAR)
+  // - 10% (100): alias_vs_miss (better = MATCH via alt.csv alias, worse = false CLEAR)
   // - 10% (100): sdn_vs_wrong_metadata (better = true UID/program, worse = wrong UID/entity/program)
   for (let i = 0; i < 1000; i++) {
+    const split = i < 850 ? 'train' : 'val';
+    const splitClean = split === 'train' ? CLEAN_ENTITIES_TRAIN : CLEAN_ENTITIES_VAL;
+    const splitEntries = split === 'train' ? trainEntries : valEntries;
+    const splitComma = split === 'train' ? trainComma : valComma;
+    const splitAlias = split === 'train' ? trainAlias : valAlias;
+
     const betterFormat = Math.floor(rng() * 5);
     const worseFormat = Math.floor(rng() * 5);
     const template = QUERY_TEMPLATES[i % QUERY_TEMPLATES.length];
     const mod = i % 20;
 
     if (mod < 9) {
-      // clean_vs_false_positive (450 pairs)
-      const cleanName = CLEAN_ENTITIES[i % CLEAN_ENTITIES.length];
-      const decoy = pick(entries);
+      // clean_vs_false_positive (45%)
+      const cleanName = splitClean[i % splitClean.length];
+      const decoy = pick(splitEntries);
       const decoyUid = String(decoy[0]);
       const decoyName = decoy[1];
-      const decoyProg = (decoy[3] || pick(PROGRAMS)).split(';')[0].trim() || 'SDGT';
+      const decoyProg = cleanProgramTag(decoy[3], pick(PROGRAMS));
       const q = template(cleanName);
 
       const better = makeResponse(betterFormat, {
@@ -197,16 +236,16 @@ function buildPairs() {
       });
       if (!usedWorse.has(worse)) {
         usedWorse.add(worse);
-        pairs.push({ intent: 'SANCTIONS_SCREENING_MATCH', split: i < 850 ? 'train' : 'val', format_pair: `${betterFormat}->${worseFormat}`, archetype: 'clean_vs_false_positive', input: q, better, worse });
+        pairs.push({ intent: 'SANCTIONS_SCREENING_MATCH', split, entity_key: cleanName, format_pair: `${betterFormat}->${worseFormat}`, archetype: 'clean_vs_false_positive', input: q, better, worse });
       }
       continue;
     }
 
-    if (mod < 14) {
-      // sdn_vs_false_negative (250 pairs)
-      const rec = entries[(i * 7 + Math.floor(rng() * 13)) % entries.length];
+    if (mod < 13) {
+      // sdn_vs_false_negative (20%)
+      const rec = splitEntries[(i * 7 + Math.floor(rng() * 13)) % splitEntries.length];
       const [uid, sdnName, , prog] = rec;
-      const cleanProg = (prog || 'SDGT').split(';')[0].trim() || 'SDGT';
+      const cleanProg = cleanProgramTag(prog, 'SDGT');
       const q = template(sdnName);
 
       const better = makeResponse(betterFormat, {
@@ -227,16 +266,16 @@ function buildPairs() {
       });
       if (!usedWorse.has(worse)) {
         usedWorse.add(worse);
-        pairs.push({ intent: 'SANCTIONS_SCREENING_MATCH', split: i < 850 ? 'train' : 'val', format_pair: `${betterFormat}->${worseFormat}`, archetype: 'sdn_vs_false_negative', input: q, better, worse });
+        pairs.push({ intent: 'SANCTIONS_SCREENING_MATCH', split, entity_key: `UID:${uid}`, format_pair: `${betterFormat}->${worseFormat}`, archetype: 'sdn_vs_false_negative', input: q, better, worse });
       }
       continue;
     }
 
-    if (mod < 18) {
-      // comma_name_vs_miss (200 pairs)
-      const rec = commaEntries[(i * 5 + 1) % commaEntries.length];
+    if (mod < 16) {
+      // comma_name_vs_miss (15%)
+      const rec = splitComma[(i * 5 + 1) % splitComma.length];
       const [uid, sdnName, , prog] = rec;
-      const cleanProg = (prog || 'SDGT').split(';')[0].trim() || 'SDGT';
+      const cleanProg = cleanProgramTag(prog, 'SDGT');
       const naturalName = flipCommaName(sdnName);
       const q = template(naturalName);
 
@@ -258,16 +297,47 @@ function buildPairs() {
       });
       if (!usedWorse.has(worse)) {
         usedWorse.add(worse);
-        pairs.push({ intent: 'SANCTIONS_SCREENING_MATCH', split: i < 850 ? 'train' : 'val', format_pair: `${betterFormat}->${worseFormat}`, archetype: 'comma_name_vs_miss', input: q, better, worse });
+        pairs.push({ intent: 'SANCTIONS_SCREENING_MATCH', split, entity_key: `UID:${uid}`, format_pair: `${betterFormat}->${worseFormat}`, archetype: 'comma_name_vs_miss', input: q, better, worse });
       }
       continue;
     }
 
-    // sdn_vs_wrong_metadata (100 pairs)
-    const rec = entries[(i * 11 + 3) % entries.length];
-    const decoy = entries[(i * 29 + 17) % entries.length];
+    if (mod < 18 && splitAlias.length > 0) {
+      // alias_vs_miss (10%)
+      const item = splitAlias[(i * 3 + 5) % splitAlias.length];
+      const [uid, sdnName, , prog] = item.entry;
+      const aliasName = item.alias;
+      const cleanProg = cleanProgramTag(prog, 'SDGT');
+      const q = template(aliasName);
+
+      const better = makeResponse(betterFormat, {
+        queryName: aliasName,
+        isMatch: true,
+        uid: String(uid),
+        matchedName: sdnName,
+        program: cleanProg,
+        refId: i
+      });
+      const worse = makeResponse(worseFormat, {
+        queryName: aliasName,
+        isMatch: false,
+        uid: null,
+        matchedName: null,
+        program: null,
+        refId: i
+      });
+      if (!usedWorse.has(worse)) {
+        usedWorse.add(worse);
+        pairs.push({ intent: 'SANCTIONS_SCREENING_MATCH', split, entity_key: `UID:${uid}`, format_pair: `${betterFormat}->${worseFormat}`, archetype: 'alias_vs_miss', input: q, better, worse });
+      }
+      continue;
+    }
+
+    // sdn_vs_wrong_metadata (10%)
+    const rec = splitEntries[(i * 11 + 3) % splitEntries.length];
+    const decoy = splitEntries[(i * 29 + 17) % splitEntries.length];
     const [uid, sdnName, , prog] = rec;
-    const cleanProg = (prog || 'SDGT').split(';')[0].trim() || 'SDGT';
+    const cleanProg = cleanProgramTag(prog, 'SDGT');
     const wrongProg = PROGRAMS.find((p) => p !== cleanProg) || 'CUBA';
     const wrongUid = String(Number(uid) + 137 + (i % 50));
     const q = template(sdnName);
@@ -290,7 +360,7 @@ function buildPairs() {
     });
     if (!usedWorse.has(worse)) {
       usedWorse.add(worse);
-      pairs.push({ intent: 'SANCTIONS_SCREENING_MATCH', split: i < 850 ? 'train' : 'val', format_pair: `${betterFormat}->${worseFormat}`, archetype: 'sdn_vs_wrong_metadata', input: q, better, worse });
+      pairs.push({ intent: 'SANCTIONS_SCREENING_MATCH', split, entity_key: `UID:${uid}`, format_pair: `${betterFormat}->${worseFormat}`, archetype: 'sdn_vs_wrong_metadata', input: q, better, worse });
     }
   }
 

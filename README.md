@@ -68,7 +68,7 @@ Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9
   - `GET /api/miner/doc-authenticity`: Cryptographic SHA-256 digest provenance check (`DOCUMENT_AUTHENTICITY_GENERAL`).
   - `GET /api/miner/corporate-registry`: Verifies official statutory registration, active status, and jurisdiction details via GLEIF ISO 17442 (`CORPORATE_REGISTRY_LOOKUP_GENERAL`).
   - `GET /api/miner/sanctions-screen`: Fast in-memory fuzzy bigram search over official US Treasury OFAC `sdn.csv` and `alt.csv` lists (`SANCTIONS_SCREENING_MATCH_GENERAL`).
-  - `GET /api/miner/regulatory-filing`: Live SEC EDGAR EFTS 10-K/10-Q/8-K query indexing and US Federal Register API (`REGULATORY_FILING_MONITOR_GENERAL`).
+  - `GET /api/miner/regulatory-filing`: CIK-resolved SEC EDGAR Submissions API (`data.sec.gov/submissions`) for issuer 10-K/10-Q/8-K counts + EFTS fallback + US Federal Register API (`REGULATORY_FILING_MONITOR_GENERAL`).
 
 ### 2. Track 2 (Evaluators): 62 Signed Dataset Rows Across 8 Intents
 All 62 evaluation cases were signed with EIP-191 `personal_sign` from contributor address [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) and admitted with zero rejections on the Telegraph node (all 62 `eligible`):

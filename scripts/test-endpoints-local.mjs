@@ -278,7 +278,75 @@ async function run() {
       throw new Error(`Mission 02 FATF check failed: ${JSON.stringify(m2Fatf.json)}`);
     }
 
-    console.log('\nALL ENDPOINTS, P0/P1 REGRESSION GUARDS, ISSUE #1, SSRF, DILIGENCE PACK & MISSION 02 VERIFIED!');
+    // 11. Post-audit security & edge regressions (C1, C2, H1, H2, M1, H4)
+    const poZeroCap = await check('/api/miner/po-verify?po_number=PO-0CAP&vendor=Apple%20Inc.&amount=100&approval_cap=0');
+    const poNegCap = await check('/api/miner/po-verify?po_number=PO-NCAP&vendor=Apple%20Inc.&amount=100&approval_cap=-50');
+    if (poZeroCap.json.verified !== false || poNegCap.json.verified !== false) {
+      throw new Error(`C1 approval_cap bypass failed: ${JSON.stringify({ zero: poZeroCap.json.verified, neg: poNegCap.json.verified })}`);
+    }
+
+    const invGarbage = await check('/api/miner/invoice-reconcile?billedQty=foo&acceptedQty=bar&unitPrice=baz');
+    const invNeg = await check('/api/miner/invoice-reconcile?billedQty=-10&acceptedQty=-10&unitPrice=50');
+    const docGarbage = await check('/api/miner/doc-authenticity?signedQrAmount=foo&pdfFaceAmount=bar&irnOrSha256=64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012');
+    const docNeg = await check('/api/miner/doc-authenticity?signedQrAmount=-100&pdfFaceAmount=-100&irnOrSha256=64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012');
+    const docTamperEqual = await check('/api/miner/doc-authenticity', 'POST', {
+      document: 'Invoice revoked certificate detected during audit',
+      signedQrAmount: 100,
+      pdfFaceAmount: 100,
+      irnOrSha256: '64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012'
+    });
+    if (invGarbage.json.reconciled !== false || invNeg.json.reconciled !== false) {
+      throw new Error(`C2/H2 invoice garbage/negative guard failed: ${JSON.stringify({ g: invGarbage.json, n: invNeg.json })}`);
+    }
+    if (docGarbage.json.authentic !== false || docNeg.json.authentic !== false || docTamperEqual.json.authentic !== false) {
+      throw new Error(`C2/H2/M1 doc guard failed: ${JSON.stringify({ g: docGarbage.json.authentic, n: docNeg.json.authentic, t: docTamperEqual.json })}`);
+    }
+
+    const m2BadCap = await check('/api/mission/stablecoin-gate', 'POST', {
+      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      amountUsdc: 0.25,
+      beneficiaryName: 'Apple Inc.',
+      delegationCapUsdc: 0
+    });
+    const m2OmittedOriginator = await check('/api/mission/stablecoin-gate', 'POST', {
+      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      amountUsdc: 1500,
+      beneficiaryName: 'Apple Inc.'
+    });
+    const m2NoTransferTx = await check('/api/mission/stablecoin-gate', 'POST', {
+      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      amountUsdc: 0.25,
+      beneficiaryName: 'Apple Inc.',
+      originatorName: 'Praman Desk Treasury',
+      txHash: '0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39'
+    });
+    if (m2BadCap.json.cleared !== false || m2BadCap.json.action !== 'REJECT_INVALID_SETTLEMENT') {
+      throw new Error(`H1 invalid delegation cap failed: ${JSON.stringify(m2BadCap.json)}`);
+    }
+    if (m2OmittedOriginator.json.cleared !== false || m2OmittedOriginator.json.action !== 'HOLD_TRAVEL_RULE') {
+      throw new Error(`H1 omitted originator FATF check failed: ${JSON.stringify(m2OmittedOriginator.json)}`);
+    }
+    if (m2NoTransferTx.json.cleared !== false || m2NoTransferTx.json.action !== 'REJECT_INVALID_SETTLEMENT') {
+      throw new Error(`H1 0-transfer txHash rejection failed: ${JSON.stringify(m2NoTransferTx.json)}`);
+    }
+
+    // 12. Remaining NL queries & redacted-VIES shell rejection (H4)
+    const sancViktorNl = await check('/api/miner/sanctions-screen?query=' + encodeURIComponent('Screen Viktor Bout for OFAC sanctions'));
+    const corpMsft = await check('/api/miner/corporate-registry?query=' + encodeURIComponent("What is Microsoft Corporation's LEI and jurisdiction?"));
+    const corpDbDe = await check('/api/miner/corporate-registry?query=' + encodeURIComponent('Verify legal entity Deutsche Bank AG DE'));
+    const regTeslaEdgar = await check('/api/miner/regulatory-filing?query=' + encodeURIComponent('How many 10-K filings did Tesla make in 2025 on SEC EDGAR?'));
+    const venFakeRedacted = await check('/api/miner/vendor-verify?vendor=FakeUnknownShellCorpXYZ&vat_number=DE143454214');
+    if (!sancViktorNl.json.matched || !corpMsft.json.found || !corpDbDe.json.found || (corpDbDe.json.jurisdiction || '').slice(0, 2) !== 'DE') {
+      throw new Error(`H4 NL query failed: viktor=${sancViktorNl.json.matched}, msft=${corpMsft.json.found}, db=${corpDbDe.json.found}/${corpDbDe.json.jurisdiction}`);
+    }
+    if (!regTeslaEdgar.json.found || (regTeslaEdgar.json.sec_filings || []).length !== 1) {
+      throw new Error(`H4 Tesla on SEC EDGAR 2025 failed: ${JSON.stringify({ found: regTeslaEdgar.json.found, len: regTeslaEdgar.json.sec_filings?.length })}`);
+    }
+    if (venFakeRedacted.json.valid !== false) {
+      throw new Error(`H4 fake shell + redacted German VAT should be valid=false, got ${JSON.stringify(venFakeRedacted.json)}`);
+    }
+
+    console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, ISSUE #1, SSRF, DILIGENCE PACK & MISSION 02 VERIFIED!');
   } finally {
     server.close();
   }

@@ -464,7 +464,7 @@
   </section>
 
   <nav role="tablist" aria-label="Praman Desk sections">
-    <button role="tab" aria-selected="true" data-tab="audit">Spend Guard (Missions 02 &amp; 04)</button>
+    <button role="tab" aria-selected="true" data-tab="audit">Spend Guard (Mission 04)</button>
     <button role="tab" aria-selected="false" data-tab="compliance">Compliance Suite (Mission 04)</button>
     <button role="tab" aria-selected="false" data-tab="stablecoin">Stablecoin Gate (Mission 02)</button>
     <button role="tab" aria-selected="false" data-tab="ledger" id="tab-btn-ledger">On-chain receipt ledger (9)</button>
@@ -644,8 +644,8 @@
 
         <div class="actions">
           <button type="button" class="secondary" id="btn-primary">1. Check primary sources &amp; math (free)</button>
-          <button type="button" class="primary" id="btn-buy">2. Buy Telegraph checks &amp; compare ($0.02)</button>
-          <span class="hint" id="spend-estimate" style="margin:0">2 paid checks selected ($0.02 test USDC on Ethereum Sepolia)</span>
+          <button type="button" class="primary" id="btn-buy">2. Buy Telegraph checks &amp; compare ($0.05)</button>
+          <span class="hint" id="spend-estimate" style="margin:0">5 paid checks selected ($0.05 test USDC on Ethereum Sepolia)</span>
         </div>
       </form>
       <div id="audit-msg"></div>
@@ -757,12 +757,12 @@
     </section>
   </div>
 
-  <!-- TAB 5: COMPLIANCE SUITE (MISSIONS 04 & 02) -->
+  <!-- TAB 5: COMPLIANCE SUITE (MISSION 04) -->
   <div id="tab-compliance" hidden>
     <section class="panel">
-      <h2>Multi-Mission Autonomous Compliance Suite (Missions 04 &amp; 02)</h2>
+      <h2>Autonomous Legal &amp; Counterparty Compliance Suite (Mission 04)</h2>
       <p class="hint" style="margin:0; font-size:13.5px;">
-        Three keyless, high-assurance regulatory intelligence engines on Telegraph Protocol. All query authoritative primary registers directly with zero API keys required, providing deterministic ground-truth guarantees for Legal &amp; Compliance (Mission 04) and Stablecoin Pre-Payment Clearing (Mission 02).
+        Three keyless, high-assurance regulatory intelligence engines on Telegraph Protocol. All query authoritative primary registers directly with zero API keys required, providing deterministic ground-truth guarantees for Legal &amp; Cross-Border Diligence (Mission 04). For pre-payment USDC clearing, see the dedicated <strong>Stablecoin Gate (Mission 02)</strong> tab.
       </p>
 
       <!-- 0. Mission 04 Flagship: Overnight 5-Jurisdiction Diligence Pack & Invoice Comparison -->
@@ -1222,8 +1222,9 @@ function downloadFile(name, content, type) {
 async function loadWallet() {
   try {
     const w = await api("/api/wallet");
+    const addrUrl = safeUrl(`${w.explorerUrl || ''}/address/${w.address || ''}`);
     $("wallet-box").innerHTML = `
-      Wallet <a href="${esc(w.explorerUrl)}/address/${esc(w.address)}" target="_blank" rel="noopener" class="mono">${esc(w.address.slice(0, 6))}...${esc(w.address.slice(-4))}</a>
+      Wallet <a href="${esc(addrUrl)}" target="_blank" rel="noopener" class="mono">${esc(w.address.slice(0, 6))}...${esc(w.address.slice(-4))}</a>
       &middot; <strong>${esc(w.usdcBalance)}</strong> test USDC
       &middot; ${esc(w.ethBalance)} Sepolia ETH
     `;
@@ -1526,7 +1527,7 @@ async function loadEvalPool() {
           <td class="mono">${esc(live.total)} rows</td>
           <td>${esc(b.provenance)}</td>
           <td><span class="badge confirmed">${esc(statusPairs)}</span></td>
-          <td>${b.commentUrl ? `<a href="${esc(b.commentUrl)}" target="_blank" rel="noopener">Issue #${esc(b.issue)} (/submit in review)</a>` : "Pool contribution"}</td>
+          <td>${b.commentUrl && safeUrl(b.commentUrl) !== "#" ? `<a href="${esc(safeUrl(b.commentUrl))}" target="_blank" rel="noopener">Issue #${esc(b.issue)} (/submit in review)</a>` : "Pool contribution"}</td>
         </tr>
       `;
     }).join("");
@@ -1934,7 +1935,7 @@ if (btnDiligence) {
             </td>
             <td class="mono">
               <div>proof ${esc((j.proofHash || "").slice(0, 14))}...</div>
-              ${receipt?.txHash ? `<div><a href="${esc(receipt.explorerUrl)}" target="_blank" rel="noopener">Sepolia x402 ${esc(receipt.txHash.slice(0, 10))}...</a></div>` : ""}
+              ${receipt?.txHash ? `<div><a href="${esc(safeUrl(receipt.explorerUrl))}" target="_blank" rel="noopener">Sepolia x402 ${esc(receipt.txHash.slice(0, 10))}...</a></div>` : ""}
             </td>
           </tr>
         `;

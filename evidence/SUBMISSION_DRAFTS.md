@@ -10,7 +10,7 @@
 Thanks for catching and documenting both edge cases cleanly! We reproduced the exact defect on `/api/miner/invoice-reconcile?invoice_id=INV-2026-081&po_number=PO-2026-7741` (and bare-reference NL queries): numeric fragments inside identifier strings (`2026`, `081`, `7741`) plus a missing-input fallback previously produced a false `reconciled: true`.
 
 **Fixed in the latest commit + live Vercel deployment:**
-1. Stripped invoice/PO identifiers, ISO dates, and reference numbers prior to fallback amount extraction, and removed the default synthetic `100 * 250` fallback in `reconcileInvoicePrimary` when line-item/amount evidence is absent. Bare references now deterministically return HTTP 200 with `reconciled: null` and `verdict: "insufficient_evidence"`.
+1. Stripped invoice/PO identifiers, ISO dates, and reference numbers prior to fallback amount extraction, and removed the default synthetic `100 * 250` fallback in `reconcileInvoicePrimary` when line-item/amount evidence is absent. Bare references now deterministically return HTTP 200 with `reconciled: null` and `status: "insufficient_evidence"`.
 2. Tightened `evaluateMinerAgreement` (`INVOICE_LEDGER_RECONCILE_GENERAL`), `/api/miner/doc-authenticity` (`signedQrAmount` without `pdfFaceAmount` returning HTTP 200 `insufficient_evidence` instead of 500, plus blocking public/localhost SSRF targets), and OFAC SDN false-positive guards (`"AIA Group Limited"` and `"Ali"` now return `matched: false`, while comma-reversed SDNs like `"Viktor Bout"` -> `"BOUT, Viktor Anatolijevitch"` match cleanly).
 3. Expanded `scripts/test-endpoints-local.mjs` and `scripts/deep-audit.mjs` to continuously assert these regression cases against live production (`https://praman-desk.vercel.app`).
 

@@ -140,6 +140,8 @@ function parseCsvLine(line) {
 }
 
 let sdnRefreshPromise = null;
+let sdnLastFailedAt = 0;
+const SDN_RETRY_BACKOFF_MS = 5 * 60 * 1000;
 
 function refreshSdnInBackground() {
   if (sdnRefreshPromise) return sdnRefreshPromise;
@@ -185,8 +187,10 @@ function refreshSdnInBackground() {
         sdnEntries = entries;
         sdnAliases = aliases;
         sdnLoadedAt = now;
+        sdnLastFailedAt = 0;
       }
     } catch {
+      sdnLastFailedAt = Date.now();
       // Keep pre-indexed snapshot if live US Treasury CSV fetch is unavailable
     } finally {
       sdnRefreshPromise = null;
@@ -199,7 +203,7 @@ async function loadSdnData() {
   initSdnFromSnapshot();
   const now = Date.now();
   if (sdnEntries && sdnEntries.size > 0) {
-    if ((now - sdnLoadedAt) >= SDN_TTL_MS && !sdnRefreshPromise) {
+    if ((now - sdnLoadedAt) >= SDN_TTL_MS && (now - sdnLastFailedAt) >= SDN_RETRY_BACKOFF_MS && !sdnRefreshPromise) {
       // Stale-while-revalidate: serve snapshot in <1ms instead of blocking serverless requests for ~12s
       refreshSdnInBackground().catch(() => {});
     }
@@ -222,7 +226,7 @@ const CORP_STOP_TOKENS = new Set([
 function normalizeSanctionsText(str) {
   let s = String(str || '').trim();
   // Unwrap natural-language question scaffolding only when explicitly phrased as a screening query
-  const nlMatch = s.match(/^(?:is|screen|check\s+if|verify\s+if|whether)\s+(.+?)\s+(?:is\s+)?(?:on\s+the\s+(?:ofac|sdn|sanctions)\b.*|sanctioned\b.*|blocked\s+under\b.*)/i);
+  const nlMatch = s.match(/^(?:is|screen|check(?:\s+if)?|verify(?:\s+if)?|whether)\s+(.+?)\s+(?:is\s+)?(?:(?:on|against|for|under)\s+(?:the\s+)?(?:ofac|sdn|sanctions)\b.*|sanctioned\b.*|blocked\s+under\b.*)/i);
   if (nlMatch) s = nlMatch[1].trim();
   return s.toLowerCase().replace(/['’`]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 }
@@ -337,10 +341,12 @@ const GLOBAL_WINDOW_MS = 60 * 60 * 1000;
 
 function extractClientIp(req) {
   if (!req || typeof req === 'string') return req || 'local';
-  const vercelFwd = req.headers?.['x-vercel-forwarded-for']?.split(',')[0]?.trim();
-  const realIp = req.headers?.['x-real-ip']?.trim();
-  const fwd = req.headers?.['x-forwarded-for']?.split(',')[0]?.trim();
-  return vercelFwd || realIp || req.socket?.remoteAddress || fwd || 'local';
+  if (process.env.VERCEL) {
+    const vercelFwd = req.headers?.['x-vercel-forwarded-for']?.split(',')[0]?.trim();
+    const realIp = req.headers?.['x-real-ip']?.trim();
+    return vercelFwd || realIp || req.socket?.remoteAddress || 'local';
+  }
+  return req.socket?.remoteAddress || 'local';
 }
 
 function checkPaidRateLimit(reqOrIp) {
@@ -385,12 +391,22 @@ function decodeBase64Json(val) {
   }
 }
 
+function parseStrictNumber(val) {
+  if (typeof val === 'number') return Number.isFinite(val) ? val : NaN;
+  if (val === null || val === undefined || typeof val === 'boolean') return NaN;
+  const raw = String(val).trim();
+  if (!raw || !/\d/.test(raw)) return NaN;
+  const stripped = raw
+    .replace(/^(?:USD|EUR|GBP|INR|USDC|USDT)\s*/i, '')
+    .replace(/[$€£₹,\s%]/g, '')
+    .replace(/\s*(?:USD|EUR|GBP|INR|USDC|USDT)$/i, '');
+  if (!/^[-+]?(?:\d+\.?\d*|\.\d+)$/.test(stripped)) return NaN;
+  const n = Number(stripped);
+  return Number.isFinite(n) ? n : NaN;
+}
+
 function parseNumber(val) {
-  if (typeof val === 'number') return val;
-  if (!val) return 0;
-  const cleaned = String(val).replace(/[^0-9.-]/g, '');
-  const n = Number(cleaned);
-  return Number.isFinite(n) ? n : 0;
+  return parseStrictNumber(val);
 }
 
 async function fetchJsonWithRetry(url, options = {}, attempts = 2, timeoutMs = 6500) {
@@ -478,9 +494,15 @@ function parseCorporateRegistryQuery(rawCompany = '', rawJurisdiction = '') {
     return { company: inlineLei[1], jurisdiction };
   }
 
+  // Direct UK Companies House registration number (e.g. "UK company number 12345678" or "SC123456")
+  const inlineUkReg = cleaned.match(/\b(?:UK\s+)?company\s+(?:number|no\.?|#)\s*(\d{8}|(?:SC|NI|OC|SO|NC)\d{6})\b/i);
+  if (inlineUkReg) {
+    return { company: inlineUkReg[1].toUpperCase(), jurisdiction: jurisdiction || 'GB' };
+  }
+
   const patterns = [
-    /^(?:what\s+is|find|get|look\s*up|check|verify)\s+(?:the\s+)?(?:official\s+)?(?:lei(?:\s+number|\s+code)?|corporate\s+(?:registration|registry|record|status|details)|legal\s+(?:entity\s+)?status|registration\s+(?:number|status))\s+(?:of|for)\s+(.+?)(?:\s+(?:in|registered in|incorporated in|from)\s+(.+))?$/i,
-    /^(?:what\s+is)\s+(.+?)(?:'s|’s)\s+(?:official\s+)?(?:lei(?:\s+number|\s+code)?|corporate\s+status|legal\s+status|registration(?:\s+status|\s+number)?)(?:\s+(?:in|from)\s+(.+))?$/i,
+    /^(?:what\s+is|find|get|look\s*up|check|verify)\s+(?:the\s+)?(?:official\s+)?(?:lei(?:\s+number|\s+code)?|corporate\s+(?:registration|registry|record|status|details)|legal\s+(?:entity\s+)?status|registration\s+(?:number|status)|incorporation\s+status(?:\s+and\s+registered\s+(?:agent|office|address))?)\s+(?:of|for)\s+(.+?)(?:\s+(?:in|registered in|incorporated in|from)\s+(.+))?$/i,
+    /^(?:what\s+is)\s+(.+?)(?:'s|’s)\s+(?:official\s+)?(?:lei(?:\s+number|\s+code)?|legal\s+entity\s+identifier|corporate\s+status|legal\s+status|registration(?:\s+status|\s+number)?)(?:\s+(?:and|&|,)\s+(?:jurisdiction|country|domicile|status))?(?:\s+(?:in|from)\s+(.+))?$/i,
     /^(?:does)\s+(.+?)\s+(?:have|hold)\s+(?:an?\s+)?(?:active|valid|issued)\s+(?:lei|corporate\s+registration)(?:\s+(?:in|from)\s+(.+))?$/i,
     /^(?:is|check if|verify if|whether)\s+(.+?)\s+(?:is\s+)?(?:currently\s+)?(?:an?\s+)?(?:active|registered|valid|incorporated|existing|live|dissolved|operational)(?:\s+(?:company|corporation|entity|firm|business))?\s+(?:in|registered in|incorporated in|from)\s+(.+)$/i,
     /^(?:look\s*up|verify|check|find|search(?:\s+for)?)\s+(?:legal\s+entity\s+(?:status\s+)?(?:of|for)\s+|corporate\s+(?:registration|registry|record|status|details)\s+(?:of|for)\s+)?(.+?)\s+(?:in|registered in|incorporated in|from)\s+(.+)$/i,
@@ -504,10 +526,20 @@ function parseCorporateRegistryQuery(rawCompany = '', rawJurisdiction = '') {
     }
   }
 
+  // Handle "Verify legal entity Deutsche Bank AG DE" (explicit trailing ISO-2 code excluding corporate suffixes like SE/SA/AG)
+  if (!matchedPattern) {
+    const trailingIso = cleaned.match(/^(?:look\s*up|verify|check|find)\s+(?:the\s+)?(?:legal\s+entity(?:\s+status)?(?:\s+(?:of|for))?\s+|corporate\s+(?:registration|registry|record|status|details)(?:\s+(?:of|for))?\s+)?(.+?)\s+(DE|US|GB|UK|FR|CH|JP|SG|HK|AU|CA|IN|IE|LU|NL)$/);
+    if (trailingIso) {
+      company = trailingIso[1].trim().replace(/[.,;!?]+$/g, '');
+      if (!jurisdiction) jurisdiction = trailingIso[2];
+      matchedPattern = true;
+    }
+  }
+
   // Fallback strip leading question phrases without "in <country>"
   if (!matchedPattern && /^(?:is|are|look\s*up|verify|check|find|what\s+is|does)\s+/i.test(cleaned)) {
     const stripped = cleaned
-      .replace(/^(?:is|are|look\s*up|verify|check|find|what\s+is|does)\s+(?:the\s+)?(?:official\s+)?(?:corporate\s+(?:registration|registry|record|status|details)\s+(?:of|for)\s+|legal\s+entity\s+(?:status\s+)?(?:of|for)\s+|lei\s+(?:of|for)\s+)?/i, '')
+      .replace(/^(?:is|are|look\s*up|verify|check|find|what\s+is|does)\s+(?:the\s+)?(?:official\s+)?(?:corporate\s+(?:registration|registry|record|status|details)\s+(?:of|for)\s+|legal\s+entity\s+(?:status\s+)?(?:of|for)\s+|lei\s+(?:of|for)\s+|legal\s+entity\s+)/i, '')
       .replace(/\s+(?:is\s+)?(?:currently\s+)?(?:an?\s+)?(?:active|registered|valid|incorporated|existing|live|dissolved|operational)(?:\s+(?:company|entity|corporation|firm|business))?(?:\s+or\s+(?:dissolved|inactive))?$/i, '')
       .replace(/\s+(?:active|registered|valid|incorporated|existing|live|dissolved|operational)$/i, '')
       .trim();
@@ -622,15 +654,16 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '') {
 
   const cleaned = company.replace(/^["'“”]+|["'“”]+$/g, '').replace(/[?!.]+$/g, '').trim();
   const timeSuffixRe = /\s+(?:(?:in|over|during|for)\s+(?:the\s+)?(?:last|past)\s+\S+\s+(?:day|days|week|weeks|month|months|year|years)|(?:last|past)\s+\S+\s+(?:day|days|week|weeks|month|months|year|years)|since\s+(?:20\d{2}(?:-\d{2}-\d{2})?|19\d{2})|(?:in|for|during)\s+(?:fy\s*)?(?:19\d{2}|20\d{2})|from\s+20\d{2}-\d{2}-\d{2}\s+(?:to|through)\s+20\d{2}-\d{2}-\d{2})$/i;
-  let extracted = cleaned;
+  const sourceSuffixRe = /\s+(?:on|with|from|via|at|in)\s+(?:the\s+)?(?:sec\s+edgar|sec|edgar|federal\s+register)\b$/i;
+  let extracted = cleaned.replace(sourceSuffixRe, '').trim();
   const tm = extracted.match(timeSuffixRe);
   if (tm) {
     if (!period) period = tm[0].trim();
     extracted = extracted.slice(0, tm.index).trim();
   }
 
-  // Strip trailing "on SEC EDGAR" / "with the SEC" / "on EDGAR" after extracting time
-  extracted = extracted.replace(/\s+(?:on|with|from|via|in)\s+(?:the\s+)?(?:sec\s+edgar|sec|edgar|federal\s+register)\b$/i, '').trim();
+  // Also strip source suffix if query put source before period (e.g. "...on SEC EDGAR in 2025")
+  extracted = extracted.replace(sourceSuffixRe, '').trim();
 
   const questionPatterns = [
     /^how\s+many\s+(?:[a-z0-9-]+\s+){0,3}?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:did|does|has)\s+(.+?)\s+(?:make|file|submit|have|publish)\b/i,
@@ -832,11 +865,20 @@ export async function verifyVendorPrimary({
   // Cross-check VIES entity identity & jurisdiction vs claimed vendor / GLEIF record
   const gleifCountry = entity?.jurisdiction || null;
   const vatCountry = vatRegistryResult?.country_code || (isEuOrUkVat ? vatPrefix : null);
-  const extractCoreTokens = (s) => String(s || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, ' ')
-    .split(/\s+/)
-    .filter(w => w.length >= 2 && !CORP_STOP_TOKENS.has(w));
+  const GENERIC_VENDOR_TOKENS = new Set([
+    ...CORP_STOP_TOKENS,
+    'services', 'service', 'solutions', 'global', 'international', 'technologies',
+    'technology', 'tech', 'systems', 'enterprises', 'ventures', 'partners', 'capital'
+  ]);
+  const extractCoreTokens = (s) => {
+    const base = String(s || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9 ]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length >= 2 && !CORP_STOP_TOKENS.has(w));
+    const distinctive = base.filter(w => !GENERIC_VENDOR_TOKENS.has(w));
+    return distinctive.length > 0 ? distinctive : base;
+  };
   let vatEntityMismatch = false;
   let vatMismatchReason = '';
   if (hasVatRegistryBool && vatRegistryResult.valid) {
@@ -856,6 +898,9 @@ export async function verifyVendorPrimary({
         vatEntityMismatch = true;
         vatMismatchReason = `Cross-jurisdiction mismatch: "${entity?.legalName?.name || vendorTrim}" is domiciled in ${gleifCountry}, which contradicts ${vatCountry} VAT ID ${vatClean}.`;
       }
+    } else if (!vatName && !gleifRecord && vendorTrim) {
+      vatEntityMismatch = true;
+      vatMismatchReason = `VIES redacted registered entity name for VAT ${vatClean} and no matching GLEIF legal entity record confirmed "${vendorTrim}".`;
     }
   }
 
@@ -863,7 +908,7 @@ export async function verifyVendorPrimary({
   if (vatEntityMismatch) {
     valid = false;
   } else if (hasVatRegistryBool) {
-    valid = vatRegistryResult.valid && (!gleifRecord || isIssued);
+    valid = vatRegistryResult.valid && (gleifRecord ? isIssued : Boolean(vatName));
   } else if (vatRegistryUnavailable) {
     // Fail closed when an EU/UK VAT ID was supplied but live VIES/VATComply lookup failed or timed out
     valid = false;
@@ -954,10 +999,40 @@ export function reconcileInvoicePrimary({
   rawInvoice = '',
   rawLedger = ''
 }) {
-  const bQty = parseNumber(billedQty);
-  const aQty = parseNumber(acceptedQty);
-  const rate = parseNumber(unitPrice);
-  const taxPct = parseNumber(taxRatePct);
+  const bQty = parseStrictNumber(billedQty);
+  const aQty = parseStrictNumber(acceptedQty);
+  const rate = parseStrictNumber(unitPrice);
+  const taxPct = parseStrictNumber(taxRatePct);
+
+  const inputsValid =
+    Number.isFinite(bQty) && Number.isFinite(aQty) && Number.isFinite(rate) && Number.isFinite(taxPct) &&
+    bQty >= 0 && aQty >= 0 && rate >= 0 && taxPct >= 0 && taxPct <= 100 &&
+    bQty <= 1e9 && aQty <= 1e9 && rate <= 1e9;
+
+  if (!inputsValid) {
+    const invalidMsg = `Invalid numeric input for invoice ${invoiceId}: billedQty, acceptedQty, unitPrice, and taxRatePct (0..100) must be finite non-negative numbers.`;
+    return {
+      reconciled: false,
+      status: 'invalid_inputs',
+      discrepancy: null,
+      explanation: invalidMsg,
+      details: {
+        invoice_id: invoiceId,
+        po_number: poNumber,
+        currency,
+        billed_qty: Number.isFinite(bQty) ? bQty : null,
+        accepted_qty: Number.isFinite(aQty) ? aQty : null,
+        qty_variance: null,
+        unit_price: Number.isFinite(rate) ? rate : null,
+        tax_rate_pct: Number.isFinite(taxPct) ? taxPct : null,
+        invoice_total: null,
+        ledger_total: null,
+        delta_total: null,
+        canonical_invoice: rawInvoice || `${invoiceId}: invalid numeric parameters`,
+        canonical_ledger: rawLedger || `Receipt/Ledger (${poNumber}): invalid numeric parameters`
+      }
+    };
+  }
 
   const invoiceSubtotal = Math.round(bQty * rate * 100) / 100;
   const invoiceTax = Math.round(invoiceSubtotal * (taxPct / 100) * 100) / 100;
@@ -1165,15 +1240,15 @@ export function verifyPurchaseOrderPrimary({
   currency = 'USD',
   dualSignoffPresent = false
 }) {
-  const amt = parseNumber(poAmount);
-  const cap = parseNumber(approvalCap);
+  const amt = parseStrictNumber(poAmount);
+  const cap = parseStrictNumber(approvalCap);
   const amountFinite = Number.isFinite(amt) && amt > 0 && amt <= 1e12;
   const capFinite = Number.isFinite(cap) && cap > 0 && cap <= 1e12;
   const exceedsCap = amountFinite && capFinite && amt > cap;
-  const verified = Boolean(poNumber && vendor && amountFinite && (!exceedsCap || dualSignoffPresent));
+  const verified = Boolean(poNumber && vendor && amountFinite && capFinite && (!exceedsCap || dualSignoffPresent));
   const status = verified
     ? 'authorized'
-    : !amountFinite
+    : (!amountFinite || !capFinite)
     ? 'invalid_po'
     : exceedsCap && !dualSignoffPresent
     ? 'approval_cap_exceeded'
@@ -1184,6 +1259,8 @@ export function verifyPurchaseOrderPrimary({
     explanation = `Purchase Order ${poNumber} for ${vendor} (${currency} ${amt.toLocaleString('en-US')}) is within authorized spend authority.`;
   } else if (!amountFinite) {
     explanation = `Invalid Purchase Order ${poNumber || 'PO'}: PO amount (${poAmount}) must be a finite positive value <= 1e12.`;
+  } else if (!capFinite) {
+    explanation = `Invalid Purchase Order ${poNumber || 'PO'}: approval cap (${approvalCap}) must be a finite positive value <= 1e12.`;
   } else if (exceedsCap && !dualSignoffPresent) {
     explanation = `Purchase Order ${poNumber} for ${vendor} (${currency} ${amt.toLocaleString('en-US')}) exceeds authorized delegation cap of ${currency} ${cap.toLocaleString('en-US')} by ${currency} ${(amt - cap).toLocaleString('en-US')} without required executive dual-signoff.`;
   } else {
@@ -1194,10 +1271,10 @@ export function verifyPurchaseOrderPrimary({
     po_number: String(poNumber),
     verified,
     status,
-    amount: amt,
+    amount: Number.isFinite(amt) ? amt : null,
     vendor: String(vendor),
     currency,
-    approval_cap: cap,
+    approval_cap: Number.isFinite(cap) ? cap : null,
     dual_signoff_present: Boolean(dualSignoffPresent),
     explanation
   };
@@ -1212,20 +1289,25 @@ export function verifyDocumentAuthenticityPrimary({
 }) {
   const hashClean = String(irnOrSha256 || '').trim().toLowerCase();
   const isHex64 = /^[0-9a-f]{64}$/.test(hashClean);
-  const qrAmt = parseNumber(signedQrAmount);
-  const faceAmt = parseNumber(pdfFaceAmount);
-  const amountDelta = Math.round((faceAmt - qrAmt) * 100) / 100;
-  const amountsMatch = Math.abs(amountDelta) < 0.01;
+  const qrAmt = parseStrictNumber(signedQrAmount);
+  const faceAmt = parseStrictNumber(pdfFaceAmount);
+  const amountsFinite = Number.isFinite(qrAmt) && Number.isFinite(faceAmt) && qrAmt >= 0 && faceAmt >= 0;
+  const amountDelta = amountsFinite ? Math.round((faceAmt - qrAmt) * 100) / 100 : null;
+  const amountsMatch = amountsFinite && Math.abs(amountDelta) < 0.01;
   const authentic = isHex64 && amountsMatch;
 
   const verdict = authentic
     ? 'Authentic'
     : !isHex64
     ? 'Invalid Digest Format'
+    : !amountsFinite
+    ? 'Invalid Monetary Amount'
     : 'Tampered / Altered Face Value';
 
   const evidence = authentic
     ? `64-hex SHA-256 digest (${hashClean.slice(0, 12)}...${hashClean.slice(-8)}) is structurally valid and signed cryptographic payload (${currency} ${qrAmt.toLocaleString('en-US')}) matches invoice face value (${currency} ${faceAmt.toLocaleString('en-US')}).`
+    : !amountsFinite
+    ? `Invalid cryptographic amount comparison: signedQrAmount (${signedQrAmount}) and pdfFaceAmount (${pdfFaceAmount}) must be finite non-negative values.`
     : `Cryptographic mismatch: signed digest payload for ${hashClean.slice(0, 16)}... attests ${currency} ${qrAmt.toLocaleString('en-US')}, whereas invoice face states ${currency} ${faceAmt.toLocaleString('en-US')} (unexplained variance of ${currency} ${Math.abs(amountDelta).toLocaleString('en-US')}).`;
 
   return {
@@ -1234,8 +1316,8 @@ export function verifyDocumentAuthenticityPrimary({
     verdict,
     evidence,
     digest_valid_hex64: isHex64,
-    signed_qr_amount: qrAmt,
-    pdf_face_amount: faceAmt,
+    signed_qr_amount: Number.isFinite(qrAmt) ? qrAmt : null,
+    pdf_face_amount: Number.isFinite(faceAmt) ? faceAmt : null,
     delta_amount: amountDelta
   };
 }
@@ -1415,7 +1497,7 @@ export async function lookupCorporateRegistry({
     candidates = fetched.candidates;
   }
 
-  if (records.length === 0 && (countryCode === 'GB' || /\b(?:plc|ltd|limited|llp|uk)\b/i.test(companyTrim) || /^(?:0\d{7}|SC\d{6}|NI\d{6})$/i.test(companyTrim))) {
+  if (records.length === 0 && (countryCode === 'GB' || /\b(?:plc|ltd|limited|llp|uk)\b/i.test(companyTrim) || /^(?:\d{8}|(?:SC|NI|OC|SO|NC)\d{6})$/i.test(companyTrim))) {
     const ch = await lookupUkCompaniesHouseFallback(companyTrim);
     if (ch) {
       const reason = `Found UK Companies House record for "${companyTrim}": ${ch.legal_name} (Company No: ${ch.company_number}, active: ${ch.active}).`;
@@ -1529,7 +1611,7 @@ export async function lookupCorporateRegistry({
   };
 }
 
-export async function screenSanctions({ name = '' }) {
+export async function screenSanctions({ name = '', threshold = 0.70 }) {
   const nameTrim = String(name).trim();
   if (!nameTrim) {
     return {
@@ -1545,7 +1627,8 @@ export async function screenSanctions({ name = '' }) {
   }
 
   await loadSdnData();
-  const THRESHOLD = 0.70;
+  const parsedThresh = parseStrictNumber(threshold);
+  const THRESHOLD = Number.isFinite(parsedThresh) && parsedThresh >= 0.5 && parsedThresh <= 0.99 ? parsedThresh : 0.70;
   const matches = [];
 
   for (const [uid, entry] of sdnEntries) {
@@ -2510,7 +2593,20 @@ function sendJson(res, status, payload) {
 
 async function readJsonBody(req) {
   if (req.body && typeof req.body === 'object') return req.body;
-  if (typeof req.body === 'string' && req.body.trim()) return JSON.parse(req.body);
+  if (typeof req.body === 'string' && req.body.trim()) {
+    if (Buffer.byteLength(req.body, 'utf8') > 256 * 1024) {
+      const err = new Error('Request body too large (max 256 KB)');
+      err.statusCode = 413;
+      throw err;
+    }
+    try {
+      return JSON.parse(req.body);
+    } catch {
+      const err = new Error('Invalid JSON body');
+      err.statusCode = 400;
+      throw err;
+    }
+  }
   return new Promise((resolve, reject) => {
     const chunks = [];
     let byteLength = 0;
@@ -2523,7 +2619,7 @@ async function readJsonBody(req) {
         settled = true;
         const err = new Error('Request body too large (max 256 KB)');
         err.statusCode = 413;
-        req.destroy();
+        req.pause();
         reject(err);
         return;
       }
@@ -2580,7 +2676,7 @@ function extractAmountList(text) {
 
 function isPrivateOrReservedIp(ip) {
   if (!ip) return true;
-  const clean = String(ip).toLowerCase().trim();
+  const clean = String(ip).toLowerCase().trim().split('%')[0];
   if (clean.startsWith('::ffff:')) {
     return isPrivateOrReservedIp(clean.slice(7));
   }
@@ -2589,7 +2685,10 @@ function isPrivateOrReservedIp(ip) {
   }
   const parts = clean.split('.');
   if (parts.length !== 4) {
-    // Non-v4 / unexpected format -> fail closed unless global unicast 2000::/3
+    // Reject 6to4 (2002::/16), Teredo (2001::/32), and documentation (2001:db8::/32); only permit global unicast 2000::/3
+    if (clean.startsWith('2002:') || clean.startsWith('2001::') || /^2001:0{0,4}:/.test(clean) || /^2001:0*db8:/.test(clean)) {
+      return true;
+    }
     return !(clean.includes(':') && /^[23][0-9a-f]{3}:/i.test(clean));
   }
   const [a, b] = parts.map(Number);
@@ -2630,11 +2729,53 @@ async function evaluateDocumentEndpoint(merged) {
   const allHashes = [...docText.matchAll(/\b(?:0x)?([0-9a-fA-F]{64})\b/g)].map(m => m[1].toLowerCase());
   const explicitIrn = String(merged.irnOrSha256 || '').replace(/^0x/i, '').trim().toLowerCase() || (allHashes[0] || '');
 
+  // Check zero-byte SHA-256 empty input hash & cryptographic tamper indicators FIRST (before numeric comparisons)
+  const EMPTY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+  const findings = [];
+  if (explicitIrn === EMPTY_SHA256 || docLower.includes(EMPTY_SHA256)) {
+    findings.push('SHA-256 e3b0c442...7852b855 is the zero-byte empty payload digest rather than signed document content.');
+  }
+  const tamperPatterns = [
+    [/revoked/i, 'Referenced statutory/signing credential is marked revoked.'],
+    [/expired\b[^.]*\bno\s+rfc\s*3161|no\s+rfc\s*3161[^.]*timestamp/i, 'Signer certificate expired without an embedded RFC 3161 timestamp token.'],
+    [/incremental\s+pdf\s+update|\/prev\s+xref|outside\s+the\s+(?:original\s+)?\/?byterange/i, 'Unsigned incremental PDF update (/Prev xref) detected outside signed /ByteRange.'],
+    [/broken|prev_hash\s*=|does\s+not\s+match|contradicts|substitution\s+attack|trailing\s+digest\s+mismatch|\b(?:forged|tampered|altered|unauthorized\s+signer)\b/i, 'Hash chain, registry binding, or cryptographic digest comparison mismatch detected.']
+  ];
+  for (const [re, reason] of tamperPatterns) {
+    if (re.test(docText)) findings.push(reason);
+  }
+  if (findings.length > 0) {
+    return {
+      document: docText || 'Document verification request',
+      authentic: false,
+      verdict: 'Forged',
+      evidence: findings,
+      intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
+      schema_version: 4,
+      as_of: new Date().toISOString()
+    };
+  }
+
   // Explicit structured amounts or QR-vs-Face text comparison
   const qrTextMatch = docText.match(/(?:QR|InvoiceValue)\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*([0-9][0-9,]*(?:\.[0-9]+)?)/i);
   const faceTextMatch = docText.match(/(?:Face|PDF\s+invoice\s+face\s+shows|Total\s+Invoice\s+Value)\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*([0-9][0-9,]*(?:\.[0-9]+)?)/i);
-  const qrVal = merged.signedQrAmount != null ? parseNumber(merged.signedQrAmount) : (qrTextMatch ? parseNumber(qrTextMatch[1]) : NaN);
-  const faceVal = merged.pdfFaceAmount != null ? parseNumber(merged.pdfFaceAmount) : (faceTextMatch ? parseNumber(faceTextMatch[1]) : NaN);
+  const hasExplicitQr = merged.signedQrAmount !== undefined && merged.signedQrAmount !== null && String(merged.signedQrAmount).trim() !== '';
+  const hasExplicitFace = merged.pdfFaceAmount !== undefined && merged.pdfFaceAmount !== null && String(merged.pdfFaceAmount).trim() !== '';
+  const qrVal = hasExplicitQr ? parseStrictNumber(merged.signedQrAmount) : (qrTextMatch ? parseStrictNumber(qrTextMatch[1]) : NaN);
+  const faceVal = hasExplicitFace ? parseStrictNumber(merged.pdfFaceAmount) : (faceTextMatch ? parseStrictNumber(faceTextMatch[1]) : NaN);
+
+  if ((hasExplicitQr && (!Number.isFinite(qrVal) || qrVal < 0)) || (hasExplicitFace && (!Number.isFinite(faceVal) || faceVal < 0))) {
+    return {
+      document: docText || 'Document verification request',
+      authentic: false,
+      verdict: 'Inconclusive',
+      status: 'invalid_input',
+      evidence: ['Invalid non-numeric or negative amount supplied for signedQrAmount / pdfFaceAmount comparison.'],
+      intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
+      schema_version: 4,
+      as_of: new Date().toISOString()
+    };
+  }
 
   const hasOneAmountOnly = (Number.isFinite(qrVal) && !Number.isFinite(faceVal)) || (!Number.isFinite(qrVal) && Number.isFinite(faceVal));
   if (hasOneAmountOnly) {
@@ -2657,7 +2798,7 @@ async function evaluateDocumentEndpoint(merged) {
       signedQrAmount: qrVal,
       pdfFaceAmount: faceVal
     });
-    const amountsMismatch = Math.abs(out.delta_amount) >= 0.01;
+    const amountsMismatch = out.delta_amount !== null && Math.abs(out.delta_amount) >= 0.01;
     // Matching numbers alone without a cryptographic 64-hex hash cannot prove document authenticity
     if (!amountsMismatch && !out.digest_valid_hex64) {
       return {
@@ -2676,33 +2817,6 @@ async function evaluateDocumentEndpoint(merged) {
       authentic: out.authentic,
       verdict: out.authentic ? 'Authentic' : 'Forged',
       evidence: [out.evidence],
-      intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
-      schema_version: 4,
-      as_of: new Date().toISOString()
-    };
-  }
-
-  // Known zero-byte SHA-256 empty input hash or cryptographic tamper indicators
-  const EMPTY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
-  const findings = [];
-  if (explicitIrn === EMPTY_SHA256 || docLower.includes(EMPTY_SHA256)) {
-    findings.push('SHA-256 e3b0c442...7852b855 is the zero-byte empty payload digest rather than signed document content.');
-  }
-  const tamperPatterns = [
-    [/revoked/i, 'Referenced statutory/signing credential is marked revoked.'],
-    [/expired\b[^.]*\bno\s+rfc\s*3161|no\s+rfc\s*3161[^.]*timestamp/i, 'Signer certificate expired without an embedded RFC 3161 timestamp token.'],
-    [/incremental\s+pdf\s+update|\/prev\s+xref|outside\s+the\s+(?:original\s+)?\/?byterange/i, 'Unsigned incremental PDF update (/Prev xref) detected outside signed /ByteRange.'],
-    [/broken|prev_hash\s*=|does\s+not\s+match|contradicts|substitution\s+attack|trailing\s+digest\s+mismatch|\b(?:forged|tampered|altered|unauthorized\s+signer)\b/i, 'Hash chain, registry binding, or cryptographic digest comparison mismatch detected.']
-  ];
-  for (const [re, reason] of tamperPatterns) {
-    if (re.test(docText)) findings.push(reason);
-  }
-  if (findings.length > 0) {
-    return {
-      document: docText || 'Document verification request',
-      authentic: false,
-      verdict: 'Forged',
-      evidence: findings,
       intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
       schema_version: 4,
       as_of: new Date().toISOString()
@@ -2879,9 +2993,9 @@ export async function evaluateStablecoinGate(params = {}) {
   const senderRaw = String(params.senderAddress || params.sender || CONTRIBUTOR_ADDRESS).trim();
   const recipientRaw = String(params.recipientAddress || params.recipient || '').trim();
   const tokenAddress = String(params.tokenAddress || TEST_USDC).trim();
-  const amountUsdc = parseNumber(params.amountUsdc ?? params.amount ?? 0);
-  const delegationCapUsdc = parseNumber(params.delegationCapUsdc ?? params.approvalCapUsdc ?? params.approval_cap ?? 5000);
-  const originatorName = String(params.originatorName ?? params.originator ?? 'Praman Desk Treasury').trim();
+  const amountUsdc = parseStrictNumber(params.amountUsdc ?? params.amount ?? 0);
+  const delegationCapUsdc = parseStrictNumber(params.delegationCapUsdc ?? params.approvalCapUsdc ?? params.approval_cap ?? 5000);
+  const originatorName = String(params.originatorName ?? params.originator ?? '').trim();
   const beneficiaryName = String(params.beneficiaryName || params.beneficiary || params.vendor || '').trim();
   const txHash = String(params.txHash || params.tx_hash || '').trim();
   const dualSignoffPresent = Boolean(params.dualSignoffPresent ?? params.dual_signoff ?? false);
@@ -2897,6 +3011,10 @@ export async function evaluateStablecoinGate(params = {}) {
   if (!tokenValid) flags.push('INVALID_TOKEN_ADDRESS');
   if (!Number.isFinite(amountUsdc) || amountUsdc <= 0 || amountUsdc > 1e9) {
     flags.push('INVALID_TRANSFER_AMOUNT');
+  }
+  const capValid = Number.isFinite(delegationCapUsdc) && delegationCapUsdc > 0 && delegationCapUsdc <= 1e9;
+  if (!capValid) {
+    flags.push('INVALID_DELEGATION_CAP');
   }
 
   // Parallel OFAC sanctions screening + optional GLEIF check
@@ -2977,9 +3095,15 @@ export async function evaluateStablecoinGate(params = {}) {
             amountUusdc: BigInt(l.data).toString(),
             amountUsdc: formatUnits(BigInt(l.data), 6)
           }));
+          if (erc20Logs.length === 0) {
+            flags.push('TX_NO_ERC20_TRANSFER_LOG');
+          }
           const matchingTransfer = recipientValid
-            ? transfers.find(t => t.to.toLowerCase() === getAddress(recipientRaw).toLowerCase()) || transfers[0]
-            : transfers[0];
+            ? transfers.find(t => t.to.toLowerCase() === getAddress(recipientRaw).toLowerCase()) || null
+            : null;
+          if (erc20Logs.length > 0 && !matchingTransfer) {
+            flags.push(`TX_RECIPIENT_MISMATCH: no ERC-20 transfer to ${recipientValid ? getAddress(recipientRaw) : recipientRaw}`);
+          }
           let wasmTxScore = null;
           if (matchingTransfer && Number.isFinite(amountUsdc) && amountUsdc > 0) {
             const truthUusdc = BigInt(Math.round(amountUsdc * 1e6));
@@ -3018,7 +3142,7 @@ export async function evaluateStablecoinGate(params = {}) {
   if (sanctionsBeneficiary.matched || sanctionsOriginator.matched) {
     action = 'REJECT_AND_FREEZE';
     riskLevel = 'CRITICAL_SANCTIONS_BLOCK';
-  } else if (!senderValid || !recipientValid || !tokenValid || !Number.isFinite(amountUsdc) || amountUsdc <= 0 || flags.some(f => f.startsWith('ONCHAIN_') || f.startsWith('TX_') || f.startsWith('INVALID_TX'))) {
+  } else if (!senderValid || !recipientValid || !tokenValid || !Number.isFinite(amountUsdc) || amountUsdc <= 0 || !capValid || flags.some(f => f.startsWith('ONCHAIN_') || f.startsWith('TX_') || f.startsWith('INVALID_'))) {
     action = 'REJECT_INVALID_SETTLEMENT';
     riskLevel = 'HIGH';
   } else if (!travelRuleSatisfied) {
@@ -3287,12 +3411,6 @@ export async function handleApiRequest(req, res) {
 
     // 5. POST /api/audit/buy (Live Paid x402 Purchase on Ethereum Sepolia + Comparison)
     if (pathname === '/api/audit/buy' && req.method === 'POST') {
-      if (!checkPaidRateLimit(req)) {
-        return sendJson(res, 429, {
-          error: 'Rate limit reached: maximum 5 paid x402 runs per 10 minutes per client (and 30/hour global demo cap).'
-        });
-      }
-
       const account = getWalletAccount();
       const body = await readJsonBody(req);
       const allSupportedIntents = [
@@ -3311,6 +3429,12 @@ export async function handleApiRequest(req, res) {
           return sendJson(res, 400, { error: 'No supported Telegraph intents specified.' });
         }
         selectedIntents = filtered.slice(0, 7);
+      }
+
+      if (!checkPaidRateLimit(req)) {
+        return sendJson(res, 429, {
+          error: 'Rate limit reached: maximum 5 paid x402 runs per 10 minutes per client (and 30/hour global demo cap).'
+        });
       }
 
       // Run all primary checks for the actual submitted input
@@ -3389,7 +3513,7 @@ export async function handleApiRequest(req, res) {
             intent: 'VENDOR_VERIFY_GENERAL',
             params: {
               vendor: vendorPrimary.vendor,
-              vat_number: vendorPrimary.vat_number || 'DE143454214'
+              vat_number: vendorPrimary.vat_number || ''
             }
           };
         }
@@ -3696,13 +3820,33 @@ export async function handleApiRequest(req, res) {
       if (pathname === '/api/miner/invoice-reconcile') {
         const invoiceStr = String(merged.invoice || merged.question || merged.query || '');
         const ledgerStr = String(merged.ledger || '');
-        const hasStructuredQty =
-          merged.billedQty !== undefined && merged.acceptedQty !== undefined && merged.unitPrice !== undefined &&
-          Number.isFinite(parseNumber(merged.billedQty)) &&
-          Number.isFinite(parseNumber(merged.acceptedQty)) &&
-          Number.isFinite(parseNumber(merged.unitPrice));
+        const hasAnyQtyArg =
+          merged.billedQty !== undefined ||
+          merged.acceptedQty !== undefined ||
+          merged.unitPrice !== undefined;
 
-        if (hasStructuredQty) {
+        if (hasAnyQtyArg) {
+          const bq = parseStrictNumber(merged.billedQty);
+          const aq = parseStrictNumber(merged.acceptedQty);
+          const up = parseStrictNumber(merged.unitPrice);
+          const tr = merged.taxRatePct !== undefined && String(merged.taxRatePct).trim() !== ''
+            ? parseStrictNumber(merged.taxRatePct)
+            : 8.25;
+          const allNumsPresent =
+            merged.billedQty !== undefined && merged.acceptedQty !== undefined && merged.unitPrice !== undefined &&
+            Number.isFinite(bq) && Number.isFinite(aq) && Number.isFinite(up) && Number.isFinite(tr);
+          const allNumsValid = allNumsPresent && bq >= 0 && aq >= 0 && up >= 0 && tr >= 0 && tr <= 100 && bq <= 1e9 && aq <= 1e9 && up <= 1e9;
+          if (!allNumsValid) {
+            return sendJson(res, 200, {
+              reconciled: false,
+              discrepancy: null,
+              status: 'invalid_inputs',
+              explanation: 'Invalid numeric invoice parameters: billedQty, acceptedQty, unitPrice, and taxRatePct must all be finite non-negative numbers.',
+              intent: 'INVOICE_LEDGER_RECONCILE_GENERAL',
+              schema_version: 4,
+              as_of: new Date().toISOString()
+            });
+          }
           const out = reconcileInvoicePrimary(merged);
           return sendJson(res, 200, {
             reconciled: out.reconciled,
@@ -3929,7 +4073,7 @@ export async function handleApiRequest(req, res) {
             as_of: new Date().toISOString()
           });
         }
-        const out = await screenSanctions({ name: rawName });
+        const out = await screenSanctions({ name: rawName, threshold: merged.threshold });
         return sendJson(res, 200, {
           ...out,
           intent: 'SANCTIONS_SCREENING_MATCH_GENERAL',

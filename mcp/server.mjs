@@ -505,8 +505,7 @@ const TOOLS = [
         },
         originator_name: {
           type: 'string',
-          description: 'Originator/sender legal entity or VASP identity (required when amount_usdc >= 1000).',
-          default: 'Praman Desk Treasury',
+          description: 'Originator/sender legal entity or VASP identity (required by FATF Travel Rule when amount_usdc >= 1000).',
         },
         delegation_cap_usdc: {
           type: 'number',
@@ -660,7 +659,7 @@ export async function startServer() {
             senderAddress: args.sender_address,
             amountUsdc: args.amount_usdc,
             beneficiaryName: args.beneficiary_name || '',
-            originatorName: args.originator_name ?? 'Praman Desk Treasury',
+            originatorName: args.originator_name ?? '',
             delegationCapUsdc: args.delegation_cap_usdc ?? 5000,
             dualSignoffPresent: Boolean(args.dual_signoff_present),
             txHash: args.tx_hash || '',
