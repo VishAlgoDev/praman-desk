@@ -5,7 +5,8 @@
   "type": "module",
   "main": "mcp/server.mjs",
   "bin": {
-    "praman-spend-guard": "./mcp/server.mjs"
+    "praman-spend-guard": "./mcp/server.mjs",
+    "praman-spend-guard-mcp": "./mcp/server.mjs"
   },
   "private": true,
   "scripts": {

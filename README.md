@@ -58,8 +58,8 @@ In 2026, autonomous AI agents (built on Eliza, Coinbase AgentKit, LangChain, or 
 
 ### 1. Track 1 (Providers): Active Telegraph Miner `#5281` (Updated from `#5186`)
 Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Tx: [`0x09a30959...`](https://sepolia.etherscan.io/tx/0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39)) supporting **7 full-spectrum compliance & procurement intents** backed by MACHINA bond.
-- **Manifest Pinned to Immutable Commit:** [`1866680`](https://github.com/VishAlgoDev/praman-desk/blob/1866680fd44ec7de4fe96677f41719ad9b6ff17b/miner.yaml)
-- **Registration Update Tx:** [`0x6f98357046e6fcdf1ecbf4439d44d18702078bbe9e0b3e968025940d98dcaca6`](https://sepolia.etherscan.io/tx/0x6f98357046e6fcdf1ecbf4439d44d18702078bbe9e0b3e968025940d98dcaca6)
+- **Manifest Pinned to Immutable Commit:** [`6430bd6`](https://github.com/VishAlgoDev/praman-desk/blob/6430bd61a0a3987f84297791e8d3e182013662f7/miner.yaml)
+- **Registration Update Tx:** [`0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39`](https://sepolia.etherscan.io/tx/0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39) (Block 12139789)
 - **Hosted Endpoints:**
   - `GET /api/miner/vendor-verify`: Queries the Global Legal Entity Identifier Foundation (GLEIF) in real time across 200+ jurisdictions (`VENDOR_VERIFY_GENERAL`).
   - `GET /api/miner/invoice-reconcile`: Performs 3-way mathematical reconciliation (Invoice vs. GRN/Receipt vs. General Ledger) (`INVOICE_LEDGER_RECONCILE_GENERAL`).
