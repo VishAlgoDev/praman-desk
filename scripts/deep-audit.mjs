@@ -19,13 +19,13 @@ async function deepProbe() {
       name: 'Devnode Miner #5281 (Active Registration)',
       url: 'https://devnode.telegraphprotocol.com/api/miners/5281',
       method: 'GET',
-      assert: (res, j) => res.status === 200 && j?.status === 'active'
+      assert: (res, j) => res.status === 200 && j?.miner?.activation_status === 'active'
     },
     {
       name: 'Devnode Evaluator #461 (Expected Rejected OOD Post-Mortem)',
       url: 'https://devnode.telegraphprotocol.com/api/wasm/461',
       method: 'GET',
-      assert: (res, j) => res.status === 200 && (j?.activation_status === 'rejected' || j?.activation_status === 'active')
+      assert: (res, j) => res.status === 200 && (j?.wasm?.activation_status === 'rejected' || j?.wasm?.activation_status === 'active')
     },
     {
       name: 'App Health (/api/health)',
@@ -158,7 +158,7 @@ async function deepProbe() {
       if (!ok && !t.optional) failures++;
       console.log(`[${tag}] ${t.name} -> HTTP ${res.status} (${elapsed}ms)`);
       if (t.name.includes('#461')) {
-        console.log(`   activation_status=${json?.activation_status} stage=${json?.stage} metrics=${JSON.stringify(json?.metrics || {})}`);
+        console.log(`   activation_status=${json?.wasm?.activation_status} stage=${json?.wasm?.stage} reason=${json?.wasm?.rejection_reason}`);
       } else if (!ok) {
         console.log(`   Unexpected payload: ${JSON.stringify(json)?.slice(0, 260)}`);
       }
