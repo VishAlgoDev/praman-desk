@@ -47,7 +47,7 @@ const INTENT = argVal('--intent') || process.env.WASM_INTENT || 'SANCTIONS_SCREE
 const WASM_HASH = argVal('--hash') || process.env.WASM_HASH || '0x62db6aa4025553aa7e83e093eb2cb0349f00717abfa0de605e64150345a12ca4';
 const WASM_URL = argVal('--url') || process.env.WASM_URL || 'https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH.safetensors';
 const WASM_FEE_ADDRESS = '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466';
-const WASM_RUNNABLE_URL = argVal('--runnable') || process.env.WASM_RUNNABLE_URL || 'https://pet-becomes-horses-accordingly.trycloudflare.com';
+const WASM_RUNNABLE_URL = argVal('--runnable') || process.env.WASM_RUNNABLE_URL || 'https://sport-mill-since-link.trycloudflare.com';
 const FOUNDATION_HASH = '0a49b325304bb4cf292e683929689d0457966be264f60bfc94d0072b614bf8e6';
 const TOKENIZER_HASH = '67bc76f8b9386efba1a761c1c8e5ad439fd0eaf1c2826e9dd1a205c7af4dc456';
 

@@ -13,6 +13,7 @@ services:
       - ../../telegraph-wasm-baseline/foundation/foundation_engine.wasm:/models/foundation_engine.wasm:ro
       - ../packages/SANCTIONS_SCREENING_MATCH.safetensors:/models/SANCTIONS_SCREENING_MATCH.safetensors:ro
       - ../packages/SANCTIONS_SCREENING_MATCH_v3.safetensors:/models/SANCTIONS_SCREENING_MATCH_v3.safetensors:ro
+    command: ["--package", "/models/SANCTIONS_SCREENING_MATCH.safetensors", "--listen", "0.0.0.0:8090"]
     deploy:
       resources:
         limits:
