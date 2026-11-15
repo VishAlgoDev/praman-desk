@@ -1,0 +1,27 @@
+services:
+  adapterexec:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: praman-adapterexec
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8090:8090"
+    volumes:
+      - ../../telegraph-wasm-baseline/foundation/foundation.json:/models/foundation.json:ro
+      - ../../telegraph-wasm-baseline/foundation/foundation_lora_fp32.onnx:/models/foundation_lora_fp32.onnx:ro
+      - ../../telegraph-wasm-baseline/foundation/foundation_engine.wasm:/models/foundation_engine.wasm:ro
+      - ../packages/SANCTIONS_SCREENING_MATCH.safetensors:/models/SANCTIONS_SCREENING_MATCH.safetensors:ro
+      - ../packages/SANCTIONS_SCREENING_MATCH_v3.safetensors:/models/SANCTIONS_SCREENING_MATCH_v3.safetensors:ro
+    deploy:
+      resources:
+        limits:
+          memory: 3G
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: praman-adapter-tunnel
+    restart: unless-stopped
+    depends_on:
+      - adapterexec
+    command: tunnel --no-autoupdate --url http://adapterexec:8090

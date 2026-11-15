@@ -36,12 +36,14 @@ const diamondAbi = parseAbi([
   'function entityBonds() external view returns (uint64 adapterUsd, uint64 contributorUsd, uint64 minerBaseUsd, uint64 minerPerIntentUsd)'
 ]);
 
-// Registration Parameters
-const INTENT = 'SANCTIONS_SCREENING_MATCH';
-const WASM_HASH = '0x62db6aa4025553aa7e83e093eb2cb0349f00717abfa0de605e64150345a12ca4';
-const WASM_URL = 'https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH.safetensors';
+// Registration Parameters (override via env for immutable pinned versions)
+const INTENT = process.env.WASM_INTENT || 'SANCTIONS_SCREENING_MATCH';
+const WASM_HASH = process.env.WASM_HASH || '0x62db6aa4025553aa7e83e093eb2cb0349f00717abfa0de605e64150345a12ca4';
+const WASM_URL = process.env.WASM_URL || 'https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH.safetensors';
 const WASM_FEE_ADDRESS = '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466';
 const WASM_RUNNABLE_URL = process.env.WASM_RUNNABLE_URL || 'https://pet-becomes-horses-accordingly.trycloudflare.com';
+const FOUNDATION_HASH = '0a49b325304bb4cf292e683929689d0457966be264f60bfc94d0072b614bf8e6';
+const TOKENIZER_HASH = '67bc76f8b9386efba1a761c1c8e5ad439fd0eaf1c2826e9dd1a205c7af4dc456';
 
 async function main() {
   console.log('================================================================');
@@ -55,21 +57,30 @@ async function main() {
   console.log(`WASM Fee Address:    ${WASM_FEE_ADDRESS}`);
   console.log(`WASM Runnable URL:   ${WASM_RUNNABLE_URL}`);
 
-  // Step 1: Pre-flight check on Runnable URL
-  console.log('\n--- Step 1: Verifying Runnable URL ---');
+  // Step 1: Pre-flight check on Runnable URL & Identity Match
+  console.log('\n--- Step 1: Verifying Runnable URL & Identity ---');
+  const expectedAdapterHash = WASM_HASH.replace(/^0x/, '').toLowerCase();
   try {
     const probeRes = await fetch(WASM_RUNNABLE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ batch: [] })
+      body: JSON.stringify({
+        batch: [{ tokens: [50281, 4118, 17526, 50282] }],
+        foundation_hash: FOUNDATION_HASH,
+        adapter_hash: expectedAdapterHash,
+        tokenizer_hash: TOKENIZER_HASH
+      })
     });
     const probeJson = await probeRes.json();
     console.log('Runnable URL probe status:', probeRes.status, JSON.stringify(probeJson));
-    if (!probeJson || !Array.isArray(probeJson.results)) {
+    if (!probeJson || !Array.isArray(probeJson.results) || probeJson.results.length !== 1) {
       throw new Error('Runnable URL failed to return valid batch results array');
     }
+    if ((probeJson.adapter_hash || '').toLowerCase() !== expectedAdapterHash) {
+      throw new Error(`Adapter hash mismatch: runner=${probeJson.adapter_hash} expected=${expectedAdapterHash}`);
+    }
   } catch (err) {
-    console.error('FAILED TO CONNECT TO RUNNABLE URL:', err.message);
+    console.error('FAILED TO CONNECT OR MATCH IDENTITY AT RUNNABLE URL:', err.message);
     process.exit(1);
   }
 
