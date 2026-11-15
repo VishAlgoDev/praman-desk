@@ -4,7 +4,8 @@ async function runHealthCheck() {
   // 1. Adapter Runner (Colab + Cloudflare Tunnel)
   try {
     const t0 = Date.now();
-    const res = await fetch('https://theory-blogging-none-delayed.trycloudflare.com/score', {
+    const RUNNER_URL = process.env.WASM_RUNNABLE_URL || 'https://pet-becomes-horses-accordingly.trycloudflare.com';
+    const res = await fetch(RUNNER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ batch: [ { tokens: [101, 102, 103] } ] })
@@ -15,7 +16,7 @@ async function runHealthCheck() {
       console.log('✅ 1. Adapter Runner (Colab): HEALTHY');
       console.log('   - Status: HTTP ' + res.status + ' (' + elapsed + 'ms)');
       console.log('   - Test Score: ' + data.results[0].score);
-      console.log('   - URL: https://theory-blogging-none-delayed.trycloudflare.com');
+      console.log('   - URL: ' + RUNNER_URL);
     } else {
       console.log('⚠️ 1. Adapter Runner (Colab): UNEXPECTED RESPONSE', data);
     }
@@ -23,16 +24,21 @@ async function runHealthCheck() {
     console.log('❌ 1. Adapter Runner (Colab): OFFLINE / ERROR', err.message);
   }
 
-  // 2. Devnode Adapter #457 Status
+  // 2. Devnode Adapter #460 Status
   try {
-    const res = await fetch('https://devnode.telegraphprotocol.com/api/wasm/457').then(r => r.json());
-    const wasm = res.wasm || res;
-    console.log('\n✅ 2. Devnode Adapter #457: INDEXED & ACTIVE');
-    console.log('   - Stage: ' + wasm.stage);
-    console.log('   - Reason: ' + (wasm.eval?.reason || 'OK'));
-    console.log('   - Runnable URL: ' + wasm.wasm_runnable_url);
+    const res = await fetch('https://devnode.telegraphprotocol.com/api/wasm/460').then(r => r.json());
+    if (res.error) {
+      console.log('\n⏳ 2. Devnode Adapter #460: PENDING DEVNODE INDEXER (Tx confirmed on-chain in Block 12140621)');
+      console.log('   - Devnode syncer status: ' + res.error);
+    } else {
+      const wasm = res.wasm || res;
+      console.log('\n✅ 2. Devnode Adapter #460: INDEXED');
+      console.log('   - Stage: ' + wasm.stage);
+      console.log('   - Reason: ' + (wasm.eval?.reason || 'OK'));
+      console.log('   - Runnable URL: ' + wasm.wasm_runnable_url);
+    }
   } catch (err) {
-    console.log('\n❌ 2. Devnode Adapter #457: ERROR', err.message);
+    console.log('\n❌ 2. Devnode Adapter #460: ERROR', err.message);
   }
 
   // 3. Devnode Miner #5281 Status

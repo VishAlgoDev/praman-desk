@@ -23,7 +23,8 @@ const ROUTER = '0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E';
 const erc20Abi = parseAbi([
   'function balanceOf(address account) external view returns (uint256)',
   'function allowance(address owner, address spender) external view returns (uint256)',
-  'function approve(address spender, uint256 amount) external returns (bool)'
+  'function approve(address spender, uint256 amount) external returns (bool)',
+  'function mint(address to, uint256 amount) external'
 ]);
 
 const routerAbi = parseAbi([
@@ -37,10 +38,10 @@ const diamondAbi = parseAbi([
 
 // Registration Parameters
 const INTENT = 'SANCTIONS_SCREENING_MATCH';
-const WASM_HASH = '0x43553a7caa4b58312a7d49d38f00b7e792e5c0158f3a9a259c1669d981b4e374';
+const WASM_HASH = '0x62db6aa4025553aa7e83e093eb2cb0349f00717abfa0de605e64150345a12ca4';
 const WASM_URL = 'https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH.safetensors';
 const WASM_FEE_ADDRESS = '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466';
-const WASM_RUNNABLE_URL = process.env.WASM_RUNNABLE_URL || 'https://theory-blogging-none-delayed.trycloudflare.com';
+const WASM_RUNNABLE_URL = process.env.WASM_RUNNABLE_URL || 'https://pet-becomes-horses-accordingly.trycloudflare.com';
 
 async function main() {
   console.log('================================================================');
@@ -84,9 +85,23 @@ async function main() {
 
   const minMachinaNeeded = parseUnits('0.50', 18); // ~$5.00 bond is ~0.48 MACHINA
   if (machinaBal < minMachinaNeeded) {
-    console.log(`\nMACHINA balance (${formatUnits(machinaBal, 18)}) < 0.50. Executing swap from USDC...`);
     const shortfall = minMachinaNeeded - machinaBal;
-    const maxUsdcIn = 6000000n; // $6.00 max USDC
+    const maxUsdcIn = 7000000n; // $7.00 max USDC
+
+    if (usdcBal < maxUsdcIn) {
+      console.log(`USDC balance (${formatUnits(usdcBal, 6)}) < 7.00. Minting 10 free test USDC...`);
+      const mintTx = await walletClient.writeContract({
+        address: USDC,
+        abi: erc20Abi,
+        functionName: 'mint',
+        args: [address, 10000000n]
+      });
+      console.log(`Mint Tx: ${mintTx}`);
+      await client.waitForTransactionReceipt({ hash: mintTx });
+      console.log('10 USDC minted successfully.');
+    }
+
+    console.log(`\nMACHINA balance (${formatUnits(machinaBal, 18)}) < 0.50. Executing swap from USDC...`);
 
     const routerAllowance = await client.readContract({ address: USDC, abi: erc20Abi, functionName: 'allowance', args: [address, ROUTER] });
     if (routerAllowance < maxUsdcIn) {
