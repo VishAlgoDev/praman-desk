@@ -361,6 +361,23 @@ async function run() {
       throw new Error(`ND-15 Mission 02 EVM address freeze failed: ${JSON.stringify(m2SanctionedAddr.json)}`);
     }
 
+    // 14. Issue #1 Exact Lucian Regression Cases (ND-16: Document ref 48291 inconclusive + trailing INR & 0.00 ledger)
+    const lucianBareRef = await check('/api/miner/invoice-reconcile', 'POST', {
+      params: { invoice: 'Document reference 48291', ledger: 'Receipt reference 48291' }
+    });
+    const lucianWithAmounts = await check('/api/miner/invoice-reconcile', 'POST', {
+      params: {
+        invoice: 'Invoice total 102660.00 INR; reference ID 48291',
+        ledger: 'Ledger paid 0.00 INR; reference ID 48291'
+      }
+    });
+    if (lucianBareRef.json.reconciled !== null || lucianBareRef.json.status !== 'insufficient_evidence') {
+      throw new Error(`ND-16 Lucian bare ref should be insufficient_evidence: ${JSON.stringify(lucianBareRef.json)}`);
+    }
+    if (lucianWithAmounts.json.reconciled !== false || lucianWithAmounts.json.discrepancy !== 102660) {
+      throw new Error(`ND-16 Lucian 102660.00 INR vs 0.00 INR mismatch failed: ${JSON.stringify(lucianWithAmounts.json)}`);
+    }
+
     console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM & MISSION 02 VERIFIED!');
   } finally {
     server.close();

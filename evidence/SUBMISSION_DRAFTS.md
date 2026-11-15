@@ -7,16 +7,27 @@
 
 ## 1. GitHub Issue `#1` Resolution Reply (`VishAlgoDev/praman-desk#1`)
 
-Thanks for catching and documenting both edge cases cleanly! We reproduced the exact defect on `/api/miner/invoice-reconcile?invoice_id=INV-2026-081&po_number=PO-2026-7741` (and bare-reference NL queries): numeric fragments inside identifier strings (`2026`, `081`, `7741`) plus a missing-input fallback previously produced a false `reconciled: true`.
+Thanks for catching and documenting both edge cases cleanly (`@epistemedeus`)! We reproduced the exact defects:
+1. Bare reference strings (`Document reference 48291` vs `Receipt reference 48291`) previously matched `48291` via the last-number fallback and returned `reconciled: true`.
+2. Suffix currency amounts & zero-paid ledgers (`Invoice total 102660.00 INR; reference ID 48291` vs `Ledger paid 0.00 INR; reference ID 48291`) needed explicit suffix currency parsing (`102660.00 INR`) and `0.00` financial total preservation without letting `reference ID 48291` alter the variance.
+3. The buyer comparator (`evaluateMinerAgreement`) previously accepted omitted booleans or mismatched discrepancy values.
 
-**Fixed in the latest commit + live Vercel deployment:**
-1. Stripped invoice/PO identifiers, ISO dates, and reference numbers prior to fallback amount extraction, and removed the default synthetic `100 * 250` fallback in `reconcileInvoicePrimary` when line-item/amount evidence is absent. Bare references now deterministically return HTTP 200 with `reconciled: null` and `status: "insufficient_evidence"`.
-2. Tightened `evaluateMinerAgreement` (`INVOICE_LEDGER_RECONCILE_GENERAL`), `/api/miner/doc-authenticity` (`signedQrAmount` without `pdfFaceAmount` returning HTTP 200 `insufficient_evidence` instead of 500, plus blocking public/localhost SSRF targets), and OFAC SDN false-positive guards (`"AIA Group Limited"` and `"Ali"` now return `matched: false`, while comma-reversed SDNs like `"Viktor Bout"` -> `"BOUT, Viktor Anatolijevitch"` match cleanly).
-3. Expanded `scripts/test-endpoints-local.mjs` and `scripts/deep-audit.mjs` to continuously assert these regression cases against live production (`https://praman-desk.vercel.app`).
+**Fixed in `src/handlers.mjs` and deployed live to `https://praman-desk.vercel.app`:**
+- `extractAmountList()` now strips invoice/PO/reference identifiers, `#refs`, ISO dates, and years before fallback amount parsing, removes the silent `100 * 250` fallback, accepts both prefix and suffix currency tags (including explicit `0.00` paid totals), and returns HTTP `200` with `reconciled: null, discrepancy: null, status: "insufficient_evidence"` when monetary evidence is absent.
+- `evaluateMinerAgreement()` strictly requires explicit boolean `reconciled === expected` agreement, matching numeric `discrepancy` within `$0.01`, and positive deterministic WASM basis-point scores before setting `confirmed: true`.
+- Expanded `scripts/test-endpoints-local.mjs` and `scripts/deep-audit.mjs` to assert both bare-reference inconclusive handling and `102660.00 INR` vs `0.00 INR` with appended `; reference ID 48291`.
 
 Re-verify live:
 ```bash
-curl -s "https://praman-desk.vercel.app/api/miner/invoice-reconcile?invoice_id=INV-2026-081&po_number=PO-2026-7741"
+# 1. Bare references stay inconclusive
+curl -sS https://praman-desk.vercel.app/api/miner/invoice-reconcile \
+  -H 'Content-Type: application/json' \
+  --data '{"params":{"invoice":"Document reference 48291","ledger":"Receipt reference 48291"}}'
+
+# 2. Appending reference ID preserves exact 102660 variance
+curl -sS https://praman-desk.vercel.app/api/miner/invoice-reconcile \
+  -H 'Content-Type: application/json' \
+  --data '{"params":{"invoice":"Invoice total 102660.00 INR; reference ID 48291","ledger":"Ledger paid 0.00 INR; reference ID 48291"}}'
 ```
 
 ---

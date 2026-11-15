@@ -71,5 +71,8 @@ All remediation work, newly discovered defects, regressions, security issues, pr
 - **ND-15 (OFAC Digital Currency EVM Address Blind Spot in `screenSanctions` & Mission 02 Gate)**:
   - Live Treasury `sdn.csv` (remarks column) and `sdn_comments.csv` contain 100+ OFAC-designated EVM `0x...` addresses (including `0x098B716B8Aaf21512996dC57EB0615e2383E2f96` — Lazarus Group / Ronin Bridge), yet neither `scripts/build-sdn-snapshot.mjs` nor `refreshSdnInBackground` extracted them.
   - Consequently, `screenSanctions` and Mission 02 `evaluateStablecoinGate` only screened entity/person names and missed sanctioned `0x...` wallet addresses supplied with a benign beneficiary name. Fixed across `build-sdn-snapshot.mjs`, `sdn-snapshot.json`, `screenSanctions`, and `evaluateStablecoinGate`.
+- **ND-16 (`extractAmountList` Trailing Currency & Zero-Paid Ledger Regression on Issue `#1`)**:
+  - `extractAmountList` only matched prefix currency tags (`INR 102660.00`) and filtered out `n === 0` (`> 0`). Consequently, Lucian's Issue `#1` scenario (`"Invoice total 102660.00 INR; reference ID 48291"` vs `"Ledger paid 0.00 INR; reference ID 48291"`) returned `insufficient_evidence` instead of `reconciled: false, discrepancy: 102660`.
+  - Fix: Match both prefix and suffix currency tags (`INR|USD|EUR|GBP|USDC|USDT`), permit `n >= 0` for explicit currency-tagged or financial-labeled totals (such as `$0.00` paid), while continuing to reject bare numeric IDs (`Document reference 48291`).
 
 

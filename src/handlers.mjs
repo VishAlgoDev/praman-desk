@@ -2724,11 +2724,20 @@ async function readJsonBody(req) {
 
 function extractAmountList(text) {
   let str = String(text || '');
-  // 1. Always prefer explicit currency-tagged monetary values first
-  const withCurrency = [...str.matchAll(/(?:INR|USD|EUR|GBP|USDC|USDT|\$|€|£|₹)\s*([0-9][0-9,]*(?:\.[0-9]+)?)/gi)]
-    .map(m => Number(m[1].replace(/,/g, '')))
-    .filter(n => Number.isFinite(n) && n > 0);
-  if (withCurrency.length) return withCurrency;
+  // 1. Always prefer explicit currency-tagged monetary values first (prefix symbol/code or suffix code)
+  const withCurrency = [
+    ...[...str.matchAll(/(?:INR|USD|EUR|GBP|USDC|USDT|\$|€|£|₹)\s*([0-9][0-9,]*(?:\.[0-9]+)?)/gi)].map(m => ({ idx: m.index ?? 0, val: Number(m[1].replace(/,/g, '')) })),
+    ...[...str.matchAll(/\b([0-9][0-9,]*(?:\.[0-9]+)?)\s*(?:INR|USD|EUR|GBP|USDC|USDT)\b/gi)].map(m => ({ idx: m.index ?? 0, val: Number(m[1].replace(/,/g, '')) }))
+  ]
+    .filter(x => Number.isFinite(x.val) && x.val >= 0)
+    .sort((a, b) => a.idx - b.idx);
+  if (withCurrency.length) {
+    const dedup = [];
+    for (const item of withCurrency) {
+      if (!dedup.length || dedup[dedup.length - 1].idx !== item.idx) dedup.push(item);
+    }
+    return dedup.map(x => x.val);
+  }
 
   // 2. Strip alphanumeric document/reference identifiers and ISO dates/years before numeric matching
   str = str
@@ -2740,7 +2749,7 @@ function extractAmountList(text) {
   // 3. Match explicitly labeled monetary fields (total/amount/balance/paid/billed/due/subtotal/tax/price)
   const labeled = [...str.matchAll(/\b(?:total|amount|balance|subtotal|sub_total|tax|vat|paid|billed|due|price|sum|credit|debit|value)\s*[:=]?\s*([0-9][0-9,]*(?:\.[0-9]+)?)/gi)]
     .map(m => Number(m[1].replace(/,/g, '')))
-    .filter(n => Number.isFinite(n) && n > 0);
+    .filter(n => Number.isFinite(n) && n >= 0);
   if (labeled.length) return labeled;
 
   // 4. Only accept comma-grouped or decimal-cents financial numbers (never bare integers)

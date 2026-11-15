@@ -95,9 +95,19 @@ async function deepProbe() {
     },
     {
       name: 'Issue #1 Guard: Bare Invoice/PO Refs Must Be Inconclusive',
-      url: `${BASE_URL}/api/miner/invoice-reconcile?invoice_id=INV-2026-081&po_number=PO-2026-7741`,
-      method: 'GET',
+      url: `${BASE_URL}/api/miner/invoice-reconcile`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ params: { invoice: 'Document reference 48291', ledger: 'Receipt reference 48291' } }),
       assert: (res, j) => res.status === 200 && j?.reconciled === null && j?.status === 'insufficient_evidence'
+    },
+    {
+      name: 'Issue #1 Guard: 102660.00 INR vs 0.00 INR Preserved With Ref ID',
+      url: `${BASE_URL}/api/miner/invoice-reconcile`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ params: { invoice: 'Invoice total 102660.00 INR; reference ID 48291', ledger: 'Ledger paid 0.00 INR; reference ID 48291' } }),
+      assert: (res, j) => res.status === 200 && j?.reconciled === false && j?.discrepancy === 102660
     },
     {
       name: 'Doc Authenticity (Partial Query HTTP 200 Inconclusive)',
