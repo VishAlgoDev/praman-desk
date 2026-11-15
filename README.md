@@ -3,7 +3,8 @@
 **Autonomous Pre-Payment Spend Guard & Counterparty Clearing Desk for AI Agents, DAOs, and ERPs**
 
 - **Live Hosted Application (No wallet required):** <https://praman-desk.vercel.app>
-- **Active On-Chain Miner (Sepolia Diamond):** ID `#5186` (`praman-compliance-miner`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
+- **Active On-Chain Miner (Sepolia Diamond):** ID `#5281` (`praman-compliance-miner`, updated from `#5186`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Tx: [`0x09a30959...`](https://sepolia.etherscan.io/tx/0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39))
+- **Canonical Evaluator Adapter (ModernBERT LoRA):** ID `#457` on `SANCTIONS_SCREENING_MATCH` (81.33% pairwise accuracy, Tx: [`0x7fa76531...`](https://sepolia.etherscan.io/tx/0x7fa76531bc49a08f782e5f8e32f13399c25bd1011e930a0292e5d876336e85e3))
 - **Live Evaluator Portfolio:** 62 cryptographically signed evaluation rows across 8 intents on `devnode.telegraphprotocol.com` (57 `eligible`, 5 newly `admitted`)
 
 ---
@@ -55,8 +56,8 @@ In 2026, autonomous AI agents (built on Eliza, Coinbase AgentKit, LangChain, or 
 
 ## Telegraph Hackathon Season II Architecture
 
-### 1. Track 1 (Providers): Active Telegraph Miner `#5186`
-Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) supporting **7 full-spectrum compliance & procurement intents** backed by MACHINA bond.
+### 1. Track 1 (Providers): Active Telegraph Miner `#5281` (Updated from `#5186`)
+Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Tx: [`0x09a30959...`](https://sepolia.etherscan.io/tx/0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39)) supporting **7 full-spectrum compliance & procurement intents** backed by MACHINA bond.
 - **Manifest Pinned to Immutable Commit:** [`1866680`](https://github.com/VishAlgoDev/praman-desk/blob/1866680fd44ec7de4fe96677f41719ad9b6ff17b/miner.yaml)
 - **Registration Update Tx:** [`0x6f98357046e6fcdf1ecbf4439d44d18702078bbe9e0b3e968025940d98dcaca6`](https://sepolia.etherscan.io/tx/0x6f98357046e6fcdf1ecbf4439d44d18702078bbe9e0b3e968025940d98dcaca6)
 - **Hosted Endpoints:**
