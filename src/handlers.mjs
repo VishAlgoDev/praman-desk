@@ -139,53 +139,76 @@ function parseCsvLine(line) {
   return fields;
 }
 
+let sdnRefreshPromise = null;
+
+function refreshSdnInBackground() {
+  if (sdnRefreshPromise) return sdnRefreshPromise;
+  const now = Date.now();
+  sdnRefreshPromise = (async () => {
+    try {
+      const [sdnRes, altRes] = await Promise.all([
+        fetch(SDN_CSV_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }),
+        fetch(ALT_CSV_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) })
+      ]);
+      if (!sdnRes.ok) throw new Error(`SDN fetch failed: ${sdnRes.status}`);
+
+      const sdnText = await sdnRes.text();
+      const entries = new Map();
+      for (const line of sdnText.split('\n')) {
+        if (!line.trim()) continue;
+        const f = parseCsvLine(line);
+        const uid = f[0];
+        const name = f[1] || '';
+        const sdnType = f[2] === '-0-' ? 'Entity' : f[2];
+        const program = f[3] === '-0-' ? '' : (f[3] || '');
+        if (uid && name) {
+          entries.set(uid, { name, type: sdnType, programs: program });
+        }
+      }
+
+      const aliases = new Map();
+      if (altRes.ok) {
+        const altText = await altRes.text();
+        for (const line of altText.split('\n')) {
+          if (!line.trim()) continue;
+          const f = parseCsvLine(line);
+          const sdnUid = f[0];
+          const aliasName = f[3] || '';
+          if (sdnUid && aliasName) {
+            if (!aliases.has(sdnUid)) aliases.set(sdnUid, []);
+            aliases.get(sdnUid).push(aliasName);
+          }
+        }
+      }
+
+      if (entries.size > 0) {
+        sdnEntries = entries;
+        sdnAliases = aliases;
+        sdnLoadedAt = now;
+      }
+    } catch {
+      // Keep pre-indexed snapshot if live US Treasury CSV fetch is unavailable
+    } finally {
+      sdnRefreshPromise = null;
+    }
+  })();
+  return sdnRefreshPromise;
+}
+
 async function loadSdnData() {
   initSdnFromSnapshot();
   const now = Date.now();
-  if (sdnEntries && (now - sdnLoadedAt) < SDN_TTL_MS) return;
-
-  try {
-    const [sdnRes, altRes] = await Promise.all([
-      fetch(SDN_CSV_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }),
-      fetch(ALT_CSV_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) })
-    ]);
-    if (!sdnRes.ok) throw new Error(`SDN fetch failed: ${sdnRes.status}`);
-
-    const sdnText = await sdnRes.text();
-    const entries = new Map();
-    for (const line of sdnText.split('\n')) {
-      if (!line.trim()) continue;
-      const f = parseCsvLine(line);
-      const uid = f[0];
-      const name = f[1] || '';
-      const sdnType = f[2] === '-0-' ? 'Entity' : f[2];
-      const program = f[3] === '-0-' ? '' : (f[3] || '');
-      if (uid && name) {
-        entries.set(uid, { name, type: sdnType, programs: program });
-      }
+  if (sdnEntries && sdnEntries.size > 0) {
+    if ((now - sdnLoadedAt) >= SDN_TTL_MS && !sdnRefreshPromise) {
+      // Stale-while-revalidate: serve snapshot in <1ms instead of blocking serverless requests for ~12s
+      refreshSdnInBackground().catch(() => {});
     }
-
-    const aliases = new Map();
-    if (altRes.ok) {
-      const altText = await altRes.text();
-      for (const line of altText.split('\n')) {
-        if (!line.trim()) continue;
-        const f = parseCsvLine(line);
-        const sdnUid = f[0];
-        const aliasName = f[3] || '';
-        if (sdnUid && aliasName) {
-          if (!aliases.has(sdnUid)) aliases.set(sdnUid, []);
-          aliases.get(sdnUid).push(aliasName);
-        }
-      }
-    }
-
-    sdnEntries = entries;
-    sdnAliases = aliases;
-    sdnLoadedAt = now;
-  } catch (err) {
-    if (sdnEntries) return; // Keep existing pre-indexed data on external network failure
-    throw err;
+    return;
+  }
+  await refreshSdnInBackground();
+  if (!sdnEntries) {
+    sdnEntries = new Map();
+    sdnAliases = new Map();
   }
 }
 
