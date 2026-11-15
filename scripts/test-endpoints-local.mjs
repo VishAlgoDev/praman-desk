@@ -346,7 +346,22 @@ async function run() {
       throw new Error(`H4 fake shell + redacted German VAT should be valid=false, got ${JSON.stringify(venFakeRedacted.json)}`);
     }
 
-    console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, ISSUE #1, SSRF, DILIGENCE PACK & MISSION 02 VERIFIED!');
+    // 13. OFAC Digital Currency EVM Address Screening (ND-15: Lazarus Ronin address + Mission 02 Freeze)
+    const evmSanc = await check('/api/miner/sanctions-screen?name=0x098B716B8Aaf21512996dC57EB0615e2383E2f96');
+    const m2SanctionedAddr = await check('/api/mission/stablecoin-gate', 'POST', {
+      recipientAddress: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96',
+      amountUsdc: 0.25,
+      beneficiaryName: 'Benign Frontend LLC',
+      originatorName: 'Praman Desk Treasury'
+    });
+    if (!evmSanc.json.matched || evmSanc.json.matches?.[0]?.matched_via !== 'digital_currency_address') {
+      throw new Error(`ND-15 OFAC EVM address screening failed: ${JSON.stringify(evmSanc.json)}`);
+    }
+    if (m2SanctionedAddr.json.cleared !== false || m2SanctionedAddr.json.action !== 'REJECT_AND_FREEZE') {
+      throw new Error(`ND-15 Mission 02 EVM address freeze failed: ${JSON.stringify(m2SanctionedAddr.json)}`);
+    }
+
+    console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM & MISSION 02 VERIFIED!');
   } finally {
     server.close();
   }

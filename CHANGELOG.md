@@ -68,4 +68,8 @@ All remediation work, newly discovered defects, regressions, security issues, pr
   - Missing NL extraction patterns: `normalizeSanctionsText` (`Screen X for OFAC sanctions`), `parseCorporateRegistryQuery` (`'s LEI and jurisdiction`, `Verify legal entity X DE`, `UK company number 12345678`, 8-digit / `SC`/`NI`/`OC` Companies House regex), `parseRegulatoryFilingQuery` (trailing `on SEC EDGAR` before year), `verifyVendorPrimary` (`hasVatRegistryBool && !vatName && !gleifRecord` auto-verifying unknown entity against redacted German VIES VAT).
   - `scripts/build-sanctions-v4-dataset.mjs` retains `[SDGT]` brackets in prose/tables and shares `CLEAN_ENTITIES` / SDN subsets across train/val splits.
   - `public/index.html` still displays `"Missions 02 & 04"` / `"Stablecoin"` label dressing inside Mission 04 UI tabs/cards and unvalidated external explorer/comment links; `evidence/SUBMISSION_DRAFTS.md` references `verdict:` instead of `status: "insufficient_evidence"`; `README.md` still cites `EFTS` without noting CIK Submissions primary lookup.
+- **ND-15 (OFAC Digital Currency EVM Address Blind Spot in `screenSanctions` & Mission 02 Gate)**:
+  - Live Treasury `sdn.csv` (remarks column) and `sdn_comments.csv` contain 100+ OFAC-designated EVM `0x...` addresses (including `0x098B716B8Aaf21512996dC57EB0615e2383E2f96` — Lazarus Group / Ronin Bridge), yet neither `scripts/build-sdn-snapshot.mjs` nor `refreshSdnInBackground` extracted them.
+  - Consequently, `screenSanctions` and Mission 02 `evaluateStablecoinGate` only screened entity/person names and missed sanctioned `0x...` wallet addresses supplied with a benign beneficiary name. Fixed across `build-sdn-snapshot.mjs`, `sdn-snapshot.json`, `screenSanctions`, and `evaluateStablecoinGate`.
+
 

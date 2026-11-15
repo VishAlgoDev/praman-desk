@@ -286,10 +286,24 @@ async function runTests() {
   if (sancHighParsed.matched !== false) {
     throw new Error(`Expected threshold=0.99 to filter comma/middle-name match (0.88-0.96), got ${JSON.stringify(sancHighParsed)}`);
   }
-  console.log('   PASS: screen_stablecoin_settlement & screen_sanctions threshold enforced live RPC, FATF Travel Rule, & bounds.\n');
+
+  const m2EvmFreeze = await client.callTool({
+    name: 'screen_stablecoin_settlement',
+    arguments: {
+      recipient_address: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96',
+      amount_usdc: 0.25,
+      beneficiary_name: 'Benign Counterparty Inc.',
+      originator_name: 'Praman Desk Treasury',
+    },
+  });
+  const m2EvmFreezeParsed = JSON.parse(m2EvmFreeze.content[0].text);
+  if (m2EvmFreezeParsed.cleared !== false || m2EvmFreezeParsed.action !== 'REJECT_AND_FREEZE') {
+    throw new Error(`Expected REJECT_AND_FREEZE on OFAC EVM address with benign name, got ${JSON.stringify(m2EvmFreezeParsed)}`);
+  }
+  console.log('   PASS: screen_stablecoin_settlement & screen_sanctions threshold enforced live RPC, FATF Travel Rule, OFAC EVM addrs & bounds.\n');
 
   await client.close();
-  console.log('=== All 14 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 15 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {

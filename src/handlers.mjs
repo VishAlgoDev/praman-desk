@@ -95,10 +95,12 @@ const BOUNTY_SUBMISSIONS = [
 // OFAC SDN sanctions data — in-memory cache, initialized from local snapshot + refreshed every 6 hours
 let sdnEntries = null;
 let sdnAliases = null;
+let sdnEvmAddresses = new Map();
 let sdnLoadedAt = 0;
 const SDN_TTL_MS = 6 * 60 * 60 * 1000;
 const SDN_CSV_URL = 'https://www.treasury.gov/ofac/downloads/sdn.csv';
 const ALT_CSV_URL = 'https://www.treasury.gov/ofac/downloads/alt.csv';
+const SDN_COMMENTS_URL = 'https://www.treasury.gov/ofac/downloads/sdn_comments.csv';
 const SNAPSHOT_PATH = path.join(rootDir, 'data', 'sdn-snapshot.json');
 
 function initSdnFromSnapshot() {
@@ -109,14 +111,21 @@ function initSdnFromSnapshot() {
       const data = JSON.parse(raw);
       const entries = new Map();
       const aliases = new Map();
+      const evmMap = new Map();
       for (const [uid, name, type, programs, aliasList] of data.entries) {
         entries.set(uid, { name, type, programs });
         if (aliasList && aliasList.length > 0) {
           aliases.set(uid, aliasList);
         }
       }
+      if (Array.isArray(data.evm_addresses)) {
+        for (const [addr, uid] of data.evm_addresses) {
+          if (addr && uid) evmMap.set(String(addr).toLowerCase(), String(uid));
+        }
+      }
       sdnEntries = entries;
       sdnAliases = aliases;
+      sdnEvmAddresses = evmMap;
       sdnLoadedAt = new Date(data.generated_at).getTime() || Date.now();
     }
   } catch (err) {
@@ -148,14 +157,16 @@ function refreshSdnInBackground() {
   const now = Date.now();
   sdnRefreshPromise = (async () => {
     try {
-      const [sdnRes, altRes] = await Promise.all([
+      const [sdnRes, altRes, commentsRes] = await Promise.all([
         fetch(SDN_CSV_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }),
-        fetch(ALT_CSV_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) })
+        fetch(ALT_CSV_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }),
+        fetch(SDN_COMMENTS_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }).catch(() => null)
       ]);
       if (!sdnRes.ok) throw new Error(`SDN fetch failed: ${sdnRes.status}`);
 
       const sdnText = await sdnRes.text();
       const entries = new Map();
+      const evmMap = new Map();
       for (const line of sdnText.split('\n')) {
         if (!line.trim()) continue;
         const f = parseCsvLine(line);
@@ -165,6 +176,10 @@ function refreshSdnInBackground() {
         const program = f[3] === '-0-' ? '' : (f[3] || '');
         if (uid && name) {
           entries.set(uid, { name, type: sdnType, programs: program });
+          const evmHits = line.match(/0x[0-9a-fA-F]{40}/g);
+          if (evmHits) {
+            for (const a of evmHits) evmMap.set(a.toLowerCase(), uid);
+          }
         }
       }
 
@@ -183,9 +198,28 @@ function refreshSdnInBackground() {
         }
       }
 
+      if (commentsRes?.ok) {
+        const commentsText = await commentsRes.text();
+        let currentUid = null;
+        for (const line of commentsText.split('\n')) {
+          if (!line.trim()) continue;
+          const uidMatch = line.match(/^(\d+),/);
+          if (uidMatch && entries.has(uidMatch[1])) currentUid = uidMatch[1];
+          if (currentUid) {
+            const evmHits = line.match(/0x[0-9a-fA-F]{40}/g);
+            if (evmHits) {
+              for (const a of evmHits) {
+                if (!evmMap.has(a.toLowerCase())) evmMap.set(a.toLowerCase(), currentUid);
+              }
+            }
+          }
+        }
+      }
+
       if (entries.size > 0) {
         sdnEntries = entries;
         sdnAliases = aliases;
+        if (evmMap.size > 0) sdnEvmAddresses = evmMap;
         sdnLoadedAt = now;
         sdnLastFailedAt = 0;
       }
@@ -1629,6 +1663,47 @@ export async function screenSanctions({ name = '', threshold = 0.70 }) {
   await loadSdnData();
   const parsedThresh = parseStrictNumber(threshold);
   const THRESHOLD = Number.isFinite(parsedThresh) && parsedThresh >= 0.5 && parsedThresh <= 0.99 ? parsedThresh : 0.70;
+
+  // Direct OFAC Digital Currency EVM address screening (0x + 40 hex)
+  const evmMatch = nameTrim.match(/\b(0x[0-9a-fA-F]{40})\b/);
+  if (evmMatch) {
+    const addrLower = evmMatch[1].toLowerCase();
+    const matchedUid = sdnEvmAddresses.get(addrLower) || null;
+    const entry = matchedUid ? sdnEntries.get(matchedUid) : null;
+    const addrMatches = matchedUid && entry
+      ? [{
+          sdn_uid: matchedUid,
+          matched_name: entry.name,
+          match_type: entry.type,
+          programs: entry.programs,
+          similarity_score: 1.0,
+          matched_via: 'digital_currency_address',
+          matched_address: addrLower,
+          matched_alias: null
+        }]
+      : [];
+    const isMatched = addrMatches.length > 0;
+    return {
+      screened: true,
+      name: nameTrim,
+      matched: isMatched,
+      matches: addrMatches,
+      lists: ['US Treasury OFAC SDN (Names + Digital Currency Addresses)'],
+      match_score: isMatched ? 1.0 : 0,
+      query_name: nameTrim,
+      match_found: isMatched,
+      match_count: addrMatches.length,
+      sdn_list_size: sdnEntries.size,
+      sdn_evm_address_count: sdnEvmAddresses.size,
+      sdn_last_loaded: new Date(sdnLoadedAt).toISOString(),
+      source: 'US Treasury OFAC SDN List (treasury.gov/ofac)',
+      source_url: 'https://sanctionssearch.ofac.treas.gov/',
+      summary: isMatched
+        ? `Exact OFAC SDN digital currency address match for ${evmMatch[1]} -> ${addrMatches[0].matched_name} (UID ${matchedUid}, program: ${addrMatches[0].programs}).`
+        : `No OFAC SDN digital currency address match for ${evmMatch[1]} (checked ${sdnEvmAddresses.size} indexed OFAC EVM addresses).`
+    };
+  }
+
   const matches = [];
 
   for (const [uid, entry] of sdnEntries) {
@@ -3017,15 +3092,19 @@ export async function evaluateStablecoinGate(params = {}) {
     flags.push('INVALID_DELEGATION_CAP');
   }
 
-  // Parallel OFAC sanctions screening + optional GLEIF check
-  const [sanctionsBeneficiary, sanctionsOriginator, corpBeneficiary] = await Promise.all([
+  // Parallel OFAC sanctions screening (entities + EVM wallet addresses) + optional GLEIF check
+  const [sanctionsBeneficiary, sanctionsOriginator, sanctionsRecipientAddr, sanctionsSenderAddr, corpBeneficiary] = await Promise.all([
     beneficiaryName ? screenSanctions({ name: beneficiaryName }) : Promise.resolve({ matched: false, matches: [] }),
     originatorName ? screenSanctions({ name: originatorName }) : Promise.resolve({ matched: false, matches: [] }),
+    recipientValid ? screenSanctions({ name: recipientRaw }) : Promise.resolve({ matched: false, matches: [] }),
+    senderValid ? screenSanctions({ name: senderRaw }) : Promise.resolve({ matched: false, matches: [] }),
     beneficiaryName ? lookupCorporateRegistry({ company: beneficiaryName }) : Promise.resolve(null)
   ]);
 
   if (sanctionsBeneficiary.matched) flags.push(`OFAC_BENEFICIARY_MATCH: ${sanctionsBeneficiary.matches?.[0]?.matched_name}`);
   if (sanctionsOriginator.matched) flags.push(`OFAC_ORIGINATOR_MATCH: ${sanctionsOriginator.matches?.[0]?.matched_name}`);
+  if (sanctionsRecipientAddr.matched) flags.push(`OFAC_RECIPIENT_ADDRESS_MATCH: ${sanctionsRecipientAddr.matches?.[0]?.matched_name} (${recipientRaw})`);
+  if (sanctionsSenderAddr.matched) flags.push(`OFAC_SENDER_ADDRESS_MATCH: ${sanctionsSenderAddr.matches?.[0]?.matched_name} (${senderRaw})`);
 
   // FATF Travel Rule threshold check (>= $1,000 requires verified originator & beneficiary identity)
   const travelRuleRequired = Number.isFinite(amountUsdc) && amountUsdc >= 1000;
@@ -3139,7 +3218,7 @@ export async function evaluateStablecoinGate(params = {}) {
   let action = 'APPROVE_USDC_TRANSFER';
   let riskLevel = 'LOW';
 
-  if (sanctionsBeneficiary.matched || sanctionsOriginator.matched) {
+  if (sanctionsBeneficiary.matched || sanctionsOriginator.matched || sanctionsRecipientAddr.matched || sanctionsSenderAddr.matched) {
     action = 'REJECT_AND_FREEZE';
     riskLevel = 'CRITICAL_SANCTIONS_BLOCK';
   } else if (!senderValid || !recipientValid || !tokenValid || !Number.isFinite(amountUsdc) || amountUsdc <= 0 || !capValid || flags.some(f => f.startsWith('ONCHAIN_') || f.startsWith('TX_') || f.startsWith('INVALID_'))) {
@@ -3186,7 +3265,14 @@ export async function evaluateStablecoinGate(params = {}) {
     sanctions: {
       beneficiaryMatched: Boolean(sanctionsBeneficiary.matched),
       originatorMatched: Boolean(sanctionsOriginator.matched),
-      matches: [...(sanctionsBeneficiary.matches || []), ...(sanctionsOriginator.matches || [])].slice(0, 5)
+      recipientAddressMatched: Boolean(sanctionsRecipientAddr.matched),
+      senderAddressMatched: Boolean(sanctionsSenderAddr.matched),
+      matches: [
+        ...(sanctionsBeneficiary.matches || []),
+        ...(sanctionsOriginator.matches || []),
+        ...(sanctionsRecipientAddr.matches || []),
+        ...(sanctionsSenderAddr.matches || [])
+      ].slice(0, 5)
     },
     onchainState: {
       chainBlockNumber,
@@ -3215,6 +3301,7 @@ export async function handleApiRequest(req, res) {
         service: 'praman-desk',
         minerId: 5281,
         sdnEntriesLoaded: sdnEntries.size,
+        sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
         timestamp: new Date().toISOString()
       });
@@ -3241,6 +3328,7 @@ export async function handleApiRequest(req, res) {
         service: 'praman-desk',
         liveSigningAvailable: Boolean(getWalletAccount()),
         sdnEntriesLoaded: sdnEntries.size,
+        sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
         miner5281,
         timestamp: new Date().toISOString()
