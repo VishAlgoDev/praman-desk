@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-11-15T07:53:01.718Z",
+  "event": "registerWasm",
+  "intent": "SANCTIONS_SCREENING_MATCH",
+  "wasmHash": "0x43553a7caa4b58312a7d49d38f00b7e792e5c0158f3a9a259c1669d981b4e374",
+  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH.safetensors",
+  "wasmRunnableUrl": "https://theory-blogging-none-delayed.trycloudflare.com",
+  "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "txHash": "0x7fa76531bc49a08f782e5f8e32f13399c25bd1011e930a0292e5d876336e85e3",
+  "blockNumber": "12138871",
+  "status": "success",
+  "predictedRegistrationId": "457",
+  "etherscanUrl": "https://sepolia.etherscan.io/tx/0x7fa76531bc49a08f782e5f8e32f13399c25bd1011e930a0292e5d876336e85e3"
+}
