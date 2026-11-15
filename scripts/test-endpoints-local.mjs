@@ -1,5 +1,5 @@
 import http from 'node:http';
-import { handleApiRequest } from '../src/handlers.mjs';
+import { handleApiRequest, evaluateMinerAgreement } from '../src/handlers.mjs';
 
 const server = http.createServer(async (req, res) => {
   if (req.url.startsWith('/api/')) {
@@ -376,6 +376,32 @@ async function run() {
     }
     if (lucianWithAmounts.json.reconciled !== false || lucianWithAmounts.json.discrepancy !== 102660) {
       throw new Error(`ND-16 Lucian 102660.00 INR vs 0.00 INR mismatch failed: ${JSON.stringify(lucianWithAmounts.json)}`);
+    }
+
+    // 15. Issue #1 Exact Lucian Comparator Release Checks (ND-17)
+    const primaryMismatch = { reconciled: false, details: { delta_total: 102660 } };
+    const primaryExact = { reconciled: true, details: { delta_total: 0 } };
+    const c1 = evaluateMinerAgreement('INVOICE_LEDGER_RECONCILE_GENERAL', primaryMismatch, { result: { discrepancy: 102660 } });
+    const c2 = evaluateMinerAgreement('INVOICE_LEDGER_RECONCILE_GENERAL', primaryMismatch, { result: { reconciled: 0, discrepancy: 102660 } });
+    const c3 = evaluateMinerAgreement('INVOICE_LEDGER_RECONCILE_GENERAL', primaryMismatch, {
+      result: { reconciled: false, discrepancy: 102660 },
+      field_status: { reconciled: 'missing', discrepancy: 'ok' }
+    });
+    const c4 = evaluateMinerAgreement('INVOICE_LEDGER_RECONCILE_GENERAL', primaryExact, { result: { reconciled: true } });
+    const c5 = evaluateMinerAgreement('INVOICE_LEDGER_RECONCILE_GENERAL', primaryExact, { result: { reconciled: true, discrepancy: 102660 } });
+    const cOkMismatch = evaluateMinerAgreement('INVOICE_LEDGER_RECONCILE_GENERAL', primaryMismatch, {
+      result: { reconciled: false, discrepancy: '102660.00' },
+      field_status: { reconciled: 'ok', discrepancy: 'ok' }
+    });
+    const cOkExact = evaluateMinerAgreement('INVOICE_LEDGER_RECONCILE_GENERAL', primaryExact, {
+      result: { reconciled: true, discrepancy: 0 },
+      field_status: { reconciled: 'ok', discrepancy: 'ok' }
+    });
+    if ([c1, c2, c3, c4, c5].some(x => x.agreement === 'confirmed')) {
+      throw new Error(`ND-17 comparator falsely confirmed invalid case: ${JSON.stringify([c1, c2, c3, c4, c5])}`);
+    }
+    if (cOkMismatch.agreement !== 'confirmed' || cOkExact.agreement !== 'confirmed') {
+      throw new Error(`ND-17 comparator rejected valid control: ${JSON.stringify({ cOkMismatch, cOkExact })}`);
     }
 
     console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM & MISSION 02 VERIFIED!');

@@ -14,8 +14,8 @@ Thanks for catching and documenting both edge cases cleanly (`@epistemedeus`)! W
 
 **Fixed in `src/handlers.mjs` and deployed live to `https://praman-desk.vercel.app`:**
 - `extractAmountList()` now strips invoice/PO/reference identifiers, `#refs`, ISO dates, and years before fallback amount parsing, removes the silent `100 * 250` fallback, accepts both prefix and suffix currency tags (including explicit `0.00` paid totals), and returns HTTP `200` with `reconciled: null, discrepancy: null, status: "insufficient_evidence"` when monetary evidence is absent.
-- `evaluateMinerAgreement()` strictly requires explicit boolean `reconciled === expected` agreement, matching numeric `discrepancy` within `$0.01`, and positive deterministic WASM basis-point scores before setting `confirmed: true`.
-- Expanded `scripts/test-endpoints-local.mjs` and `scripts/deep-audit.mjs` to assert both bare-reference inconclusive handling and `102660.00 INR` vs `0.00 INR` with appended `; reference ID 48291`.
+- `evaluateMinerAgreement()` now uses strict numeric parsing (`parseStrictNumber`), requires `typeof result.reconciled === 'boolean'`, a present finite numeric `discrepancy` (not boolean), `wasmScore >= 5000`, and blocks `'confirmed'` whenever `field_status.reconciled` or `field_status.discrepancy` is `'missing' | 'rejected' | 'unavailable'` — rejecting `{discrepancy: 102660}`, `{reconciled: 0, discrepancy: 102660}`, `{reconciled: false, discrepancy: 102660}` with `field_status.reconciled: "missing"`, `{reconciled: true}`, and `{reconciled: true, discrepancy: 102660}` while confirming exact and mismatch controls.
+- Expanded `scripts/test-endpoints-local.mjs` and `scripts/deep-audit.mjs` to assert all 5 comparator release checks alongside both live HTTP bare-reference and `102660.00 INR` vs `0.00 INR` + `; reference ID 48291` cases.
 
 Re-verify live:
 ```bash
