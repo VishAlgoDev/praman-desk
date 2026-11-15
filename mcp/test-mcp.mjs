@@ -36,10 +36,10 @@ async function runTests() {
   for (const t of toolsResult.tools) {
     console.log(`   - ${t.name}: ${t.description.slice(0, 65)}...`);
   }
-  if (toolsResult.tools.length !== 9) {
-    throw new Error(`Expected 9 tools, found ${toolsResult.tools.length}`);
+  if (toolsResult.tools.length !== 10) {
+    throw new Error(`Expected 10 tools, found ${toolsResult.tools.length}`);
   }
-  console.log('   PASS: All 9 tools registered.\n');
+  console.log('   PASS: All 10 tools registered.\n');
 
   // Test 2: verify_counterparty (STRIPE, LLC)
   console.log('3. Testing tool: verify_counterparty (STRIPE, LLC)...');
@@ -218,8 +218,53 @@ async function runTests() {
   }
   console.log('   PASS: clear_spend successfully enforced REJECT_AND_FREEZE on sanctioned counterparty.\n');
 
+  // Test 12: screen_stablecoin_settlement (Mission 02: Clean + Sanctioned Freeze + Invalid Amount)
+  console.log('13. Testing tool: screen_stablecoin_settlement (Mission 02 Sepolia gate)...');
+  const m2Clean = await client.callTool({
+    name: 'screen_stablecoin_settlement',
+    arguments: {
+      recipient_address: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      amount_usdc: 0.25,
+      beneficiary_name: 'Apple Inc.',
+      delegation_cap_usdc: 500,
+    },
+  });
+  const m2CleanParsed = JSON.parse(m2Clean.content[0].text);
+  console.log(`   Clean Gate: cleared=${m2CleanParsed.cleared} | action=${m2CleanParsed.action} | block=${m2CleanParsed.onchainState?.chainBlockNumber} | usdc=${m2CleanParsed.onchainState?.senderUsdcBalance}`);
+  if (m2CleanParsed.cleared !== true || m2CleanParsed.action !== 'APPROVE_USDC_TRANSFER' || !m2CleanParsed.onchainState?.chainBlockNumber) {
+    throw new Error(`Expected Mission 02 clean transfer approval, got ${JSON.stringify(m2CleanParsed)}`);
+  }
+
+  const m2Freeze = await client.callTool({
+    name: 'screen_stablecoin_settlement',
+    arguments: {
+      recipient_address: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      amount_usdc: 10,
+      beneficiary_name: 'Lazarus Group',
+    },
+  });
+  const m2FreezeParsed = JSON.parse(m2Freeze.content[0].text);
+  console.log(`   Sanctioned Freeze: cleared=${m2FreezeParsed.cleared} | action=${m2FreezeParsed.action} | risk=${m2FreezeParsed.riskLevel}`);
+  if (m2FreezeParsed.cleared !== false || m2FreezeParsed.action !== 'REJECT_AND_FREEZE') {
+    throw new Error(`Expected REJECT_AND_FREEZE for Lazarus Group, got ${JSON.stringify(m2FreezeParsed)}`);
+  }
+
+  const m2Negative = await client.callTool({
+    name: 'screen_stablecoin_settlement',
+    arguments: {
+      recipient_address: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      amount_usdc: -5,
+      beneficiary_name: 'Apple Inc.',
+    },
+  });
+  const m2NegParsed = JSON.parse(m2Negative.content[0].text);
+  if (m2NegParsed.cleared !== false || m2NegParsed.action !== 'REJECT_INVALID_SETTLEMENT') {
+    throw new Error(`Expected REJECT_INVALID_SETTLEMENT for negative amount, got ${JSON.stringify(m2NegParsed)}`);
+  }
+  console.log('   PASS: screen_stablecoin_settlement enforced Mission 02 live Sepolia RPC + OFAC freeze + amount bounds.\n');
+
   await client.close();
-  console.log('=== All 11 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 12 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {

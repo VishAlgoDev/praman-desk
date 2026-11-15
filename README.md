@@ -4,8 +4,9 @@
 
 - **Live Hosted Application (No wallet required):** <https://praman-desk.vercel.app>
 - **Active On-Chain Miner (Sepolia Diamond):** ID `#5281` (`praman-compliance-miner`, updated from `#5186`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Tx: [`0x09a30959...`](https://sepolia.etherscan.io/tx/0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39))
-- **Evaluator Adapter Challenger (ModernBERT LoRA):** ID `#461` on `SANCTIONS_SCREENING_MATCH` (81.33% held-out pairwise accuracy, Docker runner, Tx: [`0xf9d9e1e9...`](https://sepolia.etherscan.io/tx/0xf9d9e1e9764b057d9e265f179cd24709bf995e63e35243387dbec826b6a72607))
+- **Track 2 Evaluator Adapter Post-Mortem (#461):** Adapter `#461` (`SANCTIONS_SCREENING_MATCH`) passed Stage 1 bit-exact WASM determinism (`0xbfd4f50b`) via Docker (`Tx: 0xf9d9e1e9...`), but was **rejected on Devnode Stage 2 (`7/15 = 46.7%` vs `70%` floor)** because v3 training used single-template synthetic JSON (`81.33%` in-distribution only). A diversified 5-format v4 dataset (`scripts/build-sanctions-v4-dataset.mjs`) is prepared locally for Colab T4 retraining.
 - **Live Evaluator Portfolio:** 62 cryptographically signed evaluation rows across 8 intents on `devnode.telegraphprotocol.com` (all 62 `eligible`)
+- **Missions Covered:** **Mission 04** (Legal & Cross-Border Entity Diligence) & **Mission 02** (Stablecoin Pre-Payment Treasury Guard on Ethereum Sepolia)
 
 ---
 
@@ -141,17 +142,44 @@ Replace `/path/to/praman-desk` with your local clone path:
 }
 ```
 
-### Available MCP Tools (9 Production Tools)
+### Available MCP Tools (10 Production Tools)
 
-1. `verify_counterparty`: Real-time GLEIF global legal entity lookup and multi-jurisdiction tax syntax (EIN, VAT, GSTIN, LEI) validation.
-2. `reconcile_invoice`: Deterministic 3-way mathematical reconciliation (invoice vs PO vs receipt) detecting unapproved variances.
+1. `verify_counterparty`: Real-time GLEIF global legal entity lookup and multi-jurisdiction tax syntax (EIN, VAT, GSTIN Mod-36, LEI) + cross-jurisdiction identity matching.
+2. `reconcile_invoice`: Deterministic 3-way mathematical reconciliation (invoice vs PO vs receipt) detecting unapproved variances and refusing bare reference numbers without monetary evidence.
 3. `verify_spend_authorization`: Enforces organizational spend delegation caps and dual-signoff policies.
 4. `verify_receipt_provenance`: Cryptographic SHA-256 digest auditing against invoice face amounts.
 5. `clear_spend`: Composite autonomous pre-payment spend clearance gate producing a final `APPROVE_PAYMENT`, `REQUEST_EXECUTIVE_APPROVAL`, `REJECT_AND_HOLD`, or `REJECT_AND_FREEZE` gate decision with risk level and flags (specifically enforcing `CRITICAL_SANCTIONS_BLOCK` on any counterparty on the US Treasury OFAC SDN list).
 6. `compare_evaluator_scoring`: Evaluates miner predictions against ground truth using the standalone 651-byte AssemblyScript WASM comparator module.
-7. `screen_sanctions`: High-speed screening of counterparties against 19,563 official US Treasury OFAC Specially Designated Nationals (SDN) records with bigram token matching.
-8. `lookup_corporate_registry`: Authoritative statutory registration lookup via the Global Legal Entity Identifier Foundation (GLEIF ISO 17442) across 200+ jurisdictions.
-9. `monitor_regulatory_filings`: Real-time regulatory filing inspection querying live SEC EDGAR (10-K, 10-Q, 8-K) and US Federal Register API.
+7. `screen_sanctions`: High-speed screening of counterparties against 19,565 official US Treasury OFAC Specially Designated Nationals (SDN) records with comma-name permutation and false-positive protections.
+8. `lookup_corporate_registry`: Authoritative statutory registration lookup via GLEIF ISO 17442 and UK Companies House fallback across 200+ jurisdictions.
+9. `monitor_regulatory_filings`: Real-time regulatory filing inspection querying CIK-resolved SEC EDGAR Submissions API (10-K, 10-Q, 8-K), US Federal Register API, and GLEIF.
+10. `screen_stablecoin_settlement`: **Mission 02** stablecoin pre-payment gate querying live Ethereum Sepolia JSON-RPC chain state & USDC balances, enforcing OFAC SDN freeze (`REJECT_AND_FREEZE`), FATF Travel Rule (`>=$1,000` identity verification), delegation cap checks, and ERC-20 `Transfer` receipt WASM verification.
+
+---
+
+## Mission Acceptance Checklist (Section 02: Run, Check, Inspect, Break, Reproduce)
+
+### Mission 04 — Legal & Cross-Border Entity Diligence (`https://praman-desk.vercel.app/#compliance`)
+- **Run it:** `curl -s https://praman-desk.vercel.app/api/audit/diligence-pack` (executes 16 primary checks across `US`, `GB`, `DE`, `HK`, `SG` concurrently and benchmarks vs illustrative law-firm turnaround).
+- **Check & Inspect it:** Inspect `packSha256`, `machineInvoice.totalChecksExecuted === 16`, individual GLEIF LEI / VIES / HKMA / OFAC citations, and Sepolia x402 calibration ledger receipts.
+- **Break it:** Submit `GET /api/miner/invoice-reconcile?invoice_id=INV-2026-081&po_number=PO-2026-7741` (bare references return `reconciled: null, status: "insufficient_evidence"`), `GET /api/miner/vendor-verify?vendor=Apple%20Inc.&vat_number=DE143454214` (flags `vat_entity_mismatch`), or `GET /api/miner/sanctions-screen?name=Viktor%20Bout` vs `AIA%20Group%20Limited`.
+- **Reproduce it:** `npm run comparator:test && npm run mcp:test && node scripts/test-endpoints-local.mjs`.
+
+### Mission 02 — Stablecoin Pre-Payment Treasury Gate (`https://praman-desk.vercel.app/#stablecoin`)
+- **Run it:** Call `POST /api/mission/stablecoin-gate` with `{ "recipientAddress": "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b", "amountUsdc": 0.25, "beneficiaryName": "Apple Inc." }` -> returns `cleared: true, action: "APPROVE_USDC_TRANSFER"` anchored to live Sepolia block number and wallet USDC balance.
+- **Check & Inspect it:** Inspect `onchainState.chainBlockNumber`, `onchainState.senderUsdcBalance`, `travelRule`, `sanctions`, and `attestationSha256`. Optionally pass `txHash` to decode ERC-20 `Transfer` logs and verify settled USDC amount using `comparator.wasm`.
+- **Break it:** Pass `"beneficiaryName": "Lazarus Group"` -> `REJECT_AND_FREEZE`; pass `"amountUsdc": 99999` -> `HOLD_INSUFFICIENT_FUNDS`; pass `"amountUsdc": 1500, "originatorName": ""` -> `HOLD_TRAVEL_RULE`; pass negative amount -> `REJECT_INVALID_SETTLEMENT`.
+- **Reproduce it:** Run MCP test #13 (`screen_stablecoin_settlement`) via `npm run mcp:test`.
+
+---
+
+## Commercial Summary & Path to Revenue (Section 08)
+
+1. **Target Buyer & User Persona:** AI agent operators, DAO treasury controllers, fintech CFOs, and mid-market procurement/AP teams automating cross-border supplier payouts and stablecoin settlements.
+2. **Core Pain Solved:** Prevents autonomous wallets and AP workflows from losing funds to phantom shell vendors, over-billed/unreconciled invoices, forged receipt hashes, FATF Travel Rule gaps, and OFAC SDN exposure (including comma-reversed SDNs that evade naive string matching).
+3. **Business Model & Unit Economics:** Usage-based pay-per-verification via HTTP `x402` USDC micropayments (`$0.01/check` on-chain or hosted API tier + MCP enterprise gateway), plus `$0` open-source CLI/MCP developer funnel to convert teams handling high-value invoice & treasury flows. Compare machine-executed 5-jurisdiction diligence ($0.16 x402 equivalent in ~2–3s) against traditional manual vendor onboarding delays.
+4. **Distribution & Go-To-Market:** Distributed natively across three zero-friction surfaces: (a) Telegraph Protocol Miner `#5281` for decentralized agent discovery, (b) `praman-spend-guard-mcp` stdio server for Claude Code / Cursor / Eliza / AgentKit builders, and (c) zero-wallet web UI + REST API at `https://praman-desk.vercel.app`.
+5. **Honest Current Limitations & Next Milestones:** (a) Current `x402` settlements and Stablecoin Gate operate on Ethereum Sepolia test USDC; production requires mainnet RPC/USDC treasury policies and ERP webhooks (QuickBooks/NetSuite/Safe module). (b) Track 2 LoRA adapter `#461` was rejected on Devnode (`7/15 = 46.7%`) due to single-template synthetic training data; next milestone is Colab GPU retraining using our multi-format `eval-data/pairs_sanctions_v4.jsonl` dataset (`1,000` pairs) and moving Docker inference onto a persistent named tunnel/VM.
 
 ---
 
@@ -164,14 +192,13 @@ Replace `/path/to/praman-desk` with your local clone path:
 - Dual execution: Runs server-side in Node.js serverless functions and client-side directly in the browser via `initClientWasm()`.
 
 ### 2. Synchronous OFAC SDN Snapshot (`data/sdn-snapshot.json`)
-- 19,563 official US Treasury OFAC Specially Designated Nationals (SDN) entries packaged locally.
+- 19,565 official US Treasury OFAC Specially Designated Nationals (SDN) entries packaged locally.
 - Loaded synchronously into memory at cold start in <25ms.
-- Eliminates 3–4 second external network latency and prevents government web server rate-limiting/firewalls from blocking spend checks.
+- Supports comma-reversed personal names (`BOUT, Viktor` <-> `Viktor Bout`), transliteration tolerance, and false-positive shields against short tokens and corporate suffixes (`AIA Group Limited`, `Ali`).
 
-### 3. Parallel Telegraph `x402` Verification Architecture
-- Executes all 7 canonical procurement and compliance intents concurrently via `Promise.all` with strict 10s timeouts.
-- Reduces multi-miner verification time from 21.7s down to ~3.5s.
-- Adheres strictly to Devnode JSON schema specifications, preventing schema rejection errors.
+### 3. Parallel `x402` Execution & SSRF / Telemetry Guards
+- Executes compliance & diligence checks concurrently via `Promise.allSettled` with per-upstream timeouts and `upstream_status` transparency (`/api/health` and `/api/status`).
+- Enforces DNS-resolved public-only outbound fetches (blocking loopback, link-local metadata `169.254.169.254`, and RFC1918 private networks) and per-IP/global demo rate limits on paid routes.
 
 ---
 
@@ -185,8 +212,11 @@ npm install
 # Run the 1,043-vector WASM comparator test suite
 npm run comparator:test
 
-# Run the 11-test MCP server stdio integration test suite
+# Run the 12-test MCP server stdio integration test suite (10 tools)
 npm run mcp:test
+
+# Run the full local HTTP endpoint + P0/P1/Issue #1/Mission 02 regression suite
+node scripts/test-endpoints-local.mjs
 
 # Launch the interactive local Web UI & API
 npm run web   # launches at http://127.0.0.1:3402

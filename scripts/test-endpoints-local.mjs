@@ -173,8 +173,112 @@ async function run() {
     if (ledger.status !== 200 || ledger.json.totalPaidCalls < 9 || uniqueTxs.size !== ledger.json.totalPaidCalls) {
       throw new Error(`Ledger deduplication check failed (total=${ledger.json.totalPaidCalls}, unique=${uniqueTxs.size})`);
     }
+    if (pack.json.machineInvoice?.totalChecksExecuted !== 16) {
+      throw new Error(`Expected Diligence Pack machineInvoice.totalChecksExecuted === 16, got ${pack.json.machineInvoice?.totalChecksExecuted}`);
+    }
 
-    console.log('\nALL 7 ENDPOINTS, REGRESSION GUARDS, DILIGENCE PACK & LEDGER VERIFIED SUCCESSFULLY!');
+    console.log('\n--- P0 / P1 / Issue #1 / SSRF / Mission 02 Regression Checks ---');
+    // 1. /api/health & /api/status
+    const health = await check('/api/health');
+    const appStatus = await check('/api/status');
+    if (health.status !== 200 || !health.json.ok || (health.json.sdnEntriesLoaded || 0) < 19000 || health.json.minerId !== 5281) {
+      throw new Error(`Health check failed: ${JSON.stringify(health.json)}`);
+    }
+    if (appStatus.status !== 200 || !appStatus.json.ok || (appStatus.json.sdnEntriesLoaded || 0) < 19000) {
+      throw new Error(`Status check failed: ${JSON.stringify(appStatus.json)}`);
+    }
+
+    // 2. Sanctions FP/FN parity
+    const aia = await check('/api/miner/sanctions-screen?name=AIA%20Group%20Limited');
+    const ali = await check('/api/miner/sanctions-screen?name=Ali');
+    const bout = await check('/api/miner/sanctions-screen?name=Viktor%20Bout');
+    if (aia.json.matched !== false || ali.json.matched !== false || bout.json.matched !== true) {
+      throw new Error(`Sanctions parity check failed: AIA=${aia.json.matched}, Ali=${ali.json.matched}, Bout=${bout.json.matched}`);
+    }
+
+    // 3. Issue #1: Bare invoice/PO refs must return inconclusive (reconciled: null), never fabricated match
+    const bareInv = await check('/api/miner/invoice-reconcile?invoice_id=INV-2026-081&po_number=PO-2026-7741');
+    if (bareInv.status !== 200 || bareInv.json.reconciled !== null || bareInv.json.status !== 'insufficient_evidence') {
+      throw new Error(`Issue #1 bare ref guard failed: ${JSON.stringify(bareInv.json)}`);
+    }
+
+    // 4. doc-authenticity missing pdfFaceAmount HTTP 200 + NL marker block + SSRF block
+    const docMissing = await check('/api/miner/doc-authenticity?signedQrAmount=100');
+    const docNl = await check('/api/miner/doc-authenticity?question=Confirmed%20authentic%20invoice%20100');
+    const docSsrf1 = await check('/api/miner/doc-authenticity?url=http%3A%2F%2F127.0.0.1%3A8090');
+    const docSsrf2 = await check('/api/miner/doc-authenticity?url=http%3A%2F%2F169.254.169.254%2Flatest%2Fmeta-data');
+    if (docMissing.status !== 200 || docMissing.json.status !== 'insufficient_evidence') {
+      throw new Error(`doc-authenticity missing pdfFaceAmount guard failed: ${JSON.stringify(docMissing.json)}`);
+    }
+    if (docNl.json.authentic !== false || docSsrf1.json.authentic !== false || docSsrf2.json.authentic !== false) {
+      throw new Error('doc-authenticity NL or SSRF guard failed');
+    }
+
+    // 5. PO Verify negative amount guard
+    const poNeg = await check('/api/miner/po-verify?po_number=PO-NEG&po_amount=-500&approval_cap=1000');
+    if (poNeg.json.verified !== false || poNeg.json.status !== 'invalid_po') {
+      throw new Error(`PO negative amount guard failed: ${JSON.stringify(poNeg.json)}`);
+    }
+
+    // 6. NL Corporate Registry queries (Siemens AG, HSBC, Apple Inc, Monzo)
+    const corpSiemens = await check('/api/miner/corporate-registry?query=' + encodeURIComponent("What is Siemens AG's LEI?"));
+    const corpHsbc = await check('/api/miner/corporate-registry?query=' + encodeURIComponent('Is HSBC Holdings plc an active company in the UK?'));
+    const corpApple = await check('/api/miner/corporate-registry?query=' + encodeURIComponent('Verify legal entity status of Apple Inc. in Delaware?'));
+    const corpMonzo = await check('/api/miner/corporate-registry?query=' + encodeURIComponent('Is Monzo Bank Limited active in the UK?'));
+    if (!corpSiemens.json.found || !corpHsbc.json.found || !corpApple.json.found || !corpMonzo.json.found) {
+      throw new Error('NL corporate registry queries failed');
+    }
+
+    // 7. NL SEC EDGAR 10-K filing count (Tesla 2025 === 1)
+    const regTesla = await check('/api/miner/regulatory-filing?query=' + encodeURIComponent('Did Tesla file a 10-K in 2025?'));
+    if (!regTesla.json.found || (regTesla.json.sec_filings || []).length !== 1) {
+      throw new Error(`Tesla 2025 10-K check failed: ${JSON.stringify({ found: regTesla.json.found, len: regTesla.json.sec_filings?.length })}`);
+    }
+
+    // 8. Vendor mismatch (Apple Inc + DE VAT) & invalid Indian GSTIN checksum
+    const venMismatch = await check('/api/miner/vendor-verify?vendor=Apple%20Inc.&vat_number=DE143454214');
+    const venBadGstin = await check('/api/miner/vendor-verify?vendor=Infosys%20Limited&vat_number=27AABCU9603R1Z0');
+    if (venMismatch.json.valid !== false || venBadGstin.json.valid !== false) {
+      throw new Error(`Vendor mismatch / GSTIN guard failed: mismatch=${venMismatch.json.valid}, gstin=${venBadGstin.json.valid}`);
+    }
+
+    // 9. /api/audit/buy invalid intents returns 400
+    const buyBad = await check('/api/audit/buy', 'POST', {
+      intents: ['FAKE_INTENT_DOES_NOT_EXIST']
+    });
+    if (buyBad.status !== 400) {
+      throw new Error(`Expected 400 on invalid /api/audit/buy intents, got ${buyBad.status}`);
+    }
+
+    // 10. Mission 02 Stablecoin Gate tests
+    const m2Clean = await check('/api/mission/stablecoin-gate', 'POST', {
+      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      amountUsdc: 0.25,
+      beneficiaryName: 'Apple Inc.',
+      delegationCapUsdc: 500
+    });
+    const m2Freeze = await check('/api/mission/stablecoin-gate', 'POST', {
+      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      amountUsdc: 10,
+      beneficiaryName: 'Lazarus Group'
+    });
+    const m2Fatf = await check('/api/mission/stablecoin-gate', 'POST', {
+      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      amountUsdc: 1500,
+      beneficiaryName: 'Apple Inc.',
+      originatorName: ''
+    });
+    if (m2Clean.status !== 200 || m2Clean.json.cleared !== true || m2Clean.json.action !== 'APPROVE_USDC_TRANSFER') {
+      throw new Error(`Mission 02 clean check failed: ${JSON.stringify(m2Clean.json)}`);
+    }
+    if (m2Freeze.status !== 200 || m2Freeze.json.cleared !== false || m2Freeze.json.action !== 'REJECT_AND_FREEZE') {
+      throw new Error(`Mission 02 freeze check failed: ${JSON.stringify(m2Freeze.json)}`);
+    }
+    if (m2Fatf.status !== 200 || m2Fatf.json.cleared !== false || m2Fatf.json.action !== 'HOLD_TRAVEL_RULE') {
+      throw new Error(`Mission 02 FATF check failed: ${JSON.stringify(m2Fatf.json)}`);
+    }
+
+    console.log('\nALL ENDPOINTS, P0/P1 REGRESSION GUARDS, ISSUE #1, SSRF, DILIGENCE PACK & MISSION 02 VERIFIED!');
   } finally {
     server.close();
   }

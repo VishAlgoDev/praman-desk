@@ -189,32 +189,153 @@ async function loadSdnData() {
   }
 }
 
-function fuzzyNameMatch(query, target) {
-  const q = query.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
-  const t = target.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
-  if (!q || !t) return 0;
-  if (t === q) return 1.0;
-  if (t.includes(q) || q.includes(t)) return 0.85;
-  const bigrams = s => { const b = new Set(); for (let i = 0; i < s.length - 1; i++) b.add(s.slice(i, i + 2)); return b; };
-  const bq = bigrams(q), bt = bigrams(t);
-  const inter = [...bq].filter(x => bt.has(x)).length;
-  const union = new Set([...bq, ...bt]).size;
-  return union > 0 ? inter / union : 0;
+const CORP_STOP_TOKENS = new Set([
+  'ltd', 'limited', 'inc', 'incorporated', 'corp', 'corporation', 'llc', 'plc', 'lp', 'llp',
+  'gmbh', 'ag', 'se', 'sa', 'nv', 'bv', 'co', 'company', 'group', 'holdings', 'holding',
+  'pte', 'bhd', 'kft', 'oy', 'ab', 'as', 'asa', 'spa', 'srl', 'kk', 'jsc', 'pjsc',
+  'oao', 'zao', 'ooo', 'rao', 'fzc', 'fze', 'fzco', 'dmcc', 'the', 'of', 'and', 'for'
+]);
+
+function normalizeSanctionsText(str) {
+  let s = String(str || '').trim();
+  // Unwrap natural-language question scaffolding only when explicitly phrased as a screening query
+  const nlMatch = s.match(/^(?:is|screen|check\s+if|verify\s+if|whether)\s+(.+?)\s+(?:is\s+)?(?:on\s+the\s+(?:ofac|sdn|sanctions)\b.*|sanctioned\b.*|blocked\s+under\b.*)/i);
+  if (nlMatch) s = nlMatch[1].trim();
+  return s.toLowerCase().replace(/['’`]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
-// Rate limiter for live paid x402 calls on hosted demo: max 5 paid runs per 10 minutes per IP
-const paidRateWindow = new Map();
-const MAX_RUNS_PER_10_MIN = 5;
-const WINDOW_MS = 10 * 60 * 1000;
+function editDistanceRatio(a, b) {
+  if (a === b) return 1.0;
+  const la = a.length, lb = b.length;
+  if (!la || !lb) return 0;
+  if (Math.abs(la - lb) > 2) return 0;
+  const dp = Array.from({ length: lb + 1 }, (_, i) => i);
+  for (let i = 1; i <= la; i++) {
+    let prev = i - 1;
+    dp[0] = i;
+    for (let j = 1; j <= lb; j++) {
+      const tmp = dp[j];
+      dp[j] = a[i - 1] === b[j - 1] ? prev : 1 + Math.min(prev, dp[j], dp[j - 1]);
+      prev = tmp;
+    }
+  }
+  return 1 - dp[lb] / Math.max(la, lb);
+}
 
-function checkPaidRateLimit(ip) {
+function fuzzyNameMatch(query, target) {
+  const qRaw = normalizeSanctionsText(query);
+  const tRaw = normalizeSanctionsText(target);
+  if (!qRaw || !tRaw) return 0;
+  if (tRaw === qRaw) return 1.0;
+
+  // Handle "LAST, First Middle" OFAC format by adding comma-swapped comparison
+  let tSwapped = tRaw;
+  if (String(target || '').includes(',')) {
+    const commaParts = String(target).split(',').map(p => normalizeSanctionsText(p)).filter(Boolean);
+    if (commaParts.length >= 2) {
+      tSwapped = `${commaParts.slice(1).join(' ')} ${commaParts[0]}`.replace(/\s+/g, ' ').trim();
+      if (tSwapped === qRaw) return 0.99;
+    }
+  }
+
+  const qRawTokens = qRaw.split(' ').filter(Boolean);
+  const tRawTokens = tRaw.split(' ').filter(Boolean);
+  const qCore = qRawTokens.filter(w => !CORP_STOP_TOKENS.has(w));
+  const tCore = tRawTokens.filter(w => !CORP_STOP_TOKENS.has(w));
+  if (!qCore.length || !tCore.length) return 0;
+
+  const qCoreStr = qCore.join(' ');
+  const tCoreStr = tCore.join(' ');
+  if (qCoreStr === tCoreStr) {
+    // Require substantive core token length so single short acronyms don't falsely collide
+    return qCoreStr.length >= 4 ? 0.97 : (qRawTokens.length === tRawTokens.length ? 0.96 : 0.62);
+  }
+
+  // Guard short single-token queries (e.g. "Ali"): avoid substring floods inside unrelated words/names
+  if (qCore.length === 1 && qCore[0].length < 5) {
+    if (tCore.length === 1 && tCore[0] === qCore[0]) return 0.95;
+    return 0;
+  }
+
+  // Multi-token alignment with comma-order invariance and transliteration tolerance (e.g. Viktor Bout / BOUT, Viktor Anatolijevitch)
+  if (qCore.length >= 2) {
+    let matchedQ = 0;
+    let simSum = 0;
+    const usedT = new Set();
+    for (const qt of qCore) {
+      let bestSim = 0;
+      let bestIdx = -1;
+      for (let idx = 0; idx < tCore.length; idx++) {
+        if (usedT.has(idx)) continue;
+        const tt = tCore[idx];
+        let s = 0;
+        if (qt === tt) s = 1.0;
+        else if (qt.length >= 4 && tt.length >= 4 && qt[0] === tt[0]) {
+          s = editDistanceRatio(qt, tt);
+        }
+        if (s > bestSim) {
+          bestSim = s;
+          bestIdx = idx;
+        }
+      }
+      if (bestSim >= 0.80 && bestIdx >= 0) {
+        usedT.add(bestIdx);
+        matchedQ += 1;
+        simSum += bestSim;
+      }
+    }
+    if (matchedQ === qCore.length || (matchedQ >= 2 && matchedQ / Math.max(qCore.length, tCore.length) >= 0.66)) {
+      const avgTokenSim = simSum / matchedQ;
+      const coverage = matchedQ / Math.max(qCore.length, tCore.length);
+      return Number(Math.min(0.98, 0.72 * avgTokenSim + 0.24 * coverage).toFixed(4));
+    }
+  }
+
+  // Bigram Jaccard on core tokens (never raw corporate suffixes like "GROUP LIMITED"), preventing false hits across shared suffixes
+  const minLen = Math.min(qCoreStr.length, tCoreStr.length);
+  const maxLen = Math.max(qCoreStr.length, tCoreStr.length);
+  if (minLen < 5 || minLen / maxLen < 0.55) return 0;
+
+  const bigrams = s => { const b = new Set(); for (let i = 0; i < s.length - 1; i++) b.add(s.slice(i, i + 2)); return b; };
+  const bq = bigrams(qCoreStr), bt = bigrams(tSwapped.split(' ').filter(w => !CORP_STOP_TOKENS.has(w)).join(' ') || tCoreStr);
+  const inter = [...bq].filter(x => bt.has(x)).length;
+  const union = new Set([...bq, ...bt]).size;
+  const jaccard = union > 0 ? inter / union : 0;
+  return jaccard >= 0.65 ? Number(jaccard.toFixed(4)) : 0;
+}
+
+// Rate limiter for live paid x402 calls on hosted demo: max 5 paid runs/10m per IP + max 30/hour global circuit breaker
+const paidRateWindow = new Map();
+const paidGlobalWindow = [];
+const MAX_RUNS_PER_10_MIN = 5;
+const MAX_GLOBAL_RUNS_PER_HOUR = 30;
+const WINDOW_MS = 10 * 60 * 1000;
+const GLOBAL_WINDOW_MS = 60 * 60 * 1000;
+
+function extractClientIp(req) {
+  if (!req || typeof req === 'string') return req || 'local';
+  const vercelFwd = req.headers?.['x-vercel-forwarded-for']?.split(',')[0]?.trim();
+  const realIp = req.headers?.['x-real-ip']?.trim();
+  const fwd = req.headers?.['x-forwarded-for']?.split(',')[0]?.trim();
+  return vercelFwd || realIp || req.socket?.remoteAddress || fwd || 'local';
+}
+
+function checkPaidRateLimit(reqOrIp) {
+  const ip = extractClientIp(reqOrIp);
   const now = Date.now();
+  while (paidGlobalWindow.length > 0 && now - paidGlobalWindow[0] >= GLOBAL_WINDOW_MS) {
+    paidGlobalWindow.shift();
+  }
+  if (paidGlobalWindow.length >= MAX_GLOBAL_RUNS_PER_HOUR) {
+    return false;
+  }
   const list = (paidRateWindow.get(ip) || []).filter(t => now - t < WINDOW_MS);
   if (list.length >= MAX_RUNS_PER_10_MIN) {
     return false;
   }
   list.push(now);
   paidRateWindow.set(ip, list);
+  paidGlobalWindow.push(now);
   return true;
 }
 
@@ -322,32 +443,50 @@ function parseCorporateRegistryQuery(rawCompany = '', rawJurisdiction = '') {
   let company = String(rawCompany || '').trim();
   let jurisdiction = String(rawJurisdiction || '').trim();
 
-  // Extract from natural-language questions when passed in company/query/question
-  const cleaned = company.replace(/[?]+$/g, '').trim();
+  // Strip surrounding quotes and trailing punctuation BEFORE all pattern matching
+  const cleaned = company
+    .replace(/^["'“”]+|["'“”]+$/g, '')
+    .replace(/[?!.]+$/g, '')
+    .trim();
+
+  // Direct ISO 17442 20-char LEI embedded in a natural-language question
+  const inlineLei = cleaned.match(/\b([0-9A-Z]{18}[0-9]{2})\b/);
+  if (inlineLei && /\blei\b|legal entity identifier/i.test(cleaned)) {
+    return { company: inlineLei[1], jurisdiction };
+  }
+
   const patterns = [
-    /^(?:is|check if|verify if)\s+(.+?)\s+(?:is\s+)?(?:an?\s+)?(?:active|registered|valid|incorporated|existing|live)\s+(?:company|corporation|entity|firm|business)\s+(?:in|registered in|incorporated in|from)\s+(.+)$/i,
-    /^(?:look\s*up|verify|check|find|search(?:\s+for)?)\s+(?:corporate\s+(?:registration|registry|record|status|details)\s+(?:of|for)\s+)?(.+?)\s+(?:in|registered in|incorporated in|from)\s+(.+)$/i,
+    /^(?:what\s+is|find|get|look\s*up|check|verify)\s+(?:the\s+)?(?:official\s+)?(?:lei(?:\s+number|\s+code)?|corporate\s+(?:registration|registry|record|status|details)|legal\s+(?:entity\s+)?status|registration\s+(?:number|status))\s+(?:of|for)\s+(.+?)(?:\s+(?:in|registered in|incorporated in|from)\s+(.+))?$/i,
+    /^(?:what\s+is)\s+(.+?)(?:'s|’s)\s+(?:official\s+)?(?:lei(?:\s+number|\s+code)?|corporate\s+status|legal\s+status|registration(?:\s+status|\s+number)?)(?:\s+(?:in|from)\s+(.+))?$/i,
+    /^(?:does)\s+(.+?)\s+(?:have|hold)\s+(?:an?\s+)?(?:active|valid|issued)\s+(?:lei|corporate\s+registration)(?:\s+(?:in|from)\s+(.+))?$/i,
+    /^(?:is|check if|verify if|whether)\s+(.+?)\s+(?:is\s+)?(?:currently\s+)?(?:an?\s+)?(?:active|registered|valid|incorporated|existing|live|dissolved|operational)(?:\s+(?:company|corporation|entity|firm|business))?\s+(?:in|registered in|incorporated in|from)\s+(.+)$/i,
+    /^(?:look\s*up|verify|check|find|search(?:\s+for)?)\s+(?:legal\s+entity\s+(?:status\s+)?(?:of|for)\s+|corporate\s+(?:registration|registry|record|status|details)\s+(?:of|for)\s+)?(.+?)\s+(?:in|registered in|incorporated in|from)\s+(.+)$/i,
     /^(.+?)\s*\(([^()]{2,40})\)$/i
   ];
 
+  let matchedPattern = false;
   for (const pat of patterns) {
     const m = cleaned.match(pat);
     if (m) {
       const candidateName = m[1].trim().replace(/^["']|["']$/g, '').replace(/[.,;!?]+$/g, '').trim();
-      const candidateJuris = m[2].trim().replace(/^["']|["']$/g, '').replace(/[.,;!?]+$/g, '').trim();
+      const candidateJuris = m[2] ? m[2].trim().replace(/^["']|["']$/g, '').replace(/[.,;!?]+$/g, '').trim() : '';
       if (candidateName && candidateName.length <= 160) {
         company = candidateName;
-        if (!jurisdiction && candidateJuris) jurisdiction = candidateJuris;
+        if (!jurisdiction && candidateJuris && resolveJurisdictionCountryCode(candidateJuris)) {
+          jurisdiction = candidateJuris;
+        }
+        matchedPattern = true;
         break;
       }
     }
   }
 
   // Fallback strip leading question phrases without "in <country>"
-  if (/^(?:is|look\s*up|verify|check|find)\s+/i.test(company)) {
-    const stripped = company
-      .replace(/^(?:is|look\s*up|verify|check|find)\s+(?:the\s+)?(?:corporate\s+(?:registration|registry|record|status)\s+(?:of|for)\s+)?/i, '')
-      .replace(/\s+(?:an?\s+)?(?:active|registered|valid)\s+(?:company|entity|corporation)$/i, '')
+  if (!matchedPattern && /^(?:is|are|look\s*up|verify|check|find|what\s+is|does)\s+/i.test(cleaned)) {
+    const stripped = cleaned
+      .replace(/^(?:is|are|look\s*up|verify|check|find|what\s+is|does)\s+(?:the\s+)?(?:official\s+)?(?:corporate\s+(?:registration|registry|record|status|details)\s+(?:of|for)\s+|legal\s+entity\s+(?:status\s+)?(?:of|for)\s+|lei\s+(?:of|for)\s+)?/i, '')
+      .replace(/\s+(?:is\s+)?(?:currently\s+)?(?:an?\s+)?(?:active|registered|valid|incorporated|existing|live|dissolved|operational)(?:\s+(?:company|entity|corporation|firm|business))?(?:\s+or\s+(?:dissolved|inactive))?$/i, '')
+      .replace(/\s+(?:active|registered|valid|incorporated|existing|live|dissolved|operational)$/i, '')
       .trim();
     if (stripped) company = stripped;
   }
@@ -450,11 +589,16 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '') {
   let company = String(rawCompany || '').trim();
   let period = String(rawPeriod || '').trim();
   const rawLower = company.toLowerCase();
-  const wantsFederalRegisterOnly = /federal\s+register/.test(rawLower) && !/\bsec\b|\bedgar\b|\b10-[kq]\b|\b8-k\b/i.test(rawLower);
-  const wantsSecOnly = /\bsec\b|\bedgar\b|\b10-[kq]\b|\b8-k\b/i.test(rawLower) && !/federal\s+register/.test(rawLower);
+  const wantsFederalRegisterOnly = /federal\s+register/.test(rawLower) && !/\bsec\b|\bedgar\b|\b10-[kq]\b|\b8-k\b|\b20-f\b|\bs-1\b/i.test(rawLower);
+  const wantsSecOnly = /\bsec\b|\bedgar\b|\b10-[kq]\b|\b8-k\b|\b20-f\b|\b6-k\b|\bs-1\b/i.test(rawLower) && !/federal\s+register/.test(rawLower);
 
-  const cleaned = company.replace(/[?]+$/g, '').trim();
-  const timeSuffixRe = /\s+(?:(?:in|over|during|for)\s+the\s+(?:last|past)\s+\S+\s+(?:day|days|week|weeks|month|months|year|years)|(?:last|past)\s+\S+\s+(?:day|days|week|weeks|month|months|year|years)|since\s+(?:20\d{2}(?:-\d{2}-\d{2})?|19\d{2})|in\s+(?:19\d{2}|20\d{2})|from\s+20\d{2}-\d{2}-\d{2}\s+(?:to|through)\s+20\d{2}-\d{2}-\d{2})$/i;
+  // Extract explicit SEC form types anywhere in text (e.g. 10-K, 10-Q, 8-K, 20-F, S-1)
+  const formMatches = [...company.matchAll(/\b(10-[KQ]|8-K|20-F|6-K|S-1|DEF\s*14A|13F-HR)\b/gi)]
+    .map(m => m[1].toUpperCase().replace(/\s+/, ' '));
+  const formsFilter = [...new Set(formMatches)];
+
+  const cleaned = company.replace(/^["'“”]+|["'“”]+$/g, '').replace(/[?!.]+$/g, '').trim();
+  const timeSuffixRe = /\s+(?:(?:in|over|during|for)\s+(?:the\s+)?(?:last|past)\s+\S+\s+(?:day|days|week|weeks|month|months|year|years)|(?:last|past)\s+\S+\s+(?:day|days|week|weeks|month|months|year|years)|since\s+(?:20\d{2}(?:-\d{2}-\d{2})?|19\d{2})|(?:in|for|during)\s+(?:fy\s*)?(?:19\d{2}|20\d{2})|from\s+20\d{2}-\d{2}-\d{2}\s+(?:to|through)\s+20\d{2}-\d{2}-\d{2})$/i;
   let extracted = cleaned;
   const tm = extracted.match(timeSuffixRe);
   if (tm) {
@@ -462,11 +606,18 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '') {
     extracted = extracted.slice(0, tm.index).trim();
   }
 
+  // Strip trailing "on SEC EDGAR" / "with the SEC" / "on EDGAR" after extracting time
+  extracted = extracted.replace(/\s+(?:on|with|from|via|in)\s+(?:the\s+)?(?:sec\s+edgar|sec|edgar|federal\s+register)\b$/i, '').trim();
+
   const questionPatterns = [
+    /^how\s+many\s+(?:[a-z0-9-]+\s+){0,3}?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:did|does|has)\s+(.+?)\s+(?:make|file|submit|have|publish)\b/i,
     /^how\s+many\s+(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:mention|reference|cite|involve|for|about|on)\s+(.+)$/i,
-    /^(?:check|monitor|find|list|count|search|get|look\s*up)\s+(?:the\s+)?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:mentioning|for|about|on|involving)\s+(.+)$/i,
-    /^(?:does|has)\s+(.+?)\s+(?:have|filed|any)\s+(?:federal\s+register|regulatory|sec)\s+(?:filings?|documents?|notices?)$/i
+    /^(?:did|does|has)\s+(.+?)\s+(?:file|filed|make|submit|have)\s+(?:any\s+|an?\s+)?(?:10-[kq]|8-k|20-f|6-k|s-1|sec|edgar|regulatory|federal\s+register)\b/i,
+    /^(?:when\s+did)\s+(.+?)\s+(?:last\s+)?file\b/i,
+    /^(?:show|list|get|check|monitor|find|count|search|look\s*up)\s+(.+?)(?:'s|’s)\s+(?:recent\s+|latest\s+)?(?:[a-z0-9-]+\s+)*(?:filings?|disclosures?|documents?|notices?)$/i,
+    /^(?:check|monitor|find|list|count|search|get|look\s*up)\s+(?:the\s+)?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:mentioning|for|about|on|involving)\s+(.+)$/i
   ];
+
   for (const pat of questionPatterns) {
     const m = extracted.match(pat);
     if (m) {
@@ -474,16 +625,60 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '') {
       break;
     }
   }
-  company = company.replace(/[?!.]+$/g, '').trim();
-  return { company, period, wantsFederalRegisterOnly, wantsSecOnly };
+
+  // If no pattern captured a shorter group, clean leading noise
+  company = company
+    .replace(/^(?:show|list|get|check|monitor|find|did|does|has)\s+/i, '')
+    .replace(/(?:'s|’s)\s*$/i, '')
+    .replace(/[?!.]+$/g, '')
+    .trim();
+
+  return { company, period, formsFilter, wantsFederalRegisterOnly, wantsSecOnly };
 }
 
-export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = '', country = '' }) {
-  const vendorTrim = String(vendor || '').trim();
-  const vatTrim = String(vat_number || '').trim().toUpperCase();
+function validateIndianGstinChecksum(gstin) {
+  if (!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(gstin)) return false;
+  const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let sum = 0;
+  for (let i = 0; i < 14; i++) {
+    const val = charset.indexOf(gstin[i]);
+    if (val < 0) return false;
+    const factor = (i % 2 === 0) ? 1 : 2;
+    const prod = val * factor;
+    sum += Math.floor(prod / 36) + (prod % 36);
+  }
+  const checkIdx = (36 - (sum % 36)) % 36;
+  return charset[checkIdx] === gstin[14];
+}
+
+function parseVendorVerifyQuery(rawVendor = '') {
+  let text = String(rawVendor || '').trim();
+  let extractedVat = '';
+  const cleaned = text.replace(/^["'“”]+|["'“”]+$/g, '').replace(/[?!.]+$/g, '').trim();
+  const vatMatch = cleaned.match(/\b((?:AT|BE|BG|CY|CZ|DE|DK|EE|EL|ES|FI|FR|GB|HR|HU|IE|IT|LT|LU|LV|MT|NL|PL|PT|RO|SE|SI|SK|XI)[0-9A-Z]{8,12}|[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z])\b/);
+  if (vatMatch && /\b(?:with|vat|tax|gstin|verify|check|is)\b/i.test(cleaned)) {
+    extractedVat = vatMatch[1];
+  }
+  const qMatch = cleaned.match(/^(?:verify|check|validate|is)\s+(?:the\s+)?(?:vendor\s+|supplier\s+|counterparty\s+)?(.+?)(?:\s+(?:with\s+(?:vat|tax\s*id|gstin)|a\s+valid|registered)\b.*)?$/i);
+  if (qMatch && (/\b(?:is|verify|check|validate)\b/i.test(cleaned) || extractedVat)) {
+    text = qMatch[1].replace(/\s+with\s+(?:vat|tax\s*id|gstin).*$/i, '').trim();
+  }
+  return { vendor: text.replace(/[?!.]+$/g, '').trim(), extractedVat };
+}
+
+export async function verifyVendorPrimary({
+  vendor = '', vendor_name = '', name = '', company = '', query = '', question = '',
+  vat_number = '', vatNumber = '', vat_id = '', vatId = '', vat = '', tax_id = '', taxId = '',
+  lei = '', country = '', jurisdiction = ''
+} = {}) {
+  const rawVendorInput = vendor || vendor_name || name || company || query || question || '';
+  const rawVatInput = vat_number || vatNumber || vat_id || vatId || vat || tax_id || taxId || '';
+  const parsedQ = parseVendorVerifyQuery(rawVendorInput);
+  const vendorTrim = parsedQ.vendor;
+  const vatTrim = String(rawVatInput || parsedQ.extractedVat || '').trim().toUpperCase();
   const vatClean = vatTrim.replace(/[\s.-]+/g, '');
   const leiTrim = String(lei || '').trim().toUpperCase();
-  const countryCode = resolveJurisdictionCountryCode(country);
+  const countryCode = resolveJurisdictionCountryCode(country || jurisdiction || '');
 
   if (!vendorTrim && !vatTrim && !leiTrim) {
     return {
@@ -515,15 +710,17 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
   const leiRegex = LEI_PATTERN;
 
   const hasVat = Boolean(vatTrim);
-  const isEuOrUkVat = hasVat && (euVatRegex.test(vatClean) || ukVatRegex.test(vatClean));
+  const isGstin = hasVat && gstinRegex.test(vatClean);
+  const gstinChecksumOk = isGstin ? validateIndianGstinChecksum(vatClean) : false;
+  const isEuOrUkVat = hasVat && !isGstin && (euVatRegex.test(vatClean) || ukVatRegex.test(vatClean));
   const taxFormatValid = hasVat
-    ? (gstinRegex.test(vatClean) || isEuOrUkVat || usEinRegex.test(vatTrim) || leiRegex.test(vatClean))
+    ? (isGstin ? gstinChecksumOk : (isEuOrUkVat || usEinRegex.test(vatTrim) || leiRegex.test(vatClean)))
     : true;
 
   const taxFormatType = !hasVat
     ? 'Not provided (LEI verification)'
-    : gstinRegex.test(vatClean)
-    ? 'Indian GSTIN (15-char)'
+    : isGstin
+    ? (gstinChecksumOk ? 'Indian GSTIN (15-char, Mod-36 checksum valid)' : 'Indian GSTIN (invalid Mod-36 checksum)')
     : ukVatRegex.test(vatClean)
     ? 'UK VAT (GB)'
     : usEinRegex.test(vatTrim)
@@ -582,12 +779,9 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
       if (json?.data) record = json.data;
     }
     if (!record && vendorTrim) {
+      const fetched = await fetchGleifRecordsWithFallback(vendorTrim, countryCode);
+      record = selectBestGleifRecord(fetched.records, fetched.candidates);
       url = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(vendorTrim)}&page[size]=10`;
-      if (countryCode) {
-        url += `&filter[entity.legalAddress.country]=${encodeURIComponent(countryCode)}`;
-      }
-      const json = await fetchJsonWithRetry(url, { headers: { Accept: 'application/vnd.api+json' } }, 2, 5500);
-      if (json?.data) record = selectBestGleifRecord(json.data, vendorTrim);
     }
     return { record, url };
   };
@@ -605,8 +799,47 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
   const hasVatRegistryBool = Boolean(vatRegistryResult && typeof vatRegistryResult.valid === 'boolean');
   const vatRegistryUnavailable = isEuOrUkVat && !hasVatRegistryBool;
 
+  const vatName = vatRegistryResult?.name && vatRegistryResult.name !== '---'
+    ? String(vatRegistryResult.name).trim()
+    : null;
+  const vatAddr = vatRegistryResult?.address && vatRegistryResult.address !== '---'
+    ? String(vatRegistryResult.address).replace(/\r?\n+/g, ', ').trim()
+    : null;
+
+  // Cross-check VIES entity identity & jurisdiction vs claimed vendor / GLEIF record
+  const gleifCountry = entity?.jurisdiction || null;
+  const vatCountry = vatRegistryResult?.country_code || (isEuOrUkVat ? vatPrefix : null);
+  const extractCoreTokens = (s) => String(s || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length >= 2 && !CORP_STOP_TOKENS.has(w));
+  let vatEntityMismatch = false;
+  let vatMismatchReason = '';
+  if (hasVatRegistryBool && vatRegistryResult.valid) {
+    if (vatName && (vendorTrim || entity?.legalName?.name)) {
+      const targetRef = entity?.legalName?.name || vendorTrim;
+      const vTokens = extractCoreTokens(vatName);
+      const tTokens = extractCoreTokens(targetRef);
+      const shared = vTokens.filter(t => tTokens.includes(t));
+      if (vTokens.length > 0 && tTokens.length > 0 && shared.length === 0) {
+        vatEntityMismatch = true;
+        vatMismatchReason = `VAT ${vatClean} belongs to "${vatName}", which does not match claimed vendor "${targetRef}".`;
+      }
+    } else if (gleifCountry && vatCountry && !vatName) {
+      const gleifIso2 = String(gleifCountry).split('-')[0].toUpperCase();
+      const normIso = (c) => (c === 'EL' ? 'GR' : c);
+      if (normIso(gleifIso2) !== normIso(vatCountry)) {
+        vatEntityMismatch = true;
+        vatMismatchReason = `Cross-jurisdiction mismatch: "${entity?.legalName?.name || vendorTrim}" is domiciled in ${gleifCountry}, which contradicts ${vatCountry} VAT ID ${vatClean}.`;
+      }
+    }
+  }
+
   let valid = false;
-  if (hasVatRegistryBool) {
+  if (vatEntityMismatch) {
+    valid = false;
+  } else if (hasVatRegistryBool) {
     valid = vatRegistryResult.valid && (!gleifRecord || isIssued);
   } else if (vatRegistryUnavailable) {
     // Fail closed when an EU/UK VAT ID was supplied but live VIES/VATComply lookup failed or timed out
@@ -615,20 +848,17 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
     valid = Boolean((gleifRecord && isIssued && taxFormatValid) || (gleifRecord && isIssued && !hasVat));
   }
 
-  const vatVerified = hasVatRegistryBool ? vatRegistryResult.valid : null;
-  const taxIdVerified = hasVatRegistryBool
+  const vatVerified = vatEntityMismatch ? false : (hasVatRegistryBool ? vatRegistryResult.valid : null);
+  const taxIdVerified = vatEntityMismatch
+    ? false
+    : hasVatRegistryBool
     ? vatRegistryResult.valid
     : (hasVat && !isEuOrUkVat) ? taxFormatValid : null;
 
-  const vatName = vatRegistryResult?.name && vatRegistryResult.name !== '---'
-    ? String(vatRegistryResult.name).trim()
-    : null;
-  const vatAddr = vatRegistryResult?.address && vatRegistryResult.address !== '---'
-    ? String(vatRegistryResult.address).replace(/\r?\n+/g, ', ').trim()
-    : null;
-
   let taxSummary = '';
-  if (!hasVat) {
+  if (vatEntityMismatch) {
+    taxSummary = vatMismatchReason;
+  } else if (!hasVat) {
     taxSummary = `Tax/VAT ID not specified; identity verified via official GLEIF LEI (${attr?.lei || 'N/A'}).`;
   } else if (vatRegistryResult && vatRegistryResult.valid === true) {
     taxSummary = `Live VIES/VATComply registry confirmed ${vatClean} as VALID (${taxFormatType}).`;
@@ -639,7 +869,7 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
   } else if (taxFormatValid) {
     taxSummary = `Tax ID ${vatTrim} matches valid ${taxFormatType} format.`;
   } else {
-    taxSummary = `Tax ID ${vatTrim} did not match standard national formats (EIN/VAT/GSTIN/LEI).`;
+    taxSummary = `Tax ID ${vatTrim} failed validation (${taxFormatType}).`;
   }
 
   const gleifSummary = gleifRecord
@@ -664,11 +894,18 @@ export async function verifyVendorPrimary({ vendor = '', vat_number = '', lei = 
     valid,
     vat_valid: vatVerified,
     tax_id_valid: taxIdVerified,
-    status: vatRegistryUnavailable ? 'vat_registry_unavailable' : (valid ? 'verified' : 'unverified'),
+    vat_entity_match: hasVatRegistryBool ? !vatEntityMismatch : null,
+    status: vatEntityMismatch
+      ? 'vat_entity_mismatch'
+      : vatRegistryUnavailable
+      ? 'vat_registry_unavailable'
+      : (valid ? 'verified' : 'unverified'),
     registered_name: entity?.legalName?.name || vatName || null,
     registered_address: addressStr || vatAddr || null,
     lei: attr?.lei || (leiRegex.test(leiTrim) ? leiTrim : null),
-    registration_status: vatRegistryResult?.valid === false
+    registration_status: vatEntityMismatch
+      ? 'VAT_ENTITY_MISMATCH'
+      : vatRegistryResult?.valid === false
       ? 'VAT_INVALID'
       : vatRegistryUnavailable
       ? 'VAT_REGISTRY_UNAVAILABLE'
@@ -748,6 +985,7 @@ function parseInlinePoMath(rawText = '') {
   // Match inline line-item equations such as "10 units at $250 = $2500", "5 x 120 = 600", "4 * 50 -> 200"
   const lineRegex = /(\d+(?:,\d{3})*(?:\.\d+)?)\s*(?:x|\*|units?\s*(?:at|@)|items?\s*(?:at|@)|@)\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)\s*(?:=|equals|->|total[:\s]*)\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/gi;
   const lineMatches = [...text.matchAll(lineRegex)];
+  let lineResult = null;
   if (lineMatches.length > 0) {
     let expectedTotalCents = 0;
     let claimedTotalCents = 0;
@@ -761,13 +999,15 @@ function parseInlinePoMath(rawText = '') {
       expectedTotalCents += expectedCents;
       claimedTotalCents += claimedCents;
       if (expectedCents !== claimedCents) {
-        mismatches.push(`${qty} x ${unitPrice} = ${(expectedCents / 100).toFixed(2)} (claimed ${(claimedCents / 100).toFixed(2)})`);
+        mismatches.push(`${qty} x ${unitPrice} = ${(expectedTotalCents / 100).toFixed(2)} (claimed ${(claimedCents / 100).toFixed(2)})`);
       }
     }
     const discrepancy = Math.round(Math.abs(claimedTotalCents - expectedTotalCents)) / 100;
     const verified = mismatches.length === 0;
-    return {
+    lineResult = {
       verified,
+      expectedSubCents: expectedTotalCents,
+      claimedSubCents: claimedTotalCents,
       status: verified ? 'verified_math' : 'arithmetic_mismatch',
       computedTotal: Math.round(expectedTotalCents) / 100,
       claimedTotal: Math.round(claimedTotalCents) / 100,
@@ -778,20 +1018,24 @@ function parseInlinePoMath(rawText = '') {
     };
   }
 
-  // Match subtotal + tax (+ shipping) vs total
+  // Match subtotal + tax (+ shipping) vs total — always evaluate even if line items also appear!
   const subMatch = text.match(/subtotal\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
   const taxMatch = text.match(/\btax\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
   const shipMatch = text.match(/shipping\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
   const totalMatch = text.match(/\b(?:grand_?)?total\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
+  let summaryResult = null;
   if (subMatch && totalMatch) {
     const subCents = Math.round(parseNumber(subMatch[1]) * 100);
     const taxCents = taxMatch ? Math.round(parseNumber(taxMatch[1]) * 100) : 0;
     const shipCents = shipMatch ? Math.round(parseNumber(shipMatch[1]) * 100) : 0;
-    const expectedCents = subCents + taxCents + shipCents;
+    const baseSubCents = lineResult ? lineResult.expectedSubCents : subCents;
+    const subVsLinesDiff = lineResult ? Math.abs(subCents - lineResult.expectedSubCents) : 0;
+    const expectedCents = baseSubCents + taxCents + shipCents;
     const claimedCents = Math.round(parseNumber(totalMatch[1]) * 100);
-    const discrepancy = Math.abs(claimedCents - expectedCents) / 100;
-    const verified = expectedCents === claimedCents;
-    return {
+    const summaryDiffCents = Math.max(subVsLinesDiff, Math.abs(claimedCents - expectedCents));
+    const discrepancy = summaryDiffCents / 100;
+    const verified = summaryDiffCents === 0;
+    summaryResult = {
       verified,
       status: verified ? 'verified_math' : 'arithmetic_mismatch',
       computedTotal: expectedCents / 100,
@@ -799,11 +1043,28 @@ function parseInlinePoMath(rawText = '') {
       discrepancy,
       explanation: verified
         ? `PO summary math verified: subtotal + tax + shipping equals ${(expectedCents / 100).toFixed(2)}.`
-        : `PO summary math mismatch: computed ${(expectedCents / 100).toFixed(2)} vs stated total ${(claimedCents / 100).toFixed(2)} (variance ${discrepancy.toFixed(2)}).`
+        : subVsLinesDiff > 0
+          ? `PO line-item sum (${(lineResult.expectedSubCents / 100).toFixed(2)}) contradicts stated subtotal (${(subCents / 100).toFixed(2)}).`
+          : `PO summary math mismatch: computed ${(expectedCents / 100).toFixed(2)} vs stated total ${(claimedCents / 100).toFixed(2)} (variance ${discrepancy.toFixed(2)}).`
     };
   }
 
-  return null;
+  if (lineResult && summaryResult) {
+    const bothVerified = lineResult.verified && summaryResult.verified;
+    const maxDisc = Math.max(lineResult.discrepancy, summaryResult.discrepancy);
+    return {
+      verified: bothVerified,
+      status: bothVerified ? 'verified_math' : 'arithmetic_mismatch',
+      computedTotal: summaryResult.computedTotal,
+      claimedTotal: summaryResult.claimedTotal,
+      discrepancy: maxDisc,
+      explanation: bothVerified
+        ? `${lineResult.explanation} ${summaryResult.explanation}`
+        : [!lineResult.verified ? lineResult.explanation : null, !summaryResult.verified ? summaryResult.explanation : null].filter(Boolean).join(' ')
+    };
+  }
+
+  return summaryResult || lineResult || null;
 }
 
 /**
@@ -883,17 +1144,28 @@ export function verifyPurchaseOrderPrimary({
 }) {
   const amt = parseNumber(poAmount);
   const cap = parseNumber(approvalCap);
-  const exceedsCap = cap > 0 && amt > cap;
-  const verified = Boolean(poNumber && vendor && amt > 0 && (!exceedsCap || dualSignoffPresent));
+  const amountFinite = Number.isFinite(amt) && amt > 0 && amt <= 1e12;
+  const capFinite = Number.isFinite(cap) && cap > 0 && cap <= 1e12;
+  const exceedsCap = amountFinite && capFinite && amt > cap;
+  const verified = Boolean(poNumber && vendor && amountFinite && (!exceedsCap || dualSignoffPresent));
   const status = verified
     ? 'authorized'
+    : !amountFinite
+    ? 'invalid_po'
     : exceedsCap && !dualSignoffPresent
     ? 'approval_cap_exceeded'
     : 'invalid_po';
 
-  const explanation = verified
-    ? `Purchase Order ${poNumber} for ${vendor} (${currency} ${amt.toLocaleString('en-US')}) is within authorized spend authority.`
-    : `Purchase Order ${poNumber} for ${vendor} (${currency} ${amt.toLocaleString('en-US')}) exceeds authorized delegation cap of ${currency} ${cap.toLocaleString('en-US')} by ${currency} ${(amt - cap).toLocaleString('en-US')} without required executive dual-signoff.`;
+  let explanation;
+  if (verified) {
+    explanation = `Purchase Order ${poNumber} for ${vendor} (${currency} ${amt.toLocaleString('en-US')}) is within authorized spend authority.`;
+  } else if (!amountFinite) {
+    explanation = `Invalid Purchase Order ${poNumber || 'PO'}: PO amount (${poAmount}) must be a finite positive value <= 1e12.`;
+  } else if (exceedsCap && !dualSignoffPresent) {
+    explanation = `Purchase Order ${poNumber} for ${vendor} (${currency} ${amt.toLocaleString('en-US')}) exceeds authorized delegation cap of ${currency} ${cap.toLocaleString('en-US')} by ${currency} ${(amt - cap).toLocaleString('en-US')} without required executive dual-signoff.`;
+  } else {
+    explanation = `Purchase Order ${poNumber || 'PO'} could not be authorized (missing valid PO identifier, vendor, or positive amount).`;
+  }
 
   return {
     po_number: String(poNumber),
@@ -1035,12 +1307,77 @@ async function fetchGleifRecordsWithFallback(companyTrim, countryCode) {
   return { records: [], candidates };
 }
 
-export async function lookupCorporateRegistry({ company = '', jurisdiction = '' }) {
-  const parsed = parseCorporateRegistryQuery(company, jurisdiction);
+async function lookupUkCompaniesHouseFallback(queryText) {
+  try {
+    const url = `https://find-and-update.company-information.service.gov.uk/search/companies?q=${encodeURIComponent(queryText)}`;
+    const res = await fetch(url, {
+      headers: { Accept: 'text/html', 'User-Agent': 'PramanDeskCompliance/1.0 (admin@praman-desk.vercel.app)' },
+      signal: AbortSignal.timeout(6500)
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    const matchBlock = html.match(/<li class="type-company">([\s\S]*?)<\/li>/i);
+    if (!matchBlock) return null;
+    const block = matchBlock[1];
+    const linkMatch = block.match(/href="(\/company\/([A-Z0-9]+))"[^>]*>([\s\S]*?)<\/a>/i);
+    if (!linkMatch) return null;
+    const stripTags = (s) => String(s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const companyNo = linkMatch[2];
+    const legalName = stripTags(linkMatch[3]);
+    const metaMatch = block.match(/<p class="meta[^"]*">([\s\S]*?)<\/p>/i);
+    const metaText = metaMatch ? stripTags(metaMatch[1]) : '';
+    const dissolved = /\bdissolved\b|\bliquidation\b|\bstruck\s+off\b/i.test(metaText);
+    const addrMatches = [...block.matchAll(/<p>([\s\S]*?)<\/p>/gi)];
+    const addrText = addrMatches.length ? stripTags(addrMatches[addrMatches.length - 1][1]) : null;
+    return {
+      legal_name: legalName,
+      company_number: companyNo,
+      jurisdiction: 'GB',
+      active: !dissolved,
+      status_active: dissolved ? 0 : 1,
+      entity_status: dissolved ? 'INACTIVE' : 'ACTIVE',
+      registration_status: dissolved ? 'DISSOLVED' : 'ACTIVE',
+      registered_address: addrText,
+      meta: metaText,
+      source_url: `https://find-and-update.company-information.service.gov.uk${linkMatch[1]}`
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function lookupCorporateRegistry({
+  company = '', entity = '', name = '', legal_name = '', query = '', q = '', question = '', prompt = '', text = '',
+  jurisdiction = '', country = ''
+} = {}) {
+  const rawCompanyInput = company || entity || name || legal_name || query || q || question || prompt || text || '';
+  const parsed = parseCorporateRegistryQuery(rawCompanyInput, jurisdiction || country || '');
   const companyTrim = parsed.company;
   const companyUpper = companyTrim.toUpperCase();
   const jurisTrim = String(parsed.jurisdiction || '').trim().toUpperCase();
   const countryCode = resolveJurisdictionCountryCode(parsed.jurisdiction);
+
+  if (!companyTrim) {
+    return {
+      verdict: 'insufficient_evidence',
+      found: false,
+      company: null,
+      legal_name: null,
+      registration_id: null,
+      active: false,
+      entity_status: null,
+      registration_status: null,
+      jurisdiction: countryCode || jurisTrim || null,
+      registered_address: null,
+      incorporated: null,
+      status_active: 0,
+      confidence: 0,
+      results: [],
+      source: 'GLEIF Global LEI Index (api.gleif.org)',
+      reason: 'Insufficient parameters: supply a company name, LEI, or corporate registry inquiry.',
+      summary: 'Insufficient parameters: supply a company name, LEI, or corporate registry inquiry.'
+    };
+  }
 
   let records = [];
   let candidates = [companyTrim];
@@ -1053,6 +1390,43 @@ export async function lookupCorporateRegistry({ company = '', jurisdiction = '' 
     const fetched = await fetchGleifRecordsWithFallback(companyTrim, countryCode);
     records = fetched.records;
     candidates = fetched.candidates;
+  }
+
+  if (records.length === 0 && (countryCode === 'GB' || /\b(?:plc|ltd|limited|llp|uk)\b/i.test(companyTrim) || /^(?:0\d{7}|SC\d{6}|NI\d{6})$/i.test(companyTrim))) {
+    const ch = await lookupUkCompaniesHouseFallback(companyTrim);
+    if (ch) {
+      const reason = `Found UK Companies House record for "${companyTrim}": ${ch.legal_name} (Company No: ${ch.company_number}, active: ${ch.active}).`;
+      return {
+        verdict: 'found',
+        found: true,
+        company: companyTrim,
+        legal_name: ch.legal_name,
+        registration_id: ch.company_number,
+        active: ch.active,
+        entity_status: ch.entity_status,
+        registration_status: ch.registration_status,
+        jurisdiction: 'GB',
+        registered_address: ch.registered_address,
+        incorporated: null,
+        status_active: ch.status_active,
+        confidence: 0.9,
+        result_count: 1,
+        results: [{
+          company_number: ch.company_number,
+          legal_name: ch.legal_name,
+          jurisdiction: 'GB',
+          entity_status: ch.entity_status,
+          status: ch.registration_status,
+          active: ch.active,
+          status_active: ch.status_active,
+          registered_address: ch.registered_address,
+          source_url: ch.source_url
+        }],
+        source: 'UK Companies House Public Registry (company-information.service.gov.uk)',
+        reason,
+        summary: reason
+      };
+    }
   }
 
   if (records.length === 0) {
@@ -1197,13 +1571,75 @@ export async function screenSanctions({ name = '' }) {
   };
 }
 
+const SEC_HEADERS = {
+  'User-Agent': 'PramanDeskCompliance/1.0 (admin@praman-desk.vercel.app)',
+  Accept: 'application/json'
+};
+let secTickersCache = null;
+let secTickersLoadedAt = 0;
+
+async function resolveSecCik(companyQuery) {
+  const cleanQ = String(companyQuery || '').trim();
+  const explicitCik = cleanQ.match(/\bCIK\s*[:#]?\s*(\d{4,10})\b/i);
+  if (explicitCik) {
+    return { cik: explicitCik[1].padStart(10, '0'), title: cleanQ };
+  }
+  const now = Date.now();
+  if (!secTickersCache || now - secTickersLoadedAt > 6 * 3600 * 1000) {
+    const r = await fetch('https://www.sec.gov/files/company_tickers.json', {
+      headers: SEC_HEADERS,
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!r.ok) {
+      return { error: `SEC tickers HTTP ${r.status}` };
+    }
+    const raw = await r.json();
+    secTickersCache = Object.values(raw || {});
+    secTickersLoadedAt = now;
+  }
+  const qUpper = cleanQ.toUpperCase();
+  if (/^[A-Z]{1,5}$/.test(qUpper)) {
+    const tickerMatch = secTickersCache.find(x => String(x.ticker || '').toUpperCase() === qUpper);
+    if (tickerMatch) {
+      return { cik: String(tickerMatch.cik_str).padStart(10, '0'), title: tickerMatch.title, ticker: tickerMatch.ticker };
+    }
+  }
+  const norm = (s) => String(s || '')
+    .toLowerCase()
+    .replace(/\b(?:inc|incorporated|corp|corporation|co|company|llc|ltd|limited|plc|nv|sa|se|ag|holdings|group|the)\b/g, ' ')
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const qNorm = norm(cleanQ);
+  if (!qNorm) return null;
+  let best = null;
+  let bestScore = -1;
+  for (const row of secTickersCache) {
+    const tNorm = norm(row.title);
+    if (!tNorm) continue;
+    let score = 0;
+    if (tNorm === qNorm) score = 100;
+    else if (tNorm.startsWith(qNorm + ' ')) score = 60 - Math.min(20, tNorm.length - qNorm.length);
+    else if (qNorm.length >= 4 && new RegExp(`\\b${qNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`).test(tNorm)) score = 30;
+    if (score > bestScore) {
+      bestScore = score;
+      best = row;
+    }
+  }
+  if (best && bestScore >= 30) {
+    return { cik: String(best.cik_str).padStart(10, '0'), title: best.title, ticker: best.ticker };
+  }
+  return null;
+}
+
 export async function monitorRegulatoryFiling({ company = '', period = '' }) {
   const parsed = parseRegulatoryFilingQuery(company, period);
   const companyTrim = parsed.company;
   const periodTrim = parsed.period;
+  const formsFilter = parsed.formsFilter || [];
   if (!companyTrim) {
     return {
-      verdict: 'not_found',
+      verdict: 'insufficient_evidence',
       found: false,
       entity: '',
       filing_count: 0,
@@ -1212,7 +1648,7 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
       by_type: {},
       recent: [],
       confidence: 0.3,
-      reason: 'company parameter required',
+      reason: 'Insufficient parameters: company or entity query required.',
       error: 'company parameter required'
     };
   }
@@ -1222,18 +1658,55 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
   const frQueryBase = `conditions[term]=${encodeURIComponent(frTermParam)}&conditions[publication_date][gte]=${range.startdt}&conditions[publication_date][lte]=${range.enddt}`;
 
   const secPromise = parsed.wantsFederalRegisterOnly
-    ? Promise.resolve({ hits: [], total: 0 })
+    ? Promise.resolve({ hits: [], total: 0, mode: 'skipped', upstreamStatus: 200 })
     : (async () => {
         try {
-          const secUrl = `https://efts.sec.gov/LATEST/search-index?q=${encodeURIComponent(`"${companyTrim}"`)}&forms=10-K,10-Q,8-K&dateRange=custom&startdt=${range.startdt}&enddt=${range.enddt}`;
-          const secRes = await fetch(secUrl, {
-            headers: {
-              'User-Agent': 'Praman-Desk/1.0 (Telegraph Protocol Miner; mailto:dev@example.com)',
-              Accept: 'application/json'
-            },
-            signal: AbortSignal.timeout(15000)
-          });
-          if (!secRes.ok) return { hits: [], total: 0 };
+          // 1. Prefer authoritative CIK Issuer Submissions JSON over noisy EFTS mention search
+          const cikInfo = await resolveSecCik(companyTrim).catch(() => null);
+          if (cikInfo?.cik) {
+            const subUrl = `https://data.sec.gov/submissions/CIK${cikInfo.cik}.json`;
+            const subRes = await fetch(subUrl, { headers: SEC_HEADERS, signal: AbortSignal.timeout(10000) });
+            if (subRes.ok) {
+              const sub = await subRes.json();
+              const recent = sub?.filings?.recent;
+              if (recent?.form && recent?.filingDate) {
+                const defaultForms = new Set(['10-K', '10-Q', '8-K', '20-F', '6-K', 'S-1', 'DEF 14A']);
+                const targetSet = formsFilter.length > 0 ? new Set(formsFilter) : defaultForms;
+                const matched = [];
+                for (let i = 0; i < recent.form.length; i++) {
+                  const f = String(recent.form[i] || '').toUpperCase();
+                  const d = String(recent.filingDate[i] || '');
+                  if (!targetSet.has(f)) continue;
+                  if (d < range.startdt || d > range.enddt) continue;
+                  const acc = String(recent.accessionNumber?.[i] || '');
+                  const doc = String(recent.primaryDocument?.[i] || '');
+                  matched.push({
+                    form_type: f,
+                    filing_date: d,
+                    company_name: sub.name || cikInfo.title || companyTrim,
+                    period_ending: recent.reportDate?.[i] || null,
+                    cik: cikInfo.cik,
+                    accession_number: acc,
+                    source: 'SEC EDGAR Submissions API',
+                    url: acc
+                      ? `https://www.sec.gov/Archives/edgar/data/${Number(cikInfo.cik)}/${acc.replace(/-/g, '')}/${doc || `${acc}-index.htm`}`
+                      : null
+                  });
+                }
+                return { hits: matched.slice(0, 20), total: matched.length, mode: 'issuer_submissions', upstreamStatus: 200 };
+              }
+            } else {
+              return { hits: [], total: 0, mode: 'issuer_submissions_error', upstreamStatus: subRes.status, error: `SEC submissions HTTP ${subRes.status}` };
+            }
+          }
+
+          // 2. Fallback to EFTS full-text search for non-SEC / unrecognized entities
+          const formsParam = formsFilter.length > 0 ? formsFilter.join(',') : '10-K,10-Q,8-K';
+          const secUrl = `https://efts.sec.gov/LATEST/search-index?q=${encodeURIComponent(`"${companyTrim}"`)}&forms=${encodeURIComponent(formsParam)}&dateRange=custom&startdt=${range.startdt}&enddt=${range.enddt}`;
+          const secRes = await fetch(secUrl, { headers: SEC_HEADERS, signal: AbortSignal.timeout(12000) });
+          if (!secRes.ok) {
+            return { hits: [], total: 0, mode: 'efts_error', upstreamStatus: secRes.status, error: `SEC EFTS HTTP ${secRes.status}` };
+          }
           const secData = await secRes.json();
           const hits = secData.hits?.hits || [];
           const total = typeof secData.hits?.total?.value === 'number' ? secData.hits.total.value : hits.length;
@@ -1246,25 +1719,25 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
               period_ending: s.period_ending,
               cik: (s.ciks || [])[0],
               accession_number: s.adsh,
-              source: 'SEC EDGAR',
+              source: 'SEC EDGAR (full-text mention search)',
               url: s.adsh
                 ? `https://www.sec.gov/Archives/edgar/data/${(s.ciks || [])[0]}/${s.adsh.replace(/-/g, '')}/${s.adsh}-index.htm`
                 : null
             };
           });
-          return { hits: mapped, total };
-        } catch {
-          return { hits: [], total: 0 };
+          return { hits: mapped, total, mode: 'efts_mention_search', upstreamStatus: 200 };
+        } catch (err) {
+          return { hits: [], total: 0, mode: 'sec_timeout', upstreamStatus: 504, error: err.message };
         }
       })();
 
   const frDocsPromise = parsed.wantsSecOnly
-    ? Promise.resolve({ notices: [], total: 0 })
+    ? Promise.resolve({ notices: [], total: 0, upstreamStatus: 200 })
     : (async () => {
         try {
           const frUrl = `https://www.federalregister.gov/api/v1/documents.json?${frQueryBase}&per_page=10&order=newest`;
-          const frRes = await fetch(frUrl, { signal: AbortSignal.timeout(15000) });
-          if (!frRes.ok) return { notices: [], total: 0 };
+          const frRes = await fetch(frUrl, { signal: AbortSignal.timeout(12000) });
+          if (!frRes.ok) return { notices: [], total: 0, upstreamStatus: frRes.status, error: `Federal Register HTTP ${frRes.status}` };
           const frData = await frRes.json();
           const total = typeof frData.count === 'number' ? frData.count : (frData.results || []).length;
           const notices = (frData.results || []).map(r => ({
@@ -1276,9 +1749,9 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
             source: 'US Federal Register',
             url: r.html_url
           }));
-          return { notices, total };
-        } catch {
-          return { notices: [], total: 0 };
+          return { notices, total, upstreamStatus: 200 };
+        } catch (err) {
+          return { notices: [], total: 0, upstreamStatus: 504, error: err.message };
         }
       })();
 
@@ -1287,7 +1760,7 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
     : (async () => {
         try {
           const facetUrl = `https://www.federalregister.gov/api/v1/documents/facets/type?${frQueryBase}`;
-          const facetRes = await fetch(facetUrl, { signal: AbortSignal.timeout(12000) });
+          const facetRes = await fetch(facetUrl, { signal: AbortSignal.timeout(10000) });
           if (!facetRes.ok) return {};
           const facetJson = await facetRes.json();
           const byType = {};
@@ -1305,7 +1778,7 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
   const gleifPromise = (async () => {
     try {
       const gleifUrl = `https://api.gleif.org/api/v1/lei-records?filter[entity.legalName]=${encodeURIComponent(companyTrim)}&page[size]=5`;
-      const gleifRes = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' }, signal: AbortSignal.timeout(10000) });
+      const gleifRes = await fetch(gleifUrl, { headers: { Accept: 'application/vnd.api+json' }, signal: AbortSignal.timeout(8000) });
       if (!gleifRes.ok) return null;
       const gleifData = await gleifRes.json();
       const rec = selectBestGleifRecord(gleifData.data, companyTrim);
@@ -1339,6 +1812,8 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
   const fedRegNotices = frDocsResult.notices;
   const frCount = frDocsResult.total;
   const secCount = secResult.total;
+  const upstreamErrors = [secResult.error, frDocsResult.error].filter(Boolean);
+  const upstreamDegraded = upstreamErrors.length > 0 && secCount === 0 && frCount === 0;
 
   // Combine sample documents chronologically (newest first) into flat lists matching Telegraph schema
   const combinedFilings = [
@@ -1376,17 +1851,23 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
   if (secCount > 0) parts.push(`${secCount} SEC EDGAR filing(s)`);
   if (gleifStatus) parts.push(`LEI: ${gleifStatus.registration_status}`);
 
-  const reason = filingCount > 0 || gleifStatus
-    ? `${parts.join('; ')} for "${companyTrim}" (${range.startdt} to ${range.enddt}).`
-    : `No regulatory filings found for "${companyTrim}" (${range.startdt} to ${range.enddt}).`;
+  const reason = upstreamDegraded
+    ? `Upstream regulatory source error (${upstreamErrors.join('; ')}); cannot verify filing count cleanly.`
+    : (filingCount > 0 || gleifStatus
+        ? `${parts.join('; ')} for "${companyTrim}" (${range.startdt} to ${range.enddt}).`
+        : `No regulatory filings found for "${companyTrim}" (${range.startdt} to ${range.enddt}).`);
 
   return {
-    verdict: filingCount > 0 ? 'found' : 'not_found',
+    verdict: upstreamDegraded ? 'upstream_error' : (filingCount > 0 ? 'found' : 'not_found'),
     found: filingCount > 0,
+    upstream_status: upstreamDegraded ? 'degraded' : 'ok',
+    upstream_errors: upstreamErrors,
     entity: companyTrim,
     filing_count: filingCount,
     federal_register_count: frCount,
     sec_filing_count: secCount,
+    sec_query_mode: secResult.mode,
+    forms_filter: formsFilter,
     by_type: byType,
     period: range.label,
     from: range.startdt,
@@ -1399,10 +1880,14 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
     federal_register_notices: fedRegNotices,
     gleif_status: gleifStatus,
     total_results: filingCount,
-    confidence: filingCount > 0 ? 0.94 : 0.4,
+    confidence: upstreamDegraded ? 0.1 : (filingCount > 0 ? 0.96 : 0.6),
     sources: parsed.wantsFederalRegisterOnly
       ? ['US Federal Register (federalregister.gov)', 'GLEIF (api.gleif.org)']
-      : ['SEC EDGAR (efts.sec.gov)', 'US Federal Register (federalregister.gov)', 'GLEIF (api.gleif.org)'],
+      : [
+          secResult.mode === 'issuer_submissions' ? 'SEC EDGAR Submissions API (data.sec.gov)' : 'SEC EDGAR (efts.sec.gov)',
+          ...(parsed.wantsSecOnly ? [] : ['US Federal Register (federalregister.gov)']),
+          'GLEIF (api.gleif.org)'
+        ],
     reason,
     summary: reason
   };
@@ -1441,34 +1926,38 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
 
   if (intent === 'INVOICE_LEDGER_RECONCILE_GENERAL') {
     const expText = String(result.explanation || '').toLowerCase();
+    const hasBoolReconciled = typeof result.reconciled === 'boolean';
+    const hasNumericDiscrepancy = result.discrepancy !== undefined && result.discrepancy !== null && Number.isFinite(parseNumber(result.discrepancy));
     const primaryDelta = Math.round(Math.abs(primary.details?.delta_total ?? parseNumber(primary.discrepancy)) * 100);
-    const minerDiscrepancyVal = Math.round(Math.abs(parseNumber(result.discrepancy)) * 100);
+    const minerDiscrepancyVal = hasNumericDiscrepancy ? Math.round(Math.abs(parseNumber(result.discrepancy)) * 100) : 0;
 
-    let wasmScore = 10000;
-    try {
-      // 128-bit restoring division via WebAssembly
-      const truthVal = BigInt(primaryDelta);
-      const minerVal = BigInt(minerDiscrepancyVal);
-      // Code 2 = RelTol, 500 = 500 basis points (5.00% relative tolerance)
-      wasmScore = wasmEngine.scoreDeterministic(truthVal, minerVal, 2, 500);
-    } catch {
-      wasmScore = primaryDelta === minerDiscrepancyVal ? 10000 : 0;
+    let wasmScore = 0;
+    if (hasNumericDiscrepancy) {
+      try {
+        // 128-bit restoring division via WebAssembly
+        const truthVal = BigInt(primaryDelta);
+        const minerVal = BigInt(minerDiscrepancyVal);
+        // Code 2 = RelTol, 500 = 500 basis points (5.00% relative tolerance)
+        wasmScore = wasmEngine.scoreDeterministic(truthVal, minerVal, 2, 500);
+      } catch {
+        wasmScore = primaryDelta === minerDiscrepancyVal ? 10000 : 0;
+      }
     }
 
-    const mentionsDiscrepancy = expText.includes('discrepancy') || expText.includes('exceeds') || wasmScore >= 5000;
+    const mentionsDiscrepancy = expText.includes('discrepancy') || expText.includes('exceeds') || (hasNumericDiscrepancy && wasmScore >= 5000);
     const primaryHasDiscrepancy = !primary.reconciled;
     const textAgrees = mentionsDiscrepancy === primaryHasDiscrepancy;
 
-    if (result.reconciled === null || fieldStatus.discrepancy === 'rejected' || warnings.length > 0) {
+    if (!hasBoolReconciled || !hasNumericDiscrepancy || fieldStatus.discrepancy === 'rejected' || warnings.length > 0) {
       return {
-        agreement: textAgrees ? 'schema_warning' : 'contradicted',
-        badgeText: textAgrees ? `math ok (${wasmScore} bp) / schema warning` : 'contradicted',
+        agreement: hasBoolReconciled && textAgrees ? 'schema_warning' : 'inconclusive',
+        badgeText: hasNumericDiscrepancy && textAgrees ? `math ok (${wasmScore} bp) / schema warning` : 'inconclusive / missing fields',
         wasmScore,
-        diagnostic: `Miner #${minerRes.miner_id || '5281'} (${minerRes.miner_name || 'praman-miner'}) ${textAgrees ? 'correctly identified arithmetic variance (WASM score: ' + wasmScore + '/10000)' : 'failed to identify variance'}, but returned reconciled: null alongside warning: ${warnings[0] || 'none'}.`
+        diagnostic: `Miner #${minerRes.miner_id || '5281'} (${minerRes.miner_name || 'praman-miner'}) returned incomplete reconciliation schema (reconciled=${result.reconciled}, discrepancy=${result.discrepancy}) alongside warning: ${warnings[0] || 'none'}.`
       };
     }
-    const boolAgrees = Boolean(result.reconciled) === Boolean(primary.reconciled);
-    const agrees = boolAgrees && (wasmScore >= 5000 || (primary.reconciled && result.reconciled));
+    const boolAgrees = result.reconciled === Boolean(primary.reconciled);
+    const agrees = boolAgrees && wasmScore >= 5000;
     return {
       agreement: agrees ? 'confirmed' : 'contradicted',
       badgeText: agrees ? (wasmScore === 10000 ? 'confirmed (100% wasm match)' : `confirmed (${wasmScore} bp)`) : 'contradicted',
@@ -1752,18 +2241,14 @@ export async function runFiveJurisdictionDiligencePack(body = {}) {
     : DEFAULT_FIVE_JURISDICTION_PORTFOLIO;
 
   const storedLedger = loadStoredLedger();
-  const receiptByIntent = new Map();
-  for (const call of storedLedger.calls || []) {
-    if (!receiptByIntent.has(call.intent) && call.txHash) {
-      receiptByIntent.set(call.intent, {
-        intent: call.intent,
-        txHash: call.txHash,
-        signalHash: call.signalHash || null,
-        minerId: call.minerId || null,
-        explorerUrl: `https://sepolia.etherscan.io/tx/${call.txHash}`
-      });
-    }
-  }
+  const matchedReceiptsPool = (storedLedger.calls || []).filter(c => c.txHash).map(call => ({
+    intent: call.intent,
+    entity: call.request?.entity || call.request?.vendor || call.title || null,
+    txHash: call.txHash,
+    signalHash: call.signalHash || null,
+    minerId: call.minerId || null,
+    explorerUrl: `https://sepolia.etherscan.io/tx/${call.txHash}`
+  }));
 
   const jurisdictions = await Promise.all(entitiesInput.map(async (item) => {
     const name = String(item.name || item.company || '').trim();
@@ -1830,6 +2315,14 @@ export async function runFiveJurisdictionDiligencePack(body = {}) {
       scope: `${countryCode} local corporate registry extract, sanctions screening & filing check`
     };
 
+    // Only attach stored Sepolia receipts whose recorded entity actually matches this row's entity
+    const nameTokens = name.toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length >= 3);
+    const entityReceipts = matchedReceiptsPool.filter(r => {
+      if (!r.entity) return false;
+      const rLower = String(r.entity).toLowerCase();
+      return nameTokens.some(tok => rLower.includes(tok));
+    });
+
     return {
       ...itemPayload,
       proofHash,
@@ -1839,12 +2332,7 @@ export async function runFiveJurisdictionDiligencePack(body = {}) {
         hkmaLiveAnchor?.url || null,
         (filings.urls || [])[0] || null
       ].filter(Boolean),
-      matchedSepoliaReceipts: [
-        receiptByIntent.get('CORPORATE_REGISTRY_LOOKUP_GENERAL'),
-        receiptByIntent.get('SANCTIONS_SCREENING_MATCH_GENERAL'),
-        receiptByIntent.get('REGULATORY_FILING_MONITOR_GENERAL'),
-        vatNumber ? receiptByIntent.get('VENDOR_VERIFY_GENERAL') : null
-      ].filter(Boolean),
+      matchedSepoliaReceipts: entityReceipts,
       benchmarkLineItem: {
         jurisdiction: countryCode,
         scope: bench.scope,
@@ -1856,7 +2344,7 @@ export async function runFiveJurisdictionDiligencePack(body = {}) {
   const durationMs = Math.round(performance.now() - tStart);
   const packSha256 = '0x' + crypto.createHash('sha256').update(JSON.stringify(jurisdictions)).digest('hex');
 
-  const totalChecks = jurisdictions.reduce((sum, j) => sum + 3 + (j.vatChecked ? 1 : 0) + (j.hkmaLiveAnchor ? 1 : 0), 0);
+  const extraPrimaryRegulatorAnchors = jurisdictions.reduce((sum, j) => sum + (j.hkmaLiveAnchor ? 1 : 0), 0);
   const machineInvoiceItems = jurisdictions.map((j) => {
     const checkCount = 3 + (j.vatChecked ? 1 : 0);
     return {
@@ -1868,6 +2356,7 @@ export async function runFiveJurisdictionDiligencePack(body = {}) {
       proofHash: j.proofHash
     };
   });
+  const totalChecks = machineInvoiceItems.reduce((sum, li) => sum + li.checks, 0);
 
   const traditionalTotalUsd = jurisdictions.reduce(
     (sum, j) => sum + parseFloat(j.benchmarkLineItem.illustrativeFeeUsd),
@@ -1880,11 +2369,14 @@ export async function runFiveJurisdictionDiligencePack(body = {}) {
 
   const liveReceipts = [];
   let actualLiveSpendUsd = '0.00';
-  let resolvedMode = 'preview_with_stored_x402_proofs';
+  let liveFailedCount = 0;
+  let resolvedMode = 'preview_primary_apis_only';
 
   if (body.mode === 'buy_x402') {
     const account = getWalletAccount();
-    if (account) {
+    if (!account) {
+      resolvedMode = 'buy_x402_unavailable_no_signer';
+    } else {
       const fetchWithPayment = wrapFetchWithPaymentFromConfig(fetch, {
         schemes: [{ network: 'eip155:11155111', client: new ExactEvmScheme(account) }],
         spendControls: {
@@ -1902,32 +2394,50 @@ export async function runFiveJurisdictionDiligencePack(body = {}) {
         { intent: 'REGULATORY_FILING_MONITOR_GENERAL', params: { entity: lead.legalName, period: 'last 12 months' } }
       ];
       let liveUusdc = 0;
-      for (const askPayload of askBatch) {
-        try {
-          const askRes = await fetchWithPayment(`${NODE_URL}/engine/v1/ask`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(askPayload),
-            signal: AbortSignal.timeout(10000)
-          });
-          const askBody = await askRes.json().catch(() => ({}));
-          const rec = decodeBase64Json(askRes.headers.get('x-telegraph-receipt'));
-          const pay = decodeBase64Json(askRes.headers.get('payment-response') || askRes.headers.get('x-payment-response'));
-          const amt = rec?.amount_uusdc ? Number(rec.amount_uusdc) : (askRes.ok ? 10000 : 0);
-          liveUusdc += amt;
+      const settled = await Promise.allSettled(askBatch.map(async (askPayload) => {
+        const askRes = await fetchWithPayment(`${NODE_URL}/engine/v1/ask`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(askPayload),
+          signal: AbortSignal.timeout(6500)
+        });
+        const askBody = await askRes.json().catch(() => ({}));
+        const rec = decodeBase64Json(askRes.headers.get('x-telegraph-receipt'));
+        const pay = decodeBase64Json(askRes.headers.get('payment-response') || askRes.headers.get('x-payment-response'));
+        const amt = rec?.amount_uusdc ? Number(rec.amount_uusdc) : (askRes.ok ? 10000 : 0);
+        return {
+          intent: askPayload.intent,
+          httpStatus: askRes.status,
+          ok: askRes.ok,
+          amt,
+          minerId: askBody.miner_id || null,
+          txHash: rec?.tx_hash || pay?.transaction || null,
+          signalHash: askBody.signal_hash || null
+        };
+      }));
+      for (let i = 0; i < settled.length; i++) {
+        const item = settled[i];
+        if (item.status === 'fulfilled') {
+          liveUusdc += item.value.amt;
+          if (!item.value.ok) liveFailedCount += 1;
           liveReceipts.push({
-            intent: askPayload.intent,
-            httpStatus: askRes.status,
-            minerId: askBody.miner_id || null,
-            txHash: rec?.tx_hash || pay?.transaction || null,
-            signalHash: askBody.signal_hash || null
+            intent: item.value.intent,
+            httpStatus: item.value.httpStatus,
+            minerId: item.value.minerId,
+            txHash: item.value.txHash,
+            signalHash: item.value.signalHash
           });
-        } catch (err) {
-          liveReceipts.push({ intent: askPayload.intent, httpStatus: 504, error: err.message });
+        } else {
+          liveFailedCount += 1;
+          liveReceipts.push({
+            intent: askBatch[i].intent,
+            httpStatus: 504,
+            error: item.reason?.message || 'Upstream timeout'
+          });
         }
       }
       actualLiveSpendUsd = (liveUusdc / 1e6).toFixed(2);
-      resolvedMode = 'live_onchain_x402_settlement';
+      resolvedMode = liveFailedCount === 0 ? 'live_onchain_x402_settlement' : 'partial_live_x402_settlement';
     }
   }
 
@@ -1937,7 +2447,10 @@ export async function runFiveJurisdictionDiligencePack(body = {}) {
     mode: resolvedMode,
     durationMs,
     jurisdictions,
+    calibrationLedgerReferences: matchedReceiptsPool.slice(0, 9),
     liveReceipts,
+    liveFailedCount,
+    extraPrimaryRegulatorAnchors,
     machineInvoice: {
       title: 'Machine-Executed Compliance Diligence Receipt (Praman Desk x Telegraph Protocol)',
       actualPreviewSpendUsd: '0.00',
@@ -1945,6 +2458,7 @@ export async function runFiveJurisdictionDiligencePack(body = {}) {
       equivalentTelegraphX402Usd: telegraphEquivalentUsd.toFixed(2),
       storedSepoliaLedgerTotalUsd: storedLedger.totalSpentUsd,
       totalChecksExecuted: totalChecks,
+      extraPrimaryRegulatorAnchors,
       turnaroundTime: `${(durationMs / 1000).toFixed(2)}s`,
       settlementNetwork: 'Ethereum Sepolia (Test USDC via x402 @ $0.01/check)',
       lineItems: machineInvoiceItems
@@ -1975,59 +2489,113 @@ async function readJsonBody(req) {
   if (req.body && typeof req.body === 'object') return req.body;
   if (typeof req.body === 'string' && req.body.trim()) return JSON.parse(req.body);
   return new Promise((resolve, reject) => {
-    let data = '';
+    const chunks = [];
+    let byteLength = 0;
+    let settled = false;
     req.on('data', chunk => {
-      data += chunk;
-      if (data.length > 256 * 1024) {
-        const err = new Error('Request body too large');
+      if (settled) return;
+      const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      byteLength += buf.length;
+      if (byteLength > 256 * 1024) {
+        settled = true;
+        const err = new Error('Request body too large (max 256 KB)');
         err.statusCode = 413;
+        req.destroy();
         reject(err);
+        return;
       }
+      chunks.push(buf);
     });
     req.on('end', () => {
-      if (!data.trim()) return resolve({});
+      if (settled) return;
+      settled = true;
+      const raw = Buffer.concat(chunks).toString('utf8');
+      if (!raw.trim()) return resolve({});
       try {
-        resolve(JSON.parse(data));
-      } catch (e) {
+        resolve(JSON.parse(raw));
+      } catch {
         const err = new Error('Invalid JSON body');
         err.statusCode = 400;
         reject(err);
       }
     });
-    req.on('error', reject);
+    req.on('error', err => {
+      if (!settled) {
+        settled = true;
+        reject(err);
+      }
+    });
   });
 }
 
 function extractAmountList(text) {
-  const str = String(text || '');
-  const withCurrency = [...str.matchAll(/(?:INR|USD|EUR|GBP|\$|€|£)\s*([0-9][0-9,]*(?:\.[0-9]+)?)/gi)]
+  let str = String(text || '');
+  // 1. Always prefer explicit currency-tagged monetary values first
+  const withCurrency = [...str.matchAll(/(?:INR|USD|EUR|GBP|USDC|USDT|\$|€|£|₹)\s*([0-9][0-9,]*(?:\.[0-9]+)?)/gi)]
     .map(m => Number(m[1].replace(/,/g, '')))
     .filter(n => Number.isFinite(n) && n > 0);
   if (withCurrency.length) return withCurrency;
-  return [...str.matchAll(/\b([0-9]{1,3}(?:,[0-9]{2,3})+(?:\.[0-9]+)?|[0-9]{3,}(?:\.[0-9]+)?)\b/g)]
+
+  // 2. Strip alphanumeric document/reference identifiers and ISO dates/years before numeric matching
+  str = str
+    .replace(/\b(?:INV|PO|REF|REFERENCE|ID|DOC|TX|NO|ORDER|LEDGER|ACCOUNT|ACCT|ENTRY|BATCH|SERIAL|LOT)[-#:\s]*[A-Z0-9-]*\d+[A-Z0-9-]*\b/gi, ' ')
+    .replace(/#[0-9A-Za-z-]+/g, ' ')
+    .replace(/\b\d{4}-\d{2}-\d{2}\b/g, ' ')
+    .replace(/\b(?:19|20)\d{2}\b/g, ' ');
+
+  // 3. Match explicitly labeled monetary fields (total/amount/balance/paid/billed/due/subtotal/tax/price)
+  const labeled = [...str.matchAll(/\b(?:total|amount|balance|subtotal|sub_total|tax|vat|paid|billed|due|price|sum|credit|debit|value)\s*[:=]?\s*([0-9][0-9,]*(?:\.[0-9]+)?)/gi)]
+    .map(m => Number(m[1].replace(/,/g, '')))
+    .filter(n => Number.isFinite(n) && n > 0);
+  if (labeled.length) return labeled;
+
+  // 4. Only accept comma-grouped or decimal-cents financial numbers (never bare integers)
+  return [...str.matchAll(/\b([0-9]{1,3}(?:,[0-9]{3})+(?:\.[0-9]{1,2})?|[0-9]+\.[0-9]{2})\b/g)]
     .map(m => Number(m[1].replace(/,/g, '')))
     .filter(n => Number.isFinite(n) && n > 0);
 }
 
-function isSafePublicHttpUrl(rawUrl) {
+function isPrivateOrReservedIp(ip) {
+  if (!ip) return true;
+  const clean = String(ip).toLowerCase().trim();
+  if (clean.startsWith('::ffff:')) {
+    return isPrivateOrReservedIp(clean.slice(7));
+  }
+  if (clean === '::1' || clean === '::' || clean.startsWith('fc') || clean.startsWith('fd') || clean.startsWith('fe80') || clean.startsWith('ff')) {
+    return true;
+  }
+  const parts = clean.split('.');
+  if (parts.length !== 4) {
+    // Non-v4 / unexpected format -> fail closed unless global unicast 2000::/3
+    return !(clean.includes(':') && /^[23][0-9a-f]{3}:/i.test(clean));
+  }
+  const [a, b] = parts.map(Number);
+  if ([a, b].some(n => !Number.isInteger(n) || n < 0 || n > 255)) return true;
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 169 && b === 254) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+  if (a >= 224) return true;
+  return false;
+}
+
+async function isSafePublicHttpUrl(rawUrl) {
   try {
     const u = new URL(rawUrl);
     if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
-    const h = u.hostname.toLowerCase();
-    if (
-      h === 'localhost' ||
-      h === '0.0.0.0' ||
-      h === '::1' ||
-      h.endsWith('.local') ||
-      /^127\./.test(h) ||
-      /^10\./.test(h) ||
-      /^169\.254\./.test(h) ||
-      /^192\.168\./.test(h) ||
-      /^172\.(1[6-9]|2\d|3[0-1])\./.test(h)
-    ) {
+    const h = u.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+    if (!h || h === 'localhost' || h.endsWith('.local') || h.endsWith('.internal')) {
       return false;
     }
-    return true;
+    const { isIP } = await import('node:net');
+    if (isIP(h)) {
+      return !isPrivateOrReservedIp(h);
+    }
+    const { lookup } = await import('node:dns/promises');
+    const resolved = await lookup(h, { all: true });
+    if (!resolved || resolved.length === 0) return false;
+    return resolved.every(r => r.address && !isPrivateOrReservedIp(r.address));
   } catch {
     return false;
   }
@@ -2036,23 +2604,50 @@ function isSafePublicHttpUrl(rawUrl) {
 async function evaluateDocumentEndpoint(merged) {
   const docText = String(merged.document || merged.question || '').trim();
   const docLower = docText.toLowerCase();
-  const hashMatch = docText.match(/\b(?:0x)?([0-9a-fA-F]{64})\b/);
-  const explicitIrn = merged.irnOrSha256 || (hashMatch ? hashMatch[1] : '');
+  const allHashes = [...docText.matchAll(/\b(?:0x)?([0-9a-fA-F]{64})\b/g)].map(m => m[1].toLowerCase());
+  const explicitIrn = String(merged.irnOrSha256 || '').replace(/^0x/i, '').trim().toLowerCase() || (allHashes[0] || '');
 
   // Explicit structured amounts or QR-vs-Face text comparison
   const qrTextMatch = docText.match(/(?:QR|InvoiceValue)\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*([0-9][0-9,]*(?:\.[0-9]+)?)/i);
   const faceTextMatch = docText.match(/(?:Face|PDF\s+invoice\s+face\s+shows|Total\s+Invoice\s+Value)\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*([0-9][0-9,]*(?:\.[0-9]+)?)/i);
-  const hasExplicitAmounts = merged.signedQrAmount != null || merged.pdfFaceAmount != null || (qrTextMatch && faceTextMatch);
+  const qrVal = merged.signedQrAmount != null ? parseNumber(merged.signedQrAmount) : (qrTextMatch ? parseNumber(qrTextMatch[1]) : NaN);
+  const faceVal = merged.pdfFaceAmount != null ? parseNumber(merged.pdfFaceAmount) : (faceTextMatch ? parseNumber(faceTextMatch[1]) : NaN);
 
-  if (hasExplicitAmounts) {
-    const qrAmt = merged.signedQrAmount ?? Number(qrTextMatch[1].replace(/,/g, ''));
-    const faceAmt = merged.pdfFaceAmount ?? Number(faceTextMatch[1].replace(/,/g, ''));
+  const hasOneAmountOnly = (Number.isFinite(qrVal) && !Number.isFinite(faceVal)) || (!Number.isFinite(qrVal) && Number.isFinite(faceVal));
+  if (hasOneAmountOnly) {
+    return {
+      document: docText || 'Document verification request',
+      authentic: false,
+      verdict: 'Inconclusive',
+      status: 'insufficient_evidence',
+      evidence: ['Incomplete amount comparison: both signedQrAmount and pdfFaceAmount are required to verify QR-vs-face integrity.'],
+      intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
+      schema_version: 4,
+      as_of: new Date().toISOString()
+    };
+  }
+
+  if (Number.isFinite(qrVal) && Number.isFinite(faceVal)) {
     const out = verifyDocumentAuthenticityPrimary({
       documentRef: docText || 'Document verification request',
-      irnOrSha256: explicitIrn || '64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012',
-      signedQrAmount: qrAmt,
-      pdfFaceAmount: faceAmt
+      irnOrSha256: explicitIrn || '',
+      signedQrAmount: qrVal,
+      pdfFaceAmount: faceVal
     });
+    const amountsMismatch = Math.abs(out.delta_amount) >= 0.01;
+    // Matching numbers alone without a cryptographic 64-hex hash cannot prove document authenticity
+    if (!amountsMismatch && !out.digest_valid_hex64) {
+      return {
+        document: out.document,
+        authentic: false,
+        verdict: 'Inconclusive',
+        status: 'insufficient_evidence',
+        evidence: ['Monetary values match, but no valid 64-hex SHA-256/IRN cryptographic digest was supplied to corroborate document provenance.'],
+        intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
+        schema_version: 4,
+        as_of: new Date().toISOString()
+      };
+    }
     return {
       document: out.document,
       authentic: out.authentic,
@@ -2067,7 +2662,7 @@ async function evaluateDocumentEndpoint(merged) {
   // Known zero-byte SHA-256 empty input hash or cryptographic tamper indicators
   const EMPTY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
   const findings = [];
-  if (explicitIrn.toLowerCase() === EMPTY_SHA256 || docLower.includes(EMPTY_SHA256)) {
+  if (explicitIrn === EMPTY_SHA256 || docLower.includes(EMPTY_SHA256)) {
     findings.push('SHA-256 e3b0c442...7852b855 is the zero-byte empty payload digest rather than signed document content.');
   }
   const tamperPatterns = [
@@ -2091,10 +2686,23 @@ async function evaluateDocumentEndpoint(merged) {
     };
   }
 
-  // Live URL inspection when document input supplies an external link
+  // Live URL inspection when document input supplies an external link (SSRF-hardened DNS + manual redirect + 5 MB cap)
   const urlMatch = docText.match(/https?:\/\/[^\s"'<>)]+/i);
-  if (urlMatch && isSafePublicHttpUrl(urlMatch[0])) {
+  if (urlMatch) {
     const targetUrl = urlMatch[0];
+    const safe = await isSafePublicHttpUrl(targetUrl);
+    if (!safe) {
+      return {
+        document: targetUrl,
+        authentic: false,
+        verdict: 'Inconclusive',
+        anomalies: ['blocked_private_or_untrusted_url'],
+        evidence: [`Blocked unsafe or non-public target URL (${targetUrl}).`],
+        intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
+        schema_version: 4,
+        as_of: new Date().toISOString()
+      };
+    }
     const textWithoutUrl = docText.replace(targetUrl, ' ');
     const inlineExpectedMatch = textWithoutUrl.match(/\b(?:0x)?([0-9a-fA-F]{64})\b/);
     const explicitExpectedRaw = merged.expected_sha256 || merged.sha256 || merged.hash || (inlineExpectedMatch ? inlineExpectedMatch[1] : '');
@@ -2102,8 +2710,41 @@ async function evaluateDocumentEndpoint(merged) {
     const expectedHash = /^[0-9a-f]{64}$/.test(cleanExpected) ? cleanExpected : '';
 
     try {
-      const r = await fetch(targetUrl, { method: 'GET', signal: AbortSignal.timeout(4000) });
-      const buf = Buffer.from(await r.arrayBuffer());
+      const r = await fetch(targetUrl, { method: 'GET', redirect: 'manual', signal: AbortSignal.timeout(4000) });
+      if (r.status >= 300 && r.status < 400) {
+        return {
+          document: targetUrl,
+          authentic: false,
+          verdict: 'Inconclusive',
+          anomalies: ['blocked_http_redirect'],
+          evidence: [`Blocked HTTP redirect (${r.status}) from remote document URL to prevent SSRF bypass.`],
+          intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
+          schema_version: 4,
+          as_of: new Date().toISOString()
+        };
+      }
+      const MAX_FETCH_BYTES = 5 * 1024 * 1024;
+      const chunks = [];
+      let totalBytes = 0;
+      if (r.body) {
+        for await (const chunk of r.body) {
+          totalBytes += chunk.length;
+          if (totalBytes > MAX_FETCH_BYTES) {
+            return {
+              document: targetUrl,
+              authentic: false,
+              verdict: 'Inconclusive',
+              anomalies: ['remote_document_exceeds_5mb_limit'],
+              evidence: [`Remote document exceeded 5 MB streaming cap; aborted hashing.`],
+              intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
+              schema_version: 4,
+              as_of: new Date().toISOString()
+            };
+          }
+          chunks.push(chunk);
+        }
+      }
+      const buf = Buffer.concat(chunks);
       const sha = crypto.createHash('sha256').update(buf).digest('hex');
       const contentType = r.headers.get('content-type') || 'unknown';
       if (r.ok && buf.length > 0) {
@@ -2170,17 +2811,23 @@ async function evaluateDocumentEndpoint(merged) {
     }
   }
 
+  // Deterministic two-digest comparison when both computed & expected 64-hex digests are provided
+  const cleanExpectedField = String(merged.expected_sha256 || merged.hash || '').replace(/^0x/i, '').trim().toLowerCase();
+  const secondHash = /^[0-9a-f]{64}$/.test(cleanExpectedField) && cleanExpectedField !== explicitIrn
+    ? cleanExpectedField
+    : (allHashes.length >= 2 ? allHashes[1] : '');
   const hasNegation = /(?:^|[^a-z])(?:not|unverified|invalid|forged|tampered|altered|revoked|mismatch|rejected|failed|broken|expired)(?:[^a-z]|$)/i.test(docText);
-  const hasPositiveMarker = /(?:^|[^a-z])(?:verified|valid|matches|absent\s+from)(?:[^a-z]|$)/i.test(docText);
-  if (!hasNegation && (/^[0-9a-f]{64}$/i.test(explicitIrn) || hasPositiveMarker)) {
+
+  if (!hasNegation && /^[0-9a-f]{64}$/.test(explicitIrn) && /^[0-9a-f]{64}$/.test(secondHash)) {
+    const digMatch = explicitIrn === secondHash;
     return {
       document: docText || 'Document verification request',
-      authentic: true,
-      verdict: /^[0-9a-f]{64}$/i.test(explicitIrn) ? 'Authentic' : 'Likely authentic',
+      authentic: digMatch,
+      verdict: digMatch ? 'Authentic' : 'Forged',
       evidence: [
-        explicitIrn
-          ? `64-hex SHA-256 digest verified (${explicitIrn.slice(0, 12)}...${explicitIrn.slice(-8)}) with no tampering indicators detected.`
-          : 'Supplied attestation indicators pass cryptographic provenance checks with no contradictions found.'
+        digMatch
+          ? `Cryptographic SHA-256 digests match cleanly (0x${explicitIrn.slice(0, 12)}...${explicitIrn.slice(-8)}).`
+          : `Cryptographic digest mismatch: 0x${explicitIrn.slice(0, 12)}... !== 0x${secondHash.slice(0, 12)}...`
       ],
       intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
       schema_version: 4,
@@ -2192,11 +2839,220 @@ async function evaluateDocumentEndpoint(merged) {
     document: docText || 'Document verification request',
     authentic: false,
     verdict: 'Inconclusive',
-    evidence: ['No cryptographic digest, signed hash, or fetchable document URL was supplied for deterministic verification.'],
+    anomalies: /^[0-9a-f]{64}$/i.test(explicitIrn) ? ['single_uncorroborated_digest_no_source_bytes'] : ['missing_cryptographic_evidence'],
+    evidence: [
+      /^[0-9a-f]{64}$/i.test(explicitIrn)
+        ? `64-hex SHA-256 digest is syntactically well-formed (${explicitIrn.slice(0, 12)}...${explicitIrn.slice(-8)}), but no source bytes, second reference hash, signed QR envelope, or verifiable document URL was provided to corroborate authenticity.`
+        : 'No corroborating cryptographic digest, signed QR payload, or fetchable document URL was supplied for deterministic verification.'
+    ],
     intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
     schema_version: 4,
     as_of: new Date().toISOString()
   };
+}
+
+export async function evaluateStablecoinGate(params = {}) {
+  const { isAddress, getAddress } = await import('viem');
+  const senderRaw = String(params.senderAddress || params.sender || CONTRIBUTOR_ADDRESS).trim();
+  const recipientRaw = String(params.recipientAddress || params.recipient || '').trim();
+  const tokenAddress = String(params.tokenAddress || TEST_USDC).trim();
+  const amountUsdc = parseNumber(params.amountUsdc ?? params.amount ?? 0);
+  const delegationCapUsdc = parseNumber(params.delegationCapUsdc ?? params.approvalCapUsdc ?? params.approval_cap ?? 5000);
+  const originatorName = String(params.originatorName ?? params.originator ?? 'Praman Desk Treasury').trim();
+  const beneficiaryName = String(params.beneficiaryName || params.beneficiary || params.vendor || '').trim();
+  const txHash = String(params.txHash || params.tx_hash || '').trim();
+  const dualSignoffPresent = Boolean(params.dualSignoffPresent ?? params.dual_signoff ?? false);
+
+  const flags = [];
+  const ZERO_ADDR = '0x0000000000000000000000000000000000000000';
+  const senderValid = isAddress(senderRaw) && senderRaw.toLowerCase() !== ZERO_ADDR;
+  const recipientValid = isAddress(recipientRaw) && recipientRaw.toLowerCase() !== ZERO_ADDR;
+  const tokenValid = isAddress(tokenAddress) && tokenAddress.toLowerCase() !== ZERO_ADDR;
+
+  if (!senderValid) flags.push('INVALID_SENDER_ADDRESS');
+  if (!recipientValid) flags.push('INVALID_RECIPIENT_ADDRESS');
+  if (!tokenValid) flags.push('INVALID_TOKEN_ADDRESS');
+  if (!Number.isFinite(amountUsdc) || amountUsdc <= 0 || amountUsdc > 1e9) {
+    flags.push('INVALID_TRANSFER_AMOUNT');
+  }
+
+  // Parallel OFAC sanctions screening + optional GLEIF check
+  const [sanctionsBeneficiary, sanctionsOriginator, corpBeneficiary] = await Promise.all([
+    beneficiaryName ? screenSanctions({ name: beneficiaryName }) : Promise.resolve({ matched: false, matches: [] }),
+    originatorName ? screenSanctions({ name: originatorName }) : Promise.resolve({ matched: false, matches: [] }),
+    beneficiaryName ? lookupCorporateRegistry({ company: beneficiaryName }) : Promise.resolve(null)
+  ]);
+
+  if (sanctionsBeneficiary.matched) flags.push(`OFAC_BENEFICIARY_MATCH: ${sanctionsBeneficiary.matches?.[0]?.matched_name}`);
+  if (sanctionsOriginator.matched) flags.push(`OFAC_ORIGINATOR_MATCH: ${sanctionsOriginator.matches?.[0]?.matched_name}`);
+
+  // FATF Travel Rule threshold check (>= $1,000 requires verified originator & beneficiary identity)
+  const travelRuleRequired = Number.isFinite(amountUsdc) && amountUsdc >= 1000;
+  const travelRuleSatisfied = !travelRuleRequired || (originatorName.length >= 2 && beneficiaryName.length >= 2);
+  if (!travelRuleSatisfied) flags.push('FATF_TRAVEL_RULE_IDENTITY_MISSING');
+
+  // Delegation Spend Authority Cap
+  const exceedsCap = Number.isFinite(amountUsdc) && Number.isFinite(delegationCapUsdc) && delegationCapUsdc > 0 && amountUsdc > delegationCapUsdc;
+  if (exceedsCap && !dualSignoffPresent) {
+    flags.push(`DELEGATION_CAP_EXCEEDED: ${amountUsdc} USDC > ${delegationCapUsdc} USDC cap without dual sign-off`);
+  }
+
+  // Live Sepolia RPC Telemetry & ERC-20 Balance / Tx Verification
+  const publicClient = createPublicClient({ chain: sepolia, transport: http(RPC_URL) });
+  let chainBlockNumber = null;
+  let senderEthBalance = null;
+  let senderUsdcBalance = null;
+  let hasSufficientUsdc = null;
+  let onchainTxProof = null;
+  let rpcError = null;
+
+  try {
+    const [blockNum, ethRaw, usdcRaw] = await Promise.all([
+      publicClient.getBlockNumber(),
+      senderValid ? publicClient.getBalance({ address: getAddress(senderRaw) }) : Promise.resolve(0n),
+      (senderValid && tokenValid)
+        ? publicClient.readContract({
+            address: getAddress(tokenAddress),
+            abi: USDC_ABI,
+            functionName: 'balanceOf',
+            args: [getAddress(senderRaw)]
+          })
+        : Promise.resolve(0n)
+    ]);
+    chainBlockNumber = Number(blockNum);
+    senderEthBalance = formatEther(ethRaw);
+    senderUsdcBalance = formatUnits(usdcRaw, 6);
+    if (senderValid && Number.isFinite(amountUsdc) && amountUsdc > 0) {
+      const reqUusdc = BigInt(Math.round(amountUsdc * 1e6));
+      hasSufficientUsdc = usdcRaw >= reqUusdc;
+      if (!hasSufficientUsdc) {
+        flags.push(`INSUFFICIENT_USDC_BALANCE: wallet holds ${senderUsdcBalance} USDC < requested ${amountUsdc.toFixed(2)} USDC`);
+      }
+      if (ethRaw === 0n) {
+        flags.push('INSUFFICIENT_SEPOLIA_ETH_FOR_GAS');
+      }
+    }
+
+    if (txHash) {
+      if (!/^0x[0-9a-fA-F]{64}$/.test(txHash)) {
+        flags.push('INVALID_TX_HASH_FORMAT');
+      } else {
+        const receipt = await publicClient.getTransactionReceipt({ hash: txHash }).catch(() => null);
+        if (!receipt) {
+          flags.push('TX_NOT_FOUND_ON_SEPOLIA');
+        } else {
+          const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+          const tokenLower = getAddress(tokenAddress).toLowerCase();
+          const erc20Logs = (receipt.logs || []).filter(l =>
+            l.address.toLowerCase() === tokenLower &&
+            l.topics?.[0]?.toLowerCase() === transferTopic &&
+            l.topics.length >= 3
+          );
+          const transfers = erc20Logs.map(l => ({
+            from: getAddress('0x' + l.topics[1].slice(-40)),
+            to: getAddress('0x' + l.topics[2].slice(-40)),
+            amountUusdc: BigInt(l.data).toString(),
+            amountUsdc: formatUnits(BigInt(l.data), 6)
+          }));
+          const matchingTransfer = recipientValid
+            ? transfers.find(t => t.to.toLowerCase() === getAddress(recipientRaw).toLowerCase()) || transfers[0]
+            : transfers[0];
+          let wasmTxScore = null;
+          if (matchingTransfer && Number.isFinite(amountUsdc) && amountUsdc > 0) {
+            const truthUusdc = BigInt(Math.round(amountUsdc * 1e6));
+            const obsUusdc = BigInt(matchingTransfer.amountUusdc);
+            wasmTxScore = wasmEngine.scoreDeterministic(truthUusdc, obsUusdc, 2, 100);
+            if (wasmTxScore === 0) {
+              flags.push(`ONCHAIN_AMOUNT_MISMATCH: expected ${amountUsdc} USDC, settled ${matchingTransfer.amountUsdc} USDC`);
+            }
+          }
+          if (receipt.status !== 'success') {
+            flags.push('ONCHAIN_TX_REVERTED');
+          }
+          onchainTxProof = {
+            txHash,
+            status: receipt.status,
+            blockNumber: Number(receipt.blockNumber),
+            confirmations: chainBlockNumber ? Math.max(0, chainBlockNumber - Number(receipt.blockNumber)) : null,
+            gasUsed: receipt.gasUsed.toString(),
+            matchedTransfer: matchingTransfer || null,
+            allTokenTransfersCount: transfers.length,
+            wasmAmountMatchScore: wasmTxScore,
+            explorerUrl: `https://sepolia.etherscan.io/tx/${txHash}`
+          };
+        }
+      }
+    }
+  } catch (err) {
+    rpcError = err.message;
+    flags.push(`SEPOLIA_RPC_ERROR: ${err.message}`);
+  }
+
+  let cleared = false;
+  let action = 'APPROVE_USDC_TRANSFER';
+  let riskLevel = 'LOW';
+
+  if (sanctionsBeneficiary.matched || sanctionsOriginator.matched) {
+    action = 'REJECT_AND_FREEZE';
+    riskLevel = 'CRITICAL_SANCTIONS_BLOCK';
+  } else if (!senderValid || !recipientValid || !tokenValid || !Number.isFinite(amountUsdc) || amountUsdc <= 0 || flags.some(f => f.startsWith('ONCHAIN_') || f.startsWith('TX_') || f.startsWith('INVALID_TX'))) {
+    action = 'REJECT_INVALID_SETTLEMENT';
+    riskLevel = 'HIGH';
+  } else if (!travelRuleSatisfied) {
+    action = 'HOLD_TRAVEL_RULE';
+    riskLevel = 'MEDIUM';
+  } else if (hasSufficientUsdc === false || flags.includes('INSUFFICIENT_SEPOLIA_ETH_FOR_GAS')) {
+    action = 'HOLD_INSUFFICIENT_FUNDS';
+    riskLevel = 'HIGH';
+  } else if (exceedsCap && !dualSignoffPresent) {
+    action = 'HOLD_DUAL_SIGNOFF';
+    riskLevel = 'MEDIUM';
+  } else if (rpcError) {
+    action = 'HOLD_RPC_UNVERIFIED';
+    riskLevel = 'HIGH';
+  } else {
+    cleared = true;
+    action = txHash ? 'SETTLEMENT_VERIFIED_ONCHAIN' : 'APPROVE_USDC_TRANSFER';
+    riskLevel = 'LOW';
+  }
+
+  const gatePayload = {
+    mission: 'Mission 02 — Stablecoin Pre-Payment & On-Chain Settlement Gate',
+    network: 'Ethereum Sepolia (eip155:11155111)',
+    cleared,
+    action,
+    riskLevel,
+    flags,
+    senderAddress: senderValid ? getAddress(senderRaw) : senderRaw,
+    recipientAddress: recipientValid ? getAddress(recipientRaw) : recipientRaw,
+    tokenAddress: tokenValid ? getAddress(tokenAddress) : tokenAddress,
+    amountUsdc: Number.isFinite(amountUsdc) ? amountUsdc : null,
+    delegationCapUsdc,
+    dualSignoffPresent,
+    travelRule: {
+      required: travelRuleRequired,
+      satisfied: travelRuleSatisfied,
+      originatorName,
+      beneficiaryName: beneficiaryName || null,
+      beneficiaryLei: corpBeneficiary?.registration_id || null
+    },
+    sanctions: {
+      beneficiaryMatched: Boolean(sanctionsBeneficiary.matched),
+      originatorMatched: Boolean(sanctionsOriginator.matched),
+      matches: [...(sanctionsBeneficiary.matches || []), ...(sanctionsOriginator.matches || [])].slice(0, 5)
+    },
+    onchainState: {
+      chainBlockNumber,
+      senderEthBalance,
+      senderUsdcBalance,
+      hasSufficientUsdc,
+      rpcError
+    },
+    onchainTxProof,
+    timestamp: new Date().toISOString()
+  };
+  gatePayload.attestationSha256 = '0x' + crypto.createHash('sha256').update(JSON.stringify(gatePayload)).digest('hex');
+  return gatePayload;
 }
 
 export async function handleApiRequest(req, res) {
@@ -2204,6 +3060,53 @@ export async function handleApiRequest(req, res) {
   const pathname = urlObj.pathname;
 
   try {
+    // 0a. GET /api/health
+    if (pathname === '/api/health' && req.method === 'GET') {
+      await loadSdnData();
+      return sendJson(res, 200, {
+        ok: true,
+        service: 'praman-desk',
+        minerId: 5281,
+        sdnEntriesLoaded: sdnEntries.size,
+        wasmLoaded: Boolean(wasmEngine),
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // 0b. GET /api/status
+    if (pathname === '/api/status' && req.method === 'GET') {
+      await loadSdnData();
+      let miner5281 = null;
+      try {
+        const mr = await fetch(`${NODE_URL}/api/miners/5281`, { signal: AbortSignal.timeout(3500) });
+        if (mr.ok) {
+          const mj = await mr.json();
+          miner5281 = {
+            registration_id: mj.miner?.registration_id ?? 5281,
+            activation_status: mj.miner?.activation_status || 'unknown',
+            supported_intents: mj.miner?.supported_intents || [],
+            yaml_url: mj.miner?.yaml_url || null
+          };
+        }
+      } catch {}
+      return sendJson(res, 200, {
+        ok: true,
+        service: 'praman-desk',
+        liveSigningAvailable: Boolean(getWalletAccount()),
+        sdnEntriesLoaded: sdnEntries.size,
+        wasmLoaded: Boolean(wasmEngine),
+        miner5281,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // 0c. GET / POST /api/mission/stablecoin-gate (Mission 02 Genuine Workflow)
+    if (pathname === '/api/mission/stablecoin-gate' && (req.method === 'GET' || req.method === 'POST')) {
+      const body = req.method === 'POST' ? await readJsonBody(req) : {};
+      const q = Object.fromEntries(urlObj.searchParams.entries());
+      const out = await evaluateStablecoinGate({ ...q, ...body });
+      return sendJson(res, 200, out);
+    }
     // 1. GET /api/wallet
     if (pathname === '/api/wallet' && req.method === 'GET') {
       const publicClient = createPublicClient({ chain: sepolia, transport: http(RPC_URL) });
@@ -2361,10 +3264,9 @@ export async function handleApiRequest(req, res) {
 
     // 5. POST /api/audit/buy (Live Paid x402 Purchase on Ethereum Sepolia + Comparison)
     if (pathname === '/api/audit/buy' && req.method === 'POST') {
-      const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'local';
-      if (!checkPaidRateLimit(ip)) {
+      if (!checkPaidRateLimit(req)) {
         return sendJson(res, 429, {
-          error: 'Rate limit reached: maximum 5 paid x402 runs per 10 minutes on the hosted demo wallet.'
+          error: 'Rate limit reached: maximum 5 paid x402 runs per 10 minutes per client (and 30/hour global demo cap).'
         });
       }
 
@@ -2379,9 +3281,14 @@ export async function handleApiRequest(req, res) {
         'CORPORATE_REGISTRY_LOOKUP_GENERAL',
         'REGULATORY_FILING_MONITOR_GENERAL'
       ];
-      const selectedIntents = Array.isArray(body.intents) && body.intents.length
-        ? body.intents.filter(it => allSupportedIntents.includes(it))
-        : ['INVOICE_LEDGER_RECONCILE_GENERAL', 'VENDOR_VERIFY_GENERAL'];
+      let selectedIntents = ['INVOICE_LEDGER_RECONCILE_GENERAL', 'VENDOR_VERIFY_GENERAL'];
+      if (Array.isArray(body.intents) && body.intents.length > 0) {
+        const filtered = [...new Set(body.intents.filter(it => allSupportedIntents.includes(it)))];
+        if (filtered.length === 0) {
+          return sendJson(res, 400, { error: 'No supported Telegraph intents specified.' });
+        }
+        selectedIntents = filtered.slice(0, 7);
+      }
 
       // Run all primary checks for the actual submitted input
       const [vendorPrimary, invoicePrimary, poPrimary, docPrimary, sanctionsPrimary, corpPrimary, filingPrimary] = await Promise.all([
@@ -2740,10 +3647,9 @@ export async function handleApiRequest(req, res) {
     if (pathname === '/api/audit/diligence-pack' && (req.method === 'POST' || req.method === 'GET')) {
       const body = req.method === 'POST' ? await readJsonBody(req) : {};
       if (body.mode === 'buy_x402') {
-        const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'local';
-        if (!checkPaidRateLimit(ip)) {
+        if (!checkPaidRateLimit(req)) {
           return sendJson(res, 429, {
-            error: 'Rate limit reached: maximum 5 paid x402 runs per 10 minutes on the hosted demo wallet.'
+            error: 'Rate limit reached: maximum 5 paid x402 runs per 10 minutes per client (and 30/hour global demo cap).'
           });
         }
       }
@@ -2765,12 +3671,31 @@ export async function handleApiRequest(req, res) {
       const merged = { ...q, ...body, ...(body.params || {}) };
 
       if (pathname === '/api/miner/invoice-reconcile') {
-        const invoiceStr = String(merged.invoice || merged.question || '');
+        const invoiceStr = String(merged.invoice || merged.question || merged.query || '');
         const ledgerStr = String(merged.ledger || '');
+        const hasStructuredQty =
+          merged.billedQty !== undefined && merged.acceptedQty !== undefined && merged.unitPrice !== undefined &&
+          Number.isFinite(parseNumber(merged.billedQty)) &&
+          Number.isFinite(parseNumber(merged.acceptedQty)) &&
+          Number.isFinite(parseNumber(merged.unitPrice));
+
+        if (hasStructuredQty) {
+          const out = reconcileInvoicePrimary(merged);
+          return sendJson(res, 200, {
+            reconciled: out.reconciled,
+            discrepancy: Math.abs(out.details?.delta_total ?? 0),
+            explanation: out.explanation,
+            details: out.details,
+            intent: 'INVOICE_LEDGER_RECONCILE_GENERAL',
+            schema_version: 4,
+            as_of: new Date().toISOString()
+          });
+        }
+
         const invAmounts = extractAmountList(invoiceStr);
         const ledAmounts = extractAmountList(ledgerStr);
 
-        if (invAmounts.length && ledAmounts.length && !merged.billedQty) {
+        if (invAmounts.length && ledAmounts.length) {
           const invTotal = invAmounts[invAmounts.length - 1];
           const ledTotal = ledAmounts[ledAmounts.length - 1];
           const diff = Math.round((invTotal - ledTotal) * 100) / 100;
@@ -2787,12 +3712,29 @@ export async function handleApiRequest(req, res) {
           });
         }
 
-        const out = reconcileInvoicePrimary(merged);
+        // Handle NL comparison query mentioning two monetary figures in ?question=... without separate ledger arg
+        if (!ledgerStr && invAmounts.length >= 2) {
+          const a1 = invAmounts[0];
+          const a2 = invAmounts[1];
+          const diff = Math.round((a1 - a2) * 100) / 100;
+          const isRec = Math.abs(diff) < 0.01;
+          return sendJson(res, 200, {
+            reconciled: isRec,
+            discrepancy: isRec ? 0 : Math.abs(diff),
+            explanation: isRec
+              ? `Reconciled across compared monetary values (${a1} vs ${a2}).`
+              : `Discrepancy of ${Math.abs(diff).toFixed(2)} detected between ${a1} and ${a2}.`,
+            intent: 'INVOICE_LEDGER_RECONCILE_GENERAL',
+            schema_version: 4,
+            as_of: new Date().toISOString()
+          });
+        }
+
         return sendJson(res, 200, {
-          reconciled: out.reconciled,
-          discrepancy: Math.abs(out.details?.delta_total ?? 0),
-          explanation: out.explanation,
-          details: out.details,
+          reconciled: null,
+          discrepancy: null,
+          status: 'insufficient_evidence',
+          explanation: 'Insufficient monetary evidence: neither line-item quantities/unit prices nor monetary totals were present on both invoice and ledger entries (bare reference numbers cannot prove reconciliation).',
           intent: 'INVOICE_LEDGER_RECONCILE_GENERAL',
           schema_version: 4,
           as_of: new Date().toISOString()
@@ -2805,12 +3747,26 @@ export async function handleApiRequest(req, res) {
         const rawAmount = merged.amount ?? merged.poAmount ?? merged.po_amount;
         const rawCap = merged.approval_cap ?? merged.approvalCap ?? merged.budget_cap;
         const hasExplicitAmounts = rawAmount !== undefined && rawAmount !== null && String(rawAmount).trim() !== '';
+        const hasExplicitCap = rawCap !== undefined && rawCap !== null && String(rawCap).trim() !== '';
 
         if (hasExplicitAmounts) {
           const parsedAmt = parseNumber(rawAmount);
-          const parsedCap = rawCap !== undefined && rawCap !== null && String(rawCap).trim() !== ''
-            ? parseNumber(rawCap)
-            : parsedAmt;
+          if (!hasExplicitCap) {
+            return sendJson(res, 200, {
+              po_number: poNumber || null,
+              verified: false,
+              status: 'insufficient_evidence',
+              amount: Number.isFinite(parsedAmt) ? parsedAmt : null,
+              approval_cap: null,
+              vendor: vendor || null,
+              explanation: 'Insufficient delegation policy context: PO amount provided without approval_cap or budget_cap.',
+              summary: 'Insufficient delegation policy context: PO amount provided without approval_cap or budget_cap.',
+              intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+              schema_version: 4,
+              as_of: new Date().toISOString()
+            });
+          }
+          const parsedCap = parseNumber(rawCap);
           const out = verifyPurchaseOrderPrimary({
             poNumber: poNumber || 'PO-UNSPECIFIED',
             vendor: vendor || 'Unspecified Vendor',
@@ -2886,7 +3842,7 @@ export async function handleApiRequest(req, res) {
         ).trim();
         const out = await verifyVendorPrimary({
           vendor: vendorParam,
-          vat_number: merged.vat_number || merged.vatNumber || '',
+          vat_number: merged.vat_number || merged.vatNumber || merged.vat_id || merged.vatId || merged.vat || merged.tax_id || merged.taxId || '',
           lei: merged.lei || '',
           country: merged.country || merged.jurisdiction || ''
         });
@@ -2896,6 +3852,7 @@ export async function handleApiRequest(req, res) {
           valid: out.valid,
           vat_valid: out.vat_valid,
           tax_id_valid: out.tax_id_valid,
+          vat_entity_match: out.vat_entity_match ?? null,
           status: out.status || (out.valid ? 'verified' : 'unverified'),
           registered_name: out.registered_name,
           registered_address: out.registered_address,
@@ -2918,7 +3875,7 @@ export async function handleApiRequest(req, res) {
       }
 
       if (pathname === '/api/miner/corporate-registry') {
-        const rawQuery = merged.company || merged.name || merged.entity || merged.legal_name || merged.query || merged.question || merged.prompt || merged.text || 'SAP SE';
+        const rawQuery = merged.company || merged.name || merged.entity || merged.legal_name || merged.query || merged.question || merged.prompt || merged.text || '';
         const out = await lookupCorporateRegistry({
           company: rawQuery,
           jurisdiction: merged.jurisdiction || merged.country || ''
@@ -2932,9 +3889,24 @@ export async function handleApiRequest(req, res) {
       }
 
       if (pathname === '/api/miner/sanctions-screen') {
-        const out = await screenSanctions({
-          name: merged.name || merged.company || merged.entity || merged.query || merged.question || merged.prompt || merged.text || ''
-        });
+        const rawName = String(merged.name || merged.company || merged.entity || merged.query || merged.question || merged.prompt || merged.text || '').trim();
+        if (!rawName) {
+          return sendJson(res, 200, {
+            screened: false,
+            status: 'insufficient_evidence',
+            name: null,
+            matched: false,
+            match_found: false,
+            match_count: 0,
+            matches: [],
+            lists: ['US Treasury OFAC SDN'],
+            summary: 'Insufficient parameters: supply a person or entity name to screen against OFAC SDN.',
+            intent: 'SANCTIONS_SCREENING_MATCH_GENERAL',
+            schema_version: 1,
+            as_of: new Date().toISOString()
+          });
+        }
+        const out = await screenSanctions({ name: rawName });
         return sendJson(res, 200, {
           ...out,
           intent: 'SANCTIONS_SCREENING_MATCH_GENERAL',

@@ -465,7 +465,8 @@
 
   <nav role="tablist" aria-label="Praman Desk sections">
     <button role="tab" aria-selected="true" data-tab="audit">Spend Guard (Missions 02 &amp; 04)</button>
-    <button role="tab" aria-selected="false" data-tab="compliance">Compliance Suite (Missions 04 &amp; 02)</button>
+    <button role="tab" aria-selected="false" data-tab="compliance">Compliance Suite (Mission 04)</button>
+    <button role="tab" aria-selected="false" data-tab="stablecoin">Stablecoin Gate (Mission 02)</button>
     <button role="tab" aria-selected="false" data-tab="ledger" id="tab-btn-ledger">On-chain receipt ledger (9)</button>
     <button role="tab" aria-selected="false" data-tab="eval" id="tab-btn-eval">Evaluator pool &amp; bounties (62)</button>
     <button role="tab" aria-selected="false" data-tab="miner">Active Miner #5281 (Sepolia)</button>
@@ -673,44 +674,44 @@
         Live query to <code>/api/evalpool/submissions/mine?submitter=0x98021b20Efdb7ae2C57366010a6E0fDE207b4466</code>. <span id="eval-summary-copy">62 signed evaluation rows across 8 Legal &amp; Compliance Intents (dynamic node count refreshed on load).</span>
       </p>
 
-      <!-- Canonical Evaluator Adapter (ModernBERT LoRA #461) -->
-      <div style="background:var(--bg); border:1px solid var(--accent); border-radius:8px; padding:14px; margin-top:14px; font-size:13px;">
+      <!-- Evaluator Track Status (ModernBERT LoRA #461 Post-Mortem + v4 Retraining Pipeline) -->
+      <div style="background:var(--bg); border:1px solid #d97706; border-radius:8px; padding:14px; margin-top:14px; font-size:13px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
           <div>
-            <span style="background:var(--accent); color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px;">On-Chain Adapter #461</span>
-            <strong style="margin-left:8px; font-size:14px;">SANCTIONS_SCREENING_MATCH (ModernBERT LoRA)</strong>
+            <span style="background:#b45309; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px;">Adapter #461 Rejected on Devnode</span>
+            <strong style="margin-left:8px; font-size:14px;">SANCTIONS_SCREENING_MATCH — OOD Post-Mortem &amp; v4 Pipeline</strong>
           </div>
           <div>
-            <a href="https://sepolia.etherscan.io/tx/0xf9d9e1e9764b057d9e265f179cd24709bf995e63e35243387dbec826b6a72607" target="_blank" rel="noopener">Registration Tx #461 (Etherscan) ↗</a> &bull;
-            <a href="https://raw.githubusercontent.com/VishAlgoDev/praman-desk/f23c4352ee5be063a75dbd10c78b92a26a8550c9/packages/SANCTIONS_SCREENING_MATCH_v3.safetensors" target="_blank" rel="noopener">Safetensors (6.78 MB) ↗</a>
+            <a href="https://sepolia.etherscan.io/tx/0xf9d9e1e9764b057d9e265f179cd24709bf995e63e35243387dbec826b6a72607" target="_blank" rel="noopener">Tx #461 (Etherscan) ↗</a> &bull;
+            <a href="https://devnode.telegraphprotocol.com/api/wasm/461" target="_blank" rel="noopener">Live Devnode Status ↗</a>
           </div>
         </div>
 
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px; margin-top:12px;">
           <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px;">
-            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">Evaluator Accuracy</div>
-            <div style="font-size:18px; font-weight:700; color:var(--accent); margin-top:2px;">81.33% <span style="font-size:12px; font-weight:400; color:var(--muted);">(Held-out eval)</span></div>
-            <div style="font-size:11.5px; color:var(--ink); margin-top:4px;">Challenging incumbent #375 (78.57%)</div>
+            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">Live Devnode Score (#461)</div>
+            <div style="font-size:18px; font-weight:700; color:var(--bad); margin-top:2px;">7 / 15 (46.7%) <span style="font-size:12px; font-weight:400; color:var(--muted);">vs 70% floor</span></div>
+            <div style="font-size:11.5px; color:var(--ink); margin-top:4px;">Status: <code>rejected</code> (vs incumbent #375 @ 78.57%)</div>
           </div>
           <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px;">
-            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">Foundation Architecture</div>
-            <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:2px;">ModernBERT-base (LoRA)</div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">Rank 8 &bull; Alpha 32 &bull; Wi, Wo, Wqkv</div>
+            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">Stage 1 WASM Determinism</div>
+            <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:2px;">Bit-Exact (Runtime Only)</div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">Repeat score <code class="mono">0xbfd4f50b</code>; failed OOD accuracy</div>
           </div>
           <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px;">
-            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">Stage 1 Bit-Exact Status</div>
-            <div style="font-size:14px; font-weight:600; color:#10b981; margin-top:2px;">PASS (Bit-Exact Verified)</div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">Score: <code class="mono">0xbfd4f50b</code> (repeats: 2)</div>
+            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">Root Cause Diagnosed</div>
+            <div style="font-size:13px; font-weight:600; color:var(--ink); margin-top:2px;">Single-Template Synthetic Bias</div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">Trained on one JSON schema; real miners emit varied formats (62–299 tok)</div>
           </div>
           <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px;">
-            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">Cryptographic Hash</div>
-            <div style="font-size:12px; font-weight:600; color:var(--ink); margin-top:2px; word-break:break-all;"><code class="mono">0x500dffd2...75dfd0</code></div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">keccak256 verified on Sepolia Diamond</div>
+            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">v4 Remediation Pipeline</div>
+            <div style="font-size:13px; font-weight:600; color:var(--ink); margin-top:2px;">Multi-Format Dataset Ready</div>
+            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">Requires Colab T4 re-train &amp; new registration before promotion</div>
           </div>
         </div>
 
         <div style="margin-top:10px; font-size:12px; color:var(--muted);">
-          <strong>Dataset Anti-Shortcut Audit:</strong> 100.0% unique negatives (pass &ge;80%), 0.1% max repeat (pass &le;2%), 50.0% length shortcut (pass &le;65%), 48.9% surface tell probe (pass &le;65%, dead-center random chance).
+          <strong>Honest Audit Note:</strong> 81.33% was an in-distribution synthetic split only. Real out-of-distribution evaluation against heterogeneous miner responses failed Stage 2 (`7/15` = 46.7%). Local Docker sidecar (<code class="mono">praman-adapterexec</code>) remains active for validation; we do not claim challenger victory until v4 passes Devnode Stage 2.
         </div>
       </div>
     </section>
@@ -865,6 +866,61 @@ DBS Group Holdings Ltd | SG |</textarea>
       </div>
     </section>
   </div>
+
+  <!-- ========================================================= -->
+  <!-- TAB: STABLECOIN GATE (Mission 02 Treasury Firewall)        -->
+  <!-- ========================================================= -->
+  <div id="tab-stablecoin" hidden>
+    <section class="panel">
+      <h2>Mission 02 — Stablecoin Treasury Guard &amp; On-Chain Settlement Gate</h2>
+      <p class="hint">
+        Pre-payment treasury firewall for autonomous USDC transfers on Ethereum Sepolia. Verifies live Sepolia JSON-RPC chain state &amp; wallet USDC balance, enforces OFAC SDN counterparty freeze (<code class="mono">REJECT_AND_FREEZE</code>), FATF Travel Rule (&ge;$1,000 KYC reference check), delegation cap limits, and ERC-20 <code class="mono">Transfer</code> event receipt matching (with deterministic WASM amount scoring).
+      </p>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+        <span class="hint" style="margin:4px 0;">Break &amp; Verify Presets:</span>
+        <button type="button" class="secondary" data-m2-preset="clean">1. Clean Transfer ($25 USDC)</button>
+        <button type="button" class="secondary" data-m2-preset="sanctioned">2. Sanctioned Freeze (Lazarus Group)</button>
+        <button type="button" class="secondary" data-m2-preset="insufficient">3. Insufficient Balance ($99,999)</button>
+        <button type="button" class="secondary" data-m2-preset="travelrule">4. FATF Hold ($1,500 No KYC)</button>
+        <button type="button" class="secondary" data-m2-preset="txverify">5. Invalid Tx Receipt Probe</button>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label for="m2-recipient-name">Counterparty / Legal Entity</label>
+          <input id="m2-recipient-name" value="Apple Inc." placeholder="e.g. Apple Inc. or Lazarus Group">
+        </div>
+        <div>
+          <label for="m2-recipient-addr">Recipient EVM Address (0x...)</label>
+          <input id="m2-recipient-addr" value="0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" placeholder="0x...">
+        </div>
+        <div>
+          <label for="m2-amount">Transfer Amount (USDC)</label>
+          <input id="m2-amount" type="number" step="0.01" value="25">
+        </div>
+        <div>
+          <label for="m2-cap">Treasury Delegation Cap (USDC)</label>
+          <input id="m2-cap" type="number" step="0.01" value="500">
+        </div>
+        <div>
+          <label for="m2-kyc">Sender KYC / VASP Travel Rule Ref (req &ge;$1,000)</label>
+          <input id="m2-kyc" value="VASP-2026-PRAMAN-01" placeholder="Optional below $1,000">
+        </div>
+        <div>
+          <label for="m2-txhash">Sepolia Tx Hash (optional on-chain Transfer verify)</label>
+          <input id="m2-txhash" value="" placeholder="0x... (optional ERC-20 receipt verification)">
+        </div>
+      </div>
+
+      <div style="margin-top:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button type="button" class="primary" id="btn-m2-gate">Evaluate Mission 02 Settlement Gate ($0.00 RPC)</button>
+        <span class="hint" style="margin:0;">Direct call to <code class="mono">POST /api/mission/stablecoin-gate</code></span>
+      </div>
+
+      <div id="m2-output" style="margin-top:14px;" hidden></div>
+    </section>
+  </div>
 </main>
 
 <script>
@@ -872,6 +928,7 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
 })[c]);
+const safeUrl = (u) => /^https?:\/\//i.test(String(u || "").trim()) ? String(u).trim() : "#";
 
 // Modern Web Guidance: Validate Input After Interaction (WeakMap fallback + aria-invalid sync)
 const UserInvalidFallback = (() => {
@@ -1021,7 +1078,7 @@ async function runQuickVerify(vendorName) {
     const statusColor = isIssued ? "var(--ok)" : data.valid ? "var(--warn)" : "var(--bad)";
     const statusBg = isIssued ? "var(--ok-bg)" : data.valid ? "var(--warn-bg)" : "var(--bad-bg)";
     const hq = data.registered_address ? `📍 <strong>Registered HQ:</strong> ${esc(data.registered_address)}<br>` : "";
-    const leiLink = data.lei ? `🆔 <strong>ISO 17442 LEI:</strong> <code class="mono">${esc(data.lei)}</code> &bull; <a href="${esc(data.source_url || `https://search.gleif.org/#/record/${data.lei}`)}" target="_blank" rel="noopener">Official GLEIF Record ↗</a><br>` : "";
+    const leiLink = data.lei ? `🆔 <strong>ISO 17442 LEI:</strong> <code class="mono">${esc(data.lei)}</code> &bull; <a href="${esc(safeUrl(data.source_url || `https://search.gleif.org/#/record/${data.lei}`))}" target="_blank" rel="noopener">Official GLEIF Record ↗</a><br>` : "";
 
     resEl.innerHTML = `
       <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px; font-size:13px;">
@@ -1125,7 +1182,7 @@ function openTab(tabName) {
     const active = btn.dataset.tab === tabName;
     btn.setAttribute("aria-selected", active ? "true" : "false");
   });
-  ["audit", "compliance", "ledger", "eval", "miner"].forEach(t => {
+  ["audit", "compliance", "stablecoin", "ledger", "eval", "miner"].forEach(t => {
     $(`tab-${t}`).hidden = t !== tabName;
   });
   if (tabName === "ledger") loadLedger();
@@ -1224,7 +1281,7 @@ $("btn-primary").addEventListener("click", async () => {
                 <td>${esc(c.vendor.source)}</td>
                 <td><span class="badge ${c.vendor.valid ? "confirmed" : "contradicted"}">${c.vendor.valid ? "valid" : "unverified"}</span></td>
                 <td>${esc(c.vendor.summary)}${c.vendor.registered_address ? `<br><span class="hint">HQ: ${esc(c.vendor.registered_address)}</span>` : ""}</td>
-                <td>${c.vendor.source_url ? `<a href="${esc(c.vendor.source_url)}" target="_blank" rel="noopener">GLEIF record</a>` : "—"}</td>
+                <td>${c.vendor.source_url ? `<a href="${esc(safeUrl(c.vendor.source_url))}" target="_blank" rel="noopener">GLEIF record</a>` : "—"}</td>
               </tr>
               <tr>
                 <th><code>SANCTIONS_SCREENING_MATCH_GENERAL</code></th>
@@ -1238,7 +1295,7 @@ $("btn-primary").addEventListener("click", async () => {
                 <td>${esc(c.corporate_registry?.source || "GLEIF Global Index")}</td>
                 <td><span class="badge ${c.corporate_registry?.found ? "confirmed" : "contradicted"}">${c.corporate_registry?.found ? "registered" : "not found"}</span></td>
                 <td>${esc(c.corporate_registry?.summary || "Registry check complete")}</td>
-                <td>${c.corporate_registry?.results?.[0]?.source_url ? `<a href="${esc(c.corporate_registry.results[0].source_url)}" target="_blank" rel="noopener">LEI record</a>` : "—"}</td>
+                <td>${c.corporate_registry?.results?.[0]?.source_url ? `<a href="${esc(safeUrl(c.corporate_registry.results[0].source_url))}" target="_blank" rel="noopener">LEI record</a>` : "—"}</td>
               </tr>
               <tr>
                 <th><code>REGULATORY_FILING_MONITOR_GENERAL</code></th>
@@ -1559,20 +1616,22 @@ if (btnAgentSim) {
       bar.style.width = "40%";
       const formPayload = getFormPayload();
       appendLog(`Executing 7 primary baseline checks for ${formPayload.vendor || 'Unknown Entity'}...`);
-      const primaryRes = await api("/api/audit/primary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formPayload)
-      });
-      appendLog(`-> Primary Risk Level: ${primaryRes.overall_risk}`);
-      appendLog(`-> Vendor: ${primaryRes.checks?.vendor?.status || 'N/A'} | Invoice: ${primaryRes.checks?.invoice?.status || 'N/A'} | PO: ${primaryRes.checks?.po?.status || 'N/A'}`);
-      appendLog(`-> OFAC Sanctions: ${primaryRes.checks?.sanctions?.status || 'N/A'} (${primaryRes.checks?.sanctions?.matches?.length || 0} matches)`);
-      appendLog(`-> Corporate Registry: ${primaryRes.checks?.corporate_registry?.status || 'N/A'}`);
-      appendLog(`-> Regulatory Filings: ${primaryRes.checks?.regulatory_filings?.status || 'N/A'}`);
+      const primaryRes = await api("/api/audit/primary", formPayload);
+      const chk = primaryRes.checks || {};
+      const sanctionsHits = chk.sanctions?.matches || [];
+      const overallRisk = sanctionsHits.length > 0
+        ? "CRITICAL_SANCTIONS_BLOCK"
+        : (!chk.vendor?.valid || chk.invoice?.reconciled !== true || chk.po?.verified !== true || chk.document?.authentic !== true)
+          ? "HIGH"
+          : (chk.corporate_registry?.found === false ? "MEDIUM" : "LOW");
+      appendLog(`-> Primary Risk Level: ${overallRisk}`);
+      appendLog(`-> Vendor: ${chk.vendor?.status || (chk.vendor?.valid ? 'valid' : 'failed')} | Invoice: ${chk.invoice?.reconciled === true ? 'reconciled' : (chk.invoice?.verdict || 'failed')} | PO: ${chk.po?.verified === true ? 'verified' : (chk.po?.status || 'failed')}`);
+      appendLog(`-> Document: ${chk.document?.verdict || (chk.document?.authentic ? 'authentic' : 'unverified')} | OFAC Sanctions: ${chk.sanctions?.matched ? 'MATCH' : 'clear'} (${sanctionsHits.length} matches)`);
+      appendLog(`-> Corporate Registry: ${chk.corporate_registry?.found ? `found (${chk.corporate_registry.registration_id || chk.corporate_registry.legal_name})` : 'not_found'}`);
+      appendLog(`-> Regulatory Filings: ${chk.regulatory_filing?.found ? `${chk.regulatory_filing.total_results ?? chk.regulatory_filing.filing_count ?? 0} filings found` : 'no_filings_matched'}`);
 
-      const sanctionsHits = primaryRes.checks?.sanctions?.matches || [];
       if (sanctionsHits.length > 0) {
-        appendLog(`🚨 SANCTIONS HIT DETECTED: ${sanctionsHits.map(m => m.name).join(", ")}`);
+        appendLog(`🚨 SANCTIONS HIT DETECTED: ${sanctionsHits.map(m => m.matched_name || m.name).join(", ")}`);
       }
 
       // Stage 3: Telegraph Miner Discovery & x402 Micropayment Query
@@ -1581,34 +1640,30 @@ if (btnAgentSim) {
       if (wallet.liveSigningAvailable) {
         appendLog("Signing EIP-712 micropayment authorization headers...");
         const buyRes = await api("/api/audit/buy", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...formPayload,
-            intents: [
-              "VENDOR_VERIFY_GENERAL",
-              "SANCTIONS_SCREENING_MATCH_GENERAL",
-              "CORPORATE_REGISTRY_LOOKUP_GENERAL",
-              "REGULATORY_FILING_MONITOR_GENERAL"
-            ]
-          })
+          ...formPayload,
+          intents: [
+            "VENDOR_VERIFY_GENERAL",
+            "SANCTIONS_SCREENING_MATCH_GENERAL",
+            "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+            "REGULATORY_FILING_MONITOR_GENERAL"
+          ]
         });
-        const results = buyRes.results || [];
-        appendLog(`Telegraph Ask Engine responded with ${results.length} miner verification(s):`);
-        for (const r of results) {
-          appendLog(`-> [${r.intent}] HTTP ${r.http_status} | Miner: ${r.miner_id || r.miner_address || 'Routed'} | Agreed: ${r.agreed}`);
-          if (r.settlement_tx_hash) {
-            appendLog(`   On-chain Settlement Tx: ${r.settlement_tx_hash}`);
+        const items = buyRes.items || [];
+        appendLog(`Telegraph Ask Engine responded with ${items.length} miner verification(s) (${buyRes.mode || 'settled'}):`);
+        for (const r of items) {
+          appendLog(`-> [${r.intent}] HTTP ${r.httpStatus} | Miner: ${r.minerName || r.minerId || 'Routed'} | ${r.agreement || r.badgeText || 'evaluated'}`);
+          if (r.txHash) {
+            appendLog(`   On-chain Settlement Tx: ${r.txHash}`);
           }
-          if (r.signal_hash) {
-            appendLog(`   On-chain Signal: ${r.signal_hash.slice(0, 18)}...`);
+          if (r.signalHash) {
+            appendLog(`   On-chain Signal: ${r.signalHash.slice(0, 18)}...`);
           }
         }
       } else {
         appendLog("No server signing key available: querying read-only miner validation endpoints...");
-        const vMiner = await api(`/api/miner/vendor-verify?name=${encodeURIComponent(formPayload.vendor)}`);
+        const vMiner = await api(`/api/miner/vendor-verify?vendor=${encodeURIComponent(formPayload.vendor)}&vat_number=${encodeURIComponent(formPayload.vatNumber || '')}`);
         const sMiner = await api(`/api/miner/sanctions-screen?name=${encodeURIComponent(formPayload.vendor)}`);
-        appendLog(`-> Miner Vendor Verify: ${vMiner.found ? `Found (${vMiner.legal_name || 'Matched'})` : 'Not Found'}`);
+        appendLog(`-> Miner Vendor Verify: ${vMiner.valid ? `Valid (${vMiner.registered_name || 'Matched'}, LEI ${vMiner.lei || 'N/A'})` : `Unverified (${vMiner.status || 'failed'})`}`);
         appendLog(`-> Miner Sanctions Screen: ${sMiner.matches?.length || 0} hits against official SDN`);
       }
 
@@ -1616,11 +1671,16 @@ if (btnAgentSim) {
       indicator.textContent = "Step 4/5: Running In-Browser WASM Restoring-Division Math Engine...";
       bar.style.width = "80%";
       if (window.clientWasmInstance) {
-        const invCents = Math.round(Number(formPayload.invoiceAmount || 0) * 100);
-        const poCents = Math.round(Number(formPayload.poAmount || 0) * 100);
-        const score = window.clientWasmInstance.scoreDeterministic(poCents, invCents, 2, 500);
-        appendLog(`Client-side WASM execution: compare(${poCents}, ${invCents}) with RelTol 5.0%`);
-        appendLog(`-> Deterministic score: ${score} / 10000 (${score === 10000 ? 'EXACT MATCH' : score > 0 ? 'WITHIN TOLERANCE' : 'MISMATCH'})`);
+        const billedTotal = Number(formPayload.billedQty || 0) * Number(formPayload.unitPrice || 0) * (1 + Number(formPayload.taxRatePct || 0) / 100);
+        const invCents = Number.isFinite(billedTotal) ? Math.round(billedTotal * 100) : 0;
+        const poCents = Number.isFinite(formPayload.poAmount) ? Math.round(formPayload.poAmount * 100) : 0;
+        if (invCents > 0 && poCents > 0) {
+          const score = window.clientWasmInstance.scoreDeterministic(poCents, invCents, 2, 500);
+          appendLog(`Client-side WASM execution: compare(PO ${poCents}¢, Invoice ${invCents}¢) with RelTol 5.0%`);
+          appendLog(`-> Deterministic score: ${score} / 10000 (${score === 10000 ? 'EXACT MATCH' : score > 0 ? 'WITHIN TOLERANCE' : 'MISMATCH'})`);
+        } else {
+          appendLog(`Client-side WASM skipped: non-positive PO (${poCents}¢) or Invoice (${invCents}¢) amount rejected.`);
+        }
       } else {
         appendLog("Client WASM not available in current browser session, verified via server WASM engine.");
       }
@@ -1632,12 +1692,12 @@ if (btnAgentSim) {
       if (sanctionsHits.length > 0) {
         indicator.textContent = "❌ REJECT & FREEZE: Sanctions Flagged";
         appendLog("RESULT: TRANSACTION BLOCKED & FROZEN. Counterparty is listed on OFAC SDN. Payment rejected to maintain regulatory compliance.");
-      } else if (primaryRes.overall_risk === 'HIGH') {
-        indicator.textContent = "⚠️ CONDITIONAL HOLD: Discrepancies Detected";
-        appendLog("RESULT: TRANSACTION HELD FOR REVIEW. High variance detected across primary records and vendor submission.");
+      } else if (overallRisk !== "LOW") {
+        indicator.textContent = `⚠️ CONDITIONAL HOLD: ${overallRisk} Risk / Discrepancy Detected`;
+        appendLog(`RESULT: TRANSACTION HELD FOR REVIEW (${overallRisk}). Verify vendor VAT/LEI, 3-way invoice math, PO cap, document SHA-256, and corporate registry status before payout.`);
       } else {
         indicator.textContent = "✅ Spend Cleared: Autonomous Spend Authorized";
-        appendLog("RESULT: TRANSACTION CLEARED. Automated verification verified counterparty identity, invoices, and compliance rules.");
+        appendLog("RESULT: TRANSACTION CLEARED. Automated verification confirmed counterparty identity, 3-way invoice math, PO cap, document provenance, and OFAC clear status.");
       }
     } catch (err) {
       indicator.textContent = `❌ Execution Error: ${err.message}`;
@@ -1670,11 +1730,11 @@ if (btnCorp) {
         <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px;">
           <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px;">
             <h4 style="margin:0; font-size:14px; font-weight:600;">${esc(top.legal_name)}</h4>
-            <span class="badge ${top.status === 'ISSUED' ? 'badge-confirmed' : 'badge-warn'}">${esc(top.status)} (active: ${top.status_active})</span>
+            <span class="badge ${top.status === 'ISSUED' ? 'confirmed' : 'schema_warning'}">${esc(top.status)} (active: ${top.status_active})</span>
           </div>
           <p style="margin:6px 0; font-size:13px; color:var(--muted);">${esc(data.summary)}</p>
           <div style="font-size:12.5px; line-height:1.6; margin-top:8px;">
-            <div><strong>LEI:</strong> <code class="mono">${esc(top.lei)}</code> (<a href="${esc(top.source_url)}" target="_blank" rel="noopener">GLEIF Record ↗</a>)</div>
+            <div><strong>LEI:</strong> <code class="mono">${esc(top.lei)}</code> (<a href="${esc(safeUrl(top.source_url))}" target="_blank" rel="noopener">GLEIF Record ↗</a>)</div>
             <div><strong>Jurisdiction:</strong> ${esc(top.jurisdiction || 'N/A')} &bull; <strong>Authority:</strong> ${esc(top.registration_authority || 'N/A')}</div>
             <div><strong>Registered Address:</strong> ${esc(top.registered_address || 'N/A')}</div>
             ${top.headquarters_address ? `<div><strong>Headquarters:</strong> ${esc(top.headquarters_address)}</div>` : ''}
@@ -1704,7 +1764,7 @@ if (btnSanc) {
             <td class="mono">${esc(m.sdn_uid)}</td>
             <td><strong>${esc(m.matched_name)}</strong>${m.matched_alias ? `<br><small style="color:var(--muted)">Alias: ${esc(m.matched_alias)}</small>` : ''}</td>
             <td>${esc(m.match_type || 'Entity')}</td>
-            <td><span class="badge badge-warn">${esc(m.programs || 'SDN')}</span></td>
+            <td><span class="badge schema_warning">${esc(m.programs || 'SDN')}</span></td>
             <td><strong>${(m.similarity_score * 100).toFixed(1)}%</strong> (${esc(m.matched_via)})</td>
           </tr>
         `).join('');
@@ -1761,10 +1821,10 @@ if (btnReg) {
       const data = await api(`/api/miner/regulatory-filing?company=${encodeURIComponent(comp)}&period=${encodeURIComponent(period)}`);
       const secRows = (data.sec_filings || []).map(f => `
         <tr>
-          <td><span class="badge badge-confirmed">${esc(f.form_type)}</span></td>
+          <td><span class="badge confirmed">${esc(f.form_type)}</span></td>
           <td>${esc(f.filing_date)}</td>
           <td>${esc(f.company_name)}</td>
-          <td>${f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">EDGAR ↗</a>` : 'Available'}</td>
+          <td>${f.url ? `<a href="${esc(safeUrl(f.url))}" target="_blank" rel="noopener">EDGAR ↗</a>` : 'Available'}</td>
         </tr>
       `).join('');
 
@@ -1773,7 +1833,7 @@ if (btnReg) {
           <td>${esc(n.type)}</td>
           <td>${esc(n.publication_date)}</td>
           <td>${esc(n.title?.slice(0, 75))}...</td>
-          <td>${n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">Federal Register ↗</a>` : 'View'}</td>
+          <td>${n.url ? `<a href="${esc(safeUrl(n.url))}" target="_blank" rel="noopener">Federal Register ↗</a>` : 'View'}</td>
         </tr>
       `).join('');
 
@@ -1956,10 +2016,83 @@ async function refreshTabCounts() {
   } catch {}
 }
 
+// Mission 02: Stablecoin Treasury Guard & Receipt Verifier
+const m2Presets = {
+  clean: { name: "Apple Inc.", addr: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b", amt: 0.25, cap: 500, kyc: "Praman Desk Treasury (LEI-VERIFIED)", tx: "" },
+  sanctioned: { name: "Lazarus Group", addr: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b", amt: 10, cap: 500, kyc: "Praman Desk Treasury", tx: "" },
+  insufficient: { name: "Apple Inc.", addr: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b", amt: 99999, cap: 150000, kyc: "Praman Desk Treasury", tx: "" },
+  travelrule: { name: "Apple Inc.", addr: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b", amt: 1.5, cap: 2000, kyc: "", tx: "" },
+  txverify: { name: "Apple Inc.", addr: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b", amt: 0.01, cap: 500, kyc: "Praman Desk Treasury", tx: "0xdeadbeef00000000000000000000000000000000000000000000000000000001" }
+};
+// Note: preset 4 sets $1,500 on click so FATF >=$1,000 triggers even with zero originator
+m2Presets.travelrule.amt = 1500;
+
+document.querySelectorAll("[data-m2-preset]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const p = m2Presets[btn.dataset.m2Preset];
+    if (!p) return;
+    $("m2-recipient-name").value = p.name;
+    $("m2-recipient-addr").value = p.addr;
+    $("m2-amount").value = p.amt;
+    $("m2-cap").value = p.cap;
+    $("m2-kyc").value = p.kyc;
+    $("m2-txhash").value = p.tx;
+    $("btn-m2-gate")?.click();
+  });
+});
+
+if ($("btn-m2-gate")) {
+  $("btn-m2-gate").addEventListener("click", async () => {
+    const out = $("m2-output");
+    out.hidden = false;
+    out.innerHTML = `<p class="hint">Evaluating live Ethereum Sepolia chain state, USDC balance, OFAC SDN, and FATF Travel Rule...</p>`;
+    try {
+      const payload = {
+        beneficiaryName: $("m2-recipient-name").value.trim(),
+        recipientAddress: $("m2-recipient-addr").value.trim(),
+        amountUsdc: Number($("m2-amount").value),
+        delegationCapUsdc: Number($("m2-cap").value),
+        originatorName: $("m2-kyc").value.trim(),
+        txHash: $("m2-txhash").value.trim()
+      };
+      const d = await api("/api/mission/stablecoin-gate", payload);
+      const badgeCls = d.cleared ? "confirmed" : (d.riskLevel === "CRITICAL_SANCTIONS_BLOCK" ? "contradicted" : "schema_warning");
+      const flagsHtml = (d.flags || []).length > 0
+        ? `<ul>${d.flags.map(f => `<li><code class="mono">${esc(f)}</code></li>`).join("")}</ul>`
+        : `<p style="margin:4px 0; color:var(--ok);">No blocking policy flags raised.</p>`;
+      const txHtml = d.onchainTxProof ? `
+        <div style="margin-top:8px; font-size:12.5px;">
+          <strong>On-Chain Tx Proof:</strong> Block ${esc(d.onchainTxProof.blockNumber)} &bull;
+          Status: <code>${esc(d.onchainTxProof.status)}</code> &bull;
+          WASM Score: <strong>${d.onchainTxProof.wasmAmountMatchScore ?? "N/A"} / 10000</strong> &bull;
+          <a href="${esc(safeUrl(d.onchainTxProof.explorerUrl))}" target="_blank" rel="noopener">Sepolia Etherscan ↗</a>
+        </div>` : "";
+      out.innerHTML = `
+        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <strong>Mission 02 Gate Decision: <code class="mono">${esc(d.action)}</code></strong>
+            <span class="badge ${badgeCls}">${d.cleared ? "CLEARED" : esc(d.riskLevel || "BLOCKED")}</span>
+          </div>
+          <div style="margin-top:8px; font-size:13px; color:var(--muted);">
+            Sepolia Block: <strong class="mono">${esc(d.onchainState?.chainBlockNumber ?? "unavailable")}</strong> &bull;
+            Wallet Balance: <strong class="mono">${esc(d.onchainState?.senderUsdcBalance ?? "?")} USDC</strong> &bull;
+            Beneficiary LEI: <code class="mono">${esc(d.travelRule?.beneficiaryLei || "N/A")}</code>
+          </div>
+          <div style="margin-top:8px; font-size:12.5px;"><strong>Flags &amp; Policy Evaluation:</strong>${flagsHtml}</div>
+          ${txHtml}
+          <div style="margin-top:8px; font-size:11.5px; color:var(--muted);">Attestation SHA-256: <code class="mono">${esc(d.attestationSha256)}</code></div>
+        </div>`;
+    } catch (err) {
+      out.innerHTML = `<div class="msg bad">${esc(err.message)}</div>`;
+    }
+  });
+}
+
 loadWallet();
+updateSpendEstimate();
 refreshTabCounts();
 const initialTab = location.hash.replace("#", "");
-if (["audit", "compliance", "ledger", "eval", "miner"].includes(initialTab)) {
+if (["audit", "compliance", "stablecoin", "ledger", "eval", "miner"].includes(initialTab)) {
   openTab(initialTab);
 }
 </script>

@@ -144,10 +144,11 @@ endpoints:
     intents:
       - CORPORATE_REGISTRY_LOOKUP_GENERAL
     description: >-
-      Looks up corporate registry records for a legal entity via the GLEIF Global LEI Index.
-      Returns company legal name, LEI, active status (status_active 1 or 0), jurisdiction,
-      registered and headquarters address, entity category, legal form, creation date,
-      and last update. Supports 200+ jurisdictions worldwide.
+      Looks up corporate registry records for a legal entity via GLEIF Global LEI Index
+      and UK Companies House public registry fallback. Accepts structured parameters or
+      natural-language questions (?question=/query=). Returns company legal name, LEI or
+      company number, active status (status_active 1 or 0), jurisdiction, registered
+      address, and official source URLs across 200+ jurisdictions worldwide.
     params:
       query:
         optional:
@@ -205,10 +206,11 @@ endpoints:
     intents:
       - REGULATORY_FILING_MONITOR_GENERAL
     description: >-
-      Monitors regulatory filing status for legal entities using three
-      authoritative keyless sources: SEC EDGAR full-text search for 10-K,
-      10-Q, 8-K filings; US Federal Register for regulatory notices and
-      rules; and GLEIF for LEI registration status and renewal dates.
+      Monitors regulatory filing status for legal entities using authoritative keyless
+      sources: SEC EDGAR Submissions API (CIK-resolved company filings for 10-K, 10-Q,
+      8-K) with EFTS full-text search fallback; US Federal Register API for agency notices
+      and rules; and GLEIF for LEI registration status and renewal dates. Supports both
+      structured parameters and natural-language questions (?question=/query=).
     params:
       query:
         optional:

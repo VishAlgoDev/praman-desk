@@ -25,6 +25,7 @@ import {
   screenSanctions,
   lookupCorporateRegistry,
   monitorRegulatoryFiling,
+  evaluateStablecoinGate,
 } from '../src/handlers.mjs';
 import { getWasmInstance } from '../comparator/wasm-buffer.mjs';
 
@@ -479,6 +480,52 @@ const TOOLS = [
       required: ['company'],
     },
   },
+  {
+    name: 'screen_stablecoin_settlement',
+    description:
+      'Mission 02 Stablecoin Pre-Payment & On-Chain Settlement Gate: checks live Ethereum Sepolia JSON-RPC block state & USDC balance, enforces OFAC SDN freeze (REJECT_AND_FREEZE), FATF Travel Rule (>=$1,000 identity requirement), delegation cap limits, and optional ERC-20 Transfer txHash WASM verification.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        recipient_address: {
+          type: 'string',
+          description: 'Recipient EVM 0x address on Ethereum Sepolia.',
+        },
+        sender_address: {
+          type: 'string',
+          description: 'Optional sender treasury EVM 0x address (defaults to contributor wallet).',
+        },
+        amount_usdc: {
+          type: 'number',
+          description: 'Requested USDC transfer amount (e.g. 25.0).',
+        },
+        beneficiary_name: {
+          type: 'string',
+          description: 'Legal/counterparty name of beneficiary for OFAC SDN, GLEIF LEI, and FATF Travel Rule screening.',
+        },
+        originator_name: {
+          type: 'string',
+          description: 'Originator/sender legal entity or VASP identity (required when amount_usdc >= 1000).',
+          default: 'Praman Desk Treasury',
+        },
+        delegation_cap_usdc: {
+          type: 'number',
+          description: 'Treasury delegation cap in USDC before dual sign-off is required.',
+          default: 5000,
+        },
+        dual_signoff_present: {
+          type: 'boolean',
+          description: 'Whether executive dual sign-off has been obtained.',
+          default: false,
+        },
+        tx_hash: {
+          type: 'string',
+          description: 'Optional Sepolia ERC-20 Transfer txHash to audit settled on-chain logs against amount_usdc via WASM.',
+        },
+      },
+      required: ['recipient_address', 'amount_usdc'],
+    },
+  },
 ];
 
 // Start MCP Server
@@ -604,6 +651,19 @@ export async function startServer() {
           result = await monitorRegulatoryFiling({
             company: args.company || args.name || args.vendor || args.entity,
             period: args.period,
+          });
+          break;
+
+        case 'screen_stablecoin_settlement':
+          result = await evaluateStablecoinGate({
+            recipientAddress: args.recipient_address,
+            senderAddress: args.sender_address,
+            amountUsdc: args.amount_usdc,
+            beneficiaryName: args.beneficiary_name || '',
+            originatorName: args.originator_name ?? 'Praman Desk Treasury',
+            delegationCapUsdc: args.delegation_cap_usdc ?? 5000,
+            dualSignoffPresent: Boolean(args.dual_signoff_present),
+            txHash: args.tx_hash || '',
           });
           break;
 

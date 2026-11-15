@@ -1,111 +1,176 @@
+const BASE_URL = (process.env.BASE_URL || 'https://praman-desk.vercel.app').replace(/\/+$/, '');
+const ADAPTER_URL = process.env.WASM_RUNNABLE_URL || 'https://sport-mill-since-link.trycloudflare.com';
+
 async function deepProbe() {
-  console.log('=== RIGOROUS DEEP SYSTEM PROBE ===\n');
+  console.log(`=== RIGOROUS DEEP SYSTEM PROBE (Target: ${BASE_URL}) ===\n`);
+  let failures = 0;
 
   const tests = [
     {
       name: 'Adapter Runner (Docker Adapterexec)',
-      url: process.env.WASM_RUNNABLE_URL || 'https://sport-mill-since-link.trycloudflare.com',
+      optional: true,
+      url: ADAPTER_URL,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ batch: [ { tokens: [101, 102, 103] } ] })
+      body: JSON.stringify({ batch: [{ tokens: [101, 102, 103] }] }),
+      assert: (res, j) => res.status === 200 && j !== null
     },
     {
-      name: 'Devnode Miner #5281',
+      name: 'Devnode Miner #5281 (Active Registration)',
       url: 'https://devnode.telegraphprotocol.com/api/miners/5281',
-      method: 'GET'
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.status === 'active'
     },
     {
-      name: 'Devnode Evaluator #461',
+      name: 'Devnode Evaluator #461 (Expected Rejected OOD Post-Mortem)',
       url: 'https://devnode.telegraphprotocol.com/api/wasm/461',
-      method: 'GET'
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && (j?.activation_status === 'rejected' || j?.activation_status === 'active')
     },
     {
-      name: 'Vercel: Corporate Registry (Siemens NL)',
-      url: 'https://praman-desk.vercel.app/api/miner/corporate-registry?query=Is%20Siemens%20AG%20an%20active%20company%20in%20Germany%3F',
-      method: 'GET'
+      name: 'App Health (/api/health)',
+      url: `${BASE_URL}/api/health`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.ok === true && (j?.sdnEntriesLoaded || 0) >= 19000 && j?.minerId === 5281
     },
     {
-      name: 'Vercel: Corporate Registry (Edge Case: Nonexistent Entity)',
-      url: 'https://praman-desk.vercel.app/api/miner/corporate-registry?query=Is%20FakeCompany9999XYZ%20an%20active%20company%20in%20Antarctica%3F',
-      method: 'GET'
+      name: 'App Status (/api/status)',
+      url: `${BASE_URL}/api/status`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.ok === true && (j?.sdnEntriesLoaded || 0) >= 19000
     },
     {
-      name: 'Vercel: Regulatory Filing (Boeing 12m)',
-      url: 'https://praman-desk.vercel.app/api/miner/regulatory-filing?query=How%20many%20Federal%20Register%20documents%20mention%20Boeing%20in%20the%20last%2012%20months%3F',
-      method: 'GET'
+      name: 'Corporate Registry (Siemens AG NL)',
+      url: `${BASE_URL}/api/miner/corporate-registry?query=${encodeURIComponent("What is Siemens AG's LEI?")}`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.found === true && j?.jurisdiction === 'DE'
     },
     {
-      name: 'Vercel: Regulatory Filing (SEC EDGAR fallback)',
-      url: 'https://praman-desk.vercel.app/api/miner/regulatory-filing?company=Tesla&period=2026',
-      method: 'GET'
+      name: 'Corporate Registry (HSBC UK NL)',
+      url: `${BASE_URL}/api/miner/corporate-registry?query=${encodeURIComponent('Is HSBC Holdings plc an active company in the UK?')}`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.found === true && j?.jurisdiction === 'GB'
     },
     {
-      name: 'Vercel: Sanctions Screen (Clean Entity)',
-      url: 'https://praman-desk.vercel.app/api/miner/sanctions-screen?name=John%20Smith%20Innocent%20Person',
-      method: 'GET'
+      name: 'Corporate Registry (Apple Inc Delaware NL)',
+      url: `${BASE_URL}/api/miner/corporate-registry?query=${encodeURIComponent('Verify legal entity status of Apple Inc. in Delaware?')}`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.found === true
     },
     {
-      name: 'Vercel: Sanctions Screen (SDN Entity)',
-      url: 'https://praman-desk.vercel.app/api/miner/sanctions-screen?name=PUTIN,%20Vladimir',
-      method: 'GET'
+      name: 'Corporate Registry (Non-Existent Edge Case)',
+      url: `${BASE_URL}/api/miner/corporate-registry?query=${encodeURIComponent('Is FakeCompany9999XYZ an active company in Antarctica?')}`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.found === false && j?.verdict === 'not_found'
     },
     {
-      name: 'Vercel: Vendor Verify (GLEIF DE)',
-      url: 'https://praman-desk.vercel.app/api/miner/vendor-verify?company=Siemens%20AG&jurisdiction=DE',
-      method: 'GET'
+      name: 'Regulatory Filing (Federal Register Boeing NL)',
+      url: `${BASE_URL}/api/miner/regulatory-filing?query=${encodeURIComponent('How many Federal Register documents mention Boeing in the last 12 months?')}`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.found === true && (j?.federal_register_notices || []).length > 0
     },
     {
-      name: 'Vercel: PO Verify (Arithmetic Mismatch)',
-      url: 'https://praman-desk.vercel.app/api/miner/po-verify?po_number=PO-999&items=%5B%7B%22name%22%3A%22Item%22%2C%22quantity%22%3A2%2C%22unit_price%22%3A50%7D%5D&subtotal=100&tax=10&shipping=5&grand_total=999',
-      method: 'GET'
+      name: 'Regulatory Filing (SEC EDGAR Tesla 2025 10-K === 1)',
+      url: `${BASE_URL}/api/miner/regulatory-filing?query=${encodeURIComponent('Did Tesla file a 10-K in 2025?')}`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.found === true && (j?.sec_filings || []).length === 1
     },
     {
-      name: 'Vercel: Diligence Pack (5 Jurisdictions)',
-      url: 'https://praman-desk.vercel.app/api/audit/diligence-pack',
-      method: 'GET'
+      name: 'Sanctions Screen (Clean + AIA False-Positive Guard)',
+      url: `${BASE_URL}/api/miner/sanctions-screen?name=${encodeURIComponent('AIA Group Limited')}`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.matched === false && j?.match_count === 0
+    },
+    {
+      name: 'Sanctions Screen (SDN Comma-Name Transliteration: Viktor Bout)',
+      url: `${BASE_URL}/api/miner/sanctions-screen?name=${encodeURIComponent('Viktor Bout')}`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.matched === true && j?.match_count > 0
+    },
+    {
+      name: 'Vendor Verify (GLEIF DE + Mismatch Rejection)',
+      url: `${BASE_URL}/api/miner/vendor-verify?vendor=${encodeURIComponent('Apple Inc.')}&vat_number=DE143454214`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.valid === false && j?.status === 'vat_entity_mismatch'
+    },
+    {
+      name: 'Issue #1 Guard: Bare Invoice/PO Refs Must Be Inconclusive',
+      url: `${BASE_URL}/api/miner/invoice-reconcile?invoice_id=INV-2026-081&po_number=PO-2026-7741`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.reconciled === null && j?.status === 'insufficient_evidence'
+    },
+    {
+      name: 'Doc Authenticity (Partial Query HTTP 200 Inconclusive)',
+      url: `${BASE_URL}/api/miner/doc-authenticity?signedQrAmount=100`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.status === 'insufficient_evidence'
+    },
+    {
+      name: 'PO Verify (Arithmetic Mismatch)',
+      url: `${BASE_URL}/api/miner/po-verify?po_number=PO-999&items=%5B%7B%22name%22%3A%22Item%22%2C%22quantity%22%3A2%2C%22unit_price%22%3A50%7D%5D&subtotal=100&tax=10&shipping=5&grand_total=999`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.verified === false && j?.status === 'arithmetic_mismatch' && j?.discrepancy === 884
+    },
+    {
+      name: 'Diligence Pack (5 Jurisdictions, 16 Checks)',
+      url: `${BASE_URL}/api/audit/diligence-pack`,
+      method: 'GET',
+      assert: (res, j) => res.status === 200 && j?.jurisdictions?.length === 5 && j?.machineInvoice?.totalChecksExecuted === 16 && /^0x[0-9a-f]{64}$/i.test(j?.packSha256 || '')
+    },
+    {
+      name: 'Mission 02 Stablecoin Gate (Clean Sepolia Approve)',
+      url: `${BASE_URL}/api/mission/stablecoin-gate`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+        amountUsdc: 0.25,
+        beneficiaryName: 'Apple Inc.',
+        delegationCapUsdc: 500
+      }),
+      assert: (res, j) => res.status === 200 && j?.cleared === true && j?.action === 'APPROVE_USDC_TRANSFER'
+    },
+    {
+      name: 'Mission 02 Stablecoin Gate (OFAC Sanctions Freeze)',
+      url: `${BASE_URL}/api/mission/stablecoin-gate`,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+        amountUsdc: 10,
+        beneficiaryName: 'Lazarus Group'
+      }),
+      assert: (res, j) => res.status === 200 && j?.cleared === false && j?.action === 'REJECT_AND_FREEZE'
     }
   ];
 
   for (const t of tests) {
     const t0 = Date.now();
     try {
-      const opts = { method: t.method };
+      const opts = { method: t.method, signal: AbortSignal.timeout(15000) };
       if (t.headers) opts.headers = t.headers;
       if (t.body) opts.body = t.body;
       const res = await fetch(t.url, opts);
       const elapsed = Date.now() - t0;
       const json = await res.json().catch(() => null);
-      let tag = res.status === 200 ? 'PASS' : 'WARN';
-      if (t.name.includes('Edge Case')) {
-        const count = json?.results?.length ?? json?.result_count ?? 0;
-        if (json?.found !== false || json?.verdict !== 'not_found') tag = 'WARN';
-        console.log('[' + tag + '] ' + t.name + ' -> HTTP ' + res.status + ' (' + elapsed + 'ms)');
-        console.log('   Response summary: found=' + json?.found + ', verdict=' + json?.verdict + ', count=' + count);
-        continue;
-      }
-      if (t.name.includes('PO Verify')) {
-        if (json?.verified !== false || json?.status !== 'arithmetic_mismatch' || json?.discrepancy !== 884) tag = 'WARN';
-        console.log('[' + tag + '] ' + t.name + ' -> HTTP ' + res.status + ' (' + elapsed + 'ms)');
-        console.log('   PO verified=' + json?.verified + ', status=' + json?.status + ', discrepancy=' + json?.discrepancy);
-        continue;
-      }
-      if (t.name.includes('Diligence Pack')) {
-        if (json?.jurisdictions?.length !== 5 || !/^0x[0-9a-f]{64}$/i.test(json?.packSha256 || '')) tag = 'WARN';
-        console.log('[' + tag + '] ' + t.name + ' -> HTTP ' + res.status + ' (' + elapsed + 'ms)');
-        console.log('   Pack jurisdictions=' + (json?.jurisdictions?.length ?? 0) + ', packSha256=' + json?.packSha256?.slice(0, 18) + '..., durationMs=' + json?.durationMs);
-        continue;
-      }
-      console.log('[' + tag + '] ' + t.name + ' -> HTTP ' + res.status + ' (' + elapsed + 'ms)');
-      if (t.name.includes('Sanctions Screen (Clean)')) {
-        console.log('   Sanctions clean matched=' + json?.matched + ', count=' + json?.match_count);
-      }
-      if (t.name.includes('Sanctions Screen (SDN)')) {
-        console.log('   Sanctions SDN matched=' + json?.matched + ', top match=' + json?.matches?.[0]?.matched_name);
+      const ok = t.assert(res, json);
+      const tag = ok ? 'PASS' : (t.optional ? 'WARN' : 'FAIL');
+      if (!ok && !t.optional) failures++;
+      console.log(`[${tag}] ${t.name} -> HTTP ${res.status} (${elapsed}ms)`);
+      if (t.name.includes('#461')) {
+        console.log(`   activation_status=${json?.activation_status} stage=${json?.stage} metrics=${JSON.stringify(json?.metrics || {})}`);
+      } else if (!ok) {
+        console.log(`   Unexpected payload: ${JSON.stringify(json)?.slice(0, 260)}`);
       }
     } catch (err) {
-      console.log('[FAIL] ' + t.name + ' -> ERROR: ' + err.message);
+      const tag = t.optional ? 'WARN' : 'FAIL';
+      if (!t.optional) failures++;
+      console.log(`[${tag}] ${t.name} -> ERROR: ${err.message}`);
     }
   }
+
+  console.log(`\n=== DEEP PROBE SUMMARY: ${tests.length - failures}/${tests.length} PASSED (${failures} CRITICAL FAILURES) ===`);
+  if (failures > 0) process.exit(1);
 }
 
 deepProbe();
