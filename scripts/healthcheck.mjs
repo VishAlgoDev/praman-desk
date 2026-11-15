@@ -42,16 +42,16 @@ async function runHealthCheck() {
     }
   }
 
-  // 3. Devnode Miner #5281 Status
+  // 3. Devnode Miner #5289 Status
   try {
-    const res = await fetch('https://devnode.telegraphprotocol.com/api/miners/5281').then(r => r.json());
+    const res = await fetch('https://devnode.telegraphprotocol.com/api/miners/5289').then(r => r.json());
     const m = res.miner || res;
-    console.log('\n✅ 3. Devnode Miner #5281: ' + (m.activation_status === 'active' ? 'ACTIVE' : m.activation_status));
+    console.log('\n✅ 3. Devnode Miner #5289: ' + (m.activation_status === 'active' ? 'ACTIVE' : m.activation_status));
     console.log('   - Slug: ' + m.slug);
     console.log('   - Activation: ' + m.activation_status);
     console.log('   - Active Intents: ' + (m.supported_intents?.length || 7) + ' intents');
   } catch (err) {
-    console.log('\n❌ 3. Devnode Miner #5281: ERROR', err.message);
+    console.log('\n❌ 3. Devnode Miner #5289: ERROR', err.message);
   }
 
   // 4. Live Vercel Production Deployment

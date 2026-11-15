@@ -1,12 +1,12 @@
 {
-  "previousRegistrationId": "5186",
-  "registrationId": "5281",
-  "txHash": "0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39",
-  "blockNumber": 12139789,
+  "previousRegistrationId": "5281",
+  "registrationId": "5289",
+  "txHash": "0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff",
+  "blockNumber": 12142154,
   "miner": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
   "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
-  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/6430bd61a0a3987f84297791e8d3e182013662f7/miner.yaml",
-  "yamlHash": "0xe1574d5c0501fccfc8db2416ca6402c0a07d58af4a8035666aacebba3cdac355",
+  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/62d2169d5185060494ccfbbb7f87e8a976aa5a3c/miner.yaml",
+  "yamlHash": "0x1f1735d34d6dfbaa22b605e9dbb3ada24c99aa95a262c83575fff7a768d73f87",
   "supportedIntents": [
     "PURCHASE_ORDER_VERIFY_GENERAL",
     "INVOICE_LEDGER_RECONCILE_GENERAL",
@@ -17,5 +17,5 @@
     "REGULATORY_FILING_MONITOR_GENERAL"
   ],
   "status": "active",
-  "updatedAt": "2026-11-15T10:59:40.726Z"
+  "updatedAt": "2026-11-15T18:59:00.851Z"
 }

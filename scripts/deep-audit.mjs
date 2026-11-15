@@ -16,8 +16,8 @@ async function deepProbe() {
       assert: (res, j) => res.status === 200 && j !== null
     },
     {
-      name: 'Devnode Miner #5281 (Active Registration)',
-      url: 'https://devnode.telegraphprotocol.com/api/miners/5281',
+      name: 'Devnode Miner #5289 (Active Registration)',
+      url: 'https://devnode.telegraphprotocol.com/api/miners/5289',
       method: 'GET',
       assert: (res, j) => res.status === 200 && j?.miner?.activation_status === 'active'
     },
@@ -31,7 +31,7 @@ async function deepProbe() {
       name: 'App Health (/api/health)',
       url: `${BASE_URL}/api/health`,
       method: 'GET',
-      assert: (res, j) => res.status === 200 && j?.ok === true && (j?.sdnEntriesLoaded || 0) >= 19000 && j?.minerId === 5281
+      assert: (res, j) => res.status === 200 && j?.ok === true && (j?.sdnEntriesLoaded || 0) >= 19000 && j?.minerId === 5289
     },
     {
       name: 'App Status (/api/status)',

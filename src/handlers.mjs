@@ -3308,7 +3308,7 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, 200, {
         ok: true,
         service: 'praman-desk',
-        minerId: 5281,
+        minerId: 5289,
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
@@ -3319,13 +3319,13 @@ export async function handleApiRequest(req, res) {
     // 0b. GET /api/status
     if (pathname === '/api/status' && req.method === 'GET') {
       await loadSdnData();
-      let miner5281 = null;
+      let miner5289 = null;
       try {
-        const mr = await fetch(`${NODE_URL}/api/miners/5281`, { signal: AbortSignal.timeout(3500) });
+        const mr = await fetch(`${NODE_URL}/api/miners/5289`, { signal: AbortSignal.timeout(3500) });
         if (mr.ok) {
           const mj = await mr.json();
-          miner5281 = {
-            registration_id: mj.miner?.registration_id ?? 5281,
+          miner5289 = {
+            registration_id: mj.miner?.registration_id ?? 5289,
             activation_status: mj.miner?.activation_status || 'unknown',
             supported_intents: mj.miner?.supported_intents || [],
             yaml_url: mj.miner?.yaml_url || null
@@ -3339,7 +3339,7 @@ export async function handleApiRequest(req, res) {
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
-        miner5281,
+        miner5289,
         timestamp: new Date().toISOString()
       });
     }
@@ -3740,7 +3740,7 @@ export async function handleApiRequest(req, res) {
           const executionDurationMs = Math.round(performance.now() - tStart) || 32;
 
           const evalResult = evaluateMinerAgreement(intent, primaryObj, {
-            miner_id: refCall?.minerId || 5281,
+            miner_id: refCall?.minerId || 5289,
             miner_name: refCall?.minerName || 'praman-compliance-miner',
             result: minerResponseData,
             field_status: { status: 'verified', provenance: 'deterministic_primary_miner' },
@@ -3758,7 +3758,7 @@ export async function handleApiRequest(req, res) {
             httpStatus: 200,
             request: askPayload,
             primary: primaryObj,
-            minerId: refCall?.minerId || 5281,
+            minerId: refCall?.minerId || 5289,
             minerName: refCall?.minerName || 'praman-compliance-miner (Diamond 0x3624EB...)',
             endpoint: refCall?.endpoint || `/api/miner/${intent.toLowerCase().replace(/_/g, '-')}`,
             durationMs: executionDurationMs,

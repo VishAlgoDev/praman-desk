@@ -3,7 +3,7 @@
 **Autonomous Pre-Payment Spend Guard & Counterparty Clearing Desk for AI Agents, DAOs, and ERPs**
 
 - **Live Hosted Application (No wallet required):** <https://praman-desk.vercel.app>
-- **Active On-Chain Miner (Sepolia Diamond):** ID `#5281` (`praman-compliance-miner`, updated from `#5186`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Tx: [`0x09a30959...`](https://sepolia.etherscan.io/tx/0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39))
+- **Active On-Chain Miner (Sepolia Diamond):** ID `#5289` (`praman-compliance-miner`, updated from `#5281` / `#5186`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Tx: [`0x81b63b78...`](https://sepolia.etherscan.io/tx/0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff))
 - **Track 2 Evaluator Adapter Post-Mortem (#461):** Adapter `#461` (`SANCTIONS_SCREENING_MATCH`) passed Stage 1 bit-exact WASM determinism (`0xbfd4f50b`) via Docker (`Tx: 0xf9d9e1e9...`), but was **rejected on Devnode Stage 2 (`7/15 = 46.7%` vs `70%` floor)** because v3 training used single-template synthetic JSON (`81.33%` in-distribution only). A diversified 5-format v4 dataset (`scripts/build-sanctions-v4-dataset.mjs`) is prepared locally for Colab T4 retraining.
 - **Live Evaluator Portfolio:** 62 cryptographically signed evaluation rows across 8 intents on `devnode.telegraphprotocol.com` (all 62 `eligible`)
 - **Missions Covered:** **Mission 04** (Legal & Cross-Border Entity Diligence) & **Mission 02** (Stablecoin Pre-Payment Treasury Guard on Ethereum Sepolia)
@@ -57,10 +57,10 @@ In 2026, autonomous AI agents (built on Eliza, Coinbase AgentKit, LangChain, or 
 
 ## Telegraph Hackathon Season II Architecture
 
-### 1. Track 1 (Providers): Active Telegraph Miner `#5281` (Updated from `#5186`)
-Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Tx: [`0x09a30959...`](https://sepolia.etherscan.io/tx/0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39)) supporting **7 full-spectrum compliance & procurement intents** backed by MACHINA bond.
-- **Manifest Pinned to Immutable Commit:** [`6430bd6`](https://github.com/VishAlgoDev/praman-desk/blob/6430bd61a0a3987f84297791e8d3e182013662f7/miner.yaml)
-- **Registration Update Tx:** [`0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39`](https://sepolia.etherscan.io/tx/0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39) (Block 12139789)
+### 1. Track 1 (Providers): Active Telegraph Miner `#5289` (Updated from `#5281` / `#5186`)
+Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Tx: [`0x81b63b78...`](https://sepolia.etherscan.io/tx/0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff)) supporting **7 full-spectrum compliance & procurement intents** backed by MACHINA bond.
+- **Manifest Pinned to Immutable Commit:** [`62d2169`](https://github.com/VishAlgoDev/praman-desk/blob/62d2169d5185060494ccfbbb7f87e8a976aa5a3c/miner.yaml)
+- **Registration Update Tx:** [`0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff`](https://sepolia.etherscan.io/tx/0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff) (Block 12142154)
 - **Hosted Endpoints:**
   - `GET /api/miner/vendor-verify`: Queries the Global Legal Entity Identifier Foundation (GLEIF) in real time across 200+ jurisdictions (`VENDOR_VERIFY_GENERAL`).
   - `GET /api/miner/invoice-reconcile`: Performs 3-way mathematical reconciliation (Invoice vs. GRN/Receipt vs. General Ledger) (`INVOICE_LEDGER_RECONCILE_GENERAL`).
@@ -178,7 +178,7 @@ Replace `/path/to/praman-desk` with your local clone path:
 1. **Target Buyer & User Persona:** AI agent operators, DAO treasury controllers, fintech CFOs, and mid-market procurement/AP teams automating cross-border supplier payouts and stablecoin settlements.
 2. **Core Pain Solved:** Prevents autonomous wallets and AP workflows from losing funds to phantom shell vendors, over-billed/unreconciled invoices, forged receipt hashes, FATF Travel Rule gaps, and OFAC SDN exposure (including comma-reversed SDNs that evade naive string matching).
 3. **Business Model & Unit Economics:** Usage-based pay-per-verification via HTTP `x402` USDC micropayments (`$0.01/check` on-chain or hosted API tier + MCP enterprise gateway), plus `$0` open-source CLI/MCP developer funnel to convert teams handling high-value invoice & treasury flows. Compare machine-executed 5-jurisdiction diligence ($0.16 x402 equivalent in ~2–3s) against traditional manual vendor onboarding delays.
-4. **Distribution & Go-To-Market:** Distributed natively across three zero-friction surfaces: (a) Telegraph Protocol Miner `#5281` for decentralized agent discovery, (b) `praman-spend-guard-mcp` stdio server for Claude Code / Cursor / Eliza / AgentKit builders, and (c) zero-wallet web UI + REST API at `https://praman-desk.vercel.app`.
+4. **Distribution & Go-To-Market:** Distributed natively across three zero-friction surfaces: (a) Telegraph Protocol Miner `#5289` for decentralized agent discovery, (b) `praman-spend-guard-mcp` stdio server for Claude Code / Cursor / Eliza / AgentKit builders, and (c) zero-wallet web UI + REST API at `https://praman-desk.vercel.app`.
 5. **Honest Current Limitations & Next Milestones:** (a) Current `x402` settlements and Stablecoin Gate operate on Ethereum Sepolia test USDC; production requires mainnet RPC/USDC treasury policies and ERP webhooks (QuickBooks/NetSuite/Safe module). (b) Track 2 LoRA adapter `#461` was rejected on Devnode (`7/15 = 46.7%`) due to single-template synthetic training data; next milestone is Colab GPU retraining using our multi-format `eval-data/pairs_sanctions_v4.jsonl` dataset (`1,000` pairs) and moving Docker inference onto a persistent named tunnel/VM.
 
 ---

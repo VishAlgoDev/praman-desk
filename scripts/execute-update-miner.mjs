@@ -16,7 +16,8 @@ const { account, address } = loadOrCreateWallet();
 const walletClient = createWalletClient({ account, chain: sepolia, transport: http(RPC) });
 
 const DIAMOND_ADDRESS = '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b';
-const COMMIT_HASH = '6430bd61a0a3987f84297791e8d3e182013662f7';
+const PREVIOUS_REG_ID = 5281n;
+const COMMIT_HASH = '62d2169d5185060494ccfbbb7f87e8a976aa5a3c';
 const PINNED_URL = `https://raw.githubusercontent.com/VishAlgoDev/praman-desk/${COMMIT_HASH}/miner.yaml`;
 
 const diamondAbi = parseAbi([
@@ -44,14 +45,14 @@ async function main() {
   console.log('YAML SHA256 Hash: ' + yamlHash);
 
   // Dry run / simulation first
-  console.log('Simulating updateMiner call with oldRegistrationId: 5186...');
+  console.log(`Simulating updateMiner call with oldRegistrationId: ${PREVIOUS_REG_ID}...`);
   const sim = await client.simulateContract({
     account: address,
     address: DIAMOND_ADDRESS,
     abi: diamondAbi,
     functionName: 'updateMiner',
     args: [
-      5186n,
+      PREVIOUS_REG_ID,
       PINNED_URL,
       yamlHash,
       address,
@@ -68,7 +69,7 @@ async function main() {
     abi: diamondAbi,
     functionName: 'updateMiner',
     args: [
-      5186n,
+      PREVIOUS_REG_ID,
       PINNED_URL,
       yamlHash,
       address,
@@ -107,13 +108,13 @@ async function main() {
 
   const assignedRegId = newRegId || sim.result.toString();
   console.log('\n✅ Successfully Updated Miner On-Chain!');
-  console.log('Previous Registration ID: #5186');
+  console.log(`Previous Registration ID: #${PREVIOUS_REG_ID}`);
   console.log('New Registration ID: #' + assignedRegId);
   console.log('Tx URL: https://sepolia.etherscan.io/tx/' + txHash);
 
   // Save evidence
   const evidence = {
-    previousRegistrationId: '5186',
+    previousRegistrationId: PREVIOUS_REG_ID.toString(),
     registrationId: assignedRegId,
     txHash,
     blockNumber: Number(receipt.blockNumber),
