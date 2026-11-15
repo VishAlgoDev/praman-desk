@@ -36,12 +36,18 @@ const diamondAbi = parseAbi([
   'function entityBonds() external view returns (uint64 adapterUsd, uint64 contributorUsd, uint64 minerBaseUsd, uint64 minerPerIntentUsd)'
 ]);
 
-// Registration Parameters (override via env for immutable pinned versions)
-const INTENT = process.env.WASM_INTENT || 'SANCTIONS_SCREENING_MATCH';
-const WASM_HASH = process.env.WASM_HASH || '0x62db6aa4025553aa7e83e093eb2cb0349f00717abfa0de605e64150345a12ca4';
-const WASM_URL = process.env.WASM_URL || 'https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH.safetensors';
+// Parse CLI args (--hash, --url, --runnable, --intent) with env fallback
+const argVal = (flag) => {
+  const idx = process.argv.indexOf(flag);
+  return idx !== -1 && idx + 1 < process.argv.length ? process.argv[idx + 1] : undefined;
+};
+
+// Registration Parameters (override via CLI flags or env for immutable pinned versions)
+const INTENT = argVal('--intent') || process.env.WASM_INTENT || 'SANCTIONS_SCREENING_MATCH';
+const WASM_HASH = argVal('--hash') || process.env.WASM_HASH || '0x62db6aa4025553aa7e83e093eb2cb0349f00717abfa0de605e64150345a12ca4';
+const WASM_URL = argVal('--url') || process.env.WASM_URL || 'https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH.safetensors';
 const WASM_FEE_ADDRESS = '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466';
-const WASM_RUNNABLE_URL = process.env.WASM_RUNNABLE_URL || 'https://pet-becomes-horses-accordingly.trycloudflare.com';
+const WASM_RUNNABLE_URL = argVal('--runnable') || process.env.WASM_RUNNABLE_URL || 'https://pet-becomes-horses-accordingly.trycloudflare.com';
 const FOUNDATION_HASH = '0a49b325304bb4cf292e683929689d0457966be264f60bfc94d0072b614bf8e6';
 const TOKENIZER_HASH = '67bc76f8b9386efba1a761c1c8e5ad439fd0eaf1c2826e9dd1a205c7af4dc456';
 

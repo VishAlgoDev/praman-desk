@@ -1,15 +1,15 @@
 {
-  "timestamp": "2026-11-15T13:48:38.169Z",
+  "timestamp": "2026-11-15T15:25:03.873Z",
   "event": "registerWasm",
   "intent": "SANCTIONS_SCREENING_MATCH",
-  "wasmHash": "0x62db6aa4025553aa7e83e093eb2cb0349f00717abfa0de605e64150345a12ca4",
-  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH.safetensors",
-  "wasmRunnableUrl": "https://pet-becomes-horses-accordingly.trycloudflare.com",
+  "wasmHash": "0x500dffd21a55f2cba0494eca164b54fb25529e9d8663b3cc3a6e81a65075dfd0",
+  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/f23c4352ee5be063a75dbd10c78b92a26a8550c9/packages/SANCTIONS_SCREENING_MATCH_v3.safetensors",
+  "wasmRunnableUrl": "https://sport-mill-since-link.trycloudflare.com",
   "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
   "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
-  "txHash": "0x29541f9cf0761385219c9b943e26670d00259340927783006ff5b63578533e11",
-  "blockNumber": "12140621",
+  "txHash": "0xf9d9e1e9764b057d9e265f179cd24709bf995e63e35243387dbec826b6a72607",
+  "blockNumber": "12141098",
   "status": "success",
-  "predictedRegistrationId": "460",
-  "etherscanUrl": "https://sepolia.etherscan.io/tx/0x29541f9cf0761385219c9b943e26670d00259340927783006ff5b63578533e11"
+  "predictedRegistrationId": "461",
+  "etherscanUrl": "https://sepolia.etherscan.io/tx/0xf9d9e1e9764b057d9e265f179cd24709bf995e63e35243387dbec826b6a72607"
 }

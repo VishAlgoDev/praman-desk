@@ -23,12 +23,14 @@ async function main() {
     console.log('Leaderboard fetch note:', e.message);
   }
 
-  console.log('\n=== 3. Checking On-Chain Receipt for Adapter #460 ===');
-  try {
-    const receipt = await fetch('https://devnode.telegraphprotocol.com/api/wasm/460').then(r => r.json());
-    console.log('WASM 460 endpoint:', receipt);
-  } catch (e) {
-    console.log('WASM 460 direct endpoint error:', e.message);
+  console.log('\n=== 3. Checking On-Chain Receipts for Adapters #460 & #461 ===');
+  for (const id of [460, 461]) {
+    try {
+      const receipt = await fetch(`https://devnode.telegraphprotocol.com/api/wasm/${id}`).then(r => r.json());
+      console.log(`WASM ${id} endpoint:`, receipt);
+    } catch (e) {
+      console.log(`WASM ${id} direct endpoint error:`, e.message);
+    }
   }
 }
 

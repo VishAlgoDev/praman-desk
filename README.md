@@ -4,7 +4,7 @@
 
 - **Live Hosted Application (No wallet required):** <https://praman-desk.vercel.app>
 - **Active On-Chain Miner (Sepolia Diamond):** ID `#5281` (`praman-compliance-miner`, updated from `#5186`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Tx: [`0x09a30959...`](https://sepolia.etherscan.io/tx/0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39))
-- **Canonical Evaluator Adapter (ModernBERT LoRA):** ID `#460` on `SANCTIONS_SCREENING_MATCH` (81.33% pairwise accuracy, Tx: [`0x29541f9c...`](https://sepolia.etherscan.io/tx/0x29541f9cf0761385219c9b943e26670d00259340927783006ff5b63578533e11))
+- **Evaluator Adapter Challenger (ModernBERT LoRA):** ID `#461` on `SANCTIONS_SCREENING_MATCH` (81.33% held-out pairwise accuracy, Docker runner, Tx: [`0xf9d9e1e9...`](https://sepolia.etherscan.io/tx/0xf9d9e1e9764b057d9e265f179cd24709bf995e63e35243387dbec826b6a72607))
 - **Live Evaluator Portfolio:** 62 cryptographically signed evaluation rows across 8 intents on `devnode.telegraphprotocol.com` (57 `eligible`, 5 newly `admitted`)
 
 ---

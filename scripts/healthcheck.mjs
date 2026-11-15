@@ -4,7 +4,7 @@ async function runHealthCheck() {
   // 1. Adapter Runner (Colab + Cloudflare Tunnel)
   try {
     const t0 = Date.now();
-    const RUNNER_URL = process.env.WASM_RUNNABLE_URL || 'https://pet-becomes-horses-accordingly.trycloudflare.com';
+    const RUNNER_URL = process.env.WASM_RUNNABLE_URL || 'https://sport-mill-since-link.trycloudflare.com';
     const res = await fetch(RUNNER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -13,32 +13,33 @@ async function runHealthCheck() {
     const data = await res.json();
     const elapsed = Date.now() - t0;
     if (res.status === 200 && data.results?.[0]?.score) {
-      console.log('✅ 1. Adapter Runner (Colab): HEALTHY');
+      console.log('✅ 1. Adapter Runner (Docker): HEALTHY');
       console.log('   - Status: HTTP ' + res.status + ' (' + elapsed + 'ms)');
       console.log('   - Test Score: ' + data.results[0].score);
       console.log('   - URL: ' + RUNNER_URL);
     } else {
-      console.log('⚠️ 1. Adapter Runner (Colab): UNEXPECTED RESPONSE', data);
+      console.log('⚠️ 1. Adapter Runner (Docker): UNEXPECTED RESPONSE', data);
     }
   } catch (err) {
-    console.log('❌ 1. Adapter Runner (Colab): OFFLINE / ERROR', err.message);
+    console.log('❌ 1. Adapter Runner (Docker): OFFLINE / ERROR', err.message);
   }
 
-  // 2. Devnode Adapter #460 Status
-  try {
-    const res = await fetch('https://devnode.telegraphprotocol.com/api/wasm/460').then(r => r.json());
-    if (res.error) {
-      console.log('\n⏳ 2. Devnode Adapter #460: PENDING DEVNODE INDEXER (Tx confirmed on-chain in Block 12140621)');
-      console.log('   - Devnode syncer status: ' + res.error);
-    } else {
-      const wasm = res.wasm || res;
-      console.log('\n✅ 2. Devnode Adapter #460: INDEXED');
-      console.log('   - Stage: ' + wasm.stage);
-      console.log('   - Reason: ' + (wasm.eval?.reason || 'OK'));
-      console.log('   - Runnable URL: ' + wasm.wasm_runnable_url);
+  // 2. Devnode Adapter #461 & #460 Status
+  for (const regId of [461, 460]) {
+    try {
+      const res = await fetch(`https://devnode.telegraphprotocol.com/api/wasm/${regId}`).then(r => r.json());
+      if (res.error) {
+        console.log(`\n⏳ 2. Devnode Adapter #${regId}: PENDING DEVNODE INDEXER (${res.error})`);
+      } else {
+        const wasm = res.wasm || res;
+        console.log(`\n✅ 2. Devnode Adapter #${regId}: INDEXED`);
+        console.log('   - Stage: ' + wasm.stage);
+        console.log('   - Reason: ' + (wasm.eval?.reason || wasm.rejection_reason || 'OK'));
+        console.log('   - Runnable URL: ' + wasm.wasm_runnable_url);
+      }
+    } catch (err) {
+      console.log(`\n❌ 2. Devnode Adapter #${regId}: ERROR`, err.message);
     }
-  } catch (err) {
-    console.log('\n❌ 2. Devnode Adapter #460: ERROR', err.message);
   }
 
   // 3. Devnode Miner #5281 Status

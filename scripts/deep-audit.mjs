@@ -3,8 +3,8 @@ async function deepProbe() {
 
   const tests = [
     {
-      name: 'Adapter Runner (Adapterexec)',
-      url: process.env.WASM_RUNNABLE_URL || 'https://pet-becomes-horses-accordingly.trycloudflare.com',
+      name: 'Adapter Runner (Docker Adapterexec)',
+      url: process.env.WASM_RUNNABLE_URL || 'https://sport-mill-since-link.trycloudflare.com',
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ batch: [ { tokens: [101, 102, 103] } ] })
@@ -15,8 +15,8 @@ async function deepProbe() {
       method: 'GET'
     },
     {
-      name: 'Devnode Evaluator #460',
-      url: 'https://devnode.telegraphprotocol.com/api/wasm/460',
+      name: 'Devnode Evaluator #461',
+      url: 'https://devnode.telegraphprotocol.com/api/wasm/461',
       method: 'GET'
     },
     {
