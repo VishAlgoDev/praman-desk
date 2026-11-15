@@ -806,6 +806,73 @@ function parseInlinePoMath(rawText = '') {
   return null;
 }
 
+/**
+ * Evaluates structured purchase order payloads containing `items` JSON/array
+ * and/or summary fields (`subtotal`, `tax`, `shipping`, `grand_total`).
+ */
+function evaluateStructuredPoMath(merged = {}) {
+  let items = null;
+  if (Array.isArray(merged.items)) {
+    items = merged.items;
+  } else if (typeof merged.items === 'string' && merged.items.trim().startsWith('[')) {
+    try {
+      const parsed = JSON.parse(merged.items);
+      if (Array.isArray(parsed)) items = parsed;
+    } catch {}
+  }
+
+  const hasNum = (v) => v !== undefined && v !== null && String(v).trim() !== '' && Number.isFinite(parseNumber(v));
+  const rawSub = merged.subtotal ?? merged.sub_total;
+  const rawTax = merged.tax ?? merged.vat ?? 0;
+  const rawShip = merged.shipping ?? merged.freight ?? 0;
+  const rawGrand = merged.grand_total ?? merged.grandTotal ?? merged.total;
+
+  if (!items?.length && !(hasNum(rawSub) && hasNum(rawGrand))) {
+    return null;
+  }
+
+  let itemsSumCents = null;
+  if (items?.length) {
+    let sum = 0;
+    let validItems = 0;
+    for (const item of items) {
+      if (!item || typeof item !== 'object') continue;
+      const qty = parseNumber(item.quantity ?? item.qty);
+      const unit = parseNumber(item.unit_price ?? item.unitPrice ?? item.price);
+      if (Number.isFinite(qty) && Number.isFinite(unit)) {
+        sum += Math.round(qty * unit * 100);
+        validItems += 1;
+      }
+    }
+    if (validItems > 0) itemsSumCents = sum;
+  }
+
+  const subCents = hasNum(rawSub) ? Math.round(parseNumber(rawSub) * 100) : itemsSumCents;
+  if (subCents === null) return null;
+
+  const taxCents = hasNum(rawTax) ? Math.round(parseNumber(rawTax) * 100) : 0;
+  const shipCents = hasNum(rawShip) ? Math.round(parseNumber(rawShip) * 100) : 0;
+  const baseSubCents = itemsSumCents !== null ? itemsSumCents : subCents;
+  const expectedTotalCents = baseSubCents + taxCents + shipCents;
+  const claimedTotalCents = hasNum(rawGrand) ? Math.round(parseNumber(rawGrand) * 100) : expectedTotalCents;
+
+  const subtotalMismatchCents = itemsSumCents !== null && hasNum(rawSub) ? Math.abs(itemsSumCents - subCents) : 0;
+  const totalMismatchCents = Math.abs(claimedTotalCents - expectedTotalCents);
+  const discrepancy = Math.max(subtotalMismatchCents, totalMismatchCents) / 100;
+  const verified = discrepancy === 0;
+
+  return {
+    verified,
+    status: verified ? 'verified_math' : 'arithmetic_mismatch',
+    computedTotal: expectedTotalCents / 100,
+    claimedTotal: claimedTotalCents / 100,
+    discrepancy,
+    explanation: verified
+      ? `Structured PO arithmetic verified: computed total ${(expectedTotalCents / 100).toFixed(2)}.`
+      : `Structured PO arithmetic mismatch: computed ${(expectedTotalCents / 100).toFixed(2)} vs stated total ${(claimedTotalCents / 100).toFixed(2)} (variance ${discrepancy.toFixed(2)}).`
+  };
+}
+
 export function verifyPurchaseOrderPrimary({
   poNumber = 'PO-2026-7741',
   vendor = 'Enterprise Cloud Infrastructure',
@@ -1359,7 +1426,7 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
       return {
         agreement: 'inconclusive',
         badgeText: 'inconclusive + schema warning',
-        diagnostic: `Miner #${minerRes.miner_id || '5186'} (${minerRes.miner_name || 'praman-miner'}) returned verified: null and status: "unknown" (${rejectedFields.join(', ')}) with warning: ${warnings[0] || 'none'}. Scope: "${scope || 'PO registry'}".`
+        diagnostic: `Miner #${minerRes.miner_id || '5281'} (${minerRes.miner_name || 'praman-miner'}) returned verified: null and status: "unknown" (${rejectedFields.join(', ')}) with warning: ${warnings[0] || 'none'}. Scope: "${scope || 'PO registry'}".`
       };
     }
     const agrees = Boolean(result.verified) === Boolean(primary.verified);
@@ -1367,8 +1434,8 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
       agreement: agrees ? 'confirmed' : 'contradicted',
       badgeText: agrees ? 'confirmed' : 'contradicted',
       diagnostic: agrees
-        ? `Miner #${minerRes.miner_id || '5186'} verified=${result.verified} matches primary check.`
-        : `Miner #${minerRes.miner_id || '5186'} verified=${result.verified} contradicts primary check (${primary.verified}).`
+        ? `Miner #${minerRes.miner_id || '5281'} verified=${result.verified} matches primary check.`
+        : `Miner #${minerRes.miner_id || '5281'} verified=${result.verified} contradicts primary check (${primary.verified}).`
     };
   }
 
@@ -1397,7 +1464,7 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
         agreement: textAgrees ? 'schema_warning' : 'contradicted',
         badgeText: textAgrees ? `math ok (${wasmScore} bp) / schema warning` : 'contradicted',
         wasmScore,
-        diagnostic: `Miner #${minerRes.miner_id || '5186'} (${minerRes.miner_name || 'praman-miner'}) ${textAgrees ? 'correctly identified arithmetic variance (WASM score: ' + wasmScore + '/10000)' : 'failed to identify variance'}, but returned reconciled: null alongside warning: ${warnings[0] || 'none'}.`
+        diagnostic: `Miner #${minerRes.miner_id || '5281'} (${minerRes.miner_name || 'praman-miner'}) ${textAgrees ? 'correctly identified arithmetic variance (WASM score: ' + wasmScore + '/10000)' : 'failed to identify variance'}, but returned reconciled: null alongside warning: ${warnings[0] || 'none'}.`
       };
     }
     const boolAgrees = Boolean(result.reconciled) === Boolean(primary.reconciled);
@@ -1406,7 +1473,7 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
       agreement: agrees ? 'confirmed' : 'contradicted',
       badgeText: agrees ? (wasmScore === 10000 ? 'confirmed (100% wasm match)' : `confirmed (${wasmScore} bp)`) : 'contradicted',
       wasmScore,
-      diagnostic: `Miner #${minerRes.miner_id || '5186'} reconciled=${result.reconciled} (${result.discrepancy}). WASM 128-bit relative tolerance score: ${wasmScore}/10000.`
+      diagnostic: `Miner #${minerRes.miner_id || '5281'} reconciled=${result.reconciled} (${result.discrepancy}). WASM 128-bit relative tolerance score: ${wasmScore}/10000.`
     };
   }
 
@@ -1415,14 +1482,14 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
       return {
         agreement: 'schema_warning',
         badgeText: 'unverified / schema rejected',
-        diagnostic: `Miner #${minerRes.miner_id || '5186'} (${minerRes.miner_name || 'praman-miner'}) returned string verdict instead of boolean valid (field_status: ${rejectedFields.join(', ')}) and did not query GLEIF or VIES registries.`
+        diagnostic: `Miner #${minerRes.miner_id || '5281'} (${minerRes.miner_name || 'praman-miner'}) returned string verdict instead of boolean valid (field_status: ${rejectedFields.join(', ')}) and did not query GLEIF or VIES registries.`
       };
     }
     const boolAgrees = Boolean(result.valid) === Boolean(primary.valid);
     return {
       agreement: boolAgrees ? 'confirmed' : 'contradicted',
       badgeText: boolAgrees ? 'confirmed' : 'contradicted',
-      diagnostic: `Miner #${minerRes.miner_id || '5186'} valid=${result.valid}, registered_name=${result.registered_name || result.vendor}.`
+      diagnostic: `Miner #${minerRes.miner_id || '5281'} valid=${result.valid}, registered_name=${result.registered_name || result.vendor}.`
     };
   }
 
@@ -1431,14 +1498,14 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
       return {
         agreement: 'inconclusive',
         badgeText: 'inconclusive + schema warning',
-        diagnostic: `Miner #${minerRes.miner_id || '5186'} (${minerRes.miner_name || 'praman-miner'}) returned verdict: "Inconclusive" and authentic: null (${rejectedFields.join(', ')}) because it only checks public academic DOIs/URLs rather than cryptographic e-Invoice/SHA-256 digests.`
+        diagnostic: `Miner #${minerRes.miner_id || '5281'} (${minerRes.miner_name || 'praman-miner'}) returned verdict: "Inconclusive" and authentic: null (${rejectedFields.join(', ')}) because it only checks public academic DOIs/URLs rather than cryptographic e-Invoice/SHA-256 digests.`
       };
     }
     const boolAgrees = Boolean(result.authentic) === Boolean(primary.authentic);
     return {
       agreement: boolAgrees ? 'confirmed' : 'contradicted',
       badgeText: boolAgrees ? 'confirmed' : 'contradicted',
-      diagnostic: `Miner #${minerRes.miner_id || '5186'} authentic=${result.authentic} (${result.verdict}).`
+      diagnostic: `Miner #${minerRes.miner_id || '5281'} authentic=${result.authentic} (${result.verdict}).`
     };
   }
 
@@ -1458,8 +1525,8 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
       badgeText: agrees ? (primarySanctioned ? 'confirmed match' : 'confirmed clear') : 'contradicted',
       diagnostic: agrees
         ? (primarySanctioned
-            ? `Both primary OFAC check and Miner #${minerRes.miner_id || '5186'} flagged sanctions matches (${primaryMatchCount} primary vs ${minerMatchCount} miner).`
-            : `Both primary OFAC check and Miner #${minerRes.miner_id || '5186'} confirmed counterparty is clear of US Treasury OFAC sanctions.`)
+            ? `Both primary OFAC check and Miner #${minerRes.miner_id || '5281'} flagged sanctions matches (${primaryMatchCount} primary vs ${minerMatchCount} miner).`
+            : `Both primary OFAC check and Miner #${minerRes.miner_id || '5281'} confirmed counterparty is clear of US Treasury OFAC sanctions.`)
         : `Contradiction: primary source reports ${primarySanctioned ? 'SANCTIONED (' + primaryMatchCount + ' matches)' : 'CLEAR'}, whereas Miner reports ${minerSanctioned ? 'SANCTIONED' : 'CLEAR'}.`
     };
   }
@@ -1474,7 +1541,7 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
       agreement: agrees ? 'confirmed' : 'contradicted',
       badgeText: agrees ? (primaryActive ? 'confirmed registry' : 'confirmed inactive') : 'contradicted',
       diagnostic: agrees
-        ? `Miner #${minerRes.miner_id || '5186'} (${minerRes.miner_name || 'miner'}) verified corporate status (${primaryActive ? 'LEI: ' + (primary.registration_id || primary.results?.[0]?.lei || result.registration_id || result.lei || 'found') + ' / ' + (result.legal_name || primary.legal_name || 'verified') : 'inactive or unregistered'}).`
+        ? `Miner #${minerRes.miner_id || '5281'} (${minerRes.miner_name || 'miner'}) verified corporate status (${primaryActive ? 'LEI: ' + (primary.registration_id || primary.results?.[0]?.lei || result.registration_id || result.lei || 'found') + ' / ' + (result.legal_name || primary.legal_name || 'verified') : 'inactive or unregistered'}).`
         : `Contradiction: primary check active=${primaryActive}, miner returned active=${minerActive}.`
     };
   }
@@ -1488,7 +1555,7 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
       agreement: agrees ? 'confirmed' : 'contradicted',
       badgeText: agrees ? (agrees && primaryCount > 0 ? 'confirmed filings' : 'confirmed clear') : 'contradicted',
       diagnostic: agrees
-        ? `Miner #${minerRes.miner_id || '5186'} (${minerRes.miner_name || 'miner'}) filing monitor agreed with primary SEC/Register sources (${primaryCount} primary vs ${minerCount} miner filings).`
+        ? `Miner #${minerRes.miner_id || '5281'} (${minerRes.miner_name || 'miner'}) filing monitor agreed with primary SEC/Register sources (${primaryCount} primary vs ${minerCount} miner filings).`
         : `Contradiction: primary check found ${primaryCount} filings, miner found ${minerCount}.`
     };
   }
@@ -1496,7 +1563,7 @@ export function evaluateMinerAgreement(intent, primary, minerRes) {
   return {
     agreement: rejectedFields.length ? 'schema_warning' : 'confirmed',
     badgeText: rejectedFields.length ? 'partial schema' : 'confirmed',
-    diagnostic: `Miner #${minerRes.miner_id || '5186'} (${minerRes.miner_name || 'praman-miner'}) field_status: ${JSON.stringify(fieldStatus)}`
+    diagnostic: `Miner #${minerRes.miner_id || '5281'} (${minerRes.miner_name || 'praman-miner'}) field_status: ${JSON.stringify(fieldStatus)}`
   };
 }
 
@@ -2522,7 +2589,7 @@ export async function handleApiRequest(req, res) {
           const executionDurationMs = Math.round(performance.now() - tStart) || 32;
 
           const evalResult = evaluateMinerAgreement(intent, primaryObj, {
-            miner_id: refCall?.minerId || 5186,
+            miner_id: refCall?.minerId || 5281,
             miner_name: refCall?.minerName || 'praman-compliance-miner',
             result: minerResponseData,
             field_status: { status: 'verified', provenance: 'deterministic_primary_miner' },
@@ -2540,7 +2607,7 @@ export async function handleApiRequest(req, res) {
             httpStatus: 200,
             request: askPayload,
             primary: primaryObj,
-            minerId: refCall?.minerId || 5186,
+            minerId: refCall?.minerId || 5281,
             minerName: refCall?.minerName || 'praman-compliance-miner (Diamond 0x3624EB...)',
             endpoint: refCall?.endpoint || `/api/miner/${intent.toLowerCase().replace(/_/g, '-')}`,
             durationMs: executionDurationMs,
@@ -2768,7 +2835,7 @@ export async function handleApiRequest(req, res) {
         }
 
         const rawText = [merged.question, merged.query, merged.prompt, merged.text, merged.description, merged.items, poNumber].filter(Boolean).join(' ');
-        const inlineMath = parseInlinePoMath(rawText);
+        const inlineMath = evaluateStructuredPoMath(merged) || parseInlinePoMath(rawText);
         if (inlineMath) {
           return sendJson(res, 200, {
             po_number: poNumber || 'PO-INLINE',

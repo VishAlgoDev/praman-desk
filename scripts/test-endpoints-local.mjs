@@ -141,6 +141,12 @@ async function run() {
       throw new Error('Expected arithmetic_mismatch for 10 units at $250 = $3100');
     }
 
+    const structuredPoBad = await check('/api/miner/po-verify?po_number=PO-999&items=%5B%7B%22name%22%3A%22Item%22%2C%22quantity%22%3A2%2C%22unit_price%22%3A50%7D%5D&subtotal=100&tax=10&shipping=5&grand_total=999');
+    console.log('Structured PO math bad:', structuredPoBad.json.verified, structuredPoBad.json.status, structuredPoBad.json.discrepancy);
+    if (structuredPoBad.status !== 200 || structuredPoBad.json.verified !== false || structuredPoBad.json.status !== 'arithmetic_mismatch' || structuredPoBad.json.discrepancy !== 884) {
+      throw new Error(`Expected structured PO mismatch discrepancy 884, got ${JSON.stringify(structuredPoBad.json)}`);
+    }
+
     const urlDoc = await check('/api/miner/doc-authenticity?document=https://example.com');
     console.log('Uncorroborated URL doc guard:', urlDoc.json.authentic, urlDoc.json.verdict);
     if (urlDoc.status !== 200 || urlDoc.json.authentic !== false || urlDoc.json.verdict !== 'Inconclusive') {

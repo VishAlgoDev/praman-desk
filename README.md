@@ -5,7 +5,7 @@
 - **Live Hosted Application (No wallet required):** <https://praman-desk.vercel.app>
 - **Active On-Chain Miner (Sepolia Diamond):** ID `#5281` (`praman-compliance-miner`, updated from `#5186`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Tx: [`0x09a30959...`](https://sepolia.etherscan.io/tx/0x09a30959d7cdd99232fe5b7540695af4d9272aed7003bcabed76056678c6dc39))
 - **Evaluator Adapter Challenger (ModernBERT LoRA):** ID `#461` on `SANCTIONS_SCREENING_MATCH` (81.33% held-out pairwise accuracy, Docker runner, Tx: [`0xf9d9e1e9...`](https://sepolia.etherscan.io/tx/0xf9d9e1e9764b057d9e265f179cd24709bf995e63e35243387dbec826b6a72607))
-- **Live Evaluator Portfolio:** 62 cryptographically signed evaluation rows across 8 intents on `devnode.telegraphprotocol.com` (57 `eligible`, 5 newly `admitted`)
+- **Live Evaluator Portfolio:** 62 cryptographically signed evaluation rows across 8 intents on `devnode.telegraphprotocol.com` (all 62 `eligible`)
 
 ---
 
@@ -70,7 +70,7 @@ Registered and bonded on Ethereum Sepolia Diamond [`0x3624EB012B5E998BB57B6bE6C9
   - `GET /api/miner/regulatory-filing`: Live SEC EDGAR EFTS 10-K/10-Q/8-K query indexing and US Federal Register API (`REGULATORY_FILING_MONITOR_GENERAL`).
 
 ### 2. Track 2 (Evaluators): 62 Signed Dataset Rows Across 8 Intents
-All 62 evaluation cases were signed with EIP-191 `personal_sign` from contributor address [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) and admitted with zero rejections on the Telegraph node (57 `eligible` + 5 newly `admitted`):
+All 62 evaluation cases were signed with EIP-191 `personal_sign` from contributor address [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) and admitted with zero rejections on the Telegraph node (all 62 `eligible`):
 - **`DOCUMENT_AUTHENTICITY_GENERAL`** (10 rows, Bounty [#80](https://github.com/telegraphprotocol/bounties/issues/80))
 - **`INVOICE_LEDGER_RECONCILE_GENERAL`** (10 rows, 1st contributor on network, Bounty [#120](https://github.com/telegraphprotocol/bounties/issues/120))
 - **`PURCHASE_ORDER_VERIFY_GENERAL`** (8 rows, 1st contributor on network, Bounty [#122](https://github.com/telegraphprotocol/bounties/issues/122))

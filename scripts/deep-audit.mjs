@@ -75,22 +75,32 @@ async function deepProbe() {
       const res = await fetch(t.url, opts);
       const elapsed = Date.now() - t0;
       const json = await res.json().catch(() => null);
-      const tag = res.status === 200 ? 'PASS' : 'WARN';
-      console.log('[' + tag + '] ' + t.name + ' -> HTTP ' + res.status + ' (' + elapsed + 'ms)');
+      let tag = res.status === 200 ? 'PASS' : 'WARN';
       if (t.name.includes('Edge Case')) {
-        console.log('   Response summary: found=' + json?.found + ', verdict=' + json?.verdict + ', count=' + json?.result_count);
+        const count = json?.results?.length ?? json?.result_count ?? 0;
+        if (json?.found !== false || json?.verdict !== 'not_found') tag = 'WARN';
+        console.log('[' + tag + '] ' + t.name + ' -> HTTP ' + res.status + ' (' + elapsed + 'ms)');
+        console.log('   Response summary: found=' + json?.found + ', verdict=' + json?.verdict + ', count=' + count);
+        continue;
       }
       if (t.name.includes('PO Verify')) {
+        if (json?.verified !== false || json?.status !== 'arithmetic_mismatch' || json?.discrepancy !== 884) tag = 'WARN';
+        console.log('[' + tag + '] ' + t.name + ' -> HTTP ' + res.status + ' (' + elapsed + 'ms)');
         console.log('   PO verified=' + json?.verified + ', status=' + json?.status + ', discrepancy=' + json?.discrepancy);
+        continue;
       }
+      if (t.name.includes('Diligence Pack')) {
+        if (json?.jurisdictions?.length !== 5 || !/^0x[0-9a-f]{64}$/i.test(json?.packSha256 || '')) tag = 'WARN';
+        console.log('[' + tag + '] ' + t.name + ' -> HTTP ' + res.status + ' (' + elapsed + 'ms)');
+        console.log('   Pack jurisdictions=' + (json?.jurisdictions?.length ?? 0) + ', packSha256=' + json?.packSha256?.slice(0, 18) + '..., durationMs=' + json?.durationMs);
+        continue;
+      }
+      console.log('[' + tag + '] ' + t.name + ' -> HTTP ' + res.status + ' (' + elapsed + 'ms)');
       if (t.name.includes('Sanctions Screen (Clean)')) {
         console.log('   Sanctions clean matched=' + json?.matched + ', count=' + json?.match_count);
       }
       if (t.name.includes('Sanctions Screen (SDN)')) {
         console.log('   Sanctions SDN matched=' + json?.matched + ', top match=' + json?.matches?.[0]?.matched_name);
-      }
-      if (t.name.includes('Diligence Pack')) {
-        console.log('   Pack valid=' + json?.valid + ', jurisdictions=' + Object.keys(json?.jurisdictions || {}).length + ', pack_hash=' + json?.pack_hash?.slice(0, 16) + '...');
       }
     } catch (err) {
       console.log('[FAIL] ' + t.name + ' -> ERROR: ' + err.message);
