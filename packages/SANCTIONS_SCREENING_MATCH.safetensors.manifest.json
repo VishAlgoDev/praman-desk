@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "builder": "github.com/telegraphprotocol/telegraph-wasm-baseline/cmd/adapterbuild",
-  "builder_version": "adapterbuild/2",
+  "builder_version": "adapterbuild/2 1ed063e2f006+dirty",
   "intent": "SANCTIONS_SCREENING_MATCH",
   "class": "hybrid",
   "abi": "lora-v1",
@@ -22,17 +22,17 @@
   "delta_bytes": 6761476,
   "package": {
     "file": "SANCTIONS_SCREENING_MATCH.safetensors",
-    "sha256": "4aa759678913f0c455ce16268f328071d858153dd472081bc84772a27ebf6c81",
+    "sha256": "027bf6dd6aead074d3ac384555fbebd329631c8815b90cd6219afac3c142ee71",
     "bytes": 6776916
   },
-  "keccak256": "0x43553a7caa4b58312a7d49d38f00b7e792e5c0158f3a9a259c1669d981b4e374",
+  "keccak256": "0x50b30e260e7137728aaa44ea1fd507e77f8eec8062810bb2c8e58d2cbbb82346",
   "verification": {
     "stage1": true,
     "loaded": true,
-    "score_hex": "0xbfd4f50b",
+    "score_hex": "0x407d022c",
     "repeats": 2,
-    "seconds": "7.236",
+    "seconds": "17.102",
     "input": "default"
   },
-  "built_at": "2026-11-15T07:34:19Z"
+  "built_at": "2026-11-16T02:07:42Z"
 }
