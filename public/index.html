@@ -463,23 +463,6 @@
     </p>
   </section>
 
-  <!-- OFFICIAL 2-MINUTE ARCHITECTURE & VERIFICATION WALKTHROUGH -->
-  <section class="panel" id="showcase-video-panel" style="margin-bottom:18px; padding:16px; background:var(--panel); border:1px solid var(--accent); border-radius:10px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-      <div>
-        <h3 style="margin:0; font-size:15px; font-weight:700; color:var(--accent);">🎬 Official 2-Minute Architecture &amp; Live Verification Walkthrough</h3>
-        <p class="sub" style="margin:2px 0 0; font-size:13px;">Full-spectrum verification: Devnode Miner #5289 (Rank 2 on Invoices, Rank 3 on Filings), Mission 02 OFAC EVM Freeze, Mission 04 Diligence Pack, and 651B pure WASM comparator.</p>
-      </div>
-      <a href="/praman-desk-walkthrough.mp4" download class="secondary" style="display:inline-block; text-decoration:none; padding:5px 12px; font-size:12px; border-radius:6px; border:1px solid var(--line); color:var(--ink);">⬇ Download 1080p MP4</a>
-    </div>
-    <div style="position:relative; width:100%; border-radius:8px; overflow:hidden; background:#070b14; border:1px solid var(--line); aspect-ratio:16/9; max-height:480px;">
-      <video controls preload="metadata" style="width:100%; height:100%; display:block;" poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080' fill='%23070b14'><rect width='1920' height='1080' fill='%23070b14'/><circle cx='960' cy='540' r='60' fill='%2338bdf8' fill-opacity='0.2'/><polygon points='945,510 990,540 945,570' fill='%2338bdf8'/><text x='960' y='650' font-size='32' fill='%23ffffff' font-family='Segoe UI, Arial, sans-serif' font-weight='bold' text-anchor='middle'>Play Praman Desk Architecture Walkthrough (1080p • 2 min)</text></svg>">
-        <source src="/praman-desk-walkthrough.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>
-    </div>
-  </section>
-
   <nav role="tablist" aria-label="Praman Desk sections">
     <button role="tab" aria-selected="true" data-tab="audit">Spend Guard (Mission 04)</button>
     <button role="tab" aria-selected="false" data-tab="compliance">Compliance Suite (Mission 04)</button>
@@ -487,6 +470,7 @@
     <button role="tab" aria-selected="false" data-tab="ledger" id="tab-btn-ledger">On-chain receipt ledger (9)</button>
     <button role="tab" aria-selected="false" data-tab="eval" id="tab-btn-eval">Evaluator pool &amp; bounties (62)</button>
     <button role="tab" aria-selected="false" data-tab="miner">Active Miner #5289 (Sepolia)</button>
+    <button role="tab" aria-selected="false" data-tab="video" id="tab-btn-video" style="color:var(--accent); font-weight:600;">🎬 Walkthrough Video</button>
   </nav>
 
   <!-- TAB 1: SPEND GUARD & COMPLIANCE AUDIT -->
@@ -938,6 +922,25 @@ DBS Group Holdings Ltd | SG |</textarea>
       <div id="m2-output" style="margin-top:14px;" hidden></div>
     </section>
   </div>
+
+  <!-- TAB: OFFICIAL ARCHITECTURE & VERIFICATION WALKTHROUGH -->
+  <div id="tab-video" hidden>
+    <section class="panel" id="showcase-video-panel" style="padding:18px; background:var(--panel); border:1px solid var(--accent); border-radius:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+        <div>
+          <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--accent);">🎬 Official Architecture &amp; Live Verification Walkthrough</h3>
+          <p class="sub" style="margin:2px 0 0; font-size:13px;">Full-spectrum live demonstration: Devnode Miner #5289, Mission 02 OFAC EVM Freeze, Mission 04 Diligence Pack, and 651B pure WASM comparator.</p>
+        </div>
+        <a href="/praman-desk-walkthrough.mp4" download class="secondary" style="display:inline-block; text-decoration:none; padding:6px 14px; font-size:12.5px; border-radius:6px; border:1px solid var(--line); color:var(--ink);">⬇ Download 1080p MP4</a>
+      </div>
+      <div style="position:relative; width:100%; border-radius:8px; overflow:hidden; background:#070b14; border:1px solid var(--line); aspect-ratio:16/9; max-height:540px;">
+        <video controls preload="metadata" style="width:100%; height:100%; display:block;" poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080' fill='%23070b14'><rect width='1920' height='1080' fill='%23070b14'/><circle cx='960' cy='540' r='60' fill='%2338bdf8' fill-opacity='0.2'/><polygon points='945,510 990,540 945,570' fill='%2338bdf8'/><text x='960' y='650' font-size='32' fill='%23ffffff' font-family='Segoe UI, Arial, sans-serif' font-weight='bold' text-anchor='middle'>Play Praman Desk Architecture Walkthrough (1080p • 2 min)</text></svg>">
+          <source src="/praman-desk-walkthrough.mp4" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </section>
+  </div>
 </main>
 
 <script>
@@ -1199,7 +1202,7 @@ function openTab(tabName) {
     const active = btn.dataset.tab === tabName;
     btn.setAttribute("aria-selected", active ? "true" : "false");
   });
-  ["audit", "compliance", "stablecoin", "ledger", "eval", "miner"].forEach(t => {
+  ["audit", "compliance", "stablecoin", "ledger", "eval", "miner", "video"].forEach(t => {
     $(`tab-${t}`).hidden = t !== tabName;
   });
   if (tabName === "ledger") loadLedger();
