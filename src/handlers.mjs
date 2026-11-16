@@ -1151,19 +1151,21 @@ function parseInlinePoMath(rawText = '') {
     };
   }
 
-  // Match subtotal + tax (+ shipping) vs total — always evaluate even if line items also appear!
+  // Match subtotal + tax (+ shipping) (- discount) vs total — always evaluate even if line items also appear!
   const subMatch = text.match(/subtotal\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
   const taxMatch = text.match(/\btax\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
   const shipMatch = text.match(/shipping\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
+  const discountMatch = text.match(/\b(?:discount|rebate)\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
   const totalMatch = text.match(/\b(?:grand_?)?total\s*[:=]?\s*(?:INR|USD|EUR|GBP|\$|€|£)?\s*(\d+(?:,\d{3})*(?:\.\d+)?)/i);
   let summaryResult = null;
   if (subMatch && totalMatch) {
     const subCents = Math.round(parseNumber(subMatch[1]) * 100);
     const taxCents = taxMatch ? Math.round(parseNumber(taxMatch[1]) * 100) : 0;
     const shipCents = shipMatch ? Math.round(parseNumber(shipMatch[1]) * 100) : 0;
+    const discountCents = discountMatch ? Math.round(parseNumber(discountMatch[1]) * 100) : 0;
     const baseSubCents = lineResult ? lineResult.expectedSubCents : subCents;
     const subVsLinesDiff = lineResult ? Math.abs(subCents - lineResult.expectedSubCents) : 0;
-    const expectedCents = baseSubCents + taxCents + shipCents;
+    const expectedCents = baseSubCents + taxCents + shipCents - discountCents;
     const claimedCents = Math.round(parseNumber(totalMatch[1]) * 100);
     const summaryDiffCents = Math.max(subVsLinesDiff, Math.abs(claimedCents - expectedCents));
     const discrepancy = summaryDiffCents / 100;
@@ -1175,7 +1177,7 @@ function parseInlinePoMath(rawText = '') {
       claimedTotal: claimedCents / 100,
       discrepancy,
       explanation: verified
-        ? `PO summary math verified: subtotal + tax + shipping equals ${(expectedCents / 100).toFixed(2)}.`
+        ? `PO summary math verified: subtotal + tax + shipping${discountCents > 0 ? ' - discount' : ''} equals ${(expectedCents / 100).toFixed(2)}.`
         : subVsLinesDiff > 0
           ? `PO line-item sum (${(lineResult.expectedSubCents / 100).toFixed(2)}) contradicts stated subtotal (${(subCents / 100).toFixed(2)}).`
           : `PO summary math mismatch: computed ${(expectedCents / 100).toFixed(2)} vs stated total ${(claimedCents / 100).toFixed(2)} (variance ${discrepancy.toFixed(2)}).`
@@ -1219,6 +1221,7 @@ function evaluateStructuredPoMath(merged = {}) {
   const rawSub = merged.subtotal ?? merged.sub_total;
   const rawTax = merged.tax ?? merged.vat ?? 0;
   const rawShip = merged.shipping ?? merged.freight ?? 0;
+  const rawDiscount = merged.discount ?? merged.discount_amount ?? merged.rebate ?? 0;
   const rawGrand = merged.grand_total ?? merged.grandTotal ?? merged.total;
 
   if (!items?.length && !(hasNum(rawSub) && hasNum(rawGrand))) {
@@ -1246,8 +1249,9 @@ function evaluateStructuredPoMath(merged = {}) {
 
   const taxCents = hasNum(rawTax) ? Math.round(parseNumber(rawTax) * 100) : 0;
   const shipCents = hasNum(rawShip) ? Math.round(parseNumber(rawShip) * 100) : 0;
+  const discountCents = hasNum(rawDiscount) ? Math.round(parseNumber(rawDiscount) * 100) : 0;
   const baseSubCents = itemsSumCents !== null ? itemsSumCents : subCents;
-  const expectedTotalCents = baseSubCents + taxCents + shipCents;
+  const expectedTotalCents = baseSubCents + taxCents + shipCents - discountCents;
   const claimedTotalCents = hasNum(rawGrand) ? Math.round(parseNumber(rawGrand) * 100) : expectedTotalCents;
 
   const subtotalMismatchCents = itemsSumCents !== null && hasNum(rawSub) ? Math.abs(itemsSumCents - subCents) : 0;
@@ -1905,9 +1909,8 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
                 }
                 return { hits: matched.slice(0, 20), total: matched.length, mode: 'issuer_submissions', upstreamStatus: 200 };
               }
-            } else {
-              return { hits: [], total: 0, mode: 'issuer_submissions_error', upstreamStatus: subRes.status, error: `SEC submissions HTTP ${subRes.status}` };
             }
+            // If submissions failed or returned non-200, do not bail out with 0; fall through to EFTS search below!
           }
 
           // 2. Fallback to EFTS full-text search for non-SEC / unrecognized entities
@@ -2041,7 +2044,9 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
     }))
   ].sort((a, b) => String(b.date).localeCompare(String(a.date)));
 
-  const filings = combinedFilings.map(item => item.title);
+  const filingTitles = combinedFilings.map(item => item.title);
+  const filingTypes = combinedFilings.map(item => item.type).filter(Boolean);
+  const filings = [...new Set([...filingTypes, ...filingTitles])];
   const urls = combinedFilings.map(item => item.url);
   const recent = combinedFilings.slice(0, 5).map(item => ({
     title: item.title,
@@ -2054,7 +2059,7 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
     ? frCount
     : parsed.wantsSecOnly
       ? secCount
-      : (frCount > 0 || secCount > 0 ? frCount + secCount : combinedFilings.length);
+      : (secCount > 0 ? secCount : (frCount > 0 ? frCount : combinedFilings.length));
 
   const parts = [];
   if (frCount > 0) parts.push(`${frCount} Federal Register document(s)`);
