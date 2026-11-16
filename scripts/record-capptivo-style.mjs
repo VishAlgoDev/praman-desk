@@ -29,7 +29,8 @@ async function recordCapptivoStyle() {
 
   // Load the dashboard
   console.log('1. Loading dashboard...');
-  await page.goto('https://praman-desk.vercel.app/#audit', { waitUntil: 'networkidle' });
+  await page.goto('https://praman-desk.vercel.app/#audit', { waitUntil: 'domcontentloaded' });
+  await page.waitForSelector('nav[role="tablist"]', { timeout: 15000 });
   await page.waitForTimeout(2000);
 
   // Inject sleek virtual cursor and smooth animation helpers
@@ -188,8 +189,8 @@ async function recordCapptivoStyle() {
 
   // Watch simulation steps progress
   await page.waitForTimeout(4000);
-  await smoothScrollTo('#agent-sim-output', 'center');
-  await glideTo('#agent-sim-output', 0, 40, 6000);
+  await smoothScrollTo('#sim-progress-box', 'center');
+  await glideTo('#sim-progress-box', 0, 40, 6000);
 
   // Linger on final green clearance receipt
   await page.waitForTimeout(6500);
@@ -221,20 +222,21 @@ async function recordCapptivoStyle() {
   await smoothScrollTo('nav[role="tablist"]', 'start');
   await clickAt('button[data-tab="compliance"]', 1500);
 
-  // Click Run Diligence
-  await smoothScrollTo('#btn-run-diligence', 'center');
-  await clickAt('#btn-run-diligence', 3000);
+  // Click Run Diligence Pack
+  await smoothScrollTo('#btn-run-diligence-pack', 'center');
+  await clickAt('#btn-run-diligence-pack', 4000);
 
   // Show 5-jurisdiction table
-  await smoothScrollTo('#diligence-output', 'center');
-  await glideTo('#diligence-output', 0, 30, 6500);
+  await smoothScrollTo('#diligence-pack-output', 'center');
+  await glideTo('#diligence-pack-output', 0, 30, 6000);
 
   // Switch to Spend Guard for Case 4 tamper
   await smoothScrollTo('nav[role="tablist"]', 'start');
   await clickAt('button[data-tab="audit"]', 1200);
-  await smoothScrollTo('button[data-preset="tamper"]', 'center');
-  await clickAt('button[data-preset="tamper"]', 1200);
-  await clickAt('#btn-run-free', 3500);
+  await smoothScrollTo('button[data-preset="tampered"]', 'center');
+  await clickAt('button[data-preset="tampered"]', 1200);
+  await smoothScrollTo('#btn-primary', 'center');
+  await clickAt('#btn-primary', 4000);
 
   // ==========================================
   // SECTION 6: LEDGER, MINER #5289 & CLOSE (119s - 145s)
@@ -244,8 +246,8 @@ async function recordCapptivoStyle() {
   await clickAt('button[data-tab="ledger"]', 1500);
 
   // Show ledger rows
-  await smoothScrollTo('#ledger-body', 'center');
-  await glideTo('#ledger-body', 0, 0, 6000);
+  await smoothScrollTo('#ledger-results', 'center');
+  await glideTo('#ledger-results', 0, 0, 6000);
 
   // Switch to active miner tab
   await smoothScrollTo('nav[role="tablist"]', 'start');
