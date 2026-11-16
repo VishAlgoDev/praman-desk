@@ -700,6 +700,7 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '') {
   extracted = extracted.replace(sourceSuffixRe, '').trim();
 
   const questionPatterns = [
+    /^(?:what|which)\s+(?:[a-z0-9-]+\s+){0,3}?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:were|are|was)?\s*(?:filed|published|made|issued|submitted)?\s*(?:for|by|on|about|regarding)\s+(.+)$/i,
     /^how\s+many\s+(?:[a-z0-9-]+\s+){0,3}?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:did|does|has)\s+(.+?)\s+(?:make|file|submit|have|publish)\b/i,
     /^how\s+many\s+(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:mention|reference|cite|involve|for|about|on)\s+(.+)$/i,
     /^(?:did|does|has)\s+(.+?)\s+(?:file|filed|make|submit|have)\s+(?:any\s+|an?\s+)?(?:10-[kq]|8-k|20-f|6-k|s-1|sec|edgar|regulatory|federal\s+register)\b/i,
