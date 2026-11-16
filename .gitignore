@@ -8,3 +8,7 @@ evidence/extra-x402-calls.json
 
 bounties-ref/
 .backup/
+
+public/recorded*/
+public/test*
+scripts/test*
