@@ -17,7 +17,7 @@ Live across 4 commercial missions:
 ⚖️ M04: Legal Diligence & Bit-Exact 3-Way WASM
 🤖 M11: Autonomous Systems & Spend Delegation
 
-651-byte zero-dependency WASM engine. 50+ on-chain Sepolia settlements.
+651-byte zero-import WASM engine. 57 verified on-chain Sepolia settlements.
 
 🌐 Live App: https://praman-desk.vercel.app
 🎬 Watch 1080p Studio Walkthrough: 👇
@@ -28,11 +28,11 @@ Live across 4 commercial missions:
 ### Tweet 2 / 3 (Technical Deep-Dive: Why Deterministic WebAssembly Matters)
 Why deterministic WebAssembly is essential for AI agent procurement:
 
-Floating-point math causes silent rounding drift in multi-item invoice reconciliation. We compiled a custom 651-byte C engine to WebAssembly with ZERO external imports.
+Floating-point math causes silent rounding drift in multi-item invoice reconciliation. We compiled a custom 651-byte standalone AssemblyScript engine to WebAssembly with ZERO external imports.
 
 It enforces bit-exact 3-way math across Invoice, Purchase Order, and Goods Receipt down to the single cent:
-• SHA-256: `0x9dfe...8114`
-• Keccak-256: `0x4edd...f345`
+• SHA-256: `0x9dfe0926...8114`
+• Keccak-256: `0x4eddfdd3...f345`
 • 1,043 / 1,043 adversarial vectors passing with 100% precision.
 
 🔗 Code & WASM Specs: https://github.com/VishAlgoDev/praman-desk/tree/main/comparator
