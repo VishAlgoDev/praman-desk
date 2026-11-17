@@ -4,41 +4,41 @@
     "name": "intro",
     "text": "Welcome to Praman Desk, an autonomous pre-payment spend guard and clearing desk for AI agents on Telegraph Protocol. When autonomous agents manage real treasury balances, paying an unverified vendor or clearing tampered invoice math can drain funds in seconds. Here is how Praman Desk stops that on Ethereum Sepolia.",
     "file": "public\\audio\\section_1_intro.mp3",
-    "duration": 21.048
+    "duration": 24.072
   },
   {
     "id": 2,
     "name": "gleif",
     "text": "First, instant counterparty verification. Before money moves, Praman Desk queries the official GLEIF registry across over two hundred jurisdictions in real time. Clicking Stripe, LLC validates its active corporate status and returns its official LEI. We can also verify German companies like SAP SE with direct Handelsregister and VIES EU VAT validation.",
     "file": "public\\audio\\section_2_gleif.mp3",
-    "duration": 26.136
+    "duration": 27.528
   },
   {
     "id": 3,
     "name": "pipeline",
     "text": "Next, our one-click autonomous agent spend pipeline. Watch it probe the signer, execute multi-source primary audits, query Telegraph miners over x402 micropayments, and run client-side WebAssembly scoring. The live terminal displays each verification step as it happens, enforcing full settlement clearance before signing.",
     "file": "public\\audio\\section_3_pipeline.mp3",
-    "duration": 22.56
+    "duration": 25.608
   },
   {
     "id": 4,
     "name": "mission02",
     "text": "Here is Mission 02 in action: unapproved exploit detection. When an agent is prompted with an address associated with the Lazarus Group Ronin bridge exploit, Praman Desk scans nineteen thousand OFAC SDN records and EVM addresses, immediately halting the transaction with a REJECT AND FREEZE decision. On transactions over one thousand dollars, the FATF Travel Rule is strictly enforced.",
     "file": "public\\audio\\section_4_mission02.mp3",
-    "duration": 25.584
+    "duration": 28.248
   },
   {
     "id": 5,
     "name": "mission04",
     "text": "For Mission 04, we generate an overnight five-jurisdiction legal diligence pack across the UK, Germany, GLEIF, Federal Register, and SEC EDGAR in three point two seconds. Our six hundred and fifty-one byte standalone WebAssembly comparator performs deterministic three-way reconciliation, catching one-cent variances without floating-point drift.",
     "file": "public\\audio\\section_5_mission04.mp3",
-    "duration": 23.424
+    "duration": 24.84
   },
   {
     "id": 6,
     "name": "miner_closing",
     "text": "All verifications are recorded in our on-chain receipt ledger. And on Devnode Epoch 2107, our Miner 5289 achieved Rank 2 network-wide on invoice reconciliation and Rank 3 on regulatory filings. Developers can install our ten-tool MCP server today with npx at praman slash spend guard mcp. Zero slop, verified on chain.",
     "file": "public\\audio\\section_6_miner_closing.mp3",
-    "duration": 25.728
+    "duration": 28.296
   }
 ]
