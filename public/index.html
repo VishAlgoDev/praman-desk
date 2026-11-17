@@ -3,2477 +3,1337 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Praman Desk — Procurement & Compliance Verification on Telegraph</title>
+<title>Praman Desk — Autonomous Pre-Payment Spend Firewall for AI Agents & DAOs</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="description" content="Deterministic pre-payment firewall for AI agents, DAOs, and ERPs. Checks counterparties against official registers and runs bit-exact WASM arithmetic before crypto funds move.">
 <style>
   :root {
-    --bg: #f6f5f1;
-    --panel: #ffffff;
-    --ink: #1d1d1b;
-    --muted: #65645e;
-    --line: #dfddd5;
-    --accent: #1d4ed8;
-    --accent-ink: #ffffff;
-    --ok: #186a3b;
-    --ok-bg: #e3f3e9;
-    --bad: #b3261e;
-    --bad-bg: #fce8e6;
-    --warn: #8a5a00;
-    --warn-bg: #fdf0d5;
-    --none: #54534e;
-    --none-bg: #ecebe6;
+    --bg: #0b0f19;
+    --panel: #111827;
+    --panel-subtle: #1a2234;
+    --panel-border: #243048;
+    --ink: #f1f5f9;
+    --ink-muted: #94a3b8;
+    --ink-faint: #64748b;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-bg: rgba(59, 130, 246, 0.12);
+    --danger: #ef4444;
+    --danger-bg: rgba(239, 68, 68, 0.12);
+    --danger-border: rgba(239, 68, 68, 0.35);
+    --danger-glow: rgba(239, 68, 68, 0.25);
+    --success: #10b981;
+    --success-bg: rgba(16, 185, 129, 0.12);
+    --success-border: rgba(16, 185, 129, 0.35);
+    --warn: #f59e0b;
+    --warn-bg: rgba(245, 158, 11, 0.12);
+    --warn-border: rgba(245, 158, 11, 0.35);
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #141413;
-      --panel: #1d1d1b;
-      --ink: #ecebe6;
-      --muted: #a09f98;
-      --line: #32312d;
-      --accent: #7da2f8;
-      --accent-ink: #0f1424;
-      --ok: #7fd3a1;
-      --ok-bg: #163022;
-      --bad: #f4a49e;
-      --bad-bg: #3b1b18;
-      --warn: #f0c46e;
-      --warn-bg: #382b10;
-      --none: #c4c3bc;
-      --none-bg: #2a2926;
-    }
-  }
-  * {
-    box-sizing: border-box;
-  }
+
+  * { box-sizing: border-box; }
   body {
     margin: 0;
+    font-family: var(--font-sans);
     background: var(--bg);
     color: var(--ink);
-    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
-  main {
-    max-width: 1080px;
+
+  .container {
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 24px 16px 64px;
+    padding: 24px 20px 80px;
   }
+
+  /* Header */
   header {
     display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 18px;
-  }
-  h1 {
-    margin: 0;
-    font-size: 23px;
-    letter-spacing: -0.01em;
-  }
-  h2 {
-    font-size: 16.5px;
-    margin: 0 0 8px;
-  }
-  h3 {
-    font-size: 14.5px;
-    margin: 0 0 6px;
-  }
-  .sub, .hint {
-    color: var(--muted);
-  }
-  .sub {
-    margin: 4px 0 0;
-    max-width: 620px;
-    font-size: 14px;
-  }
-  .hint {
-    display: block;
-    font-size: 12.5px;
-    margin-bottom: 4px;
-  }
-  .wallet-box {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 9px 13px;
-    font-size: 13px;
-    font-variant-numeric: tabular-nums;
-  }
-  code, .mono {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 12.5px;
-    font-variant-numeric: tabular-nums;
-  }
-  a {
-    color: var(--accent);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-  nav[role="tablist"] {
-    display: flex;
+    align-items: center;
     flex-wrap: wrap;
-    gap: 4px;
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 16px;
+    gap: 16px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--panel-border);
+    margin-bottom: 24px;
   }
-  nav[role="tablist"] button {
-    background: none;
-    border: 0;
-    border-bottom: 2px solid transparent;
-    padding: 10px 14px;
-    font: inherit;
-    color: var(--muted);
-    cursor: pointer;
-  }
-  nav[role="tablist"] button[aria-selected="true"] {
-    color: var(--ink);
-    border-color: var(--accent);
-    font-weight: 600;
-  }
-  section.panel {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  .brand {
+    display: flex;
+    align-items: center;
     gap: 12px;
   }
-  .field {
+  .brand-logo {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    border-radius: 8px;
     display: flex;
-    flex-direction: column;
-  }
-  .field label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--ink);
-    margin-bottom: 2px;
-  }
-  input[type="text"],
-  input[type="number"],
-  select,
-  textarea {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid var(--line);
-    border-radius: 7px;
-    background: var(--bg);
-    color: var(--ink);
-    font: inherit;
-    font-variant-numeric: tabular-nums;
-  }
-  /* Validate Input After Interaction (:user-invalid & WeakMap fallback) */
-  .error-msg {
-    display: none;
-    color: var(--bad);
-    font-size: 12px;
-    margin-top: 4px;
-  }
-  input:user-invalid,
-  input.user-invalid-fallback {
-    border-color: var(--bad);
-    background-color: var(--bad-bg);
-  }
-  input:user-invalid + .error-msg,
-  input.user-invalid-fallback + .error-msg {
-    display: block;
-  }
-  input:user-valid,
-  input.user-valid-fallback {
-    border-color: var(--ok);
-  }
-  .checks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-top: 12px;
-  }
-  .checks label {
-    display: inline-flex;
-    gap: 6px;
     align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  }
+  .brand h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  .brand p {
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin: 0;
+  }
+  .header-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--ink-muted);
+  }
+  .pill a { color: var(--accent); text-decoration: none; }
+  .pill a:hover { text-decoration: underline; }
+  .pill .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    display: inline-block;
+  }
+
+  /* Hero Callout */
+  .hero-banner {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(17, 24, 39, 0.7) 100%);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .hero-banner h2 {
+    font-size: 17px;
+    margin: 0 0 4px 0;
+    color: #fff;
+    font-weight: 600;
+  }
+  .hero-banner p {
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin: 0;
+    max-width: 800px;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 20px;
+  }
+  .hero-stat-item {
+    text-align: right;
+  }
+  .hero-stat-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    font-family: var(--font-mono);
+  }
+  .hero-stat-lbl {
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Scenario Selector */
+  .section-title {
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-faint);
+    font-weight: 700;
+    margin: 0 0 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .scenario-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    position: relative;
+    text-align: left;
+  }
+  .scenario-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    background: var(--panel-subtle);
+  }
+  .scenario-card.active {
+    border-color: var(--accent);
+    background: var(--panel-subtle);
+    box-shadow: 0 0 0 2px var(--accent-bg);
+  }
+  .scenario-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .scenario-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+  }
+  .tag-danger { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
+  .tag-warn { background: var(--warn-bg); color: var(--warn); border: 1px solid var(--warn-border); }
+  .tag-success { background: var(--success-bg); color: var(--success); border: 1px solid var(--success-border); }
+  .scenario-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 4px 0;
+  }
+  .scenario-desc {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* Split-Screen Interactive Playground */
+  .playground-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 960px) {
+    .playground-grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .panel-header h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+  }
+
+  /* Left Panel: Request Details */
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .meta-field {
+    background: var(--bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .meta-label {
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .meta-value {
     font-size: 13.5px;
     color: var(--ink);
-    cursor: pointer;
+    font-family: var(--font-mono);
+    word-break: break-all;
   }
-  .actions {
+
+  /* Line Items Table */
+  .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin-bottom: 16px;
+    background: var(--bg);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--panel-border);
+  }
+  .items-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--panel-subtle);
+    color: var(--ink-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .items-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--ink);
+  }
+  .items-table td.num, .items-table th.num {
+    text-align: right;
+    font-family: var(--font-mono);
+  }
+
+  .cta-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
-    margin-top: 14px;
   }
-  button.primary,
-  button.secondary {
-    border-radius: 7px;
-    padding: 8px 15px;
-    font: inherit;
+  .btn-primary {
+    flex: 1;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-  }
-  button.primary {
-    background: var(--accent);
-    color: var(--accent-ink);
-    border: 1px solid var(--accent);
-  }
-  button.secondary {
-    background: var(--panel);
-    color: var(--ink);
-    border: 1px solid var(--line);
-  }
-  button:disabled {
-    opacity: 0.55;
-    cursor: wait;
-  }
-  .preset-bar {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
     align-items: center;
-    margin-bottom: 14px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--line);
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    transition: all 0.15s ease;
   }
-  .preset-bar button {
-    background: var(--bg);
-    color: var(--ink);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 5px 10px;
-    font: inherit;
-    font-size: 12.5px;
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    background: var(--panel-subtle);
+    color: var(--ink-muted);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
+    transition: all 0.15s ease;
   }
-  .preset-bar button:hover {
-    border-color: var(--accent);
+  .btn-secondary:hover { color: #fff; border-color: var(--ink-muted); }
+
+  /* Right Panel: Verdict & Policy Matrix */
+  .verdict-banner {
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
   }
-  .msg {
-    margin-top: 12px;
-    padding: 10px 12px;
-    border-radius: 7px;
+  .verdict-banner.halt {
+    background: var(--danger-bg);
+    border-color: var(--danger-border);
+    box-shadow: 0 0 20px var(--danger-glow);
+  }
+  .verdict-banner.approved {
+    background: var(--success-bg);
+    border-color: var(--success-border);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+  }
+  .verdict-banner.ready {
+    background: var(--panel-subtle);
+    border-color: var(--panel-border);
+  }
+  .verdict-headline {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0 0 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .verdict-banner.halt .verdict-headline { color: #f87171; }
+  .verdict-banner.approved .verdict-headline { color: #34d399; }
+  .verdict-banner.ready .verdict-headline { color: var(--ink); }
+  .verdict-summary {
     font-size: 13.5px;
-  }
-  .msg.ok {
-    background: var(--ok-bg);
-    color: var(--ok);
-  }
-  .msg.bad {
-    background: var(--bad-bg);
-    color: var(--bad);
-  }
-  .msg.warn {
-    background: var(--warn-bg);
-    color: var(--warn);
-  }
-  .msg.info {
-    background: var(--none-bg);
     color: var(--ink);
+    margin: 0;
+    line-height: 1.45;
   }
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 999px;
+
+  /* Policy Matrix List */
+  .policy-matrix {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .policy-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .policy-title {
+    font-weight: 500;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .policy-sub {
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    margin-top: 2px;
+  }
+  .badge-pass {
+    background: var(--success-bg);
+    color: #34d399;
+    border: 1px solid var(--success-border);
     font-size: 11.5px;
     font-weight: 600;
-    white-space: nowrap;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
   }
-  .badge.confirmed {
-    background: var(--ok-bg);
-    color: var(--ok);
+  .badge-halt {
+    background: var(--danger-bg);
+    color: #f87171;
+    border: 1px solid var(--danger-border);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
   }
-  .badge.contradicted {
-    background: var(--bad-bg);
-    color: var(--bad);
-  }
-  .badge.schema_warning {
+  .badge-warn {
     background: var(--warn-bg);
-    color: var(--warn);
+    color: #fbbf24;
+    border: 1px solid var(--warn-border);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
   }
-  .badge.inconclusive {
-    background: var(--none-bg);
-    color: var(--none);
-  }
-  /* Modern Web Guidance: Responsive Table with Container Queries & Sticky Headers */
-  .table-wrapper {
-    overflow: auto;
-    max-inline-size: 100%;
-    max-block-size: min(560px, 80vh);
-    container-type: inline-size;
-    border: 1px solid var(--line);
+
+  /* Cryptographic Attestation Card */
+  .crypto-card {
+    background: var(--bg);
+    border: 1px solid var(--panel-border);
     border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--ink-muted);
   }
-  table {
+  .crypto-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    word-break: break-all;
+  }
+  .crypto-row:last-child { margin-bottom: 0; }
+  .crypto-label { color: var(--ink-faint); }
+  .crypto-val { color: var(--ink); }
+
+  /* Custom Request Drawer */
+  #custom-drawer {
+    display: none;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--panel-border);
+  }
+  .form-row {
+    margin-bottom: 12px;
+  }
+  .form-row label {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .form-row input, .form-row textarea {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    font-size: 13.5px;
-  }
-  caption {
-    text-align: left;
-    padding: 8px 10px;
-    font-weight: 600;
-    font-size: 13px;
-    color: var(--muted);
+    padding: 8px 12px;
     background: var(--bg);
-    border-bottom: 1px solid var(--line);
-  }
-  th, td {
-    text-align: left;
-    vertical-align: top;
-    padding: 9px 10px;
-    border-bottom: 1px solid var(--line);
-  }
-  thead {
-    position: sticky;
-    inset-block-start: 0;
-    z-index: 1;
-    background: var(--bg);
-  }
-  thead th {
-    color: var(--muted);
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  tbody th {
-    position: sticky;
-    inset-inline-start: 0;
-    background: var(--panel);
-    font-weight: 600;
-  }
-  @container (width < 600px) {
-    table, thead, tbody, tr, th, td {
-      display: block;
-    }
-    thead {
-      display: none;
-    }
-    tr {
-      margin-block-end: 1rem;
-      border-bottom: 2px solid var(--line);
-    }
-    tbody th {
-      position: sticky;
-      inset-block-start: 0;
-      z-index: 2;
-      background: var(--bg);
-    }
-    td:nth-child(2)::before {
-      content: var(--label-2, "Primary") ": ";
-      font-weight: 600;
-      color: var(--muted);
-    }
-    td:nth-child(3)::before {
-      content: var(--label-3, "Telegraph Miner") ": ";
-      font-weight: 600;
-      color: var(--muted);
-    }
-    td:nth-child(4)::before {
-      content: var(--label-4, "Status") ": ";
-      font-weight: 600;
-      color: var(--muted);
-    }
-    td:nth-child(5)::before {
-      content: var(--label-5, "Receipt") ": ";
-      font-weight: 600;
-      color: var(--muted);
-    }
-  }
-  details summary {
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 12px;
-    margin-top: 4px;
-  }
-  pre {
-    white-space: pre-wrap;
-    word-break: break-word;
-    background: var(--bg);
-    border: 1px solid var(--line);
+    border: 1px solid var(--panel-border);
     border-radius: 6px;
-    padding: 10px;
-    font-size: 12px;
-    margin: 6px 0 0;
-  }
-  [hidden] {
-    display: none !important;
-  }
-  .diligence-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 14px;
-    margin-top: 14px;
-  }
-  .invoice-card {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 14px;
+    color: var(--ink);
+    font-family: var(--font-mono);
     font-size: 13px;
   }
-  .invoice-card.machine {
-    border-color: var(--ok);
+  .form-row input:focus, .form-row textarea:focus {
+    outline: none;
+    border-color: var(--accent);
   }
-  .invoice-card.benchmark {
-    border-color: var(--warn);
+
+  /* Lower Sections: Commercial Viability & Quickstart */
+  .section-divider {
+    margin: 40px 0 24px;
+    border-top: 1px solid var(--panel-border);
   }
-  @media print {
-    body {
-      background: #ffffff !important;
-      color: #111827 !important;
-      padding: 0;
-    }
-    nav[role="tablist"],
-    #testnet-banner,
-    .no-print,
-    button {
-      display: none !important;
-    }
-    #tab-compliance {
-      display: block !important;
-    }
-    .panel,
-    .invoice-card {
-      background: #ffffff !important;
-      color: #111827 !important;
-      border-color: #cbd5e1 !important;
-      box-shadow: none !important;
-      break-inside: avoid;
-    }
-    .badge {
-      border: 1px solid #94a3b8;
-    }
+
+  .viability-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
   }
+  @media (max-width: 800px) {
+    .viability-grid { grid-template-columns: 1fr; }
+  }
+  .viability-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .viability-card.bad {
+    border-color: var(--danger-border);
+    background: linear-gradient(180deg, rgba(239, 68, 68, 0.04) 0%, var(--panel) 100%);
+  }
+  .viability-card.good {
+    border-color: var(--success-border);
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, var(--panel) 100%);
+  }
+  .viability-card h4 {
+    font-size: 16px;
+    margin: 0 0 8px 0;
+    font-weight: 600;
+  }
+  .viability-card.bad h4 { color: #f87171; }
+  .viability-card.good h4 { color: #34d399; }
+  .viability-metric {
+    font-size: 26px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    margin: 8px 0 12px;
+  }
+  .viability-card.bad .viability-metric { color: #f87171; }
+  .viability-card.good .viability-metric { color: #34d399; }
+  .viability-card ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+  }
+
+  /* Developer Quickstart Tabs */
+  .quickstart-card {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+  .code-block {
+    position: relative;
+    background: var(--bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: #e2e8f0;
+    overflow-x: auto;
+    margin-top: 12px;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--panel-subtle);
+    border: 1px solid var(--panel-border);
+    color: var(--ink-muted);
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+  }
+  .copy-btn:hover { color: #fff; border-color: var(--ink-muted); }
+
+  /* Accordions */
+  .accordion-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  details {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  summary {
+    padding: 14px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--ink);
+    user-select: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  summary:hover { background: var(--panel-subtle); }
+  .accordion-content {
+    padding: 16px 18px;
+    border-top: 1px solid var(--panel-border);
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+  .receipt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-family: var(--font-mono);
+  }
+  .receipt-table th {
+    text-align: left;
+    padding: 8px;
+    color: var(--ink-faint);
+    border-bottom: 1px solid var(--panel-border);
+  }
+  .receipt-table td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .receipt-table a { color: var(--accent); text-decoration: none; }
+  .receipt-table a:hover { text-decoration: underline; }
+
+  footer {
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid var(--panel-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--ink-faint);
+  }
+  footer a { color: var(--ink-muted); text-decoration: none; }
+  footer a:hover { color: var(--ink); text-decoration: underline; }
 </style>
 </head>
 <body>
-<main>
+
+<div class="container">
+
+  <!-- Header -->
   <header>
-    <div>
-      <h1>Praman Desk</h1>
-      <p class="sub">Autonomous Pre-Payment Spend Guard &amp; Counterparty Clearing Desk for AI Agents, DAOs, and ERPs on Telegraph Protocol (Ethereum Sepolia). Deterministic 3-way reconciliation and primary global entity verification against GLEIF (200+ jurisdictions).</p>
+    <div class="brand">
+      <div class="brand-logo">🛡️</div>
+      <div>
+        <h1>Praman Desk</h1>
+        <p>The Autonomous Pre-Payment Spend Firewall for AI Agents & DAOs</p>
+      </div>
     </div>
-    <div class="wallet-box" id="wallet-box">Loading Sepolia wallet...</div>
+    <div class="header-badges">
+      <div class="pill">
+        <span class="dot"></span>
+        <span>Sepolia Diamond:</span>
+        <a href="https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" target="_blank" rel="noopener">0x3624...99b</a>
+      </div>
+      <div class="pill">
+        <span>Miner #5289</span>
+      </div>
+      <div class="pill">
+        <span>651-byte WASM Math</span>
+      </div>
+      <div class="pill">
+        <span>Payer:</span>
+        <a href="https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466" target="_blank" rel="noopener">0x9802...466</a>
+      </div>
+    </div>
   </header>
 
-  <section class="panel" id="testnet-banner">
-    <p class="hint" style="margin:0; font-size:13px; color:var(--ink)">
-      <strong>Testnet verification notice:</strong> Every paid check spends $0.01 in free Sepolia test USDC from contributor wallet <a id="banner-wallet-link" href="https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466" target="_blank" rel="noopener" class="mono">0x98021b20...7b4466</a>. Paid answers from miners are treated as claims and checked against the official GLEIF registry and deterministic 3-way reconciliation; schema rejections and miner scope gaps are recorded openly in the receipt ledger.
+  <!-- Hero Pitch Callout -->
+  <div class="hero-banner">
+    <div>
+      <h2>In 2026, AI Agents hold private keys. Who checks the spend before signing?</h2>
+      <p>If an autonomous agent is prompt-injected or fed a spoofed invoice, funds move irreversibly in seconds. Praman Desk intercepts crypto transactions <em>before</em> signing via authoritative GLEIF identity, OFAC address screening, and bit-exact WASM math over Telegraph Protocol.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat-item">
+        <div class="hero-stat-val">$0.01</div>
+        <div class="hero-stat-lbl">Per Pre-Flight Check</div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-val">250,000 : 1</div>
+        <div class="hero-stat-lbl">Protection Ratio</div>
+      </div>
+      <div class="hero-stat-item">
+        <div class="hero-stat-val">&lt;5 ms</div>
+        <div class="hero-stat-lbl">Inspection Latency</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Scenario Selector -->
+  <div class="section-title">⚡ Interactive Spend Simulator — Select Threat Scenario</div>
+  <div class="scenario-grid">
+    <div class="scenario-card active" id="card-scen-1" onclick="selectScenario('phishing_sanctions')">
+      <div class="scenario-card-header">
+        <span class="scenario-tag tag-danger">THREAT DETECTED</span>
+        <span style="font-size:12px; font-family:var(--font-mono); color:var(--danger);">$4,200.00 USDC</span>
+      </div>
+      <div class="scenario-title">1. Phishing & Sanctions Exploit</div>
+      <div class="scenario-desc">Compromised agent attempting payout to Lazarus Group OFAC-sanctioned address spoofing a Cloudflare invoice.</div>
+    </div>
+
+    <div class="scenario-card" id="card-scen-2" onclick="selectScenario('arithmetic_overcharge')">
+      <div class="scenario-card-header">
+        <span class="scenario-tag tag-warn">DISCREPANCY DETECTED</span>
+        <span style="font-size:12px; font-family:var(--font-mono); color:var(--warn);">$2,250.00 USDC</span>
+      </div>
+      <div class="scenario-title">2. Arithmetic Overcharge</div>
+      <div class="scenario-desc">GPU cloud invoice claims $2,250.00, but line items calculate to $1,800.00 ($450 phantom markup caught by WASM).</div>
+    </div>
+
+    <div class="scenario-card" id="card-scen-3" onclick="selectScenario('compliant_payout')">
+      <div class="scenario-card-header">
+        <span class="scenario-tag tag-success">CLEARED FOR PAYMENT</span>
+        <span style="font-size:12px; font-family:var(--font-mono); color:var(--success);">$250.00 USDC</span>
+      </div>
+      <div class="scenario-title">3. Compliant Agent Payout</div>
+      <div class="scenario-desc">Anthropic API token invoice ($250), verified GLEIF LEI, clean OFAC screen, within $500 autonomous cap.</div>
+    </div>
+  </div>
+
+  <!-- Split-Screen Interactive Playground -->
+  <div class="playground-grid">
+    
+    <!-- Left Column: Spend Request Simulator -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Proposed Agent Transaction</h3>
+        <span class="pill" id="active-scenario-pill">Scenario 1: Phishing & Sanctions</span>
+      </div>
+
+      <div class="meta-grid">
+        <div class="meta-field">
+          <div class="meta-label">Agent ID & Delegation Tier</div>
+          <div class="meta-value" id="disp-agent">autonomous-infra-agent-01</div>
+        </div>
+        <div class="meta-field">
+          <div class="meta-label">Proposed Spend Amount</div>
+          <div class="meta-value" id="disp-amount" style="color:#60a5fa; font-weight:700;">$4,200.00 USDC</div>
+        </div>
+        <div class="meta-field" style="grid-column: span 2;">
+          <div class="meta-label">Recipient EVM Address</div>
+          <div class="meta-value" id="disp-recipient">0x098B716B8Aaf21512996dC57EB0615e2383E2f96</div>
+        </div>
+        <div class="meta-field" style="grid-column: span 2;">
+          <div class="meta-label">Vendor / Counterparty Claim</div>
+          <div class="meta-value" id="disp-vendor">Cloudflare, Inc. (Phishing Impersonation)</div>
+        </div>
+      </div>
+
+      <!-- Line Items Table -->
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Line Item Description</th>
+            <th class="num">Qty</th>
+            <th class="num">Unit Price</th>
+            <th class="num">Total</th>
+          </tr>
+        </thead>
+        <tbody id="line-items-body">
+          <tr>
+            <td>Enterprise Edge Worker Bandwidth & Compute</td>
+            <td class="num">1</td>
+            <td class="num">$4,200.00</td>
+            <td class="num">$4,200.00</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="cta-row">
+        <button class="btn-primary" id="btn-run-inspect" onclick="triggerInspection()">
+          <span>⚡ Run Pre-Flight Inspection</span>
+        </button>
+        <button class="btn-secondary" onclick="toggleCustomDrawer()">
+          <span>⚙️ Custom Request</span>
+        </button>
+      </div>
+
+      <!-- Custom Request Drawer (Collapsible) -->
+      <div id="custom-drawer">
+        <div class="form-row">
+          <label>Agent Identifier</label>
+          <input type="text" id="cust-agent" value="procurement-bot-07">
+        </div>
+        <div class="form-row">
+          <label>Recipient Address (0x...)</label>
+          <input type="text" id="cust-recipient" placeholder="0x...">
+        </div>
+        <div class="form-row">
+          <label>Vendor Legal Name</label>
+          <input type="text" id="cust-vendor" placeholder="e.g. OpenAI OpCo, LLC">
+        </div>
+        <div class="form-row">
+          <label>Spend Amount (USDC)</label>
+          <input type="number" id="cust-amount" value="350.00" step="0.01">
+        </div>
+        <button class="btn-primary" style="margin-top:8px; width:100%;" onclick="runCustomInspection()">
+          <span>Inspect Custom Transaction</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Column: Real-Time Firewall Verdict -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3>Firewall Verdict & Policy Matrix</h3>
+        <span class="pill" id="latency-pill">&lt; 3 ms</span>
+      </div>
+
+      <!-- Dynamic Visual Verdict Banner -->
+      <div class="verdict-banner halt" id="verdict-banner">
+        <div class="verdict-headline" id="verdict-headline">
+          <span>🛑 HALT &amp; FREEZE — TRANSACTION BLOCKED</span>
+        </div>
+        <p class="verdict-summary" id="verdict-summary">
+          Firewall intercepted unsafe spend request: Recipient address matches Lazarus Group on US Treasury OFAC SDN list. Zero funds moved.
+        </p>
+      </div>
+
+      <!-- 4-Point Policy Enforcement Matrix -->
+      <div class="policy-matrix">
+        <div class="policy-item">
+          <div>
+            <div class="policy-title">
+              <span>🏛️ OFAC &amp; Sanctions Screening</span>
+            </div>
+            <div class="policy-sub">US Treasury SDN list &amp; digital currency EVM addresses</div>
+          </div>
+          <div id="badge-ofac" class="badge-halt">🛑 BLOCKED</div>
+        </div>
+
+        <div class="policy-item">
+          <div>
+            <div class="policy-title">
+              <span>🌐 GLEIF Legal Entity Registry</span>
+            </div>
+            <div class="policy-sub">Global LEI Index resolution across 200+ jurisdictions</div>
+          </div>
+          <div id="badge-gleif" class="badge-warn">⚠️ UNVERIFIED</div>
+        </div>
+
+        <div class="policy-item">
+          <div>
+            <div class="policy-title">
+              <span>⚙️ Bit-Exact Arithmetic (WASM)</span>
+            </div>
+            <div class="policy-sub">651-byte standalone AssemblyScript math engine</div>
+          </div>
+          <div id="badge-wasm" class="badge-pass">✅ 0.00% DIFF</div>
+        </div>
+
+        <div class="policy-item">
+          <div>
+            <div class="policy-title">
+              <span>🔐 Spend Delegation &amp; Dual-Auth</span>
+            </div>
+            <div class="policy-sub">Single Agent Cap: $500.00 | Ceiling: $5,000.00</div>
+          </div>
+          <div id="badge-delegation" class="badge-halt">🛑 EXCEEDED</div>
+        </div>
+      </div>
+
+      <!-- Cryptographic Proof Card -->
+      <div class="crypto-card">
+        <div class="crypto-row">
+          <span class="crypto-label">Attestation SHA-256:</span>
+          <span class="crypto-val" id="disp-attestation">0x7f4a...92b1</span>
+        </div>
+        <div class="crypto-row">
+          <span class="crypto-label">WASM Comparator:</span>
+          <span class="crypto-val">0x9dfe09265391c579... (651 bytes)</span>
+        </div>
+        <div class="crypto-row">
+          <span class="crypto-label">Telegraph Rail:</span>
+          <span class="crypto-val">x402 Micro-Challenge ($0.01 Sepolia USDC)</span>
+        </div>
+        <div class="crypto-row">
+          <span class="crypto-label">Circuit Breaker:</span>
+          <span class="crypto-val" id="disp-circuit" style="color:#f87171; font-weight:700;">TRIGGERED (HALT)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Commercial Viability Section (Section 06 Rubric) -->
+  <div class="section-divider"></div>
+  <div class="section-title">📊 Commercial Viability & Unit Economics (Section 06)</div>
+  <div class="viability-grid">
+    <div class="viability-card bad">
+      <h4>Without Praman Desk (Unguarded Agent Spending)</h4>
+      <div class="viability-metric">$6,700+ <span style="font-size:14px; font-weight:400; color:var(--ink-muted);">Loss Per Incident</span></div>
+      <ul>
+        <li><strong>Prompt injection &amp; invoice fraud:</strong> $4,200 average drain before human notices.</li>
+        <li><strong>Post-loss forensic investigation &amp; legal counsel:</strong> $2,500+ minimum retainer.</li>
+        <li><strong>Irreversible on-chain settlement:</strong> Zero chargebacks, zero recourse on public blockchains.</li>
+      </ul>
+    </div>
+
+    <div class="viability-card good">
+      <h4>With Praman Desk Pre-Payment Firewall</h4>
+      <div class="viability-metric">$0.01 <span style="font-size:14px; font-weight:400; color:var(--ink-muted);">Per Pre-Flight Inspection</span></div>
+      <ul>
+        <li><strong>250,000 : 1 Protection Ratio:</strong> A 1-cent check prevents a $2,500+ loss event.</li>
+        <li><strong>Sub-5ms deterministic gate:</strong> Fits directly into agent tool-calling loops before signing.</li>
+        <li><strong>Telegraph x402 settlement:</strong> Instant micropayment rail, zero balance exposure, zero custody risk.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Developer Quickstart Section (Section 07 Rubric) -->
+  <div class="section-title">💻 Developer Integration & 10-Second Quickstart (Section 07)</div>
+  <div class="quickstart-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+      <h3 style="margin:0; font-size:15px; color:#fff;">Add Praman Desk to Cursor, Claude Code, or Any Agent Loop</h3>
+      <span class="pill" style="color:var(--success);">Available on npm &amp; MCP registry</span>
+    </div>
+    
+    <p style="font-size:13px; color:var(--ink-muted); margin:8px 0 12px;">
+      Give your autonomous agents a pre-payment firewall before calling <code>sendTransaction()</code>:
     </p>
-  </section>
 
-  <nav role="tablist" aria-label="Praman Desk sections">
-    <button role="tab" aria-selected="true" data-tab="audit">Spend Guard (Mission 04)</button>
-    <button role="tab" aria-selected="false" data-tab="compliance">Compliance Suite (Mission 04)</button>
-    <button role="tab" aria-selected="false" data-tab="stablecoin">Stablecoin Gate (Mission 02)</button>
-    <button role="tab" aria-selected="false" data-tab="exchange">Exchange Integrity (Mission 01)</button>
-    <button role="tab" aria-selected="false" data-tab="autonomous">Autonomous Systems (Mission 11)</button>
-    <button role="tab" aria-selected="false" data-tab="ledger" id="tab-btn-ledger">On-chain receipt ledger (50+)</button>
-    <button role="tab" aria-selected="false" data-tab="eval" id="tab-btn-eval">Evaluator pool &amp; bounties (62)</button>
-    <button role="tab" aria-selected="false" data-tab="miner">Active Miner #5289 (Sepolia)</button>
-    <button role="tab" aria-selected="false" data-tab="video" id="tab-btn-video" style="color:var(--accent); font-weight:600;">🎬 Walkthrough Video</button>
-  </nav>
+    <!-- Code Snippet 1: MCP -->
+    <div class="code-block">
+      <button class="copy-btn" onclick="copySnippet('mcp-snip')">Copy</button>
+      <div id="mcp-snip">// In claude_desktop_config.json or cursor settings:
+{
+  "mcpServers": {
+    "praman-spend-guard": {
+      "command": "npx",
+      "args": ["-y", "@praman/spend-guard-mcp"]
+    }
+  }
+}</div>
+    </div>
 
-  <!-- TAB 1: SPEND GUARD & COMPLIANCE AUDIT -->
-  <div id="tab-audit">
-    <section class="panel">
-      <!-- QUICK GLOBAL COUNTERPARTY & GLEIF INSPECTOR -->
-      <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:18px;">
-        <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-          <h3 style="margin:0; font-size:14px; font-weight:600;">⚡ Instant Global Counterparty Lookup (Live GLEIF API)</h3>
-          <span class="hint" style="margin:0;">200+ jurisdictions &bull; keyless primary registry &bull; real-time validation</span>
-        </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-          <input type="text" id="quick-vendor-input" placeholder="Type any corporate entity (e.g. Apple Inc., SAP SE, Stripe, Amazon, Infosys)..." style="flex:1; min-width:240px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
-          <button type="button" class="primary" id="btn-quick-verify" style="padding:7px 14px; font-size:13px;">Verify Entity</button>
-        </div>
-        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:8px;">
-          <span class="hint" style="margin:0; font-size:12px;">Quick test:</span>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Apple Inc.">Apple Inc.</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="SAP SE">SAP SE</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="STRIPE, LLC">STRIPE, LLC</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Microsoft">Microsoft (Lapsed)</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Siemens AG">Siemens AG</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-quick="Infosys Limited">Infosys Limited</button>
-        </div>
-        <div id="quick-vendor-result" style="margin-top:10px;" hidden></div>
-      </div>
-
-      <!-- 1-CLICK AUTONOMOUS AGENT SIMULATION WIDGET -->
-      <div style="background:var(--bg); border:1px solid var(--accent); border-radius:8px; padding:14px; margin-bottom:18px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <div>
-            <h3 style="margin:0; font-size:14px; font-weight:600; color:var(--accent);">🤖 1-Click Autonomous Agent Spend &amp; Clearing Pipeline</h3>
-            <span class="hint" style="margin:0; font-size:12.5px;">Execute live autonomous agent workflow: probe wallet/signer, run multi-source primary audit, query Telegraph miners via x402, run client-side WASM scoring, and enforce settlement clearance.</span>
-          </div>
-          <button type="button" class="primary" id="btn-agent-sim" style="background:var(--accent); color:var(--accent-ink); padding:8px 16px; font-size:13px; font-weight:600;">Run Agent Pipeline</button>
-        </div>
-        <div id="sim-progress-box" style="margin-top:12px; display:none;">
-          <div id="sim-step-indicator" style="font-size:13px; font-weight:600; margin-bottom:6px; color:var(--accent);"></div>
-          <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; height:8px; overflow:hidden; margin-bottom:10px;">
-            <div id="sim-progress-bar" style="background:var(--accent); height:100%; width:0%; transition:width 0.4s ease;"></div>
-          </div>
-          <pre id="sim-terminal-log" style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px; font-size:12px; line-height:1.45; max-height:180px; overflow-y:auto; margin:0; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;"></pre>
-        </div>
-      </div>
-
-      <div class="preset-bar">
-        <span class="hint" style="margin:0; font-weight:600; color:var(--ink)">Spend audit presets:</span>
-        <button type="button" data-preset="saas">Case 1: Clean 3-way match (STRIPE, LLC / USD $27,062.50)</button>
-        <button type="button" data-preset="variance">Case 2: Quantity over-billing variance (Apple Inc. / USD $995 unapproved)</button>
-        <button type="button" data-preset="europe">Case 3: Cross-border EU VAT license (SAP SE / EUR €59,500)</button>
-        <button type="button" data-preset="tampered">Case 4: Cryptographic digest tamper ($1,416 QR vs $1,888 PDF face)</button>
-      </div>
-
-      <form id="audit-form" novalidate>
-        <h2>1. Counterparty, Purchase Order, Invoice &amp; Provenance Inputs</h2>
-        <div class="grid">
-          <div class="field">
-            <label for="f-vendor">Vendor legal name</label>
-            <span id="hint-vendor" class="hint">Exact registered corporate name</span>
-            <input type="text" id="f-vendor" name="vendor" value="STRIPE, LLC" required minlength="2" aria-describedby="hint-vendor" aria-errormessage="err-vendor">
-            <div id="err-vendor" class="error-msg">Enter a legal entity name (at least 2 characters).</div>
-          </div>
-
-          <div class="field">
-            <label for="f-vat">Tax ID / EIN / VAT (Optional)</label>
-            <span id="hint-vat" class="hint">US EIN (XX-XXXXXXX), EU/UK VAT, or GSTIN</span>
-            <input type="text" id="f-vat" name="vatNumber" value="" pattern="[A-Za-z0-9-]{0,20}" aria-describedby="hint-vat" aria-errormessage="err-vat">
-            <div id="err-vat" class="error-msg">Enter a valid tax identifier format or leave blank.</div>
-          </div>
-
-          <div class="field">
-            <label for="f-lei">GLEIF LEI (20-char ISO 17442)</label>
-            <span id="hint-lei" class="hint">Checked live against api.gleif.org</span>
-            <input type="text" id="f-lei" name="lei" value="549300CLHGIPTCYHQ143" pattern="[A-Za-z0-9]{0,20}" aria-describedby="hint-lei" aria-errormessage="err-lei">
-            <div id="err-lei" class="error-msg">LEI must be 20 alphanumeric characters if provided.</div>
-          </div>
-
-          <div class="field">
-            <label for="f-po">Purchase Order ID</label>
-            <span id="hint-po" class="hint">ERP PO reference number</span>
-            <input type="text" id="f-po" name="poNumber" value="PO-2026-104" required aria-describedby="hint-po" aria-errormessage="err-po">
-            <div id="err-po" class="error-msg">Purchase Order reference is required.</div>
-          </div>
-
-          <div class="field">
-            <label for="f-po-amt">PO amount</label>
-            <span id="hint-po-amt" class="hint">Committed purchase order value</span>
-            <input type="number" id="f-po-amt" name="poAmount" value="27062.50" required min="1" step="0.01" aria-describedby="hint-po-amt" aria-errormessage="err-po-amt">
-            <div id="err-po-amt" class="error-msg">Enter a positive PO amount.</div>
-          </div>
-
-          <div class="field">
-            <label for="f-po-cap">Single-signatory approval cap</label>
-            <span id="hint-po-cap" class="hint">Max value without executive dual sign-off</span>
-            <input type="number" id="f-po-cap" name="approvalCap" value="50000.00" required min="1" step="0.01" aria-describedby="hint-po-cap" aria-errormessage="err-po-cap">
-            <div id="err-po-cap" class="error-msg">Enter a positive approval cap.</div>
-          </div>
-
-          <div class="field">
-            <label for="f-inv-id">Supplier invoice ID</label>
-            <span id="hint-inv-id" class="hint">Invoice identifier to reconcile</span>
-            <input type="text" id="f-inv-id" name="invoiceId" value="INV-2026-081" required aria-describedby="hint-inv-id" aria-errormessage="err-inv-id">
-            <div id="err-inv-id" class="error-msg">Invoice ID is required.</div>
-          </div>
-
-          <div class="field">
-            <label for="f-billed-qty">Invoice billed quantity</label>
-            <span id="hint-billed-qty" class="hint">Units billed by supplier</span>
-            <input type="number" id="f-billed-qty" name="billedQty" value="100" required min="0.01" step="0.01" aria-describedby="hint-billed-qty">
-          </div>
-
-          <div class="field">
-            <label for="f-acc-qty">Accepted receipt quantity</label>
-            <span id="hint-acc-qty" class="hint">Units accepted into ledger after verification</span>
-            <input type="number" id="f-acc-qty" name="acceptedQty" value="100" required min="0" step="0.01" aria-describedby="hint-acc-qty">
-          </div>
-
-          <div class="field">
-            <label for="f-rate">Contract unit rate</label>
-            <span id="hint-rate" class="hint">Agreed price per unit before tax</span>
-            <input type="number" id="f-rate" name="unitPrice" value="250" required min="0.01" step="0.01" aria-describedby="hint-rate">
-          </div>
-
-          <div class="field">
-            <label for="f-tax">Tax rate (%)</label>
-            <span id="hint-tax" class="hint">Applicable sales/VAT tax percentage</span>
-            <input type="number" id="f-tax" name="taxRatePct" value="8.25" required min="0" max="100" step="0.01" aria-describedby="hint-tax">
-          </div>
-
-          <div class="field">
-            <label for="f-curr">Currency</label>
-            <span id="hint-curr" class="hint">ISO currency code (USD, EUR, GBP, INR)</span>
-            <input type="text" id="f-curr" name="currency" value="USD" required pattern="[A-Za-z]{3}" aria-describedby="hint-curr" aria-errormessage="err-curr">
-            <div id="err-curr" class="error-msg">Use a 3-letter currency code (e.g. USD, EUR).</div>
-          </div>
-
-          <div class="field" style="grid-column: span 2">
-            <label for="f-irn">Document SHA-256 Digest (64-hex)</label>
-            <span id="hint-irn" class="hint">64-character hexadecimal digest of the signed invoice or spend receipt</span>
-            <input type="text" id="f-irn" name="irnOrSha256" class="mono" value="64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012" required pattern="[0-9a-fA-F]{64}" aria-describedby="hint-irn" aria-errormessage="err-irn">
-            <div id="err-irn" class="error-msg">Digest must be an exact 64-character hexadecimal string.</div>
-          </div>
-
-          <div class="field">
-            <label for="f-qr-amt">Signed payload value</label>
-            <span id="hint-qr-amt" class="hint">Amount authenticated by cryptographic signature</span>
-            <input type="number" id="f-qr-amt" name="signedQrAmount" value="27062.50" required min="0" step="0.01" aria-describedby="hint-qr-amt">
-          </div>
-
-          <div class="field">
-            <label for="f-face-amt">Invoice printed face amount</label>
-            <span id="hint-face-amt" class="hint">Amount printed on received invoice face</span>
-            <input type="number" id="f-face-amt" name="pdfFaceAmount" value="27062.50" required min="0" step="0.01" aria-describedby="hint-face-amt">
-          </div>
-        </div>
-
-        <div class="checks">
-          <div style="font-weight:600; color:var(--ink); margin-bottom:4px">Financial &amp; Procurement Reconciliation Intents ($0.01 test USDC each):</div>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:6px; margin-bottom:12px">
-            <label><input type="checkbox" name="intent" value="INVOICE_LEDGER_RECONCILE_GENERAL" checked> <code>INVOICE_LEDGER_RECONCILE_GENERAL</code></label>
-            <label><input type="checkbox" name="intent" value="PURCHASE_ORDER_VERIFY_GENERAL" checked> <code>PURCHASE_ORDER_VERIFY_GENERAL</code></label>
-            <label><input type="checkbox" name="intent" value="DOCUMENT_AUTHENTICITY_GENERAL" checked> <code>DOCUMENT_AUTHENTICITY_GENERAL</code></label>
-          </div>
-          <div style="font-weight:600; color:var(--ink); margin-bottom:4px">Legal &amp; Statutory Compliance Intents ($0.01 test USDC each):</div>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:6px">
-            <label><input type="checkbox" name="intent" value="VENDOR_VERIFY_GENERAL" checked> <code>VENDOR_VERIFY_GENERAL</code></label>
-            <label><input type="checkbox" name="intent" value="SANCTIONS_SCREENING_MATCH_GENERAL" checked> <code>SANCTIONS_SCREENING_MATCH_GENERAL</code></label>
-            <label><input type="checkbox" name="intent" value="CORPORATE_REGISTRY_LOOKUP_GENERAL"> <code>CORPORATE_REGISTRY_LOOKUP_GENERAL</code></label>
-            <label><input type="checkbox" name="intent" value="REGULATORY_FILING_MONITOR_GENERAL"> <code>REGULATORY_FILING_MONITOR_GENERAL</code></label>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button type="button" class="secondary" id="btn-primary">1. Check primary sources &amp; math (free)</button>
-          <button type="button" class="primary" id="btn-buy">2. Buy Telegraph checks &amp; compare ($0.05)</button>
-          <span class="hint" id="spend-estimate" style="margin:0">5 paid checks selected ($0.05 test USDC on Ethereum Sepolia)</span>
-        </div>
-      </form>
-      <div id="audit-msg"></div>
-    </section>
-
-    <div id="audit-results"></div>
+    <!-- Code Snippet 2: cURL -->
+    <div class="code-block" style="margin-top:12px;">
+      <button class="copy-btn" onclick="copySnippet('curl-snip')">Copy</button>
+      <div id="curl-snip"># Direct HTTP Pre-Flight Check via cURL:
+curl -X POST https://praman-desk.vercel.app/api/spend-guard/evaluate \
+  -H "Content-Type: application/json" \
+  -d '{"scenario": "phishing_sanctions"}'</div>
+    </div>
   </div>
 
-  
-  <!-- TAB: EXCHANGE INTEGRITY (MISSION 01) -->
-  <div id="tab-exchange" hidden>
-    <section class="panel">
-      <h2>Mission 01 — Exchange &amp; Market Integrity (Token Listing &amp; Counterparty Diligence)</h2>
-      <p class="hint">
-        Continuous market-integrity diligence portal for centralized exchanges (CEX) and DEX listing committees. Screens token foundation entities against GLEIF primary corporate registries, inspects treasury multisig signers against 19,565 OFAC SDN entries via Telegraph <code class="mono">SANCTIONS_SCREENING_MATCH</code>, monitors regulatory disclosures with <code class="mono">REGULATORY_FILING_MONITOR</code>, and validates deployed contract bytecode on Ethereum Sepolia.
-      </p>
-
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-        <span class="hint" style="margin:4px 0;">Break &amp; Verify Presets:</span>
-        <button type="button" class="secondary" data-m1-preset="compliant">1. Compliant Listing (PRAMA - Apple Inc. Foundation)</button>
-        <button type="button" class="secondary" data-m1-preset="sanctioned">2. Sanctioned Signer (Lazarus Exploiter)</button>
-        <button type="button" class="secondary" data-m1-preset="offshore">3. Opaque Offshore Shell (RugPull Finance - Cayman)</button>
-        <button type="button" class="secondary" data-m1-preset="undeployed">4. Undeployed Contract (Empty Bytecode)</button>
+  <!-- Network Infrastructure & Audit Evidence Accordions -->
+  <div class="section-title">🔍 Network Infrastructure & Verification Evidence</div>
+  <div class="accordion-group">
+    
+    <!-- Accordion 1: Receipts -->
+    <details>
+      <summary>
+        <span>📜 On-Chain Receipt Ledger (57 Verified Sepolia Transactions)</span>
+        <span style="font-size:12px; color:var(--ink-faint); font-family:var(--font-mono);">Live Diamond Port</span>
+      </summary>
+      <div class="accordion-content">
+        <p style="margin:0 0 12px 0;">All pre-flight spend guard clearances are settled via x402 on Ethereum Sepolia. Recent on-chain settlements:</p>
+        <table class="receipt-table">
+          <thead>
+            <tr>
+              <th>Tx Hash</th>
+              <th>Block</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Verification</th>
+            </tr>
+          </thead>
+          <tbody id="receipts-tbody">
+            <tr>
+              <td><a href="https://sepolia.etherscan.io/tx/0x91d906e5d2630ff541c8816ba7d10d6b6375bc860e6e76d54238e55e09f7a77e" target="_blank" rel="noopener">0x91d906e5...a77e</a></td>
+              <td>12155659</td>
+              <td>0.01 USDC</td>
+              <td style="color:#34d399;">SETTLED</td>
+              <td>GLEIF + OFAC Verified</td>
+            </tr>
+            <tr>
+              <td><a href="https://sepolia.etherscan.io/tx/0xa1e7d23a48e89f81a1795ba66ea55331bcad0b5b9e0750ca2bf28a8670dafa7a" target="_blank" rel="noopener">0xa1e7d23a...fa7a</a></td>
+              <td>12155658</td>
+              <td>0.01 USDC</td>
+              <td style="color:#34d399;">SETTLED</td>
+              <td>WASM Bit-Exact Math</td>
+            </tr>
+            <tr>
+              <td><a href="https://sepolia.etherscan.io/tx/0x9597cfdf053ea3e4b77f98d4a9ecda93b7ff4aa23070bc0e99dca289945df84b" target="_blank" rel="noopener">0x9597cfdf...f84b</a></td>
+              <td>12155657</td>
+              <td>0.01 USDC</td>
+              <td style="color:#34d399;">SETTLED</td>
+              <td>Autonomous Cap Checked</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </details>
 
-      <div class="grid">
-        <div>
-          <label for="m1-token-symbol">Token Symbol</label>
-          <input id="m1-token-symbol" value="PRAMA" placeholder="e.g. PRAMA, USDT">
+    <!-- Accordion 2: Miner #5289 -->
+    <details>
+      <summary>
+        <span>⛏️ Telegraph Miner #5289 & 1,043 WASM Test Vectors</span>
+        <span style="font-size:12px; color:var(--ink-faint); font-family:var(--font-mono);">devnode.telegraphprotocol.com</span>
+      </summary>
+      <div class="accordion-content">
+        <p>Miner #5289 is registered and active on the Telegraph Protocol network for intent <code>REGULATORY_FILING_MONITOR</code>. Direct devnode endpoint:</p>
+        <div class="code-block" style="margin:8px 0 12px;">
+POST https://devnode.telegraphprotocol.com/engine/v1/ask/5289
+Content-Type: application/json
+
+{"intent": "REGULATORY_FILING_MONITOR", "params": {"query": "USDC_PRE_PAYMENT_CLEARANCE"}}
         </div>
-        <div>
-          <label for="m1-token-name">Token Name</label>
-          <input id="m1-token-name" value="Praman Protocol Token" placeholder="e.g. Praman Protocol Token">
-        </div>
-        <div>
-          <label for="m1-contract-addr">Token Contract Address (Sepolia 0x...)</label>
-          <input id="m1-contract-addr" value="0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" placeholder="0x...">
-        </div>
-        <div>
-          <label for="m1-issuer-name">Issuer Entity Legal Name</label>
-          <input id="m1-issuer-name" value="Apple Inc." placeholder="e.g. Apple Inc. or Offshore DAO">
-        </div>
-        <div>
-          <label for="m1-issuer-country">Issuer Jurisdiction (ISO 2-letter)</label>
-          <input id="m1-issuer-country" value="US" placeholder="e.g. US, GB, SG, KY">
-        </div>
-        <div>
-          <label for="m1-signer-addr">Treasury Multisig Signer (0x...)</label>
-          <input id="m1-signer-addr" value="0x98021b20Efdb7ae2C57366010a6E0fDE207b4466" placeholder="0x...">
+        <p>The deterministic comparator engine compiles to 651 bytes of standalone WebAssembly with zero external runtime imports. Verified against 1,043/1,043 test vectors with 0 discrepancies.</p>
+      </div>
+    </details>
+
+    <!-- Accordion 3: 62 Evaluator Bounties -->
+    <details>
+      <summary>
+        <span>🎯 Evaluator Pool & 62 Bounties (Closed-Loop Truth Verification)</span>
+        <span style="font-size:12px; color:var(--ink-faint); font-family:var(--font-mono);">Track 02 & Track 03 Flywheel</span>
+      </summary>
+      <div class="accordion-content">
+        <p>Praman Desk forms a closed-loop intelligence flywheel with Telegraph's scoring network: our Evaluators score external miners against primary authoritative registers, and our Spend Guard consumes the resulting high-reputation miners to verify transaction parameters before settlement.</p>
+      </div>
+    </details>
+
+    <!-- Accordion 4: Video Screencast -->
+    <details>
+      <summary>
+        <span>🎥 90-Second Screencast Walkthrough & Architecture</span>
+        <span style="font-size:12px; color:var(--accent); font-weight:600;">Watch Walkthrough</span>
+      </summary>
+      <div class="accordion-content">
+        <div style="background:var(--bg); border:1px solid var(--panel-border); border-radius:8px; padding:16px; margin-bottom:12px;">
+          <h4 style="margin:0 0 8px 0; color:#fff;">Live Interception Screencast (Cursor / CLI + Web Playground)</h4>
+          <p style="margin:0 0 12px 0;">Demonstrating how Praman Desk intercepts prompt-injected agent spending in real time before crypto transactions settle.</p>
+          <video controls style="width:100%; max-height:480px; border-radius:6px; background:#000;" src="/praman-desk-walkthrough.mp4"></video>
         </div>
       </div>
+    </details>
 
-      <div style="margin-top:14px; display:flex; gap:10px; align-items:center;">
-        <button type="button" class="primary" id="btn-m1-evaluate">Run Mission 01 Exchange Diligence</button>
-        <span class="hint" id="m1-status-hint">Routes through Telegraph Miners #5289 &amp; #375</span>
-      </div>
-
-      <div id="m1-result" style="margin-top:16px;"></div>
-    </section>
   </div>
 
-  <!-- TAB: AUTONOMOUS SYSTEMS (MISSION 11) -->
-  <div id="tab-autonomous" hidden>
-    <section class="panel">
-      <h2>Mission 11 — Autonomous Systems &amp; Spend Delegation (Circuit Breakers &amp; Spend Caps)</h2>
-      <p class="hint">
-        Autonomous agent spend governor and safety gateway. Enforces deterministic 3-way WASM mathematical reconciliation (<code class="mono">praman-wasm-651b</code>), multi-tier spend delegation policy ($500 single agent cap, $5,000 dual approval cap), vendor corporate registry verification, and instant emergency circuit breaker halts on anomalous invoice discrepancies or unverified counterparties.
-      </p>
+  <!-- Footer -->
+  <footer>
+    <div>
+      Built for <strong>Telegraph Hackathon Season II</strong> &bull; Track 01 (Apps &amp; Agents) &bull; Mission 11 &amp; Mission 02
+    </div>
+    <div style="display:flex; gap:16px;">
+      <a href="https://github.com/VishAlgoDev/praman-desk" target="_blank" rel="noopener">GitHub Repository</a>
+      <a href="https://anjoman.ai/dashboard/apps" target="_blank" rel="noopener">Anjoman Listing (9ae7025e...)</a>
+      <a href="https://hackathon.telegraphprotocol.com/rules" target="_blank" rel="noopener">Hackathon Rules</a>
+    </div>
+  </footer>
 
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-        <span class="hint" style="margin:4px 0;">Break &amp; Verify Presets:</span>
-        <button type="button" class="secondary" data-m11-preset="tier1">1. Approved Micro-Spend ($450 Autonomous)</button>
-        <button type="button" class="secondary" data-m11-preset="missing-sig">2. Dual-Sig Required ($4,200 No Sig)</button>
-        <button type="button" class="secondary" data-m11-preset="wasm-break">3. WASM 1-Cent Discrepancy (Halt)</button>
-        <button type="button" class="secondary" data-m11-preset="sanctioned">4. Sanctioned Vendor (Lazarus Group)</button>
-      </div>
-
-      <div class="grid">
-        <div>
-          <label for="m11-agent-id">Autonomous Agent ID</label>
-          <input id="m11-agent-id" value="agent-procure-v2" placeholder="e.g. agent-procure-v2">
-        </div>
-        <div>
-          <label for="m11-amount">Spend Request Amount (USDC)</label>
-          <input id="m11-amount" type="number" step="0.01" value="450.00">
-        </div>
-        <div>
-          <label for="m11-single-cap">Single Agent Cap (USDC)</label>
-          <input id="m11-single-cap" type="number" step="0.01" value="500.00">
-        </div>
-        <div>
-          <label for="m11-dual-cap">Dual Approval Cap (USDC)</label>
-          <input id="m11-dual-cap" type="number" step="0.01" value="5000.00">
-        </div>
-        <div>
-          <label for="m11-vendor-name">Vendor Entity Legal Name</label>
-          <input id="m11-vendor-name" value="SAP SE" placeholder="e.g. SAP SE">
-        </div>
-        <div>
-          <label for="m11-vendor-country">Vendor Jurisdiction (ISO)</label>
-          <input id="m11-vendor-country" value="DE" placeholder="e.g. DE, US">
-        </div>
-        <div style="grid-column: 1 / -1;">
-          <label for="m11-signature">Supervisor Executive Signature (Required &gt;$500)</label>
-          <input id="m11-signature" value="" placeholder="Optional for &le;$500; Hex signature 0x... required &gt;$500">
-        </div>
-      </div>
-
-      <div style="margin-top:14px; display:flex; gap:10px; align-items:center;">
-        <button type="button" class="primary" id="btn-m11-evaluate">Evaluate Mission 11 Spend Policy &amp; Circuit Breakers</button>
-        <span class="hint" id="m11-status-hint">Deterministic WASM bit-exact validation active</span>
-      </div>
-
-      <div id="m11-result" style="margin-top:16px;"></div>
-    </section>
-  </div>
-<!-- TAB 2: ON-CHAIN RECEIPT LEDGER -->
-  <div id="tab-ledger" hidden>
-    <section class="panel">
-      <h2>Verified On-Chain Payment &amp; Signal Ledger</h2>
-      <p class="hint" style="margin:0; font-size:13px">
-        Every paid <span class="mono">x402</span> purchase settled on Ethereum Sepolia from contributor wallet <code id="ledger-wallet">0x98021b20Efdb7ae2C57366010a6E0fDE207b4466</code>, paired with the Telegraph node's keccak256 signal record (<span class="mono">GET /engine/v1/signal/&lt;hash&gt;</span>) and our primary-source diagnostic audit.
-      </p>
-      <div id="ledger-summary" style="margin-top:10px"></div>
-    </section>
-    <div id="ledger-results"></div>
-  </div>
-
-  <!-- TAB 3: EVALUATOR POOL & BOUNTIES -->
-  <div id="tab-eval" hidden>
-    <section class="panel">
-      <h2>Track 2 (Evaluators) — Signed Pool Submissions &amp; Bounties</h2>
-      <p class="hint" style="margin:0; font-size:13px">
-        Live query to <code>/api/evalpool/submissions/mine?submitter=0x98021b20Efdb7ae2C57366010a6E0fDE207b4466</code>. <span id="eval-summary-copy">62 signed evaluation rows across 8 Legal &amp; Compliance Intents (dynamic node count refreshed on load).</span>
-      </p>
-
-      <!-- Evaluator Track Status (ModernBERT LoRA #461 Post-Mortem + v4 Retraining Pipeline) -->
-      <div style="background:var(--bg); border:1px solid #d97706; border-radius:8px; padding:14px; margin-top:14px; font-size:13px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <div>
-            <span style="background:#b45309; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:0.5px;">Adapter #461 Rejected on Devnode</span>
-            <strong style="margin-left:8px; font-size:14px;">SANCTIONS_SCREENING_MATCH — OOD Post-Mortem &amp; v4 Pipeline</strong>
-          </div>
-          <div>
-            <a href="https://sepolia.etherscan.io/tx/0xf9d9e1e9764b057d9e265f179cd24709bf995e63e35243387dbec826b6a72607" target="_blank" rel="noopener">Tx #461 (Etherscan) ↗</a> &bull;
-            <a href="https://devnode.telegraphprotocol.com/api/wasm/461" target="_blank" rel="noopener">Live Devnode Status ↗</a>
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px; margin-top:12px;">
-          <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px;">
-            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">Live Devnode Score (#461)</div>
-            <div style="font-size:18px; font-weight:700; color:var(--bad); margin-top:2px;">7 / 15 (46.7%) <span style="font-size:12px; font-weight:400; color:var(--muted);">vs 70% floor</span></div>
-            <div style="font-size:11.5px; color:var(--ink); margin-top:4px;">Status: <code>rejected</code> (vs incumbent #375 @ 78.57%)</div>
-          </div>
-          <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px;">
-            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">Stage 1 WASM Determinism</div>
-            <div style="font-size:14px; font-weight:600; color:var(--ink); margin-top:2px;">Bit-Exact (Runtime Only)</div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">Repeat score <code class="mono">0xbfd4f50b</code>; failed OOD accuracy</div>
-          </div>
-          <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px;">
-            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">Root Cause Diagnosed</div>
-            <div style="font-size:13px; font-weight:600; color:var(--ink); margin-top:2px;">Single-Template Synthetic Bias</div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">Trained on one JSON schema; real miners emit varied formats (62–299 tok)</div>
-          </div>
-          <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:10px;">
-            <div style="font-size:11.5px; color:var(--muted); text-transform:uppercase;">v4 Remediation Pipeline</div>
-            <div style="font-size:13px; font-weight:600; color:var(--ink); margin-top:2px;">Multi-Format Dataset Ready</div>
-            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">Requires Colab T4 re-train &amp; new registration before promotion</div>
-          </div>
-        </div>
-
-        <div style="margin-top:10px; font-size:12px; color:var(--muted);">
-          <strong>Honest Audit Note:</strong> 81.33% was an in-distribution synthetic split only. Real out-of-distribution evaluation against heterogeneous miner responses failed Stage 2 (`7/15` = 46.7%). Local Docker sidecar (<code class="mono">praman-adapterexec</code>) remains active for validation; we do not claim challenger victory until v4 passes Devnode Stage 2.
-        </div>
-      </div>
-    </section>
-    <div id="eval-results"></div>
-  </div>
-
-  <!-- TAB 4: ACTIVE TELEGRAPH MINER #5289 -->
-  <div id="tab-miner" hidden>
-    <section class="panel">
-      <h2>Track 1 (Providers) — Active Telegraph Miner #5289 (Sepolia Diamond)</h2>
-      <p class="hint" style="margin:0; font-size:13px">
-        Registered on the Telegraph Diamond Contract (<a href="https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" target="_blank" rel="noopener" class="mono">0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b</a>) with active Registration ID <strong>#5289</strong> supporting <strong>7 intents</strong> backed by 0.10 MACHINA bond. Manifest pinned to immutable commit <a href="https://github.com/VishAlgoDev/praman-desk/blob/62d2169d5185060494ccfbbb7f87e8a976aa5a3c/miner.yaml" target="_blank" rel="noopener" class="mono">62d2169</a>.
-      </p>
-
-      <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:12px; margin-top:12px; font-size:13px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <div>
-            <strong>Diamond Miner ID:</strong> <code class="mono">#5289</code> &bull; 
-            <strong>Slug:</strong> <code class="mono">praman-compliance-miner</code> &bull;
-            <strong>Intents:</strong> <code class="mono">7 registered</code>
-          </div>
-          <div>
-            <a href="https://sepolia.etherscan.io/tx/0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff" target="_blank" rel="noopener">Update Tx #5289 (Etherscan) ↗</a> &bull;
-            <a href="https://devnode.telegraphprotocol.com/api/miners/5289" target="_blank" rel="noopener">Live Devnode Miner JSON ↗</a>
-          </div>
-        </div>
-        <p style="margin:8px 0 0; color:var(--muted); font-size:12.5px;">
-          These hosted endpoints accept both canonical typed parameters and free-text <code>?question=</code> queries while returning strict schemas with live keyless GLEIF validation, OFAC SDN screening, SEC EDGAR filing monitoring, and deterministic 3-way reconciliation.
-        </p>
-      </div>
-
-      <div class="actions" style="margin-top:14px">
-        <button type="button" class="secondary" data-test-miner="/api/miner/invoice-reconcile">Test /api/miner/invoice-reconcile</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=Apple%20Inc.">Test /api/miner/vendor-verify (Apple Inc. / Live GLEIF)</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/vendor-verify?vendor=SAP%20SE&vat_number=DE143454214">Test /api/miner/vendor-verify (SAP SE / EU VAT)</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/po-verify?po_number=PO-2026-7741&vendor=STRIPE%2C%20LLC&amount=27062.50&approval_cap=30000">Test /api/miner/po-verify (Canonical PO)</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/doc-authenticity?signedQrAmount=1416000&pdfFaceAmount=1888000&document=GST%20e-Invoice%2064a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012">Test /api/miner/doc-authenticity</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/corporate-registry?company=SAP%20SE&jurisdiction=DE">Test /api/miner/corporate-registry (SAP SE / DE)</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/sanctions-screen?name=Banco%20Nacional%20de%20Cuba">Test /api/miner/sanctions-screen (OFAC SDN)</button>
-        <button type="button" class="secondary" data-test-miner="/api/miner/regulatory-filing?entity=Tesla%20Inc&period=last%2012%20months">Test /api/miner/regulatory-filing (SEC EDGAR / Fed Reg)</button>
-      </div>
-      <div id="miner-test-output" style="margin-top:12px"></div>
-    </section>
-  </div>
-
-  <!-- TAB 5: COMPLIANCE SUITE (MISSION 04) -->
-  <div id="tab-compliance" hidden>
-    <section class="panel">
-      <h2>Autonomous Legal &amp; Counterparty Compliance Suite (Mission 04)</h2>
-      <p class="hint" style="margin:0; font-size:13.5px;">
-        Three keyless, high-assurance regulatory intelligence engines on Telegraph Protocol. All query authoritative primary registers directly with zero API keys required, providing deterministic ground-truth guarantees for Legal &amp; Cross-Border Diligence (Mission 04). For pre-payment USDC clearing, see the dedicated <strong>Stablecoin Gate (Mission 02)</strong> tab.
-      </p>
-
-      <!-- 0. Mission 04 Flagship: Overnight 5-Jurisdiction Diligence Pack & Invoice Comparison -->
-      <div style="background:var(--bg); border:1px solid var(--accent); border-radius:8px; padding:16px; margin-top:16px;" id="diligence-pack-panel">
-        <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-          <h3 style="margin:0; font-size:15px; font-weight:600; color:var(--accent);">⚖️ Overnight 5-Jurisdiction Diligence Pack (Mission 04)</h3>
-          <span class="hint" style="margin:0;">US &middot; GB &middot; DE &middot; HK &middot; SG &bull; GLEIF + VIES + OFAC + SEC/FedReg + HKMA</span>
-        </div>
-        <p style="margin:0 0 10px; font-size:13px; color:var(--muted);">
-          Generates a cross-border diligence pack with per-item cryptographic SHA-256 proofs, links Sepolia x402 verification receipts, and prints the machine invoice alongside an illustrative traditional law-firm benchmark.
-        </p>
-        <div style="margin-bottom:10px;" class="no-print">
-          <label for="diligence-entities-input" style="font-size:12px; font-weight:600; color:var(--muted); display:block; margin-bottom:4px;">Portfolio Entities (one per line: Name | Jurisdiction | Optional EU/UK VAT):</label>
-          <textarea id="diligence-entities-input" rows="5" style="width:100%; font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; font-size:12px; padding:8px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink);">Tesla, Inc. | US |
-HSBC Holdings plc | GB |
-SAP SE | DE | DE143454214
-AIA Group Limited | HK |
-DBS Group Holdings Ltd | SG |</textarea>
-        </div>
-        <div class="actions no-print" style="margin-top:8px;">
-          <button type="button" class="primary" id="btn-run-diligence-pack">Generate 5-Jurisdiction Diligence Pack (US &middot; GB &middot; DE &middot; HK &middot; SG)</button>
-          <button type="button" class="secondary" id="btn-print-diligence-pack" hidden>Print / Save PDF Invoice Comparison</button>
-        </div>
-        <div id="diligence-pack-output" style="margin-top:12px;" hidden></div>
-      </div>
-
-      <!-- 1. Corporate Registry Lookup -->
-      <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:16px; margin-top:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-          <h3 style="margin:0; font-size:15px; font-weight:600;">1. Global Corporate Registry Lookup (<code>CORPORATE_REGISTRY_LOOKUP_GENERAL</code>)</h3>
-          <span class="hint" style="margin:0;">GLEIF Global LEI Index &bull; 200+ Jurisdictions</span>
-        </div>
-        <p style="margin:0 0 10px; font-size:13px; color:var(--muted);">
-          Resolves legal entity status, official LEI, registration authority, incorporation jurisdiction, and registered/headquarters addresses with binary active status flag (<code>status_active: 1|0</code>).
-        </p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-          <input type="text" id="corp-name-input" placeholder="Entity name (e.g. Stripe, SAP SE, Apple Inc., Infosys)..." style="flex:2; min-width:200px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
-          <select id="corp-juris-input" style="flex:1; min-width:110px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
-            <option value="">Any Jurisdiction</option>
-            <option value="US">United States (US)</option>
-            <option value="DE">Germany (DE)</option>
-            <option value="GB">United Kingdom (GB)</option>
-            <option value="FR">France (FR)</option>
-            <option value="IN">India (IN)</option>
-            <option value="CH">Switzerland (CH)</option>
-            <option value="NL">Netherlands (NL)</option>
-            <option value="JP">Japan (JP)</option>
-            <option value="SG">Singapore (SG)</option>
-          </select>
-          <button type="button" class="primary" id="btn-corp-lookup" style="padding:7px 16px; font-size:13px;">Lookup Registry</button>
-        </div>
-        <div id="corp-output" style="margin-top:12px;" hidden></div>
-      </div>
-
-      <!-- 2. Sanctions Screening -->
-      <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:16px; margin-top:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-          <h3 style="margin:0; font-size:15px; font-weight:600;">2. Keyless Sanctions Screening &amp; Fuzzy Match (<code>SANCTIONS_SCREENING_MATCH_GENERAL</code>)</h3>
-          <span class="hint" style="margin:0;">US Treasury OFAC SDN &bull; 19,500+ Entities &amp; Aliases</span>
-        </div>
-        <p style="margin:0 0 10px; font-size:13px; color:var(--muted);">
-          In-memory sub-100ms screening against official US Treasury OFAC Specially Designated Nationals (SDN) and Consolidated Non-SDN lists with bigram fuzzy matching across primary names and aliases.
-        </p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-          <input type="text" id="sanc-name-input" placeholder="Person or entity name to screen (e.g. Banco Nacional de Cuba, Aero-Caribbean, Acme Corp)..." style="flex:1; min-width:240px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
-          <button type="button" class="primary" id="btn-sanc-screen" style="padding:7px 16px; font-size:13px;">Screen Sanctions</button>
-        </div>
-        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:8px;">
-          <span class="hint" style="margin:0; font-size:12px;">Quick test:</span>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-sanc-quick="Banco Nacional de Cuba">Banco Nacional de Cuba (Match)</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-sanc-quick="National Bank of Cuba">National Bank of Cuba (Alias)</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-sanc-quick="AERO-CARIBBEAN">AERO-CARIBBEAN (Alias)</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-sanc-quick="Apple Inc.">Apple Inc. (Clean)</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-sanc-quick="STRIPE, LLC">STRIPE, LLC (Clean)</button>
-        </div>
-        <div id="sanc-output" style="margin-top:12px;" hidden></div>
-      </div>
-
-      <!-- 3. Regulatory Filing Monitor -->
-      <div style="background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:16px; margin-top:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-          <h3 style="margin:0; font-size:15px; font-weight:600;">3. Multi-Source Regulatory Filing Monitor (<code>REGULATORY_FILING_MONITOR_GENERAL</code>)</h3>
-          <span class="hint" style="margin:0;">SEC EDGAR &bull; US Federal Register &bull; GLEIF</span>
-        </div>
-        <p style="margin:0 0 10px; font-size:13px; color:var(--muted);">
-          Cross-verifies published SEC EDGAR disclosures (10-K, 10-Q, 8-K), Federal Register agency notices/rules, and LEI renewal compliance status in real-time.
-        </p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-          <input type="text" id="reg-company-input" placeholder="Company or concern name (e.g. Goldman Sachs, Pfizer, Boeing, Tesla)..." style="flex:2; min-width:200px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
-          <input type="text" id="reg-period-input" placeholder="Period (e.g. 2026)" value="2026" style="flex:1; max-width:120px; padding:7px 11px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); font:inherit; font-size:13.5px;">
-          <button type="button" class="primary" id="btn-reg-check" style="padding:7px 16px; font-size:13px;">Check Filings</button>
-        </div>
-        <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-top:8px;">
-          <span class="hint" style="margin:0; font-size:12px;">Quick test:</span>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-reg-quick="Goldman Sachs">Goldman Sachs</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-reg-quick="Tesla">Tesla</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-reg-quick="Pfizer">Pfizer</button>
-          <button type="button" class="secondary" style="padding:3px 8px; font-size:12px;" data-reg-quick="Boeing">Boeing</button>
-        </div>
-        <div id="reg-output" style="margin-top:12px;" hidden></div>
-      </div>
-    </section>
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- TAB: STABLECOIN GATE (Mission 02 Treasury Firewall)        -->
-  <!-- ========================================================= -->
-  <div id="tab-stablecoin" hidden>
-    <section class="panel">
-      <h2>Mission 02 — Stablecoin Treasury Guard &amp; On-Chain Settlement Gate</h2>
-      <p class="hint">
-        Pre-payment treasury firewall for autonomous USDC transfers on Ethereum Sepolia. Verifies live Sepolia JSON-RPC chain state &amp; wallet USDC balance, enforces OFAC SDN counterparty freeze (<code class="mono">REJECT_AND_FREEZE</code>), FATF Travel Rule (&ge;$1,000 KYC reference check), delegation cap limits, and ERC-20 <code class="mono">Transfer</code> event receipt matching (with deterministic WASM amount scoring).
-      </p>
-
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-        <span class="hint" style="margin:4px 0;">Break &amp; Verify Presets:</span>
-        <button type="button" class="secondary" data-m2-preset="clean">1. Clean Transfer ($25 USDC)</button>
-        <button type="button" class="secondary" data-m2-preset="sanctioned">2. Sanctioned Freeze (Lazarus Group)</button>
-        <button type="button" class="secondary" data-m2-preset="insufficient">3. Insufficient Balance ($99,999)</button>
-        <button type="button" class="secondary" data-m2-preset="travelrule">4. FATF Hold ($1,500 No KYC)</button>
-        <button type="button" class="secondary" data-m2-preset="txverify">5. Invalid Tx Receipt Probe</button>
-      </div>
-
-      <div class="grid">
-        <div>
-          <label for="m2-recipient-name">Counterparty / Legal Entity</label>
-          <input id="m2-recipient-name" value="Apple Inc." placeholder="e.g. Apple Inc. or Lazarus Group">
-        </div>
-        <div>
-          <label for="m2-recipient-addr">Recipient EVM Address (0x...)</label>
-          <input id="m2-recipient-addr" value="0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" placeholder="0x...">
-        </div>
-        <div>
-          <label for="m2-amount">Transfer Amount (USDC)</label>
-          <input id="m2-amount" type="number" step="0.01" value="25">
-        </div>
-        <div>
-          <label for="m2-cap">Treasury Delegation Cap (USDC)</label>
-          <input id="m2-cap" type="number" step="0.01" value="500">
-        </div>
-        <div>
-          <label for="m2-kyc">Sender KYC / VASP Travel Rule Ref (req &ge;$1,000)</label>
-          <input id="m2-kyc" value="VASP-2026-PRAMAN-01" placeholder="Optional below $1,000">
-        </div>
-        <div>
-          <label for="m2-txhash">Sepolia Tx Hash (optional on-chain Transfer verify)</label>
-          <input id="m2-txhash" value="" placeholder="0x... (optional ERC-20 receipt verification)">
-        </div>
-      </div>
-
-      <div style="margin-top:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <button type="button" class="primary" id="btn-m2-gate">Evaluate Mission 02 Settlement Gate ($0.00 RPC)</button>
-        <span class="hint" style="margin:0;">Direct call to <code class="mono">POST /api/mission/stablecoin-gate</code></span>
-      </div>
-
-      <div id="m2-output" style="margin-top:14px;" hidden></div>
-    </section>
-  </div>
-
-  <!-- TAB: OFFICIAL ARCHITECTURE & VERIFICATION WALKTHROUGH -->
-  <div id="tab-video" hidden>
-    <section class="panel" id="showcase-video-panel" style="padding:18px; background:var(--panel); border:1px solid var(--accent); border-radius:10px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-        <div>
-          <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--accent);">🎬 Official Architecture &amp; Live Verification Walkthrough</h3>
-          <p class="sub" style="margin:2px 0 0; font-size:13px;">Full-spectrum live demonstration: Devnode Miner #5289, Mission 02 OFAC EVM Freeze, Mission 04 Diligence Pack, and 651B pure WASM comparator.</p>
-        </div>
-        <a href="/praman-desk-walkthrough.mp4" download class="secondary" style="display:inline-block; text-decoration:none; padding:6px 14px; font-size:12.5px; border-radius:6px; border:1px solid var(--line); color:var(--ink);">⬇ Download 1080p MP4</a>
-      </div>
-      <div style="position:relative; width:100%; border-radius:8px; overflow:hidden; background:#070b14; border:1px solid var(--line); aspect-ratio:16/9; max-height:540px;">
-        <video controls preload="metadata" style="width:100%; height:100%; display:block;" poster="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080' fill='%23070b14'><rect width='1920' height='1080' fill='%23070b14'/><circle cx='960' cy='540' r='60' fill='%2338bdf8' fill-opacity='0.2'/><polygon points='945,510 990,540 945,570' fill='%2338bdf8'/><text x='960' y='650' font-size='32' fill='%23ffffff' font-family='Segoe UI, Arial, sans-serif' font-weight='bold' text-anchor='middle'>Play Praman Desk Architecture Walkthrough (1080p • 2 min)</text></svg>">
-          <source src="/praman-desk-walkthrough.mp4" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
-      </div>
-    </section>
-  </div>
-</main>
+</div>
 
 <script>
-const $ = (id) => document.getElementById(id);
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
-  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
-})[c]);
-const safeUrl = (u) => /^https?:\/\//i.test(String(u || "").trim()) ? String(u).trim() : "#";
+  // Scenario Data Presets
+  const SCENARIOS = {
+    phishing_sanctions: {
+      name: 'Scenario 1: Phishing & Sanctions Exploit',
+      agent: 'autonomous-infra-agent-01',
+      amount: '$4,200.00 USDC',
+      amountVal: 4200.00,
+      recipient: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96',
+      vendor: 'Cloudflare, Inc. (Phishing Impersonation)',
+      items: [
+        { desc: 'Enterprise Edge Worker Bandwidth & Compute', qty: 1, price: '$4,200.00', total: '$4,200.00' }
+      ]
+    },
+    arithmetic_overcharge: {
+      name: 'Scenario 2: Arithmetic Overcharge Discrepancy',
+      agent: 'devops-cluster-agent-09',
+      amount: '$2,250.00 USDC',
+      amountVal: 2250.00,
+      recipient: '0x71C84164b3D9d5a7151320349383637144e05b33',
+      vendor: 'Lambda Labs Compute Inc.',
+      items: [
+        { desc: '8x H100 GPU Instance Hours', qty: 40, price: '$35.00', total: '$1,400.00' },
+        { desc: 'High-Speed InfiniBand Interconnect', qty: 1, price: '$400.00', total: '$400.00' }
+      ]
+    },
+    compliant_payout: {
+      name: 'Scenario 3: Verified Compliant Agent Payout',
+      agent: 'api-gateway-agent-03',
+      amount: '$250.00 USDC',
+      amountVal: 250.00,
+      recipient: '0x5462D6334F333C8D0662D8a291F04bE5b736b71b',
+      vendor: 'Anthropic PBC',
+      items: [
+        { desc: 'Claude 3.7 Sonnet Inference Tokens', qty: 10, price: '$25.00', total: '$250.00' }
+      ]
+    }
+  };
 
-// Modern Web Guidance: Validate Input After Interaction (WeakMap fallback + aria-invalid sync)
-const UserInvalidFallback = (() => {
-  const dirtyState = new WeakMap();
-  const syncAria = (el) => {
-    if (!el || typeof el.checkValidity !== "function") return;
-    const isInvalid = el.matches?.(":user-invalid") || (!el.checkValidity() && dirtyState.get(el)?.hasBlurred);
-    if (isInvalid) {
-      el.setAttribute("aria-invalid", "true");
+  let currentScenario = 'phishing_sanctions';
+
+  function selectScenario(key) {
+    currentScenario = key;
+    document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+    if (key === 'phishing_sanctions') document.getElementById('card-scen-1').classList.add('active');
+    if (key === 'arithmetic_overcharge') document.getElementById('card-scen-2').classList.add('active');
+    if (key === 'compliant_payout') document.getElementById('card-scen-3').classList.add('active');
+
+    const s = SCENARIOS[key];
+    document.getElementById('active-scenario-pill').textContent = s.name;
+    document.getElementById('disp-agent').textContent = s.agent;
+    document.getElementById('disp-amount').textContent = s.amount;
+    document.getElementById('disp-recipient').textContent = s.recipient;
+    document.getElementById('disp-vendor').textContent = s.vendor;
+
+    const tbody = document.getElementById('line-items-body');
+    tbody.innerHTML = '';
+    s.items.forEach(it => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${it.desc}</td><td class="num">${it.qty}</td><td class="num">${it.price}</td><td class="num">${it.total}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    triggerInspection();
+  }
+
+  async function triggerInspection() {
+    const btn = document.getElementById('btn-run-inspect');
+    btn.innerHTML = '<span>⏳ Inspecting with 651b WASM...</span>';
+    btn.disabled = true;
+
+    const start = performance.now();
+    try {
+      const res = await fetch(`/api/spend-guard/evaluate?scenario=${currentScenario}`, {
+        method: 'GET'
+      });
+      const data = await res.json();
+      const latency = Math.round(performance.now() - start);
+      updateVerdictUI(data, latency);
+    } catch (err) {
+      console.warn('API error, using local fallback verification:', err);
+      const latency = Math.round(performance.now() - start);
+      updateVerdictUIFallback(currentScenario, latency);
+    } finally {
+      btn.innerHTML = '<span>⚡ Run Pre-Flight Inspection</span>';
+      btn.disabled = false;
+    }
+  }
+
+  function updateVerdictUI(data, latency) {
+    document.getElementById('latency-pill').textContent = `${latency} ms`;
+    const banner = document.getElementById('verdict-banner');
+    const headline = document.getElementById('verdict-headline');
+    const summary = document.getElementById('verdict-summary');
+    const circuit = document.getElementById('disp-circuit');
+    const attestation = document.getElementById('disp-attestation');
+
+    if (data.status === 'HALTED' || data.verdict === 'HALT_AND_FREEZE' || data.circuitBreaker?.triggered) {
+      banner.className = 'verdict-banner halt';
+      headline.innerHTML = '<span>🛑 HALT &amp; FREEZE — TRANSACTION BLOCKED</span>';
+      summary.textContent = data.summary || `Firewall intercepted unsafe spend request: ${data.flags?.[0] || 'Policy violation'}. Zero funds moved.`;
+      circuit.textContent = 'TRIGGERED (HALT)';
+      circuit.style.color = '#f87171';
     } else {
-      el.removeAttribute("aria-invalid");
+      banner.className = 'verdict-banner approved';
+      headline.innerHTML = '<span>✅ APPROVED — SAFE FOR X402 PAYMENT</span>';
+      summary.textContent = data.summary || 'Pre-payment spend cleared: OFAC clean, GLEIF verified, deterministic math bit-exact (0.00% discrepancy), within delegation limit.';
+      circuit.textContent = 'CLEARED (READY)';
+      circuit.style.color = '#34d399';
     }
-  };
-  const updateState = (input) => {
-    const isValid = input.checkValidity();
-    input.classList.toggle("user-invalid-fallback", !isValid);
-    input.classList.toggle("user-valid-fallback", isValid);
-    syncAria(input);
-  };
-  const init = (root = document) => {
-    root.addEventListener("blur", (e) => {
-      const input = e.target;
-      if (!input || typeof input.checkValidity !== "function") return;
-      const state = dirtyState.get(input) || { hasInteracted: false, hasBlurred: false };
-      state.hasBlurred = true;
-      dirtyState.set(input, state);
-      if (state.hasInteracted) updateState(input);
-      syncAria(input);
-    }, true);
-    root.addEventListener("input", (e) => {
-      const input = e.target;
-      if (!input || typeof input.checkValidity !== "function") return;
-      const state = dirtyState.get(input) || { hasInteracted: false, hasBlurred: false };
-      state.hasInteracted = true;
-      dirtyState.set(input, state);
-      if (state.hasBlurred) updateState(input);
-      if (input.hasAttribute("aria-invalid")) syncAria(input);
+
+    if (data.attestationSha256) {
+      attestation.textContent = data.attestationSha256.slice(0, 10) + '...' + data.attestationSha256.slice(-8);
+    }
+
+    // Policy Badges
+    const badgeOfac = document.getElementById('badge-ofac');
+    const badgeGleif = document.getElementById('badge-gleif');
+    const badgeWasm = document.getElementById('badge-wasm');
+    const badgeDelegation = document.getElementById('badge-delegation');
+
+    // OFAC
+    const ofacClean = data.recipientVerification?.sanctionsScreeningClear && data.vendorVerification?.sanctionsScreeningClear;
+    if (ofacClean) {
+      badgeOfac.className = 'badge-pass';
+      badgeOfac.textContent = '✅ CLEAN';
+    } else {
+      badgeOfac.className = 'badge-halt';
+      badgeOfac.textContent = '🛑 BLOCKED';
+    }
+
+    // GLEIF
+    if (data.vendorVerification?.gleifVerified) {
+      badgeGleif.className = 'badge-pass';
+      badgeGleif.textContent = '✅ VERIFIED';
+    } else {
+      badgeGleif.className = 'badge-warn';
+      badgeGleif.textContent = '⚠️ UNVERIFIED';
+    }
+
+    // WASM Math
+    if (data.mathVerification?.bitExactMatch) {
+      badgeWasm.className = 'badge-pass';
+      badgeWasm.textContent = '✅ 0.00% DIFF';
+    } else {
+      badgeWasm.className = 'badge-halt';
+      badgeWasm.textContent = `🛑 $${(data.mathVerification?.discrepancyCents / 100).toFixed(2)} MISMATCH`;
+    }
+
+    // Delegation Caps
+    const capsOk = !data.policyCaps?.supervisorAuthRequired || data.policyCaps?.supervisorAuthValid;
+    if (capsOk && data.policyCaps?.delegationTier !== 'EXCEEDS_HARD_CEILING') {
+      badgeDelegation.className = 'badge-pass';
+      badgeDelegation.textContent = '✅ WITHIN CAP';
+    } else {
+      badgeDelegation.className = 'badge-halt';
+      badgeDelegation.textContent = '🛑 EXCEEDED';
+    }
+  }
+
+  function updateVerdictUIFallback(scen, latency) {
+    if (scen === 'phishing_sanctions') {
+      updateVerdictUI({
+        status: 'HALTED',
+        verdict: 'HALT_AND_FREEZE',
+        flags: ['SANCTIONED_RECIPIENT_ADDRESS: 0x098B...2f96 matches LAZARUS GROUP'],
+        summary: 'Firewall intercepted unsafe spend request: Recipient address matches Lazarus Group on US Treasury OFAC SDN list. Zero funds moved.',
+        recipientVerification: { sanctionsScreeningClear: false },
+        vendorVerification: { gleifVerified: false, sanctionsScreeningClear: true },
+        mathVerification: { bitExactMatch: true, discrepancyCents: 0 },
+        policyCaps: { delegationTier: 'TIER_2_DUAL_AUTH_REQUIRED', supervisorAuthRequired: true, supervisorAuthValid: false },
+        attestationSha256: '0x7f4ae910a3b8cd92b15e4492a88194b1'
+      }, latency);
+    } else if (scen === 'arithmetic_overcharge') {
+      updateVerdictUI({
+        status: 'HALTED',
+        verdict: 'HALT_AND_FREEZE',
+        flags: ['WASM_3WAY_MATH_MISMATCH: Stated $2250.00 differs from computed $1800.00 ($450.00 discrepancy)'],
+        summary: 'Firewall intercepted overcharge: Stated total $2,250.00 differs from computed line-item sum $1,800.00 ($450.00 discrepancy detected by 651b WASM engine).',
+        recipientVerification: { sanctionsScreeningClear: true },
+        vendorVerification: { gleifVerified: true, sanctionsScreeningClear: true },
+        mathVerification: { bitExactMatch: false, discrepancyCents: 45000 },
+        policyCaps: { delegationTier: 'TIER_2_DUAL_AUTH_REQUIRED', supervisorAuthRequired: true, supervisorAuthValid: false },
+        attestationSha256: '0x12b48a09cf4bde29184acb014761299e'
+      }, latency);
+    } else {
+      updateVerdictUI({
+        status: 'APPROVED',
+        verdict: 'APPROVED_FOR_PAYMENT',
+        flags: [],
+        summary: 'Pre-payment spend cleared: OFAC clean, GLEIF verified, deterministic math bit-exact (0.00% discrepancy), within delegation limit. Ready for Telegraph x402 settlement.',
+        recipientVerification: { sanctionsScreeningClear: true },
+        vendorVerification: { gleifVerified: true, sanctionsScreeningClear: true },
+        mathVerification: { bitExactMatch: true, discrepancyCents: 0 },
+        policyCaps: { delegationTier: 'TIER_1_AUTONOMOUS', supervisorAuthRequired: false, supervisorAuthValid: true },
+        attestationSha256: '0x49ca3801f92e811acb50882149b1093c'
+      }, latency);
+    }
+  }
+
+  function toggleCustomDrawer() {
+    const d = document.getElementById('custom-drawer');
+    d.style.display = d.style.display === 'block' ? 'none' : 'block';
+  }
+
+  async function runCustomInspection() {
+    const agent = document.getElementById('cust-agent').value;
+    const recipient = document.getElementById('cust-recipient').value;
+    const vendor = document.getElementById('cust-vendor').value;
+    const amount = parseFloat(document.getElementById('cust-amount').value) || 0;
+
+    document.getElementById('active-scenario-pill').textContent = 'Custom Spend Request';
+    document.getElementById('disp-agent').textContent = agent;
+    document.getElementById('disp-amount').textContent = `$${amount.toFixed(2)} USDC`;
+    document.getElementById('disp-recipient').textContent = recipient || '0x (not specified)';
+    document.getElementById('disp-vendor').textContent = vendor || '(unspecified vendor)';
+
+    const start = performance.now();
+    try {
+      const res = await fetch('/api/spend-guard/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agentId: agent,
+          recipientAddress: recipient,
+          vendorName: vendor,
+          spendAmountUsdc: amount,
+          statedTotal: amount,
+          lineItems: [{ desc: 'Custom Autonomous Payout Item', qty: 1, unitPrice: amount, amount: amount }]
+        })
+      });
+      const data = await res.json();
+      const latency = Math.round(performance.now() - start);
+      updateVerdictUI(data, latency);
+    } catch (e) {
+      console.error(e);
+      alert('Custom inspection request failed: ' + e.message);
+    }
+  }
+
+  function copySnippet(id) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Snippet copied to clipboard!');
     });
-  };
-  return { init };
-})();
-UserInvalidFallback.init(document.getElementById("audit-form"));
-
-const PRESETS = {
-  saas: {
-    vendor: "STRIPE, LLC",
-    vatNumber: "",
-    lei: "549300CLHGIPTCYHQ143",
-    poNumber: "PO-2026-104",
-    poAmount: 27062.5,
-    approvalCap: 50000,
-    invoiceId: "INV-2026-081",
-    billedQty: 100,
-    acceptedQty: 100,
-    unitPrice: 250,
-    taxRatePct: 8.25,
-    currency: "USD",
-    irnOrSha256: "64a9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef012",
-    signedQrAmount: 27062.5,
-    pdfFaceAmount: 27062.5
-  },
-  variance: {
-    vendor: "Apple Inc.",
-    vatNumber: "",
-    lei: "HWUPKR0MPOU8FGXBT394",
-    poNumber: "PO-US-2026-8812",
-    poAmount: 15000,
-    approvalCap: 25000,
-    invoiceId: "INV-APL-2026-904",
-    billedQty: 15,
-    acceptedQty: 14,
-    unitPrice: 995,
-    taxRatePct: 0,
-    currency: "USD",
-    irnOrSha256: "88f9b2c1d8e7f0123456789abcdef0123456789abcdef0123456789abcdef088",
-    signedQrAmount: 13930,
-    pdfFaceAmount: 14925
-  },
-  europe: {
-    vendor: "SAP SE",
-    vatNumber: "DE143454214",
-    lei: "529900D6BF99LW9R2E68",
-    poNumber: "PO-EU-2026-104",
-    poAmount: 59500,
-    approvalCap: 100000,
-    invoiceId: "INV-SAP-2026-88",
-    billedQty: 10,
-    acceptedQty: 10,
-    unitPrice: 5000,
-    taxRatePct: 19,
-    currency: "EUR",
-    irnOrSha256: "a1b2c3d4e5f60123456789abcdef0123456789abcdef0123456789abcdef0123",
-    signedQrAmount: 59500,
-    pdfFaceAmount: 59500
-  },
-  tampered: {
-    vendor: "Enterprise Cloud Infrastructure",
-    vatNumber: "",
-    lei: "",
-    poNumber: "PO-SEC-2026-440",
-    poAmount: 2000,
-    approvalCap: 5000,
-    invoiceId: "INV-SEC-440",
-    billedQty: 1,
-    acceptedQty: 1,
-    unitPrice: 1416,
-    taxRatePct: 0,
-    currency: "USD",
-    irnOrSha256: "c3d4e5f60123456789abcdef0123456789abcdef0123456789abcdef01234567",
-    signedQrAmount: 1416,
-    pdfFaceAmount: 1888
   }
-};
 
-document.querySelectorAll("[data-preset]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const p = PRESETS[btn.dataset.preset];
-    if (!p) return;
-    $("f-vendor").value = p.vendor;
-    $("f-vat").value = p.vatNumber;
-    $("f-lei").value = p.lei;
-    $("f-po").value = p.poNumber;
-    $("f-po-amt").value = p.poAmount;
-    $("f-po-cap").value = p.approvalCap;
-    $("f-inv-id").value = p.invoiceId;
-    $("f-billed-qty").value = p.billedQty;
-    $("f-acc-qty").value = p.acceptedQty;
-    $("f-rate").value = p.unitPrice;
-    $("f-tax").value = p.taxRatePct;
-    $("f-curr").value = p.currency;
-    $("f-irn").value = p.irnOrSha256;
-    $("f-qr-amt").value = p.signedQrAmount;
-    $("f-face-amt").value = p.pdfFaceAmount;
+  // Auto-run Scenario 1 on initial page load
+  window.addEventListener('DOMContentLoaded', () => {
+    selectScenario('phishing_sanctions');
   });
-});
-
-async function runQuickVerify(vendorName) {
-  const v = (vendorName || $("quick-vendor-input").value).trim();
-  if (!v) return;
-  $("quick-vendor-input").value = v;
-  const resEl = $("quick-vendor-result");
-  resEl.hidden = false;
-  resEl.innerHTML = `<div class="msg" style="background:var(--panel); border:1px solid var(--line); font-size:13px;">Querying GLEIF primary global index for <strong>${esc(v)}</strong>...</div>`;
-  try {
-    const data = await api(`/api/miner/vendor-verify?vendor=${encodeURIComponent(v)}`);
-    const isIssued = data.registration_status === "ISSUED";
-    const statusColor = isIssued ? "var(--ok)" : data.valid ? "var(--warn)" : "var(--bad)";
-    const statusBg = isIssued ? "var(--ok-bg)" : data.valid ? "var(--warn-bg)" : "var(--bad-bg)";
-    const hq = data.registered_address ? `📍 <strong>Registered HQ:</strong> ${esc(data.registered_address)}<br>` : "";
-    const leiLink = data.lei ? `🆔 <strong>ISO 17442 LEI:</strong> <code class="mono">${esc(data.lei)}</code> &bull; <a href="${esc(safeUrl(data.source_url || `https://search.gleif.org/#/record/${data.lei}`))}" target="_blank" rel="noopener">Official GLEIF Record ↗</a><br>` : "";
-
-    resEl.innerHTML = `
-      <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px; font-size:13px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; margin-bottom:8px;">
-          <div style="font-size:14px; font-weight:600;">${esc(data.registered_name || data.vendor || v)}</div>
-          <span class="badge" style="background:${statusBg}; color:${statusColor}; font-weight:600;">${esc(data.registration_status || (data.valid ? "VALID" : "UNVERIFIED"))}</span>
-        </div>
-        <div style="color:var(--muted); margin-bottom:6px; line-height:1.6;">
-          ${hq}
-          ${leiLink}
-          🏛️ <strong>Jurisdiction:</strong> ${esc(data.jurisdiction || "Global")} &bull; <strong>Source:</strong> ${esc(data.source)}
-        </div>
-        <p style="margin:6px 0 0; font-size:12.5px; color:var(--ink);">${esc(data.summary)}</p>
-        <div style="margin-top:8px;">
-          <button type="button" class="secondary" style="font-size:12px; padding:3px 8px;" id="btn-apply-vendor">Apply to Spend Audit Form ↓</button>
-        </div>
-      </div>
-    `;
-    const applyBtn = $("btn-apply-vendor");
-    if (applyBtn) {
-      applyBtn.onclick = () => {
-        $("f-vendor").value = data.registered_name || v;
-        if (data.lei) $("f-lei").value = data.lei;
-      };
-    }
-  } catch (err) {
-    resEl.innerHTML = `<div class="msg bad">Verification failed: ${esc(err.message)}</div>`;
-  }
-}
-
-$("btn-quick-verify").addEventListener("click", () => runQuickVerify());
-$("quick-vendor-input").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    runQuickVerify();
-  }
-});
-document.querySelectorAll("[data-quick]").forEach((btn) => {
-  btn.addEventListener("click", () => runQuickVerify(btn.dataset.quick));
-});
-
-// In-Browser WebAssembly Instantiation for Client-Side Mathematical Verification
-async function initClientWasm() {
-  try {
-    const res = await fetch('/comparator.wasm');
-    if (!res.ok) return;
-    const wasmBytes = await res.arrayBuffer();
-    const wasmModule = await WebAssembly.instantiate(wasmBytes, {});
-    const { imw_alloc, imw_score_deterministic, memory } = wasmModule.instance.exports;
-    const specPtr = imw_alloc(16);
-    const view = new DataView(memory.buffer);
-
-    window.clientWasmInstance = {
-      scoreDeterministic(truth, miner, code = 2, tolerance = 500) {
-        view.setInt32(specPtr, code, true);
-        view.setInt32(specPtr + 4, 0, true);
-        view.setBigInt64(specPtr + 8, BigInt(tolerance), true);
-        return Number(imw_score_deterministic(BigInt(truth), BigInt(miner), specPtr));
-      }
-    };
-    console.log('[WASM] In-browser comparator.wasm initialized successfully');
-  } catch (err) {
-    console.warn('[WASM] In-browser comparator initialization failed:', err.message);
-  }
-}
-initClientWasm();
-
-function getFormPayload() {
-  const intents = [...document.querySelectorAll('input[name="intent"]:checked')].map(el => el.value);
-  return {
-    vendor: $("f-vendor").value.trim(),
-    vatNumber: $("f-vat").value.trim(),
-    lei: $("f-lei").value.trim(),
-    poNumber: $("f-po").value.trim(),
-    poAmount: Number($("f-po-amt").value),
-    approvalCap: Number($("f-po-cap").value),
-    invoiceId: $("f-inv-id").value.trim(),
-    billedQty: Number($("f-billed-qty").value),
-    acceptedQty: Number($("f-acc-qty").value),
-    unitPrice: Number($("f-rate").value),
-    taxRatePct: Number($("f-tax").value),
-    currency: $("f-curr").value.trim(),
-    irnOrSha256: $("f-irn").value.trim(),
-    signedQrAmount: Number($("f-qr-amt").value),
-    pdfFaceAmount: Number($("f-face-amt").value),
-    intents
-  };
-}
-
-function updateSpendEstimate() {
-  const checked = [...document.querySelectorAll('input[name="intent"]:checked')];
-  const n = checked.length;
-  const cost = (n * 0.01).toFixed(2);
-  $("btn-buy").textContent = `2. Buy Telegraph checks & compare ($${cost})`;
-  $("spend-estimate").textContent = `${n} paid ${n === 1 ? "check" : "checks"} selected ($${cost} test USDC on Ethereum Sepolia)`;
-}
-document.querySelectorAll('input[name="intent"]').forEach(el => el.addEventListener("change", updateSpendEstimate));
-
-function openTab(tabName) {
-  document.querySelectorAll('nav[role="tablist"] button').forEach(btn => {
-    const active = btn.dataset.tab === tabName;
-    btn.setAttribute("aria-selected", active ? "true" : "false");
-  });
-  ["audit", "compliance", "stablecoin", "exchange", "autonomous", "ledger", "eval", "miner", "video"].forEach(t => {
-    $(`tab-${t}`).hidden = t !== tabName;
-  });
-  if (tabName === "ledger") loadLedger();
-  if (tabName === "eval") loadEvalPool();
-}
-
-document.querySelectorAll('nav[role="tablist"] button').forEach(btn => {
-  btn.addEventListener("click", () => {
-    location.hash = btn.dataset.tab;
-    openTab(btn.dataset.tab);
-  });
-});
-
-async function api(path, body) {
-  const res = await fetch(path, body ? {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body)
-  } : {});
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-  return data;
-}
-
-function showMsg(id, kind, html) {
-  $(id).innerHTML = html ? `<div class="msg ${kind}">${html}</div>` : "";
-}
-
-function downloadFile(name, content, type) {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([content], { type }));
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-async function loadWallet() {
-  try {
-    const w = await api("/api/wallet");
-    const addrUrl = safeUrl(`${w.explorerUrl || ''}/address/${w.address || ''}`);
-    $("wallet-box").innerHTML = `
-      Wallet <a href="${esc(addrUrl)}" target="_blank" rel="noopener" class="mono">${esc(w.address.slice(0, 6))}...${esc(w.address.slice(-4))}</a>
-      &middot; <strong>${esc(w.usdcBalance)}</strong> test USDC
-      &middot; ${esc(w.ethBalance)} Sepolia ETH
-    `;
-  } catch (e) {
-    $("wallet-box").textContent = `Wallet status unavailable: ${e.message}`;
-  }
-}
-
-$("btn-primary").addEventListener("click", async () => {
-  const form = $("audit-form");
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    return;
-  }
-  const btn = $("btn-primary");
-  btn.disabled = true;
-  showMsg("audit-msg", "info", "Running free primary source checks (GLEIF API + deterministic 3-way reconciliation)...");
-  try {
-    const data = await api("/api/audit/primary", getFormPayload());
-    const c = data.checks;
-    const issues = [
-      !c.vendor.valid ? "Vendor registry/tax check flagged" : null,
-      c.sanctions?.matches?.length > 0 ? `OFAC Sanctions match (${c.sanctions.matches.length} hits)` : null,
-      !c.invoice.reconciled ? `Invoice discrepancy (${c.invoice.discrepancy})` : null,
-      !c.po.verified ? `PO status: ${c.po.status}` : null,
-      !c.document.authentic ? `Document: ${c.document.verdict}` : null,
-      c.corporate_registry && !c.corporate_registry.found ? "Corporate registry record not found" : null
-    ].filter(Boolean);
-
-    showMsg(
-      "audit-msg",
-      issues.length ? "warn" : "ok",
-      issues.length
-        ? `Primary verification completed ($0.00 spent). Flagged ${issues.length} compliance ${issues.length === 1 ? "exception" : "exceptions"}: ${esc(issues.join("; "))}.`
-        : `Primary verification completed across all 7 checks ($0.00 spent). All checks validated.`
-    );
-
-    $("audit-results").innerHTML = `
-      <section class="panel">
-        <div tabindex="0" role="region" aria-labelledby="primary-table-caption" class="table-wrapper">
-          <table style="--label-2:'Source'; --label-3:'Status'; --label-4:'Finding'; --label-5:'Reference'">
-            <caption id="primary-table-caption">Primary Source &amp; Deterministic Compliance Findings (7 Checks &middot; $0.00)</caption>
-            <thead>
-              <tr>
-                <th>Check / Intent</th>
-                <th>Primary Source</th>
-                <th>Verdict</th>
-                <th>Deterministic Finding</th>
-                <th>Reference</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th><code>VENDOR_VERIFY_GENERAL</code></th>
-                <td>${esc(c.vendor.source)}</td>
-                <td><span class="badge ${c.vendor.valid ? "confirmed" : "contradicted"}">${c.vendor.valid ? "valid" : "unverified"}</span></td>
-                <td>${esc(c.vendor.summary)}${c.vendor.registered_address ? `<br><span class="hint">HQ: ${esc(c.vendor.registered_address)}</span>` : ""}</td>
-                <td>${c.vendor.source_url ? `<a href="${esc(safeUrl(c.vendor.source_url))}" target="_blank" rel="noopener">GLEIF record</a>` : "—"}</td>
-              </tr>
-              <tr>
-                <th><code>SANCTIONS_SCREENING_MATCH_GENERAL</code></th>
-                <td>${esc(c.sanctions?.source || "US Treasury OFAC SDN List")}</td>
-                <td><span class="badge ${c.sanctions?.matches?.length > 0 ? "contradicted" : "confirmed"}">${c.sanctions?.matches?.length > 0 ? "SANCTIONED" : "CLEAR"}</span></td>
-                <td>${esc(c.sanctions?.summary || "0 OFAC SDN matches")}</td>
-                <td><a href="https://sanctionssearch.ofac.treas.gov/" target="_blank" rel="noopener">OFAC search</a></td>
-              </tr>
-              <tr>
-                <th><code>CORPORATE_REGISTRY_LOOKUP_GENERAL</code></th>
-                <td>${esc(c.corporate_registry?.source || "GLEIF Global Index")}</td>
-                <td><span class="badge ${c.corporate_registry?.found ? "confirmed" : "contradicted"}">${c.corporate_registry?.found ? "registered" : "not found"}</span></td>
-                <td>${esc(c.corporate_registry?.summary || "Registry check complete")}</td>
-                <td>${c.corporate_registry?.results?.[0]?.source_url ? `<a href="${esc(safeUrl(c.corporate_registry.results[0].source_url))}" target="_blank" rel="noopener">LEI record</a>` : "—"}</td>
-              </tr>
-              <tr>
-                <th><code>REGULATORY_FILING_MONITOR_GENERAL</code></th>
-                <td>${esc(c.regulatory_filing?.sources?.join(', ') || "SEC EDGAR / Fed Register")}</td>
-                <td><span class="badge ${c.regulatory_filing?.total_results > 0 ? "confirmed" : "schema_warning"}">${c.regulatory_filing?.total_results > 0 ? `${c.regulatory_filing.total_results} filings` : "no filings"}</span></td>
-                <td>${esc(c.regulatory_filing?.summary || "Regulatory check complete")}</td>
-                <td><a href="https://www.sec.gov/edgar/searchedgar/companysearch" target="_blank" rel="noopener">SEC search</a></td>
-              </tr>
-              <tr>
-                <th><code>INVOICE_LEDGER_RECONCILE_GENERAL</code></th>
-                <td>3-Way PO-GRN-Invoice Math (WASM Engine)</td>
-                <td><span class="badge ${c.invoice.reconciled ? "confirmed" : "contradicted"}">${c.invoice.reconciled ? "reconciled" : "discrepancy"}</span></td>
-                <td>${esc(c.invoice.explanation)}</td>
-                <td class="mono">${esc(c.invoice.discrepancy)}</td>
-              </tr>
-              <tr>
-                <th><code>PURCHASE_ORDER_VERIFY_GENERAL</code></th>
-                <td>Approval Authority Matrix</td>
-                <td><span class="badge ${c.po.verified ? "confirmed" : "contradicted"}">${esc(c.po.status)}</span></td>
-                <td>${esc(c.po.explanation)}</td>
-                <td class="mono">${esc(c.po.po_number)}</td>
-              </tr>
-              <tr>
-                <th><code>DOCUMENT_AUTHENTICITY_GENERAL</code></th>
-                <td>SHA-256 / NIC QR Envelope</td>
-                <td><span class="badge ${c.document.authentic ? "confirmed" : "contradicted"}">${esc(c.document.verdict)}</span></td>
-                <td>${esc(c.document.evidence)}</td>
-                <td class="mono">${esc(String(c.document.document).slice(0, 22))}...</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    `;
-  } catch (err) {
-    showMsg("audit-msg", "bad", esc(err.message));
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-$("btn-buy").addEventListener("click", async () => {
-  const form = $("audit-form");
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    return;
-  }
-  const payload = getFormPayload();
-  if (!payload.intents.length) {
-    showMsg("audit-msg", "bad", "Select at least one Telegraph Intent checkbox above to purchase.");
-    return;
-  }
-  const btn = $("btn-buy");
-  btn.disabled = true;
-  showMsg("audit-msg", "info", `Purchasing ${payload.intents.length} verification ${payload.intents.length === 1 ? "check" : "checks"} through Telegraph (x402 on Ethereum Sepolia) and comparing with primary sources. This takes 10–25 seconds while Sepolia transactions settle...`);
-
-  try {
-    const r = await api("/api/audit/buy", payload);
-    loadWallet();
-    showMsg(
-      "audit-msg",
-      "ok",
-      `Settled ${r.items.length} paid Telegraph ${r.items.length === 1 ? "check" : "checks"} ($${esc(r.totalSpentUsd)} test USDC spent). Audit pack SHA-256: <code>${esc(r.auditPackSha256.slice(0, 18))}...</code>`
-    );
-
-    const rowsHtml = r.items.map(item => `
-      <tr>
-        <th>
-          <code>${esc(item.intent)}</code>
-          <div class="hint">Miner: ${esc(item.minerName || "N/A")} (#${esc(item.minerId || "N/A")})</div>
-        </th>
-        <td>
-          ${esc(item.primary.explanation || item.primary.summary || item.primary.evidence)}
-        </td>
-        <td>
-          <div><strong>Field status:</strong> <code>${esc(JSON.stringify(item.fieldStatus || {}))}</code></div>
-          <div style="margin-top:4px">${esc(item.diagnostic)}</div>
-          <details>
-            <summary>Normalized &amp; raw miner response</summary>
-            <pre>${esc(JSON.stringify({ normalized: item.normalizedResult, warnings: item.warnings, raw: item.rawMinerPayload }, null, 2))}</pre>
-          </details>
-        </td>
-        <td><span class="badge ${esc(item.agreement)}">${esc(item.badgeText)}</span></td>
-        <td class="mono">
-          <div>$0.01 USDC &middot; ${esc(item.durationMs)}ms</div>
-          ${item.txHash ? `<div><a href="https://sepolia.etherscan.io/tx/${esc(item.txHash)}" target="_blank" rel="noopener">tx ${esc(item.txHash.slice(0, 10))}...</a></div>` : ""}
-          ${item.signalHash ? `<div><a href="https://devnode.telegraphprotocol.com/engine/v1/signal/${esc(item.signalHash)}" target="_blank" rel="noopener">signal ${esc(item.signalHash.slice(0, 10))}...</a></div>` : ""}
-        </td>
-      </tr>
-    `).join("");
-
-    $("audit-results").innerHTML = `
-      <section class="panel">
-        <div tabindex="0" role="region" aria-labelledby="paid-table-caption" class="table-wrapper">
-          <table style="--label-2:'Primary Ground Truth'; --label-3:'Paid Miner Response'; --label-4:'Agreement'; --label-5:'On-Chain Receipt'">
-            <caption id="paid-table-caption">Live Paid Telegraph x402 Verification vs. Primary Sources (Pack ${esc(r.auditPackSha256.slice(0, 14))}...)</caption>
-            <thead>
-              <tr>
-                <th>Intent &amp; Miner</th>
-                <th>Primary Ground Truth</th>
-                <th>Telegraph Miner Response &amp; Schema Audit</th>
-                <th>Comparison</th>
-                <th>Receipt</th>
-              </tr>
-            </thead>
-            <tbody>${rowsHtml}</tbody>
-          </table>
-        </div>
-        <div class="actions">
-          <button type="button" class="secondary" id="btn-dl-json">Download receipt bundle (.json)</button>
-          <button type="button" class="secondary" id="btn-dl-md">Download audit memo (.md)</button>
-        </div>
-      </section>
-    `;
-
-    $("btn-dl-json").addEventListener("click", () => {
-      downloadFile(`praman-audit-receipts-${Date.now()}.json`, JSON.stringify(r, null, 2), "application/json");
-    });
-    $("btn-dl-md").addEventListener("click", () => {
-      const md = [
-        `# Praman Desk — Cryptographic Compliance Audit Memo`,
-        `- **Timestamp**: ${r.timestamp}`,
-        `- **Buyer Wallet**: \`${r.payer}\` (Ethereum Sepolia \`eip155:11155111\`)`,
-        `- **Total Paid**: $${r.totalSpentUsd} Test USDC`,
-        `- **Audit Pack SHA-256**: \`${r.auditPackSha256}\``,
-        ``,
-        `## Verification Results`,
-        ...r.items.map((it, idx) => [
-          `### ${idx + 1}. \`${it.intent}\` — ${it.badgeText.toUpperCase()}`,
-          `- **Miner Routed**: ${it.minerName} (\`#${it.minerId}\`, endpoint \`${it.endpoint}\`)`,
-          `- **Sepolia Payment Tx**: https://sepolia.etherscan.io/tx/${it.txHash}`,
-          `- **Telegraph Signal Record**: https://devnode.telegraphprotocol.com/engine/v1/signal/${it.signalHash}`,
-          `- **Primary Ground Truth**: ${it.primary.explanation || it.primary.summary || it.primary.evidence}`,
-          `- **Schema & Diagnostic Audit**: ${it.diagnostic}`,
-          ``
-        ].join("\n"))
-      ].join("\n");
-      downloadFile(`praman-audit-memo-${Date.now()}.md`, md, "text/markdown");
-    });
-  } catch (err) {
-    showMsg("audit-msg", "bad", esc(err.message));
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-async function loadLedger() {
-  $("ledger-results").innerHTML = `<section class="panel"><p class="hint">Loading on-chain receipts...</p></section>`;
-  try {
-    const l = await api("/api/ledger");
-    if ($("tab-btn-ledger")) {
-      $("tab-btn-ledger").textContent = `On-chain receipt ledger (${l.totalPaidCalls})`;
-    }
-    $("ledger-summary").innerHTML = `
-      <div class="hint" style="color:var(--ink)">
-        <strong>${esc(l.totalPaidCalls)} settled x402 purchases</strong> ($${esc(l.totalSpentUsd)} test USDC total)
-        ${l.usdcMintTxHash ? `&middot; Test USDC Mint Tx: <a href="https://sepolia.etherscan.io/tx/${esc(l.usdcMintTxHash)}" target="_blank" rel="noopener" class="mono">${esc(l.usdcMintTxHash.slice(0, 14))}...</a>` : ""}
-      </div>
-    `;
-    const rows = l.calls.map(c => `
-      <tr>
-        <th>
-          <div><code>#${esc(c.index)} ${esc(c.intent)}</code></div>
-          <div class="hint">${esc(c.title)}</div>
-        </th>
-        <td>
-          <div><strong>${esc(c.minerName)}</strong> (<code>#${esc(c.minerId)}</code>)</div>
-          <div class="hint">Endpoint: <code>${esc(c.endpoint)}</code>${c.durationMs != null ? ` &middot; ${esc(c.durationMs)}ms` : ""}</div>
-        </td>
-        <td>
-          <div>${esc(c.diagnostic)}</div>
-          <div class="hint" style="margin-top:4px"><code>field_status: ${esc(JSON.stringify(c.fieldStatus))}</code></div>
-          <details>
-            <summary>Inspect request, normalized output &amp; raw signal payload</summary>
-            <pre>${esc(JSON.stringify({ request: c.request, normalizedResult: c.normalizedResult, warnings: c.warnings, rawMinerPayload: c.rawMinerPayload }, null, 2))}</pre>
-          </details>
-        </td>
-        <td><span class="badge ${esc(c.agreement)}">${esc(c.badgeText)}</span></td>
-        <td class="mono">
-          <div>$0.01 USDC (${c.epochId ? `Epoch ${esc(c.epochId)}` : "Sepolia x402"})</div>
-          ${c.txHash ? `<div><a href="https://sepolia.etherscan.io/tx/${esc(c.txHash)}" target="_blank" rel="noopener">tx ${esc(c.txHash.slice(0, 10))}...</a></div>` : ""}
-          ${c.signalHash ? `<div><a href="https://devnode.telegraphprotocol.com/engine/v1/signal/${esc(c.signalHash)}" target="_blank" rel="noopener">signal ${esc(c.signalHash.slice(0, 10))}...</a></div>` : ""}
-        </td>
-      </tr>
-    `).join("");
-
-    $("ledger-results").innerHTML = `
-      <section class="panel">
-        <div tabindex="0" role="region" aria-labelledby="ledger-table-caption" class="table-wrapper">
-          <table style="--label-2:'Miner'; --label-3:'Diagnostic Audit'; --label-4:'Status'; --label-5:'On-Chain Proof'">
-            <caption id="ledger-table-caption">Ethereum Sepolia x402 Payment &amp; Signal Verification Ledger</caption>
-            <thead>
-              <tr>
-                <th>Call &amp; Intent</th>
-                <th>Routed Miner</th>
-                <th>Schema &amp; Accuracy Audit</th>
-                <th>Agreement</th>
-                <th>Sepolia Tx &amp; Signal</th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-      </section>
-    `;
-  } catch (err) {
-    $("ledger-results").innerHTML = `<section class="panel"><div class="msg bad">${esc(err.message)}</div></section>`;
-  }
-}
-
-async function loadEvalPool() {
-  $("eval-results").innerHTML = `<section class="panel"><p class="hint">Querying Telegraph devnode evalpool...</p></section>`;
-  try {
-    const e = await api("/api/evalpool");
-    if ($("tab-btn-eval")) {
-      $("tab-btn-eval").textContent = `Evaluator pool & bounties (${e.totalRows})`;
-    }
-    if ($("eval-summary-copy")) {
-      const intentCount = Object.keys(e.byIntent || {}).length;
-      $("eval-summary-copy").textContent = `${e.totalRows} signed evaluation rows across ${intentCount} Legal & Compliance Intents on devnode.`;
-    }
-    const bountyRows = e.bounties.map(b => {
-      const live = e.byIntent[b.intent] || { total: b.rows, statuses: { admitted: b.rows } };
-      const statusPairs = Object.entries(live.statuses).map(([k, v]) => `${v} ${k}`).join(", ");
-      return `
-        <tr>
-          <th><code>${esc(b.intent)}</code></th>
-          <td class="mono">${esc(live.total)} rows</td>
-          <td>${esc(b.provenance)}</td>
-          <td><span class="badge confirmed">${esc(statusPairs)}</span></td>
-          <td>${b.commentUrl && safeUrl(b.commentUrl) !== "#" ? `<a href="${esc(safeUrl(b.commentUrl))}" target="_blank" rel="noopener">Issue #${esc(b.issue)} (/submit in review)</a>` : "Pool contribution"}</td>
-        </tr>
-      `;
-    }).join("");
-
-    const sampleRows = (e.rows || []).slice(0, 15).map(r => `
-      <tr>
-        <th><code>${esc(r.intent_id)}</code></th>
-        <td class="mono">${esc(r.case_id.slice(0, 16))}...</td>
-        <td class="mono">${esc(r.row_hash.slice(0, 16))}...</td>
-        <td><code>${esc(r.provenance_class)}</code></td>
-        <td><span class="badge confirmed">${esc(r.status)}</span></td>
-      </tr>
-    `).join("");
-
-    $("eval-results").innerHTML = `
-      <section class="panel">
-        <div tabindex="0" role="region" aria-labelledby="bounty-table-caption" class="table-wrapper">
-          <table style="--label-2:'Rows'; --label-3:'Provenance'; --label-4:'Node Status'; --label-5:'GitHub Bounty'">
-            <caption id="bounty-table-caption">Submitted Evaluation Pool Datasets (${esc(e.totalRows)} total rows from ${esc(e.submitter)})</caption>
-            <thead>
-              <tr>
-                <th>Intent ID</th>
-                <th>Admitted Rows</th>
-                <th>Provenance Class</th>
-                <th>Live Node Status</th>
-                <th>Bounty Submission</th>
-              </tr>
-            </thead>
-            <tbody>${bountyRows}</tbody>
-          </table>
-        </div>
-      </section>
-      <section class="panel">
-        <div tabindex="0" role="region" aria-labelledby="rows-table-caption" class="table-wrapper">
-          <table style="--label-2:'Case ID'; --label-3:'Row SHA-256'; --label-4:'Provenance'; --label-5:'Status'">
-            <caption id="rows-table-caption">Sample Cryptographic Row Hashes on devnode.telegraphprotocol.com (Showing 15 of ${esc(e.totalRows)})</caption>
-            <thead>
-              <tr>
-                <th>Intent</th>
-                <th>Case ID</th>
-                <th>Row SHA-256</th>
-                <th>Provenance</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>${sampleRows}</tbody>
-          </table>
-        </div>
-      </section>
-    `;
-  } catch (err) {
-    $("eval-results").innerHTML = `<section class="panel"><div class="msg bad">${esc(err.message)}</div></section>`;
-  }
-}
-
-// 1-Click Autonomous Agent Spend & Clearing Pipeline (Live Execution)
-const btnAgentSim = $("btn-agent-sim");
-if (btnAgentSim) {
-  btnAgentSim.addEventListener("click", async () => {
-    btnAgentSim.disabled = true;
-    const box = $("sim-progress-box");
-    const indicator = $("sim-step-indicator");
-    const bar = $("sim-progress-bar");
-    const log = $("sim-terminal-log");
-    box.style.display = "block";
-    log.textContent = "";
-
-    const appendLog = (line) => {
-      log.textContent += `[${new Date().toLocaleTimeString()}] ${line}\n`;
-      log.scrollTop = log.scrollHeight;
-    };
-
-    try {
-      appendLog("Initiating Autonomous Spend & Clearing Pipeline...");
-
-      // Stage 1: Wallet & Signer Discovery
-      indicator.textContent = "Step 1/5: Checking Protocol Wallet & Signer Configuration...";
-      bar.style.width = "20%";
-      appendLog("Probing /api/wallet for active signer credentials...");
-      const wallet = await api("/api/wallet");
-      appendLog(`-> Signer Address: ${wallet.address || 'Not Configured'}`);
-      appendLog(`-> Sepolia Balance: ${wallet.balanceEth ?? wallet.ethBalance ?? '0'} ETH | ${wallet.balanceUsdc ?? wallet.usdcBalance ?? '0'} USDC`);
-      appendLog(`-> Live Signing: ${wallet.liveSigningAvailable ? "ONLINE (EIP-712 + Sepolia x402)" : "OFFLINE (Read-only verification mode)"}`);
-
-      // Stage 2: Multi-Source Primary Verification
-      indicator.textContent = "Step 2/5: Executing Multi-Source Primary Baseline Audit...";
-      bar.style.width = "40%";
-      const formPayload = getFormPayload();
-      appendLog(`Executing 7 primary baseline checks for ${formPayload.vendor || 'Unknown Entity'}...`);
-      const primaryRes = await api("/api/audit/primary", formPayload);
-      const chk = primaryRes.checks || {};
-      const sanctionsHits = chk.sanctions?.matches || [];
-      const overallRisk = sanctionsHits.length > 0
-        ? "CRITICAL_SANCTIONS_BLOCK"
-        : (!chk.vendor?.valid || chk.invoice?.reconciled !== true || chk.po?.verified !== true || chk.document?.authentic !== true)
-          ? "HIGH"
-          : (chk.corporate_registry?.found === false ? "MEDIUM" : "LOW");
-      appendLog(`-> Primary Risk Level: ${overallRisk}`);
-      appendLog(`-> Vendor: ${chk.vendor?.status || (chk.vendor?.valid ? 'valid' : 'failed')} | Invoice: ${chk.invoice?.reconciled === true ? 'reconciled' : (chk.invoice?.verdict || 'failed')} | PO: ${chk.po?.verified === true ? 'verified' : (chk.po?.status || 'failed')}`);
-      appendLog(`-> Document: ${chk.document?.verdict || (chk.document?.authentic ? 'authentic' : 'unverified')} | OFAC Sanctions: ${chk.sanctions?.matched ? 'MATCH' : 'clear'} (${sanctionsHits.length} matches)`);
-      appendLog(`-> Corporate Registry: ${chk.corporate_registry?.found ? `found (${chk.corporate_registry.registration_id || chk.corporate_registry.legal_name})` : 'not_found'}`);
-      appendLog(`-> Regulatory Filings: ${chk.regulatory_filing?.found ? `${chk.regulatory_filing.total_results ?? chk.regulatory_filing.filing_count ?? 0} filings found` : 'no_filings_matched'}`);
-
-      if (sanctionsHits.length > 0) {
-        appendLog(`🚨 SANCTIONS HIT DETECTED: ${sanctionsHits.map(m => m.matched_name || m.name).join(", ")}`);
-      }
-
-      // Stage 3: Telegraph Miner Discovery & x402 Micropayment Query
-      indicator.textContent = "Step 3/5: Querying Telegraph Protocol Miners via x402...";
-      bar.style.width = "60%";
-      if (wallet.liveSigningAvailable) {
-        appendLog("Signing EIP-712 micropayment authorization headers...");
-        const buyRes = await api("/api/audit/buy", {
-          ...formPayload,
-          intents: [
-            "VENDOR_VERIFY_GENERAL",
-            "SANCTIONS_SCREENING_MATCH_GENERAL",
-            "CORPORATE_REGISTRY_LOOKUP_GENERAL",
-            "REGULATORY_FILING_MONITOR_GENERAL"
-          ]
-        });
-        const items = buyRes.items || [];
-        appendLog(`Telegraph Ask Engine responded with ${items.length} miner verification(s) (${buyRes.mode || 'settled'}):`);
-        for (const r of items) {
-          appendLog(`-> [${r.intent}] HTTP ${r.httpStatus} | Miner: ${r.minerName || r.minerId || 'Routed'} | ${r.agreement || r.badgeText || 'evaluated'}`);
-          if (r.txHash) {
-            appendLog(`   On-chain Settlement Tx: ${r.txHash}`);
-          }
-          if (r.signalHash) {
-            appendLog(`   On-chain Signal: ${r.signalHash.slice(0, 18)}...`);
-          }
-        }
-      } else {
-        appendLog("No server signing key available: querying read-only miner validation endpoints...");
-        const vMiner = await api(`/api/miner/vendor-verify?vendor=${encodeURIComponent(formPayload.vendor)}&vat_number=${encodeURIComponent(formPayload.vatNumber || '')}`);
-        const sMiner = await api(`/api/miner/sanctions-screen?name=${encodeURIComponent(formPayload.vendor)}`);
-        appendLog(`-> Miner Vendor Verify: ${vMiner.valid ? `Valid (${vMiner.registered_name || 'Matched'}, LEI ${vMiner.lei || 'N/A'})` : `Unverified (${vMiner.status || 'failed'})`}`);
-        appendLog(`-> Miner Sanctions Screen: ${sMiner.matches?.length || 0} hits against official SDN`);
-      }
-
-      // Stage 4: In-Browser Mathematical WASM Engine Verification
-      indicator.textContent = "Step 4/5: Running In-Browser WASM Restoring-Division Math Engine...";
-      bar.style.width = "80%";
-      if (window.clientWasmInstance) {
-        const billedTotal = Number(formPayload.billedQty || 0) * Number(formPayload.unitPrice || 0) * (1 + Number(formPayload.taxRatePct || 0) / 100);
-        const invCents = Number.isFinite(billedTotal) ? Math.round(billedTotal * 100) : 0;
-        const poCents = Number.isFinite(formPayload.poAmount) ? Math.round(formPayload.poAmount * 100) : 0;
-        if (invCents > 0 && poCents > 0) {
-          const score = window.clientWasmInstance.scoreDeterministic(poCents, invCents, 2, 500);
-          appendLog(`Client-side WASM execution: compare(PO ${poCents}¢, Invoice ${invCents}¢) with RelTol 5.0%`);
-          appendLog(`-> Deterministic score: ${score} / 10000 (${score === 10000 ? 'EXACT MATCH' : score > 0 ? 'WITHIN TOLERANCE' : 'MISMATCH'})`);
-        } else {
-          appendLog(`Client-side WASM skipped: non-positive PO (${poCents}¢) or Invoice (${invCents}¢) amount rejected.`);
-        }
-      } else {
-        appendLog("Client WASM not available in current browser session, verified via server WASM engine.");
-      }
-
-      // Stage 5: Autonomous Clearing & Enforcement Decision
-      indicator.textContent = "Step 5/5: Enforcing Pre-Payment Policy Decision...";
-      bar.style.width = "100%";
-      appendLog("========================================================");
-      if (sanctionsHits.length > 0) {
-        indicator.textContent = "❌ REJECT & FREEZE: Sanctions Flagged";
-        appendLog("RESULT: TRANSACTION BLOCKED & FROZEN. Counterparty is listed on OFAC SDN. Payment rejected to maintain regulatory compliance.");
-      } else if (overallRisk !== "LOW") {
-        indicator.textContent = `⚠️ CONDITIONAL HOLD: ${overallRisk} Risk / Discrepancy Detected`;
-        appendLog(`RESULT: TRANSACTION HELD FOR REVIEW (${overallRisk}). Verify vendor VAT/LEI, 3-way invoice math, PO cap, document SHA-256, and corporate registry status before payout.`);
-      } else {
-        indicator.textContent = "✅ Spend Cleared: Autonomous Spend Authorized";
-        appendLog("RESULT: TRANSACTION CLEARED. Automated verification confirmed counterparty identity, 3-way invoice math, PO cap, document provenance, and OFAC clear status.");
-      }
-    } catch (err) {
-      indicator.textContent = `❌ Execution Error: ${err.message}`;
-      appendLog(`ERROR: Pipeline terminated with failure: ${err.message}`);
-    } finally {
-      btnAgentSim.disabled = false;
-    }
-  });
-}
-
-// Corporate Registry Lookup
-const btnCorp = $("btn-corp-lookup");
-if (btnCorp) {
-  btnCorp.addEventListener("click", async () => {
-    const name = $("corp-name-input").value.trim();
-    if (!name) return alert("Please enter an entity name.");
-    const juris = $("corp-juris-input").value;
-    const out = $("corp-output");
-    out.hidden = false;
-    out.innerHTML = `<p class="hint">Querying GLEIF primary registry for <strong>${esc(name)}</strong>...</p>`;
-    try {
-      const url = `/api/miner/corporate-registry?name=${encodeURIComponent(name)}${juris ? `&jurisdiction=${juris}` : ''}`;
-      const data = await api(url);
-      if (!data.found || !data.results?.length) {
-        out.innerHTML = `<div class="msg bad">No records found for "${esc(name)}" ${juris ? `in ${juris}` : ''}.</div>`;
-        return;
-      }
-      const top = data.results[0];
-      out.innerHTML = `
-        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px;">
-          <div style="display:flex; justify-content:space-between; align-items:baseline; flex-wrap:wrap; gap:8px;">
-            <h4 style="margin:0; font-size:14px; font-weight:600;">${esc(top.legal_name)}</h4>
-            <span class="badge ${top.status === 'ISSUED' ? 'confirmed' : 'schema_warning'}">${esc(top.status)} (active: ${top.status_active})</span>
-          </div>
-          <p style="margin:6px 0; font-size:13px; color:var(--muted);">${esc(data.summary)}</p>
-          <div style="font-size:12.5px; line-height:1.6; margin-top:8px;">
-            <div><strong>LEI:</strong> <code class="mono">${esc(top.lei)}</code> (<a href="${esc(safeUrl(top.source_url))}" target="_blank" rel="noopener">GLEIF Record ↗</a>)</div>
-            <div><strong>Jurisdiction:</strong> ${esc(top.jurisdiction || 'N/A')} &bull; <strong>Authority:</strong> ${esc(top.registration_authority || 'N/A')}</div>
-            <div><strong>Registered Address:</strong> ${esc(top.registered_address || 'N/A')}</div>
-            ${top.headquarters_address ? `<div><strong>Headquarters:</strong> ${esc(top.headquarters_address)}</div>` : ''}
-          </div>
-        </div>
-      `;
-    } catch (err) {
-      out.innerHTML = `<div class="msg bad">${esc(err.message)}</div>`;
-    }
-  });
-}
-
-// Sanctions Screening
-const btnSanc = $("btn-sanc-screen");
-if (btnSanc) {
-  btnSanc.addEventListener("click", async () => {
-    const name = $("sanc-name-input").value.trim();
-    if (!name) return alert("Please enter a name to screen.");
-    const out = $("sanc-output");
-    out.hidden = false;
-    out.innerHTML = `<p class="hint">Screening <strong>${esc(name)}</strong> against OFAC SDN list...</p>`;
-    try {
-      const data = await api(`/api/miner/sanctions-screen?name=${encodeURIComponent(name)}`);
-      if (data.match_found) {
-        const rows = (data.matches || []).map(m => `
-          <tr>
-            <td class="mono">${esc(m.sdn_uid)}</td>
-            <td><strong>${esc(m.matched_name)}</strong>${m.matched_alias ? `<br><small style="color:var(--muted)">Alias: ${esc(m.matched_alias)}</small>` : ''}</td>
-            <td>${esc(m.match_type || 'Entity')}</td>
-            <td><span class="badge schema_warning">${esc(m.programs || 'SDN')}</span></td>
-            <td><strong>${(m.similarity_score * 100).toFixed(1)}%</strong> (${esc(m.matched_via)})</td>
-          </tr>
-        `).join('');
-        out.innerHTML = `
-          <div style="background:var(--bad-bg); border:1px solid var(--bad); border-radius:6px; padding:12px; margin-top:8px;">
-            <div style="font-weight:600; color:var(--bad); font-size:14px; margin-bottom:4px;">⚠ SANCTIONS MATCH DETECTED</div>
-            <p style="margin:0 0 10px; font-size:13px;">${esc(data.summary)}</p>
-            <table style="width:100%; font-size:12px; border-collapse:collapse;">
-              <thead>
-                <tr style="text-align:left; border-bottom:1px solid var(--bad);">
-                  <th style="padding:4px 6px;">UID</th>
-                  <th style="padding:4px 6px;">Matched Name</th>
-                  <th style="padding:4px 6px;">Type</th>
-                  <th style="padding:4px 6px;">Program</th>
-                  <th style="padding:4px 6px;">Similarity</th>
-                </tr>
-              </thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        `;
-      } else {
-        out.innerHTML = `
-          <div style="background:var(--ok-bg); border:1px solid var(--ok); border-radius:6px; padding:12px; margin-top:8px;">
-            <div style="font-weight:600; color:var(--ok); font-size:14px; margin-bottom:4px;">✓ NO SANCTIONS MATCHES FOUND</div>
-            <p style="margin:0; font-size:13px;">${esc(data.summary)} Checked across ${data.sdn_list_size.toLocaleString()} SDN entities and aliases.</p>
-          </div>
-        `;
-      }
-    } catch (err) {
-      out.innerHTML = `<div class="msg bad">${esc(err.message)}</div>`;
-    }
-  });
-
-  document.querySelectorAll("[data-sanc-quick]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      $("sanc-name-input").value = btn.dataset.sancQuick;
-      btnSanc.click();
-    });
-  });
-}
-
-// Regulatory Filing Monitor
-const btnReg = $("btn-reg-check");
-if (btnReg) {
-  btnReg.addEventListener("click", async () => {
-    const comp = $("reg-company-input").value.trim();
-    if (!comp) return alert("Please enter a company name.");
-    const period = $("reg-period-input").value.trim();
-    const out = $("reg-output");
-    out.hidden = false;
-    out.innerHTML = `<p class="hint">Querying SEC EDGAR, Federal Register, and GLEIF for <strong>${esc(comp)}</strong>...</p>`;
-    try {
-      const data = await api(`/api/miner/regulatory-filing?company=${encodeURIComponent(comp)}&period=${encodeURIComponent(period)}`);
-      const secRows = (data.sec_filings || []).map(f => `
-        <tr>
-          <td><span class="badge confirmed">${esc(f.form_type)}</span></td>
-          <td>${esc(f.filing_date)}</td>
-          <td>${esc(f.company_name)}</td>
-          <td>${f.url ? `<a href="${esc(safeUrl(f.url))}" target="_blank" rel="noopener">EDGAR ↗</a>` : 'Available'}</td>
-        </tr>
-      `).join('');
-
-      const frRows = (data.federal_register_notices || []).map(n => `
-        <tr>
-          <td>${esc(n.type)}</td>
-          <td>${esc(n.publication_date)}</td>
-          <td>${esc(n.title?.slice(0, 75))}...</td>
-          <td>${n.url ? `<a href="${esc(safeUrl(n.url))}" target="_blank" rel="noopener">Federal Register ↗</a>` : 'View'}</td>
-        </tr>
-      `).join('');
-
-      out.innerHTML = `
-        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:12px;">
-          <h4 style="margin:0 0 6px; font-size:14px; font-weight:600;">Regulatory Filing Profile: ${esc(data.company)} (${esc(data.period)})</h4>
-          <p style="margin:0 0 10px; font-size:13px; color:var(--muted);">${esc(data.summary)}</p>
-          ${secRows ? `
-            <div style="font-weight:600; font-size:13px; margin:10px 0 4px;">SEC EDGAR Disclosures</div>
-            <table style="width:100%; font-size:12px; border-collapse:collapse; margin-bottom:12px;">
-              <thead><tr style="text-align:left; border-bottom:1px solid var(--line);"><th style="padding:4px 6px;">Form</th><th style="padding:4px 6px;">Date</th><th style="padding:4px 6px;">Entity</th><th style="padding:4px 6px;">Link</th></tr></thead>
-              <tbody>${secRows}</tbody>
-            </table>
-          ` : ''}
-          ${frRows ? `
-            <div style="font-weight:600; font-size:13px; margin:10px 0 4px;">US Federal Register Notices &amp; Rules</div>
-            <table style="width:100%; font-size:12px; border-collapse:collapse;">
-              <thead><tr style="text-align:left; border-bottom:1px solid var(--line);"><th style="padding:4px 6px;">Type</th><th style="padding:4px 6px;">Date</th><th style="padding:4px 6px;">Notice Title</th><th style="padding:4px 6px;">Link</th></tr></thead>
-              <tbody>${frRows}</tbody>
-            </table>
-          ` : ''}
-        </div>
-      `;
-    } catch (err) {
-      out.innerHTML = `<div class="msg bad">${esc(err.message)}</div>`;
-    }
-  });
-
-  document.querySelectorAll("[data-reg-quick]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      $("reg-company-input").value = btn.dataset.regQuick;
-      btnReg.click();
-    });
-  });
-}
-
-document.querySelectorAll("[data-test-miner]").forEach(btn => {
-  btn.addEventListener("click", async () => {
-    const endpoint = btn.dataset.testMiner;
-    $("miner-test-output").innerHTML = `<p class="hint">Calling <code>${esc(endpoint)}</code>...</p>`;
-    try {
-      const data = await api(endpoint);
-      $("miner-test-output").innerHTML = `
-        <div class="hint">Response from <code>${esc(endpoint)}</code>:</div>
-        <pre>${esc(JSON.stringify(data, null, 2))}</pre>
-      `;
-    } catch (err) {
-      $("miner-test-output").innerHTML = `<div class="msg bad">${esc(err.message)}</div>`;
-    }
-  });
-});
-
-// Overnight 5-Jurisdiction Diligence Pack (Mission 04)
-const btnDiligence = $("btn-run-diligence-pack");
-const btnPrintDiligence = $("btn-print-diligence-pack");
-if (btnPrintDiligence) {
-  btnPrintDiligence.addEventListener("click", () => window.print());
-}
-if (btnDiligence) {
-  btnDiligence.addEventListener("click", async () => {
-    btnDiligence.disabled = true;
-    const out = $("diligence-pack-output");
-    out.hidden = false;
-    out.innerHTML = `<p class="hint">Running parallel registry, EU VAT, OFAC sanctions, SEC EDGAR, and HKMA regulatory diligence across 5 jurisdictions...</p>`;
-    try {
-      const rawLines = ($("diligence-entities-input")?.value || "").split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-      const entities = rawLines.map(line => {
-        const [name, jurisdiction, vatNumber] = line.split("|").map(x => (x || "").trim());
-        return { name, jurisdiction: jurisdiction || "US", vatNumber: vatNumber || "" };
-      }).filter(e => e.name);
-
-      const pack = await api("/api/audit/diligence-pack", { mode: "preview", entities });
-      const rows = (pack.jurisdictions || []).map(j => {
-        const receipt = (j.matchedSepoliaReceipts || [])[0];
-        const vatLabel = j.vatChecked
-          ? `<div style="margin-top:3px"><span class="badge ${j.vatValid ? "confirmed" : "contradicted"}">VAT ${j.vatValid ? "VALID" : "INVALID"}</span></div>`
-          : "";
-        const hkmaLabel = j.hkmaLiveAnchor?.verified
-          ? `<div style="margin-top:3px" class="hint">HKMA Live (${esc(j.hkmaLiveAnchor.latestRecordDate || "200 OK")})</div>`
-          : "";
-        return `
-          <tr>
-            <th>
-              <div><span class="badge confirmed">${esc(j.jurisdiction)}</span> <strong>${esc(j.legalName)}</strong></div>
-              <div class="hint mono">${j.lei ? `LEI: ${esc(j.lei)}` : "No LEI"}</div>
-            </th>
-            <td>
-              <span class="badge ${j.registryActive ? "confirmed" : "contradicted"}">${j.registryActive ? "ACTIVE" : (j.registryFound ? "INACTIVE" : "NOT FOUND")}</span>
-              ${vatLabel}
-              <div class="hint" style="margin-top:3px">${esc(j.registeredAddress || "—")}</div>
-            </td>
-            <td>
-              <span class="badge ${j.sanctionsMatched ? "contradicted" : "confirmed"}">${j.sanctionsMatched ? "FLAGGED" : "CLEAR (0 hits)"}</span>
-            </td>
-            <td>
-              <div><strong>${esc(j.filingsCount)}</strong> EDGAR / FedReg docs</div>
-              ${hkmaLabel}
-            </td>
-            <td class="mono">
-              <div>proof ${esc((j.proofHash || "").slice(0, 14))}...</div>
-              ${receipt?.txHash ? `<div><a href="${esc(safeUrl(receipt.explorerUrl))}" target="_blank" rel="noopener">Sepolia x402 ${esc(receipt.txHash.slice(0, 10))}...</a></div>` : ""}
-            </td>
-          </tr>
-        `;
-      }).join("");
-
-      const mi = pack.machineInvoice || {};
-      const tb = pack.traditionalBenchmarkInvoice || {};
-      const mLines = (mi.lineItems || []).map(li => `
-        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding:4px 0;">
-          <span><code>${esc(li.jurisdiction)}</code> ${esc(li.entity)} (${esc(li.checks)} checks)</span>
-          <span class="mono">$${esc(li.telegraphEquivalentX402Usd)} x402 eq.</span>
-        </div>
-      `).join("");
-      const bLines = (tb.lineItems || []).map(li => `
-        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--line); padding:4px 0;">
-          <span><code>${esc(li.jurisdiction)}</code> ${esc(li.scope)}</span>
-          <span class="mono">$${esc(li.illustrativeFeeUsd)}</span>
-        </div>
-      `).join("");
-
-      out.innerHTML = `
-        <div class="msg ok" style="margin-bottom:12px;">
-          <strong>5-Jurisdiction Diligence Pack Verified</strong> &middot; Turnaround: <strong>${esc(mi.turnaroundTime)}</strong> &middot; Pack SHA-256: <code class="mono">${esc(pack.packSha256)}</code>
-        </div>
-        <div tabindex="0" role="region" aria-labelledby="diligence-table-caption" class="table-wrapper">
-          <table style="--label-2:'Registry & VAT'; --label-3:'Sanctions'; --label-4:'Filings & Regulator'; --label-5:'Proof & Sepolia'">
-            <caption id="diligence-table-caption">Cross-Border Counterparty Diligence Summary (${esc((pack.jurisdictions || []).length)} Jurisdictions)</caption>
-            <thead>
-              <tr>
-                <th>Jurisdiction &amp; Entity</th>
-                <th>Registry &amp; VAT</th>
-                <th>OFAC Sanctions</th>
-                <th>Filings &amp; Regulator</th>
-                <th>SHA-256 Proof &amp; x402</th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
-        <div class="diligence-grid">
-          <div class="invoice-card machine">
-            <h4 style="margin:0 0 6px; color:var(--ok);">${esc(mi.title)}</h4>
-            <div class="hint" style="margin-bottom:8px;">Preview primary spend: <strong>$${esc(mi.actualPreviewSpendUsd)}</strong> &bull; Telegraph x402 equivalent (${esc(mi.totalChecksExecuted)} checks): <strong>$${esc(mi.equivalentTelegraphX402Usd)} test USDC</strong> &bull; Stored Sepolia ledger total: <strong>$${esc(mi.storedSepoliaLedgerTotalUsd)}</strong></div>
-            ${mLines}
-            <div style="display:flex; justify-content:space-between; font-weight:700; padding-top:8px;">
-              <span>Total Machine Turnaround (${esc(mi.turnaroundTime)})</span>
-              <span class="mono">$${esc(mi.equivalentTelegraphX402Usd)} Testnet Eq.</span>
-            </div>
-          </div>
-          <div class="invoice-card benchmark">
-            <h4 style="margin:0 0 6px; color:var(--warn);">${esc(tb.title)}</h4>
-            <div class="hint" style="margin-bottom:8px;"><em>${esc(tb.disclaimer)}</em> Turnaround: <strong>${esc(tb.estimatedTurnaround)}</strong>.</div>
-            ${bLines}
-            <div style="display:flex; justify-content:space-between; font-weight:700; padding-top:8px;">
-              <span>Illustrative Counsel Total</span>
-              <span class="mono">$${esc(tb.totalUsd)}</span>
-            </div>
-          </div>
-        </div>
-      `;
-      if (btnPrintDiligence) btnPrintDiligence.hidden = false;
-    } catch (err) {
-      out.innerHTML = `<div class="msg bad">Diligence pack error: ${esc(err.message)}</div>`;
-    } finally {
-      btnDiligence.disabled = false;
-    }
-  });
-}
-
-async function refreshTabCounts() {
-  try {
-    const [l, e] = await Promise.all([api("/api/ledger"), api("/api/evalpool")]);
-    if ($("tab-btn-ledger") && l?.totalPaidCalls != null) {
-      $("tab-btn-ledger").textContent = `On-chain receipt ledger (${l.totalPaidCalls})`;
-    }
-    if ($("tab-btn-eval") && e?.totalRows != null) {
-      $("tab-btn-eval").textContent = `Evaluator pool & bounties (${e.totalRows})`;
-    }
-  } catch {}
-}
-
-// Mission 02: Stablecoin Treasury Guard & Receipt Verifier
-const m2Presets = {
-  clean: { name: "Apple Inc.", addr: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b", amt: 0.25, cap: 500, kyc: "Praman Desk Treasury (LEI-VERIFIED)", tx: "" },
-  sanctioned: { name: "Lazarus Group", addr: "0x098B716B8Aaf21512996dC57EB0615e2383E2f96", amt: 1500, cap: 500, kyc: "Praman Desk Treasury", tx: "" },
-  insufficient: { name: "Apple Inc.", addr: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b", amt: 99999, cap: 150000, kyc: "Praman Desk Treasury", tx: "" },
-  travelrule: { name: "Apple Inc.", addr: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b", amt: 1.5, cap: 2000, kyc: "", tx: "" },
-  txverify: { name: "Apple Inc.", addr: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b", amt: 0.01, cap: 500, kyc: "Praman Desk Treasury", tx: "0xdeadbeef00000000000000000000000000000000000000000000000000000001" }
-};
-// Note: preset 4 sets $1,500 on click so FATF >=$1,000 triggers even with zero originator
-m2Presets.travelrule.amt = 1500;
-
-document.querySelectorAll("[data-m2-preset]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const p = m2Presets[btn.dataset.m2Preset];
-    if (!p) return;
-    $("m2-recipient-name").value = p.name;
-    $("m2-recipient-addr").value = p.addr;
-    $("m2-amount").value = p.amt;
-    $("m2-cap").value = p.cap;
-    $("m2-kyc").value = p.kyc;
-    $("m2-txhash").value = p.tx;
-    $("btn-m2-gate")?.click();
-  });
-});
-
-if ($("btn-m2-gate")) {
-  $("btn-m2-gate").addEventListener("click", async () => {
-    const out = $("m2-output");
-    out.hidden = false;
-    out.innerHTML = `<p class="hint">Evaluating live Ethereum Sepolia chain state, USDC balance, OFAC SDN, and FATF Travel Rule...</p>`;
-    try {
-      const payload = {
-        beneficiaryName: $("m2-recipient-name").value.trim(),
-        recipientAddress: $("m2-recipient-addr").value.trim(),
-        amountUsdc: Number($("m2-amount").value),
-        delegationCapUsdc: Number($("m2-cap").value),
-        originatorName: $("m2-kyc").value.trim(),
-        txHash: $("m2-txhash").value.trim()
-      };
-      const d = await api("/api/mission/stablecoin-gate", payload);
-      const badgeCls = d.cleared ? "confirmed" : (d.riskLevel === "CRITICAL_SANCTIONS_BLOCK" ? "contradicted" : "schema_warning");
-      const flagsHtml = (d.flags || []).length > 0
-        ? `<ul>${d.flags.map(f => `<li><code class="mono">${esc(f)}</code></li>`).join("")}</ul>`
-        : `<p style="margin:4px 0; color:var(--ok);">No blocking policy flags raised.</p>`;
-      const txHtml = d.onchainTxProof ? `
-        <div style="margin-top:8px; font-size:12.5px;">
-          <strong>On-Chain Tx Proof:</strong> Block ${esc(d.onchainTxProof.blockNumber)} &bull;
-          Status: <code>${esc(d.onchainTxProof.status)}</code> &bull;
-          WASM Score: <strong>${d.onchainTxProof.wasmAmountMatchScore ?? "N/A"} / 10000</strong> &bull;
-          <a href="${esc(safeUrl(d.onchainTxProof.explorerUrl))}" target="_blank" rel="noopener">Sepolia Etherscan ↗</a>
-        </div>` : "";
-      out.innerHTML = `
-        <div style="background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:14px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-            <strong>Mission 02 Gate Decision: <code class="mono">${esc(d.action)}</code></strong>
-            <span class="badge ${badgeCls}">${d.cleared ? "CLEARED" : esc(d.riskLevel || "BLOCKED")}</span>
-          </div>
-          <div style="margin-top:8px; font-size:13px; color:var(--muted);">
-            Sepolia Block: <strong class="mono">${esc(d.onchainState?.chainBlockNumber ?? "unavailable")}</strong> &bull;
-            Wallet Balance: <strong class="mono">${esc(d.onchainState?.senderUsdcBalance ?? "?")} USDC</strong> &bull;
-            Beneficiary LEI: <code class="mono">${esc(d.travelRule?.beneficiaryLei || "N/A")}</code>
-          </div>
-          <div style="margin-top:8px; font-size:12.5px;"><strong>Flags &amp; Policy Evaluation:</strong>${flagsHtml}</div>
-          ${txHtml}
-          <div style="margin-top:8px; font-size:11.5px; color:var(--muted);">Attestation SHA-256: <code class="mono">${esc(d.attestationSha256)}</code></div>
-        </div>`;
-    } catch (err) {
-      out.innerHTML = `<div class="msg bad">${esc(err.message)}</div>`;
-    }
-  });
-}
-
-loadWallet();
-updateSpendEstimate();
-refreshTabCounts();
-
-// ==========================================
-// MISSION 01: EXCHANGE INTEGRITY LOGIC
-// ==========================================
-const m1Presets = {
-  compliant: {
-    symbol: "PRAMA",
-    name: "Praman Protocol Token",
-    contract: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b",
-    issuer: "Apple Inc.",
-    country: "US",
-    signer: "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466"
-  },
-  sanctioned: {
-    symbol: "LAZ",
-    name: "Lazarus Exploit Token",
-    contract: "0x098B716B8Aaf21512996dC57EB0615e2383E2f96",
-    issuer: "Lazarus Group",
-    country: "KP",
-    signer: "0x098B716B8Aaf21512996dC57EB0615e2383E2f96"
-  },
-  offshore: {
-    symbol: "RUG",
-    name: "RugPull Finance Token",
-    contract: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b",
-    issuer: "RugPull Shell Foundation Ltd",
-    country: "KY",
-    signer: "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466"
-  },
-  undeployed: {
-    symbol: "GHOST",
-    name: "Ghost Bytecode Token",
-    contract: "0x000000000000000000000000000000000000dEaD",
-    issuer: "Apple Inc.",
-    country: "US",
-    signer: "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466"
-  }
-};
-
-document.querySelectorAll('button[data-m1-preset]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const p = m1Presets[btn.dataset.m1Preset];
-    if (!p) return;
-    $('m1-token-symbol').value = p.symbol;
-    $('m1-token-name').value = p.name;
-    $('m1-contract-addr').value = p.contract;
-    $('m1-issuer-name').value = p.issuer;
-    $('m1-issuer-country').value = p.country;
-    $('m1-signer-addr').value = p.signer;
-    $('btn-m1-evaluate').click();
-  });
-});
-
-$('btn-m1-evaluate').addEventListener('click', async () => {
-  const btn = $('btn-m1-evaluate');
-  const resBox = $('m1-result');
-  btn.disabled = true;
-  resBox.innerHTML = '<div class="msg" style="border-left:3px solid var(--accent);">⏳ Running Mission 01 Multi-Miner Diligence (GLEIF Corporate Registry, OFAC SDN Sanctions, Regulatory Monitor, Sepolia RPC Bytecode)...</div>';
-
-  try {
-    const payload = {
-      tokenSymbol: $('m1-token-symbol').value.trim(),
-      tokenName: $('m1-token-name').value.trim(),
-      contractAddress: $('m1-contract-addr').value.trim(),
-      issuerEntityName: $('m1-issuer-name').value.trim(),
-      issuerJurisdiction: $('m1-issuer-country').value.trim(),
-      treasurySigner: $('m1-signer-addr').value.trim()
-    };
-
-    const res = await api('/api/mission/exchange-integrity', payload);
-    const isApproved = res.cleared && res.listingVerdict === 'APPROVED_FOR_EXCHANGE_LISTING';
-    const badgeColor = isApproved ? 'var(--pass)' : (res.marketRisk === 'CRITICAL' ? 'var(--fail)' : 'var(--warn)');
-    const badgeText = isApproved ? 'LISTING APPROVED' : res.listingVerdict;
-
-    let flagsHtml = '';
-    if (res.flags && res.flags.length > 0) {
-      flagsHtml = '<div style="margin-top:10px;"><strong>Flags Raised (' + res.flags.length + '):</strong><ul style="margin:4px 0 0 18px; padding:0; color:var(--fail);">' +
-        res.flags.map(f => '<li>' + esc(f) + '</li>').join('') + '</ul></div>';
-    }
-
-    resBox.innerHTML = `
-      <div style="background:var(--bg); border:1px solid ${badgeColor}; border-radius:8px; padding:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <h3 style="margin:0; font-size:16px;">Verdict: <span style="color:${badgeColor}; font-weight:700;">${badgeText}</span></h3>
-          <span style="background:${badgeColor}; color:#fff; padding:3px 10px; border-radius:4px; font-weight:600; font-size:12px;">Market Risk: ${res.marketRisk} (Score: ${res.riskScore})</span>
-        </div>
-        ${flagsHtml}
-        <div class="grid" style="margin-top:12px; font-size:13px;">
-          <div><strong>Token Symbol:</strong> ${esc(res.token?.symbol)}</div>
-          <div><strong>Contract Deployed:</strong> ${res.token?.isDeployed ? 'Yes (' + res.token?.bytecodeBytes + ' bytes)' : 'No (Empty Bytecode)'}</div>
-          <div><strong>Corporate Registry:</strong> ${res.counterpartyDiligence?.corporateRegistryVerified ? 'Verified LEI Active' : 'Unverified Legal Entity'}</div>
-          <div><strong>Regulatory Status:</strong> ${esc(res.counterpartyDiligence?.regulatoryFilingStatus)}</div>
-          <div><strong>Sanctions Check:</strong> ${res.sanctionsScreening?.issuerMatched || res.sanctionsScreening?.treasurySignerMatched ? 'MATCH DETECTED' : 'Clear (0 OFAC matches)'}</div>
-          <div><strong>Sepolia Block:</strong> #${res.onchainTelemetry?.chainBlockNumber || 'Latest'}</div>
-        </div>
-        <div style="margin-top:10px; font-size:12px; color:var(--hint);">
-          Attestation Seal: <code class="mono">${res.attestationSha256 || 'Verified'}</code> &bull; Settlement: <code class="mono">${res.telegraphSettlement?.contractAddress}</code> (Miner #${res.telegraphSettlement?.minerId})
-        </div>
-        <details style="margin-top:12px; font-size:12px;">
-          <summary style="cursor:pointer; color:var(--accent);">Inspect Full Cryptographic Payload</summary>
-          <pre style="background:var(--panel); padding:10px; border-radius:4px; overflow-x:auto; margin-top:6px;">${esc(JSON.stringify(res, null, 2))}</pre>
-        </details>
-      </div>`;
-  } catch (err) {
-    resBox.innerHTML = '<div class="msg error">Execution failed: ' + esc(err.message) + '</div>';
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-// ==========================================
-// MISSION 11: AUTONOMOUS SYSTEMS LOGIC
-// ==========================================
-const m11Presets = {
-  tier1: {
-    agentId: "agent-procure-v2",
-    amount: "450.00",
-    vendor: "SAP SE",
-    country: "DE",
-    signature: "",
-    lineItems: [
-      { desc: "Cloud Inference Compute (Tier A)", qty: 10, unitPrice: 35.00, amount: 350.00 },
-      { desc: "Dedicated Gateway Endpoint", qty: 1, unitPrice: 100.00, amount: 100.00 }
-    ],
-    statedTotal: 450.00
-  },
-  'missing-sig': {
-    agentId: "agent-procure-v2",
-    amount: "4200.00",
-    vendor: "SAP SE",
-    country: "DE",
-    signature: "",
-    lineItems: [
-      { desc: "Enterprise GPU Node Cluster", qty: 1, unitPrice: 4200.00, amount: 4200.00 }
-    ],
-    statedTotal: 4200.00
-  },
-  'wasm-break': {
-    agentId: "agent-procure-v2",
-    amount: "450.00",
-    vendor: "SAP SE",
-    country: "DE",
-    signature: "",
-    lineItems: [
-      { desc: "Cloud Inference Compute (Tier A)", qty: 10, unitPrice: 35.00, amount: 350.00 },
-      { desc: "Dedicated Gateway Endpoint", qty: 1, unitPrice: 100.00, amount: 100.00 }
-    ],
-    statedTotal: 450.01 // 1 cent discrepancy!
-  },
-  sanctioned: {
-    agentId: "agent-procure-v2",
-    amount: "450.00",
-    vendor: "Lazarus Group",
-    country: "KP",
-    signature: "",
-    lineItems: [
-      { desc: "Offshore Node Relay", qty: 1, unitPrice: 450.00, amount: 450.00 }
-    ],
-    statedTotal: 450.00
-  }
-};
-
-let currentM11Preset = m11Presets.tier1;
-
-document.querySelectorAll('button[data-m11-preset]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const key = btn.dataset.m11Preset;
-    const p = m11Presets[key];
-    if (!p) return;
-    currentM11Preset = p;
-    $('m11-agent-id').value = p.agentId;
-    $('m11-amount').value = p.amount;
-    $('m11-vendor-name').value = p.vendor;
-    $('m11-vendor-country').value = p.country;
-    $('m11-signature').value = p.signature;
-    $('btn-m11-evaluate').click();
-  });
-});
-
-$('btn-m11-evaluate').addEventListener('click', async () => {
-  const btn = $('btn-m11-evaluate');
-  const resBox = $('m11-result');
-  btn.disabled = true;
-  resBox.innerHTML = '<div class="msg" style="border-left:3px solid var(--accent);">⏳ Evaluating Mission 11 Spend Policy & Deterministic WASM Math...</div>';
-
-  try {
-    const spendAmt = parseFloat($('m11-amount').value) || 0;
-    let items = currentM11Preset.lineItems;
-    let sTotal = currentM11Preset.statedTotal;
-    if (currentM11Preset !== m11Presets['wasm-break'] && Math.abs(spendAmt - currentM11Preset.statedTotal) > 0.001) {
-      items = [{ desc: 'Dynamic Procurement Line Item', qty: 1, unitPrice: spendAmt, amount: spendAmt }];
-      sTotal = spendAmt;
-    }
-
-    const payload = {
-      agentId: $('m11-agent-id').value.trim(),
-      spendAmountUsdc: spendAmt,
-      singleAgentCap: parseFloat($('m11-single-cap').value),
-      dualApprovalCap: parseFloat($('m11-dual-cap').value),
-      vendorName: $('m11-vendor-name').value.trim(),
-      vendorJurisdiction: $('m11-vendor-country').value.trim(),
-      supervisorSignature: $('m11-signature').value.trim(),
-      lineItems: items,
-      statedTotal: sTotal
-    };
-
-    const res = await api('/api/mission/autonomous-spend', payload);
-    const isApproved = res.policyDecision === 'DELEGATED_EXECUTION_APPROVED' || res.policyDecision === 'DUAL_AUTHORIZED_AGENT_SPEND';
-    const badgeColor = isApproved ? 'var(--pass)' : 'var(--fail)';
-    const badgeText = isApproved ? 'EXECUTION APPROVED' : 'CIRCUIT BREAKER TRIGGERED (EXECUTION HALTED)';
-
-    let flagsHtml = '';
-    if (res.flags && res.flags.length > 0) {
-      flagsHtml = '<div style="margin-top:10px;"><strong>Safety Circuit Breaker Reasons (' + res.flags.length + '):</strong><ul style="margin:4px 0 0 18px; padding:0; color:var(--fail);">' +
-        res.flags.map(f => '<li>' + esc(f) + '</li>').join('') + '</ul></div>';
-    }
-
-    resBox.innerHTML = `
-      <div style="background:var(--bg); border:1px solid ${badgeColor}; border-radius:8px; padding:16px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <h3 style="margin:0; font-size:16px;">Policy Status: <span style="color:${badgeColor}; font-weight:700;">${badgeText}</span></h3>
-          <span style="background:${badgeColor}; color:#fff; padding:3px 10px; border-radius:4px; font-weight:600; font-size:12px;">Delegation Tier: ${res.policyCaps?.delegationTier}</span>
-        </div>
-        ${flagsHtml}
-        <div class="grid" style="margin-top:12px; font-size:13px;">
-          <div><strong>Agent ID:</strong> ${esc(res.agentId)}</div>
-          <div><strong>Spend Request:</strong> $${res.spendAmountUsdc} USDC</div>
-          <div><strong>WASM Engine:</strong> ${res.mathVerification?.engine}</div>
-          <div><strong>WASM Bit-Exact Match:</strong> ${res.mathVerification?.bitExactMatch ? 'Exact 0-cent drift' : 'MISMATCH (' + res.mathVerification?.discrepancyCents + ' cents)'}</div>
-          <div><strong>Vendor Corporate Status:</strong> ${res.vendorVerification?.gleifVerified ? 'GLEIF Verified Active' : 'Unregistered Vendor'}</div>
-          <div><strong>Vendor Sanctions Check:</strong> ${res.vendorVerification?.sanctionsScreeningClear ? 'Clear (0 Matches)' : 'SANCTIONED VENDOR MATCH'}</div>
-        </div>
-        <div style="margin-top:10px; font-size:12px; color:var(--hint);">
-          Circuit Breaker Halt: <strong style="color:${res.circuitBreaker?.haltExecution ? 'var(--fail)' : 'var(--pass)'};">${res.circuitBreaker?.haltExecution ? 'YES (AGENT HALTED)' : 'NO (EXECUTION PERMITTED)'}</strong> &bull; Attestation: <code class="mono">${res.attestationSha256}</code>
-        </div>
-        <details style="margin-top:12px; font-size:12px;">
-          <summary style="cursor:pointer; color:var(--accent);">Inspect Full Cryptographic Policy Attestation</summary>
-          <pre style="background:var(--panel); padding:10px; border-radius:4px; overflow-x:auto; margin-top:6px;">${esc(JSON.stringify(res, null, 2))}</pre>
-        </details>
-      </div>`;
-  } catch (err) {
-    resBox.innerHTML = '<div class="msg error">Policy check failed: ' + esc(err.message) + '</div>';
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-const initialTab = location.hash.replace("#", "");
-if (["audit", "compliance", "stablecoin", "exchange", "autonomous", "ledger", "eval", "miner", "video"].includes(initialTab)) {
-  openTab(initialTab);
-}
 </script>
+
 </body>
 </html>

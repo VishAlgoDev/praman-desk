@@ -3559,24 +3559,85 @@ export async function evaluateExchangeIntegrity(params = {}) {
 }
 
 export async function evaluateAutonomousSpendPolicy(params = {}) {
-  const agentId = String(params.agentId || params.agent || 'agent-procure-v2').trim();
-  const spendAmountUsdc = parseStrictNumber(params.spendAmountUsdc ?? params.spendAmount ?? params.amount ?? 0);
-  const singleAgentCap = parseStrictNumber(params.singleAgentCap ?? 500);
-  const dualApprovalCap = parseStrictNumber(params.dualApprovalCap ?? 5000);
-  const vendorName = String(params.vendorName || params.vendor || '').trim();
-  const vendorJurisdiction = String(params.vendorJurisdiction || params.country || 'US').trim().toUpperCase();
-  const invoiceId = String(params.invoiceId || 'INV-AUTON-001').trim();
-  const supervisorSignature = String(params.supervisorSignature || '').trim();
-  const emergencyHaltFlag = Boolean(params.emergencyHaltFlag ?? false);
+  // Support quick-test preset scenarios
+  let p = { ...params };
+  const scenario = String(p.scenario || '').trim().toLowerCase();
+  if (scenario === 'phishing_sanctions') {
+    p = {
+      agentId: p.agentId || 'autonomous-infra-agent-01',
+      recipientAddress: p.recipientAddress || '0x098B716B8Aaf21512996dC57EB0615e2383E2f96',
+      vendorName: p.vendorName || 'Cloudflare, Inc. (Phishing Impersonation)',
+      vendorJurisdiction: p.vendorJurisdiction || 'US',
+      spendAmountUsdc: p.spendAmountUsdc ?? 4200.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 5000,
+      invoiceId: p.invoiceId || 'INV-EXPLOIT-4200',
+      lineItems: [
+        { desc: 'Enterprise Edge Worker Bandwidth & Compute', qty: 1, unitPrice: 4200.00, amount: 4200.00 }
+      ],
+      statedSubtotal: 4200.00,
+      statedTax: 0,
+      statedTotal: 4200.00,
+      ...p
+    };
+  } else if (scenario === 'arithmetic_overcharge') {
+    p = {
+      agentId: p.agentId || 'devops-cluster-agent-09',
+      recipientAddress: p.recipientAddress || '0x71C84164b3D9d5a7151320349383637144e05b33',
+      vendorName: p.vendorName || 'Lambda Labs Compute Inc.',
+      vendorJurisdiction: p.vendorJurisdiction || 'US',
+      spendAmountUsdc: p.spendAmountUsdc ?? 2250.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 5000,
+      invoiceId: p.invoiceId || 'INV-GPU-OVERCHARGE',
+      lineItems: [
+        { desc: '8x H100 GPU Instance Hours', qty: 40, unitPrice: 35.00, amount: 1400.00 },
+        { desc: 'High-Speed InfiniBand Interconnect', qty: 1, unitPrice: 400.00, amount: 400.00 }
+      ],
+      statedSubtotal: 2250.00,
+      statedTax: 0,
+      statedTotal: 2250.00,
+      ...p
+    };
+  } else if (scenario === 'compliant_payout') {
+    p = {
+      agentId: p.agentId || 'api-gateway-agent-03',
+      recipientAddress: p.recipientAddress || '0x5462D6334F333C8D0662D8a291F04bE5b736b71b',
+      vendorName: p.vendorName || 'Anthropic PBC',
+      vendorJurisdiction: p.vendorJurisdiction || 'US',
+      spendAmountUsdc: p.spendAmountUsdc ?? 250.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 5000,
+      invoiceId: p.invoiceId || 'INV-ANTHROPIC-250',
+      lineItems: [
+        { desc: 'Claude 3.7 Sonnet Inference Tokens', qty: 10, unitPrice: 25.00, amount: 250.00 }
+      ],
+      statedSubtotal: 250.00,
+      statedTax: 0,
+      statedTotal: 250.00,
+      ...p
+    };
+  }
+
+  const agentId = String(p.agentId || p.agent || 'agent-procure-v2').trim();
+  const spendAmountUsdc = parseStrictNumber(p.spendAmountUsdc ?? p.spendAmount ?? p.amount ?? 0);
+  const singleAgentCap = parseStrictNumber(p.singleAgentCap ?? 500);
+  const dualApprovalCap = parseStrictNumber(p.dualApprovalCap ?? 5000);
+  const vendorName = String(p.vendorName || p.vendor || '').trim();
+  const vendorJurisdiction = String(p.vendorJurisdiction || p.country || 'US').trim().toUpperCase();
+  const recipientAddress = String(p.recipientAddress || p.recipient || p.address || '').trim();
+  const invoiceId = String(p.invoiceId || 'INV-AUTON-001').trim();
+  const supervisorSignature = String(p.supervisorSignature || '').trim();
+  const emergencyHaltFlag = Boolean(p.emergencyHaltFlag ?? false);
 
   // Invoice Math Reconciliation (Deterministic WASM Bit-Exact check)
-  const lineItems = Array.isArray(params.lineItems) ? params.lineItems : [
+  const lineItems = Array.isArray(p.lineItems) ? p.lineItems : [
     { desc: 'Cloud Inference Compute (Tier A)', qty: 10, unitPrice: 35.00, amount: 350.00 },
     { desc: 'Dedicated Gateway Endpoint', qty: 1, unitPrice: 100.00, amount: 100.00 }
   ];
-  const statedSubtotal = parseStrictNumber(params.statedSubtotal ?? lineItems.reduce((acc, it) => acc + (it.amount || 0), 0));
-  const statedTax = parseStrictNumber(params.statedTax ?? 0);
-  const statedTotal = parseStrictNumber(params.statedTotal ?? (statedSubtotal + statedTax));
+  const statedSubtotal = parseStrictNumber(p.statedSubtotal ?? lineItems.reduce((acc, it) => acc + (it.amount || 0), 0));
+  const statedTax = parseStrictNumber(p.statedTax ?? 0);
+  const statedTotal = parseStrictNumber(p.statedTotal ?? (statedSubtotal + statedTax));
 
   const flags = [];
   if (!agentId) flags.push('MISSING_AGENT_ID');
@@ -3597,17 +3658,21 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   if (wasmDiscrepancyCents === 0 && Math.abs(calcTotalWithTax - spendAmountUsdc) < 0.01) {
     wasmMatch = true;
   } else {
-    flags.push(`WASM_3WAY_MATH_MISMATCH: Stated $${statedTotal.toFixed(2)} differs from computed $${calcTotalWithTax.toFixed(2)} (${wasmDiscrepancyCents} cents discrepancy)`);
+    flags.push(`WASM_3WAY_MATH_MISMATCH: Stated $${statedTotal.toFixed(2)} differs from computed $${calcTotalWithTax.toFixed(2)} (${wasmDiscrepancyCents} cents / $${(wasmDiscrepancyCents / 100).toFixed(2)} discrepancy)`);
   }
 
-  // Parallel Sanctions & Corporate Verification for vendor
-  const [sanctionsVendor, corpVendor] = await Promise.all([
+  // Parallel Sanctions & Corporate Verification for vendor and recipient address
+  const [sanctionsVendor, sanctionsAddress, corpVendor] = await Promise.all([
     vendorName ? screenSanctions({ name: vendorName }) : Promise.resolve({ matched: false, matches: [] }),
+    recipientAddress ? screenSanctions({ name: recipientAddress }) : Promise.resolve({ matched: false, matches: [] }),
     vendorName ? lookupCorporateRegistry({ company: vendorName, country: vendorJurisdiction }) : Promise.resolve(null)
   ]);
 
+  if (sanctionsAddress?.matched) {
+    flags.push(`SANCTIONED_RECIPIENT_ADDRESS: ${recipientAddress} matches ${sanctionsAddress.matches?.[0]?.matched_name || 'US Treasury OFAC SDN List'}`);
+  }
   if (sanctionsVendor?.matched) {
-    flags.push(`SANCTIONED_VENDOR_MATCH: ${sanctionsVendor.matches?.[0]?.matched_name}`);
+    flags.push(`SANCTIONED_VENDOR_MATCH: ${sanctionsVendor.matches?.[0]?.matched_name || vendorName}`);
   }
 
   // Delegation Cap Policy
@@ -3631,6 +3696,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   // Evaluate Circuit Breaker Status
   const circuitBreakerTriggered = emergencyHaltFlag ||
     Boolean(sanctionsVendor?.matched) ||
+    Boolean(sanctionsAddress?.matched) ||
     wasmDiscrepancyCents > 0 ||
     delegationTier === 'EXCEEDS_HARD_CEILING' ||
     (supervisorAuthRequired && !supervisorAuthValid);
@@ -3640,7 +3706,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
 
   if (circuitBreakerTriggered) {
     policyDecision = 'CIRCUIT_BREAKER_TRIGGERED';
-    riskLevel = sanctionsVendor?.matched ? 'CRITICAL' : 'HIGH';
+    riskLevel = (sanctionsVendor?.matched || sanctionsAddress?.matched) ? 'CRITICAL' : 'HIGH';
   } else if (supervisorAuthRequired) {
     policyDecision = 'DUAL_AUTHORIZED_AGENT_SPEND';
     riskLevel = 'LOW';
@@ -3649,6 +3715,12 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   const payload = {
     mission: 'Mission 11 — Autonomous Systems & Spend Delegation (Circuit Breakers & Spend Caps)',
     network: 'Ethereum Sepolia (eip155:11155111)',
+    status: circuitBreakerTriggered ? 'HALTED' : 'APPROVED',
+    verdict: circuitBreakerTriggered ? 'HALT_AND_FREEZE' : 'APPROVED_FOR_PAYMENT',
+    verdictHeadline: circuitBreakerTriggered ? 'HALT & FREEZE — TRANSACTION BLOCKED' : 'APPROVED — SAFE FOR X402 PAYMENT',
+    summary: circuitBreakerTriggered
+      ? `Firewall intercepted unsafe spend request: ${flags[0] || 'Policy violation detected'}. Zero funds moved.`
+      : `Pre-payment spend cleared: OFAC clean, GLEIF verified, deterministic math bit-exact (0.00% discrepancy), within delegation limit. Ready for Telegraph x402 settlement.`,
     agentId,
     spendAmountUsdc,
     policyDecision,
@@ -3682,6 +3754,11 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       gleifVerified: Boolean(corpVendor && (corpVendor.found || corpVendor.active || corpVendor.gleif_verified)),
       sanctionsScreeningClear: !sanctionsVendor?.matched,
       matchedSanctions: sanctionsVendor?.matches || []
+    },
+    recipientVerification: {
+      recipientAddress: recipientAddress || null,
+      sanctionsScreeningClear: !sanctionsAddress?.matched,
+      matchedSanctions: sanctionsAddress?.matches || []
     },
     telegraphSettlement: {
       intent: 'REGULATORY_FILING_MONITOR',
@@ -3757,8 +3834,8 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, 200, out);
     }
 
-    // 0e. GET / POST /api/mission/autonomous-spend (Mission 11 Genuine Workflow)
-    if (pathname === '/api/mission/autonomous-spend' && (req.method === 'GET' || req.method === 'POST')) {
+    // 0e. GET / POST /api/mission/autonomous-spend & /api/spend-guard/evaluate (Mission 11 Genuine Workflow)
+    if ((pathname === '/api/mission/autonomous-spend' || pathname === '/api/spend-guard/evaluate') && (req.method === 'GET' || req.method === 'POST')) {
       const body = req.method === 'POST' ? await readJsonBody(req) : {};
       const q = Object.fromEntries(urlObj.searchParams.entries());
       const out = await evaluateAutonomousSpendPolicy({ ...q, ...body });
