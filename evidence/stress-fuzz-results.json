@@ -2,173 +2,165 @@
   "benchmark": {
     "coldResults": {
       "po-verify": {
-        "coldMs": 2279,
-        "warm1Ms": 443,
-        "warm2Ms": 576,
+        "coldMs": 329,
+        "warm1Ms": 230,
+        "warm2Ms": 252,
         "status": 200
       },
       "invoice-reconcile": {
-        "coldMs": 311,
-        "warm1Ms": 303,
-        "warm2Ms": 304,
+        "coldMs": 224,
+        "warm1Ms": 229,
+        "warm2Ms": 256,
         "status": 200
       },
       "vendor-verify": {
-        "coldMs": 747,
-        "warm1Ms": 478,
-        "warm2Ms": 516,
+        "coldMs": 1105,
+        "warm1Ms": 506,
+        "warm2Ms": 494,
         "status": 200
       },
       "doc-authenticity": {
-        "coldMs": 316,
-        "warm1Ms": 308,
-        "warm2Ms": 317,
+        "coldMs": 787,
+        "warm1Ms": 315,
+        "warm2Ms": 225,
         "status": 200
       },
       "corporate-registry": {
-        "coldMs": 489,
-        "warm1Ms": 490,
-        "warm2Ms": 497,
+        "coldMs": 531,
+        "warm1Ms": 484,
+        "warm2Ms": 480,
         "status": 200
       },
       "sanctions-screen": {
-        "coldMs": 3325,
-        "warm1Ms": 4333,
-        "warm2Ms": 1017,
+        "coldMs": 952,
+        "warm1Ms": 863,
+        "warm2Ms": 883,
         "status": 200
       },
       "regulatory-filing": {
-        "coldMs": 1508,
-        "warm1Ms": 586,
-        "warm2Ms": 536,
+        "coldMs": 997,
+        "warm1Ms": 622,
+        "warm2Ms": 411,
         "status": 200
       }
     },
     "benchmarkStats": {
       "po-verify": {
         "concurrency": 35,
-        "totalDurationSec": "10.69",
-        "throughput": "3.28",
-        "successRate": "77.1%",
-        "p50": 3766,
-        "p95": 10658,
-        "p99": 10663,
-        "min": 361,
-        "max": 10663,
-        "avg": 4621,
+        "totalDurationSec": "2.07",
+        "throughput": "16.90",
+        "successRate": "100.0%",
+        "p50": 1659,
+        "p95": 1997,
+        "p99": 2047,
+        "min": 257,
+        "max": 2047,
+        "avg": 1181,
         "statusBreakdown": {
-          "0": 8,
-          "200": 27
+          "200": 35
         }
       },
       "invoice-reconcile": {
         "concurrency": 35,
-        "totalDurationSec": "10.68",
-        "throughput": "3.28",
-        "successRate": "85.7%",
-        "p50": 1716,
-        "p95": 10674,
-        "p99": 10675,
-        "min": 302,
-        "max": 10675,
-        "avg": 3635,
+        "totalDurationSec": "0.30",
+        "throughput": "114.80",
+        "successRate": "100.0%",
+        "p50": 242,
+        "p95": 300,
+        "p99": 304,
+        "min": 216,
+        "max": 304,
+        "avg": 246,
         "statusBreakdown": {
-          "0": 5,
-          "200": 30
+          "200": 35
         }
       },
       "vendor-verify": {
         "concurrency": 35,
-        "totalDurationSec": "10.66",
-        "throughput": "3.28",
-        "successRate": "85.7%",
-        "p50": 1962,
-        "p95": 10652,
-        "p99": 10652,
-        "min": 746,
-        "max": 10652,
-        "avg": 4013,
+        "totalDurationSec": "2.53",
+        "throughput": "13.84",
+        "successRate": "100.0%",
+        "p50": 1278,
+        "p95": 2496,
+        "p99": 2527,
+        "min": 581,
+        "max": 2527,
+        "avg": 1367,
         "statusBreakdown": {
-          "0": 5,
-          "200": 30
+          "200": 35
         }
       },
       "doc-authenticity": {
         "concurrency": 35,
-        "totalDurationSec": "10.69",
-        "throughput": "3.28",
-        "successRate": "85.7%",
-        "p50": 1719,
-        "p95": 10673,
-        "p99": 10674,
-        "min": 307,
-        "max": 10674,
-        "avg": 3637,
+        "totalDurationSec": "0.34",
+        "throughput": "101.51",
+        "successRate": "100.0%",
+        "p50": 254,
+        "p95": 321,
+        "p99": 343,
+        "min": 223,
+        "max": 343,
+        "avg": 259,
         "statusBreakdown": {
-          "0": 5,
-          "200": 30
+          "200": 35
         }
       },
       "corporate-registry": {
         "concurrency": 35,
-        "totalDurationSec": "10.69",
-        "throughput": "3.28",
-        "successRate": "85.7%",
-        "p50": 1962,
-        "p95": 10678,
-        "p99": 10679,
-        "min": 656,
-        "max": 10679,
-        "avg": 3894,
+        "totalDurationSec": "1.05",
+        "throughput": "33.41",
+        "successRate": "100.0%",
+        "p50": 705,
+        "p95": 1041,
+        "p99": 1046,
+        "min": 480,
+        "max": 1046,
+        "avg": 738,
         "statusBreakdown": {
-          "0": 5,
-          "200": 30
+          "200": 35
         }
       },
       "sanctions-screen": {
         "concurrency": 35,
-        "totalDurationSec": "10.70",
-        "throughput": "3.27",
-        "successRate": "85.7%",
-        "p50": 4356,
-        "p95": 10689,
-        "p99": 10689,
-        "min": 900,
-        "max": 10689,
-        "avg": 5589,
+        "totalDurationSec": "3.09",
+        "throughput": "11.31",
+        "successRate": "100.0%",
+        "p50": 1024,
+        "p95": 1139,
+        "p99": 3094,
+        "min": 906,
+        "max": 3094,
+        "avg": 1097,
         "statusBreakdown": {
-          "0": 5,
-          "200": 30
+          "200": 35
         }
       },
       "regulatory-filing": {
         "concurrency": 35,
-        "totalDurationSec": "10.66",
-        "throughput": "3.28",
-        "successRate": "88.6%",
-        "p50": 1955,
-        "p95": 10646,
-        "p99": 10647,
-        "min": 1007,
-        "max": 10647,
-        "avg": 3791,
+        "totalDurationSec": "0.79",
+        "throughput": "44.48",
+        "successRate": "100.0%",
+        "p50": 574,
+        "p95": 770,
+        "p99": 785,
+        "min": 451,
+        "max": 785,
+        "avg": 579,
         "statusBreakdown": {
-          "0": 4,
-          "200": 31
+          "200": 35
         }
       }
     },
     "mixedStats": {
       "totalRequests": 50,
-      "durationSec": "10.65",
-      "throughput": "4.69",
-      "successRate": "60.0%",
-      "p50": 4382,
-      "p95": 10666,
-      "p99": 10670,
+      "durationSec": "0.99",
+      "throughput": "50.30",
+      "successRate": "100.0%",
+      "p50": 539,
+      "p95": 936,
+      "p99": 995,
       "statuses": {
-        "0": 20,
-        "200": 30
+        "200": 50
       }
     }
   },
@@ -178,7 +170,7 @@
       "vectorId": "MALFORMED_JSON",
       "desc": "Invalid truncated JSON body (syntax error)",
       "status": 400,
-      "durationMs": 442,
+      "durationMs": 257,
       "isClean": true,
       "is500": false,
       "responseSnippet": "{\"error\":\"Invalid JSON\"}"
@@ -188,107 +180,107 @@
       "vectorId": "EMPTY_BODY",
       "desc": "Empty string POST body with application/json header",
       "status": 200,
-      "durationMs": 434,
+      "durationMs": 218,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"po_number\":\"PO-ERP-2026-7741\",\"verified\":false,\"status\":\"approval_cap_exceeded\",\"amount\":18500000,\"vendor\":\"V-10492\",\"explanation\":\"Purchase Order P"
+      "responseSnippet": "{\"po_number\":null,\"verified\":false,\"status\":\"insufficient_evidence\",\"amount\":null,\"approval_cap\":null,\"budget_delta\":null,\"vendor\":null,\"vendor_contex"
     },
     {
       "endpoint": "po-verify",
       "vectorId": "EMPTY_JSON_OBJECT",
       "desc": "Empty JSON object {}",
       "status": 200,
-      "durationMs": 314,
+      "durationMs": 223,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"po_number\":\"PO-ERP-2026-7741\",\"verified\":false,\"status\":\"approval_cap_exceeded\",\"amount\":18500000,\"vendor\":\"V-10492\",\"explanation\":\"Purchase Order P"
+      "responseSnippet": "{\"po_number\":null,\"verified\":false,\"status\":\"insufficient_evidence\",\"amount\":null,\"approval_cap\":null,\"budget_delta\":null,\"vendor\":null,\"vendor_contex"
     },
     {
       "endpoint": "po-verify",
       "vectorId": "ASTRONOMICAL_INTEGER",
       "desc": "10^30 number / huge float representation",
       "status": 200,
-      "durationMs": 306,
+      "durationMs": 271,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"po_number\":\"PO-ERP-2026-7741\",\"verified\":true,\"status\":\"authorized\",\"amount\":1e+30,\"vendor\":\"V-10492\",\"explanation\":\"Purchase Order PO-ERP-2026-7741"
+      "responseSnippet": "{\"po_number\":\"PO-UNSPECIFIED\",\"verified\":false,\"status\":\"invalid_po\",\"amount\":1e+30,\"approval_cap\":1e+30,\"vendor\":\"Unspecified Vendor\",\"explanation\":\""
     },
     {
       "endpoint": "po-verify",
       "vectorId": "NEGATIVE_NUMBERS",
       "desc": "Negative amounts and negative approval thresholds",
       "status": 200,
-      "durationMs": 304,
+      "durationMs": 241,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"po_number\":\"PO-ERP-2026-7741\",\"verified\":false,\"status\":\"invalid_po\",\"amount\":-9999999999,\"vendor\":\"V-10492\",\"explanation\":\"Purchase Order PO-ERP-20"
+      "responseSnippet": "{\"po_number\":\"PO-UNSPECIFIED\",\"verified\":false,\"status\":\"invalid_po\",\"amount\":-9999999999,\"approval_cap\":-500000,\"vendor\":\"Unspecified Vendor\",\"explan"
     },
     {
       "endpoint": "po-verify",
       "vectorId": "SQL_INJECTION",
       "desc": "Classic SQL injection vectors",
       "status": 200,
-      "durationMs": 309,
+      "durationMs": 851,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"po_number\":\"PO-7741' OR 1=1--\",\"verified\":false,\"status\":\"approval_cap_exceeded\",\"amount\":18500000,\"vendor\":\"'; DROP TABLE miners; SELECT * FROM cre"
+      "responseSnippet": "{\"po_number\":\"PO-7741' OR 1=1--\",\"verified\":false,\"status\":\"insufficient_evidence\",\"amount\":null,\"approval_cap\":null,\"budget_delta\":null,\"vendor\":\"'; "
     },
     {
       "endpoint": "po-verify",
       "vectorId": "XSS_HTML_INJECTION",
       "desc": "Stored/reflected XSS tags and event handlers",
       "status": 200,
-      "durationMs": 327,
+      "durationMs": 720,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"po_number\":\"PO-ERP-2026-7741\",\"verified\":false,\"status\":\"approval_cap_exceeded\",\"amount\":18500000,\"vendor\":\"<script>alert(\\\"pwned\\\")</script>\",\"expl"
+      "responseSnippet": "{\"po_number\":null,\"verified\":false,\"status\":\"insufficient_evidence\",\"amount\":null,\"approval_cap\":null,\"budget_delta\":null,\"vendor\":\"<script>alert(\\\"pw"
     },
     {
       "endpoint": "po-verify",
       "vectorId": "NULL_BYTE_INJECTION",
       "desc": "Null bytes and control characters",
       "status": 200,
-      "durationMs": 304,
+      "durationMs": 631,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"po_number\":\"PO-7741\\u0000ADMIN\",\"verified\":false,\"status\":\"approval_cap_exceeded\",\"amount\":18500000,\"vendor\":\"SAP\\u0000SE\\u0000LLC\",\"explanation\":\"P"
+      "responseSnippet": "{\"po_number\":\"PO-7741\\u0000ADMIN\",\"verified\":false,\"status\":\"insufficient_evidence\",\"amount\":null,\"approval_cap\":null,\"budget_delta\":null,\"vendor\":\"SA"
     },
     {
       "endpoint": "po-verify",
       "vectorId": "UNICODE_SURROGATES_EMOJIS",
       "desc": "4-byte UTF-8 emojis and unpaired surrogate characters",
       "status": 200,
-      "durationMs": 316,
+      "durationMs": 492,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"po_number\":\"PO-ERP-2026-7741\",\"verified\":false,\"status\":\"approval_cap_exceeded\",\"amount\":18500000,\"vendor\":\"🔥🚀💀 SAP SE ﷽\",\"explanation\":\"Purchase"
+      "responseSnippet": "{\"po_number\":null,\"verified\":false,\"status\":\"insufficient_evidence\",\"amount\":null,\"approval_cap\":null,\"budget_delta\":null,\"vendor\":\"🔥🚀💀 SAP SE ﷽\",\""
     },
     {
       "endpoint": "po-verify",
       "vectorId": "INVALID_LEI_FORMAT",
       "desc": "Corrupt and non-compliant ISO 17442 LEIs",
       "status": 200,
-      "durationMs": 328,
+      "durationMs": 554,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"po_number\":\"PO-ERP-2026-7741\",\"verified\":false,\"status\":\"approval_cap_exceeded\",\"amount\":18500000,\"vendor\":\"Random Test Entity\",\"explanation\":\"Purch"
+      "responseSnippet": "{\"po_number\":null,\"verified\":false,\"status\":\"insufficient_evidence\",\"amount\":null,\"approval_cap\":null,\"budget_delta\":null,\"vendor\":\"Random Test Entity"
     },
     {
       "endpoint": "po-verify",
       "vectorId": "CORRUPT_SHA256_HASH",
       "desc": "Invalid length, non-hex, and odd-length SHA-256 strings",
       "status": 200,
-      "durationMs": 323,
+      "durationMs": 233,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"po_number\":\"PO-ERP-2026-7741\",\"verified\":false,\"status\":\"approval_cap_exceeded\",\"amount\":18500000,\"vendor\":\"V-10492\",\"explanation\":\"Purchase Order P"
+      "responseSnippet": "{\"po_number\":null,\"verified\":false,\"status\":\"insufficient_evidence\",\"amount\":null,\"approval_cap\":null,\"budget_delta\":null,\"vendor\":null,\"vendor_contex"
     },
     {
       "endpoint": "po-verify",
       "vectorId": "1MB_LARGE_PAYLOAD",
       "desc": "1MB string input in payload body",
       "status": 200,
-      "durationMs": 2104,
+      "durationMs": 1917,
       "isClean": true,
       "is500": false,
       "responseSnippet": "{\"po_number\":\"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
@@ -298,7 +290,7 @@
       "vectorId": "MALFORMED_JSON",
       "desc": "Invalid truncated JSON body (syntax error)",
       "status": 400,
-      "durationMs": 370,
+      "durationMs": 251,
       "isClean": true,
       "is500": false,
       "responseSnippet": "{\"error\":\"Invalid JSON\"}"
@@ -308,27 +300,27 @@
       "vectorId": "EMPTY_BODY",
       "desc": "Empty string POST body with application/json header",
       "status": 200,
-      "durationMs": 345,
+      "durationMs": 248,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"reconciled\":true,\"discrepancy\":0,\"explanation\":\"Reconciled. Invoice INV-2026-081 (100 units @ USD 250 + 8.25% tax = USD 27,062.5) matches accepted r"
+      "responseSnippet": "{\"reconciled\":null,\"discrepancy\":null,\"status\":\"insufficient_evidence\",\"explanation\":\"Insufficient monetary evidence: neither line-item quantities/uni"
     },
     {
       "endpoint": "invoice-reconcile",
       "vectorId": "EMPTY_JSON_OBJECT",
       "desc": "Empty JSON object {}",
       "status": 200,
-      "durationMs": 310,
+      "durationMs": 245,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"reconciled\":true,\"discrepancy\":0,\"explanation\":\"Reconciled. Invoice INV-2026-081 (100 units @ USD 250 + 8.25% tax = USD 27,062.5) matches accepted r"
+      "responseSnippet": "{\"reconciled\":null,\"discrepancy\":null,\"status\":\"insufficient_evidence\",\"explanation\":\"Insufficient monetary evidence: neither line-item quantities/uni"
     },
     {
       "endpoint": "invoice-reconcile",
       "vectorId": "ASTRONOMICAL_INTEGER",
       "desc": "10^30 number / huge float representation",
       "status": 200,
-      "durationMs": 312,
+      "durationMs": 250,
       "isClean": true,
       "is500": false,
       "responseSnippet": "{\"reconciled\":true,\"discrepancy\":0,\"explanation\":\"Reconciled. Invoice total (1e+30) matches ledger total (1e+30).\",\"intent\":\"INVOICE_LEDGER_RECONCILE_"
@@ -338,7 +330,7 @@
       "vectorId": "NEGATIVE_NUMBERS",
       "desc": "Negative amounts and negative approval thresholds",
       "status": 200,
-      "durationMs": 305,
+      "durationMs": 233,
       "isClean": true,
       "is500": false,
       "responseSnippet": "{\"reconciled\":true,\"discrepancy\":0,\"explanation\":\"Reconciled. Invoice total (5000) matches ledger total (5000).\",\"intent\":\"INVOICE_LEDGER_RECONCILE_GE"
@@ -348,77 +340,77 @@
       "vectorId": "SQL_INJECTION",
       "desc": "Classic SQL injection vectors",
       "status": 200,
-      "durationMs": 322,
+      "durationMs": 246,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"reconciled\":true,\"discrepancy\":0,\"explanation\":\"Reconciled. Invoice INV-2026-081 (100 units @ USD 250 + 8.25% tax = USD 27,062.5) matches accepted r"
+      "responseSnippet": "{\"reconciled\":null,\"discrepancy\":null,\"status\":\"insufficient_evidence\",\"explanation\":\"Insufficient monetary evidence: neither line-item quantities/uni"
     },
     {
       "endpoint": "invoice-reconcile",
       "vectorId": "XSS_HTML_INJECTION",
       "desc": "Stored/reflected XSS tags and event handlers",
       "status": 200,
-      "durationMs": 329,
+      "durationMs": 528,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"reconciled\":true,\"discrepancy\":0,\"explanation\":\"Reconciled. Invoice INV-2026-081 (100 units @ USD 250 + 8.25% tax = USD 27,062.5) matches accepted r"
+      "responseSnippet": "{\"reconciled\":null,\"discrepancy\":null,\"status\":\"insufficient_evidence\",\"explanation\":\"Insufficient monetary evidence: neither line-item quantities/uni"
     },
     {
       "endpoint": "invoice-reconcile",
       "vectorId": "NULL_BYTE_INJECTION",
       "desc": "Null bytes and control characters",
       "status": 200,
-      "durationMs": 306,
+      "durationMs": 222,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"reconciled\":true,\"discrepancy\":0,\"explanation\":\"Reconciled. Invoice INV-2026-081 (100 units @ USD 250 + 8.25% tax = USD 27,062.5) matches accepted r"
+      "responseSnippet": "{\"reconciled\":null,\"discrepancy\":null,\"status\":\"insufficient_evidence\",\"explanation\":\"Insufficient monetary evidence: neither line-item quantities/uni"
     },
     {
       "endpoint": "invoice-reconcile",
       "vectorId": "UNICODE_SURROGATES_EMOJIS",
       "desc": "4-byte UTF-8 emojis and unpaired surrogate characters",
       "status": 200,
-      "durationMs": 308,
+      "durationMs": 246,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"reconciled\":true,\"discrepancy\":0,\"explanation\":\"Reconciled. Invoice INV-2026-081 (100 units @ USD 250 + 8.25% tax = USD 27,062.5) matches accepted r"
+      "responseSnippet": "{\"reconciled\":null,\"discrepancy\":null,\"status\":\"insufficient_evidence\",\"explanation\":\"Insufficient monetary evidence: neither line-item quantities/uni"
     },
     {
       "endpoint": "invoice-reconcile",
       "vectorId": "INVALID_LEI_FORMAT",
       "desc": "Corrupt and non-compliant ISO 17442 LEIs",
       "status": 200,
-      "durationMs": 416,
+      "durationMs": 236,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"reconciled\":true,\"discrepancy\":0,\"explanation\":\"Reconciled. Invoice INV-2026-081 (100 units @ USD 250 + 8.25% tax = USD 27,062.5) matches accepted r"
+      "responseSnippet": "{\"reconciled\":null,\"discrepancy\":null,\"status\":\"insufficient_evidence\",\"explanation\":\"Insufficient monetary evidence: neither line-item quantities/uni"
     },
     {
       "endpoint": "invoice-reconcile",
       "vectorId": "CORRUPT_SHA256_HASH",
       "desc": "Invalid length, non-hex, and odd-length SHA-256 strings",
       "status": 200,
-      "durationMs": 312,
+      "durationMs": 255,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"reconciled\":true,\"discrepancy\":0,\"explanation\":\"Reconciled. Invoice INV-2026-081 (100 units @ USD 250 + 8.25% tax = USD 27,062.5) matches accepted r"
+      "responseSnippet": "{\"reconciled\":null,\"discrepancy\":null,\"status\":\"insufficient_evidence\",\"explanation\":\"Insufficient monetary evidence: neither line-item quantities/uni"
     },
     {
       "endpoint": "invoice-reconcile",
       "vectorId": "1MB_LARGE_PAYLOAD",
       "desc": "1MB string input in payload body",
       "status": 200,
-      "durationMs": 1787,
+      "durationMs": 1774,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"reconciled\":true,\"discrepancy\":0,\"explanation\":\"Reconciled. Invoice INV-2026-081 (100 units @ USD 250 + 8.25% tax = USD 27,062.5) matches accepted r"
+      "responseSnippet": "{\"reconciled\":null,\"discrepancy\":null,\"status\":\"insufficient_evidence\",\"explanation\":\"Insufficient monetary evidence: neither line-item quantities/uni"
     },
     {
       "endpoint": "vendor-verify",
       "vectorId": "MALFORMED_JSON",
       "desc": "Invalid truncated JSON body (syntax error)",
       "status": 400,
-      "durationMs": 300,
+      "durationMs": 256,
       "isClean": true,
       "is500": false,
       "responseSnippet": "{\"error\":\"Invalid JSON\"}"
@@ -428,107 +420,107 @@
       "vectorId": "EMPTY_BODY",
       "desc": "Empty string POST body with application/json header",
       "status": 200,
-      "durationMs": 650,
+      "durationMs": 219,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"vendor\":\"SAP SE\",\"vat_number\":null,\"valid\":true,\"registered_name\":\"SAP SE\",\"registered_address\":\"Dietmar-Hopp-Allee 16, Walldorf, DE-BW, 69190, DE\","
+      "responseSnippet": "{\"vendor\":\"\",\"vat_number\":null,\"valid\":false,\"vat_valid\":false,\"tax_id_valid\":false,\"vat_entity_match\":null,\"status\":\"missing_parameters\",\"registered_"
     },
     {
       "endpoint": "vendor-verify",
       "vectorId": "EMPTY_JSON_OBJECT",
       "desc": "Empty JSON object {}",
       "status": 200,
-      "durationMs": 479,
+      "durationMs": 229,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"vendor\":\"SAP SE\",\"vat_number\":null,\"valid\":true,\"registered_name\":\"SAP SE\",\"registered_address\":\"Dietmar-Hopp-Allee 16, Walldorf, DE-BW, 69190, DE\","
+      "responseSnippet": "{\"vendor\":\"\",\"vat_number\":null,\"valid\":false,\"vat_valid\":false,\"tax_id_valid\":false,\"vat_entity_match\":null,\"status\":\"missing_parameters\",\"registered_"
     },
     {
       "endpoint": "vendor-verify",
       "vectorId": "ASTRONOMICAL_INTEGER",
       "desc": "10^30 number / huge float representation",
       "status": 200,
-      "durationMs": 483,
+      "durationMs": 269,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"vendor\":\"SAP SE\",\"vat_number\":null,\"valid\":true,\"registered_name\":\"SAP SE\",\"registered_address\":\"Dietmar-Hopp-Allee 16, Walldorf, DE-BW, 69190, DE\","
+      "responseSnippet": "{\"vendor\":\"\",\"vat_number\":null,\"valid\":false,\"vat_valid\":false,\"tax_id_valid\":false,\"vat_entity_match\":null,\"status\":\"missing_parameters\",\"registered_"
     },
     {
       "endpoint": "vendor-verify",
       "vectorId": "NEGATIVE_NUMBERS",
       "desc": "Negative amounts and negative approval thresholds",
       "status": 200,
-      "durationMs": 478,
+      "durationMs": 238,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"vendor\":\"SAP SE\",\"vat_number\":null,\"valid\":true,\"registered_name\":\"SAP SE\",\"registered_address\":\"Dietmar-Hopp-Allee 16, Walldorf, DE-BW, 69190, DE\","
+      "responseSnippet": "{\"vendor\":\"\",\"vat_number\":null,\"valid\":false,\"vat_valid\":false,\"tax_id_valid\":false,\"vat_entity_match\":null,\"status\":\"missing_parameters\",\"registered_"
     },
     {
       "endpoint": "vendor-verify",
       "vectorId": "SQL_INJECTION",
       "desc": "Classic SQL injection vectors",
       "status": 200,
-      "durationMs": 494,
+      "durationMs": 741,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"vendor\":\"'; DROP TABLE miners; SELECT * FROM credentials WHERE '1'='1\",\"vat_number\":null,\"valid\":false,\"registered_name\":null,\"registered_address\":n"
+      "responseSnippet": "{\"vendor\":\"'; DROP TABLE miners; SELECT * FROM credentials WHERE '1'='1\",\"vat_number\":null,\"valid\":false,\"vat_valid\":null,\"tax_id_valid\":null,\"vat_ent"
     },
     {
       "endpoint": "vendor-verify",
       "vectorId": "XSS_HTML_INJECTION",
       "desc": "Stored/reflected XSS tags and event handlers",
       "status": 200,
-      "durationMs": 761,
+      "durationMs": 631,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"vendor\":\"<script>alert(\\\"pwned\\\")</script>\",\"vat_number\":null,\"valid\":true,\"registered_name\":\"ELEVATED HORIZON CAPITAL PTY LTD\",\"registered_address\""
+      "responseSnippet": "{\"vendor\":\"<script>alert(\\\"pwned\\\")</script>\",\"vat_number\":null,\"valid\":true,\"vat_valid\":null,\"tax_id_valid\":null,\"vat_entity_match\":null,\"status\":\"ve"
     },
     {
       "endpoint": "vendor-verify",
       "vectorId": "NULL_BYTE_INJECTION",
       "desc": "Null bytes and control characters",
       "status": 200,
-      "durationMs": 505,
+      "durationMs": 535,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"vendor\":\"SAP\\u0000SE\\u0000LLC\",\"vat_number\":null,\"valid\":false,\"registered_name\":null,\"registered_address\":null,\"lei\":null,\"source\":\"Deterministic T"
+      "responseSnippet": "{\"vendor\":\"SAP\\u0000SE\\u0000LLC\",\"vat_number\":null,\"valid\":true,\"vat_valid\":null,\"tax_id_valid\":null,\"vat_entity_match\":null,\"status\":\"verified\",\"regi"
     },
     {
       "endpoint": "vendor-verify",
       "vectorId": "UNICODE_SURROGATES_EMOJIS",
       "desc": "4-byte UTF-8 emojis and unpaired surrogate characters",
       "status": 200,
-      "durationMs": 478,
+      "durationMs": 410,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"vendor\":\"🔥🚀💀 SAP SE ﷽\",\"vat_number\":null,\"valid\":true,\"registered_name\":\"SAP SE\",\"registered_address\":\"Dietmar-Hopp-Allee 16, Walldorf, DE-BW, 69"
+      "responseSnippet": "{\"vendor\":\"🔥🚀💀 SAP SE ﷽\",\"vat_number\":null,\"valid\":true,\"vat_valid\":null,\"tax_id_valid\":null,\"vat_entity_match\":null,\"status\":\"verified\",\"registere"
     },
     {
       "endpoint": "vendor-verify",
       "vectorId": "INVALID_LEI_FORMAT",
       "desc": "Corrupt and non-compliant ISO 17442 LEIs",
       "status": 200,
-      "durationMs": 475,
+      "durationMs": 614,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"vendor\":\"Random Test Entity\",\"vat_number\":\"INVALID-LEI-12345!\",\"valid\":false,\"registered_name\":null,\"registered_address\":null,\"lei\":null,\"source\":\"D"
+      "responseSnippet": "{\"vendor\":\"Random Test Entity\",\"vat_number\":\"INVALID-LEI-12345!\",\"valid\":false,\"vat_valid\":null,\"tax_id_valid\":null,\"vat_entity_match\":null,\"status\":\""
     },
     {
       "endpoint": "vendor-verify",
       "vectorId": "CORRUPT_SHA256_HASH",
       "desc": "Invalid length, non-hex, and odd-length SHA-256 strings",
       "status": 200,
-      "durationMs": 488,
+      "durationMs": 247,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"vendor\":\"SAP SE\",\"vat_number\":null,\"valid\":true,\"registered_name\":\"SAP SE\",\"registered_address\":\"Dietmar-Hopp-Allee 16, Walldorf, DE-BW, 69190, DE\","
+      "responseSnippet": "{\"vendor\":\"\",\"vat_number\":null,\"valid\":false,\"vat_valid\":false,\"tax_id_valid\":false,\"vat_entity_match\":null,\"status\":\"missing_parameters\",\"registered_"
     },
     {
       "endpoint": "vendor-verify",
       "vectorId": "1MB_LARGE_PAYLOAD",
       "desc": "1MB string input in payload body",
       "status": 200,
-      "durationMs": 2049,
+      "durationMs": 1609,
       "isClean": true,
       "is500": false,
       "responseSnippet": "{\"vendor\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
@@ -538,7 +530,7 @@
       "vectorId": "MALFORMED_JSON",
       "desc": "Invalid truncated JSON body (syntax error)",
       "status": 400,
-      "durationMs": 314,
+      "durationMs": 219,
       "isClean": true,
       "is500": false,
       "responseSnippet": "{\"error\":\"Invalid JSON\"}"
@@ -548,117 +540,117 @@
       "vectorId": "EMPTY_BODY",
       "desc": "Empty string POST body with application/json header",
       "status": 200,
-      "durationMs": 325,
+      "durationMs": 269,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"evidence\":[\"No cryptographic digest, signed hash, or fetchable"
+      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"anomalies\":[\"missing_cryptographic_evidence\"],\"evidence\":[\"No "
     },
     {
       "endpoint": "doc-authenticity",
       "vectorId": "EMPTY_JSON_OBJECT",
       "desc": "Empty JSON object {}",
       "status": 200,
-      "durationMs": 323,
+      "durationMs": 257,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"evidence\":[\"No cryptographic digest, signed hash, or fetchable"
+      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"anomalies\":[\"missing_cryptographic_evidence\"],\"evidence\":[\"No "
     },
     {
       "endpoint": "doc-authenticity",
       "vectorId": "ASTRONOMICAL_INTEGER",
       "desc": "10^30 number / huge float representation",
       "status": 200,
-      "durationMs": 308,
+      "durationMs": 229,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":true,\"verdict\":\"Authentic\",\"evidence\":[\"64-hex SHA-256 digest (64a9b2c1d8e7...bcdef012) is str"
+      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"status\":\"insufficient_evidence\",\"evidence\":[\"Monetary values m"
     },
     {
       "endpoint": "doc-authenticity",
       "vectorId": "NEGATIVE_NUMBERS",
       "desc": "Negative amounts and negative approval thresholds",
       "status": 200,
-      "durationMs": 308,
+      "durationMs": 221,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Forged\",\"evidence\":[\"Cryptographic mismatch: signed digest payload for 64a9b2"
+      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"status\":\"invalid_input\",\"evidence\":[\"Invalid non-numeric or ne"
     },
     {
       "endpoint": "doc-authenticity",
       "vectorId": "SQL_INJECTION",
       "desc": "Classic SQL injection vectors",
       "status": 200,
-      "durationMs": 311,
+      "durationMs": 247,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"evidence\":[\"No cryptographic digest, signed hash, or fetchable"
+      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"anomalies\":[\"missing_cryptographic_evidence\"],\"evidence\":[\"No "
     },
     {
       "endpoint": "doc-authenticity",
       "vectorId": "XSS_HTML_INJECTION",
       "desc": "Stored/reflected XSS tags and event handlers",
       "status": 200,
-      "durationMs": 332,
+      "durationMs": 350,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"document\":\"https://evil.com/leak.js\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"evidence\":[\"Target URL returned HTTP 404 (693 bytes).\"],\"intent\":\"D"
+      "responseSnippet": "{\"document\":\"https://evil.com/leak.js\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"confidence\":0.25,\"evidence\":[\"Target URL returned HTTP 404 (693 byt"
     },
     {
       "endpoint": "doc-authenticity",
       "vectorId": "NULL_BYTE_INJECTION",
       "desc": "Null bytes and control characters",
       "status": 200,
-      "durationMs": 315,
+      "durationMs": 256,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"evidence\":[\"No cryptographic digest, signed hash, or fetchable"
+      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"anomalies\":[\"missing_cryptographic_evidence\"],\"evidence\":[\"No "
     },
     {
       "endpoint": "doc-authenticity",
       "vectorId": "UNICODE_SURROGATES_EMOJIS",
       "desc": "4-byte UTF-8 emojis and unpaired surrogate characters",
       "status": 200,
-      "durationMs": 306,
+      "durationMs": 253,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"evidence\":[\"No cryptographic digest, signed hash, or fetchable"
+      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"anomalies\":[\"missing_cryptographic_evidence\"],\"evidence\":[\"No "
     },
     {
       "endpoint": "doc-authenticity",
       "vectorId": "INVALID_LEI_FORMAT",
       "desc": "Corrupt and non-compliant ISO 17442 LEIs",
       "status": 200,
-      "durationMs": 323,
+      "durationMs": 250,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"evidence\":[\"No cryptographic digest, signed hash, or fetchable"
+      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"anomalies\":[\"missing_cryptographic_evidence\"],\"evidence\":[\"No "
     },
     {
       "endpoint": "doc-authenticity",
       "vectorId": "CORRUPT_SHA256_HASH",
       "desc": "Invalid length, non-hex, and odd-length SHA-256 strings",
       "status": 200,
-      "durationMs": 327,
+      "durationMs": 237,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"document\":\"Invoice #101\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"evidence\":[\"No cryptographic digest, signed hash, or fetchable document URL was"
+      "responseSnippet": "{\"document\":\"Invoice #101\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"anomalies\":[\"missing_cryptographic_evidence\"],\"evidence\":[\"No corroborating cry"
     },
     {
       "endpoint": "doc-authenticity",
       "vectorId": "1MB_LARGE_PAYLOAD",
       "desc": "1MB string input in payload body",
       "status": 200,
-      "durationMs": 2009,
+      "durationMs": 1662,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"evidence\":[\"No cryptographic digest, signed hash, or fetchable"
+      "responseSnippet": "{\"document\":\"Document verification request\",\"authentic\":false,\"verdict\":\"Inconclusive\",\"anomalies\":[\"missing_cryptographic_evidence\"],\"evidence\":[\"No "
     },
     {
       "endpoint": "corporate-registry",
       "vectorId": "MALFORMED_JSON",
       "desc": "Invalid truncated JSON body (syntax error)",
       "status": 400,
-      "durationMs": 331,
+      "durationMs": 265,
       "isClean": true,
       "is500": false,
       "responseSnippet": "{\"error\":\"Invalid JSON\"}"
@@ -668,117 +660,117 @@
       "vectorId": "EMPTY_BODY",
       "desc": "Empty string POST body with application/json header",
       "status": 200,
-      "durationMs": 686,
+      "durationMs": 254,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"SAP SE\",\"jurisdiction\":\"DE\",\"status_active\":1,\"result_count\":3,\"results\":[{\"lei\":\"529900D6BF99LW9R2E68\",\"legal_name\":\"SAP SE\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"company\":null,\"legal_name\":null,\"registration_id\":null,\"active\":false,\"entity_status\":null,\"registra"
     },
     {
       "endpoint": "corporate-registry",
       "vectorId": "EMPTY_JSON_OBJECT",
       "desc": "Empty JSON object {}",
       "status": 200,
-      "durationMs": 498,
+      "durationMs": 242,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"SAP SE\",\"jurisdiction\":\"DE\",\"status_active\":1,\"result_count\":3,\"results\":[{\"lei\":\"529900D6BF99LW9R2E68\",\"legal_name\":\"SAP SE\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"company\":null,\"legal_name\":null,\"registration_id\":null,\"active\":false,\"entity_status\":null,\"registra"
     },
     {
       "endpoint": "corporate-registry",
       "vectorId": "ASTRONOMICAL_INTEGER",
       "desc": "10^30 number / huge float representation",
       "status": 200,
-      "durationMs": 549,
+      "durationMs": 243,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"SAP SE\",\"jurisdiction\":\"DE\",\"status_active\":1,\"result_count\":3,\"results\":[{\"lei\":\"529900D6BF99LW9R2E68\",\"legal_name\":\"SAP SE\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"company\":null,\"legal_name\":null,\"registration_id\":null,\"active\":false,\"entity_status\":null,\"registra"
     },
     {
       "endpoint": "corporate-registry",
       "vectorId": "NEGATIVE_NUMBERS",
       "desc": "Negative amounts and negative approval thresholds",
       "status": 200,
-      "durationMs": 582,
+      "durationMs": 254,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"SAP SE\",\"jurisdiction\":\"DE\",\"status_active\":1,\"result_count\":3,\"results\":[{\"lei\":\"529900D6BF99LW9R2E68\",\"legal_name\":\"SAP SE\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"company\":null,\"legal_name\":null,\"registration_id\":null,\"active\":false,\"entity_status\":null,\"registra"
     },
     {
       "endpoint": "corporate-registry",
       "vectorId": "SQL_INJECTION",
       "desc": "Classic SQL injection vectors",
       "status": 200,
-      "durationMs": 577,
+      "durationMs": 750,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"OFAC' OR 'a'='a\",\"jurisdiction\":\"FR\",\"status_active\":0,\"result_count\":10,\"results\":[{\"lei\":\"9695003O0IBMX0ACM562\",\"legal_name"
+      "responseSnippet": "{\"verdict\":\"found\",\"found\":true,\"company\":\"SAP' UNION SELECT 1,2,3--\",\"legal_name\":\"1 2 3 MEDIA\",\"registration_id\":\"969500Y68ZS4EN1XOF11\",\"active\":tru"
     },
     {
       "endpoint": "corporate-registry",
       "vectorId": "XSS_HTML_INJECTION",
       "desc": "Stored/reflected XSS tags and event handlers",
       "status": 200,
-      "durationMs": 881,
+      "durationMs": 552,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"<svg onload=alert(document.cookie)>\",\"jurisdiction\":\"AU\",\"status_active\":1,\"result_count\":10,\"results\":[{\"lei\":\"9845009LCP789"
+      "responseSnippet": "{\"verdict\":\"found\",\"found\":true,\"company\":\"<img src=x onerror=alert(1)>\",\"legal_name\":\"Dentallabor Wippel GmbH\",\"registration_id\":\"9845003C99A6DFA4B18"
     },
     {
       "endpoint": "corporate-registry",
       "vectorId": "NULL_BYTE_INJECTION",
       "desc": "Null bytes and control characters",
       "status": 200,
-      "durationMs": 564,
+      "durationMs": 530,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"Banco\\u0000Nacional\",\"jurisdiction\":\"PA\",\"status_active\":1,\"result_count\":10,\"results\":[{\"lei\":\"529900H2Q7WMDKKIW109\",\"legal_"
+      "responseSnippet": "{\"verdict\":\"found\",\"found\":true,\"company\":\"Goldman\\u0000Sachs\",\"legal_name\":\"GOLDMAN SACHS INTERNATIONAL\",\"registration_id\":\"549300R83Q2VTICWNV15\",\"ac"
     },
     {
       "endpoint": "corporate-registry",
       "vectorId": "UNICODE_SURROGATES_EMOJIS",
       "desc": "4-byte UTF-8 emojis and unpaired surrogate characters",
       "status": 200,
-      "durationMs": 592,
+      "durationMs": 638,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":false,\"company\":\"💣💥⚡ Banco Nacional de Cuba\",\"jurisdiction\":null,\"status_active\":0,\"results\":[],\"source\":\"GLEIF Global LEI Index (api.gleif"
+      "responseSnippet": "{\"verdict\":\"not_found\",\"found\":false,\"company\":\"𠜎𠝹𠱓𠱸𠲖 Goldman Sachs\",\"legal_name\":null,\"registration_id\":null,\"active\":false,\"entity_status\":null"
     },
     {
       "endpoint": "corporate-registry",
       "vectorId": "INVALID_LEI_FORMAT",
       "desc": "Corrupt and non-compliant ISO 17442 LEIs",
       "status": 200,
-      "durationMs": 665,
+      "durationMs": 613,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":false,\"company\":\"549300!INVALID@LEI#\",\"jurisdiction\":null,\"status_active\":0,\"results\":[],\"source\":\"GLEIF Global LEI Index (api.gleif.org)\",\"s"
+      "responseSnippet": "{\"verdict\":\"not_found\",\"found\":false,\"company\":\"549300!INVALID@LEI#\",\"legal_name\":null,\"registration_id\":null,\"active\":false,\"entity_status\":null,\"reg"
     },
     {
       "endpoint": "corporate-registry",
       "vectorId": "CORRUPT_SHA256_HASH",
       "desc": "Invalid length, non-hex, and odd-length SHA-256 strings",
       "status": 200,
-      "durationMs": 470,
+      "durationMs": 238,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"SAP SE\",\"jurisdiction\":\"DE\",\"status_active\":1,\"result_count\":3,\"results\":[{\"lei\":\"529900D6BF99LW9R2E68\",\"legal_name\":\"SAP SE\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"company\":null,\"legal_name\":null,\"registration_id\":null,\"active\":false,\"entity_status\":null,\"registra"
     },
     {
       "endpoint": "corporate-registry",
       "vectorId": "1MB_LARGE_PAYLOAD",
       "desc": "1MB string input in payload body",
       "status": 200,
-      "durationMs": 2576,
+      "durationMs": 1649,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"SAP SE\",\"jurisdiction\":\"DE\",\"status_active\":1,\"result_count\":3,\"results\":[{\"lei\":\"529900D6BF99LW9R2E68\",\"legal_name\":\"SAP SE\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"company\":null,\"legal_name\":null,\"registration_id\":null,\"active\":false,\"entity_status\":null,\"registra"
     },
     {
       "endpoint": "sanctions-screen",
       "vectorId": "MALFORMED_JSON",
       "desc": "Invalid truncated JSON body (syntax error)",
       "status": 400,
-      "durationMs": 318,
+      "durationMs": 238,
       "isClean": true,
       "is500": false,
       "responseSnippet": "{\"error\":\"Invalid JSON\"}"
@@ -788,117 +780,117 @@
       "vectorId": "EMPTY_BODY",
       "desc": "Empty string POST body with application/json header",
       "status": 200,
-      "durationMs": 316,
+      "durationMs": 244,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"screened\":false,\"match_found\":false,\"error\":\"name parameter required\",\"intent\":\"SANCTIONS_SCREENING_MATCH_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-"
+      "responseSnippet": "{\"screened\":false,\"status\":\"insufficient_evidence\",\"name\":null,\"matched\":false,\"match_found\":false,\"match_count\":0,\"matches\":[],\"lists\":[\"US Treasury "
     },
     {
       "endpoint": "sanctions-screen",
       "vectorId": "EMPTY_JSON_OBJECT",
       "desc": "Empty JSON object {}",
       "status": 200,
-      "durationMs": 317,
+      "durationMs": 224,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"screened\":false,\"match_found\":false,\"error\":\"name parameter required\",\"intent\":\"SANCTIONS_SCREENING_MATCH_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-"
+      "responseSnippet": "{\"screened\":false,\"status\":\"insufficient_evidence\",\"name\":null,\"matched\":false,\"match_found\":false,\"match_count\":0,\"matches\":[],\"lists\":[\"US Treasury "
     },
     {
       "endpoint": "sanctions-screen",
       "vectorId": "ASTRONOMICAL_INTEGER",
       "desc": "10^30 number / huge float representation",
       "status": 200,
-      "durationMs": 351,
+      "durationMs": 230,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"screened\":false,\"match_found\":false,\"error\":\"name parameter required\",\"intent\":\"SANCTIONS_SCREENING_MATCH_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-"
+      "responseSnippet": "{\"screened\":false,\"status\":\"insufficient_evidence\",\"name\":null,\"matched\":false,\"match_found\":false,\"match_count\":0,\"matches\":[],\"lists\":[\"US Treasury "
     },
     {
       "endpoint": "sanctions-screen",
       "vectorId": "NEGATIVE_NUMBERS",
       "desc": "Negative amounts and negative approval thresholds",
       "status": 200,
-      "durationMs": 341,
+      "durationMs": 221,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"screened\":false,\"match_found\":false,\"error\":\"name parameter required\",\"intent\":\"SANCTIONS_SCREENING_MATCH_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-"
+      "responseSnippet": "{\"screened\":false,\"status\":\"insufficient_evidence\",\"name\":null,\"matched\":false,\"match_found\":false,\"match_count\":0,\"matches\":[],\"lists\":[\"US Treasury "
     },
     {
       "endpoint": "sanctions-screen",
       "vectorId": "SQL_INJECTION",
       "desc": "Classic SQL injection vectors",
       "status": 200,
-      "durationMs": 732,
+      "durationMs": 753,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"screened\":true,\"query_name\":\"OFAC' OR 'a'='a\",\"match_found\":false,\"match_count\":0,\"matches\":[],\"sdn_list_size\":19563,\"sdn_last_loaded\":\"2026-11-12T1"
+      "responseSnippet": "{\"screened\":true,\"name\":\"OFAC' OR 'a'='a\",\"matched\":false,\"matches\":[],\"lists\":[\"US Treasury OFAC SDN\"],\"match_score\":0,\"query_name\":\"OFAC' OR 'a'='a\""
     },
     {
       "endpoint": "sanctions-screen",
       "vectorId": "XSS_HTML_INJECTION",
       "desc": "Stored/reflected XSS tags and event handlers",
       "status": 200,
-      "durationMs": 977,
+      "durationMs": 982,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"screened\":true,\"query_name\":\"<svg onload=alert(document.cookie)>\",\"match_found\":true,\"match_count\":3,\"matches\":[{\"sdn_uid\":\"15039\",\"matched_name\":\"A"
+      "responseSnippet": "{\"screened\":true,\"name\":\"<svg onload=alert(document.cookie)>\",\"matched\":false,\"matches\":[],\"lists\":[\"US Treasury OFAC SDN\"],\"match_score\":0,\"query_nam"
     },
     {
       "endpoint": "sanctions-screen",
       "vectorId": "NULL_BYTE_INJECTION",
       "desc": "Null bytes and control characters",
       "status": 200,
-      "durationMs": 736,
+      "durationMs": 733,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"screened\":true,\"query_name\":\"Banco\\u0000Nacional\",\"match_found\":false,\"match_count\":0,\"matches\":[],\"sdn_list_size\":19563,\"sdn_last_loaded\":\"2026-11-"
+      "responseSnippet": "{\"screened\":true,\"name\":\"Banco\\u0000Nacional\",\"matched\":true,\"matches\":[{\"sdn_uid\":\"306\",\"matched_name\":\"BANCO NACIONAL DE CUBA\",\"match_type\":\"Entity\""
     },
     {
       "endpoint": "sanctions-screen",
       "vectorId": "UNICODE_SURROGATES_EMOJIS",
       "desc": "4-byte UTF-8 emojis and unpaired surrogate characters",
       "status": 200,
-      "durationMs": 838,
+      "durationMs": 934,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"screened\":true,\"query_name\":\"💣💥⚡ Banco Nacional de Cuba\",\"match_found\":true,\"match_count\":1,\"matches\":[{\"sdn_uid\":\"306\",\"matched_name\":\"BANCO NACI"
+      "responseSnippet": "{\"screened\":true,\"name\":\"💣💥⚡ Banco Nacional de Cuba\",\"matched\":true,\"matches\":[{\"sdn_uid\":\"306\",\"matched_name\":\"BANCO NACIONAL DE CUBA\",\"match_type\""
     },
     {
       "endpoint": "sanctions-screen",
       "vectorId": "INVALID_LEI_FORMAT",
       "desc": "Corrupt and non-compliant ISO 17442 LEIs",
       "status": 200,
-      "durationMs": 755,
+      "durationMs": 861,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"screened\":true,\"query_name\":\"549300!INVALID@LEI#\",\"match_found\":false,\"match_count\":0,\"matches\":[],\"sdn_list_size\":19563,\"sdn_last_loaded\":\"2026-11-"
+      "responseSnippet": "{\"screened\":true,\"name\":\"549300!INVALID@LEI#\",\"matched\":false,\"matches\":[],\"lists\":[\"US Treasury OFAC SDN\"],\"match_score\":0,\"query_name\":\"549300!INVAL"
     },
     {
       "endpoint": "sanctions-screen",
       "vectorId": "CORRUPT_SHA256_HASH",
       "desc": "Invalid length, non-hex, and odd-length SHA-256 strings",
       "status": 200,
-      "durationMs": 343,
+      "durationMs": 211,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"screened\":false,\"match_found\":false,\"error\":\"name parameter required\",\"intent\":\"SANCTIONS_SCREENING_MATCH_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-"
+      "responseSnippet": "{\"screened\":false,\"status\":\"insufficient_evidence\",\"name\":null,\"matched\":false,\"match_found\":false,\"match_count\":0,\"matches\":[],\"lists\":[\"US Treasury "
     },
     {
       "endpoint": "sanctions-screen",
       "vectorId": "1MB_LARGE_PAYLOAD",
       "desc": "1MB string input in payload body",
       "status": 200,
-      "durationMs": 2041,
+      "durationMs": 1348,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"screened\":false,\"match_found\":false,\"error\":\"name parameter required\",\"intent\":\"SANCTIONS_SCREENING_MATCH_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-"
+      "responseSnippet": "{\"screened\":false,\"status\":\"insufficient_evidence\",\"name\":null,\"matched\":false,\"match_found\":false,\"match_count\":0,\"matches\":[],\"lists\":[\"US Treasury "
     },
     {
       "endpoint": "regulatory-filing",
       "vectorId": "MALFORMED_JSON",
       "desc": "Invalid truncated JSON body (syntax error)",
       "status": 400,
-      "durationMs": 315,
+      "durationMs": 230,
       "isClean": true,
       "is500": false,
       "responseSnippet": "{\"error\":\"Invalid JSON\"}"
@@ -908,111 +900,111 @@
       "vectorId": "EMPTY_BODY",
       "desc": "Empty string POST body with application/json header",
       "status": 200,
-      "durationMs": 318,
+      "durationMs": 216,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":false,\"error\":\"company parameter required\",\"intent\":\"REGULATORY_FILING_MONITOR_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-11-12T13:03:00.340Z\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"entity\":\"\",\"filing_count\":0,\"filings\":[],\"urls\":[],\"by_type\":{},\"recent\":[],\"confidence\":0.3,\"reason"
     },
     {
       "endpoint": "regulatory-filing",
       "vectorId": "EMPTY_JSON_OBJECT",
       "desc": "Empty JSON object {}",
       "status": 200,
-      "durationMs": 305,
+      "durationMs": 231,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":false,\"error\":\"company parameter required\",\"intent\":\"REGULATORY_FILING_MONITOR_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-11-12T13:03:00.654Z\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"entity\":\"\",\"filing_count\":0,\"filings\":[],\"urls\":[],\"by_type\":{},\"recent\":[],\"confidence\":0.3,\"reason"
     },
     {
       "endpoint": "regulatory-filing",
       "vectorId": "ASTRONOMICAL_INTEGER",
       "desc": "10^30 number / huge float representation",
       "status": 200,
-      "durationMs": 312,
+      "durationMs": 243,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":false,\"error\":\"company parameter required\",\"intent\":\"REGULATORY_FILING_MONITOR_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-11-12T13:03:01.076Z\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"entity\":\"\",\"filing_count\":0,\"filings\":[],\"urls\":[],\"by_type\":{},\"recent\":[],\"confidence\":0.3,\"reason"
     },
     {
       "endpoint": "regulatory-filing",
       "vectorId": "NEGATIVE_NUMBERS",
       "desc": "Negative amounts and negative approval thresholds",
       "status": 200,
-      "durationMs": 315,
+      "durationMs": 233,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":false,\"error\":\"company parameter required\",\"intent\":\"REGULATORY_FILING_MONITOR_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-11-12T13:03:01.498Z\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"entity\":\"\",\"filing_count\":0,\"filings\":[],\"urls\":[],\"by_type\":{},\"recent\":[],\"confidence\":0.3,\"reason"
     },
     {
       "endpoint": "regulatory-filing",
       "vectorId": "SQL_INJECTION",
       "desc": "Classic SQL injection vectors",
       "status": 200,
-      "durationMs": 741,
+      "durationMs": 714,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"SAP' UNION SELECT 1,2,3--\",\"period\":\"2026\",\"sec_filings\":[],\"federal_register_notices\":[],\"gleif_status\":{\"lei\":\"96950046GNSA"
+      "responseSnippet": "{\"verdict\":\"upstream_error\",\"found\":false,\"upstream_status\":\"degraded\",\"upstream_errors\":[\"SEC EFTS HTTP 403\"],\"entity\":\"SAP' UNION SELECT 1,2,3--\",\"f"
     },
     {
       "endpoint": "regulatory-filing",
       "vectorId": "XSS_HTML_INJECTION",
       "desc": "Stored/reflected XSS tags and event handlers",
       "status": 200,
-      "durationMs": 661,
+      "durationMs": 487,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"<img src=x onerror=alert(1)>\",\"period\":\"2026\",\"sec_filings\":[],\"federal_register_notices\":[],\"gleif_status\":{\"lei\":\"9845009LC"
+      "responseSnippet": "{\"verdict\":\"upstream_error\",\"found\":false,\"upstream_status\":\"degraded\",\"upstream_errors\":[\"SEC EFTS HTTP 403\"],\"entity\":\"<img src=x onerror=alert(1)>\""
     },
     {
       "endpoint": "regulatory-filing",
       "vectorId": "NULL_BYTE_INJECTION",
       "desc": "Null bytes and control characters",
       "status": 200,
-      "durationMs": 674,
+      "durationMs": 544,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":true,\"company\":\"Goldman\\u0000Sachs\",\"period\":\"2026\",\"sec_filings\":[],\"federal_register_notices\":[{\"title\":\"Self-Regulatory Organizations; The"
+      "responseSnippet": "{\"verdict\":\"found\",\"found\":true,\"upstream_status\":\"ok\",\"upstream_errors\":[],\"entity\":\"Goldman\\u0000Sachs\",\"filing_count\":26,\"federal_register_count\":1"
     },
     {
       "endpoint": "regulatory-filing",
       "vectorId": "UNICODE_SURROGATES_EMOJIS",
       "desc": "4-byte UTF-8 emojis and unpaired surrogate characters",
       "status": 200,
-      "durationMs": 1058,
+      "durationMs": 422,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":false,\"company\":\"𠜎𠝹𠱓𠱸𠲖 Goldman Sachs\",\"period\":\"2026\",\"sec_filings\":[],\"federal_register_notices\":[],\"gleif_status\":null,\"total_results\""
+      "responseSnippet": "{\"verdict\":\"found\",\"found\":true,\"upstream_status\":\"ok\",\"upstream_errors\":[],\"entity\":\"𠜎𠝹𠱓𠱸𠲖 Goldman Sachs\",\"filing_count\":26,\"federal_register_co"
     },
     {
       "endpoint": "regulatory-filing",
       "vectorId": "INVALID_LEI_FORMAT",
       "desc": "Corrupt and non-compliant ISO 17442 LEIs",
       "status": 200,
-      "durationMs": 897,
+      "durationMs": 501,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":false,\"company\":\"549300!INVALID@LEI#\",\"period\":\"2026\",\"sec_filings\":[],\"federal_register_notices\":[],\"gleif_status\":null,\"total_results\":0,\"s"
+      "responseSnippet": "{\"verdict\":\"not_found\",\"found\":false,\"upstream_status\":\"ok\",\"upstream_errors\":[],\"entity\":\"549300!INVALID@LEI#\",\"filing_count\":0,\"federal_register_cou"
     },
     {
       "endpoint": "regulatory-filing",
       "vectorId": "CORRUPT_SHA256_HASH",
       "desc": "Invalid length, non-hex, and odd-length SHA-256 strings",
       "status": 200,
-      "durationMs": 326,
+      "durationMs": 236,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":false,\"error\":\"company parameter required\",\"intent\":\"REGULATORY_FILING_MONITOR_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-11-12T13:03:06.195Z\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"entity\":\"\",\"filing_count\":0,\"filings\":[],\"urls\":[],\"by_type\":{},\"recent\":[],\"confidence\":0.3,\"reason"
     },
     {
       "endpoint": "regulatory-filing",
       "vectorId": "1MB_LARGE_PAYLOAD",
       "desc": "1MB string input in payload body",
       "status": 200,
-      "durationMs": 2336,
+      "durationMs": 1499,
       "isClean": true,
       "is500": false,
-      "responseSnippet": "{\"found\":false,\"error\":\"company parameter required\",\"intent\":\"REGULATORY_FILING_MONITOR_GENERAL\",\"schema_version\":1,\"as_of\":\"2026-11-12T13:03:08.505Z\""
+      "responseSnippet": "{\"verdict\":\"insufficient_evidence\",\"found\":false,\"entity\":\"\",\"filing_count\":0,\"filings\":[],\"urls\":[],\"by_type\":{},\"recent\":[],\"confidence\":0.3,\"reason"
     }
   ],
-  "timestamp": "2026-11-12T13:03:07.997Z"
+  "timestamp": "2026-11-17T11:59:21.013Z"
 }
