@@ -9,33 +9,23 @@ const rate = '-3%';
 const sections = [
   {
     id: 1,
-    name: 'intro',
-    text: "Welcome to Praman Desk, an autonomous pre-payment spend guard and clearing desk for AI agents on Telegraph Protocol. When autonomous agents manage real treasury balances, paying an unverified vendor or clearing tampered invoice math can drain funds in seconds. Here is how Praman Desk stops that on Ethereum Sepolia."
+    name: 'intro_threat',
+    text: "In 2026, AI agents and DAOs hold private keys with spend caps. If an agent gets prompt-injected or fed a spoofed invoice, funds move irreversibly in seconds. Here is Praman Desk, a pre-payment firewall on Telegraph Protocol. Scenario one screens the counterparty EVM address against US Treasury OFAC SDN records, catches a Lazarus Group match in under three milliseconds, and blocks the four-thousand-two-hundred-dollar payout before signing."
   },
   {
     id: 2,
-    name: 'gleif',
-    text: "First, instant counterparty verification. Before money moves, Praman Desk queries the official GLEIF registry across over two hundred jurisdictions in real time. Clicking Stripe, LLC validates its active corporate status and returns its official LEI. We can also verify German companies like SAP SE with direct Handelsregister and VIES EU VAT validation."
+    name: 'wasm_overcharge',
+    text: "Scenario two tests phantom invoice markup against NVIDIA Corporation. Identity and delegation caps pass cleanly, yet the invoice demands four hundred fifty dollars while ten H100 compute hours total three hundred fifty. Our six-hundred-fifty-one byte standalone WebAssembly engine catches the exact hundred-dollar discrepancy, and anyone can verify the WASM binary directly in the browser with SHA-256 confirmation."
   },
   {
     id: 3,
-    name: 'pipeline',
-    text: "Next, our one-click autonomous agent spend pipeline. Watch it probe the signer, execute multi-source primary audits, query Telegraph miners over x402 micropayments, and run client-side WebAssembly scoring. The live terminal displays each verification step as it happens, enforcing full settlement clearance before signing."
+    name: 'compliant_payout',
+    text: "Scenario three validates a clean two-hundred-fifty-dollar payout to Anthropic PBC. Praman Desk resolves the live GLEIF legal entity identifier, verifies clean OFAC sanctions status, confirms zero-percent arithmetic variance in WebAssembly, and authorizes settlement within the five-hundred-dollar autonomous limit."
   },
   {
     id: 4,
-    name: 'mission02',
-    text: "Here is Mission 02 in action: unapproved exploit detection. When an agent is prompted with an address associated with the Lazarus Group Ronin bridge exploit, Praman Desk scans nineteen thousand OFAC SDN records and EVM addresses, immediately halting the transaction with a REJECT AND FREEZE decision. On transactions over one thousand dollars, the FATF Travel Rule is strictly enforced."
-  },
-  {
-    id: 5,
-    name: 'mission04',
-    text: "For Mission 04, we generate an overnight five-jurisdiction legal diligence pack across the UK, Germany, GLEIF, Federal Register, and SEC EDGAR in three point two seconds. Our six hundred and fifty-one byte standalone WebAssembly comparator performs deterministic three-way reconciliation, catching one-cent variances without floating-point drift."
-  },
-  {
-    id: 6,
-    name: 'miner_closing',
-    text: "All verifications are recorded in our on-chain receipt ledger. And on Devnode Epoch 2107, our Miner 5289 achieved Rank 2 network-wide on invoice reconciliation and Rank 3 on regulatory filings. Developers can install our ten-tool MCP server today with npx at praman slash spend guard mcp. Zero slop, verified on chain."
+    name: 'economics_quickstart',
+    text: "A one-cent check on Telegraph prevents a twenty-five-hundred-dollar forensic legal loss, a two-hundred-fifty-thousand-to-one protection ratio. Every verification receipt in our fifty-seven-transaction ledger links directly to Sepolia Etherscan, and any engineer can plug the ten-tool firewall into Cursor or Claude Code in ten seconds via GitHub npx."
   }
 ];
 

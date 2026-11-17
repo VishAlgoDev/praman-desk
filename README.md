@@ -5,7 +5,7 @@
 [![Live Hosted App](https://img.shields.io/badge/Live%20Firewall-praman--desk.vercel.app-0284c7?style=for-the-badge&logo=vercel)](https://praman-desk.vercel.app)
 [![Active Sepolia Miner](https://img.shields.io/badge/Sepolia%20Miner-%235289%20Active-10b981?style=for-the-badge&logo=ethereum)](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
 [![WASM Comparator](https://img.shields.io/badge/WASM%20Engine-651%20Bytes%20Pure%20Binary-f59e0b?style=for-the-badge)](https://praman-desk.vercel.app/comparator.wasm)
-[![MCP Server](https://img.shields.io/badge/MCP-Spend%20Guard-6366f1?style=for-the-badge)](https://www.npmjs.com/package/@praman/spend-guard-mcp)
+[![MCP Server](https://img.shields.io/badge/MCP-Zero--Install%20GitHub%20npx-6366f1?style=for-the-badge)](https://github.com/VishAlgoDev/praman-desk#10-second-developer-quickstart)
 
 - **Live Split-Screen Interactive Playground:** <https://praman-desk.vercel.app>
 - **Official Screencast Walkthrough (90s):** [Direct MP4 Stream](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) · [Developer Script](docs/SHOWCASE_WALKTHROUGH_SCRIPT.md)
@@ -41,12 +41,12 @@ Visit [https://praman-desk.vercel.app](https://praman-desk.vercel.app) to test t
 | Threat Scenario | Challenge | Firewall Verdict | Policy Enforcement |
 |---|---|:---:|---|
 | **1. Phishing & Sanctions Exploit** | Prompt-injected agent attempts $4,200 payout to Lazarus Group OFAC address (`0x098B...2f96`) spoofing a Cloudflare edge bill | **`[ HALT & FREEZE ]`** | Intercepted in <3ms. Recipient flagged on US Treasury SDN list. Zero funds moved. |
-| **2. Arithmetic Overcharge** | GPU compute invoice claims $2,250.00, but line items sum to $1,800.00 (phantom markup) | **`[ HALT & FREEZE ]`** | 651-byte WASM engine detects exact $450.00 (45,000 cents) discrepancy. |
-| **3. Compliant Agent Payout** | Legitimate Anthropic API compute invoice ($250.00 USDC) within $500 single-agent cap | **`[ APPROVED ]`** | OFAC clean, GLEIF LEI verified, 0.00% math error. Ready for Telegraph x402 settlement. |
+| **2. Arithmetic Overcharge** | NVIDIA Corporation GPU compute invoice claims $450.00, but line items sum to $350.00 (phantom markup) | **`[ HALT & FREEZE ]`** | GLEIF LEI verified (`549300S4KLFTLO7GSQ80`); 651-byte WASM engine catches exact $100.00 (10,000 cents) discrepancy. |
+| **3. Compliant Agent Payout** | Legitimate Anthropic API compute invoice ($250.00 USDC) within $500 single-agent cap | **`[ APPROVED ]`** | OFAC clean, GLEIF LEI verified (`984500B6DEB8CEBC4Z70`), 0.00% math error. Ready for Telegraph x402 settlement. |
 
 ---
 
-## Commercial Viability & Unit Economics (Section 06)
+## Commercial Viability & Unit Economics
 
 Why DAOs and agent frameworks integrate Praman Desk:
 
@@ -57,9 +57,9 @@ Why DAOs and agent frameworks integrate Praman Desk:
 
 ---
 
-## 10-Second Developer Quickstart (Section 07)
+## 10-Second Developer Quickstart
 
-### 1. Cursor / Claude Code MCP Server
+### 1. Cursor / Claude Code MCP Server (Zero-Install GitHub npx)
 Add Praman Desk to your agent's MCP configuration (`claude_desktop_config.json` or Cursor settings):
 
 ```json
@@ -67,10 +67,15 @@ Add Praman Desk to your agent's MCP configuration (`claude_desktop_config.json` 
   "mcpServers": {
     "praman-spend-guard": {
       "command": "npx",
-      "args": ["-y", "@praman/spend-guard-mcp"]
+      "args": ["-y", "--package=github:VishAlgoDev/praman-desk", "praman-spend-guard-mcp"]
     }
   }
 }
+```
+
+Or verify directly from your terminal:
+```bash
+npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp --self-test
 ```
 
 ### 2. Direct HTTP API via cURL (Zero Setup)

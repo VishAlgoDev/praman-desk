@@ -627,7 +627,7 @@ function selectBestGleifRecord(records, queryName = '') {
 function resolvePeriodRange(period = '') {
   const now = new Date();
   const enddt = now.toISOString().slice(0, 10);
-  const p = String(period || '').trim().toLowerCase();
+  const p = String(period || '').trim().toLowerCase().replace(/\b(?:calendar|fiscal|fy)\s*(?:year\s*)?/g, ' ').replace(/\s+/g, ' ').trim();
 
   const betweenMatch = p.match(/(20\d{2}-\d{2}-\d{2})\s+(?:to|through|until|and|-)\s+(20\d{2}-\d{2}-\d{2})/);
   if (betweenMatch) {
@@ -674,21 +674,28 @@ function resolvePeriodRange(period = '') {
   return { startdt: start.toISOString().slice(0, 10), enddt, label: period.trim() || 'last 12 months' };
 }
 
-function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '') {
+function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '', rawForm = '') {
   let company = String(rawCompany || '').trim();
   let period = String(rawPeriod || '').trim();
-  const rawLower = company.toLowerCase();
+  const formStr = String(rawForm || '').trim();
+  const rawLower = `${company} ${formStr}`.toLowerCase();
   const wantsFederalRegisterOnly = /federal\s+register/.test(rawLower) && !/\bsec\b|\bedgar\b|\b10-[kq]\b|\b8-k\b|\b20-f\b|\bs-1\b/i.test(rawLower);
   const wantsSecOnly = /\bsec\b|\bedgar\b|\b10-[kq]\b|\b8-k\b|\b20-f\b|\b6-k\b|\bs-1\b/i.test(rawLower) && !/federal\s+register/.test(rawLower);
 
-  // Extract explicit SEC form types anywhere in text (e.g. 10-K, 10-Q, 8-K, 20-F, S-1)
-  const formMatches = [...company.matchAll(/\b(10-[KQ]|8-K|20-F|6-K|S-1|DEF\s*14A|13F-HR)\b/gi)]
+  // Extract explicit SEC form types from both text and explicit ?form= param (e.g. 10-K, 10-Q, 8-K, 20-F, S-1)
+  const formMatches = [...`${company} ${formStr}`.matchAll(/\b(10-[KQ]|8-K|20-F|6-K|S-1|DEF\s*14A|13F-HR)\b/gi)]
     .map(m => m[1].toUpperCase().replace(/\s+/, ' '));
+  if (formStr && formMatches.length === 0) {
+    formMatches.push(formStr.toUpperCase());
+  }
   const formsFilter = [...new Set(formMatches)];
 
+  const cikMatch = company.match(/\bCIK\s*[:#]?\s*(\d{4,10})\b/i);
+  const explicitCik = cikMatch ? cikMatch[1].padStart(10, '0') : null;
+
   const cleaned = company.replace(/^["'“”]+|["'“”]+$/g, '').replace(/[?!.]+$/g, '').trim();
-  const timeSuffixRe = /\s+(?:(?:in|over|during|for)\s+(?:the\s+)?(?:last|past)\s+\S+\s+(?:day|days|week|weeks|month|months|year|years)|(?:last|past)\s+\S+\s+(?:day|days|week|weeks|month|months|year|years)|since\s+(?:20\d{2}(?:-\d{2}-\d{2})?|19\d{2})|(?:in|for|during)\s+(?:fy\s*)?(?:19\d{2}|20\d{2})|from\s+20\d{2}-\d{2}-\d{2}\s+(?:to|through)\s+20\d{2}-\d{2}-\d{2})$/i;
-  const sourceSuffixRe = /\s+(?:on|with|from|via|at|in)\s+(?:the\s+)?(?:sec\s+edgar|sec|edgar|federal\s+register)\b$/i;
+  const timeSuffixRe = /\s+(?:(?:in|over|during|for)\s+(?:the\s+)?(?:last|past)\s+\S+\s+(?:day|days|week|weeks|month|months|year|years)|(?:last|past)\s+\S+\s+(?:day|days|week|weeks|month|months|year|years)|since\s+(?:20\d{2}(?:-\d{2}-\d{2})?|19\d{2})|(?:in|for|during)\s+(?:(?:calendar|fiscal|fy)\s*(?:year\s*)?)?(?:19\d{2}|20\d{2})|from\s+20\d{2}-\d{2}-\d{2}\s+(?:to|through)\s+20\d{2}-\d{2}-\d{2})$/i;
+  const sourceSuffixRe = /\s+(?:(?:are|were|is|was)\s+)?(?:filed\s+|published\s+|listed\s+|available\s+)?(?:on|with|from|via|at|in)\s+(?:the\s+)?(?:sec\s+edgar|sec|edgar|federal\s+register)\b$/i;
   let extracted = cleaned.replace(sourceSuffixRe, '').trim();
   const tm = extracted.match(timeSuffixRe);
   if (tm) {
@@ -701,6 +708,7 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '') {
 
   const questionPatterns = [
     /^(?:what|which)\s+(?:[a-z0-9-]+\s+){0,3}?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:were|are|was)?\s*(?:filed|published|made|issued|submitted)?\s*(?:for|by|on|about|regarding)\s+(.+)$/i,
+    /^how\s+many\s+(?:form\s+)?(?:[a-z0-9-]+\s+){0,4}?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:by|for|from|of|did|does|has)\s+(.+?)(?:\s+(?:make|file|submit|have|publish)\b.*)?$/i,
     /^how\s+many\s+(?:[a-z0-9-]+\s+){0,3}?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:did|does|has)\s+(.+?)\s+(?:make|file|submit|have|publish)\b/i,
     /^how\s+many\s+(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:mention|reference|cite|involve|for|about|on)\s+(.+)$/i,
     /^(?:did|does|has)\s+(.+?)\s+(?:file|filed|make|submit|have)\s+(?:any\s+|an?\s+)?(?:10-[kq]|8-k|20-f|6-k|s-1|sec|edgar|regulatory|federal\s+register)\b/i,
@@ -717,14 +725,15 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '') {
     }
   }
 
-  // If no pattern captured a shorter group, clean leading noise
+  // Strip embedded "(CIK ...)" suffix from canonical entity string after explicitCik has been captured
   company = company
+    .replace(/\s*\(\s*CIK\s*[:#]?\s*\d{4,10}\s*\)/ig, '')
     .replace(/^(?:show|list|get|check|monitor|find|did|does|has)\s+/i, '')
     .replace(/(?:'s|’s)\s*$/i, '')
     .replace(/[?!.]+$/g, '')
     .trim();
 
-  return { company, period, formsFilter, wantsFederalRegisterOnly, wantsSecOnly };
+  return { company, period, formsFilter, explicitCik, wantsFederalRegisterOnly, wantsSecOnly };
 }
 
 function validateIndianGstinChecksum(gstin) {
@@ -1706,9 +1715,37 @@ function setCachedSanctions(key, val) {
   SANCTIONS_CACHE.set(k, val);
 }
 
+function cleanSanctionsQuery(raw = '') {
+  let q = String(raw || '').trim();
+  const isWrapperQuestion = /^(?:please\s+)?(?:screen|check|verify|is|does|search|are)\b/i.test(q) || /\?\s*$/.test(q);
+  if (isWrapperQuestion) {
+    const quoted = q.match(/['"“]([^'"”]{2,})['"”]/);
+    if (quoted) {
+      q = quoted[1].trim();
+    } else {
+      q = q
+        .replace(/^(?:please\s+)?(?:screen|check|verify|search|is|does|are)\s+(?:the\s+)?(?:person|company|entity|vessel|ship|wallet|address|individual|organization|bank)?\s*/i, '')
+        .replace(/\s+(?:against|on|in|appear\s+on|listed\s+on|listed\s+in|sanctioned|designated)\s+(?:the\s+)?(?:ofac|sdn|eu|un|uk|us|sanctions|consolidated|list|lists)\b.*$/i, '')
+        .replace(/\s+(?:sanctioned|listed|designated)\??$/i, '')
+        .replace(/[?!]+$/g, '')
+        .trim();
+    }
+  }
+  q = q.replace(/,?\s*\b(?:dob|date\s+of\s+birth|born)\b[^,]*/gi, '').replace(/\s+/g, ' ').replace(/,\s*$/, '').trim();
+  const candidates = [q];
+  if (q.includes(',')) {
+    const preComma = q.split(',')[0].trim();
+    const postComma = q.slice(q.indexOf(',') + 1).trim();
+    if (preComma && preComma.split(/\s+/).length >= 2 && !/^(?:inc|llc|ltd|corp|plc|sa|se|ag|gmbh)\.?$/i.test(postComma)) {
+      candidates.push(preComma);
+    }
+  }
+  return { primary: candidates[candidates.length - 1] || q, candidates: [...new Set(candidates.filter(Boolean))] };
+}
+
 export async function screenSanctions({ name = '', threshold = 0.70 }) {
-  const nameTrim = String(name).trim();
-  if (!nameTrim) {
+  const rawNameTrim = String(name).trim();
+  if (!rawNameTrim) {
     return {
       screened: false,
       name: '',
@@ -1721,6 +1758,10 @@ export async function screenSanctions({ name = '', threshold = 0.70 }) {
     };
   }
 
+  const parsedQuery = cleanSanctionsQuery(rawNameTrim);
+  const nameTrim = parsedQuery.primary || rawNameTrim;
+  const queryCandidates = parsedQuery.candidates.length ? parsedQuery.candidates : [nameTrim];
+
   const parsedThresh = parseStrictNumber(threshold);
   const THRESHOLD = Number.isFinite(parsedThresh) && parsedThresh >= 0.5 && parsedThresh <= 0.99 ? parsedThresh : 0.70;
   const cacheKey = `${nameTrim}::${THRESHOLD}`;
@@ -1732,7 +1773,7 @@ export async function screenSanctions({ name = '', threshold = 0.70 }) {
   await loadSdnData();
 
   // Direct OFAC Digital Currency EVM address screening (0x + 40 hex)
-  const evmMatch = nameTrim.match(/\b(0x[0-9a-fA-F]{40})\b/);
+  const evmMatch = rawNameTrim.match(/\b(0x[0-9a-fA-F]{40})\b/);
   if (evmMatch) {
     const addrLower = evmMatch[1].toLowerCase();
     const matchedUid = sdnEvmAddresses.get(addrLower) || null;
@@ -1774,9 +1815,9 @@ export async function screenSanctions({ name = '', threshold = 0.70 }) {
   const matches = [];
 
   for (const [uid, entry] of sdnEntries) {
-    const nameScore = fuzzyNameMatch(nameTrim, entry.name);
+    const nameScore = Math.max(...queryCandidates.map(q => fuzzyNameMatch(q, entry.name)));
     const entryAliases = sdnAliases.get(uid) || [];
-    const aliasScores = entryAliases.map(a => fuzzyNameMatch(nameTrim, a));
+    const aliasScores = entryAliases.map(a => Math.max(...queryCandidates.map(q => fuzzyNameMatch(q, a))));
     const bestAlias = aliasScores.length > 0 ? Math.max(0, ...aliasScores) : 0;
     const bestAliasName = aliasScores.length > 0 ? entryAliases[aliasScores.indexOf(bestAlias)] : null;
     const score = Math.max(nameScore, bestAlias);
@@ -1910,8 +1951,8 @@ async function resolveSecCik(companyQuery) {
   return null;
 }
 
-export async function monitorRegulatoryFiling({ company = '', period = '' }) {
-  const parsed = parseRegulatoryFilingQuery(company, period);
+export async function monitorRegulatoryFiling({ company = '', period = '', form = '' }) {
+  const parsed = parseRegulatoryFilingQuery(company, period, form);
   const companyTrim = parsed.company;
   const periodTrim = parsed.period;
   const formsFilter = parsed.formsFilter || [];
@@ -1940,7 +1981,9 @@ export async function monitorRegulatoryFiling({ company = '', period = '' }) {
     : (async () => {
         try {
           // 1. Prefer authoritative CIK Issuer Submissions JSON over noisy EFTS mention search
-          const cikInfo = await resolveSecCik(companyTrim).catch(() => null);
+          const cikInfo = parsed.explicitCik
+            ? { cik: parsed.explicitCik, title: companyTrim }
+            : await resolveSecCik(companyTrim).catch(() => null);
           if (cikInfo?.cik) {
             const subUrl = `https://data.sec.gov/submissions/CIK${cikInfo.cik}.json`;
             const subRes = await fetchSecWithRetry(subUrl, 10000);
@@ -3584,19 +3627,18 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     p = {
       agentId: p.agentId || 'devops-cluster-agent-09',
       recipientAddress: p.recipientAddress || '0x71C84164b3D9d5a7151320349383637144e05b33',
-      vendorName: p.vendorName || 'Lambda Labs Compute Inc.',
+      vendorName: p.vendorName || 'NVIDIA Corporation',
       vendorJurisdiction: p.vendorJurisdiction || 'US',
-      spendAmountUsdc: p.spendAmountUsdc ?? 2250.00,
+      spendAmountUsdc: p.spendAmountUsdc ?? 450.00,
       singleAgentCap: p.singleAgentCap ?? 500,
       dualApprovalCap: p.dualApprovalCap ?? 5000,
       invoiceId: p.invoiceId || 'INV-GPU-OVERCHARGE',
       lineItems: [
-        { desc: '8x H100 GPU Instance Hours', qty: 40, unitPrice: 35.00, amount: 1400.00 },
-        { desc: 'High-Speed InfiniBand Interconnect', qty: 1, unitPrice: 400.00, amount: 400.00 }
+        { desc: '8x H100 GPU Instance Hours', qty: 10, unitPrice: 35.00, amount: 350.00 }
       ],
-      statedSubtotal: 2250.00,
+      statedSubtotal: 450.00,
       statedTax: 0,
-      statedTotal: 2250.00,
+      statedTotal: 450.00,
       ...p
     };
   } else if (scenario === 'compliant_payout') {
@@ -3645,20 +3687,22 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   if (!vendorName) flags.push('MISSING_VENDOR_NAME');
   if (emergencyHaltFlag) flags.push('EMERGENCY_HALT_FLAG_ACTIVE');
 
-  // WASM Deterministic Reconciliation
-  let wasmMatch = false;
-  let wasmDiscrepancyCents = 0;
-  let computedTotal = 0;
+  // WASM Deterministic Reconciliation (651-byte standalone AssemblyScript WASM binary)
+  let computedCents = 0;
   for (const item of lineItems) {
-    computedTotal += (item.qty * item.unitPrice);
+    computedCents += Math.round(Number(item.qty || 0) * Math.round(Number(item.unitPrice || 0) * 100));
   }
-  const calcTotalWithTax = computedTotal + statedTax;
-  wasmDiscrepancyCents = Math.round(Math.abs(calcTotalWithTax - statedTotal) * 100);
+  const calcTotalCents = computedCents + Math.round(statedTax * 100);
+  const statedCents = Math.round(statedTotal * 100);
+  const spendCents = Math.round(spendAmountUsdc * 100);
+  const wasmScoreBps = wasmEngine.scoreDeterministic(calcTotalCents, statedCents, 0, 0);
+  const wasmSpendScoreBps = wasmEngine.scoreDeterministic(calcTotalCents, spendCents, 0, 0);
+  const computedTotal = calcTotalCents / 100;
+  const wasmDiscrepancyCents = Math.abs(calcTotalCents - statedCents);
+  const wasmMatch = wasmScoreBps === 10000 && wasmSpendScoreBps === 10000;
 
-  if (wasmDiscrepancyCents === 0 && Math.abs(calcTotalWithTax - spendAmountUsdc) < 0.01) {
-    wasmMatch = true;
-  } else {
-    flags.push(`WASM_3WAY_MATH_MISMATCH: Stated $${statedTotal.toFixed(2)} differs from computed $${calcTotalWithTax.toFixed(2)} (${wasmDiscrepancyCents} cents / $${(wasmDiscrepancyCents / 100).toFixed(2)} discrepancy)`);
+  if (!wasmMatch) {
+    flags.push(`WASM_3WAY_MATH_MISMATCH: Stated $${statedTotal.toFixed(2)} differs from computed $${computedTotal.toFixed(2)} (${wasmDiscrepancyCents} cents / $${(wasmDiscrepancyCents / 100).toFixed(2)} discrepancy)`);
   }
 
   // Parallel Sanctions & Corporate Verification for vendor and recipient address
@@ -3673,6 +3717,11 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   }
   if (sanctionsVendor?.matched) {
     flags.push(`SANCTIONED_VENDOR_MATCH: ${sanctionsVendor.matches?.[0]?.matched_name || vendorName}`);
+  }
+
+  const gleifVerified = Boolean(corpVendor && (corpVendor.found || corpVendor.active || corpVendor.gleif_verified));
+  if (!gleifVerified && !sanctionsVendor?.matched && !sanctionsAddress?.matched) {
+    flags.push(`UNVERIFIED_COUNTERPARTY_ENTITY: "${vendorName || 'Unknown'}" has no active registration in the official GLEIF Global LEI Index`);
   }
 
   // Delegation Cap Policy
@@ -3697,6 +3746,8 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   const circuitBreakerTriggered = emergencyHaltFlag ||
     Boolean(sanctionsVendor?.matched) ||
     Boolean(sanctionsAddress?.matched) ||
+    !gleifVerified ||
+    !wasmMatch ||
     wasmDiscrepancyCents > 0 ||
     delegationTier === 'EXCEEDS_HARD_CEILING' ||
     (supervisorAuthRequired && !supervisorAuthValid);
@@ -3720,7 +3771,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     verdictHeadline: circuitBreakerTriggered ? 'HALT & FREEZE — TRANSACTION BLOCKED' : 'APPROVED — SAFE FOR X402 PAYMENT',
     summary: circuitBreakerTriggered
       ? `Firewall intercepted unsafe spend request: ${flags[0] || 'Policy violation detected'}. Zero funds moved.`
-      : `Pre-payment spend cleared: OFAC clean, GLEIF verified, deterministic math bit-exact (0.00% discrepancy), within delegation limit. Ready for Telegraph x402 settlement.`,
+      : `Pre-payment spend cleared: OFAC clean, GLEIF verified (LEI: ${corpVendor?.registration_id || 'active'}), deterministic math bit-exact (0.00% discrepancy), within delegation limit. Ready for Telegraph x402 settlement.`,
     agentId,
     spendAmountUsdc,
     policyDecision,
@@ -3743,15 +3794,23 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       engine: 'praman-wasm-651b (AssemblyScript Standalone WASM, 651 bytes, 0 imports)',
       sha256: '0x9dfe09265391c579d1b9467a5f33a7e8e82e09fa0a3a205527185edaf74f8114',
       keccak256: '0x4eddfdd368d15c36d96ae6109acd66ae00a5ca4ff261806df8596905be78f345',
+      wasmScoreBps,
+      wasmSpendScoreBps,
       bitExactMatch: wasmMatch,
       discrepancyCents: wasmDiscrepancyCents,
       computedTotal,
+      computedCents: calcTotalCents,
+      statedCents,
       statedTotal
     },
     vendorVerification: {
       vendorName,
       vendorJurisdiction,
-      gleifVerified: Boolean(corpVendor && (corpVendor.found || corpVendor.active || corpVendor.gleif_verified)),
+      gleifVerified,
+      lei: corpVendor?.registration_id || null,
+      legalName: corpVendor?.legal_name || null,
+      registeredAddress: corpVendor?.registered_address || null,
+      gleifUrl: corpVendor?.results?.[0]?.source_url || null,
       sanctionsScreeningClear: !sanctionsVendor?.matched,
       matchedSanctions: sanctionsVendor?.matches || []
     },
@@ -4672,7 +4731,8 @@ export async function handleApiRequest(req, res) {
       if (pathname === '/api/miner/regulatory-filing') {
         const out = await monitorRegulatoryFiling({
           company: merged.company || merged.entity || merged.name || merged.product || merged.drug || merged.device || merged.concern || merged.query || merged.question || merged.prompt || merged.text || '',
-          period: merged.period || ''
+          period: merged.period || '',
+          form: merged.form || merged.form_type || ''
         });
         return sendJson(res, 200, {
           ...out,

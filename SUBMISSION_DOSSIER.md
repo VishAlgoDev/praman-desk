@@ -37,8 +37,8 @@
 - **Walkthrough Flow**:
   1. `0:00 - 0:15` | **The Threat**: Why autonomous agent spending is broken in 2026. Prompt injection and invoice spoofing cause irreversible crypto loss.
   2. `0:15 - 0:40` | **Live Cursor / CLI Interception**: An autonomous agent attempting a $4,200 payout to a Lazarus Group OFAC address is intercepted by Praman Desk MCP before `signer.sendTransaction()` can execute.
-  3. `0:40 - 1:10` | **Live Split-Screen Web Playground**: One-click demo of Scenario 2 (Arithmetic Overcharge: $450 discrepancy detected by 651-byte WASM) and Scenario 3 (Compliant Payout: Anthropic API invoice, GLEIF verified, approved for execution).
-  4. `1:10 - 1:30` | **Telegraph Protocol Rail & Economics**: Every check settles for $0.01 via Telegraph x402 on Sepolia; unit economics comparison ($0.01 vs $2,500 legal retainer, 250,000:1 protection ratio); 10-second MCP setup (`npx -y @praman/spend-guard-mcp`).
+  3. `0:40 - 1:10` | **Live Split-Screen Web Playground**: One-click demo of Scenario 2 (Arithmetic Overcharge on NVIDIA Corporation: $100 discrepancy detected by 651-byte WASM + in-browser `.wasm` verification) and Scenario 3 (Compliant Payout: Anthropic PBC invoice, verified GLEIF LEI `984500B6DEB8CEBC4Z70`, approved for execution).
+  4. `1:10 - 1:30` | **Telegraph Protocol Rail & Economics**: Every check settles for $0.01 via Telegraph x402 on Sepolia; unit economics comparison ($0.01 vs $2,500 legal retainer, 250,000:1 protection ratio); 10-second MCP setup (`npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp`).
 
 ---
 
@@ -51,9 +51,9 @@ Judges can verify Praman Desk via web browser, live cURL API calls, or the Model
 2. Under **Threat Scenarios**, click **Scenario 1: Phishing & Sanctions Exploit**:
    - *Expected Result*: Right panel renders red `[ HALT & FREEZE — TRANSACTION BLOCKED ]` banner. Recipient flagged on US Treasury OFAC SDN list (Lazarus Group).
 3. Click **Scenario 2: Arithmetic Overcharge**:
-   - *Expected Result*: Right panel renders red `[ HALT & FREEZE ]` banner. 651-byte WASM comparator catches exact $450.00 discrepancy between line items and invoice total.
+   - *Expected Result*: Right panel renders red `[ HALT & FREEZE ]` banner. GLEIF LEI (`549300S4KLFTLO7GSQ80`) and OFAC pass, while 651-byte WASM comparator catches the exact $100.00 discrepancy between line items ($350.00) and invoice total ($450.00). Click **Recompute in Browser (651b WASM)** to run client-side WebAssembly confirmation.
 4. Click **Scenario 3: Compliant Agent Payout**:
-   - *Expected Result*: Right panel turns emerald `[ APPROVED — READY FOR X402 PAYMENT ]`. OFAC clean, GLEIF LEI verified, 0.00% math error, within $500 single-agent delegation cap.
+   - *Expected Result*: Right panel turns emerald `[ APPROVED — READY FOR X402 PAYMENT ]`. OFAC clean, GLEIF LEI (`984500B6DEB8CEBC4Z70`) verified, 0.00% math error, within $500 single-agent delegation cap.
 
 ### Option B: Direct Reproducible cURL Commands
 ```bash
@@ -74,10 +74,10 @@ curl -X POST https://praman-desk.vercel.app/api/spend-guard/evaluate \
 ```
 
 ### Option C: 10-Tool Model Context Protocol (MCP) Server
-AI agents (Cursor, Claude Code, Windsurf) can install Praman Desk natively:
+AI agents (Cursor, Claude Code, Windsurf) can run Praman Desk with zero install directly from GitHub:
 ```bash
-# Direct MCP Execution via npx
-npx -y @praman/spend-guard-mcp
+# Direct MCP Execution & Self-Test via GitHub npx
+npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp --self-test
 
 # Or run from local clone
 git clone https://github.com/VishAlgoDev/praman-desk.git
@@ -152,4 +152,4 @@ Praman Desk serves as an autonomous pre-payment spend firewall:
 - **Google Colab Training Notebook**: Complete standalone Colab reproducing ModernBERT-base LoRA training for `SANCTIONS_SCREENING_MATCH`:  
   *Colab Link*: [`Train_Sanctions_Evaluator_Adapter.ipynb`](https://colab.research.google.com/github/VishAlgoDev/praman-desk/blob/main/colab/Train_Sanctions_Evaluator_Adapter.ipynb)
 - **Zero-Wallet Quickstart**: Interactive developer testing instructions in `README.md` and live web demo at [https://praman-desk.vercel.app](https://praman-desk.vercel.app).
-- **NPM Package / MCP Tool**: Instant stdio integration for AI agents via `npx @praman/spend-guard-mcp`.
+- **GitHub npx Package / MCP Tool**: Zero-install stdio integration for AI agents via `npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp`.

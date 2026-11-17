@@ -732,10 +732,10 @@
     <div class="scenario-card" id="card-scen-2" onclick="selectScenario('arithmetic_overcharge')">
       <div class="scenario-card-header">
         <span class="scenario-tag tag-warn">DISCREPANCY DETECTED</span>
-        <span style="font-size:12px; font-family:var(--font-mono); color:var(--warn);">$2,250.00 USDC</span>
+        <span style="font-size:12px; font-family:var(--font-mono); color:var(--warn);">$450.00 USDC</span>
       </div>
       <div class="scenario-title">2. Arithmetic Overcharge</div>
-      <div class="scenario-desc">GPU cloud invoice claims $2,250.00, but line items calculate to $1,800.00 ($450 phantom markup caught by WASM).</div>
+      <div class="scenario-desc">GPU cloud invoice claims $450.00, but line items calculate to $350.00 ($100 phantom markup caught by 651b WASM).</div>
     </div>
 
     <div class="scenario-card" id="card-scen-3" onclick="selectScenario('compliant_payout')">
@@ -864,7 +864,7 @@
             <div class="policy-title">
               <span>🌐 GLEIF Legal Entity Registry</span>
             </div>
-            <div class="policy-sub">Global LEI Index resolution across 200+ jurisdictions</div>
+            <div class="policy-sub" id="sub-gleif">Global LEI Index resolution across 200+ jurisdictions</div>
           </div>
           <div id="badge-gleif" class="badge-warn">⚠️ UNVERIFIED</div>
         </div>
@@ -874,7 +874,7 @@
             <div class="policy-title">
               <span>⚙️ Bit-Exact Arithmetic (WASM)</span>
             </div>
-            <div class="policy-sub">651-byte standalone AssemblyScript math engine</div>
+            <div class="policy-sub" id="sub-wasm">651-byte standalone AssemblyScript math engine</div>
           </div>
           <div id="badge-wasm" class="badge-pass">✅ 0.00% DIFF</div>
         </div>
@@ -908,13 +908,19 @@
           <span class="crypto-label">Circuit Breaker:</span>
           <span class="crypto-val" id="disp-circuit" style="color:#f87171; font-weight:700;">TRIGGERED (HALT)</span>
         </div>
+        <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--panel-border); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" id="btn-wasm-verify" style="padding:6px 12px; font-size:12px;" onclick="verifyWasmInBrowser()">
+            🔬 Recompute in Browser (651b WASM)
+          </button>
+          <span id="wasm-browser-result" style="font-size:11.5px; color:var(--ink-muted);">Click to run client-side .wasm check</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Commercial Viability Section (Section 06 Rubric) -->
+  <!-- Commercial Viability Section -->
   <div class="section-divider"></div>
-  <div class="section-title">📊 Commercial Viability & Unit Economics (Section 06)</div>
+  <div class="section-title">📊 Commercial Viability &amp; Unit Economics</div>
   <div class="viability-grid">
     <div class="viability-card bad">
       <h4>Without Praman Desk (Unguarded Agent Spending)</h4>
@@ -937,12 +943,12 @@
     </div>
   </div>
 
-  <!-- Developer Quickstart Section (Section 07 Rubric) -->
-  <div class="section-title">💻 Developer Integration & 10-Second Quickstart (Section 07)</div>
+  <!-- Developer Quickstart Section -->
+  <div class="section-title">💻 Developer Integration &amp; 10-Second Quickstart</div>
   <div class="quickstart-card">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <h3 style="margin:0; font-size:15px; color:#fff;">Add Praman Desk to Cursor, Claude Code, or Any Agent Loop</h3>
-      <span class="pill" style="color:var(--success);">Available on npm &amp; MCP registry</span>
+      <span class="pill" style="color:var(--success);">Zero-Install GitHub npx &amp; MCP Stdio</span>
     </div>
     
     <p style="font-size:13px; color:var(--ink-muted); margin:8px 0 12px;">
@@ -952,12 +958,12 @@
     <!-- Code Snippet 1: MCP -->
     <div class="code-block">
       <button class="copy-btn" onclick="copySnippet('mcp-snip')">Copy</button>
-      <div id="mcp-snip">// In claude_desktop_config.json or cursor settings:
+      <div id="mcp-snip">// In claude_desktop_config.json or Cursor MCP settings:
 {
   "mcpServers": {
     "praman-spend-guard": {
       "command": "npx",
-      "args": ["-y", "@praman/spend-guard-mcp"]
+      "args": ["-y", "--package=github:VishAlgoDev/praman-desk", "praman-spend-guard-mcp"]
     }
   }
 }</div>
@@ -974,58 +980,80 @@ curl -X POST https://praman-desk.vercel.app/api/spend-guard/evaluate \
   </div>
 
   <!-- Network Infrastructure & Audit Evidence Accordions -->
-  <div class="section-title">🔍 Network Infrastructure & Verification Evidence</div>
+  <div class="section-title">🔍 Network Infrastructure &amp; Verification Evidence</div>
   <div class="accordion-group">
     
     <!-- Accordion 1: Receipts -->
-    <details>
+    <details id="ledger-accordion">
       <summary>
-        <span>📜 On-Chain Receipt Ledger (57 Verified Sepolia Transactions)</span>
+        <span>📜 On-Chain Receipt Ledger (<span id="ledger-count-label">57</span> Verified Sepolia Transactions)</span>
         <span style="font-size:12px; color:var(--ink-faint); font-family:var(--font-mono);">Live Diamond Port</span>
       </summary>
       <div class="accordion-content">
-        <p style="margin:0 0 12px 0;">All pre-flight spend guard clearances are settled via x402 on Ethereum Sepolia. Recent on-chain settlements:</p>
-        <table class="receipt-table">
-          <thead>
-            <tr>
-              <th>Tx Hash</th>
-              <th>Block</th>
-              <th>Amount</th>
-              <th>Status</th>
-              <th>Verification</th>
-            </tr>
-          </thead>
-          <tbody id="receipts-tbody">
-            <tr>
-              <td><a href="https://sepolia.etherscan.io/tx/0x91d906e5d2630ff541c8816ba7d10d6b6375bc860e6e76d54238e55e09f7a77e" target="_blank" rel="noopener">0x91d906e5...a77e</a></td>
-              <td>12155659</td>
-              <td>0.01 USDC</td>
-              <td style="color:#34d399;">SETTLED</td>
-              <td>GLEIF + OFAC Verified</td>
-            </tr>
-            <tr>
-              <td><a href="https://sepolia.etherscan.io/tx/0xa1e7d23a48e89f81a1795ba66ea55331bcad0b5b9e0750ca2bf28a8670dafa7a" target="_blank" rel="noopener">0xa1e7d23a...fa7a</a></td>
-              <td>12155658</td>
-              <td>0.01 USDC</td>
-              <td style="color:#34d399;">SETTLED</td>
-              <td>WASM Bit-Exact Math</td>
-            </tr>
-            <tr>
-              <td><a href="https://sepolia.etherscan.io/tx/0x9597cfdf053ea3e4b77f98d4a9ecda93b7ff4aa23070bc0e99dca289945df84b" target="_blank" rel="noopener">0x9597cfdf...f84b</a></td>
-              <td>12155657</td>
-              <td>0.01 USDC</td>
-              <td style="color:#34d399;">SETTLED</td>
-              <td>Autonomous Cap Checked</td>
-            </tr>
-          </tbody>
-        </table>
+        <p style="margin:0 0 12px 0;">All pre-flight spend guard clearances are settled via x402 on Ethereum Sepolia (free test USDC from contributor wallet). Live settlements loaded from <code>/api/ledger</code>:</p>
+        <div style="max-height:420px; overflow-y:auto;">
+          <table class="receipt-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Tx Hash</th>
+                <th>Intent</th>
+                <th>Miner</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="receipts-tbody">
+              <tr>
+                <td>53</td>
+                <td><a href="https://sepolia.etherscan.io/tx/0x6bcd38d81a2d0548438a1a42f30dd89454367a7c6a8ef99524f5bdfd00c28131" target="_blank" rel="noopener">0x6bcd38d8...8131</a></td>
+                <td>CORPORATE_REGISTRY_LOOKUP_GENERAL</td>
+                <td>#130003</td>
+                <td>$0.01 USDC</td>
+                <td style="color:#34d399;">SETTLED</td>
+              </tr>
+              <tr>
+                <td>52</td>
+                <td><a href="https://sepolia.etherscan.io/tx/0x953f73d4fb3f5ec6f460387077c41bec99a2a70ab02a5003a10136b7c9e18818" target="_blank" rel="noopener">0x953f73d4...8818</a></td>
+                <td>CORPORATE_REGISTRY_LOOKUP_GENERAL</td>
+                <td>#84002</td>
+                <td>$0.01 USDC</td>
+                <td style="color:#34d399;">SETTLED</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><a href="https://sepolia.etherscan.io/tx/0x113577b25d97768fe5ca21493020cd2d9c83b80f030f1073da8f43e9cd551ae7" target="_blank" rel="noopener">0x113577b2...1ae7</a></td>
+                <td>INVOICE_LEDGER_RECONCILE_GENERAL</td>
+                <td>#7455</td>
+                <td>$0.01 USDC</td>
+                <td style="color:#34d399;">INCONCLUSIVE</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><a href="https://sepolia.etherscan.io/tx/0x8e1b1b80314f9847133105ced374879744aa52ed525d8ecf02322d02404e341b" target="_blank" rel="noopener">0x8e1b1b80...341b</a></td>
+                <td>PURCHASE_ORDER_VERIFY_GENERAL</td>
+                <td>#7454</td>
+                <td>$0.01 USDC</td>
+                <td style="color:#34d399;">INCONCLUSIVE</td>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td><a href="https://sepolia.etherscan.io/tx/0x6e3f77449af4ae6c2346b0df1d4d6049e979cd9d333829d78d2fc6cf240295bc" target="_blank" rel="noopener">0x6e3f7744...95bc</a></td>
+                <td>DOCUMENT_AUTHENTICITY_GENERAL</td>
+                <td>#74351</td>
+                <td>$0.01 USDC</td>
+                <td style="color:#34d399;">INCONCLUSIVE</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </details>
 
     <!-- Accordion 2: Miner #5289 -->
     <details>
       <summary>
-        <span>⛏️ Telegraph Miner #5289 & 1,043 WASM Test Vectors</span>
+        <span>⛏️ Telegraph Miner #5289 &amp; 1,043 WASM Test Vectors</span>
         <span style="font-size:12px; color:var(--ink-faint); font-family:var(--font-mono);">devnode.telegraphprotocol.com</span>
       </summary>
       <div class="accordion-content">
@@ -1043,8 +1071,8 @@ Content-Type: application/json
     <!-- Accordion 3: 62 Evaluator Bounties -->
     <details>
       <summary>
-        <span>🎯 Evaluator Pool & 62 Bounties (Closed-Loop Truth Verification)</span>
-        <span style="font-size:12px; color:var(--ink-faint); font-family:var(--font-mono);">Track 02 & Track 03 Flywheel</span>
+        <span>🎯 Evaluator Pool &amp; 62 Bounties (Closed-Loop Truth Verification)</span>
+        <span style="font-size:12px; color:var(--ink-faint); font-family:var(--font-mono);">Primary Registry Ground Truth</span>
       </summary>
       <div class="accordion-content">
         <p>Praman Desk forms a closed-loop intelligence flywheel with Telegraph's scoring network: our Evaluators score external miners against primary authoritative registers, and our Spend Guard consumes the resulting high-reputation miners to verify transaction parameters before settlement.</p>
@@ -1099,13 +1127,12 @@ Content-Type: application/json
     arithmetic_overcharge: {
       name: 'Scenario 2: Arithmetic Overcharge Discrepancy',
       agent: 'devops-cluster-agent-09',
-      amount: '$2,250.00 USDC',
-      amountVal: 2250.00,
+      amount: '$450.00 USDC',
+      amountVal: 450.00,
       recipient: '0x71C84164b3D9d5a7151320349383637144e05b33',
-      vendor: 'Lambda Labs Compute Inc.',
+      vendor: 'NVIDIA Corporation',
       items: [
-        { desc: '8x H100 GPU Instance Hours', qty: 40, price: '$35.00', total: '$1,400.00' },
-        { desc: 'High-Speed InfiniBand Interconnect', qty: 1, price: '$400.00', total: '$400.00' }
+        { desc: '8x H100 GPU Instance Hours (Stated Invoice Total: $450.00)', qty: 10, price: '$35.00', total: '$350.00' }
       ]
     },
     compliant_payout: {
@@ -1122,6 +1149,7 @@ Content-Type: application/json
   };
 
   let currentScenario = 'phishing_sanctions';
+  window.lastVerdictData = null;
 
   function selectScenario(key) {
     currentScenario = key;
@@ -1141,7 +1169,11 @@ Content-Type: application/json
     tbody.innerHTML = '';
     s.items.forEach(it => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${it.desc}</td><td class="num">${it.qty}</td><td class="num">${it.price}</td><td class="num">${it.total}</td>`;
+      const td1 = document.createElement('td'); td1.textContent = it.desc;
+      const td2 = document.createElement('td'); td2.className = 'num'; td2.textContent = String(it.qty);
+      const td3 = document.createElement('td'); td3.className = 'num'; td3.textContent = it.price;
+      const td4 = document.createElement('td'); td4.className = 'num'; td4.textContent = it.total;
+      tr.append(td1, td2, td3, td4);
       tbody.appendChild(tr);
     });
 
@@ -1152,6 +1184,11 @@ Content-Type: application/json
     const btn = document.getElementById('btn-run-inspect');
     btn.innerHTML = '<span>⏳ Inspecting with 651b WASM...</span>';
     btn.disabled = true;
+    const wasmOut = document.getElementById('wasm-browser-result');
+    if (wasmOut) {
+      wasmOut.textContent = 'Click to run client-side .wasm check';
+      wasmOut.style.color = 'var(--ink-muted)';
+    }
 
     const start = performance.now();
     try {
@@ -1172,6 +1209,7 @@ Content-Type: application/json
   }
 
   function updateVerdictUI(data, latency) {
+    window.lastVerdictData = data;
     document.getElementById('latency-pill').textContent = `${latency} ms`;
     const banner = document.getElementById('verdict-banner');
     const headline = document.getElementById('verdict-headline');
@@ -1200,7 +1238,9 @@ Content-Type: application/json
     // Policy Badges
     const badgeOfac = document.getElementById('badge-ofac');
     const badgeGleif = document.getElementById('badge-gleif');
+    const subGleif = document.getElementById('sub-gleif');
     const badgeWasm = document.getElementById('badge-wasm');
+    const subWasm = document.getElementById('sub-wasm');
     const badgeDelegation = document.getElementById('badge-delegation');
 
     // OFAC
@@ -1213,22 +1253,51 @@ Content-Type: application/json
       badgeOfac.textContent = '🛑 BLOCKED';
     }
 
-    // GLEIF
+    // GLEIF with clickable LEI link
     if (data.vendorVerification?.gleifVerified) {
       badgeGleif.className = 'badge-pass';
       badgeGleif.textContent = '✅ VERIFIED';
+      if (subGleif) {
+        subGleif.innerHTML = '';
+        if (data.vendorVerification.lei && data.vendorVerification.gleifUrl) {
+          subGleif.append('Verified LEI: ');
+          const a = document.createElement('a');
+          a.href = data.vendorVerification.gleifUrl;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.style.color = '#60a5fa';
+          a.style.textDecoration = 'none';
+          a.textContent = data.vendorVerification.lei;
+          subGleif.appendChild(a);
+          if (data.vendorVerification.legalName) {
+            subGleif.append(` (${data.vendorVerification.legalName})`);
+          }
+        } else {
+          subGleif.textContent = 'Verified active corporate registration in Global LEI Index';
+        }
+      }
     } else {
-      badgeGleif.className = 'badge-warn';
-      badgeGleif.textContent = '⚠️ UNVERIFIED';
+      const unverifiedHalted = Array.isArray(data.flags) && data.flags.some(f => f.startsWith('UNVERIFIED_COUNTERPARTY_ENTITY'));
+      badgeGleif.className = unverifiedHalted ? 'badge-halt' : 'badge-warn';
+      badgeGleif.textContent = unverifiedHalted ? '🛑 UNREGISTERED' : '⚠️ UNVERIFIED';
+      if (subGleif) {
+        subGleif.textContent = 'Global LEI Index resolution across 200+ jurisdictions';
+      }
     }
 
     // WASM Math
     if (data.mathVerification?.bitExactMatch) {
       badgeWasm.className = 'badge-pass';
       badgeWasm.textContent = '✅ 0.00% DIFF';
+      if (subWasm) {
+        subWasm.textContent = `651-byte standalone WASM engine (${data.mathVerification?.wasmScoreBps ?? 10000} bps)`;
+      }
     } else {
       badgeWasm.className = 'badge-halt';
-      badgeWasm.textContent = `🛑 $${(data.mathVerification?.discrepancyCents / 100).toFixed(2)} MISMATCH`;
+      badgeWasm.textContent = `🛑 $${((data.mathVerification?.discrepancyCents || 0) / 100).toFixed(2)} MISMATCH`;
+      if (subWasm) {
+        subWasm.textContent = `Computed $${Number(data.mathVerification?.computedTotal || 0).toFixed(2)} vs Stated $${Number(data.mathVerification?.statedTotal || 0).toFixed(2)} (0 bps)`;
+      }
     }
 
     // Delegation Caps
@@ -1242,6 +1311,102 @@ Content-Type: application/json
     }
   }
 
+  async function verifyWasmInBrowser() {
+    const out = document.getElementById('wasm-browser-result');
+    const btn = document.getElementById('btn-wasm-verify');
+    if (!out || !btn) return;
+    btn.disabled = true;
+    out.textContent = 'Running 651b comparator.wasm in browser...';
+    out.style.color = 'var(--ink-muted)';
+
+    try {
+      const resp = await fetch('/comparator.wasm');
+      const buf = await resp.arrayBuffer();
+      const digestBuf = await crypto.subtle.digest('SHA-256', buf);
+      const shaHex = '0x' + Array.from(new Uint8Array(digestBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+      const wasmMod = await WebAssembly.instantiate(buf, {});
+      const { imw_alloc, imw_free, imw_score_deterministic, memory } = wasmMod.instance.exports;
+
+      const mv = window.lastVerdictData?.mathVerification;
+      const computedCents = mv?.computedCents ?? Math.round((mv?.computedTotal ?? 350) * 100);
+      const statedCents = mv?.statedCents ?? Math.round((mv?.statedTotal ?? 450) * 100);
+
+      const specPtr = imw_alloc(16);
+      const view = new DataView(memory.buffer);
+      view.setInt32(specPtr, 0, true); // exact match mode
+      view.setInt32(specPtr + 4, 0, true);
+      view.setBigInt64(specPtr + 8, BigInt(0), true);
+      const score = Number(imw_score_deterministic(BigInt(computedCents), BigInt(statedCents), specPtr));
+      imw_free(specPtr);
+
+      const matchedHash = shaHex === '0x9dfe09265391c579d1b9467a5f33a7e8e82e09fa0a3a205527185edaf74f8114';
+      out.textContent = `Browser WASM Verified: ${score} bps (${buf.byteLength} bytes, SHA-256 ${matchedHash ? 'matched' : shaHex.slice(0, 12)})`;
+      out.style.color = score === 10000 ? '#34d399' : '#f87171';
+    } catch (err) {
+      out.textContent = `Browser WASM verification error: ${err.message}`;
+      out.style.color = '#fbbf24';
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function loadReceiptsLedger() {
+    try {
+      const res = await fetch('/api/ledger');
+      if (!res.ok) return;
+      const data = await res.json();
+      const calls = Array.isArray(data?.calls) ? data.calls : [];
+      if (!calls.length) return;
+
+      const countEl = document.getElementById('ledger-count-label');
+      if (countEl) countEl.textContent = String(calls.length);
+
+      const tbody = document.getElementById('receipts-tbody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      // Render newest verified receipts first
+      const ordered = [...calls].reverse();
+      ordered.forEach(row => {
+        const tr = document.createElement('tr');
+        const tdIdx = document.createElement('td');
+        tdIdx.textContent = String(row.index ?? '');
+
+        const tdHash = document.createElement('td');
+        if (row.txHash) {
+          const a = document.createElement('a');
+          a.href = `https://sepolia.etherscan.io/tx/${row.txHash}`;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = `${row.txHash.slice(0, 10)}...${row.txHash.slice(-4)}`;
+          tdHash.appendChild(a);
+        } else {
+          tdHash.textContent = 'n/a';
+        }
+
+        const tdIntent = document.createElement('td');
+        tdIntent.textContent = row.intent || 'UNKNOWN';
+
+        const tdMiner = document.createElement('td');
+        tdMiner.textContent = row.minerId ? `#${row.minerId}` : 'auto';
+
+        const tdAmt = document.createElement('td');
+        tdAmt.textContent = `$${Number(row.costUsd ?? 0.01).toFixed(2)} USDC`;
+
+        const tdStatus = document.createElement('td');
+        const agr = String(row.agreement || row.badgeText || 'SETTLED').toUpperCase();
+        tdStatus.textContent = agr;
+        tdStatus.style.color = agr.includes('CONTRADICT') ? '#f87171' : (agr.includes('CONFIRMED') || agr.includes('SETTLED') ? '#34d399' : '#fbbf24');
+
+        tr.append(tdIdx, tdHash, tdIntent, tdMiner, tdAmt, tdStatus);
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      console.warn('Could not load live ledger:', err);
+    }
+  }
+
   function updateVerdictUIFallback(scen, latency) {
     if (scen === 'phishing_sanctions') {
       updateVerdictUI({
@@ -1251,7 +1416,7 @@ Content-Type: application/json
         summary: 'Firewall intercepted unsafe spend request: Recipient address matches Lazarus Group on US Treasury OFAC SDN list. Zero funds moved.',
         recipientVerification: { sanctionsScreeningClear: false },
         vendorVerification: { gleifVerified: false, sanctionsScreeningClear: true },
-        mathVerification: { bitExactMatch: true, discrepancyCents: 0 },
+        mathVerification: { bitExactMatch: true, discrepancyCents: 0, computedCents: 420000, statedCents: 420000, computedTotal: 4200, statedTotal: 4200, wasmScoreBps: 10000 },
         policyCaps: { delegationTier: 'TIER_2_DUAL_AUTH_REQUIRED', supervisorAuthRequired: true, supervisorAuthValid: false },
         attestationSha256: '0x7f4ae910a3b8cd92b15e4492a88194b1'
       }, latency);
@@ -1259,12 +1424,12 @@ Content-Type: application/json
       updateVerdictUI({
         status: 'HALTED',
         verdict: 'HALT_AND_FREEZE',
-        flags: ['WASM_3WAY_MATH_MISMATCH: Stated $2250.00 differs from computed $1800.00 ($450.00 discrepancy)'],
-        summary: 'Firewall intercepted overcharge: Stated total $2,250.00 differs from computed line-item sum $1,800.00 ($450.00 discrepancy detected by 651b WASM engine).',
+        flags: ['WASM_3WAY_MATH_MISMATCH: Stated $450.00 differs from computed $350.00 ($100.00 discrepancy)'],
+        summary: 'Firewall intercepted overcharge: Stated total $450.00 differs from computed line-item sum $350.00 ($100.00 discrepancy detected by 651b WASM engine).',
         recipientVerification: { sanctionsScreeningClear: true },
-        vendorVerification: { gleifVerified: true, sanctionsScreeningClear: true },
-        mathVerification: { bitExactMatch: false, discrepancyCents: 45000 },
-        policyCaps: { delegationTier: 'TIER_2_DUAL_AUTH_REQUIRED', supervisorAuthRequired: true, supervisorAuthValid: false },
+        vendorVerification: { gleifVerified: true, lei: '549300S4KLFTLO7GSQ80', legalName: 'NVIDIA CORPORATION', gleifUrl: 'https://search.gleif.org/#/record/549300S4KLFTLO7GSQ80', sanctionsScreeningClear: true },
+        mathVerification: { bitExactMatch: false, discrepancyCents: 10000, computedCents: 35000, statedCents: 45000, computedTotal: 350, statedTotal: 450, wasmScoreBps: 0 },
+        policyCaps: { delegationTier: 'TIER_1_AUTONOMOUS', supervisorAuthRequired: false, supervisorAuthValid: true },
         attestationSha256: '0x12b48a09cf4bde29184acb014761299e'
       }, latency);
     } else {
@@ -1272,10 +1437,10 @@ Content-Type: application/json
         status: 'APPROVED',
         verdict: 'APPROVED_FOR_PAYMENT',
         flags: [],
-        summary: 'Pre-payment spend cleared: OFAC clean, GLEIF verified, deterministic math bit-exact (0.00% discrepancy), within delegation limit. Ready for Telegraph x402 settlement.',
+        summary: 'Pre-payment spend cleared: OFAC clean, GLEIF verified (LEI: 984500B6DEB8CEBC4Z70), deterministic math bit-exact (0.00% discrepancy), within delegation limit. Ready for Telegraph x402 settlement.',
         recipientVerification: { sanctionsScreeningClear: true },
-        vendorVerification: { gleifVerified: true, sanctionsScreeningClear: true },
-        mathVerification: { bitExactMatch: true, discrepancyCents: 0 },
+        vendorVerification: { gleifVerified: true, lei: '984500B6DEB8CEBC4Z70', legalName: 'ANTHROPIC, PBC', gleifUrl: 'https://search.gleif.org/#/record/984500B6DEB8CEBC4Z70', sanctionsScreeningClear: true },
+        mathVerification: { bitExactMatch: true, discrepancyCents: 0, computedCents: 25000, statedCents: 25000, computedTotal: 250, statedTotal: 250, wasmScoreBps: 10000 },
         policyCaps: { delegationTier: 'TIER_1_AUTONOMOUS', supervisorAuthRequired: false, supervisorAuthValid: true },
         attestationSha256: '0x49ca3801f92e811acb50882149b1093c'
       }, latency);
@@ -1329,9 +1494,10 @@ Content-Type: application/json
     });
   }
 
-  // Auto-run Scenario 1 on initial page load
+  // Auto-run Scenario 1 & hydrate live on-chain receipt ledger on load
   window.addEventListener('DOMContentLoaded', () => {
     selectScenario('phishing_sanctions');
+    loadReceiptsLedger();
   });
 </script>
 

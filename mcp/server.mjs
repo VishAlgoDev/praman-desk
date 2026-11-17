@@ -529,6 +529,38 @@ const TOOLS = [
 
 // Start MCP Server
 export async function startServer() {
+  const cliArgs = process.argv.slice(2);
+  if (cliArgs.includes('--help') || cliArgs.includes('-h') || cliArgs.includes('--version') || cliArgs.includes('-v')) {
+    console.log([
+      'Praman Spend Guard MCP Server v1.0.0',
+      'Autonomous Pre-Payment Firewall for AI Agents & DAOs (10 deterministic tools)',
+      '',
+      'Usage:',
+      '  npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp [options]',
+      '',
+      'Options:',
+      '  -h, --help       Show this help message and tool list',
+      '  -v, --version    Show version number',
+      '  --self-test      Run a local 651-byte WASM + OFAC SDN self-test and exit',
+      '',
+      'Registered Tools (' + TOOLS.length + '):',
+      ...TOOLS.map(t => `  - ${t.name}`)
+    ].join('\n'));
+    process.exit(0);
+  }
+
+  if (cliArgs.includes('--self-test')) {
+    await initWasmComparator();
+    const wasmOk = runWasmScore(25000, 25000, 0, 0) === 10000;
+    const sanctionsRes = await screenSanctions({ name: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' });
+    if (!wasmOk || !sanctionsRes?.matched) {
+      console.error('FAIL: Praman Spend Guard MCP self-test failed.', { wasmOk, matched: sanctionsRes?.matched });
+      process.exit(1);
+    }
+    console.log('PASS: Praman Spend Guard MCP self-test (651b WASM + OFAC SDN) verified.');
+    process.exit(0);
+  }
+
   await initWasmComparator();
 
   const server = new Server(
@@ -698,8 +730,17 @@ export async function startServer() {
   await server.connect(transport);
 }
 
-// Auto-run if executed directly
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+// Auto-run if executed directly (handles symlinks/npx shims cleanly)
+const isDirectEntry = (() => {
+  if (!process.argv[1]) return false;
+  try {
+    return fs.realpathSync(fileURLToPath(import.meta.url)) === fs.realpathSync(process.argv[1]);
+  } catch {
+    return fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+  }
+})();
+
+if (isDirectEntry) {
   startServer().catch((err) => {
     console.error('Fatal MCP server error:', err);
     process.exit(1);
