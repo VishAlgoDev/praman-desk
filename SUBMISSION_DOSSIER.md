@@ -154,3 +154,22 @@ Praman Desk serves as an autonomous pre-payment spend guard and clearing desk fo
 - **Public Showcase Consent**: Yes, full permission is granted to share all text, diagrams, screen recordings, tutorials, and walkthrough videos across Telegraph Protocol, Anjoman, and hackathon social channels.
 - **Buyer & Partner Introductions**: Yes, we welcome introductions to enterprises, DAOs, and agent framework teams seeking verifiable pre-payment spend guards and compliance clearing desks.
 - **License**: MIT Open Source License.
+
+---
+
+## SECTION 07: Organic Growth, Education & Community Activation (20 Points Evidence)
+
+### 1. Three Meaningful Public Technical Updates on Separate Dates
+- **Update 1 (Nov 9, 2026)**: Initial Devnode integration & EIP-191 personal_sign evaluator dataset generation (62 rows across 8 intents).  
+  *Link*: [Discord #hackathon Milestone Post](https://discord.com/channels/1438396125609463881/1498654113376899112)
+- **Update 2 (Nov 14, 2026)**: Formal Integration Milestone — 5 on-chain Sepolia settlement receipts (`evidence/nov14-milestone-receipt.json`) & initial 651-byte WASM comparator engine.  
+  *Link*: [Official Milestone Receipt Commit (62d2169)](https://github.com/VishAlgoDev/praman-desk/commit/62d2169d5185060494ccfbbb7f87e8a976aa5a3c)
+- **Update 3 (Nov 17, 2026)**: Full 1080p Studio Walkthrough Video, Mission 02 Stablecoin Gate (OFAC EVM freeze), Mission 04 Legal Diligence Suite, and 10-tool MCP stdio server.  
+  *Link*: [Direct 1080p MP4 Walkthrough](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) · [GitHub Main Commit](https://github.com/VishAlgoDev/praman-desk/commit/d103bee227042dfe0b2edccd81f9859bd7fdab14)
+
+### 2. Educational Tutorials & Developer Reproducibility
+- **Google Colab Training Notebook**: Complete standalone Colab reproducing ModernBERT-base LoRA training for `SANCTIONS_SCREENING_MATCH`:  
+  *Colab Link*: [`Train_Sanctions_Evaluator_Adapter.ipynb`](https://colab.research.google.com/github/VishAlgoDev/praman-desk/blob/main/colab/Train_Sanctions_Evaluator_Adapter.ipynb)
+- **Zero-Wallet Quickstart**: Interactive developer testing instructions in `README.md` and live web demo at [https://praman-desk.vercel.app](https://praman-desk.vercel.app).
+- **NPM Package / MCP Tool**: Instant stdio integration for AI agents via `npx @praman/spend-guard-mcp`.
+
