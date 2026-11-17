@@ -3594,7 +3594,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       supervisorSignature: supervisorSignature || null
     },
     mathVerification: {
-      engine: 'praman-wasm-651b (zero-dependency C to WASM)',
+      engine: 'praman-wasm-651b (AssemblyScript Standalone WASM, 651 bytes, 0 imports)',
       sha256: '0x9dfe3fb4d232049d5df1076f87ea955f10688005b82fb8f3d89e5efd84b23835',
       keccak256: '0x4edd911855a8f4c9c735d4911d7398b1784c9c5750df92d6e3e57e937d55f9a5',
       bitExactMatch: wasmMatch,
