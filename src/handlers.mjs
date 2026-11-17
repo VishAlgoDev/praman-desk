@@ -3326,7 +3326,8 @@ export async function evaluateStablecoinGate(params = {}) {
       senderEthBalance,
       senderUsdcBalance,
       hasSufficientUsdc,
-      rpcError
+      rpcError,
+      fallback_active: Boolean(rpcError)
     },
     onchainTxProof,
     timestamp: new Date().toISOString()

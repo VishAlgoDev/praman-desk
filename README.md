@@ -31,6 +31,9 @@ Scored against all 2,173 registered miners on the Telegraph Devnode network in E
 
 *Zero simulated scores. All ranks and scores independently verifiable on `devnode.telegraphprotocol.com`.*
 
+> [!NOTE]
+> **Devnode Indexer Identity Note**: On-chain Diamond transaction [`0x81b63b78...`](https://sepolia.etherscan.io/tx/0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff) registered active on-chain miner ID **`#5289`** (Block 12142154 updating genesis `#5281`). Devnode's aggregate miner list (`GET /api/miners`) preserves benchmark scores under index `#5281`, while single-miner endpoint `GET /api/miners/5289` verifies the live active entity.
+
 ---
 
 ## 2-Minute Quickstart (Zero Setup Required)

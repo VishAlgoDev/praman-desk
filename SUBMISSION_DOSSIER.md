@@ -114,6 +114,7 @@ npm run mcp:test
 - **Miner ID**: `#5289` (`praman-compliance-miner`)
 - **Diamond Registration Tx**: [`0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff`](https://sepolia.etherscan.io/tx/0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff)
 - **Active Endpoints**: Live HTTP 200 health check maintained by continuous watchdog runner.
+- **Devnode Indexer Identity Note**: On-chain Diamond transaction [`0x81b63b78...`](https://sepolia.etherscan.io/tx/0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff) registered active on-chain miner ID **`#5289`** (Block 12142154 updating genesis `#5281`). Devnode's aggregate miner list (`GET /api/miners`) preserves benchmark scores under index `#5281`, while single-miner endpoint `GET /api/miners/5289` verifies the live active entity.
 
 ### 2. Devnode Epoch 2107 Network Leaderboard
 Scored against all 2,173 registered miners on the Telegraph network:

@@ -2409,16 +2409,24 @@ $('btn-m11-evaluate').addEventListener('click', async () => {
   resBox.innerHTML = '<div class="msg" style="border-left:3px solid var(--accent);">⏳ Evaluating Mission 11 Spend Policy & Deterministic WASM Math...</div>';
 
   try {
+    const spendAmt = parseFloat($('m11-amount').value) || 0;
+    let items = currentM11Preset.lineItems;
+    let sTotal = currentM11Preset.statedTotal;
+    if (currentM11Preset !== m11Presets['wasm-break'] && Math.abs(spendAmt - currentM11Preset.statedTotal) > 0.001) {
+      items = [{ desc: 'Dynamic Procurement Line Item', qty: 1, unitPrice: spendAmt, amount: spendAmt }];
+      sTotal = spendAmt;
+    }
+
     const payload = {
       agentId: $('m11-agent-id').value.trim(),
-      spendAmountUsdc: parseFloat($('m11-amount').value),
+      spendAmountUsdc: spendAmt,
       singleAgentCap: parseFloat($('m11-single-cap').value),
       dualApprovalCap: parseFloat($('m11-dual-cap').value),
       vendorName: $('m11-vendor-name').value.trim(),
       vendorJurisdiction: $('m11-vendor-country').value.trim(),
       supervisorSignature: $('m11-signature').value.trim(),
-      lineItems: currentM11Preset.lineItems,
-      statedTotal: currentM11Preset.statedTotal
+      lineItems: items,
+      statedTotal: sTotal
     };
 
     const res = await api('/api/mission/autonomous-spend', payload);
