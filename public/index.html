@@ -467,7 +467,9 @@
     <button role="tab" aria-selected="true" data-tab="audit">Spend Guard (Mission 04)</button>
     <button role="tab" aria-selected="false" data-tab="compliance">Compliance Suite (Mission 04)</button>
     <button role="tab" aria-selected="false" data-tab="stablecoin">Stablecoin Gate (Mission 02)</button>
-    <button role="tab" aria-selected="false" data-tab="ledger" id="tab-btn-ledger">On-chain receipt ledger (9)</button>
+    <button role="tab" aria-selected="false" data-tab="exchange">Exchange Integrity (Mission 01)</button>
+    <button role="tab" aria-selected="false" data-tab="autonomous">Autonomous Systems (Mission 11)</button>
+    <button role="tab" aria-selected="false" data-tab="ledger" id="tab-btn-ledger">On-chain receipt ledger (50+)</button>
     <button role="tab" aria-selected="false" data-tab="eval" id="tab-btn-eval">Evaluator pool &amp; bounties (62)</button>
     <button role="tab" aria-selected="false" data-tab="miner">Active Miner #5289 (Sepolia)</button>
     <button role="tab" aria-selected="false" data-tab="video" id="tab-btn-video" style="color:var(--accent); font-weight:600;">🎬 Walkthrough Video</button>
@@ -655,7 +657,115 @@
     <div id="audit-results"></div>
   </div>
 
-  <!-- TAB 2: ON-CHAIN RECEIPT LEDGER -->
+  
+  <!-- TAB: EXCHANGE INTEGRITY (MISSION 01) -->
+  <div id="tab-exchange" hidden>
+    <section class="panel">
+      <h2>Mission 01 — Exchange &amp; Market Integrity (Token Listing &amp; Counterparty Diligence)</h2>
+      <p class="hint">
+        Continuous market-integrity diligence portal for centralized exchanges (CEX) and DEX listing committees. Screens token foundation entities against GLEIF primary corporate registries, inspects treasury multisig signers against 19,565 OFAC SDN entries via Telegraph <code class="mono">SANCTIONS_SCREENING_MATCH</code>, monitors regulatory disclosures with <code class="mono">REGULATORY_FILING_MONITOR</code>, and validates deployed contract bytecode on Ethereum Sepolia.
+      </p>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+        <span class="hint" style="margin:4px 0;">Break &amp; Verify Presets:</span>
+        <button type="button" class="secondary" data-m1-preset="compliant">1. Compliant Listing (PRAMA - Apple Inc. Foundation)</button>
+        <button type="button" class="secondary" data-m1-preset="sanctioned">2. Sanctioned Signer (Lazarus Exploiter)</button>
+        <button type="button" class="secondary" data-m1-preset="offshore">3. Opaque Offshore Shell (RugPull Finance - Cayman)</button>
+        <button type="button" class="secondary" data-m1-preset="undeployed">4. Undeployed Contract (Empty Bytecode)</button>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label for="m1-token-symbol">Token Symbol</label>
+          <input id="m1-token-symbol" value="PRAMA" placeholder="e.g. PRAMA, USDT">
+        </div>
+        <div>
+          <label for="m1-token-name">Token Name</label>
+          <input id="m1-token-name" value="Praman Protocol Token" placeholder="e.g. Praman Protocol Token">
+        </div>
+        <div>
+          <label for="m1-contract-addr">Token Contract Address (Sepolia 0x...)</label>
+          <input id="m1-contract-addr" value="0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" placeholder="0x...">
+        </div>
+        <div>
+          <label for="m1-issuer-name">Issuer Entity Legal Name</label>
+          <input id="m1-issuer-name" value="Apple Inc." placeholder="e.g. Apple Inc. or Offshore DAO">
+        </div>
+        <div>
+          <label for="m1-issuer-country">Issuer Jurisdiction (ISO 2-letter)</label>
+          <input id="m1-issuer-country" value="US" placeholder="e.g. US, GB, SG, KY">
+        </div>
+        <div>
+          <label for="m1-signer-addr">Treasury Multisig Signer (0x...)</label>
+          <input id="m1-signer-addr" value="0x98021b20Efdb7ae2C57366010a6E0fDE207b4466" placeholder="0x...">
+        </div>
+      </div>
+
+      <div style="margin-top:14px; display:flex; gap:10px; align-items:center;">
+        <button type="button" class="primary" id="btn-m1-evaluate">Run Mission 01 Exchange Diligence</button>
+        <span class="hint" id="m1-status-hint">Routes through Telegraph Miners #5289 &amp; #375</span>
+      </div>
+
+      <div id="m1-result" style="margin-top:16px;"></div>
+    </section>
+  </div>
+
+  <!-- TAB: AUTONOMOUS SYSTEMS (MISSION 11) -->
+  <div id="tab-autonomous" hidden>
+    <section class="panel">
+      <h2>Mission 11 — Autonomous Systems &amp; Spend Delegation (Circuit Breakers &amp; Spend Caps)</h2>
+      <p class="hint">
+        Autonomous agent spend governor and safety gateway. Enforces deterministic 3-way WASM mathematical reconciliation (<code class="mono">praman-wasm-651b</code>), multi-tier spend delegation policy ($500 single agent cap, $5,000 dual approval cap), vendor corporate registry verification, and instant emergency circuit breaker halts on anomalous invoice discrepancies or unverified counterparties.
+      </p>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+        <span class="hint" style="margin:4px 0;">Break &amp; Verify Presets:</span>
+        <button type="button" class="secondary" data-m11-preset="tier1">1. Approved Micro-Spend ($450 Autonomous)</button>
+        <button type="button" class="secondary" data-m11-preset="missing-sig">2. Dual-Sig Required ($4,200 No Sig)</button>
+        <button type="button" class="secondary" data-m11-preset="wasm-break">3. WASM 1-Cent Discrepancy (Halt)</button>
+        <button type="button" class="secondary" data-m11-preset="sanctioned">4. Sanctioned Vendor (Lazarus Group)</button>
+      </div>
+
+      <div class="grid">
+        <div>
+          <label for="m11-agent-id">Autonomous Agent ID</label>
+          <input id="m11-agent-id" value="agent-procure-v2" placeholder="e.g. agent-procure-v2">
+        </div>
+        <div>
+          <label for="m11-amount">Spend Request Amount (USDC)</label>
+          <input id="m11-amount" type="number" step="0.01" value="450.00">
+        </div>
+        <div>
+          <label for="m11-single-cap">Single Agent Cap (USDC)</label>
+          <input id="m11-single-cap" type="number" step="0.01" value="500.00">
+        </div>
+        <div>
+          <label for="m11-dual-cap">Dual Approval Cap (USDC)</label>
+          <input id="m11-dual-cap" type="number" step="0.01" value="5000.00">
+        </div>
+        <div>
+          <label for="m11-vendor-name">Vendor Entity Legal Name</label>
+          <input id="m11-vendor-name" value="SAP SE" placeholder="e.g. SAP SE">
+        </div>
+        <div>
+          <label for="m11-vendor-country">Vendor Jurisdiction (ISO)</label>
+          <input id="m11-vendor-country" value="DE" placeholder="e.g. DE, US">
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label for="m11-signature">Supervisor Executive Signature (Required &gt;$500)</label>
+          <input id="m11-signature" value="" placeholder="Optional for &le;$500; Hex signature 0x... required &gt;$500">
+        </div>
+      </div>
+
+      <div style="margin-top:14px; display:flex; gap:10px; align-items:center;">
+        <button type="button" class="primary" id="btn-m11-evaluate">Evaluate Mission 11 Spend Policy &amp; Circuit Breakers</button>
+        <span class="hint" id="m11-status-hint">Deterministic WASM bit-exact validation active</span>
+      </div>
+
+      <div id="m11-result" style="margin-top:16px;"></div>
+    </section>
+  </div>
+<!-- TAB 2: ON-CHAIN RECEIPT LEDGER -->
   <div id="tab-ledger" hidden>
     <section class="panel">
       <h2>Verified On-Chain Payment &amp; Signal Ledger</h2>
@@ -1202,7 +1312,7 @@ function openTab(tabName) {
     const active = btn.dataset.tab === tabName;
     btn.setAttribute("aria-selected", active ? "true" : "false");
   });
-  ["audit", "compliance", "stablecoin", "ledger", "eval", "miner", "video"].forEach(t => {
+  ["audit", "compliance", "stablecoin", "exchange", "autonomous", "ledger", "eval", "miner", "video"].forEach(t => {
     $(`tab-${t}`).hidden = t !== tabName;
   });
   if (tabName === "ledger") loadLedger();
@@ -2112,8 +2222,247 @@ if ($("btn-m2-gate")) {
 loadWallet();
 updateSpendEstimate();
 refreshTabCounts();
+
+// ==========================================
+// MISSION 01: EXCHANGE INTEGRITY LOGIC
+// ==========================================
+const m1Presets = {
+  compliant: {
+    symbol: "PRAMA",
+    name: "Praman Protocol Token",
+    contract: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b",
+    issuer: "Apple Inc.",
+    country: "US",
+    signer: "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466"
+  },
+  sanctioned: {
+    symbol: "LAZ",
+    name: "Lazarus Exploit Token",
+    contract: "0x098B716B8Aaf21512996dC57EB0615e2383E2f96",
+    issuer: "Lazarus Group",
+    country: "KP",
+    signer: "0x098B716B8Aaf21512996dC57EB0615e2383E2f96"
+  },
+  offshore: {
+    symbol: "RUG",
+    name: "RugPull Finance Token",
+    contract: "0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b",
+    issuer: "RugPull Shell Foundation Ltd",
+    country: "KY",
+    signer: "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466"
+  },
+  undeployed: {
+    symbol: "GHOST",
+    name: "Ghost Bytecode Token",
+    contract: "0x000000000000000000000000000000000000dEaD",
+    issuer: "Apple Inc.",
+    country: "US",
+    signer: "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466"
+  }
+};
+
+document.querySelectorAll('button[data-m1-preset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const p = m1Presets[btn.dataset.m1Preset];
+    if (!p) return;
+    $('m1-token-symbol').value = p.symbol;
+    $('m1-token-name').value = p.name;
+    $('m1-contract-addr').value = p.contract;
+    $('m1-issuer-name').value = p.issuer;
+    $('m1-issuer-country').value = p.country;
+    $('m1-signer-addr').value = p.signer;
+    $('btn-m1-evaluate').click();
+  });
+});
+
+$('btn-m1-evaluate').addEventListener('click', async () => {
+  const btn = $('btn-m1-evaluate');
+  const resBox = $('m1-result');
+  btn.disabled = true;
+  resBox.innerHTML = '<div class="msg" style="border-left:3px solid var(--accent);">⏳ Running Mission 01 Multi-Miner Diligence (GLEIF Corporate Registry, OFAC SDN Sanctions, Regulatory Monitor, Sepolia RPC Bytecode)...</div>';
+
+  try {
+    const payload = {
+      tokenSymbol: $('m1-token-symbol').value.trim(),
+      tokenName: $('m1-token-name').value.trim(),
+      contractAddress: $('m1-contract-addr').value.trim(),
+      issuerEntityName: $('m1-issuer-name').value.trim(),
+      issuerJurisdiction: $('m1-issuer-country').value.trim(),
+      treasurySigner: $('m1-signer-addr').value.trim()
+    };
+
+    const res = await api('/api/mission/exchange-integrity', payload);
+    const isApproved = res.cleared && res.listingVerdict === 'APPROVED_FOR_EXCHANGE_LISTING';
+    const badgeColor = isApproved ? 'var(--pass)' : (res.marketRisk === 'CRITICAL' ? 'var(--fail)' : 'var(--warn)');
+    const badgeText = isApproved ? 'LISTING APPROVED' : res.listingVerdict;
+
+    let flagsHtml = '';
+    if (res.flags && res.flags.length > 0) {
+      flagsHtml = '<div style="margin-top:10px;"><strong>Flags Raised (' + res.flags.length + '):</strong><ul style="margin:4px 0 0 18px; padding:0; color:var(--fail);">' +
+        res.flags.map(f => '<li>' + esc(f) + '</li>').join('') + '</ul></div>';
+    }
+
+    resBox.innerHTML = `
+      <div style="background:var(--bg); border:1px solid ${badgeColor}; border-radius:8px; padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <h3 style="margin:0; font-size:16px;">Verdict: <span style="color:${badgeColor}; font-weight:700;">${badgeText}</span></h3>
+          <span style="background:${badgeColor}; color:#fff; padding:3px 10px; border-radius:4px; font-weight:600; font-size:12px;">Market Risk: ${res.marketRisk} (Score: ${res.riskScore})</span>
+        </div>
+        ${flagsHtml}
+        <div class="grid" style="margin-top:12px; font-size:13px;">
+          <div><strong>Token Symbol:</strong> ${esc(res.token?.symbol)}</div>
+          <div><strong>Contract Deployed:</strong> ${res.token?.isDeployed ? 'Yes (' + res.token?.bytecodeBytes + ' bytes)' : 'No (Empty Bytecode)'}</div>
+          <div><strong>Corporate Registry:</strong> ${res.counterpartyDiligence?.corporateRegistryVerified ? 'Verified LEI Active' : 'Unverified Legal Entity'}</div>
+          <div><strong>Regulatory Status:</strong> ${esc(res.counterpartyDiligence?.regulatoryFilingStatus)}</div>
+          <div><strong>Sanctions Check:</strong> ${res.sanctionsScreening?.issuerMatched || res.sanctionsScreening?.treasurySignerMatched ? 'MATCH DETECTED' : 'Clear (0 OFAC matches)'}</div>
+          <div><strong>Sepolia Block:</strong> #${res.onchainTelemetry?.chainBlockNumber || 'Latest'}</div>
+        </div>
+        <div style="margin-top:10px; font-size:12px; color:var(--hint);">
+          Attestation Seal: <code class="mono">${res.attestationSha256 || 'Verified'}</code> &bull; Settlement: <code class="mono">${res.telegraphSettlement?.contractAddress}</code> (Miner #${res.telegraphSettlement?.minerId})
+        </div>
+        <details style="margin-top:12px; font-size:12px;">
+          <summary style="cursor:pointer; color:var(--accent);">Inspect Full Cryptographic Payload</summary>
+          <pre style="background:var(--panel); padding:10px; border-radius:4px; overflow-x:auto; margin-top:6px;">${esc(JSON.stringify(res, null, 2))}</pre>
+        </details>
+      </div>`;
+  } catch (err) {
+    resBox.innerHTML = '<div class="msg error">Execution failed: ' + esc(err.message) + '</div>';
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ==========================================
+// MISSION 11: AUTONOMOUS SYSTEMS LOGIC
+// ==========================================
+const m11Presets = {
+  tier1: {
+    agentId: "agent-procure-v2",
+    amount: "450.00",
+    vendor: "SAP SE",
+    country: "DE",
+    signature: "",
+    lineItems: [
+      { desc: "Cloud Inference Compute (Tier A)", qty: 10, unitPrice: 35.00, amount: 350.00 },
+      { desc: "Dedicated Gateway Endpoint", qty: 1, unitPrice: 100.00, amount: 100.00 }
+    ],
+    statedTotal: 450.00
+  },
+  'missing-sig': {
+    agentId: "agent-procure-v2",
+    amount: "4200.00",
+    vendor: "SAP SE",
+    country: "DE",
+    signature: "",
+    lineItems: [
+      { desc: "Enterprise GPU Node Cluster", qty: 1, unitPrice: 4200.00, amount: 4200.00 }
+    ],
+    statedTotal: 4200.00
+  },
+  'wasm-break': {
+    agentId: "agent-procure-v2",
+    amount: "450.00",
+    vendor: "SAP SE",
+    country: "DE",
+    signature: "",
+    lineItems: [
+      { desc: "Cloud Inference Compute (Tier A)", qty: 10, unitPrice: 35.00, amount: 350.00 },
+      { desc: "Dedicated Gateway Endpoint", qty: 1, unitPrice: 100.00, amount: 100.00 }
+    ],
+    statedTotal: 450.01 // 1 cent discrepancy!
+  },
+  sanctioned: {
+    agentId: "agent-procure-v2",
+    amount: "450.00",
+    vendor: "Lazarus Group",
+    country: "KP",
+    signature: "",
+    lineItems: [
+      { desc: "Offshore Node Relay", qty: 1, unitPrice: 450.00, amount: 450.00 }
+    ],
+    statedTotal: 450.00
+  }
+};
+
+let currentM11Preset = m11Presets.tier1;
+
+document.querySelectorAll('button[data-m11-preset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.m11Preset;
+    const p = m11Presets[key];
+    if (!p) return;
+    currentM11Preset = p;
+    $('m11-agent-id').value = p.agentId;
+    $('m11-amount').value = p.amount;
+    $('m11-vendor-name').value = p.vendor;
+    $('m11-vendor-country').value = p.country;
+    $('m11-signature').value = p.signature;
+    $('btn-m11-evaluate').click();
+  });
+});
+
+$('btn-m11-evaluate').addEventListener('click', async () => {
+  const btn = $('btn-m11-evaluate');
+  const resBox = $('m11-result');
+  btn.disabled = true;
+  resBox.innerHTML = '<div class="msg" style="border-left:3px solid var(--accent);">⏳ Evaluating Mission 11 Spend Policy & Deterministic WASM Math...</div>';
+
+  try {
+    const payload = {
+      agentId: $('m11-agent-id').value.trim(),
+      spendAmountUsdc: parseFloat($('m11-amount').value),
+      singleAgentCap: parseFloat($('m11-single-cap').value),
+      dualApprovalCap: parseFloat($('m11-dual-cap').value),
+      vendorName: $('m11-vendor-name').value.trim(),
+      vendorJurisdiction: $('m11-vendor-country').value.trim(),
+      supervisorSignature: $('m11-signature').value.trim(),
+      lineItems: currentM11Preset.lineItems,
+      statedTotal: currentM11Preset.statedTotal
+    };
+
+    const res = await api('/api/mission/autonomous-spend', payload);
+    const isApproved = res.policyDecision === 'DELEGATED_EXECUTION_APPROVED' || res.policyDecision === 'DUAL_AUTHORIZED_AGENT_SPEND';
+    const badgeColor = isApproved ? 'var(--pass)' : 'var(--fail)';
+    const badgeText = isApproved ? 'EXECUTION APPROVED' : 'CIRCUIT BREAKER TRIGGERED (EXECUTION HALTED)';
+
+    let flagsHtml = '';
+    if (res.flags && res.flags.length > 0) {
+      flagsHtml = '<div style="margin-top:10px;"><strong>Safety Circuit Breaker Reasons (' + res.flags.length + '):</strong><ul style="margin:4px 0 0 18px; padding:0; color:var(--fail);">' +
+        res.flags.map(f => '<li>' + esc(f) + '</li>').join('') + '</ul></div>';
+    }
+
+    resBox.innerHTML = `
+      <div style="background:var(--bg); border:1px solid ${badgeColor}; border-radius:8px; padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <h3 style="margin:0; font-size:16px;">Policy Status: <span style="color:${badgeColor}; font-weight:700;">${badgeText}</span></h3>
+          <span style="background:${badgeColor}; color:#fff; padding:3px 10px; border-radius:4px; font-weight:600; font-size:12px;">Delegation Tier: ${res.policyCaps?.delegationTier}</span>
+        </div>
+        ${flagsHtml}
+        <div class="grid" style="margin-top:12px; font-size:13px;">
+          <div><strong>Agent ID:</strong> ${esc(res.agentId)}</div>
+          <div><strong>Spend Request:</strong> $${res.spendAmountUsdc} USDC</div>
+          <div><strong>WASM Engine:</strong> ${res.mathVerification?.engine}</div>
+          <div><strong>WASM Bit-Exact Match:</strong> ${res.mathVerification?.bitExactMatch ? 'Exact 0-cent drift' : 'MISMATCH (' + res.mathVerification?.discrepancyCents + ' cents)'}</div>
+          <div><strong>Vendor Corporate Status:</strong> ${res.vendorVerification?.gleifVerified ? 'GLEIF Verified Active' : 'Unregistered Vendor'}</div>
+          <div><strong>Vendor Sanctions Check:</strong> ${res.vendorVerification?.sanctionsScreeningClear ? 'Clear (0 Matches)' : 'SANCTIONED VENDOR MATCH'}</div>
+        </div>
+        <div style="margin-top:10px; font-size:12px; color:var(--hint);">
+          Circuit Breaker Halt: <strong style="color:${res.circuitBreaker?.haltExecution ? 'var(--fail)' : 'var(--pass)'};">${res.circuitBreaker?.haltExecution ? 'YES (AGENT HALTED)' : 'NO (EXECUTION PERMITTED)'}</strong> &bull; Attestation: <code class="mono">${res.attestationSha256}</code>
+        </div>
+        <details style="margin-top:12px; font-size:12px;">
+          <summary style="cursor:pointer; color:var(--accent);">Inspect Full Cryptographic Policy Attestation</summary>
+          <pre style="background:var(--panel); padding:10px; border-radius:4px; overflow-x:auto; margin-top:6px;">${esc(JSON.stringify(res, null, 2))}</pre>
+        </details>
+      </div>`;
+  } catch (err) {
+    resBox.innerHTML = '<div class="msg error">Policy check failed: ' + esc(err.message) + '</div>';
+  } finally {
+    btn.disabled = false;
+  }
+});
+
 const initialTab = location.hash.replace("#", "");
-if (["audit", "compliance", "stablecoin", "ledger", "eval", "miner"].includes(initialTab)) {
+if (["audit", "compliance", "stablecoin", "exchange", "autonomous", "ledger", "eval", "miner", "video"].includes(initialTab)) {
   openTab(initialTab);
 }
 </script>

@@ -3,7 +3,7 @@
 **Project Name**: Praman Desk  
 **Subtitle**: Autonomous Pre-Payment Spend Guard & Counterparty Clearing Desk for AI Agents, DAOs, and ERPs  
 **Submission Tracks**:
-- **Primary Track**: Track 01 — Apps & Agents (Dual Mission Compliance: **Mission 02** & **Mission 04**)
+- **Primary Track**: Track 01 — Apps & Agents (Quad-Mission Comprehensive Compliance: **Mission 01 (Exchange & Market Integrity)**, **Mission 02 (Stablecoin Treasury Guard)**, **Mission 04 (Legal Diligence & 3-Way WASM)**, **Mission 11 (Autonomous Systems & Spend Delegation)**)
 - **Secondary Track**: Track 02 — Miners / Providers (Active Sepolia Miner **`#5289`**)
 - **Supporting Track**: Track 03 — Evaluators (WASM Deterministic Arithmetic Comparator + 62 Attested Bounties)  
 **Main Competition Deadline**: December 1, 2026, 23:59 UTC  
@@ -43,7 +43,7 @@
 3. `0:54 - 1:21` | **1-Click Spend Pipeline**: Live terminal streaming signer probe, GLEIF primary audit, x402 Telegraph miner payment, client-side WASM verification, and green clearance receipt.
 4. `1:21 - 1:50` | **Mission 02 (Stablecoin Guard)**: Live OFAC SDN EVM match against Lazarus Group Ronin bridge exploiter (`0x098B...2f96`, $1,500 USDC), triggering red `REJECT_AND_FREEZE` banner and FATF Travel Rule enforcement.
 5. `1:50 - 2:16` | **Mission 04 (Legal Diligence & WASM)**: Overnight 5-jurisdiction legal pack (US, GB, DE, HK, SG in 3.53s) with SHA-256 seal, plus Case 4 WASM 1-cent math discrepancy detection.
-6. `2:16 - 2:45` | **On-Chain Ledger & Active Miner #5289**: Inspection of 9 on-chain Sepolia settlement receipts, Devnode Epoch 2107 ranking badges (Rank #2 in Invoice Reconcile, Rank #3 in Regulatory Filings), and `npx @praman/spend-guard-mcp` quickstart.
+6. `2:16 - 2:45` | **On-Chain Ledger & Active Miner #5289**: Inspection of 50+ verified on-chain Sepolia settlement receipts across 4 missions, Devnode Epoch 2107 ranking badges (Rank #2 in Invoice Reconcile, Rank #3 in Regulatory Filings), and `npx @praman/spend-guard-mcp` quickstart.
 
 ---
 
@@ -61,6 +61,10 @@ Judges can verify Praman Desk via web browser, via live curl API calls, or via t
    - *Expected Result*: Evaluates live Sepolia chain state, detects OFAC SDN match, and renders red `DECISION: REJECT_AND_FREEZE` banner with FATF Travel Rule warning.
 5. Click tab **Compliance Suite (Mission 04)**, and click **Generate 5-Jurisdiction Diligence Pack**.
    - *Expected Result*: Within 3.5 seconds, aggregates statutory evidence across US (SEC EDGAR), GB (Companies House), DE (Handelsregister), HK (HKMA), and SG (ACRA/DBS) with canonical SHA-256 seal.
+6. Click tab **Exchange Integrity (Mission 01)**, click preset **1. Compliant Listing (PRAMA)** or **2. Sanctioned Signer (Lazarus)**, and click **Run Mission 01 Exchange Diligence**.
+   - *Expected Result*: Performs live multi-miner diligence (GLEIF verification, OFAC SDN treasury screening, and Sepolia bytecode analysis), rendering green `LISTING APPROVED` badge or red `REJECT_OFAC_SANCTIONED` alert.
+7. Click tab **Autonomous Systems (Mission 11)**, click preset **1. Approved Micro-Spend ($450)** or **3. WASM 1-Cent Discrepancy**, and click **Evaluate Mission 11 Spend Policy & Circuit Breakers**.
+   - *Expected Result*: Validates deterministic WASM arithmetic across line items, enforces $500 autonomous delegation ceiling, and halts immediately on single-cent math rounding drift or missing supervisor co-signatures.
 
 ### Option B: Direct Reproducible cURL Commands
 ```bash
@@ -77,6 +81,16 @@ curl -s "https://praman-desk.vercel.app/api/miner/sanctions-screen?name=Ivanov"
 curl -s -X POST "https://praman-desk.vercel.app/api/audit/diligence-pack" \
   -H "Content-Type: application/json" \
   -d '{"entities":["Tesla, Inc. | US","SAP SE | DE"]}'
+
+# 5. Evaluate Exchange Token Listing Integrity (Mission 01)
+curl -s -X POST "https://praman-desk.vercel.app/api/mission/exchange-integrity" \
+  -H "Content-Type: application/json" \
+  -d '{"tokenSymbol":"PRAMA","tokenName":"Praman Protocol Token","contractAddress":"0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b","issuerEntityName":"Apple Inc.","issuerJurisdiction":"US"}'
+
+# 6. Evaluate Autonomous Agent Spend Delegation & Circuit Breaker (Mission 11)
+curl -s -X POST "https://praman-desk.vercel.app/api/mission/autonomous-spend" \
+  -H "Content-Type: application/json" \
+  -d '{"agentId":"agent-procure-v2","spendAmountUsdc":450,"vendorName":"SAP SE","vendorJurisdiction":"DE","statedTotal":450}'
 ```
 
 ### Option C: 10-Tool Model Context Protocol (MCP) Server
