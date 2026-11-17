@@ -9,7 +9,7 @@
 [![WASM Comparator](https://img.shields.io/badge/WASM%20Engine-651%20Bytes%20Pure%20Binary-f59e0b?style=for-the-badge)](https://praman-desk.vercel.app/comparator.wasm)
 
 - **Live Hosted Application (No wallet required):** <https://praman-desk.vercel.app>
-- **🎬 Official 1080p Video Walkthrough:** [Watch Direct MP4 Walkthrough](public/praman-desk-walkthrough.mp4) (or embedded live at [praman-desk.vercel.app](https://praman-desk.vercel.app))
+- **🎬 Official 1080p Video Walkthrough:** [Direct MP4 Stream (1080p • 2m 45s • Indian English Neural Voice)](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) · [Interactive In-App Player](https://praman-desk.vercel.app/#video) · [Audio Track (MP3)](https://praman-desk.vercel.app/narration.mp3)
 - **Active On-Chain Miner (Sepolia Diamond):** ID `#5289` (`praman-compliance-miner`, updated from `#5281` / `#5186`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Tx: [`0x81b63b78...`](https://sepolia.etherscan.io/tx/0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff))
 - **Missions Covered:** Dual Mission Compliance — **Mission 02** (Universal Spend Guard + OFAC EVM Freeze + FATF Travel Rule + Sepolia USDC Settlement) & **Mission 04** (Overnight 5-Jurisdiction Legal Diligence Pack + 3-Way Invoice vs PO vs ERP Reconciliation).
 - **Evaluator Pool & WASM Comparator:** 62 cryptographically signed evaluation rows across 8 intents on Devnode + standalone 651-byte zero-import WASM arithmetic comparator (`1,043 / 1,043` test vectors passing).
