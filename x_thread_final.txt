@@ -1,0 +1,27 @@
+### Tweet 1 / 3 (275 chars)
+Introducing Praman Desk for @TelegraphProto Season II: an autonomous pre-payment spend guard & compliance desk for AI agents, DAOs, and treasuries.
+
+Live across 4 missions (M01, M02, M04, M11) with 57 verified Sepolia settlement receipts.
+
+App: https://praman-desk.vercel.app
+
+---
+
+### Tweet 2 / 3 (270 chars)
+Why WebAssembly for invoice math?
+
+Floating-point creates subtle rounding drift in multi-line tax totals. We built a 651-byte standalone AssemblyScript WASM module (0 external imports) verifying math down to the exact cent:
+
+1,043/1,043 adversarial vectors passing 100%.
+
+---
+
+### Tweet 3 / 3 (274 chars)
+Miner #5289 (Devnode #5281) benchmark standings:
+• Rank #2: Invoice Reconcile (0.9986)
+• Rank #3: Regulatory Filings (0.5000)
+• Rank #4: PO Verify (0.9591)
+• Rank #8: Corporate Registry (1.0000)
+• Rank #10: OFAC Sanctions (1.0000)
+
+https://github.com/VishAlgoDev/praman-desk

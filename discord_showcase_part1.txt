@@ -1,0 +1,17 @@
+**Season II Showcase Update — Praman Desk (Quad-Mission Spend Guard, Miner #5289, 57 Sepolia Settlements)**
+
+Here is our end-to-end technical progress, latency fixes, and what is live on testnet ahead of the Nov 20 showcase:
+
+**1. Quad-Mission Expansion & On-Chain Settlement**
+Praman Desk is an autonomous pre-payment spend guard and statutory compliance desk for AI agents, DAOs, and treasuries:
+- **Mission 01 (Exchange & Token Pre-Listing)**: Verifies token issuer incorporated legal identity against official GLEIF LEI registers across 200+ jurisdictions; multisig sanctions check on deployer addresses.
+- **Mission 02 (Stablecoin Settlement Gate)**: Live Ethereum Sepolia balance checks via JSON-RPC, automated FATF Travel Rule holds (>= $1,000 without counterparty metadata), and sub-25ms OFAC EVM address screening (instant REJECT_AND_FREEZE).
+- **Mission 04 (Legal & Procurement)**: 5-jurisdiction diligence packs (US, GB, DE, HK, SG) comparing machine verification cost ($0.16) against traditional law firm billings.
+- **Mission 11 (Autonomous Systems)**: Real-time spend caps ($500 single-agent automatic, $5,000 supervisor dual-approval) and deterministic circuit breakers.
+- **57 On-Chain Settlements**: 57 unique paid x402 settlement receipts permanently mined on Ethereum Sepolia (blocks 12095549 to 12152748), verified in our public ledger (https://praman-desk.vercel.app/api/ledger).
+
+**2. 651-Byte Zero-Import Standalone WASM Engine**
+Floating-point math in JS/Python creates subtle rounding errors in multi-line item reconciliation. We built a custom 651-byte AssemblyScript WebAssembly module with zero external imports:
+- Bit-exact math down to the exact cent across Invoice, Purchase Order, and Goods Receipt.
+- 1,043 / 1,043 adversarial vectors passing with 100% precision (`npm run comparator:test`).
+- Hashes: SHA-256 `0x9dfe...8114` | Keccak-256 `0x4edd...f345`.
