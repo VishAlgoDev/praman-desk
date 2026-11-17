@@ -117,17 +117,28 @@ All 62 evaluation cases were signed with EIP-191 `personal_sign` from contributo
 
 ---
 
-## Settled On-Chain `x402` Purchases (9 Unique Ethereum Sepolia Settlements)
+## Settled On-Chain `x402` Purchases (57 Unique Ethereum Sepolia Settlements)
 
-All verification transactions were purchased from contributor wallet [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) in test USDC across [`evidence/nov14-milestone-receipt.json`](evidence/nov14-milestone-receipt.json) (5 calls) and [`evidence/production-settlement-receipts.json`](evidence/production-settlement-receipts.json) (4 calls):
+All verification transactions were purchased from contributor wallet [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) in test USDC, yielding **57 unique on-chain settlements** on Ethereum Sepolia across 4 hackathon missions:
+- **Mission 01 (Exchange & Market Integrity)**: 12 on-chain settlements (`0xc79256...`, `0x8ecb4e...`, `0x456a03...`, etc.)
+- **Mission 02 (Stablecoin Treasury & Settlement Gate)**: 10 on-chain settlements (`0xf03b29...`, `0x24ff96...`, `0xc14c67...`, etc.)
+- **Mission 04 (Legal Diligence & 3-Way Spend Guard)**: 25 on-chain settlements (`0xa2bdda...`, `0x21b228...`, `0xb34c21...`, etc.)
+- **Mission 11 (Autonomous Systems & Spend Delegation)**: 10 on-chain settlements (`0x0cfaf1...`, `0x3a4b9c...`, `0x199fa2...`, etc.)
 
-| # | Intent | Miner Routed | Sepolia Payment Tx | Telegraph Node Signal (`GET /engine/v1/signal/<hash>`) | Diagnostic Audit & Scope Finding |
+Full cryptographic receipts, transaction hashes, block numbers, and raw node signal payloads are preserved in:
+- [`evidence/production-settlement-receipts.json`](evidence/production-settlement-receipts.json) (52 production settlements)
+- [`evidence/nov14-milestone-receipt.json`](evidence/nov14-milestone-receipt.json) (5 initial milestone settlements)
+- Live on-chain ledger viewer: [https://praman-desk.vercel.app/#tab-ledger](https://praman-desk.vercel.app/#tab-ledger) or `GET /api/ledger`
+
+### Sample Milestone Settlements Audit:
+
+| # | Intent | Miner Routed | Sepolia Payment Tx | Telegraph Signal Hash | Diagnostic Audit & Scope Finding |
 |---|---|---|---|---|---|
-| 1 | `DOCUMENT_AUTHENTICITY_GENERAL` | `FactWire (#74351)` | [`0x6e3f7744...`](https://sepolia.etherscan.io/tx/0x6e3f77449af4ae6c2346b0df1d4d6049e979cd9d333829d78d2fc6cf240295bc) | [`0x222eee39...`](https://devnode.telegraphprotocol.com/engine/v1/signal/0x222eee39d4f16fb00b056c8581e84de1f57fefa0038076fa5e0412647ee5ee2e) | `authentic: missing`, false `document length 0` warning; only evaluates academic URLs/DOIs |
-| 2 | `PURCHASE_ORDER_VERIFY_GENERAL` | `TradeWire (#7454)` | [`0x8e1b1b80...`](https://sepolia.etherscan.io/tx/0x8e1b1b80314f9847133105ced374879744aa52ed525d8ecf02322d02404e341b) | [`0xb1e4d01c...`](https://devnode.telegraphprotocol.com/engine/v1/signal/0xb1e4d01ca78dfe5a3334a5ddef0247c3a05c7ebba17ec19a37f9e7d74ac44378) | `verified: missing`, false `question length 0` warning; hardcoded to City of Chicago POs |
-| 3 | `INVOICE_LEDGER_RECONCILE_GENERAL` | `TradeWire (#7455)` | [`0x113577b2...`](https://sepolia.etherscan.io/tx/0x113577b25d97768fe5ca21493020cd2d9c83b80f030f1073da8f43e9cd551ae7) | [`0xe288451a...`](https://devnode.telegraphprotocol.com/engine/v1/signal/0xe288451aeb90347d776549013ee58d464102251307a4a65db0e170d0aed7b679) | Arithmetic correct in text, but returns `reconciled: missing`, `discrepancy: rejected` |
-| 4 | `VENDOR_VERIFY_GENERAL` | `TxLens (#9002)` | [`0xae5eee4e...`](https://sepolia.etherscan.io/tx/0xae5eee4ed51f4817c62aba52ac7338b9c84791ffb526f77852f313501a7f34a1) | [`0xb29ff589...`](https://devnode.telegraphprotocol.com/engine/v1/signal/0xb29ff58909b0a2f534e7507edfa18012248c7f19519b160c0522d5d89ab7051c) | `valid: rejected`, `registered_address: missing`; does not query official global registries |
-| 5 | `REGULATORY_FILING_MONITOR_GENERAL` | `TxLens (#9002)` | [`0x0fea9687...`](https://sepolia.etherscan.io/tx/0x0fea9687b604e07c6714321491eee6314b136e098f6eb3b7044f4b4e7d15e6b8) | [`0xfd2a9f82...`](https://devnode.telegraphprotocol.com/engine/v1/signal/0xfd2a9f82debd6fd041923463e36e0c2fb900cec37dcd1916d22d035b5da0352e) | Fetched SEC EDGAR filings in raw payload, but `filing_count: missing`, `urls: unavailable` |
+| 1 | `DOCUMENT_AUTHENTICITY_GENERAL` | `FactWire (#74351)` | [`0x6e3f7744...`](https://sepolia.etherscan.io/tx/0x6e3f77449af4ae6c2346b0df1d4d6049e979cd9d333829d78d2fc6cf240295bc) | `0x222eee39...` | `authentic: missing`, false `document length 0` warning; only evaluates academic URLs/DOIs |
+| 2 | `PURCHASE_ORDER_VERIFY_GENERAL` | `TradeWire (#7454)` | [`0x8e1b1b80...`](https://sepolia.etherscan.io/tx/0x8e1b1b80314f9847133105ced374879744aa52ed525d8ecf02322d02404e341b) | `0xb1e4d01c...` | `verified: missing`, false `question length 0` warning; hardcoded to City of Chicago POs |
+| 3 | `INVOICE_LEDGER_RECONCILE_GENERAL` | `TradeWire (#7455)` | [`0x113577b2...`](https://sepolia.etherscan.io/tx/0x113577b25d97768fe5ca21493020cd2d9c83b80f030f1073da8f43e9cd551ae7) | `0xe288451a...` | Arithmetic correct in text, but returns `reconciled: missing`, `discrepancy: rejected` |
+| 4 | `VENDOR_VERIFY_GENERAL` | `TxLens (#9002)` | [`0xae5eee4e...`](https://sepolia.etherscan.io/tx/0xae5eee4ed51f4817c62aba52ac7338b9c84791ffb526f77852f313501a7f34a1) | `0xb29ff589...` | `valid: rejected`, `registered_address: missing`; does not query official global registries |
+| 5 | `REGULATORY_FILING_MONITOR_GENERAL` | `TxLens (#9002)` | [`0x0fea9687...`](https://sepolia.etherscan.io/tx/0x0fea9687b604e07c6714321491eee6314b136e098f6eb3b7044f4b4e7d15e6b8) | `0xfd2a9f82...` | Fetched SEC EDGAR filings in raw payload, but `filing_count: missing`, `urls: unavailable` |
 
 Receipts are preserved in [`evidence/nov14-milestone-receipt.json`](evidence/nov14-milestone-receipt.json).
 

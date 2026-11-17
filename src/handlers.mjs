@@ -3595,8 +3595,8 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     },
     mathVerification: {
       engine: 'praman-wasm-651b (AssemblyScript Standalone WASM, 651 bytes, 0 imports)',
-      sha256: '0x9dfe3fb4d232049d5df1076f87ea955f10688005b82fb8f3d89e5efd84b23835',
-      keccak256: '0x4edd911855a8f4c9c735d4911d7398b1784c9c5750df92d6e3e57e937d55f9a5',
+      sha256: '0x9dfe09265391c579d1b9467a5f33a7e8e82e09fa0a3a205527185edaf74f8114',
+      keccak256: '0x4eddfdd368d15c36d96ae6109acd66ae00a5ca4ff261806df8596905be78f345',
       bitExactMatch: wasmMatch,
       discrepancyCents: wasmDiscrepancyCents,
       computedTotal,
