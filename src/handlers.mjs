@@ -9,6 +9,9 @@ import { wrapFetchWithPaymentFromConfig } from '@x402/fetch';
 import { ExactEvmScheme } from '@x402/evm';
 import { getWasmInstance } from '../comparator/wasm-buffer.mjs';
 import { TOOLS as MCP_TOOLS, executeMcpTool } from '../mcp/server.mjs';
+import { generateComplianceCertificate, renderCertificateHtml } from './certificate.mjs';
+import { evaluateCounterpartyShield } from './bridges/fakewatch-bridge.mjs';
+import { generateRugReceiptProof } from './bridges/rugreceipt-bridge.mjs';
 
 const wasmEngine = await getWasmInstance();
 
@@ -260,9 +263,11 @@ const CORP_STOP_TOKENS = new Set([
 
 function normalizeSanctionsText(str) {
   let s = String(str || '').trim();
-  // Unwrap natural-language question scaffolding only when explicitly phrased as a screening query
-  const nlMatch = s.match(/^(?:is|screen|check(?:\s+if)?|verify(?:\s+if)?|whether)\s+(.+?)\s+(?:is\s+)?(?:(?:on|against|for|under)\s+(?:the\s+)?(?:ofac|sdn|sanctions)\b.*|sanctioned\b.*|blocked\s+under\b.*)/i);
-  if (nlMatch) s = nlMatch[1].trim();
+  if (!s) return '';
+  const evmMatch = s.match(/0x[a-fA-F0-9]{40}/);
+  if (evmMatch) {
+    return evmMatch[0].toLowerCase();
+  }
   return s.toLowerCase().replace(/['’`]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
@@ -2909,17 +2914,17 @@ function cleanSanctionsQuery(raw = '') {
     const addr = evmMatch[1];
     return { primary: addr, candidates: [addr, q] };
   }
-  const isWrapperQuestion = /^(?:please\s+)?(?:screen|check|verify|is|does|search|are)\b/i.test(q) || /\?\s*$/.test(q);
+  const isWrapperQuestion = /^(?:please\s+)?(?:screen|check|verify|is|does|search|are|whether)\b/i.test(q) || /\?\s*$/.test(q);
   if (isWrapperQuestion) {
-    const quoted = q.match(/['"“]([^'"”]{2,})['"”]/);
+    const quoted = q.match(/['"“‘]([^'"”’]{2,})['"”’]/);
     if (quoted) {
       q = quoted[1].trim();
     } else {
       q = q
-        .replace(/^(?:please\s+)?(?:screen|check|verify|search|is|does|are)(?:\s+(?:if|whether))?\s+(?:the\s+)?(?:person|company|entity|vessel|ship|wallet|address|individual|organization|bank)?\s*/i, '')
-        .replace(/\s+(?:is\s+)?(?:against|on|in|for|under|appear\s+on|listed\s+on|listed\s+in|sanctioned|designated)\s+(?:a\s+|an\s+|the\s+)?(?:ofac|sdn|eu|un|uk|us|sanctions|consolidated|list|lists)\b.*$/i, '')
-        .replace(/\s+(?:is\s+)?(?:sanctioned|listed|designated)\??$/i, '')
-        .replace(/[?!]+$/g, '')
+        .replace(/^(?:please\s+)?(?:screen|check|verify|search|is|does|are|whether)(?:\s+(?:if|whether))?\s+(?:the\s+)?(?:person|company|entity|vessel|ship|wallet|address|individual|organization|bank|vendor)?\s*/i, '')
+        .replace(/\s+(?:is\s+)?(?:against|on|in|for|under|appears?\s+on|listed\s+on|listed\s+in|sanctioned|designated)\s+(?:a\s+|an\s+|the\s+)?(?:ofac|sdn|eu|un|uk|us(?:\s+treasury)?|sanctions|consolidated|list|lists)\b.*$/i, '')
+        .replace(/\s+(?:is\s+)?(?:sanctioned|listed|designated|blocked)\??$/i, '')
+        .replace(/[?!.]+$/g, '')
         .trim();
     }
   }
@@ -5899,6 +5904,89 @@ export async function handleApiRequest(req, res) {
       }
       const pack = await runFiveJurisdictionDiligencePack(body);
       return sendJson(res, 200, pack);
+    }
+
+    // 5c. GET / POST /api/audit/certificate (Bank-Grade Compliance Audit Certificate)
+    if (pathname === '/api/audit/certificate' && (req.method === 'POST' || req.method === 'GET')) {
+      const q = Object.fromEntries(urlObj.searchParams.entries());
+      let body = {};
+      if (req.method === 'POST') {
+        try {
+          body = await readJsonBody(req);
+        } catch {
+          body = {};
+        }
+      }
+      const params = { ...q, ...body };
+      const cert = await generateComplianceCertificate({
+        entity: params.entity || params.vendor || params.name || 'Global Enterprise',
+        vendor: params.vendor,
+        lei: params.lei,
+        jurisdiction: params.jurisdiction || params.country || 'US',
+        invoiceAmount: params.invoiceAmount ?? params.invoice_amount,
+        poAmount: params.poAmount ?? params.po_amount,
+        invoiceNumber: params.invoiceNumber ?? params.invoice_number,
+        poNumber: params.poNumber ?? params.po_number,
+        format: params.format || 'json'
+      });
+
+      const wantsHtml = params.format === 'html' || (req.headers.accept && req.headers.accept.includes('text/html'));
+      if (wantsHtml) {
+        const html = renderCertificateHtml(cert);
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Access-Control-Allow-Origin': '*'
+        });
+        return res.end(html);
+      }
+      return sendJson(res, 200, cert);
+    }
+
+    // 5d. GET / POST /api/bridge/fakewatch (FakeWatch Domain & Spend Shield)
+    if (pathname === '/api/bridge/fakewatch' && (req.method === 'POST' || req.method === 'GET')) {
+      const q = Object.fromEntries(urlObj.searchParams.entries());
+      let body = {};
+      if (req.method === 'POST') {
+        try {
+          body = await readJsonBody(req);
+        } catch {
+          body = {};
+        }
+      }
+      const params = { ...q, ...body };
+      const report = await evaluateCounterpartyShield({
+        url: params.url,
+        domain: params.domain,
+        vendor: params.vendor || params.entity,
+        entity: params.entity,
+        lei: params.lei,
+        address: params.address,
+        amount: params.amount,
+        currency: params.currency || 'USD'
+      });
+      return sendJson(res, 200, report);
+    }
+
+    // 5e. GET / POST /api/bridge/rugreceipt (RugReceipt Smart Contract Safety Attestation)
+    if (pathname === '/api/bridge/rugreceipt' && (req.method === 'POST' || req.method === 'GET')) {
+      const q = Object.fromEntries(urlObj.searchParams.entries());
+      let body = {};
+      if (req.method === 'POST') {
+        try {
+          body = await readJsonBody(req);
+        } catch {
+          body = {};
+        }
+      }
+      const params = { ...q, ...body };
+      const proof = await generateRugReceiptProof({
+        contractAddress: params.contractAddress ?? params.contract_address,
+        deployerAddress: params.deployerAddress ?? params.deployer_address,
+        tokenSymbol: params.tokenSymbol ?? params.token_symbol ?? 'TOKEN',
+        network: params.network || 'sepolia',
+        chainId: params.chainId ?? params.chain_id ?? 11155111
+      });
+      return sendJson(res, 200, proof);
     }
 
     // 6. Replacement Compliance Miner Endpoints (/api/miner/*)

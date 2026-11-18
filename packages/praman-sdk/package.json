@@ -1,0 +1,24 @@
+{
+  "name": "@vishalgodev/praman-sdk",
+  "version": "1.0.0",
+  "description": "Official TypeScript & Node.js SDK for Praman Desk autonomous compliance and x402 spend clearance on Telegraph Protocol",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "keywords": [
+    "telegraph",
+    "compliance",
+    "ofac",
+    "gleif",
+    "lei",
+    "wasm",
+    "x402",
+    "spend-guard",
+    "mcp"
+  ],
+  "author": "VishAlgoDev",
+  "license": "MIT"
+}

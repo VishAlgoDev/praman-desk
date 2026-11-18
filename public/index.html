@@ -914,6 +914,12 @@
           </button>
           <span id="wasm-browser-result" style="font-size:11.5px; color:var(--ink-muted);">Click to run client-side .wasm check</span>
         </div>
+        <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--panel-border); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <button type="button" class="btn-primary" id="btn-download-cert" style="padding:8px 14px; font-size:12px; background:linear-gradient(135deg, #0284c7 0%, #6366f1 100%); border:none; cursor:pointer;" onclick="downloadComplianceCertificate()">
+            📜 View Bank Compliance Certificate
+          </button>
+          <span id="cert-status-hint" style="font-size:11.5px; color:var(--ink-muted);">Printable PDF/HTML attestation with SHA-256 seal</span>
+        </div>
       </div>
     </div>
   </div>
@@ -991,6 +997,53 @@
 curl -X POST https://praman-desk.vercel.app/api/spend-guard/evaluate \
   -H "Content-Type: application/json" \
   -d '{"scenario": "phishing_sanctions"}'</div>
+    </div>
+
+    <!-- Code Snippet 3: TypeScript & Python SDKs -->
+    <div style="font-size:12px; font-weight:600; color:var(--accent); margin:14px 0 4px;">Option C: Universal TypeScript &amp; Python SDKs (1-Line Spend Guard)</div>
+    <div class="code-block" style="margin-bottom:12px;">
+      <button class="copy-btn" onclick="copySnippet('sdk-ts-snip')">Copy</button>
+      <div id="sdk-ts-snip">// TypeScript / Node.js (npm install @vishalgodev/praman-sdk):
+import { PramanDesk } from '@vishalgodev/praman-sdk';
+
+const praman = new PramanDesk({ endpoint: 'https://praman-desk.vercel.app' });
+const clearance = await praman.clearSpend({
+  vendor: 'Stripe, LLC',
+  amount: 2500.00,
+  invoiceNumber: 'INV-2026-081',
+  poNumber: 'PO-2026-104'
+});
+if (!clearance.cleared) throw new Error(`Spend Blocked: ${clearance.verdict}`);</div>
+    </div>
+
+    <div class="code-block" style="margin-bottom:12px;">
+      <button class="copy-btn" onclick="copySnippet('sdk-py-snip')">Copy</button>
+      <div id="sdk-py-snip"># Python (from praman import PramanDesk):
+from praman import PramanDesk
+
+praman = PramanDesk(endpoint="https://praman-desk.vercel.app")
+clearance = praman.clear_spend(
+    vendor="Stripe, LLC",
+    amount=2500.00,
+    invoice_number="INV-2026-081"
+)
+if not clearance["cleared"]:
+    raise PermissionError(f"Spend Blocked: {clearance['verdict']}")</div>
+    </div>
+
+    <!-- Partner Bridges Section -->
+    <div style="font-size:12px; font-weight:600; color:#34d399; margin:14px 0 6px;">🤝 Reciprocal Ecosystem Bridges (FakeWatch &amp; RugReceipt)</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:6px;">
+      <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px;">
+        <div style="font-size:12px; font-weight:700; color:#38bdf8; margin-bottom:4px;">FakeWatch Shield (#42420)</div>
+        <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Combines FakeWatch phishing/dApp domain safety with Praman Desk LEI &amp; OFAC checks. Unknown domains trigger manual CFO review.</p>
+        <code style="font-size:11px; color:#94a3b8;">POST /api/bridge/fakewatch</code>
+      </div>
+      <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px;">
+        <div style="font-size:12px; font-weight:700; color:#818cf8; margin-bottom:4px;">RugReceipt Screen (Issue #208)</div>
+        <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Screens smart contract and deployer addresses against 19,565 OFAC SDN entities, Lazarus Group, and exploit signatures.</p>
+        <code style="font-size:11px; color:#94a3b8;">POST /api/bridge/rugreceipt</code>
+      </div>
     </div>
   </div>
 
@@ -1324,6 +1377,28 @@ Content-Type: application/json
       badgeDelegation.className = 'badge-halt';
       badgeDelegation.textContent = '🛑 EXCEEDED';
     }
+  }
+
+  function downloadComplianceCertificate() {
+    const data = window.lastVerdictData;
+    let vendor = 'STRIPE, LLC';
+    let amount = 2500;
+    let po = 2500;
+    if (currentScenario === 'sanctions' || currentScenario === 'phishing_sanctions') {
+      vendor = 'BANCO NACIONAL DE CUBA';
+      amount = 4200;
+      po = 4200;
+    } else if (currentScenario === 'discrepancy' || currentScenario === 'diff') {
+      vendor = 'ACME METALS CORP';
+      amount = 5500;
+      po = 5000;
+    }
+    if (data?.vendor || data?.entity) vendor = data.vendor || data.entity;
+    if (data?.invoiceAmount) amount = data.invoiceAmount;
+    if (data?.poAmount) po = data.poAmount;
+
+    const url = `/api/audit/certificate?vendor=${encodeURIComponent(vendor)}&invoiceAmount=${amount}&poAmount=${po}&format=html`;
+    window.open(url, '_blank');
   }
 
   async function verifyWasmInBrowser() {

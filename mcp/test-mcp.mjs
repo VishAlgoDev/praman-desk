@@ -36,10 +36,10 @@ async function runTests() {
   for (const t of toolsResult.tools) {
     console.log(`   - ${t.name}: ${t.description.slice(0, 65)}...`);
   }
-  if (toolsResult.tools.length !== 10) {
-    throw new Error(`Expected 10 tools, found ${toolsResult.tools.length}`);
+  if (toolsResult.tools.length !== 13) {
+    throw new Error(`Expected 13 tools, found ${toolsResult.tools.length}`);
   }
-  console.log('   PASS: All 10 tools registered.\n');
+  console.log('   PASS: All 13 tools registered.\n');
 
   // Test 2: verify_counterparty (STRIPE, LLC)
   console.log('3. Testing tool: verify_counterparty (STRIPE, LLC)...');
@@ -324,8 +324,47 @@ async function runTests() {
   }
   console.log('   PASS: screen_stablecoin_settlement & screen_sanctions threshold enforced live RPC, FATF Travel Rule, OFAC EVM addrs & bounds.\n');
 
+  // Test 16: get_compliance_certificate
+  console.log('16. Testing tool: get_compliance_certificate (Apple Inc.)...');
+  const resCert = await client.callTool({
+    name: 'get_compliance_certificate',
+    arguments: { entity: 'Apple Inc.', invoice_amount: 500, po_amount: 500 },
+  });
+  const certParsed = JSON.parse(resCert.content[0].text);
+  if (!certParsed.certificateId || !certParsed.cryptographicSeal?.sealDigest) {
+    throw new Error(`Expected certificateId and sealDigest, got ${JSON.stringify(certParsed)}`);
+  }
+  console.log(`   Result: Certificate ${certParsed.certificateId} | Verdict: ${certParsed.clearanceVerdict} | Seal: ${certParsed.cryptographicSeal.sealDigest.slice(0, 16)}...`);
+  console.log('   PASS: get_compliance_certificate succeeded.\n');
+
+  // Test 17: fakewatch_counterparty_shield
+  console.log('17. Testing tool: fakewatch_counterparty_shield (unisvvap phishing link vs stripe)...');
+  const resFakeWatch = await client.callTool({
+    name: 'fakewatch_counterparty_shield',
+    arguments: { domain: 'unisvvap.org', vendor: 'Stripe, LLC' },
+  });
+  const fwParsed = JSON.parse(resFakeWatch.content[0].text);
+  if (fwParsed.shieldVerdict !== 'BLOCKED_PHISHING' || !fwParsed.blocked) {
+    throw new Error(`Expected BLOCKED_PHISHING for unisvvap.org, got ${JSON.stringify(fwParsed)}`);
+  }
+  console.log(`   Result: Phishing blocked | Verdict: ${fwParsed.shieldVerdict} | Reason: ${fwParsed.primaryReason}`);
+  console.log('   PASS: fakewatch_counterparty_shield succeeded.\n');
+
+  // Test 18: rugreceipt_contract_screen
+  console.log('18. Testing tool: rugreceipt_contract_screen (Lazarus EVM address)...');
+  const resRugRec = await client.callTool({
+    name: 'rugreceipt_contract_screen',
+    arguments: { contract_address: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' },
+  });
+  const rugParsed = JSON.parse(resRugRec.content[0].text);
+  if (rugParsed.verdict !== 'CRITICAL_RISK' || rugParsed.safetyScore > 10) {
+    throw new Error(`Expected CRITICAL_RISK for Lazarus EVM address, got ${JSON.stringify(rugParsed)}`);
+  }
+  console.log(`   Result: Critical risk flagged | Score: ${rugParsed.safetyScore}/100 | Receipt: ${rugParsed.receiptId}`);
+  console.log('   PASS: rugreceipt_contract_screen succeeded.\n');
+
   await client.close();
-  console.log('=== All 15 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 18 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {

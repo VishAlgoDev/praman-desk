@@ -452,7 +452,7 @@ async function run() {
 
     // 18. Keyless Streamable HTTP & JSON-RPC 2.0 MCP endpoint (/api/mcp)
     const mcpMeta = await check('/api/mcp');
-    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 10) {
+    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 13) {
       throw new Error(`GET /api/mcp metadata failed: ${JSON.stringify(mcpMeta)}`);
     }
     const mcpInit = await check('/api/mcp', 'POST', {
@@ -476,7 +476,7 @@ async function run() {
       id: 2,
       method: 'tools/list'
     });
-    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 10) {
+    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 13) {
       throw new Error(`POST /api/mcp tools/list failed: ${JSON.stringify(mcpList)}`);
     }
     const mcpCall = await check('/api/mcp', 'POST', {
@@ -501,6 +501,24 @@ async function run() {
     });
     if (mcpPing.status !== 200 || mcpUnknown.json.error?.code !== -32602) {
       throw new Error(`POST /api/mcp ping/unknown-tool guard failed: ${JSON.stringify({ mcpPing, mcpUnknown })}`);
+    }
+
+    // 19. Bank-Grade Compliance Certificate (/api/audit/certificate)
+    const certJson = await check('/api/audit/certificate?vendor=Stripe%20Inc&invoiceAmount=2500&poAmount=2500&format=json');
+    if (certJson.status !== 200 || !certJson.json.certificateId || !certJson.json.cryptographicSeal?.sealDigest) {
+      throw new Error(`GET /api/audit/certificate failed: ${JSON.stringify(certJson)}`);
+    }
+
+    // 20. FakeWatch Bridge (/api/bridge/fakewatch)
+    const fwBridge = await check('/api/bridge/fakewatch', 'POST', { domain: 'unisvvap.org', vendor: 'Stripe, LLC' });
+    if (fwBridge.status !== 200 || fwBridge.json.shieldVerdict !== 'BLOCKED_PHISHING') {
+      throw new Error(`POST /api/bridge/fakewatch failed: ${JSON.stringify(fwBridge)}`);
+    }
+
+    // 21. RugReceipt Bridge (/api/bridge/rugreceipt)
+    const rugBridge = await check('/api/bridge/rugreceipt', 'POST', { contractAddress: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' });
+    if (rugBridge.status !== 200 || rugBridge.json.verdict !== 'CRITICAL_RISK') {
+      throw new Error(`POST /api/bridge/rugreceipt failed: ${JSON.stringify(rugBridge)}`);
     }
 
     console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM & MISSION 02 VERIFIED!');

@@ -27,6 +27,9 @@ import {
   monitorRegulatoryFiling,
   evaluateStablecoinGate,
 } from '../src/handlers.mjs';
+import { generateComplianceCertificate } from '../src/certificate.mjs';
+import { evaluateCounterpartyShield } from '../src/bridges/fakewatch-bridge.mjs';
+import { generateRugReceiptProof } from '../src/bridges/rugreceipt-bridge.mjs';
 import { getWasmInstance } from '../comparator/wasm-buffer.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -571,6 +574,96 @@ export const TOOLS = [
       required: ['recipient_address', 'amount_usdc'],
     },
   },
+  {
+    name: 'get_compliance_certificate',
+    description:
+      'Generate a bank-grade cryptographic compliance audit certificate with SHA-256 seal, OFAC zero-hit attestation, GLEIF LEI verification, and on-chain Sepolia Diamond proof.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        entity: {
+          type: 'string',
+          description: 'Legal entity or vendor name to certify (e.g. "Apple Inc.", "Stripe, LLC").',
+        },
+        lei: {
+          type: 'string',
+          description: 'Optional 20-character ISO 17442 Legal Entity Identifier.',
+        },
+        jurisdiction: {
+          type: 'string',
+          description: 'Country or jurisdiction code (e.g. "US", "DE", "GB").',
+          default: 'US',
+        },
+        invoice_amount: {
+          type: 'number',
+          description: 'Optional invoice amount for bit-exact WASM reconciliation.',
+        },
+        po_amount: {
+          type: 'number',
+          description: 'Optional purchase order amount for bit-exact WASM reconciliation.',
+        },
+      },
+      required: ['entity'],
+    },
+  },
+  {
+    name: 'fakewatch_counterparty_shield',
+    description:
+      'Reciprocal counterparty shield with FakeWatch (Miner #42420). Evaluates destination URL/domain safety, phishing threats, OFAC SDN sanctions, and corporate LEI validity.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        url: {
+          type: 'string',
+          description: 'Payment link or dApp URL to verify against phishing feeds.',
+        },
+        domain: {
+          type: 'string',
+          description: 'Hostname or domain name (e.g. "uniswap.org", "stripe.com").',
+        },
+        vendor: {
+          type: 'string',
+          description: 'Vendor or counterparty legal entity name.',
+        },
+        lei: {
+          type: 'string',
+          description: 'Optional Legal Entity Identifier.',
+        },
+        amount: {
+          type: 'number',
+          description: 'Transaction amount.',
+        },
+        currency: {
+          type: 'string',
+          description: 'Currency code (default USD).',
+          default: 'USD',
+        },
+      },
+    },
+  },
+  {
+    name: 'rugreceipt_contract_screen',
+    description:
+      'Reciprocal smart contract safety screen with RugReceipt (Issue #208). Checks smart contract and deployer EVM addresses against OFAC SDN digital currency lists and exploit records.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        contract_address: {
+          type: 'string',
+          description: 'EVM smart contract address (0x...) to screen.',
+        },
+        deployer_address: {
+          type: 'string',
+          description: 'Deployer or owner EVM address (0x...).',
+        },
+        token_symbol: {
+          type: 'string',
+          description: 'Token ticker or symbol.',
+          default: 'TOKEN',
+        },
+      },
+    },
+  },
 ];
 
 // Execute an MCP tool deterministically (shared by stdio and Streamable HTTP /api/mcp)
@@ -692,6 +785,36 @@ export async function executeMcpTool(name, inputArgs = {}) {
             delegationCapUsdc: args.delegation_cap_usdc ?? 5000,
             dualSignoffPresent: Boolean(args.dual_signoff_present),
             txHash: args.tx_hash || '',
+          });
+          break;
+
+        case 'get_compliance_certificate':
+          result = await generateComplianceCertificate({
+            entity: args.entity || args.vendor || args.name,
+            lei: args.lei,
+            jurisdiction: args.jurisdiction || 'US',
+            invoiceAmount: args.invoice_amount,
+            poAmount: args.po_amount,
+            format: 'json',
+          });
+          break;
+
+        case 'fakewatch_counterparty_shield':
+          result = await evaluateCounterpartyShield({
+            url: args.url,
+            domain: args.domain,
+            vendor: args.vendor || args.entity,
+            lei: args.lei,
+            amount: args.amount,
+            currency: args.currency || 'USD',
+          });
+          break;
+
+        case 'rugreceipt_contract_screen':
+          result = await generateRugReceiptProof({
+            contractAddress: args.contract_address,
+            deployerAddress: args.deployer_address,
+            tokenSymbol: args.token_symbol || 'TOKEN',
           });
           break;
 
