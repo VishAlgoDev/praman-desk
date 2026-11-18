@@ -59,8 +59,23 @@ Why DAOs and agent frameworks integrate Praman Desk:
 
 ## 10-Second Developer Quickstart
 
-### 1. Cursor / Claude Code MCP Server (Zero-Install GitHub npx)
-Add Praman Desk to your agent's MCP configuration (`claude_desktop_config.json` or Cursor settings):
+### 1. Dual MCP Integration (Remote Streamable HTTP or Local Stdio CLI)
+
+#### Option A: Keyless Streamable HTTP MCP (Recommended for Cursor, Claude Code, & Remote Agents)
+Add Praman Desk to your agent's MCP configuration (`claude_desktop_config.json` or Cursor settings) with zero local installations:
+
+```json
+{
+  "mcpServers": {
+    "praman-spend-guard": {
+      "url": "https://praman-desk.vercel.app/api/mcp"
+    }
+  }
+}
+```
+
+#### Option B: Zero-Install Stdio CLI (via GitHub npx)
+Run as a local process via standard I/O:
 
 ```json
 {

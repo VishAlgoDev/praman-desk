@@ -948,14 +948,29 @@
   <div class="quickstart-card">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
       <h3 style="margin:0; font-size:15px; color:#fff;">Add Praman Desk to Cursor, Claude Code, or Any Agent Loop</h3>
-      <span class="pill" style="color:var(--success);">Zero-Install GitHub npx &amp; MCP Stdio</span>
+      <span class="pill" style="color:var(--success);">Dual Door: Remote Streamable HTTP + Stdio CLI</span>
     </div>
     
     <p style="font-size:13px; color:var(--ink-muted); margin:8px 0 12px;">
       Give your autonomous agents a pre-payment firewall before calling <code>sendTransaction()</code>:
     </p>
 
-    <!-- Code Snippet 1: MCP -->
+    <!-- Code Snippet 1A: Streamable HTTP MCP (Recommended) -->
+    <div style="font-size:12px; font-weight:600; color:var(--accent); margin-bottom:4px;">Option A: Keyless Streamable HTTP MCP (Cursor / Claude Code / Remote Agents)</div>
+    <div class="code-block" style="margin-bottom:12px;">
+      <button class="copy-btn" onclick="copySnippet('mcp-http-snip')">Copy</button>
+      <div id="mcp-http-snip">// In claude_desktop_config.json or Cursor MCP settings (Zero local binaries required):
+{
+  "mcpServers": {
+    "praman-spend-guard": {
+      "url": "https://praman-desk.vercel.app/api/mcp"
+    }
+  }
+}</div>
+    </div>
+
+    <!-- Code Snippet 1B: Stdio MCP -->
+    <div style="font-size:12px; font-weight:600; color:var(--ink-muted); margin-bottom:4px;">Option B: Stdio CLI via GitHub npx (Local Process)</div>
     <div class="code-block">
       <button class="copy-btn" onclick="copySnippet('mcp-snip')">Copy</button>
       <div id="mcp-snip">// In claude_desktop_config.json or Cursor MCP settings:
