@@ -749,7 +749,7 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '', rawForm = '
 
   // Extract period from prompt if not supplied
   if (!period) {
-    const periodMatch = company.match(/(?:over|covering|in|as of|for)\s+((?:(?:january|february|march|april|may|june|july|august|september|october|november|december)(?:\s*-\s*(?:january|february|march|april|may|june|july|august|september|october|november|december))?\s+(?:20\d{2}))|Q[1-4]\s+20\d{2})/i);
+    const periodMatch = company.match(/(?:over|covering|in|as of|for|during)\s+((?:(?:january|february|march|april|may|june|july|august|september|october|november|december)(?:\s*-\s*(?:january|february|march|april|may|june|july|august|september|october|november|december))?\s+(?:20\d{2}))|Q[1-4]\s+20\d{2}|(?:(?:calendar|fiscal|fy)\s*(?:year\s*)?)?(?:19\d{2}|20\d{2}))\b/i);
     if (periodMatch) {
       period = periodMatch[1];
     }
