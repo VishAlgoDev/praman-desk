@@ -45,6 +45,18 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legacy query alias for question"
+          - name: purchase_order
+            type: string
+            intents: ["*"]
+            description: "Full purchase order text or identifier"
+          - name: po
+            type: string
+            intents: ["*"]
+            description: "Purchase order alias"
+          - name: text
+            type: string
+            intents: ["*"]
+            description: "Purchase order text"
 
   - path: /api/miner/invoice-reconcile
     external_path: /api/miner/invoice-reconcile
@@ -275,6 +287,10 @@ endpoints:
             description: "Clause or sub-clause under audit"
 
 semantics:
+  signal_mapping:
+    confidence_field: confidence
+    label_field: summary
+    reason_field: summary
   supported_intents:
     - PURCHASE_ORDER_VERIFY_GENERAL
     - INVOICE_LEDGER_RECONCILE_GENERAL

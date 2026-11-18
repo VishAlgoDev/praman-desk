@@ -151,6 +151,15 @@ async function main() {
   };
   if (!probes.miner_contract.ok) failures.push('Miner contract-obligation probe failed');
 
+  const mPo = await fetchJsonSafe(`${PROD_BASE}/api/miner/po-verify?purchase_order=${encodeURIComponent('Verify Purchase Order PO-ERP-2026-7741 in SAP S/4HANA for Project Tower-B Foundation Piling: Stated Vendor = V-10492 (Apex Geotech Pvt Ltd, Status: Active), PO Net Value = INR 1,85,00,000 (INR 1.85 Crore), WBS Cost Center = WBS-TWB-SUB-01 (Available Uncommitted Budget = INR 2,10,00,000), Approval Chain Recorded = Level 1 Procurement Manager (limit INR 25L) + Level 2 VP Projects (limit INR 1.00 Crore). Corporate Delegation of Authority (DOA) policy requires CFO + Managing Director joint digital sign-off for any single PO exceeding INR 1.00 Crore.')}`);
+  probes.miner_po = {
+    ok: mPo.ok && mPo.json?.status === 'doa_breach' && mPo.json?.po_number === 'PO-ERP-2026-7741' && Boolean(mPo.json?.answer),
+    status: mPo.json?.status,
+    poNumber: mPo.json?.po_number,
+    latencyMs: mPo.latencyMs
+  };
+  if (!probes.miner_po.ok) failures.push('Miner po-verify purchase_order param probe failed');
+
   const mcpBatch = await fetchJsonSafe(`${PROD_BASE}/api/mcp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
