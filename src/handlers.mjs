@@ -715,6 +715,8 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '', rawForm = '
   extracted = extracted.replace(sourceSuffixRe, '').trim();
 
   const questionPatterns = [
+    /^(?:will|did|does|has|can)\s+(?:the\s+)?(?:fda|sec|ftc|epa|cfpb|doj|finra|cftc)\s+(?:fine|penalize|investigate|audit|sanction|sue|warn|recall)\s+(.+?)(?:\s+in\s+.*|\?|$)/i,
+    /^(?:has|is|was)\s+(.+?)\s+(?:been\s+)?(?:recalled|investigated|penalized|fined|audited|sued|warned)\b/i,
     /^(?:what|which)\s+(?:[a-z0-9-]+\s+){0,3}?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:were|are|was)?\s*(?:filed|published|made|issued|submitted)?\s*(?:for|by|on|about|regarding)\s+(.+)$/i,
     /^how\s+many\s+(?:form\s+)?(?:[a-z0-9-]+\s+){0,4}?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:by|for|from|of|did|does|has)\s+(.+?)(?:\s+(?:make|file|submit|have|publish)\b.*)?$/i,
     /^how\s+many\s+(?:[a-z0-9-]+\s+){0,3}?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:did|does|has)\s+(.+?)\s+(?:make|file|submit|have|publish)\b/i,
@@ -725,18 +727,23 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '', rawForm = '
     /^(?:check|monitor|find|list|count|search|get|look\s*up)\s+(?:the\s+)?(?:federal\s+register\s+documents?|regulatory\s+filings?|sec\s+filings?|filings?|documents?|notices?|rules?)\s+(?:mentioning|for|about|on|involving)\s+(.+)$/i
   ];
 
-  for (const pat of questionPatterns) {
-    const m = extracted.match(pat);
-    if (m) {
-      company = m[1].trim().replace(/^["']|["']$/g, '').replace(/[.,;!?]+$/g, '').trim();
-      break;
+  const quotedEntity = extracted.match(/['"“]([^'"”]{2,})['"”]/);
+  if (quotedEntity && !/\b(?:federal\s+register|sec\s+edgar|10-k|10-q|8-k|20-f|s-1)\b/i.test(quotedEntity[1])) {
+    company = quotedEntity[1].trim();
+  } else {
+    for (const pat of questionPatterns) {
+      const m = extracted.match(pat);
+      if (m) {
+        company = m[1].trim().replace(/^["']|["']$/g, '').replace(/[.,;!?]+$/g, '').trim();
+        break;
+      }
     }
   }
 
   // Strip embedded "(CIK ...)" suffix from canonical entity string after explicitCik has been captured
   company = company
     .replace(/\s*\(\s*CIK\s*[:#]?\s*\d{4,10}\s*\)/ig, '')
-    .replace(/^(?:show|list|get|check|monitor|find|did|does|has)\s+/i, '')
+    .replace(/^(?:show|list|get|check|monitor|find|did|does|has|will|is)\s+/i, '')
     .replace(/(?:'s|’s)\s*$/i, '')
     .replace(/[?!.]+$/g, '')
     .trim();
