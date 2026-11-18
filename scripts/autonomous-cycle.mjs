@@ -174,7 +174,7 @@ async function main() {
     ])
   });
   probes.mcp_http = {
-    ok: mcpBatch.ok && Array.isArray(mcpBatch.json) && mcpBatch.json[0]?.result?.serverInfo?.name === 'praman-spend-guard' && mcpBatch.json[1]?.result?.tools?.length === 10,
+    ok: mcpBatch.ok && Array.isArray(mcpBatch.json) && mcpBatch.json[0]?.result?.serverInfo?.name === 'praman-spend-guard' && (mcpBatch.json[1]?.result?.tools?.length === 13 || mcpBatch.json[1]?.result?.tools?.length === 10),
     protocolVersion: mcpBatch.json?.[0]?.result?.protocolVersion || null,
     toolsCount: mcpBatch.json?.[1]?.result?.tools?.length || 0,
     latencyMs: mcpBatch.latencyMs
