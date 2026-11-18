@@ -47,6 +47,20 @@ function runWasmScore(truth, miner, code, tolerance) {
   return wasmEngine.scoreDeterministic(truth, miner, code, tolerance);
 }
 
+// Phishing & Malicious URL Threat Screener (Powered by FakeWatch / ScamSniffer)
+async function checkUrlThreat(url) {
+  if (!url || typeof url !== 'string') return null;
+  try {
+    const res = await fetch(`https://fakewatch.pro/api/v1/url-safe?url=${encodeURIComponent(url.trim())}`, {
+      signal: AbortSignal.timeout(3500),
+    });
+    if (!res.ok) return { verdict: 'Unavailable', status: res.status };
+    return await res.json();
+  } catch (err) {
+    return { verdict: 'Unavailable', error: err.message };
+  }
+}
+
 // Composite Spend Clearance Engine
 export async function clearSpendComposite({
   vendor,
@@ -62,10 +76,26 @@ export async function clearSpendComposite({
   sha256_digest = '',
   currency = 'USD',
   dual_signoff_present = false,
+  payment_url = '',
 }) {
   const flags = [];
 
-  // 0. OFAC SDN Sanctions Screening (Critical Mandatory Gate)
+  // 0a. Payment Link & dApp Phishing Verification (FakeWatch Threat Intel)
+  let urlThreatResult = null;
+  if (payment_url) {
+    urlThreatResult = await checkUrlThreat(payment_url);
+    if (urlThreatResult && urlThreatResult.verdict === 'Malicious') {
+      flags.push(
+        `CRITICAL_MALICIOUS_PAYMENT_URL: Phishing/threat reported by FakeWatch (${urlThreatResult.summary || urlThreatResult.detections + ' detections'})`
+      );
+    } else if (urlThreatResult && urlThreatResult.verdict === 'Unknown') {
+      flags.push(
+        `UNVERIFIED_PAYMENT_URL: Inconclusive domain reputation from FakeWatch/ScamSniffer; requires secondary administrative review`
+      );
+    }
+  }
+
+  // 0b. OFAC SDN Sanctions Screening (Critical Mandatory Gate)
   const sanctionsResult = await screenSanctions({ name: vendor });
   if (sanctionsResult.matches && sanctionsResult.matches.length > 0) {
     flags.push(`CRITICAL_OFAC_SANCTIONS_MATCH: ${sanctionsResult.summary}`);
@@ -136,6 +166,8 @@ export async function clearSpendComposite({
 
   // Determine Gate Decision
   const isSanctioned = Boolean(sanctionsResult.matches && sanctionsResult.matches.length > 0);
+  const isMaliciousUrl = Boolean(urlThreatResult && urlThreatResult.verdict === 'Malicious');
+  const isUnknownUrl = Boolean(urlThreatResult && urlThreatResult.verdict === 'Unknown');
   const hasCriticalFailure = !reconResult.reconciled || (docResult && !docResult.authentic);
   const requiresDualSignoff = poResult.status === 'approval_cap_exceeded' && !dual_signoff_present;
 
@@ -147,6 +179,10 @@ export async function clearSpendComposite({
     cleared = false;
     risk_level = 'CRITICAL_SANCTIONS_BLOCK';
     action = 'REJECT_AND_FREEZE';
+  } else if (isMaliciousUrl) {
+    cleared = false;
+    risk_level = 'CRITICAL_SECURITY_BLOCK';
+    action = 'REJECT_AND_FREEZE';
   } else if (hasCriticalFailure) {
     cleared = false;
     risk_level = 'CRITICAL_BLOCK';
@@ -155,6 +191,10 @@ export async function clearSpendComposite({
     cleared = false;
     risk_level = 'MEDIUM';
     action = 'REQUEST_EXECUTIVE_APPROVAL';
+  } else if (isUnknownUrl) {
+    cleared = false;
+    risk_level = 'MEDIUM';
+    action = 'HELD_FOR_MANUAL_REVIEW';
   } else if (flags.length > 0) {
     cleared = true; // Cleared with warnings
     risk_level = 'LOW_WARNING';
@@ -175,6 +215,7 @@ export async function clearSpendComposite({
       flags,
       timestamp: new Date().toISOString(),
     },
+    payment_url_threat: urlThreatResult,
     counterparty: vendorResult,
     sanctions: sanctionsResult,
     reconciliation: reconResult,
@@ -379,6 +420,11 @@ export const TOOLS = [
           type: 'boolean',
           description: 'Whether dual sign-off is attached.',
           default: false,
+        },
+        payment_url: {
+          type: 'string',
+          description:
+            'Optional invoice payment link or dApp URL to screen for phishing/drainer reputation via FakeWatch.',
         },
       },
       required: [
@@ -592,6 +638,7 @@ export async function executeMcpTool(name, inputArgs = {}) {
             sha256_digest: args.sha256_digest,
             currency: args.currency ?? 'USD',
             dual_signoff_present: Boolean(args.dual_signoff_present),
+            payment_url: args.payment_url ?? '',
           });
           break;
 

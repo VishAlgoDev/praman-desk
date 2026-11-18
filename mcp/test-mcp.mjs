@@ -139,6 +139,28 @@ async function runTests() {
   }
   console.log('   PASS: clear_spend composite gate approved valid payment.\n');
 
+  // Test 6b: clear_spend with FakeWatch Unknown payment URL (Manual Review Gate)
+  console.log('7b. Testing tool: clear_spend with Unknown payment URL (FakeWatch gate)...');
+  const resUnknownUrl = await client.callTool({
+    name: 'clear_spend',
+    arguments: {
+      vendor: 'Apple Inc.',
+      invoice_id: 'INV-2026-APP-02',
+      po_number: 'PO-2026-APP-02',
+      billed_qty: 1,
+      accepted_qty: 1,
+      unit_price: 500,
+      approval_cap: 5000,
+      payment_url: 'https://uniswapp-claim.xyz',
+    },
+  });
+  const unknownUrlParsed = JSON.parse(resUnknownUrl.content[0].text);
+  console.log(`   Gate Decision: Cleared=${unknownUrlParsed.gate_decision.cleared}, Action=${unknownUrlParsed.gate_decision.action}, Risk=${unknownUrlParsed.gate_decision.risk_level}`);
+  if (unknownUrlParsed.gate_decision.cleared !== false || unknownUrlParsed.gate_decision.action !== 'HELD_FOR_MANUAL_REVIEW') {
+    throw new Error('Expected Unknown URL to trigger HELD_FOR_MANUAL_REVIEW gate');
+  }
+  console.log('   PASS: clear_spend correctly routed Unknown URL to HELD_FOR_MANUAL_REVIEW.\n');
+
   // Test 7: compare_evaluator_scoring (WASM deterministic scoring)
   console.log('8. Testing tool: compare_evaluator_scoring (WASM deterministic)...');
   const resWasm = await client.callTool({
