@@ -234,6 +234,45 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legacy query alias for question"
+          - name: filter[entity.legalName]
+            type: string
+            intents: ["*"]
+            description: "GLEIF standard filter for entity legal name"
+          - name: filter[entity.lei]
+            type: string
+            intents: ["*"]
+            description: "GLEIF standard filter for entity LEI"
+
+  - path: /api/miner/contract-obligation
+    external_path: /api/miner/contract-obligation
+    method: GET
+    intents:
+      - CONTRACT_OBLIGATION_AUDIT_GENERAL
+    description: >-
+      Audits contractual and statutory obligations across standard procurement, construction,
+      and commercial real estate regimes (MahaRERA delay interest under Section 18(1), FIDIC Sub-Clause 20.1
+      EOT time-bars & Sub-Clause 8.7 LDs, MEP turnkey retention releases, MSMED Act 2006 statutory
+      overrides of pay-when-paid clauses, commercial lease CAM caps, and civil works price escalation).
+      Accepts canonical parameters or verbatim natural-language audit prompts (?question=...).
+    params:
+      query:
+        optional:
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Full verbatim contract obligation audit query"
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Legacy query alias for question"
+          - name: contract
+            type: string
+            intents: ["*"]
+            description: "Contract identifier or reference"
+          - name: clause
+            type: string
+            intents: ["*"]
+            description: "Clause or sub-clause under audit"
 
 semantics:
   supported_intents:
@@ -244,6 +283,7 @@ semantics:
     - CORPORATE_REGISTRY_LOOKUP_GENERAL
     - SANCTIONS_SCREENING_MATCH_GENERAL
     - REGULATORY_FILING_MONITOR_GENERAL
+    - CONTRACT_OBLIGATION_AUDIT_GENERAL
 
 docs:
   repository: https://github.com/VishAlgoDev/praman-desk
