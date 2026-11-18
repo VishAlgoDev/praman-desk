@@ -163,10 +163,14 @@ async function main() {
   if (!probes.mcp_http.ok) failures.push('Streamable HTTP /api/mcp probe failed');
 
   // 4. Devnode Miner Telemetry (#5281 / #5289)
-  const devMiners = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners`, { timeoutMs: 20000 });
+  let devMiners = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners`, { timeoutMs: 35000 });
+  if (!devMiners.ok) {
+    // Retry once on transient network/load timeout (2.7MB payload)
+    devMiners = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners`, { timeoutMs: 40000 });
+  }
   const minerList = Array.isArray(devMiners.json?.miners) ? devMiners.json.miners : (Array.isArray(devMiners.json) ? devMiners.json : []);
   const ourMiner = minerList.find(m => String(m.id) === '5281' || m.slug === 'praman-compliance-miner') || null;
-  const direct5289 = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners/5289`, { timeoutMs: 12000 });
+  const direct5289 = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners/5289`, { timeoutMs: 15000 });
 
   const prevKnownByIntent = { ...(prevState?.devnode?.lastKnownByIntent || {}) };
   for (const oldScore of (prevState?.devnode?.scores || [])) {
@@ -177,18 +181,20 @@ async function main() {
   const lastKnownByIntent = { ...prevKnownByIntent };
   const currentScores = Array.isArray(ourMiner?.scores)
     ? ourMiner.scores.map(s => ({ intent: s.intent_id, epoch: s.epoch_id, rank: s.rank, score: s.score }))
-    : [];
+    : (devMiners.ok ? [] : (prevState?.devnode?.scores || []));
 
   // Detect Devnode deltas and cross-epoch regressions against persistent intent watermarks
   const deltas = [];
   const regressions = [];
-  if (prevState?.devnode) {
+  if (prevState?.devnode && devMiners.ok && ourMiner) {
     if (prevState.devnode.lastScoredEpoch !== (ourMiner?.last_scored_epoch ?? null)) {
       deltas.push(`Devnode epoch changed: ${prevState.devnode.lastScoredEpoch} -> ${ourMiner?.last_scored_epoch ?? null}`);
     }
     if (prevState.devnode.totalRequestsServed !== (ourMiner?.total_requests_served ?? null)) {
       deltas.push(`Requests served changed: ${prevState.devnode.totalRequestsServed} -> ${ourMiner?.total_requests_served ?? null}`);
     }
+  } else if (!devMiners.ok) {
+    deltas.push('Devnode miners list fetch transiently timed out; persistent watermarks preserved');
   }
 
   for (const s of currentScores) {
@@ -211,9 +217,9 @@ async function main() {
     fetchedOk: devMiners.ok,
     miner5281Found: Boolean(ourMiner),
     miner5289Ok: direct5289.ok,
-    lastScoredEpoch: ourMiner?.last_scored_epoch ?? null,
-    lastScoredAt: ourMiner?.last_scored_at ?? null,
-    totalRequestsServed: ourMiner?.total_requests_served ?? null,
+    lastScoredEpoch: ourMiner?.last_scored_epoch ?? (devMiners.ok ? null : (prevState?.devnode?.lastScoredEpoch ?? null)),
+    lastScoredAt: ourMiner?.last_scored_at ?? (devMiners.ok ? null : (prevState?.devnode?.lastScoredAt ?? null)),
+    totalRequestsServed: ourMiner?.total_requests_served ?? (devMiners.ok ? null : (prevState?.devnode?.totalRequestsServed ?? null)),
     scores: currentScores,
     lastKnownByIntent
   };
