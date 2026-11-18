@@ -181,10 +181,11 @@ async function main() {
   };
   if (!probes.mcp_http.ok) failures.push('Streamable HTTP /api/mcp probe failed');
 
-  // 4. Devnode Miner Telemetry (#5281 / #5289)
+  // 4. Devnode Miner Telemetry (#5281 / #5289 / #5305)
   let devMiners = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners`, { timeoutMs: 18000, maxAttempts: 1 });
   const minerList = Array.isArray(devMiners.json?.miners) ? devMiners.json.miners : (Array.isArray(devMiners.json) ? devMiners.json : []);
-  const ourMiner = minerList.find(m => String(m.id) === '5281' || m.slug === 'praman-compliance-miner') || null;
+  const ourMiner = minerList.find(m => String(m.id) === '5305' || String(m.id) === '5289' || String(m.id) === '5281' || m.slug === 'praman-compliance-miner') || null;
+  const direct5305 = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners/5305`, { timeoutMs: 10000, maxAttempts: 1 });
   const direct5289 = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners/5289`, { timeoutMs: 10000, maxAttempts: 1 });
 
   const prevKnownByIntent = { ...(prevState?.devnode?.lastKnownByIntent || {}) };
@@ -230,7 +231,8 @@ async function main() {
 
   const devnodeSnapshot = {
     fetchedOk: devMiners.ok,
-    miner5281Found: Boolean(ourMiner),
+    minerFound: Boolean(ourMiner),
+    miner5305Ok: direct5305.ok,
     miner5289Ok: direct5289.ok,
     lastScoredEpoch: ourMiner?.last_scored_epoch ?? (devMiners.ok ? null : (prevState?.devnode?.lastScoredEpoch ?? null)),
     lastScoredAt: ourMiner?.last_scored_at ?? (devMiners.ok ? null : (prevState?.devnode?.lastScoredAt ?? null)),
