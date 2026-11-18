@@ -142,6 +142,15 @@ async function main() {
   };
   if (!probes.miner_go_optional.ok) failures.push('Miner Go optional=map[...] unpacking probe failed');
 
+  const mContract = await fetchJsonSafe(`${PROD_BASE}/api/miner/contract-obligation?question=${encodeURIComponent('Audit the contractual and statutory obligations under an Indian Agreement for Sale (MahaRERA Reg. P51900022104) executed on 2023-05-15: Clause 7.1 commits handover of Apartment B-1402 by 2026-03-31')}`);
+  probes.miner_contract = {
+    ok: mContract.ok && mContract.json?.status === 'delay_interest_triggered' && mContract.json?.accrued_liability === 1155000,
+    status: mContract.json?.status,
+    accruedLiability: mContract.json?.accrued_liability,
+    latencyMs: mContract.latencyMs
+  };
+  if (!probes.miner_contract.ok) failures.push('Miner contract-obligation probe failed');
+
   const mcpBatch = await fetchJsonSafe(`${PROD_BASE}/api/mcp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
