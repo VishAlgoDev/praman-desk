@@ -436,7 +436,74 @@ async function run() {
       throw new Error(`Chicago PO vendor mismatch check failed: ${JSON.stringify(chicagoMismatch.json)}`);
     }
 
-    console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM & MISSION 02 VERIFIED!');
+    // 17. Go Dispatcher optional=map[...] unpacking & empty query placeholder safety
+    const goOptSanctions = await check('/api/miner/sanctions-screen?optional=' + encodeURIComponent('map[name:Rosneft Oil Company]'));
+    if (goOptSanctions.status !== 200 || goOptSanctions.json.matched !== true || !(goOptSanctions.json.match_count > 0)) {
+      throw new Error(`Go optional=map[...] sanctions unpacking failed: ${JSON.stringify(goOptSanctions.json)}`);
+    }
+    const goOptPlaceholder = await check('/api/miner/sanctions-screen?name=&optional=' + encodeURIComponent('map[name:Rosneft Oil Company]'));
+    if (goOptPlaceholder.status !== 200 || goOptPlaceholder.json.matched !== true) {
+      throw new Error(`Go optional=map[...] clobbered by empty name param: ${JSON.stringify(goOptPlaceholder.json)}`);
+    }
+    const goOptPo = await check('/api/miner/po-verify?optional=' + encodeURIComponent('map[po_number:294329 vendor:RUSH UNIVERSITY MEDICAL CENTER]'));
+    if (goOptPo.status !== 200 || goOptPo.json.verified !== true || goOptPo.json.verdict !== 'Verified') {
+      throw new Error(`Go optional=map[...] PO unpacking failed: ${JSON.stringify(goOptPo.json)}`);
+    }
+
+    // 18. Keyless Streamable HTTP & JSON-RPC 2.0 MCP endpoint (/api/mcp)
+    const mcpMeta = await check('/api/mcp');
+    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 10) {
+      throw new Error(`GET /api/mcp metadata failed: ${JSON.stringify(mcpMeta)}`);
+    }
+    const mcpInit = await check('/api/mcp', 'POST', {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: { protocolVersion: '2025-03-26', clientInfo: { name: 'local-test', version: '1.0.0' } }
+    });
+    if (mcpInit.status !== 200 || mcpInit.json.result?.serverInfo?.name !== 'praman-spend-guard' || !mcpInit.json.result?.protocolVersion) {
+      throw new Error(`POST /api/mcp initialize failed: ${JSON.stringify(mcpInit)}`);
+    }
+    const mcpNotif = await check('/api/mcp', 'POST', {
+      jsonrpc: '2.0',
+      method: 'notifications/initialized'
+    });
+    if (mcpNotif.status !== 202) {
+      throw new Error(`POST /api/mcp notifications/initialized expected 202, got ${mcpNotif.status}`);
+    }
+    const mcpList = await check('/api/mcp', 'POST', {
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/list'
+    });
+    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 10) {
+      throw new Error(`POST /api/mcp tools/list failed: ${JSON.stringify(mcpList)}`);
+    }
+    const mcpCall = await check('/api/mcp', 'POST', {
+      jsonrpc: '2.0',
+      id: 3,
+      method: 'tools/call',
+      params: {
+        name: 'screen_sanctions',
+        arguments: { name: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' }
+      }
+    });
+    const mcpCallPayload = JSON.parse(mcpCall.json.result?.content?.[0]?.text || '{}');
+    if (mcpCall.status !== 200 || mcpCall.json.result?.isError || mcpCallPayload.matched !== true) {
+      throw new Error(`POST /api/mcp tools/call screen_sanctions failed: ${JSON.stringify(mcpCall)}`);
+    }
+    const mcpPing = await check('/api/mcp', 'POST', { jsonrpc: '2.0', id: 4, method: 'ping' });
+    const mcpUnknown = await check('/api/mcp', 'POST', {
+      jsonrpc: '2.0',
+      id: 5,
+      method: 'tools/call',
+      params: { name: 'nonexistent_tool', arguments: {} }
+    });
+    if (mcpPing.status !== 200 || mcpUnknown.json.error?.code !== -32602) {
+      throw new Error(`POST /api/mcp ping/unknown-tool guard failed: ${JSON.stringify({ mcpPing, mcpUnknown })}`);
+    }
+
+    console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM & MISSION 02 VERIFIED!');
   } finally {
     server.close();
   }

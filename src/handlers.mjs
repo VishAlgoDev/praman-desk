@@ -8,6 +8,7 @@ import { sepolia } from 'viem/chains';
 import { wrapFetchWithPaymentFromConfig } from '@x402/fetch';
 import { ExactEvmScheme } from '@x402/evm';
 import { getWasmInstance } from '../comparator/wasm-buffer.mjs';
+import { TOOLS as MCP_TOOLS, executeMcpTool } from '../mcp/server.mjs';
 
 const wasmEngine = await getWasmInstance();
 
@@ -3915,11 +3916,214 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   payload.attestationSha256 = '0x' + crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex');
   return payload;
 }
+
+/**
+ * Unpack Go fmt.Sprint map syntax (`map[k1:v1 k2:v2]`) or JSON object strings sent in `optional`/`params`.
+ */
+function parseGoMapOrJsonParam(raw) {
+  if (raw == null) return {};
+  if (typeof raw === 'object' && !Array.isArray(raw)) {
+    return { ...raw };
+  }
+  const text = String(raw).trim();
+  if (!text || text === '<nil>' || text === 'null' || text === 'map[]') return {};
+  if (text.startsWith('{') && text.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {}
+  }
+  const goMatch = text.match(/^map\[([\s\S]*)\]$/);
+  if (!goMatch) return {};
+  const inner = goMatch[1].trim();
+  if (!inner) return {};
+
+  const out = {};
+  const keyRe = /(?:^|\s)([A-Za-z_][A-Za-z0-9_-]*):(?=\S)(?!\/\/)/g;
+  const matches = [];
+  let m;
+  while ((m = keyRe.exec(inner)) !== null) {
+    const keyStart = m.index + (m[0].length - m[1].length - 1);
+    matches.push({ key: m[1], keyStart, valStart: m.index + m[0].length });
+  }
+  for (let i = 0; i < matches.length; i++) {
+    const cur = matches[i];
+    const next = matches[i + 1];
+    const rawVal = (next ? inner.slice(cur.valStart, next.keyStart) : inner.slice(cur.valStart)).trim();
+    if (!rawVal || rawVal === '<nil>' || rawVal === 'map[]') continue;
+    if (rawVal.startsWith('map[')) {
+      const nested = parseGoMapOrJsonParam(rawVal);
+      if (Object.keys(nested).length > 0) {
+        Object.assign(out, nested);
+        continue;
+      }
+    }
+    out[cur.key] = rawVal;
+  }
+  return out;
+}
+
+/**
+ * Merge parameter layers while skipping undefined, null, or empty-string placeholders.
+ */
+function mergeNonEmptyParams(...layers) {
+  const merged = {};
+  for (const layer of layers) {
+    if (!layer || typeof layer !== 'object' || Array.isArray(layer)) continue;
+    for (const [k, v] of Object.entries(layer)) {
+      if (v === undefined || v === null || v === '') continue;
+      merged[k] = v;
+    }
+  }
+  return merged;
+}
+
+/**
+ * Keyless Streamable HTTP & JSON-RPC 2.0 MCP endpoint (/api/mcp).
+ */
+async function handleMcpHttpRequest(req, res) {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, DELETE',
+    'Access-Control-Allow-Headers': 'Content-Type, Accept, Mcp-Session-Id, Mcp-Protocol-Version',
+    'Access-Control-Expose-Headers': 'Mcp-Session-Id, Mcp-Protocol-Version',
+  };
+
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, corsHeaders);
+    return res.end();
+  }
+
+  if (req.method === 'DELETE') {
+    res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ ok: true, closed: true }));
+  }
+
+  if (req.method === 'GET') {
+    res.writeHead(200, { ...corsHeaders, 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({
+      ok: true,
+      name: 'praman-spend-guard',
+      version: '1.0.0',
+      protocolVersion: '2025-03-26',
+      transport: 'streamable-http',
+      endpoint: '/api/mcp',
+      authentication: 'none',
+      stdioCommand: 'npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp',
+      capabilities: { tools: {} },
+      toolsCount: MCP_TOOLS.length,
+      tools: MCP_TOOLS,
+    }, null, 2));
+  }
+
+  if (req.method !== 'POST') {
+    res.writeHead(405, { ...corsHeaders, 'Content-Type': 'application/json', Allow: 'GET, POST, OPTIONS, DELETE' });
+    return res.end(JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32600, message: `Method not allowed: ${req.method}` } }));
+  }
+
+  let payload;
+  try {
+    payload = await readJsonBody(req);
+  } catch (err) {
+    res.writeHead(400, { ...corsHeaders, 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32700, message: err.message || 'Parse error' } }));
+  }
+
+  const isBatch = Array.isArray(payload);
+  const messages = isBatch ? payload : [payload];
+  if (isBatch && messages.length === 0) {
+    res.writeHead(400, { ...corsHeaders, 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32600, message: 'Invalid Request: empty batch' } }));
+  }
+
+  let negotiatedProtocol = String(req.headers['mcp-protocol-version'] || '2025-03-26');
+  const dispatchSingle = async (msg) => {
+    if (!msg || typeof msg !== 'object' || typeof msg.method !== 'string') {
+      return {
+        jsonrpc: '2.0',
+        id: msg && typeof msg === 'object' && msg.id !== undefined ? msg.id : null,
+        error: { code: -32600, message: 'Invalid Request: missing method' },
+      };
+    }
+
+    const hasId = msg.id !== undefined && msg.id !== null;
+    if (msg.method === 'notifications/initialized' || msg.method.startsWith('notifications/')) {
+      return hasId ? { jsonrpc: '2.0', id: msg.id, result: {} } : null;
+    }
+
+    const id = hasId ? msg.id : null;
+    switch (msg.method) {
+      case 'initialize': {
+        const reqVer = msg.params?.protocolVersion;
+        const supported = ['2025-06-18', '2025-03-26', '2024-11-05'];
+        negotiatedProtocol = supported.includes(reqVer) ? reqVer : '2025-03-26';
+        return {
+          jsonrpc: '2.0',
+          id,
+          result: {
+            protocolVersion: negotiatedProtocol,
+            capabilities: { tools: {} },
+            serverInfo: { name: 'praman-spend-guard', version: '1.0.0' },
+            instructions: 'Praman Desk Pre-Payment Spend Guard (10 deterministic OFAC, GLEIF, SEC EDGAR, 651-byte WASM math, and Sepolia x402 verification tools). Keyless public access.',
+          },
+        };
+      }
+      case 'ping':
+        return { jsonrpc: '2.0', id, result: {} };
+      case 'tools/list':
+        return { jsonrpc: '2.0', id, result: { tools: MCP_TOOLS } };
+      case 'resources/list':
+        return { jsonrpc: '2.0', id, result: { resources: [] } };
+      case 'prompts/list':
+        return { jsonrpc: '2.0', id, result: { prompts: [] } };
+      case 'tools/call': {
+        const toolName = msg.params?.name;
+        const toolArgs = msg.params?.arguments && typeof msg.params.arguments === 'object' ? msg.params.arguments : {};
+        if (!toolName || typeof toolName !== 'string') {
+          return { jsonrpc: '2.0', id, error: { code: -32602, message: 'Invalid params: missing params.name' } };
+        }
+        if (!MCP_TOOLS.some(t => t.name === toolName)) {
+          return { jsonrpc: '2.0', id, error: { code: -32602, message: `Unknown MCP tool: ${toolName}` } };
+        }
+        const toolResult = await executeMcpTool(toolName, toolArgs);
+        return hasId ? { jsonrpc: '2.0', id, result: toolResult } : null;
+      }
+      default:
+        return hasId ? { jsonrpc: '2.0', id, error: { code: -32601, message: `Method not found: ${msg.method}` } } : null;
+    }
+  };
+
+  const responses = [];
+  for (const msg of messages) {
+    const out = await dispatchSingle(msg);
+    if (out !== null) responses.push(out);
+  }
+
+  if (responses.length === 0) {
+    res.writeHead(202, { ...corsHeaders, 'Mcp-Protocol-Version': negotiatedProtocol });
+    return res.end();
+  }
+
+  res.writeHead(200, {
+    ...corsHeaders,
+    'Content-Type': 'application/json',
+    'Mcp-Protocol-Version': negotiatedProtocol,
+  });
+  return res.end(JSON.stringify(isBatch ? responses : responses[0]));
+}
+
 export async function handleApiRequest(req, res) {
   const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = urlObj.pathname;
 
   try {
+    // 0. Streamable HTTP & JSON-RPC 2.0 MCP Server (/api/mcp)
+    if (pathname === '/api/mcp') {
+      return await handleMcpHttpRequest(req, res);
+    }
+
     // 0a. GET /api/health
     if (pathname === '/api/health' && req.method === 'GET') {
       await loadSdnData();
@@ -4546,7 +4750,16 @@ export async function handleApiRequest(req, res) {
         }
       }
       const q = Object.fromEntries(urlObj.searchParams.entries());
-      const merged = { ...q, ...body, ...(body.params || {}) };
+      const merged = mergeNonEmptyParams(
+        parseGoMapOrJsonParam(q.optional),
+        parseGoMapOrJsonParam(q.params),
+        q,
+        parseGoMapOrJsonParam(body?.optional),
+        parseGoMapOrJsonParam(body?.params),
+        body
+      );
+      delete merged.optional;
+      delete merged.params;
 
       if (pathname === '/api/miner/invoice-reconcile') {
         const invoiceStr = String(merged.invoice || merged.question || merged.query || '');

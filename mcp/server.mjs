@@ -184,7 +184,7 @@ export async function clearSpendComposite({
 }
 
 // Define Server Tools
-const TOOLS = [
+export const TOOLS = [
   {
     name: 'verify_counterparty',
     description:
@@ -527,60 +527,10 @@ const TOOLS = [
   },
 ];
 
-// Start MCP Server
-export async function startServer() {
-  const cliArgs = process.argv.slice(2);
-  if (cliArgs.includes('--help') || cliArgs.includes('-h') || cliArgs.includes('--version') || cliArgs.includes('-v')) {
-    console.log([
-      'Praman Spend Guard MCP Server v1.0.0',
-      'Autonomous Pre-Payment Firewall for AI Agents & DAOs (10 deterministic tools)',
-      '',
-      'Usage:',
-      '  npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp [options]',
-      '',
-      'Options:',
-      '  -h, --help       Show this help message and tool list',
-      '  -v, --version    Show version number',
-      '  --self-test      Run a local 651-byte WASM + OFAC SDN self-test and exit',
-      '',
-      'Registered Tools (' + TOOLS.length + '):',
-      ...TOOLS.map(t => `  - ${t.name}`)
-    ].join('\n'));
-    process.exit(0);
-  }
-
-  if (cliArgs.includes('--self-test')) {
-    await initWasmComparator();
-    const wasmOk = runWasmScore(25000, 25000, 0, 0) === 10000;
-    const sanctionsRes = await screenSanctions({ name: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' });
-    if (!wasmOk || !sanctionsRes?.matched) {
-      console.error('FAIL: Praman Spend Guard MCP self-test failed.', { wasmOk, matched: sanctionsRes?.matched });
-      process.exit(1);
-    }
-    console.log('PASS: Praman Spend Guard MCP self-test (651b WASM + OFAC SDN) verified.');
-    process.exit(0);
-  }
-
+// Execute an MCP tool deterministically (shared by stdio and Streamable HTTP /api/mcp)
+export async function executeMcpTool(name, inputArgs = {}) {
   await initWasmComparator();
-
-  const server = new Server(
-    {
-      name: 'praman-spend-guard',
-      version: '1.0.0',
-    },
-    {
-      capabilities: {
-        tools: {},
-      },
-    }
-  );
-
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: TOOLS,
-  }));
-
-  server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    const { name, arguments: args } = request.params;
+  const args = inputArgs && typeof inputArgs === 'object' ? inputArgs : {};
 
     try {
       let result;
@@ -724,6 +674,63 @@ export async function startServer() {
         isError: true,
       };
     }
+}
+
+// Start MCP Server (Stdio Transport)
+export async function startServer() {
+  const cliArgs = process.argv.slice(2);
+  if (cliArgs.includes('--help') || cliArgs.includes('-h') || cliArgs.includes('--version') || cliArgs.includes('-v')) {
+    console.log([
+      'Praman Spend Guard MCP Server v1.0.0',
+      'Autonomous Pre-Payment Firewall for AI Agents & DAOs (10 deterministic tools)',
+      '',
+      'Usage:',
+      '  npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp [options]',
+      '',
+      'Options:',
+      '  -h, --help       Show this help message and tool list',
+      '  -v, --version    Show version number',
+      '  --self-test      Run a local 651-byte WASM + OFAC SDN self-test and exit',
+      '',
+      'Registered Tools (' + TOOLS.length + '):',
+      ...TOOLS.map(t => `  - ${t.name}`)
+    ].join('\n'));
+    process.exit(0);
+  }
+
+  if (cliArgs.includes('--self-test')) {
+    await initWasmComparator();
+    const wasmOk = runWasmScore(25000, 25000, 0, 0) === 10000;
+    const sanctionsRes = await screenSanctions({ name: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' });
+    if (!wasmOk || !sanctionsRes?.matched) {
+      console.error('FAIL: Praman Spend Guard MCP self-test failed.', { wasmOk, matched: sanctionsRes?.matched });
+      process.exit(1);
+    }
+    console.log('PASS: Praman Spend Guard MCP self-test (651b WASM + OFAC SDN) verified.');
+    process.exit(0);
+  }
+
+  await initWasmComparator();
+
+  const server = new Server(
+    {
+      name: 'praman-spend-guard',
+      version: '1.0.0',
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    }
+  );
+
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({
+    tools: TOOLS,
+  }));
+
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
+    return executeMcpTool(name, args || {});
   });
 
   const transport = new StdioServerTransport();

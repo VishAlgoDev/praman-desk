@@ -132,11 +132,80 @@ async function main() {
     latencyMs: ledger.latencyMs
   };
 
+  const mGoOpt = await fetchJsonSafe(`${PROD_BASE}/api/miner/sanctions-screen?optional=${encodeURIComponent('map[name:Rosneft Oil Company]')}`);
+  probes.miner_go_optional = {
+    ok: mGoOpt.ok && mGoOpt.json?.matched === true && (mGoOpt.json?.match_count || 0) > 0,
+    matched: mGoOpt.json?.matched,
+    matchCount: mGoOpt.json?.match_count,
+    latencyMs: mGoOpt.latencyMs
+  };
+  if (!probes.miner_go_optional.ok) failures.push('Miner Go optional=map[...] unpacking probe failed');
+
+  const mcpBatch = await fetchJsonSafe(`${PROD_BASE}/api/mcp`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify([
+      {
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'initialize',
+        params: { protocolVersion: '2025-03-26', clientInfo: { name: 'autonomous-monitor', version: '1.0' } }
+      },
+      { jsonrpc: '2.0', id: 2, method: 'tools/list' }
+    ])
+  });
+  probes.mcp_http = {
+    ok: mcpBatch.ok && Array.isArray(mcpBatch.json) && mcpBatch.json[0]?.result?.serverInfo?.name === 'praman-spend-guard' && mcpBatch.json[1]?.result?.tools?.length === 10,
+    protocolVersion: mcpBatch.json?.[0]?.result?.protocolVersion || null,
+    toolsCount: mcpBatch.json?.[1]?.result?.tools?.length || 0,
+    latencyMs: mcpBatch.latencyMs
+  };
+  if (!probes.mcp_http.ok) failures.push('Streamable HTTP /api/mcp probe failed');
+
   // 4. Devnode Miner Telemetry (#5281 / #5289)
   const devMiners = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners`, { timeoutMs: 20000 });
   const minerList = Array.isArray(devMiners.json?.miners) ? devMiners.json.miners : (Array.isArray(devMiners.json) ? devMiners.json : []);
   const ourMiner = minerList.find(m => String(m.id) === '5281' || m.slug === 'praman-compliance-miner') || null;
   const direct5289 = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners/5289`, { timeoutMs: 12000 });
+
+  const prevKnownByIntent = { ...(prevState?.devnode?.lastKnownByIntent || {}) };
+  for (const oldScore of (prevState?.devnode?.scores || [])) {
+    if (oldScore?.intent && !prevKnownByIntent[oldScore.intent]) {
+      prevKnownByIntent[oldScore.intent] = { epoch: oldScore.epoch, rank: oldScore.rank, score: oldScore.score };
+    }
+  }
+  const lastKnownByIntent = { ...prevKnownByIntent };
+  const currentScores = Array.isArray(ourMiner?.scores)
+    ? ourMiner.scores.map(s => ({ intent: s.intent_id, epoch: s.epoch_id, rank: s.rank, score: s.score }))
+    : [];
+
+  // Detect Devnode deltas and cross-epoch regressions against persistent intent watermarks
+  const deltas = [];
+  const regressions = [];
+  if (prevState?.devnode) {
+    if (prevState.devnode.lastScoredEpoch !== (ourMiner?.last_scored_epoch ?? null)) {
+      deltas.push(`Devnode epoch changed: ${prevState.devnode.lastScoredEpoch} -> ${ourMiner?.last_scored_epoch ?? null}`);
+    }
+    if (prevState.devnode.totalRequestsServed !== (ourMiner?.total_requests_served ?? null)) {
+      deltas.push(`Requests served changed: ${prevState.devnode.totalRequestsServed} -> ${ourMiner?.total_requests_served ?? null}`);
+    }
+  }
+
+  for (const s of currentScores) {
+    const old = prevKnownByIntent[s.intent];
+    if (!old || old.score !== s.score || old.rank !== s.rank || old.epoch !== s.epoch) {
+      deltas.push(`Score delta [${s.intent}] (e${old?.epoch ?? '?'}->e${s.epoch}): score ${old?.score ?? 'none'}->${s.score}, rank ${old?.rank ?? 'none'}->${s.rank}`);
+    }
+    if (old) {
+      if (typeof old.score === 'number' && typeof s.score === 'number' && s.score < old.score - 0.005) {
+        regressions.push(`Score drop [${s.intent}]: ${old.score} (e${old.epoch}) -> ${s.score} (e${s.epoch})`);
+      }
+      if (typeof old.rank === 'number' && typeof s.rank === 'number' && s.rank > old.rank) {
+        regressions.push(`Rank drop [${s.intent}]: #${old.rank} (e${old.epoch}) -> #${s.rank} (e${s.epoch})`);
+      }
+    }
+    lastKnownByIntent[s.intent] = { epoch: s.epoch, rank: s.rank, score: s.score, updatedAt: new Date().toISOString() };
+  }
 
   const devnodeSnapshot = {
     fetchedOk: devMiners.ok,
@@ -145,28 +214,9 @@ async function main() {
     lastScoredEpoch: ourMiner?.last_scored_epoch ?? null,
     lastScoredAt: ourMiner?.last_scored_at ?? null,
     totalRequestsServed: ourMiner?.total_requests_served ?? null,
-    scores: Array.isArray(ourMiner?.scores)
-      ? ourMiner.scores.map(s => ({ intent: s.intent_id, epoch: s.epoch_id, rank: s.rank, score: s.score }))
-      : []
+    scores: currentScores,
+    lastKnownByIntent
   };
-
-  // Detect Devnode deltas since previous cycle
-  const deltas = [];
-  if (prevState?.devnode) {
-    if (prevState.devnode.lastScoredEpoch !== devnodeSnapshot.lastScoredEpoch) {
-      deltas.push(`Devnode epoch changed: ${prevState.devnode.lastScoredEpoch} -> ${devnodeSnapshot.lastScoredEpoch}`);
-    }
-    if (prevState.devnode.totalRequestsServed !== devnodeSnapshot.totalRequestsServed) {
-      deltas.push(`Requests served changed: ${prevState.devnode.totalRequestsServed} -> ${devnodeSnapshot.totalRequestsServed}`);
-    }
-    const prevMap = new Map((prevState.devnode.scores || []).map(x => [x.intent, x]));
-    for (const s of devnodeSnapshot.scores) {
-      const old = prevMap.get(s.intent);
-      if (!old || old.score !== s.score || old.rank !== s.rank) {
-        deltas.push(`Score delta [${s.intent}]: score ${old?.score ?? 'none'}->${s.score}, rank ${old?.rank ?? 'none'}->${s.rank}`);
-      }
-    }
-  }
 
   // 5. GitHub Issues & Comments Monitor
   const ghIssues = await fetchJsonSafe(`https://api.github.com/repos/${GITHUB_REPO}/issues?state=all&per_page=10`);
@@ -185,6 +235,7 @@ async function main() {
     prodBase: PROD_BASE,
     allProbesOk: failures.length === 0,
     failures,
+    regressions,
     probes,
     devnode: devnodeSnapshot,
     github: githubSummary,
@@ -199,6 +250,7 @@ async function main() {
   console.log(`Production Base: ${PROD_BASE}`);
   console.log(`Overall Probe Status: ${failures.length === 0 ? 'ALL GREEN (0 FAILURES)' : `DEGRADED (${failures.length} FAILURES)`}`);
   if (failures.length) console.log('Failures:', failures);
+  if (regressions.length) console.log('Regressions:', regressions);
   console.log('Devnode #5281/#5289:', JSON.stringify(devnodeSnapshot));
   console.log('GitHub Repo:', JSON.stringify(githubSummary));
   console.log('Deltas:', deltas.length ? deltas : ['No changes since last cycle']);
