@@ -14,7 +14,8 @@ const GITHUB_REPO = 'VishAlgoDev/praman-desk';
 async function fetchJsonSafe(url, opts = {}) {
   const start = Date.now();
   let lastError = 'Unknown fetch error';
-  for (let attempt = 0; attempt < 2; attempt++) {
+  const maxAttempts = opts.maxAttempts || 2;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
       const res = await fetch(url, {
         ...opts,
@@ -163,14 +164,10 @@ async function main() {
   if (!probes.mcp_http.ok) failures.push('Streamable HTTP /api/mcp probe failed');
 
   // 4. Devnode Miner Telemetry (#5281 / #5289)
-  let devMiners = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners`, { timeoutMs: 35000 });
-  if (!devMiners.ok) {
-    // Retry once on transient network/load timeout (2.7MB payload)
-    devMiners = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners`, { timeoutMs: 40000 });
-  }
+  let devMiners = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners`, { timeoutMs: 18000, maxAttempts: 1 });
   const minerList = Array.isArray(devMiners.json?.miners) ? devMiners.json.miners : (Array.isArray(devMiners.json) ? devMiners.json : []);
   const ourMiner = minerList.find(m => String(m.id) === '5281' || m.slug === 'praman-compliance-miner') || null;
-  const direct5289 = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners/5289`, { timeoutMs: 15000 });
+  const direct5289 = await fetchJsonSafe(`${DEVNODE_BASE}/api/miners/5289`, { timeoutMs: 10000, maxAttempts: 1 });
 
   const prevKnownByIntent = { ...(prevState?.devnode?.lastKnownByIntent || {}) };
   for (const oldScore of (prevState?.devnode?.scores || [])) {
