@@ -5932,9 +5932,14 @@ export async function handleApiRequest(req, res) {
           return sendJson(res, 200, {
             reconciled: nlEval.reconciled,
             discrepancy: nlEval.discrepancy,
+            verdict: nlEval.reconciled ? 'RECONCILED' : 'DISCREPANCY_DETECTED',
             explanation: nlEval.explanation,
             status: nlEval.status,
             summary: nlEval.explanation,
+            reason: nlEval.explanation,
+            answer: nlEval.explanation,
+            results: [nlEval.explanation],
+            confidence: 1.0,
             details: nlEval.details,
             intent: 'INVOICE_LEDGER_RECONCILE_GENERAL',
             schema_version: 4,
@@ -5970,10 +5975,17 @@ export async function handleApiRequest(req, res) {
             });
           }
           const out = reconcileInvoicePrimary(merged);
+          const expl = out.explanation || (out.reconciled ? 'Reconciled' : 'Discrepancy detected');
           return sendJson(res, 200, {
             reconciled: out.reconciled,
             discrepancy: Math.abs(out.details?.delta_total ?? 0),
-            explanation: out.explanation,
+            verdict: out.reconciled ? 'RECONCILED' : 'DISCREPANCY_DETECTED',
+            explanation: expl,
+            summary: expl,
+            reason: expl,
+            answer: expl,
+            results: [expl],
+            confidence: 1.0,
             details: out.details,
             intent: 'INVOICE_LEDGER_RECONCILE_GENERAL',
             schema_version: 4,
@@ -5989,12 +6001,19 @@ export async function handleApiRequest(req, res) {
           const ledTotal = ledAmounts[ledAmounts.length - 1];
           const diff = Math.round((invTotal - ledTotal) * 100) / 100;
           const isRec = Math.abs(diff) < 0.01;
+          const expl = isRec
+            ? `Reconciled. Invoice total (${invTotal}) matches ledger total (${ledTotal}).`
+            : `Discrepancy of ${Math.abs(diff).toFixed(2)} detected: invoice states ${invTotal} whereas ledger states ${ledTotal}.`;
           return sendJson(res, 200, {
             reconciled: isRec,
             discrepancy: isRec ? 0 : Math.abs(diff),
-            explanation: isRec
-              ? `Reconciled. Invoice total (${invTotal}) matches ledger total (${ledTotal}).`
-              : `Discrepancy of ${Math.abs(diff).toFixed(2)} detected: invoice states ${invTotal} whereas ledger states ${ledTotal}.`,
+            verdict: isRec ? 'RECONCILED' : 'DISCREPANCY_DETECTED',
+            explanation: expl,
+            summary: expl,
+            reason: expl,
+            answer: expl,
+            results: [expl],
+            confidence: 1.0,
             intent: 'INVOICE_LEDGER_RECONCILE_GENERAL',
             schema_version: 4,
             as_of: new Date().toISOString()
@@ -6007,12 +6026,19 @@ export async function handleApiRequest(req, res) {
           const a2 = invAmounts[1];
           const diff = Math.round((a1 - a2) * 100) / 100;
           const isRec = Math.abs(diff) < 0.01;
+          const expl = isRec
+            ? `Reconciled across compared monetary values (${a1} vs ${a2}).`
+            : `Discrepancy of ${Math.abs(diff).toFixed(2)} detected between ${a1} and ${a2}.`;
           return sendJson(res, 200, {
             reconciled: isRec,
             discrepancy: isRec ? 0 : Math.abs(diff),
-            explanation: isRec
-              ? `Reconciled across compared monetary values (${a1} vs ${a2}).`
-              : `Discrepancy of ${Math.abs(diff).toFixed(2)} detected between ${a1} and ${a2}.`,
+            verdict: isRec ? 'RECONCILED' : 'DISCREPANCY_DETECTED',
+            explanation: expl,
+            summary: expl,
+            reason: expl,
+            answer: expl,
+            results: [expl],
+            confidence: 1.0,
             intent: 'INVOICE_LEDGER_RECONCILE_GENERAL',
             schema_version: 4,
             as_of: new Date().toISOString()
@@ -6214,6 +6240,10 @@ export async function handleApiRequest(req, res) {
           evidence_urls: out.evidence_urls,
           summary: out.summary,
           explanation: out.summary,
+          reason: out.summary,
+          answer: out.summary,
+          results: [out.summary],
+          confidence: out.confidence !== undefined ? out.confidence : 1.0,
           intent: 'VENDOR_VERIFY_GENERAL',
           schema_version: 3,
           as_of: new Date().toISOString()
@@ -6222,7 +6252,16 @@ export async function handleApiRequest(req, res) {
 
       if (pathname === '/api/miner/doc-authenticity') {
         const payload = await evaluateDocumentEndpoint(merged);
-        return sendJson(res, 200, payload);
+        const summary = payload.summary || payload.explanation || (Array.isArray(payload.evidence) ? payload.evidence[0] : '') || '';
+        return sendJson(res, 200, {
+          ...payload,
+          summary: payload.summary || summary,
+          explanation: payload.explanation || summary,
+          reason: payload.reason || summary,
+          answer: payload.answer || summary,
+          results: (Array.isArray(payload.results) && payload.results.length) ? payload.results : [summary],
+          confidence: payload.confidence !== undefined ? payload.confidence : 1.0
+        });
       }
 
       if (pathname === '/api/miner/corporate-registry') {
@@ -6231,8 +6270,15 @@ export async function handleApiRequest(req, res) {
           company: rawQuery,
           jurisdiction: merged.jurisdiction || merged.country || ''
         });
+        const summary = out.summary || out.reason || (out.found ? `Corporate record found for ${rawQuery}` : `No corporate record found for ${rawQuery}`);
         return sendJson(res, 200, {
           ...out,
+          summary,
+          explanation: out.explanation || summary,
+          reason: out.reason || summary,
+          answer: out.answer || summary,
+          results: (Array.isArray(out.results) && out.results.length) ? out.results : [summary],
+          confidence: out.confidence !== undefined ? out.confidence : (out.found ? 1.0 : 0.8),
           intent: 'CORPORATE_REGISTRY_LOOKUP_GENERAL',
           schema_version: 2,
           as_of: new Date().toISOString()
@@ -6245,6 +6291,8 @@ export async function handleApiRequest(req, res) {
           return sendJson(res, 200, {
             screened: false,
             status: 'insufficient_evidence',
+            verdict: 'insufficient_evidence',
+            confidence: 0.3,
             name: null,
             matched: false,
             match_found: false,
@@ -6252,14 +6300,26 @@ export async function handleApiRequest(req, res) {
             matches: [],
             lists: ['US Treasury OFAC SDN'],
             summary: 'Insufficient parameters: supply a person or entity name to screen against OFAC SDN.',
+            explanation: 'Insufficient parameters: supply a person or entity name to screen against OFAC SDN.',
+            reason: 'Insufficient parameters: supply a person or entity name to screen against OFAC SDN.',
+            answer: 'Insufficient parameters: supply a person or entity name to screen against OFAC SDN.',
+            results: ['Insufficient parameters: supply a person or entity name to screen against OFAC SDN.'],
             intent: 'SANCTIONS_SCREENING_MATCH_GENERAL',
             schema_version: 1,
             as_of: new Date().toISOString()
           });
         }
         const out = await screenSanctions({ name: rawName, threshold: merged.threshold });
+        const summary = out.summary || (out.matched ? `Sanctions match found for ${rawName}` : `No sanctions matches found for ${rawName}`);
         return sendJson(res, 200, {
           ...out,
+          verdict: out.verdict || (out.matched ? 'SANCTIONED' : 'CLEAR'),
+          summary,
+          explanation: out.explanation || summary,
+          reason: out.reason || summary,
+          answer: out.answer || summary,
+          results: (Array.isArray(out.results) && out.results.length) ? out.results : [summary],
+          confidence: out.confidence !== undefined ? out.confidence : 1.0,
           intent: 'SANCTIONS_SCREENING_MATCH_GENERAL',
           schema_version: 1,
           as_of: new Date().toISOString()
@@ -6297,8 +6357,12 @@ export async function handleApiRequest(req, res) {
         return sendJson(res, 200, {
           ...out,
           verdict: out.verdict || (out.found ? 'found' : 'not_found'),
+          summary: out.summary || out.reason || '',
           explanation: out.summary || out.reason || '',
           reason: out.summary || out.reason || '',
+          answer: out.summary || out.reason || '',
+          results: (Array.isArray(out.results) && out.results.length) ? out.results : [out.summary || out.reason || ''],
+          confidence: out.confidence !== undefined ? out.confidence : 1.0,
           intent: 'REGULATORY_FILING_MONITOR_GENERAL',
           schema_version: 2,
           as_of: new Date().toISOString()
