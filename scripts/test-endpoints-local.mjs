@@ -397,11 +397,43 @@ async function run() {
       result: { reconciled: true, discrepancy: 0 },
       field_status: { reconciled: 'ok', discrepancy: 'ok' }
     });
+    const cOkOneCent = evaluateMinerAgreement('INVOICE_LEDGER_RECONCILE_GENERAL', primaryMismatch, {
+      result: { reconciled: false, discrepancy: '102660.01' },
+      field_status: { reconciled: 'ok', discrepancy: 'ok' }
+    });
+    const cFailOneUnit = evaluateMinerAgreement('INVOICE_LEDGER_RECONCILE_GENERAL', primaryMismatch, {
+      result: { reconciled: false, discrepancy: '102661.00' },
+      field_status: { reconciled: 'ok', discrepancy: 'ok' }
+    });
+    const cFailThousand = evaluateMinerAgreement('INVOICE_LEDGER_RECONCILE_GENERAL', primaryMismatch, {
+      result: { reconciled: false, discrepancy: '103660.00' },
+      field_status: { reconciled: 'ok', discrepancy: 'ok' }
+    });
     if ([c1, c2, c3, c4, c5].some(x => x.agreement === 'confirmed')) {
       throw new Error(`ND-17 comparator falsely confirmed invalid case: ${JSON.stringify([c1, c2, c3, c4, c5])}`);
     }
     if (cOkMismatch.agreement !== 'confirmed' || cOkExact.agreement !== 'confirmed') {
       throw new Error(`ND-17 comparator rejected valid control: ${JSON.stringify({ cOkMismatch, cOkExact })}`);
+    }
+    if (cOkOneCent.agreement !== 'confirmed' || cOkOneCent.wasmScore !== 5000) {
+      throw new Error(`ND-17 1-cent boundary failed: ${JSON.stringify(cOkOneCent)}`);
+    }
+    if (cFailOneUnit.agreement !== 'contradicted' || cFailOneUnit.wasmScore !== 0 || cFailThousand.agreement !== 'contradicted' || cFailThousand.wasmScore !== 0) {
+      throw new Error(`ND-17 strict >1-cent rejection failed: ${JSON.stringify({ cFailOneUnit, cFailThousand })}`);
+    }
+
+    // 16. Enhanced PO Inline Math ("each ($X)" + tax/shipping/total without subtotal) & Chicago Public PO FMPS Lookup
+    const inlineEachPo = await check('/api/miner/po-verify?po_number=PO-INLINE-EACH&question=' + encodeURIComponent('5 laptops at $1,200 each ($6,000), 2 monitors at $350 each ($700), tax $536, shipping $50, grand total $7,286'));
+    if (inlineEachPo.status !== 200 || inlineEachPo.json.verified !== true || inlineEachPo.json.amount !== 7286) {
+      throw new Error(`Enhanced inline PO math check failed: ${JSON.stringify(inlineEachPo.json)}`);
+    }
+    const chicagoMatch = await check('/api/miner/po-verify?po_number=294329&vendor=RUSH%20UNIVERSITY%20MEDICAL%20CENTER');
+    const chicagoMismatch = await check('/api/miner/po-verify?po_number=294329&vendor=ACME%20CORP');
+    if (chicagoMatch.status !== 200 || chicagoMatch.json.verified !== true || chicagoMatch.json.verdict !== 'Verified') {
+      throw new Error(`Chicago PO public match failed: ${JSON.stringify(chicagoMatch.json)}`);
+    }
+    if (chicagoMismatch.status !== 200 || chicagoMismatch.json.verified !== false || chicagoMismatch.json.status !== 'vendor_mismatch') {
+      throw new Error(`Chicago PO vendor mismatch check failed: ${JSON.stringify(chicagoMismatch.json)}`);
     }
 
     console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM & MISSION 02 VERIFIED!');
