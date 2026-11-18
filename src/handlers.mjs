@@ -1982,8 +1982,32 @@ export function verifyPurchaseOrderPrimary({
   poAmount = 25000,
   approvalCap = 50000,
   currency = 'USD',
-  dualSignoffPresent = false
+  dualSignoffPresent = false,
+  question = '',
+  query = '',
+  prompt = '',
+  text = ''
 }) {
+  const queryText = [question, query, prompt, text].filter(Boolean).join(' ');
+  const gov = evaluatePoGovernancePrompt(queryText);
+  if (gov) {
+    return {
+      po_number: gov.po_number || String(poNumber),
+      verified: gov.verified,
+      verdict: gov.verdict,
+      status: gov.status,
+      amount: gov.amount,
+      vendor: gov.vendor || String(vendor),
+      currency,
+      approval_cap: gov.approval_cap || null,
+      dual_signoff_present: false,
+      checks_passed: gov.checks_passed || [],
+      discrepancies: gov.discrepancies || [],
+      explanation: gov.explanation,
+      summary: gov.explanation
+    };
+  }
+
   const amt = parseStrictNumber(poAmount);
   const cap = parseStrictNumber(approvalCap);
   const amountFinite = Number.isFinite(amt) && amt > 0 && amt <= 1e12;
