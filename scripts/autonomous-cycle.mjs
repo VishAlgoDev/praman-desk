@@ -13,35 +13,42 @@ const GITHUB_REPO = 'VishAlgoDev/praman-desk';
 
 async function fetchJsonSafe(url, opts = {}) {
   const start = Date.now();
-  try {
-    const res = await fetch(url, {
-      ...opts,
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'PramanDesk-AutonomousMonitor/1.0',
-        ...(opts.headers || {})
-      },
-      signal: AbortSignal.timeout(opts.timeoutMs || 15000)
-    });
-    const text = await res.text();
-    let json = null;
-    try { json = JSON.parse(text); } catch {}
-    return {
-      ok: res.ok,
-      status: res.status,
-      latencyMs: Date.now() - start,
-      json,
-      error: res.ok ? null : `HTTP ${res.status}: ${text.slice(0, 200)}`
-    };
-  } catch (err) {
-    return {
-      ok: false,
-      status: 0,
-      latencyMs: Date.now() - start,
-      json: null,
-      error: err.message
-    };
+  let lastError = 'Unknown fetch error';
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, {
+        ...opts,
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'PramanDesk-AutonomousMonitor/1.0',
+          ...(opts.headers || {})
+        },
+        signal: AbortSignal.timeout(opts.timeoutMs || 15000)
+      });
+      const text = await res.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch {}
+      return {
+        ok: res.ok,
+        status: res.status,
+        latencyMs: Date.now() - start,
+        json,
+        error: res.ok ? null : `HTTP ${res.status}: ${text.slice(0, 200)}`
+      };
+    } catch (err) {
+      lastError = err.message;
+      if (attempt === 0) {
+        await new Promise(r => setTimeout(r, 300));
+      }
+    }
   }
+  return {
+    ok: false,
+    status: 0,
+    latencyMs: Date.now() - start,
+    json: null,
+    error: lastError
+  };
 }
 
 async function main() {
