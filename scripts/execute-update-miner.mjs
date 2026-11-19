@@ -16,7 +16,7 @@ const { account, address } = loadOrCreateWallet();
 const walletClient = createWalletClient({ account, chain: sepolia, transport: http(RPC) });
 
 const DIAMOND_ADDRESS = '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b';
-const PREVIOUS_REG_ID = 5289n;
+const PREVIOUS_REG_ID = 5305n;
 const COMMIT_HASH = '093bab8294257a260bcff15a68af19489f6bbc42';
 const PINNED_URL = `https://raw.githubusercontent.com/VishAlgoDev/praman-desk/${COMMIT_HASH}/miner.yaml`;
 

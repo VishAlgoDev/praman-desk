@@ -1,8 +1,8 @@
 {
-  "previousRegistrationId": "5289",
-  "registrationId": "5305",
-  "txHash": "0xb9b66532403497a123c633fea7b4e70a4c30ded2c098446de4498b70377ca085",
-  "blockNumber": 12163265,
+  "previousRegistrationId": "5305",
+  "registrationId": "5311",
+  "txHash": "0x3fdf3be7c6ebd3c9db95faf910ee7cfd78b68a72630952115badc13018da0945",
+  "blockNumber": 12165894,
   "miner": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
   "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
   "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/093bab8294257a260bcff15a68af19489f6bbc42/miner.yaml",
@@ -18,5 +18,5 @@
     "CONTRACT_OBLIGATION_AUDIT_GENERAL"
   ],
   "status": "active",
-  "updatedAt": "2026-11-18T18:39:50.878Z"
+  "updatedAt": "2026-11-19T03:40:56.657Z"
 }
