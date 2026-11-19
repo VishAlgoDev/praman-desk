@@ -13,6 +13,8 @@
     "mcp:start": "node mcp/server.mjs",
     "mcp:test": "node mcp/test-mcp.mjs",
     "comparator:test": "node comparator/test-comparator.mjs",
+    "adapters:test": "node examples/paysheet-consensus/paysheet-praman-adapter.mjs && node examples/fakewatch-shield/fakewatch-praman-shield.mjs && node examples/rugreceipt-screen/rugreceipt-praman-screen.mjs",
+    "test": "node comparator/test-comparator.mjs && node mcp/test-mcp.mjs && node scripts/test-endpoints-local.mjs && node examples/paysheet-consensus/paysheet-praman-adapter.mjs && node examples/fakewatch-shield/fakewatch-praman-shield.mjs && node examples/rugreceipt-screen/rugreceipt-praman-screen.mjs",
     "wallet:init": "node scripts/init-wallet.mjs",
     "eval:status": "node scripts/check-eval-status.mjs",
     "eval:generate": "node scripts/generate-eval-datasets.mjs",
