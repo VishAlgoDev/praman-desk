@@ -4,7 +4,7 @@
 **Subtitle**: Autonomous Pre-Payment Spend Firewall for AI Agents, DAOs & Treasuries  
 **Submission Tracks**:
 - **Primary Track**: Track 01 — Apps & Agents
-  - **Collaborative Two-Mind Architecture**: Animoca Brands Minds (hellominds.ai) Diligence Investigator + Escrow Reviewer
+  - **Collaborative Two-Mind Architecture**: Reference Implementation of the Animoca Brands Minds Specification (hellominds.ai) — Diligence Investigator + Escrow Reviewer
   - **Mission 04**: Legal & Cross-Border Diligence (MahaRERA, FIDIC, MSMED Act, GLEIF, OFAC)
   - **Mission 03**: Institutional Markets & Counterparty Clearing (FakeWatch Phishing Shield, FX Parity)
   - **Mission 11**: Autonomous Systems (Spend Delegation Approval Caps & Circuit Breakers)
@@ -15,8 +15,8 @@
   - 🥈 **Rank #2 Globally**: SANCTIONS_SCREENING_MATCH_GENERAL (Score: 1.0000, 19,565 OFAC records)
   - 💎 **Rank #6 Globally**: CORPORATE_REGISTRY_LOOKUP_GENERAL (Score: 1.0000, 200+ jurisdictions GLEIF)
   - 164 live network requests served on Devnode
-- **Supporting Track**: Track 03 — Evaluators & Truth Sources (62 Attested Bounties in EvalPool + Track 3 Ground-Truth Dossier for Bounties #120, #122, #192)  
-- **Empirical Benchmark**: "With vs Without Telegraph" ($79,373 Capital Loss Averted across 5 Adversarial Scenarios, 100% Catch Rate vs 0% Raw LLM)  
+- **Supporting Track**: Track 03 — Evaluators & Truth Sources (62 Attested Rows in EvalPool + [Upstream PR #217](https://github.com/telegraphprotocol/bounties/pull/217) for Mission 04 Legal Evaluator Adapter #192)  
+- **Benchmark & Policy Evaluation**: "With vs Without Telegraph" ($79,373 Capital Loss Averted across 5 Adversarial Scenarios, 100% Catch Rate vs 0% Ungrounded Baseline)  
 - **Main Competition Deadline**: December 1, 2026, 23:59 UTC  
 - **GitHub Repository**: [https://github.com/VishAlgoDev/praman-desk](https://github.com/VishAlgoDev/praman-desk)  
 - **Live Application**: [https://praman-desk.vercel.app](https://praman-desk.vercel.app)  
@@ -32,7 +32,7 @@
 - **GitHub Account**: [`https://github.com/VishAlgoDev`](https://github.com/VishAlgoDev)
 - **Primary Contributor & Fee Address**: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
 - **Network**: Ethereum Sepolia Testnet + Telegraph Protocol Devnode (`https://devnode.telegraphprotocol.com`)
-- **Sepolia Diamond Contract**: [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
+- **Sepolia Diamond Contract (Port #6128 / Miner #6127)**: [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
 - **Test USDC Contract**: [`0xcc194e1a843B658526D0D5C431f670028582Ae17`](https://sepolia.etherscan.io/address/0xcc194e1a843B658526D0D5C431f670028582Ae17)
 - **Anjoman App Registry**: Submission ID `9ae7025e-65be-490b-8e59-2aa598f16992` (`In review`)
 

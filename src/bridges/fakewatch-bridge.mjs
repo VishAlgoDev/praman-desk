@@ -22,6 +22,24 @@ const KNOWN_PHISHING_REGEXES = [
   /revoke-cash-claim\./i
 ];
 
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const d = Array.from({ length: m + 1 }, () => new Uint8Array(n + 1));
+  for (let i = 0; i <= m; i++) d[i][0] = i;
+  for (let j = 0; j <= n; j++) d[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+    }
+  }
+  return d[m][n];
+}
+
+const PROTECTED_BRANDS = [
+  'uniswap', 'metamask', 'opensea', 'binance', 'coinbase', 'stripe', 'paypal', 'ethereum', 'arbitrum', 'optimism', 'polygon'
+];
+
 export async function checkFakeWatchDomain(urlOrDomain) {
   const tStart = performance.now();
   let domain = String(urlOrDomain || '').trim();
@@ -36,7 +54,24 @@ export async function checkFakeWatchDomain(urlOrDomain) {
     // keep raw domain
   }
 
-  // 1. Check deterministic local heuristic / blacklist
+  // 1. Generalized Heuristic Typosquat Detection
+  const sld = domain.toLowerCase().split('.')[0].replace(/[^a-z0-9]/g, '');
+  for (const brand of PROTECTED_BRANDS) {
+    if (sld !== brand && Math.abs(sld.length - brand.length) <= 2) {
+      const dist = levenshtein(sld, brand);
+      if (dist === 1 || (dist === 2 && sld.length > 5)) {
+        return {
+          domain,
+          verdict: 'PHISHING',
+          risk_score: 96,
+          source: `FakeWatch Heuristic Typosquat Shield (Target: ${brand})`,
+          latency_ms: Math.round(performance.now() - tStart)
+        };
+      }
+    }
+  }
+
+  // 2. Check deterministic local heuristic / blacklist
   for (const rx of KNOWN_PHISHING_REGEXES) {
     if (rx.test(domain)) {
       return {

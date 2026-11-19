@@ -1,6 +1,6 @@
 # 🧠 Praman Desk: Collaborative Two-Mind Spend Guard Architecture
 
-> Built for **Animoca Brands Minds (`hellominds.ai`)** & **Telegraph Protocol Season II Hackathon**  
+> **Reference Implementation of the Animoca Brands Minds Specification (`hellominds.ai`)** for **Telegraph Protocol Season II Hackathon**  
 > Primary Missions: **Mission 04 (Legal)** & **Mission 03 (Institutional Markets)**  
 > Protocol Intelligence Layer: **Telegraph Protocol via Anjoman Skill (`telegraphprotocol/telegraph-mcp`)**
 

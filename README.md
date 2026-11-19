@@ -10,7 +10,7 @@
 
 - **Live Split-Screen Interactive Playground:** <https://praman-desk.vercel.app>
 - **Official Showcase Video (43s, 1080p HD):** [Direct MP4 Stream](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) · [Renderer Script](scripts/render-minds-benchmark-video.mjs)
-- **Animoca Brands Minds Architecture:** [Collaborative Two-Mind Spend Guard](examples/minds-spend-guard/) (Investigator + Reviewer Minds)
+- **Two-Mind Spend Guard Architecture:** [Reference Implementation of the Animoca Brands Minds Specification](examples/minds-spend-guard/) (Diligence Investigator + Escrow Reviewer Minds)
 - **Empirical Benchmark Report:** [With vs Without Telegraph ($79,373 Averted)](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md)
 - **Active Telegraph Miner:** Devnode Miner `#6127` (Route `5281` / Sepolia Diamond Registration `#6128`) on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
 - **Devnode Global Leaderboard Standing (Epoch 18):**
@@ -22,7 +22,7 @@
   - 💎 **Rank #6 Globally:** `VENDOR_VERIFY_GENERAL`
 - **Total Requests Served on Devnode:** 164 live network requests served
 - **Telegraph Hackathon Season II Tracks Covered:**
-  - **Track 01 (Apps & Agents):** Praman Desk Collaborative Two-Mind Spend Guard on `hellominds.ai` (Mission 04: Legal & Mission 03: Institutional Markets)
+  - **Track 01 (Apps & Agents):** Praman Desk Collaborative Two-Mind Spend Guard (Reference Implementation of the Animoca Brands Minds Specification on `hellominds.ai`; Mission 04: Legal & Mission 03: Institutional Markets)
   - **Track 02 (Miners/Providers):** Miner `#6127` holding Rank #1 standings across 8 active compliance intents
   - **Track 03 (Evaluators/Truth Sources):** 62 eligible rows in Devnode EvalPool + Upstream Ground-Truth Dossier for Bounties #120, #122, #192
 - **Anjoman App Submission ID:** `9ae7025e-65be-490b-8e59-2aa598f16992`

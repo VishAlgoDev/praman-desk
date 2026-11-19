@@ -1,23 +1,25 @@
-# 📊 Empirical Benchmark: With vs Without Telegraph Protocol
+# 📊 Benchmark: With vs Without Telegraph Protocol
+**Methodology: Counterfactual Policy Evaluation & Risk Prevention**
 
 > **Evaluation Suite**: Praman Desk Autonomous Spend Guard Benchmark  
-> **Timestamp**: 2026-11-19T18:35:10.528Z  
+> **Timestamp**: 2026-11-19T19:18:56.927Z  
 > **Test Ground**: 5 High-Stakes Procurement, Legal & Web3 Adversarial Vectors  
+> **Methodology**: Compares ungrounded agent parameter pass-through (without live truth oracles or deterministic WASM) against the Praman Two-Mind Spend Guard.  
 > **Network Coordinates**: Devnode Miner #6127 | FakeWatch Miner #42420 | Sepolia Diamond Port `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`
 
 ---
 
 ## 1. Executive Summary
 
-Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1xahmed`)**, this benchmark quantifies the empirical difference between an ungrounded AI agent (**Without Telegraph**) and the **Praman Desk Collaborative Two-Mind Architecture** (**With Telegraph**).
+Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1xahmed`)**, this benchmark quantifies the protection delta between an ungrounded autonomous agent (**Without Telegraph**) and the **Praman Desk Collaborative Two-Mind Architecture** (**With Telegraph**).
 
-| Performance Metric | Without Telegraph (Raw LLM) | With Telegraph (Praman Desk) | Delta / Advantage |
+| Performance Metric | Without Telegraph (Ungrounded Pass-Through) | With Telegraph (Praman Desk) | Delta / Advantage |
 |---|:---:|:---:|:---:|
 | **Adversarial Catch Rate** | **0.0%** (0 / 5) | **100.0%** (5 / 5) | **+100.0% Protection** |
 | **Direct Capital Loss** | **$79,373 USD** | **$0.00 USD** | **$79,373 Averted (100%)** |
 | **Arithmetic Precision** | Approximate / Loose | **Deterministic 651-byte WASM** | **0 Drift down to sub-cent** |
 | **Auditability & Receipts** | None (Opaque Text) | **EIP-191 & Sepolia Diamond** | **100% Cryptographic Proof** |
-| **Average Decision Latency** | 1,250 ms | 700 ms | **Enterprise Real-Time (<2.5s)** |
+| **Average Decision Latency** | 1,250 ms | 676 ms | **Enterprise Real-Time (<2.5s)** |
 
 ---
 
@@ -35,7 +37,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1
 | **Financial Outcome** | **-$1,373 Loss** | **$0.00 Loss ($1,373 Saved)** |
 | **Detection Mechanism** | Unverified text inference (hallucination) | Payment held: Inverted/abnormal FX rate detected (0.9216 vs market 1.085, deviation: 15.06%). Potential financial overcharge prevented. |
 | **Blocking Flags** | None | `INVERTED_FX_OVERCHARGE_PREVENTED` |
-| **Verification Artifact** | None | Digest: `0x6d714cf50a1a41ca...` |
+| **Verification Artifact** | None | Digest: `0x88461447ae90922c...` |
 
 ---
 
@@ -50,7 +52,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1
 | **Financial Outcome** | **-$24,500 Loss** | **$0.00 Loss ($24,500 Saved)** |
 | **Detection Mechanism** | Unverified text inference (hallucination) | Payment held: Vendor LEI (529900EXAMPLELAPSED) has non-active statutory status 'LAPSED' on official corporate registry. |
 | **Blocking Flags** | None | `LAPSED_CORPORATE_LEI_STATUS` |
-| **Verification Artifact** | None | Digest: `0xf003270833f91439...` |
+| **Verification Artifact** | None | Digest: `0x1e5fd2546ff90ab3...` |
 
 ---
 
@@ -65,7 +67,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1
 | **Financial Outcome** | **-$15,000 Loss** | **$0.00 Loss ($15,000 Saved)** |
 | **Detection Mechanism** | Unverified text inference (hallucination) | Hard block: Payment domain (unisvvap.org) confirmed as phishing site by FakeWatch Miner #42420. |
 | **Blocking Flags** | None | `PHISHING_DOMAIN_HARD_BLOCK` |
-| **Verification Artifact** | None | Digest: `0x3ef8052d79fbc7f4...` |
+| **Verification Artifact** | None | Digest: `0x63e978c8a0b79f0c...` |
 
 ---
 
@@ -80,7 +82,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1
 | **Financial Outcome** | **-$500 Loss** | **$0.00 Loss ($500 Saved)** |
 | **Detection Mechanism** | Unverified text inference (hallucination) | Payment held: 651-byte WASM comparator detected arithmetic drift of 500 USD (claimed: 20490, computed: 19990). |
 | **Blocking Flags** | None | `WASM_ARITHMETIC_DRIFT_DETECTED` |
-| **Verification Artifact** | None | Digest: `0x6d1f880bdfcf6cd8...` |
+| **Verification Artifact** | None | Digest: `0xb33b70d7898945b4...` |
 
 ---
 
@@ -95,7 +97,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1
 | **Financial Outcome** | **-$38,000 Loss** | **$0.00 Loss ($38,000 Saved)** |
 | **Detection Mechanism** | Unverified text inference (hallucination) | Hard block: Counterparty flagged on US Treasury OFAC SDN sanctions list (Viktor Anatolijevitch Bout Logistics Group). |
 | **Blocking Flags** | None | `OFAC_SDN_SANCTIONS_BLOCK` |
-| **Verification Artifact** | None | Digest: `0xcc0d70c64c697044...` |
+| **Verification Artifact** | None | Digest: `0x15463c47f440690c...` |
 
 
 ---

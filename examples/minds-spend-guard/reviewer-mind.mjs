@@ -134,16 +134,24 @@ export async function reviewAndGateSpend(caseFile, options = {}) {
     };
 
     let authorizationSignature = null;
+    let signerAddress = null;
+    let signatureMode = 'UNCONFIGURED';
+
     if (wallet && wallet.signMessage) {
+      signerAddress = wallet.address;
+      signatureMode = 'EIP191_CRYPTOGRAPHIC';
       try {
         authorizationSignature = await wallet.signMessage({
           message: JSON.stringify(releasePayload)
         });
-      } catch {
-        authorizationSignature = `0x${crypto.randomBytes(65).toString('hex')}`;
+      } catch (signErr) {
+        signatureMode = 'PREFLIGHT_DETERMINISTIC_HASH';
+        authorizationSignature = `0xPREFLIGHT_${crypto.createHash('sha256').update(JSON.stringify(releasePayload)).digest('hex')}`;
       }
     } else {
-      authorizationSignature = `0x${crypto.randomBytes(65).toString('hex')}`;
+      signerAddress = '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466';
+      signatureMode = 'PREFLIGHT_DETERMINISTIC_HASH';
+      authorizationSignature = `0xPREFLIGHT_${crypto.createHash('sha256').update(JSON.stringify(releasePayload)).digest('hex')}`;
     }
 
     escrowReceipt = {
@@ -153,6 +161,8 @@ export async function reviewAndGateSpend(caseFile, options = {}) {
       token: TEST_USDC,
       recipient: releasePayload.recipient,
       amountMicroUsdc: releasePayload.amountUnits,
+      signerAddress,
+      signatureMode,
       authorizationSignature,
       blockNetwork: 'Ethereum Sepolia Testnet (Telegraph Protocol Diamond Port)',
       timestamp: releasePayload.authorizedAt

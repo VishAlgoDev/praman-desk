@@ -2,11 +2,11 @@
  * Praman Desk: Official Minds & Benchmark Showcase Video Renderer
  * Built with FFmpeg (1080p @ 30fps) for Season II Hackathon Community Showcase
  * Features:
- * 1. Two-Mind Collaborative Architecture on hellominds.ai (Animoca Brands)
+ * 1. Two-Mind Collaborative Architecture: Reference Implementation of the Minds Spec
  * 2. Mind 1 (Diligence Investigator via Anjoman) + Mind 2 (Escrow Reviewer via 651-byte WASM)
  * 3. Clean Siemens AG Procurement Approval with Sepolia Diamond Escrow Receipt
  * 4. Adversarial Attack Interception: Inverted FX Rate & Phishing Domain
- * 5. With vs Without Telegraph Empirical Benchmark: $79,373 in Capital Loss Averted
+ * 5. Deterministic Policy Evaluation & Empirical Baseline: $79,373 in Capital Loss Averted
  */
 
 import { execSync } from 'node:child_process';
@@ -32,10 +32,11 @@ function escapeText(str) {
     .replace(/%/g, ' percent');
 }
 
-function renderScene(sceneId, duration, vfCommands) {
+function renderScene(sceneId, duration, vfCommands, audioFreq = 140) {
   const outFile = path.join(publicDir, `scene_${sceneId}.mp4`);
   const vf = vfCommands.join(',');
-  const cmd = `ffmpeg -y -f lavfi -i color=c=0x070b14:s=1920x1080:d=${duration}:r=30 -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 -vf "${vf}" -c:v libx264 -pix_fmt yuv420p -t ${duration} -c:a aac -shortest "${outFile}"`;
+  // Ambient synthesized tech chord per scene instead of pure dead silence
+  const cmd = `ffmpeg -y -f lavfi -i color=c=0x070b14:s=1920x1080:d=${duration}:r=30 -f lavfi -i "sine=frequency=${audioFreq}:sample_rate=44100,volume=0.04,afade=t=in:ss=0:d=0.5,afade=t=out:st=${duration - 0.5}:d=0.5" -vf "${vf}" -c:v libx264 -pix_fmt yuv420p -t ${duration} -c:a aac -shortest "${outFile}"`;
   
   console.log(`▶ Rendering Scene ${sceneId} (${duration}s)...`);
   execSync(cmd, { stdio: 'pipe' });
@@ -51,27 +52,27 @@ const scene1 = [
   "drawbox=x=140:y=110:w=440:h=44:color=0x38bdf8@0.8:t=2",
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("TELEGRAPH PROTOCOL SEASON II")}':fontsize=18:fontcolor=0x38bdf8:x=160:y=122`,
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("Praman Desk: Collaborative Two-Mind Spend Guard")}':fontsize=56:fontcolor=white:x=140:y=190`,
-  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("Architected for Animoca Brands Minds (hellominds.ai) & Enterprise Procurement")}':fontsize=26:fontcolor=0x94a3b8:x=140:y=270`,
+  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("Reference Implementation of Animoca Brands Minds Specification (hellominds.ai)")}':fontsize=26:fontcolor=0x94a3b8:x=140:y=270`,
   
   // Left: Mind 1 Card
   "drawbox=x=140:y=340:w=800:h=480:color=0x1e293b@0.7:t=fill",
   "drawbox=x=140:y=340:w=800:h=480:color=0x38bdf8@0.7:t=2",
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("MIND 1: DILIGENCE INVESTIGATOR")}':fontsize=24:fontcolor=0x38bdf8:x=170:y=375`,
-  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("â€¢ Anjoman Skill Router (telegraphprotocol/telegraph-mcp)")}':fontsize=20:fontcolor=0xe2e8f0:x=170:y=435`,
-  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("â€¢ Corporate LEI Registry: GLEIF Live Primary Index")}':fontsize=20:fontcolor=0xe2e8f0:x=170:y=485`,
-  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("â€¢ OFAC SDN Screening: In-Memory <25ms Fuzzy Jaccard Engine")}':fontsize=20:fontcolor=0xe2e8f0:x=170:y=535`,
-  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("â€¢ FakeWatch Phishing Shield: Miner #42420 Domain Reputation")}':fontsize=20:fontcolor=0xe2e8f0:x=170:y=585`,
-  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("â€¢ Compiles Tamper-Evident SHA-256 Digested Case File")}':fontsize=20:fontcolor=0x10b981:x=170:y=645`,
+  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("- Anjoman Skill Router (telegraphprotocol/telegraph-mcp)")}':fontsize=20:fontcolor=0xe2e8f0:x=170:y=435`,
+  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("- Corporate LEI Registry: GLEIF Live Primary Index")}':fontsize=20:fontcolor=0xe2e8f0:x=170:y=485`,
+  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("- OFAC SDN Screening: In-Memory <25ms Fuzzy Jaccard Engine")}':fontsize=20:fontcolor=0xe2e8f0:x=170:y=535`,
+  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("- FakeWatch Phishing Shield: Miner #42420 Domain Reputation")}':fontsize=20:fontcolor=0xe2e8f0:x=170:y=585`,
+  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("- Compiles Tamper-Evident SHA-256 Digested Case File")}':fontsize=20:fontcolor=0x10b981:x=170:y=645`,
 
   // Right: Mind 2 Card
   "drawbox=x=980:y=340:w=800:h=480:color=0x1e293b@0.7:t=fill",
   "drawbox=x=980:y=340:w=800:h=480:color=0x10b981@0.7:t=2",
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("MIND 2: ESCROW REVIEWER & SPEND GATE")}':fontsize=24:fontcolor=0x10b981:x=1010:y=375`,
-  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("â€¢ 651-byte WebAssembly Deterministic Comparator")}':fontsize=20:fontcolor=0xe2e8f0:x=1010:y=435`,
-  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("â€¢ Zero Arithmetic Drift down to the sub-cent")}':fontsize=20:fontcolor=0xe2e8f0:x=1010:y=485`,
-  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("â€¢ Multi-Miner Consensus: Validates 3+ Independent Providers")}':fontsize=20:fontcolor=0xe2e8f0:x=1010:y=535`,
-  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("â€¢ Fail-Closed Protection: Failsafe with 0 Micro-USDC Loss")}':fontsize=20:fontcolor=0xe2e8f0:x=1010:y=585`,
-  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("â€¢ On-Chain Sepolia Diamond Escrow (0x72a7...a08b)")}':fontsize=20:fontcolor=0x38bdf8:x=1010:y=645`,
+  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("- 651-byte WebAssembly Deterministic Comparator")}':fontsize=20:fontcolor=0xe2e8f0:x=1010:y=435`,
+  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("- Zero Arithmetic Drift down to the sub-cent")}':fontsize=20:fontcolor=0xe2e8f0:x=1010:y=485`,
+  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("- Multi-Miner Consensus: Validates 3+ Independent Providers")}':fontsize=20:fontcolor=0xe2e8f0:x=1010:y=535`,
+  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("- Fail-Closed Protection: Failsafe with 0 Micro-USDC Loss")}':fontsize=20:fontcolor=0xe2e8f0:x=1010:y=585`,
+  `drawtext=fontfile='${FONT_BODY}':text='${escapeText("- On-Chain Sepolia Diamond Escrow (0x72a7...a08b)")}':fontsize=20:fontcolor=0x38bdf8:x=1010:y=645`,
 
   // Bottom Status
   `drawtext=fontfile='${FONT_MONO}':text='${escapeText("Devnode Miner #6127  |  Rank #1 Contract Obligation  |  Rank #1 Purchase Order Verify")}':fontsize=20:fontcolor=0x64748b:x=140:y=860`
@@ -84,19 +85,19 @@ const scene2 = [
   "drawbox=x=140:y=110:w=440:h=44:color=0x10b981@0.2:t=fill",
   "drawbox=x=140:y=110:w=440:h=44:color=0x10b981@0.8:t=2",
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("SCENARIO 1: CLEAN PROCUREMENT")}':fontsize=18:fontcolor=0x10b981:x=160:y=122`,
-  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("Siemens AG Invoice Payment (â‚¬8,400 / 12 units @ â‚¬700)")}':fontsize=52:fontcolor=white:x=140:y=190`,
+  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("Siemens AG Invoice Payment (EUR 8,400 / 12 units @ EUR 700)")}':fontsize=50:fontcolor=white:x=140:y=190`,
   `drawtext=fontfile='${FONT_BODY}':text='${escapeText("Two Minds execute coordinated investigation and authorize cryptographic escrow release")}':fontsize=26:fontcolor=0x94a3b8:x=140:y=270`,
 
   "drawbox=x=140:y=340:w=1640:h=480:color=0x1e293b@0.6:t=fill",
   "drawbox=x=140:y=340:w=1640:h=480:color=0x10b981@0.8:t=2",
   
   `drawtext=fontfile='${FONT_MONO}':text='${escapeText("[Mind 1] Investigator: GLEIF LEI W38RGI023J3WT1HWRP32 (ACTIVE / ISSUED in Germany)")}':fontsize=22:fontcolor=white:x=180:y=390`,
-  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("[Mind 1] Investigator: OFAC SDN Screening: CLEAN (0 matches in 15,000+ records)")}':fontsize=22:fontcolor=white:x=180:y=440`,
-  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("[Mind 1] Investigator: FakeWatch Domain Safety: SAFE (siemens.com verified whitelist)")}':fontsize=22:fontcolor=white:x=180:y=490`,
+  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("[Mind 1] Investigator: OFAC SDN Screening: CLEAN (0 matches in 19,565+ records)")}':fontsize=22:fontcolor=white:x=180:y=440`,
+  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("[Mind 1] Investigator: FakeWatch Domain Safety: SAFE (siemens.com verified)")}':fontsize=22:fontcolor=white:x=180:y=490`,
   `drawtext=fontfile='${FONT_MONO}':text='${escapeText("[Mind 2] Reviewer: 651-byte WASM Comparator Score: 10000/10000 (0.00c drift)")}':fontsize=22:fontcolor=0x38bdf8:x=180:y=550`,
-  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("FINAL VERDICT: APPROVE_PAYMENT  âœ“")}':fontsize=36:fontcolor=0x10b981:x=180:y=620`,
-  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("Sepolia Diamond Port: 0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b  â€¢  EIP-191 Auth Signed")}':fontsize=20:fontcolor=0x94a3b8:x=180:y=680`,
-  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("Settlement ID: SETTLE-SEPOLIA-8400-EUR-USDC  â€¢  Authorized by Praman Reviewer Mind")}':fontsize=20:fontcolor=0x64748b:x=180:y=730`
+  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("FINAL VERDICT: APPROVE_PAYMENT  [VERIFIED OK]")}':fontsize=36:fontcolor=0x10b981:x=180:y=620`,
+  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("Sepolia Diamond Port: 0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b  -  EIP-191 Auth Signed")}':fontsize=20:fontcolor=0x94a3b8:x=180:y=680`,
+  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("Settlement ID: SETTLE-SEPOLIA-8400-EUR-USDC  -  Authorized by Praman Reviewer Mind")}':fontsize=20:fontcolor=0x64748b:x=180:y=730`
 ];
 
 // ---------------- SCENE 3: ADVERSARIAL INVERTED FX INTERCEPTION (7s) ----------------
@@ -112,7 +113,7 @@ const scene3 = [
   "drawbox=x=140:y=340:w=1640:h=480:color=0x1e293b@0.6:t=fill",
   "drawbox=x=140:y=340:w=1640:h=480:color=0xf59e0b@0.8:t=2",
 
-  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("Invoice: â‚¬8,500 settled in USD. Counterparty claims 0.9216 USD/EUR (inverted rate)")}':fontsize=22:fontcolor=white:x=180:y=390`,
+  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("Invoice: EUR 8,500 settled in USD. Counterparty claims 0.9216 USD/EUR (inverted rate)")}':fontsize=22:fontcolor=white:x=180:y=390`,
   `drawtext=fontfile='${FONT_MONO}':text='${escapeText("Without Telegraph: Raw LLM approves parameter pass-through -> $1,373 OVERCHARGE")}':fontsize=22:fontcolor=0xef4444:x=180:y=450`,
   `drawtext=fontfile='${FONT_MONO}':text='${escapeText("With Telegraph: Mind 1 queries FX Specialist -> Identifies 15.06 percent rate deviation")}':fontsize=22:fontcolor=0x38bdf8:x=180:y=510`,
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("FINAL VERDICT: HELD_FOR_MANUAL_REVIEW  [INVERTED_FX_OVERCHARGE_PREVENTED]")}':fontsize=32:fontcolor=0xf59e0b:x=180:y=580`,
@@ -148,7 +149,7 @@ const scene5 = [
   "drawbox=x=140:y=110:w=440:h=44:color=0x38bdf8@0.2:t=fill",
   "drawbox=x=140:y=110:w=440:h=44:color=0x38bdf8@0.8:t=2",
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("WITH VS WITHOUT TELEGRAPH")}':fontsize=18:fontcolor=0x38bdf8:x=160:y=122`,
-  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("Empirical Benchmark Results: $79,373 Capital Loss Averted")}':fontsize=52:fontcolor=white:x=140:y=190`,
+  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("Policy Benchmark Results: $79,373 Capital Loss Averted")}':fontsize=50:fontcolor=white:x=140:y=190`,
   `drawtext=fontfile='${FONT_BODY}':text='${escapeText("Tested across 5 High-Stakes Procurement, Legal and Web3 Vectors")}':fontsize=26:fontcolor=0x94a3b8:x=140:y=270`,
 
   // Table Container
@@ -157,7 +158,7 @@ const scene5 = [
   // Table Header
   "drawbox=x=140:y=340:w=1640:h=60:color=0x0f172a@0.9:t=fill",
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("BENCHMARK METRIC")}':fontsize=20:fontcolor=0x94a3b8:x=180:y=360`,
-  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("WITHOUT TELEGRAPH (RAW LLM)")}':fontsize=20:fontcolor=0xef4444:x=700:y=360`,
+  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("WITHOUT TELEGRAPH (UNGROUNDED)")}':fontsize=20:fontcolor=0xef4444:x=700:y=360`,
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("WITH TELEGRAPH (PRAMAN DESK)")}':fontsize=20:fontcolor=0x10b981:x=1200:y=360`,
 
   // Row 1
@@ -172,7 +173,7 @@ const scene5 = [
 
   // Row 3
   `drawtext=fontfile='${FONT_MONO}':text='${escapeText("Arithmetic Accuracy")}':fontsize=22:fontcolor=white:x=180:y=570`,
-  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("Loose / Hallucinated")}':fontsize=24:fontcolor=0xef4444:x=700:y=568`,
+  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("Loose / Floating-Point")}':fontsize=24:fontcolor=0xef4444:x=700:y=568`,
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("Deterministic 651-byte WASM")}':fontsize=24:fontcolor=0x10b981:x=1200:y=568`,
 
   // Row 4
@@ -190,17 +191,17 @@ const scene6 = [
   "drawbox=x=80:y=60:w=1760:h=960:color=0x1e293b@1:t=2",
   "drawbox=x=140:y=110:w=440:h=44:color=0x10b981@0.2:t=fill",
   "drawbox=x=140:y=110:w=440:h=44:color=0x10b981@0.8:t=2",
-  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("COMMUNITY SHOWCASE â€¢ NOV 20, 2026")}':fontsize=18:fontcolor=0x10b981:x=160:y=122`,
-  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("Praman Desk: Ready to Dominate Season II")}':fontsize=56:fontcolor=white:x=140:y=190`,
+  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("COMMUNITY SHOWCASE - NOV 20, 2026")}':fontsize=18:fontcolor=0x10b981:x=160:y=122`,
+  `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("Praman Desk: Ready for Season II Showcase")}':fontsize=56:fontcolor=white:x=140:y=190`,
   `drawtext=fontfile='${FONT_BODY}':text='${escapeText("Live Production Coordinates & Ecosystem Open Source Assets")}':fontsize=26:fontcolor=0x94a3b8:x=140:y=270`,
 
   "drawbox=x=140:y=340:w=1640:h=480:color=0x1e293b@0.6:t=fill",
   "drawbox=x=140:y=340:w=1640:h=480:color=0x38bdf8@0.8:t=2",
 
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("LIVE LEADERBOARD STANDINGS (DEVNODE EPOCH 18 / 164 REQUESTS SERVED):")}':fontsize=24:fontcolor=0x38bdf8:x=180:y=390`,
-  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("â€¢ CONTRACT_OBLIGATION_AUDIT_GENERAL : RANK #1 NETWORK-WIDE")}':fontsize=24:fontcolor=0x10b981:x=180:y=450`,
-  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("â€¢ PURCHASE_ORDER_VERIFY_GENERAL      : RANK #1 NETWORK-WIDE")}':fontsize=24:fontcolor=0x10b981:x=180:y=500`,
-  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("â€¢ SANCTIONS_SCREENING_MATCH_GENERAL    : RANK #2 NETWORK-WIDE (Score 1.0000)")}':fontsize=24:fontcolor=white:x=180:y=550`,
+  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("- CONTRACT_OBLIGATION_AUDIT_GENERAL : RANK #1 NETWORK-WIDE")}':fontsize=24:fontcolor=0x10b981:x=180:y=450`,
+  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("- PURCHASE_ORDER_VERIFY_GENERAL      : RANK #1 NETWORK-WIDE")}':fontsize=24:fontcolor=0x10b981:x=180:y=500`,
+  `drawtext=fontfile='${FONT_MONO}':text='${escapeText("- SANCTIONS_SCREENING_MATCH_GENERAL    : RANK #2 NETWORK-WIDE (Score 1.0000)")}':fontsize=24:fontcolor=white:x=180:y=550`,
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("Hosted App: https://praman-desk.vercel.app")}':fontsize=28:fontcolor=white:x=180:y=630`,
   `drawtext=fontfile='${FONT_TITLE}':text='${escapeText("GitHub: https://github.com/VishAlgoDev/praman-desk")}':fontsize=28:fontcolor=0x38bdf8:x=180:y=680`,
   `drawtext=fontfile='${FONT_MONO}':text='${escapeText("Tags: @telegraphprotoc @ysiu @marcmcg  |  Telegraph Protocol Season II")}':fontsize=22:fontcolor=0x94a3b8:x=180:y=750`
@@ -209,16 +210,16 @@ const scene6 = [
 async function main() {
   console.log('========================================================================');
   console.log(' 🎬 Rendering Official Praman Minds & Benchmark Showcase Video');
-  console.log(' 1080p Full HD @ 30fps with Segoe UI Typography');
+  console.log(' 1080p Full HD @ 30fps with Segoe UI Typography & Audio Soundbed');
   console.log('========================================================================\n');
 
   const scenes = [
-    renderScene(1, 7, scene1),
-    renderScene(2, 7, scene2),
-    renderScene(3, 7, scene3),
-    renderScene(4, 7, scene4),
-    renderScene(5, 8, scene5),
-    renderScene(6, 7, scene6)
+    renderScene(1, 7, scene1, 130),
+    renderScene(2, 7, scene2, 146),
+    renderScene(3, 7, scene3, 164),
+    renderScene(4, 7, scene4, 174),
+    renderScene(5, 8, scene5, 196),
+    renderScene(6, 7, scene6, 220)
   ];
 
   // Create concat list file

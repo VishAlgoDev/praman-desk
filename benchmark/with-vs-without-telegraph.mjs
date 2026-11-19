@@ -1,16 +1,19 @@
 /**
- * With vs Without Telegraph Protocol Empirical Benchmark
+ * With vs Without Telegraph Protocol Benchmark
+ *
+ * Methodology: Counterfactual Policy Evaluation & Deterministic Spend Guarding
  *
  * Compares procurement and financial spend decisions across 5 high-stakes real-world scenarios:
- * 1. Without Telegraph: Baseline LLM agent relying on internal weights, general web tools, and ungrounded math.
+ * 1. Without Telegraph: Ungrounded Agent Baseline (an autonomous agent lacking real-time truth oracles,
+ *    relying on user-provided parameter pass-through, internal model knowledge, and loose floating-point math).
  * 2. With Telegraph: Praman Desk Collaborative Two-Mind architecture powered by Telegraph Protocol
  *    (Miner #6127, FakeWatch #42420, Anjoman intelligence layer, and 651-byte WASM comparator).
  *
  * Quantifies:
- * - Error & Adversarial Catch Rate (%)
- * - Direct Financial Loss Prevented ($)
+ * - Adversarial & Anomaly Catch Rate (%)
+ * - Capital Exposure Prevented ($ USD)
  * - Cryptographic Auditability & On-Chain Receipts
- * - Processing Latency (ms) & Micro-USDC Cost
+ * - Decision Latency (ms) & Micro-USDC Cost
  */
 
 import fs from 'node:fs';
@@ -272,20 +275,22 @@ export async function runBenchmark() {
 }
 
 function generateMarkdownReport(summary) {
-  return `# 📊 Empirical Benchmark: With vs Without Telegraph Protocol
+  return `# 📊 Benchmark: With vs Without Telegraph Protocol
+**Methodology: Counterfactual Policy Evaluation & Risk Prevention**
 
 > **Evaluation Suite**: Praman Desk Autonomous Spend Guard Benchmark  
 > **Timestamp**: ${summary.generatedAt}  
 > **Test Ground**: 5 High-Stakes Procurement, Legal & Web3 Adversarial Vectors  
+> **Methodology**: Compares ungrounded agent parameter pass-through (without live truth oracles or deterministic WASM) against the Praman Two-Mind Spend Guard.  
 > **Network Coordinates**: Devnode Miner #6127 | FakeWatch Miner #42420 | Sepolia Diamond Port \`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b\`
 
 ---
 
 ## 1. Executive Summary
 
-Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (\`1xahmed\`)**, this benchmark quantifies the empirical difference between an ungrounded AI agent (**Without Telegraph**) and the **Praman Desk Collaborative Two-Mind Architecture** (**With Telegraph**).
+Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (\`1xahmed\`)**, this benchmark quantifies the protection delta between an ungrounded autonomous agent (**Without Telegraph**) and the **Praman Desk Collaborative Two-Mind Architecture** (**With Telegraph**).
 
-| Performance Metric | Without Telegraph (Raw LLM) | With Telegraph (Praman Desk) | Delta / Advantage |
+| Performance Metric | Without Telegraph (Ungrounded Pass-Through) | With Telegraph (Praman Desk) | Delta / Advantage |
 |---|:---:|:---:|:---:|
 | **Adversarial Catch Rate** | **0.0%** (0 / 5) | **100.0%** (5 / 5) | **+100.0% Protection** |
 | **Direct Capital Loss** | **\$${summary.withoutTelegraph.totalLossIncurredUsd.toLocaleString()} USD** | **\$0.00 USD** | **\$${summary.withTelegraph.totalLossAvertedUsd.toLocaleString()} Averted (100%)** |
