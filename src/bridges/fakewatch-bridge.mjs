@@ -1,6 +1,6 @@
 /**
  * Praman Desk x FakeWatch Reciprocal Integration Bridge
- * Connects FakeWatch Domain Safety (Miner #42420) with Praman Desk Compliance & OFAC (Miner #5289)
+ * Connects FakeWatch Domain Safety (Miner #42420) with Praman Desk Compliance & OFAC (Devnode #5281 / Diamond #5311)
  *
  * Implements the reciprocal counterparty shield:
  * 1. Checks invoice / dApp domain against FakeWatch & ScamSniffer feeds

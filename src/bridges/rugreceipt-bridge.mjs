@@ -1,6 +1,6 @@
 /**
  * Praman Desk x RugReceipt Reciprocal Integration Bridge
- * Connects RugReceipt (Issue #208 / Gajanand) with Praman Desk Compliance (Miner #5289)
+ * Connects RugReceipt (Issue #208 / Gajanand) with Praman Desk Compliance (Devnode #5281 / Diamond #5311)
  *
  * Implements:
  * 1. Deep EVM smart contract & deployer address screening against OFAC SDN digital currency list
@@ -62,7 +62,8 @@ export async function generateRugReceiptProof({
     safetyScore,
     receiptVerdict,
     flags,
-    minerId: 5289,
+    minerId: 5281,
+    diamondRegistration: 5311,
     timestamp: new Date().toISOString().slice(0, 10)
   });
   const attestationHash = '0x' + crypto.createHash('sha256').update(canonicalData).digest('hex');

@@ -5059,8 +5059,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
           intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
           params: {
             po_number: invoiceId,
-            vendor: vendorName,
-            amount: spendAmountUsdc
+            vendor: vendorName
           }
         };
         const askRes = await fetchWithPayment(`${NODE_URL}/engine/v1/ask/5281`, {
@@ -5072,28 +5071,45 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
         const rec = decodeBase64Json(askRes.headers.get('x-telegraph-receipt'));
         const pay = decodeBase64Json(askRes.headers.get('payment-response') || askRes.headers.get('x-payment-response'));
         const askBody = await askRes.json().catch(() => ({}));
+        const txHash = pay?.transactionHash || rec?.tx_hash || rec?.transactionHash || (pay?.success && pay?.transaction ? pay.transaction : null);
+        const isSettled = Boolean(askRes.ok && txHash);
+
+        let settlementStatus = 'SETTLEMENT_FAILED';
+        if (isSettled) {
+          settlementStatus = 'LIVE_SEPOLIA_X402_SETTLED';
+        } else if (askRes.status === 402 && (askBody?.hint || pay?.errorReason?.includes('deadline') || pay?.errorReason?.includes('timeout'))) {
+          settlementStatus = 'X402_FACILITATOR_TIMEOUT';
+        } else if (askRes.status === 400) {
+          settlementStatus = 'INVALID_PARAMS';
+        } else if (!askRes.ok) {
+          settlementStatus = `HTTP_${askRes.status}_ERROR`;
+        }
+
         liveSettlement = {
           intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
-          settled: true,
-          status: 'LIVE_SEPOLIA_X402_SETTLED',
+          settled: isSettled,
+          status: settlementStatus,
           httpStatus: askRes.status,
           minerId: 5281,
           minerRoute: '/engine/v1/ask/5281',
           contractAddress: DIAMOND_PORT,
-          txHash: pay?.transactionHash || rec?.tx_hash || rec?.transactionHash || null,
+          txHash: txHash || null,
           payer: account.address,
-          amountSpentUsdc: '0.01',
+          amountSpentUsdc: isSettled ? '0.01' : '0.00',
           telegraphReceipt: rec || null,
-          responsePayload: askBody
+          responsePayload: askBody,
+          failureReason: !isSettled ? (askBody?.reason || askBody?.hint || pay?.errorReason || askBody?.message || 'Settlement incomplete') : null
         };
       } catch (err) {
         liveSettlement = {
           intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
           settled: false,
-          status: 'SETTLEMENT_ATTEMPTED',
+          status: 'SETTLEMENT_ERROR',
           error: err.message,
           minerId: 5281,
-          contractAddress: DIAMOND_PORT
+          contractAddress: DIAMOND_PORT,
+          amountSpentUsdc: '0.00',
+          txHash: null
         };
       }
     } else {

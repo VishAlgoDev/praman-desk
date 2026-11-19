@@ -1457,6 +1457,12 @@ Content-Type: application/json
         dispSettlement.textContent = h.slice(0, 10) + '...' + h.slice(-8);
         dispSettlement.href = `https://sepolia.etherscan.io/tx/${h}`;
       }
+    } else if (data.telegraphSettlement?.status === 'X402_FACILITATOR_TIMEOUT') {
+      if (rowSettlement && dispSettlement) {
+        rowSettlement.style.display = 'flex';
+        dispSettlement.textContent = 'x402 Facilitator Timeout (Issue #214)';
+        dispSettlement.href = 'https://github.com/telegraphprotocol/bounties/issues/214';
+      }
     } else if (data.telegraphSettlement?.status === 'LIVE_SEPOLIA_X402_SETTLED') {
       if (rowSettlement && dispSettlement) {
         rowSettlement.style.display = 'flex';
