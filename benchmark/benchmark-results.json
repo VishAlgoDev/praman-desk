@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-19T22:40:17.766Z",
+  "generatedAt": "2026-11-19T23:25:10.530Z",
   "totalScenarios": 5,
   "totalPotentialLossUsd": 79373,
   "withoutTelegraph": {
@@ -15,7 +15,7 @@
     "totalLossAvertedUsd": 79373,
     "lossAversionRatePct": 100,
     "cryptographicVerifiability": "100% (EIP-191 Signatures + Sepolia Diamond Escrow)",
-    "avgLatencyMs": 2244
+    "avgLatencyMs": 699
   },
   "detailedResults": [
     {
@@ -71,7 +71,7 @@
         "financialLoss": 0,
         "financialLossAverted": 1373,
         "auditReceipt": {
-          "caseDigest": "0xc6171e8ad348dab9b500869e6e9d1002cb0da671b2231747355e1afea77ab7b6",
+          "caseDigest": "0x66c2bee4ae6711453407eb5a76bdfc6010872de8a1ee1419f18913996fed4cd0",
           "escrowStatus": "ESCROW_FUNDS_LOCKED_IN_PORT",
           "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
           "wasmScore": 10000
@@ -80,7 +80,7 @@
         "blockingFlags": [
           "INVERTED_FX_OVERCHARGE_PREVENTED"
         ],
-        "latencyMs": 7770,
+        "latencyMs": 949,
         "costMicroUsdc": 1500
       }
     },
@@ -136,7 +136,7 @@
         "financialLoss": 0,
         "financialLossAverted": 24500,
         "auditReceipt": {
-          "caseDigest": "0xde9bae48d40b7b860b0a8ff9184bd99162cd20171ed4fc8c30154ab3a2e109fa",
+          "caseDigest": "0xb8e0c5b0d552b7dfcb211831365507f84fecd668d39ad3f69030fb79ec272088",
           "escrowStatus": "ESCROW_FUNDS_LOCKED_IN_PORT",
           "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
           "wasmScore": 10000
@@ -145,7 +145,7 @@
         "blockingFlags": [
           "LAPSED_CORPORATE_LEI_STATUS"
         ],
-        "latencyMs": 856,
+        "latencyMs": 447,
         "costMicroUsdc": 1500
       }
     },
@@ -200,7 +200,7 @@
         "financialLoss": 0,
         "financialLossAverted": 15000,
         "auditReceipt": {
-          "caseDigest": "0x883326b9eff13c0846eff87990f5c5c7d0fa34bf506532c5ecc948d0b6384286",
+          "caseDigest": "0x8e156c9cb47cb7170f6894fe465b08acfe707f7aa0b435ad2a642e6fc0895850",
           "escrowStatus": "ESCROW_FUNDS_LOCKED_IN_PORT",
           "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
           "wasmScore": 10000
@@ -209,7 +209,7 @@
         "blockingFlags": [
           "PHISHING_DOMAIN_HARD_BLOCK"
         ],
-        "latencyMs": 1593,
+        "latencyMs": 986,
         "costMicroUsdc": 1500
       }
     },
@@ -264,7 +264,7 @@
         "financialLoss": 0,
         "financialLossAverted": 500,
         "auditReceipt": {
-          "caseDigest": "0x39f4a4ecb1e798907de0fde314843b14a36bef63206d305910f620ffcb6c2370",
+          "caseDigest": "0xef0ec2329ab5142dc1f24d61ae4d3dd236bf96d70c7ac17a6479ad74df13540a",
           "escrowStatus": "ESCROW_FUNDS_LOCKED_IN_PORT",
           "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
           "wasmScore": 0
@@ -273,7 +273,7 @@
         "blockingFlags": [
           "WASM_ARITHMETIC_DRIFT_DETECTED"
         ],
-        "latencyMs": 153,
+        "latencyMs": 200,
         "costMicroUsdc": 1500
       }
     },
@@ -328,7 +328,7 @@
         "financialLoss": 0,
         "financialLossAverted": 38000,
         "auditReceipt": {
-          "caseDigest": "0x726c9027fda0157e033c4fd08a093831362bed3e7a1cdf0c99f4d61771e694d7",
+          "caseDigest": "0xb943a37c5190dcd1b3f5f5d42312227b99b8687bc28412223a7fef060437ee42",
           "escrowStatus": "ESCROW_FUNDS_LOCKED_IN_PORT",
           "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
           "wasmScore": 10000
@@ -337,7 +337,7 @@
         "blockingFlags": [
           "OFAC_SDN_SANCTIONS_BLOCK"
         ],
-        "latencyMs": 848,
+        "latencyMs": 912,
         "costMicroUsdc": 1500
       }
     }
