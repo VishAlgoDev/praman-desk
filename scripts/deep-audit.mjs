@@ -133,7 +133,7 @@ async function deepProbe() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+        recipientAddress: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
         amountUsdc: 0.25,
         beneficiaryName: 'Apple Inc.',
         delegationCapUsdc: 500
@@ -146,7 +146,7 @@ async function deepProbe() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+        recipientAddress: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
         amountUsdc: 10,
         beneficiaryName: 'Lazarus Group'
       }),

@@ -128,7 +128,7 @@ export async function generateRugReceiptProof({
       sha256Seal: attestationHash,
       onChainDiamond: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       settlementMinerId: 5281,
-      diamondRegistration: 6127,
+      diamondRegistration: 6128,
       explorerUrl: 'https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b'
     },
     reciprocalAttribution: {

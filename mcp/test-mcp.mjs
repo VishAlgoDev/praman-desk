@@ -245,7 +245,7 @@ async function runTests() {
   const m2Clean = await client.callTool({
     name: 'screen_stablecoin_settlement',
     arguments: {
-      recipient_address: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      recipient_address: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       amount_usdc: 0.25,
       beneficiary_name: 'Apple Inc.',
       delegation_cap_usdc: 500,
@@ -260,7 +260,7 @@ async function runTests() {
   const m2Freeze = await client.callTool({
     name: 'screen_stablecoin_settlement',
     arguments: {
-      recipient_address: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      recipient_address: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       amount_usdc: 10,
       beneficiary_name: 'Lazarus Group',
     },
@@ -274,7 +274,7 @@ async function runTests() {
   const m2Negative = await client.callTool({
     name: 'screen_stablecoin_settlement',
     arguments: {
-      recipient_address: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      recipient_address: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       amount_usdc: -5,
       beneficiary_name: 'Apple Inc.',
     },
@@ -287,7 +287,7 @@ async function runTests() {
   const m2OmitOrig = await client.callTool({
     name: 'screen_stablecoin_settlement',
     arguments: {
-      recipient_address: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      recipient_address: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       amount_usdc: 1500,
       beneficiary_name: 'Apple Inc.',
     },

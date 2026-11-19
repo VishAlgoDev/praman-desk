@@ -9,14 +9,14 @@
  * 
  * Demonstrates both:
  *  1. Direct keyless HTTP query fallback
- *  2. Sepolia Diamond Escrow rail (0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
+ *  2. Sepolia Diamond Escrow rail (0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
  */
 
 export const MINERS = {
   PRAMAN_DESK: {
     id: 5281,
     devnodeId: 5281,
-    diamondRegId: 5311,
+    diamondRegId: 6128,
     slug: 'praman-compliance-miner',
     endpoint: 'https://praman-desk.vercel.app/api/miner/sanctions-screen',
     devnodeAsk: 'https://devnode.telegraphprotocol.com/engine/v1/ask/5281',

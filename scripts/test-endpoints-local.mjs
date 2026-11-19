@@ -252,18 +252,18 @@ async function run() {
 
     // 10. Mission 02 Stablecoin Gate tests
     const m2Clean = await check('/api/mission/stablecoin-gate', 'POST', {
-      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      recipientAddress: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       amountUsdc: 0.25,
       beneficiaryName: 'Apple Inc.',
       delegationCapUsdc: 500
     });
     const m2Freeze = await check('/api/mission/stablecoin-gate', 'POST', {
-      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      recipientAddress: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       amountUsdc: 10,
       beneficiaryName: 'Lazarus Group'
     });
     const m2Fatf = await check('/api/mission/stablecoin-gate', 'POST', {
-      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      recipientAddress: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       amountUsdc: 1500,
       beneficiaryName: 'Apple Inc.',
       originatorName: ''
@@ -303,18 +303,18 @@ async function run() {
     }
 
     const m2BadCap = await check('/api/mission/stablecoin-gate', 'POST', {
-      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      recipientAddress: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       amountUsdc: 0.25,
       beneficiaryName: 'Apple Inc.',
       delegationCapUsdc: 0
     });
     const m2OmittedOriginator = await check('/api/mission/stablecoin-gate', 'POST', {
-      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      recipientAddress: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       amountUsdc: 1500,
       beneficiaryName: 'Apple Inc.'
     });
     const m2NoTransferTx = await check('/api/mission/stablecoin-gate', 'POST', {
-      recipientAddress: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      recipientAddress: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       amountUsdc: 0.25,
       beneficiaryName: 'Apple Inc.',
       originatorName: 'Praman Desk Treasury',
