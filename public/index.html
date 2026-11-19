@@ -683,7 +683,7 @@
         <a href="https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" target="_blank" rel="noopener">0x3624...99b</a>
       </div>
       <div class="pill">
-        <span>Miner #5289</span>
+        <span>Miner #5281 (Devnode)</span>
       </div>
       <div class="pill">
         <span>651-byte WASM Math</span>
@@ -711,10 +711,25 @@
         <div class="hero-stat-lbl">Protection Ratio</div>
       </div>
       <div class="hero-stat-item">
-        <div class="hero-stat-val">&lt;5 ms</div>
-        <div class="hero-stat-lbl">Inspection Latency</div>
+        <div class="hero-stat-val">&lt;25 ms</div>
+        <div class="hero-stat-lbl">In-Memory Engine</div>
       </div>
     </div>
+  </div>
+
+  <!-- 90-Second Walkthrough Video (Prominent) -->
+  <div style="background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:20px;">🎥</span>
+        <div>
+          <h3 style="margin:0; font-size:15px; color:#fff;">90-Second Walkthrough: Intercepting Autonomous Agent Exploits</h3>
+          <p style="margin:2px 0 0 0; font-size:12px; color:var(--ink-muted);">Watch Claude Code &amp; Cursor intercept prompt-injected agent spending in real time before crypto transactions settle.</p>
+        </div>
+      </div>
+      <a href="https://github.com/VishAlgoDev/praman-desk" target="_blank" rel="noopener" style="font-size:12px; color:var(--accent); text-decoration:none; font-weight:600;">View Source on GitHub &rarr;</a>
+    </div>
+    <video controls style="width:100%; max-height:420px; border-radius:8px; background:#000; display:block;" src="/praman-desk-walkthrough.mp4"></video>
   </div>
 
   <!-- Interactive Scenario Selector -->
@@ -804,6 +819,14 @@
         <button class="btn-secondary" onclick="toggleCustomDrawer()">
           <span>⚙️ Custom Request</span>
         </button>
+      </div>
+
+      <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 6px; padding: 8px 12px; font-size: 12px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #93c5fd; margin: 0; font-weight: 500;">
+          <input type="checkbox" id="toggle-live-settle" style="accent-color: var(--accent); cursor: pointer;">
+          <span>⚡ Live Settle via Sepolia x402 on Approval ($0.01 test-USDC)</span>
+        </label>
+        <span style="color: var(--ink-muted); font-size: 11px;">Devnode #5281</span>
       </div>
 
       <!-- Custom Request Drawer (Collapsible) -->
@@ -907,6 +930,10 @@
         <div class="crypto-row">
           <span class="crypto-label">Circuit Breaker:</span>
           <span class="crypto-val" id="disp-circuit" style="color:#f87171; font-weight:700;">TRIGGERED (HALT)</span>
+        </div>
+        <div class="crypto-row" id="row-settlement-tx" style="display:none;">
+          <span class="crypto-label">Sepolia Settlement Tx:</span>
+          <a class="crypto-val" id="disp-settlement-tx" href="#" target="_blank" rel="noopener" style="color:#60a5fa; text-decoration:none;">0x...</a>
         </div>
         <div style="margin-top:10px; padding-top:10px; border-top:1px solid var(--panel-border); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
           <button type="button" class="btn-secondary" id="btn-wasm-verify" style="padding:6px 12px; font-size:12px;" onclick="verifyWasmInBrowser()">
@@ -1269,7 +1296,10 @@ Content-Type: application/json
 
   async function triggerInspection() {
     const btn = document.getElementById('btn-run-inspect');
-    btn.innerHTML = '<span>⏳ Inspecting with 651b WASM...</span>';
+    const liveSettleChecked = document.getElementById('toggle-live-settle')?.checked || false;
+    btn.innerHTML = liveSettleChecked
+      ? '<span>⏳ Inspecting &amp; Settling via Sepolia x402...</span>'
+      : '<span>⏳ Inspecting with 651b WASM...</span>';
     btn.disabled = true;
     const wasmOut = document.getElementById('wasm-browser-result');
     if (wasmOut) {
@@ -1279,7 +1309,8 @@ Content-Type: application/json
 
     const start = performance.now();
     try {
-      const res = await fetch(`/api/spend-guard/evaluate?scenario=${currentScenario}`, {
+      const url = `/api/spend-guard/evaluate?scenario=${currentScenario}${liveSettleChecked ? '&liveSettle=true' : ''}`;
+      const res = await fetch(url, {
         method: 'GET'
       });
       const data = await res.json();
@@ -1320,6 +1351,25 @@ Content-Type: application/json
 
     if (data.attestationSha256) {
       attestation.textContent = data.attestationSha256.slice(0, 10) + '...' + data.attestationSha256.slice(-8);
+    }
+
+    const rowSettlement = document.getElementById('row-settlement-tx');
+    const dispSettlement = document.getElementById('disp-settlement-tx');
+    if (data.telegraphSettlement?.txHash) {
+      if (rowSettlement && dispSettlement) {
+        rowSettlement.style.display = 'flex';
+        const h = data.telegraphSettlement.txHash;
+        dispSettlement.textContent = h.slice(0, 10) + '...' + h.slice(-8);
+        dispSettlement.href = `https://sepolia.etherscan.io/tx/${h}`;
+      }
+    } else if (data.telegraphSettlement?.status === 'LIVE_SEPOLIA_X402_SETTLED') {
+      if (rowSettlement && dispSettlement) {
+        rowSettlement.style.display = 'flex';
+        dispSettlement.textContent = 'Mined on Sepolia Diamond (#5281)';
+        dispSettlement.href = 'https://devnode.telegraphprotocol.com/engine/v1/ask/5281';
+      }
+    } else {
+      if (rowSettlement) rowSettlement.style.display = 'none';
     }
 
     // Policy Badges
@@ -1641,6 +1691,7 @@ Content-Type: application/json
           vendorName: vendor,
           spendAmountUsdc: amount,
           statedTotal: amount,
+          liveSettle: document.getElementById('toggle-live-settle')?.checked || false,
           lineItems: [{ desc: 'Custom Autonomous Payout Item', qty: 1, unitPrice: amount, amount: amount }]
         })
       });

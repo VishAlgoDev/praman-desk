@@ -4941,6 +4941,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   const invoiceId = String(p.invoiceId || 'INV-AUTON-001').trim();
   const supervisorSignature = String(p.supervisorSignature || '').trim();
   const emergencyHaltFlag = Boolean(p.emergencyHaltFlag ?? false);
+  const liveSettle = Boolean(p.liveSettle === true || p.liveSettle === 'true' || p.settleOnChain === true || p.settleOnChain === 'true');
 
   // Invoice Math Reconciliation (Deterministic WASM Bit-Exact check)
   const lineItems = Array.isArray(p.lineItems) ? p.lineItems : [
@@ -5033,6 +5034,80 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     riskLevel = 'LOW';
   }
 
+  let liveSettlement = {
+    intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+    minerId: 5281,
+    contractAddress: DIAMOND_PORT,
+    status: circuitBreakerTriggered ? 'BLOCKED_BY_POLICY' : 'VERIFIED_POLICY_SETTLEMENT'
+  };
+
+  if (liveSettle && !circuitBreakerTriggered) {
+    const account = getWalletAccount();
+    if (account) {
+      try {
+        const fetchWithPayment = wrapFetchWithPaymentFromConfig(fetch, {
+          schemes: [{ network: 'eip155:11155111', client: new ExactEvmScheme(account) }],
+          spendControls: {
+            allowedAssets: [{
+              network: 'eip155:11155111',
+              asset: TEST_USDC,
+              maxAmountPerPayment: '100000'
+            }]
+          }
+        });
+        const askPayload = {
+          intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+          params: {
+            po_number: invoiceId,
+            vendor: vendorName,
+            amount: spendAmountUsdc
+          }
+        };
+        const askRes = await fetchWithPayment(`${NODE_URL}/engine/v1/ask/5281`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(askPayload),
+          signal: AbortSignal.timeout(12000)
+        });
+        const rec = decodeBase64Json(askRes.headers.get('x-telegraph-receipt'));
+        const pay = decodeBase64Json(askRes.headers.get('payment-response') || askRes.headers.get('x-payment-response'));
+        const askBody = await askRes.json().catch(() => ({}));
+        liveSettlement = {
+          intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+          settled: true,
+          status: 'LIVE_SEPOLIA_X402_SETTLED',
+          httpStatus: askRes.status,
+          minerId: 5281,
+          minerRoute: '/engine/v1/ask/5281',
+          contractAddress: DIAMOND_PORT,
+          txHash: pay?.transactionHash || rec?.tx_hash || rec?.transactionHash || null,
+          payer: account.address,
+          amountSpentUsdc: '0.01',
+          telegraphReceipt: rec || null,
+          responsePayload: askBody
+        };
+      } catch (err) {
+        liveSettlement = {
+          intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+          settled: false,
+          status: 'SETTLEMENT_ATTEMPTED',
+          error: err.message,
+          minerId: 5281,
+          contractAddress: DIAMOND_PORT
+        };
+      }
+    } else {
+      liveSettlement = {
+        intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+        settled: false,
+        status: 'SIGNER_KEY_NOT_CONFIGURED',
+        note: 'Live on-chain signing requires CONTRIBUTOR_PRIVATE_KEY. Policy cleared in pre-flight mode.',
+        minerId: 5281,
+        contractAddress: DIAMOND_PORT
+      };
+    }
+  }
+
   const payload = {
     mission: 'Mission 11 — Autonomous Systems & Spend Delegation (Circuit Breakers & Spend Caps)',
     network: 'Ethereum Sepolia (eip155:11155111)',
@@ -5089,12 +5164,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       sanctionsScreeningClear: !sanctionsAddress?.matched,
       matchedSanctions: sanctionsAddress?.matches || []
     },
-    telegraphSettlement: {
-      intent: 'REGULATORY_FILING_MONITOR',
-      minerId: 5289,
-      contractAddress: DIAMOND_PORT,
-      status: 'VERIFIED_POLICY_SETTLEMENT'
-    },
+    telegraphSettlement: liveSettlement,
     timestamp: new Date().toISOString()
   };
   payload.attestationSha256 = '0x' + crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex');
