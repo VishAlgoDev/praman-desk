@@ -194,7 +194,7 @@ export async function evaluateCounterpartyShield({
     } : null,
     reciprocalAttribution: {
       integratedMiners: [
-        { id: 5289, name: 'Praman Desk', role: 'OFAC SDN & LEI Compliance Engine' },
+        { id: 5281, diamondRegistration: 5311, name: 'Praman Desk', role: 'OFAC SDN & LEI Compliance Engine' },
         { id: 42420, name: 'FakeWatch', role: 'Domain Reputation & Phishing Detection' }
       ],
       network: 'Telegraph Protocol Season II',

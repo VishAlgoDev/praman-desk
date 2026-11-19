@@ -127,12 +127,13 @@ export async function generateRugReceiptProof({
     attestation: {
       sha256Seal: attestationHash,
       onChainDiamond: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
-      settlementMinerId: 5289,
+      settlementMinerId: 5281,
+      diamondRegistration: 5311,
       explorerUrl: 'https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b'
     },
     reciprocalAttribution: {
       collaborator: 'RugReceipt (Issue #208 / Gajanand)',
-      provider: 'Praman Desk Autonomous Compliance Engine (#5289)',
+      provider: 'Praman Desk Autonomous Compliance Engine (Devnode #5281 / Diamond #5311)',
       protocol: 'Telegraph Protocol Season II'
     },
     latency_ms: totalLatencyMs,

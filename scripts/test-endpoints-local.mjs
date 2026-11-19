@@ -181,7 +181,7 @@ async function run() {
     // 1. /api/health & /api/status
     const health = await check('/api/health');
     const appStatus = await check('/api/status');
-    if (health.status !== 200 || !health.json.ok || (health.json.sdnEntriesLoaded || 0) < 19000 || health.json.minerId !== 5289) {
+    if (health.status !== 200 || !health.json.ok || (health.json.sdnEntriesLoaded || 0) < 19000 || health.json.minerId !== 5281) {
       throw new Error(`Health check failed: ${JSON.stringify(health.json)}`);
     }
     if (appStatus.status !== 200 || !appStatus.json.ok || (appStatus.json.sdnEntriesLoaded || 0) < 19000) {

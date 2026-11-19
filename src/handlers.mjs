@@ -4785,7 +4785,8 @@ export async function evaluateExchangeIntegrity(params = {}) {
     },
     telegraphSettlement: {
       intent: 'CORPORATE_REGISTRY_LOOKUP',
-      minerId: 5289,
+      minerId: 5281,
+      diamondRegistration: 5311,
       contractAddress: DIAMOND_PORT,
       status: 'VERIFIED_MICROSETTLEMENT'
     },
@@ -4851,6 +4852,24 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       statedSubtotal: 250.00,
       statedTax: 0,
       statedTotal: 250.00,
+      ...p
+    };
+  } else if (scenario === 'paysheet_payroll') {
+    p = {
+      agentId: p.agentId || 'payroll-stream-agent-07',
+      recipientAddress: p.recipientAddress || '0x098B716B8Aaf21512996dC57EB0615e2383E2f96',
+      vendorName: p.vendorName || 'Autonomous Contributor Payout (Issue #214)',
+      vendorJurisdiction: p.vendorJurisdiction || 'US',
+      spendAmountUsdc: p.spendAmountUsdc ?? 500.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 5000,
+      invoiceId: p.invoiceId || 'PAYROLL-CONTRIBUTOR-214',
+      lineItems: [
+        { desc: 'Weekly Sprint Contributor Streaming Grant', qty: 1, unitPrice: 500.00, amount: 500.00 }
+      ],
+      statedSubtotal: 500.00,
+      statedTax: 0,
+      statedTotal: 500.00,
       ...p
     };
   }
@@ -5324,7 +5343,8 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, 200, {
         ok: true,
         service: 'praman-desk',
-        minerId: 5289,
+        minerId: 5281,
+        diamondRegistration: 5311,
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
@@ -5792,7 +5812,7 @@ export async function handleApiRequest(req, res) {
           const executionDurationMs = Math.round(performance.now() - tStart) || 32;
 
           const evalResult = evaluateMinerAgreement(intent, primaryObj, {
-            miner_id: refCall?.minerId || 5289,
+            miner_id: refCall?.minerId || 5281,
             miner_name: refCall?.minerName || 'praman-compliance-miner',
             result: minerResponseData,
             field_status: { status: 'verified', provenance: 'deterministic_primary_miner' },
@@ -5810,7 +5830,7 @@ export async function handleApiRequest(req, res) {
             httpStatus: 200,
             request: askPayload,
             primary: primaryObj,
-            minerId: refCall?.minerId || 5289,
+            minerId: refCall?.minerId || 5281,
             minerName: refCall?.minerName || 'praman-compliance-miner (Diamond 0x3624EB...)',
             endpoint: refCall?.endpoint || `/api/miner/${intent.toLowerCase().replace(/_/g, '-')}`,
             durationMs: executionDurationMs,

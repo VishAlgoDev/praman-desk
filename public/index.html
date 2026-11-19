@@ -713,11 +713,11 @@
     <div class="header-badges">
       <div class="pill">
         <span class="dot"></span>
-        <span>Sepolia Diamond:</span>
+        <span>Sepolia Diamond #5311:</span>
         <a href="https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b" target="_blank" rel="noopener">0x3624...99b</a>
       </div>
       <div class="pill">
-        <span>Miner #5281 (Devnode)</span>
+        <span>Devnode Route #5281</span>
       </div>
       <div class="pill">
         <span>651-byte WASM Math</span>
@@ -810,6 +810,15 @@
       </div>
       <div class="scenario-title">3. Compliant Agent Payout</div>
       <div class="scenario-desc">Anthropic API token invoice ($250), verified GLEIF LEI, clean OFAC screen, within $500 autonomous cap.</div>
+    </div>
+
+    <div class="scenario-card" id="card-scen-4" onclick="selectScenario('paysheet_payroll')">
+      <div class="scenario-card-header">
+        <span class="scenario-tag tag-danger">QUORUM HALT</span>
+        <span style="font-size:12px; font-family:var(--font-mono); color:var(--danger);">$500.00 USDC</span>
+      </div>
+      <div class="scenario-title">4. Paysheet Payroll Quorum (Issue #214)</div>
+      <div class="scenario-desc">Streaming payroll agent attempting $500 payout evaluated across 3 independent miners (#710637, #64175, #5281).</div>
     </div>
   </div>
 
@@ -1381,6 +1390,17 @@ Content-Type: application/json
       items: [
         { desc: 'Claude 3.7 Sonnet Inference Tokens', qty: 10, price: '$25.00', total: '$250.00' }
       ]
+    },
+    paysheet_payroll: {
+      name: 'Scenario 4: Paysheet Payroll 3-Way Quorum (Issue #214)',
+      agent: 'payroll-stream-agent-07',
+      amount: '$500.00 USDC',
+      amountVal: 500.00,
+      recipient: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96',
+      vendor: 'Autonomous Contributor Payout (Issue #214)',
+      items: [
+        { desc: 'Weekly Sprint Contributor Streaming Grant', qty: 1, price: '$500.00', total: '$500.00' }
+      ]
     }
   };
 
@@ -1393,6 +1413,7 @@ Content-Type: application/json
     if (key === 'phishing_sanctions') document.getElementById('card-scen-1').classList.add('active');
     if (key === 'arithmetic_overcharge') document.getElementById('card-scen-2').classList.add('active');
     if (key === 'compliant_payout') document.getElementById('card-scen-3').classList.add('active');
+    if (key === 'paysheet_payroll') document.getElementById('card-scen-4').classList.add('active');
 
     const s = SCENARIOS[key];
     document.getElementById('active-scenario-pill').textContent = s.name;
@@ -1803,6 +1824,21 @@ Content-Type: application/json
         mathVerification: { bitExactMatch: false, discrepancyCents: 10000, computedCents: 35000, statedCents: 45000, computedTotal: 350, statedTotal: 450, wasmScoreBps: 0 },
         policyCaps: { delegationTier: 'TIER_1_AUTONOMOUS', supervisorAuthRequired: false, supervisorAuthValid: true },
         attestationSha256: '0x12b48a09cf4bde29184acb014761299e'
+      }, latency);
+    } else if (scen === 'paysheet_payroll') {
+      updateVerdictUI({
+        status: 'HALTED',
+        verdict: 'HALT_AND_FREEZE',
+        flags: [
+          'SANCTIONED_RECIPIENT_ADDRESS: 0x098B...2f96 matches LAZARUS GROUP on OFAC SDN',
+          'PAYSHEET_QUORUM_HALT: 3-way miner consensus rejected unverified streaming grant'
+        ],
+        summary: 'Firewall intercepted Paysheet streaming payroll grant: Recipient address matches Lazarus Group on OFAC SDN digital currency blacklist. Consensus quorum HALTED. Zero funds disbursed.',
+        recipientVerification: { sanctionsScreeningClear: false },
+        vendorVerification: { gleifVerified: false, sanctionsScreeningClear: true },
+        mathVerification: { bitExactMatch: true, discrepancyCents: 0, computedCents: 50000, statedCents: 50000, computedTotal: 500, statedTotal: 500, wasmScoreBps: 10000 },
+        policyCaps: { delegationTier: 'TIER_1_AUTONOMOUS', supervisorAuthRequired: false, supervisorAuthValid: true },
+        attestationSha256: '0x3a9f0291ba8efc11a0b387c4d516297a'
       }, latency);
     } else {
       updateVerdictUI({
