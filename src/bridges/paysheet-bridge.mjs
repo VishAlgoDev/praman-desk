@@ -14,11 +14,13 @@ import crypto from 'node:crypto';
 
 export async function evaluatePaysheetConsensus({
   target = '',
+  recipientAddress = '',
+  vendorName = '',
   amountUsdc = '0.00',
   payrollId = 'PAYROLL-DEFAULT'
 }) {
   const tStart = performance.now();
-  const rawTarget = String(target || '').trim();
+  const rawTarget = String(target || recipientAddress || vendorName || '').trim();
   const isEvmAddress = /^0x[0-9a-f]{40}$/i.test(rawTarget);
 
   // 1. Praman Desk In-Memory Screen

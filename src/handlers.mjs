@@ -6069,7 +6069,7 @@ export async function handleApiRequest(req, res) {
       }
       const params = { ...q, ...body };
       const report = await evaluatePaysheetConsensus({
-        target: params.target || params.recipient || params.payee || params.name || params.address,
+        target: params.target || params.recipientAddress || params.recipient || params.payee || params.vendorName || params.vendor || params.name || params.address,
         amountUsdc: params.amountUsdc || params.amount || '0.00',
         payrollId: params.payrollId || params.payroll_id || 'PAYROLL-DEFAULT'
       });
