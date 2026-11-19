@@ -51,6 +51,9 @@ export declare class PramanDesk {
   getCertificate(input: { vendor?: string; entity?: string; lei?: string; format?: 'json' | 'html' }): Promise<any>;
   counterpartyShield(input: { domain?: string; url?: string; vendor?: string; amount?: number; lei?: string }): Promise<any>;
   rugReceiptScreen(input: { contractAddress?: string; deployerAddress?: string; tokenSymbol?: string }): Promise<any>;
+  auditContractObligation(input: { contractText?: string; invoiceAmount?: number; invoiceDate?: string; paymentDueDate?: string; interestRatePct?: number }): Promise<any>;
+  screenStablecoinSettlement(input: { recipientAddress: string; amount: number; asset?: string; purpose?: string; dryRun?: boolean }): Promise<any>;
+  paysheetConsensus(input: { payeeAddress: string; grossAmount: number; deductions?: number; netPayable?: number; payPeriod?: string }): Promise<any>;
 }
 
 export default PramanDesk;

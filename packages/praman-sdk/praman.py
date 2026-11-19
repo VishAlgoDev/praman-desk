@@ -43,7 +43,7 @@ class PramanDesk:
         jurisdiction: str = "US"
     ) -> Dict[str, Any]:
         """Universal 1-line Pre-Payment Spend Guard."""
-        return self._request("/api/audit/primary", method="POST", payload={
+        res = self._request("/api/spend-guard/evaluate", method="POST", payload={
             "vendor": vendor,
             "amount": amount,
             "invoiceNumber": invoice_number,
@@ -52,6 +52,8 @@ class PramanDesk:
             "lei": lei,
             "jurisdiction": jurisdiction
         })
+        res["cleared"] = (res.get("status") == "APPROVED")
+        return res
 
     def screen_sanctions(self, entity: str = "", address: str = "", threshold: float = 0.70) -> Dict[str, Any]:
         """High-speed (<25ms RAM) OFAC SDN & EVM digital currency screening."""
@@ -92,8 +94,62 @@ class PramanDesk:
 
     def rug_receipt_screen(self, contract_address: str = "", deployer_address: str = "", token_symbol: str = "TOKEN") -> Dict[str, Any]:
         """RugReceipt contract and deployer sanctions safety attestation."""
-        return self._request("/api/bridge/rugreceipt", method="POST", payload={
+        res = self._request("/api/bridge/rugreceipt", method="POST", payload={
             "contractAddress": contract_address,
             "deployerAddress": deployer_address,
             "tokenSymbol": token_symbol
         })
+        res["cleared"] = (res.get("verdict") == "VERIFIED_SAFE" or res.get("safetyScore", 0) >= 70)
+        return res
+
+    def audit_contract_obligation(
+        self,
+        contract_text: str = "",
+        invoice_amount: float = 0.0,
+        invoice_date: str = "",
+        payment_due_date: str = "",
+        interest_rate_pct: float = 0.0
+    ) -> Dict[str, Any]:
+        """Mission 04 & CONTRACT_OBLIGATION_AUDIT_GENERAL: Audit contractual obligations."""
+        return self._request("/api/miner/contract-obligation", method="POST", payload={
+            "contractText": contract_text,
+            "invoiceAmount": invoice_amount,
+            "invoiceDate": invoice_date,
+            "paymentDueDate": payment_due_date,
+            "interestRatePct": interest_rate_pct
+        })
+
+    def screen_stablecoin_settlement(
+        self,
+        recipient_address: str,
+        amount: float,
+        asset: str = "USDC",
+        purpose: str = "",
+        dry_run: bool = False
+    ) -> Dict[str, Any]:
+        """Mission 02: Stablecoin pre-payment & on-chain settlement gate."""
+        return self._request("/api/mission/stablecoin-gate", method="POST", payload={
+            "recipientAddress": recipient_address,
+            "amount": amount,
+            "asset": asset,
+            "purpose": purpose,
+            "dryRun": dry_run
+        })
+
+    def paysheet_consensus(
+        self,
+        payee_address: str,
+        gross_amount: float,
+        deductions: float = 0.0,
+        net_payable: float = 0.0,
+        pay_period: str = ""
+    ) -> Dict[str, Any]:
+        """Issue #214 / PR #1: 3-way consensus payroll shield with Paysheet."""
+        return self._request("/api/bridge/paysheet", method="POST", payload={
+            "payeeAddress": payee_address,
+            "grossAmount": gross_amount,
+            "deductions": deductions,
+            "netPayable": net_payable,
+            "payPeriod": pay_period
+        })
+

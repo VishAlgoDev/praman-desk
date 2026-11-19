@@ -31,10 +31,10 @@ export class PramanDesk {
 
   /**
    * Universal 1-line Pre-Payment Spend Guard.
-   * Runs OFAC SDN check, corporate registry lookup, and optional invoice-to-PO reconciliation.
+   * Runs OFAC SDN check, corporate registry lookup, WASM line-item math, and delegation policy caps.
    */
   async clearSpend({ vendor = '', amount = 0, invoiceNumber = '', currency = 'USD', poNumber = '', lei = '', jurisdiction = 'US' } = {}) {
-    return this._request('/api/audit/primary', 'POST', {
+    const res = await this._request('/api/spend-guard/evaluate', 'POST', {
       vendor,
       amount,
       invoiceNumber,
@@ -43,6 +43,10 @@ export class PramanDesk {
       lei,
       jurisdiction
     });
+    return {
+      ...res,
+      cleared: res.status === 'APPROVED'
+    };
   }
 
   /**
@@ -106,10 +110,53 @@ export class PramanDesk {
    * RugReceipt contract and deployer sanctions safety attestation.
    */
   async rugReceiptScreen({ contractAddress = '', deployerAddress = '', tokenSymbol = 'TOKEN' } = {}) {
-    return this._request('/api/bridge/rugreceipt', 'POST', {
+    const res = await this._request('/api/bridge/rugreceipt', 'POST', {
       contractAddress,
       deployerAddress,
       tokenSymbol
+    });
+    return {
+      ...res,
+      cleared: res.verdict === 'VERIFIED_SAFE' || (res.safetyScore ?? 0) >= 70
+    };
+  }
+
+  /**
+   * Mission 04 & CONTRACT_OBLIGATION_AUDIT_GENERAL: Audit contractual payment obligations.
+   */
+  async auditContractObligation({ contractText = '', invoiceAmount = 0, invoiceDate = '', paymentDueDate = '', interestRatePct = 0 } = {}) {
+    return this._request('/api/miner/contract-obligation', 'POST', {
+      contractText,
+      invoiceAmount,
+      invoiceDate,
+      paymentDueDate,
+      interestRatePct
+    });
+  }
+
+  /**
+   * Mission 02: Stablecoin pre-payment & on-chain settlement gate with Sepolia Diamond receipt.
+   */
+  async screenStablecoinSettlement({ recipientAddress = '', amount = 0, asset = 'USDC', purpose = '', dryRun = false } = {}) {
+    return this._request('/api/mission/stablecoin-gate', 'POST', {
+      recipientAddress,
+      amount,
+      asset,
+      purpose,
+      dryRun
+    });
+  }
+
+  /**
+   * Issue #214 / PR #1: 3-way consensus payroll shield with Paysheet.
+   */
+  async paysheetConsensus({ payeeAddress = '', grossAmount = 0, deductions = 0, netPayable = 0, payPeriod = '' } = {}) {
+    return this._request('/api/bridge/paysheet', 'POST', {
+      payeeAddress,
+      grossAmount,
+      deductions,
+      netPayable,
+      payPeriod
     });
   }
 }
