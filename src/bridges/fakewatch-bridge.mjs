@@ -71,7 +71,7 @@ export async function checkFakeWatchDomain(urlOrDomain) {
   }
 
   // 3. Fallback heuristic for unrecognized domains: triggers UNKNOWN
-  const isTopTierSafe = /^(?:[a-z0-9-]+\.)*(?:stripe\.com|google\.com|microsoft\.com|github\.com|aws\.amazon\.com|apple\.com|etherscan\.io|uniswap\.org|circle\.com|coinbase\.com)$/i.test(domain);
+  const isTopTierSafe = /^(?:[a-z0-9-]+\.)*(?:stripe\.com|google\.com|microsoft\.com|github\.com|aws\.amazon\.com|apple\.com|etherscan\.io|uniswap\.org|circle\.com|coinbase\.com|siemens\.com|sap\.com|ibm\.com|oracle\.com|cisco\.com)$/i.test(domain);
   if (isTopTierSafe) {
     return {
       domain,

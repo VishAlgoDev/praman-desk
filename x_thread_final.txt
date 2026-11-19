@@ -17,10 +17,11 @@ Floating-point creates subtle rounding drift in multi-line tax totals. We built 
 ---
 
 ### Tweet 3 / 3 (278 chars)
-Devnode #5281 / Diamond #6128 standings:
-- Rank #1 Globally: Document Authenticity (0.9993)
-- Rank #3 Globally: OFAC Sanctions (1.0000)
-- Rank #6 Globally: Corporate Registry (1.0000)
-- 15 Streamable MCP tools for Cursor & Claude Code
+Devnode Miner #6127 (Epoch 18) standings:
+- Rank #1: Contract Obligation Audit
+- Rank #1: Purchase Order Verify
+- Rank #2: OFAC Sanctions Screening (1.0000)
+- Rank #6: Corporate Registry (1.0000)
+- 164 requests served on Sepolia
 
-https://github.com/VishAlgoDev/praman-desk
+Repo: https://github.com/VishAlgoDev/praman-desk

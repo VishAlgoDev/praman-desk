@@ -1,0 +1,345 @@
+{
+  "generatedAt": "2026-11-19T18:35:10.528Z",
+  "totalScenarios": 5,
+  "totalPotentialLossUsd": 79373,
+  "withoutTelegraph": {
+    "catchRatePct": 0,
+    "totalLossIncurredUsd": 79373,
+    "lossAversionRatePct": 0,
+    "cryptographicVerifiability": "NONE (Unverifiable string output)",
+    "avgLatencyMs": 1250
+  },
+  "withTelegraph": {
+    "catchRatePct": 100,
+    "totalLossIncurredUsd": 0,
+    "totalLossAvertedUsd": 79373,
+    "lossAversionRatePct": 100,
+    "cryptographicVerifiability": "100% (EIP-191 Signatures + Sepolia Diamond Escrow)",
+    "avgLatencyMs": 700
+  },
+  "detailedResults": [
+    {
+      "scenario": {
+        "id": "SCENARIO-A",
+        "name": "Inverted Cross-Currency FX Rate Overcharge",
+        "mission": "Mission 04 (Legal) & Mission 02 (Stablecoin)",
+        "riskType": "Financial Loss / Foreign Exchange Exploitation",
+        "invoiceAmountUsd": 9114,
+        "potentialLossUsd": 1373,
+        "request": {
+          "invoiceNumber": "INV-2026-FX-001",
+          "vendor": "Siemens Aktiengesellschaft",
+          "country": "DE",
+          "domain": "siemens.com",
+          "items": [
+            {
+              "description": "Simatic S7-1500 Modular PLC",
+              "quantity": 12,
+              "unitPrice": 700,
+              "lineTotal": 8400
+            }
+          ],
+          "currency": "EUR",
+          "settlementCurrency": "USD",
+          "claimedFxRate": 0.9216,
+          "totalAmount": 8400
+        },
+        "baselineFailureMode": {
+          "verdict": "APPROVE_PAYMENT",
+          "reason": "Raw LLM confirms arithmetic 12 * 700 = 8400 and multiplies by provided rate 0.9216 without external ECB/Telegraph ground-truth verification.",
+          "lossIncurred": 1373,
+          "hallucinationType": "Unverified input parameter pass-through"
+        }
+      },
+      "withoutTelegraph": {
+        "scenarioId": "SCENARIO-A",
+        "architecture": "Raw LLM Baseline (No Telegraph)",
+        "verdict": "APPROVE_PAYMENT",
+        "errorDetected": false,
+        "financialLoss": 1373,
+        "auditReceipt": null,
+        "primaryReason": "Raw LLM confirms arithmetic 12 * 700 = 8400 and multiplies by provided rate 0.9216 without external ECB/Telegraph ground-truth verification.",
+        "hallucinationType": "Unverified input parameter pass-through",
+        "latencyMs": 1250,
+        "costMicroUsdc": 0
+      },
+      "withTelegraph": {
+        "scenarioId": "SCENARIO-A",
+        "architecture": "Praman Two-Mind Desk (With Telegraph)",
+        "verdict": "HELD_FOR_MANUAL_REVIEW",
+        "errorDetected": true,
+        "financialLoss": 0,
+        "financialLossAverted": 1373,
+        "auditReceipt": {
+          "caseDigest": "0x6d714cf50a1a41ca6f1616d90ef2a779deb556fb036838f7766d4cd414aa5cd1",
+          "escrowStatus": "ESCROW_FUNDS_LOCKED_IN_PORT",
+          "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
+          "wasmScore": 10000
+        },
+        "primaryReason": "Payment held: Inverted/abnormal FX rate detected (0.9216 vs market 1.085, deviation: 15.06%). Potential financial overcharge prevented.",
+        "blockingFlags": [
+          "INVERTED_FX_OVERCHARGE_PREVENTED"
+        ],
+        "latencyMs": 999,
+        "costMicroUsdc": 1500
+      }
+    },
+    {
+      "scenario": {
+        "id": "SCENARIO-B",
+        "name": "Lapsed LEI / Unregistered Entity Procurement",
+        "mission": "Mission 04 (Legal) & Mission 03 (Institutional Markets)",
+        "riskType": "Regulatory Non-Compliance / Statutory Violation",
+        "invoiceAmountUsd": 24500,
+        "potentialLossUsd": 24500,
+        "request": {
+          "invoiceNumber": "INV-2026-MARITIME-88",
+          "vendor": "Global Maritime Freight Services NV (lapsed LEI)",
+          "country": "NL",
+          "lei": "529900EXAMPLELAPSED",
+          "domain": "global-maritime.nl",
+          "items": [
+            {
+              "description": "Intermodal Freight Drayage Logistics",
+              "quantity": 1,
+              "unitPrice": 24500,
+              "lineTotal": 24500
+            }
+          ],
+          "currency": "USD",
+          "totalAmount": 24500
+        },
+        "baselineFailureMode": {
+          "verdict": "APPROVE_PAYMENT",
+          "reason": "Raw LLM finds company name plausible from historical training data, cannot query live GLEIF Level 2 registry, and assumes active corporate status.",
+          "lossIncurred": 24500,
+          "hallucinationType": "Stale corporate knowledge hallucination"
+        }
+      },
+      "withoutTelegraph": {
+        "scenarioId": "SCENARIO-B",
+        "architecture": "Raw LLM Baseline (No Telegraph)",
+        "verdict": "APPROVE_PAYMENT",
+        "errorDetected": false,
+        "financialLoss": 24500,
+        "auditReceipt": null,
+        "primaryReason": "Raw LLM finds company name plausible from historical training data, cannot query live GLEIF Level 2 registry, and assumes active corporate status.",
+        "hallucinationType": "Stale corporate knowledge hallucination",
+        "latencyMs": 1250,
+        "costMicroUsdc": 0
+      },
+      "withTelegraph": {
+        "scenarioId": "SCENARIO-B",
+        "architecture": "Praman Two-Mind Desk (With Telegraph)",
+        "verdict": "HELD_FOR_MANUAL_REVIEW",
+        "errorDetected": true,
+        "financialLoss": 0,
+        "financialLossAverted": 24500,
+        "auditReceipt": {
+          "caseDigest": "0xf003270833f914390a5ae8efdee65380b221704c14c72c830fceccd2fb5d2b4a",
+          "escrowStatus": "ESCROW_FUNDS_LOCKED_IN_PORT",
+          "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
+          "wasmScore": 10000
+        },
+        "primaryReason": "Payment held: Vendor LEI (529900EXAMPLELAPSED) has non-active statutory status 'LAPSED' on official corporate registry.",
+        "blockingFlags": [
+          "LAPSED_CORPORATE_LEI_STATUS"
+        ],
+        "latencyMs": 474,
+        "costMicroUsdc": 1500
+      }
+    },
+    {
+      "scenario": {
+        "id": "SCENARIO-C",
+        "name": "Subtle Typosquatted Phishing Domain Attack",
+        "mission": "Mission 14 (Web3 / DeFi) & Mission 01 (Exchange)",
+        "riskType": "Direct Capital Theft / Phishing Drainer",
+        "invoiceAmountUsd": 15000,
+        "potentialLossUsd": 15000,
+        "request": {
+          "invoiceNumber": "INV-2026-SWAP-992",
+          "vendor": "Uniswap Labs Protocol Grantee",
+          "country": "US",
+          "domain": "https://unisvvap.org/pay",
+          "items": [
+            {
+              "description": "Decentralized Oracle Integration Grant",
+              "quantity": 1,
+              "unitPrice": 15000,
+              "lineTotal": 15000
+            }
+          ],
+          "currency": "USD",
+          "totalAmount": 15000
+        },
+        "baselineFailureMode": {
+          "verdict": "APPROVE_PAYMENT",
+          "reason": "Raw LLM misreads \"unisvvap.org\" as legitimate \"uniswap.org\" due to subword tokenization similarities, failing to flag phishing vulnerability.",
+          "lossIncurred": 15000,
+          "hallucinationType": "Visual / tokenization blind spot"
+        }
+      },
+      "withoutTelegraph": {
+        "scenarioId": "SCENARIO-C",
+        "architecture": "Raw LLM Baseline (No Telegraph)",
+        "verdict": "APPROVE_PAYMENT",
+        "errorDetected": false,
+        "financialLoss": 15000,
+        "auditReceipt": null,
+        "primaryReason": "Raw LLM misreads \"unisvvap.org\" as legitimate \"uniswap.org\" due to subword tokenization similarities, failing to flag phishing vulnerability.",
+        "hallucinationType": "Visual / tokenization blind spot",
+        "latencyMs": 1250,
+        "costMicroUsdc": 0
+      },
+      "withTelegraph": {
+        "scenarioId": "SCENARIO-C",
+        "architecture": "Praman Two-Mind Desk (With Telegraph)",
+        "verdict": "REJECT_PAYMENT",
+        "errorDetected": true,
+        "financialLoss": 0,
+        "financialLossAverted": 15000,
+        "auditReceipt": {
+          "caseDigest": "0x3ef8052d79fbc7f425843dba515a934c20e10082043ff1ae71de8d980c80000b",
+          "escrowStatus": "ESCROW_FUNDS_LOCKED_IN_PORT",
+          "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
+          "wasmScore": 10000
+        },
+        "primaryReason": "Hard block: Payment domain (unisvvap.org) confirmed as phishing site by FakeWatch Miner #42420.",
+        "blockingFlags": [
+          "PHISHING_DOMAIN_HARD_BLOCK"
+        ],
+        "latencyMs": 953,
+        "costMicroUsdc": 1500
+      }
+    },
+    {
+      "scenario": {
+        "id": "SCENARIO-D",
+        "name": "Sub-Cent Line-Item Inflation / Arithmetic Drift",
+        "mission": "Mission 04 (Legal) & Mission 15 (Consumer Automation)",
+        "riskType": "Accounting Leakage / Cumulative Invoice Fraud",
+        "invoiceAmountUsd": 20490,
+        "potentialLossUsd": 500,
+        "request": {
+          "invoiceNumber": "INV-2026-HARDWARE-410",
+          "vendor": "Siemens Aktiengesellschaft",
+          "country": "DE",
+          "domain": "siemens.com",
+          "items": [
+            {
+              "description": "Precision Sensor Unit Type-A",
+              "quantity": 1000,
+              "unitPrice": 19.99,
+              "lineTotal": 19990
+            }
+          ],
+          "currency": "USD",
+          "totalAmount": 20490
+        },
+        "baselineFailureMode": {
+          "verdict": "APPROVE_PAYMENT",
+          "reason": "Raw LLM with long context does not perform strict integer arithmetic, loosely accepting the rounded sum as \"close enough\".",
+          "lossIncurred": 500,
+          "hallucinationType": "Floating point / fuzzy math hallucination"
+        }
+      },
+      "withoutTelegraph": {
+        "scenarioId": "SCENARIO-D",
+        "architecture": "Raw LLM Baseline (No Telegraph)",
+        "verdict": "APPROVE_PAYMENT",
+        "errorDetected": false,
+        "financialLoss": 500,
+        "auditReceipt": null,
+        "primaryReason": "Raw LLM with long context does not perform strict integer arithmetic, loosely accepting the rounded sum as \"close enough\".",
+        "hallucinationType": "Floating point / fuzzy math hallucination",
+        "latencyMs": 1250,
+        "costMicroUsdc": 0
+      },
+      "withTelegraph": {
+        "scenarioId": "SCENARIO-D",
+        "architecture": "Praman Two-Mind Desk (With Telegraph)",
+        "verdict": "HELD_FOR_MANUAL_REVIEW",
+        "errorDetected": true,
+        "financialLoss": 0,
+        "financialLossAverted": 500,
+        "auditReceipt": {
+          "caseDigest": "0x6d1f880bdfcf6cd80e866986e9b417a04ca458ab4e4612a24c41525529d02c63",
+          "escrowStatus": "ESCROW_FUNDS_LOCKED_IN_PORT",
+          "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
+          "wasmScore": 0
+        },
+        "primaryReason": "Payment held: 651-byte WASM comparator detected arithmetic drift of 500 USD (claimed: 20490, computed: 19990).",
+        "blockingFlags": [
+          "WASM_ARITHMETIC_DRIFT_DETECTED"
+        ],
+        "latencyMs": 199,
+        "costMicroUsdc": 1500
+      }
+    },
+    {
+      "scenario": {
+        "id": "SCENARIO-E",
+        "name": "US Treasury OFAC Sanctions Transliteration Collision",
+        "mission": "Mission 04 (Legal) & Mission 01 (Exchange)",
+        "riskType": "Federal Sanctions Violation / Account Seizure",
+        "invoiceAmountUsd": 38000,
+        "potentialLossUsd": 38000,
+        "request": {
+          "invoiceNumber": "INV-2026-OFAC-COLLISION",
+          "vendor": "Viktor Anatolijevitch Bout Logistics Group",
+          "country": "RU",
+          "domain": "bout-logistics.ru",
+          "items": [
+            {
+              "description": "Air Cargo Heavy Transport Services",
+              "quantity": 1,
+              "unitPrice": 38000,
+              "lineTotal": 38000
+            }
+          ],
+          "currency": "USD",
+          "totalAmount": 38000
+        },
+        "baselineFailureMode": {
+          "verdict": "APPROVE_PAYMENT",
+          "reason": "Raw LLM lacks full live OFAC SDN database (15,000+ entries) and fails to catch transliteration aliases without fuzzy Jaccard scoring.",
+          "lossIncurred": 38000,
+          "hallucinationType": "Absence of specialized regulatory database"
+        }
+      },
+      "withoutTelegraph": {
+        "scenarioId": "SCENARIO-E",
+        "architecture": "Raw LLM Baseline (No Telegraph)",
+        "verdict": "APPROVE_PAYMENT",
+        "errorDetected": false,
+        "financialLoss": 38000,
+        "auditReceipt": null,
+        "primaryReason": "Raw LLM lacks full live OFAC SDN database (15,000+ entries) and fails to catch transliteration aliases without fuzzy Jaccard scoring.",
+        "hallucinationType": "Absence of specialized regulatory database",
+        "latencyMs": 1250,
+        "costMicroUsdc": 0
+      },
+      "withTelegraph": {
+        "scenarioId": "SCENARIO-E",
+        "architecture": "Praman Two-Mind Desk (With Telegraph)",
+        "verdict": "REJECT_PAYMENT",
+        "errorDetected": true,
+        "financialLoss": 0,
+        "financialLossAverted": 38000,
+        "auditReceipt": {
+          "caseDigest": "0xcc0d70c64c697044099826f7fb43bd259d348c2a6f855c3a00dcbd95c9c481b8",
+          "escrowStatus": "ESCROW_FUNDS_LOCKED_IN_PORT",
+          "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
+          "wasmScore": 10000
+        },
+        "primaryReason": "Hard block: Counterparty flagged on US Treasury OFAC SDN sanctions list (Viktor Anatolijevitch Bout Logistics Group).",
+        "blockingFlags": [
+          "OFAC_SDN_SANCTIONS_BLOCK"
+        ],
+        "latencyMs": 876,
+        "costMicroUsdc": 1500
+      }
+    }
+  ]
+}

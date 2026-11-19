@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "skills": {
+    "anjoman": {
+      "source": "telegraphprotocol/telegraph-mcp",
+      "commit": "787b78d9f968b5e3c04bf0db7b2ccfb8386c15ec",
+      "sourceType": "github",
+      "skillPath": "skills/anjoman/SKILL.md",
+      "computedHash": "0d5bd2200271b312aa6d1cd8e9eec76db1f1e7214bea329555b52cb735e15983"
+    }
+  }
+}

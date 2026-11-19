@@ -1,0 +1,84 @@
+{
+  "submissionTimestamp": "2026-11-19T18:31:35.926Z",
+  "submitterAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "network": "Telegraph Protocol Season II Devnode (Chain ID 11155111)",
+  "datasets": [
+    {
+      "intentId": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+      "title": "Statutory & FIDIC Commercial Contract Obligation Ground Truths",
+      "domain": "Legal & Construction Procurement (Mission 04)",
+      "file": "contract_obligation_audit_general.jsonl",
+      "rowCount": 6,
+      "bodySha256": "ff9976d383ccb5dbad1ffeb7672820ff0b8bd83bb852a1fa29af2f166093080c",
+      "nonce": "ee6834f6bf547a4021aef03d1fa299d0",
+      "signature": "0x1c7a1f174fb603bdbe8a63c22906b3fa249ac057a9e4a2affaf6950f99788a697b481b6c4e8890d62560d8fbf32555070a93cf4e874e1549070ff9faf69af0721b",
+      "targetBountyIssue": 192,
+      "uploadReceipt": {
+        "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 6,
+        "accepted": 0,
+        "duplicate": 6,
+        "rejected": 0,
+        "curated": 0,
+        "state_counts": {
+          "eligible": 338,
+          "rejected": 48
+        }
+      },
+      "samplePrompt": "Audit the contractual and statutory obligations under an Indian Agreement for Sale (MahaRERA Reg. P51900022104) executed on 2023-05-15: Clau..."
+    },
+    {
+      "intentId": "PURCHASE_ORDER_VERIFY_GENERAL",
+      "title": "Enterprise Multi-Tax & Currency Split Purchase Order Truths",
+      "domain": "Enterprise AP / Procurement (Mission 03 & 04)",
+      "file": "purchase_order_verify_general.jsonl",
+      "rowCount": 8,
+      "bodySha256": "3ad30696e1e21be2a5c54a8717018e29be12a10575259f6c49759ed23596fea0",
+      "nonce": "7d33a5ffceda9f3df74117786d92ca2a",
+      "signature": "0x5aef1b8487a91b0f43ca03972aff9199838d18fd02a23fc502b2bc4986bcd45b29c28ef23d26fb8535979a4f535b00455f3d6614e5e74b963040829942dd1e871b",
+      "targetBountyIssue": 122,
+      "uploadReceipt": {
+        "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 8,
+        "accepted": 0,
+        "duplicate": 8,
+        "rejected": 0,
+        "curated": 0,
+        "state_counts": {
+          "eligible": 199,
+          "quarantine": 179
+        }
+      },
+      "samplePrompt": "Verify Purchase Order PO-ERP-2026-7741 in SAP S/4HANA for Project Tower-B Foundation Piling: Stated Vendor = V-10492 (Apex Geotech Pvt Ltd, ..."
+    },
+    {
+      "intentId": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "title": "3-Way Invoice vs ERP General Ledger Reconciliation Ground Truths",
+      "domain": "Treasury & Financial Clearing (Mission 03)",
+      "file": "invoice_ledger_reconcile_general.jsonl",
+      "rowCount": 10,
+      "bodySha256": "450a9208f632d54f9fc3e0af0fb4fe981f2887ce0b1db3a48ea8efe30d84bce7",
+      "nonce": "d5b14210efe917f8737c32fab6a01a66",
+      "signature": "0x6122a8e00a2613ef5b423c03dcaffb4bf2ee6ef328abeb3c0467d7e8c378b42a01edca1145a5882db1cf9a0633b568efa6f10d237fab265fb6741d765518dc6d1b",
+      "targetBountyIssue": 120,
+      "uploadReceipt": {
+        "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 10,
+        "accepted": 0,
+        "duplicate": 10,
+        "rejected": 0,
+        "curated": 0,
+        "state_counts": {
+          "eligible": 14
+        }
+      },
+      "samplePrompt": "Perform a 3-way reconciliation between Purchase Order PO-2026-4410, Goods Receipt Note GRN-2026-889, and Tax Invoice INV-STL-902 for Fe-550D..."
+    }
+  ]
+}
