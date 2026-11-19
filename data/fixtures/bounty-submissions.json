@@ -1,0 +1,66 @@
+[
+  {
+    "issue": 80,
+    "intent": "DOCUMENT_AUTHENTICITY_GENERAL",
+    "rows": 10,
+    "provenance": "attested",
+    "commentUrl": "https://github.com/telegraphprotocol/bounties/issues/80#issuecomment-6733168110",
+    "status": "review"
+  },
+  {
+    "issue": 120,
+    "intent": "INVOICE_LEDGER_RECONCILE_GENERAL",
+    "rows": 10,
+    "provenance": "attested (1st contributor on network)",
+    "commentUrl": "https://github.com/telegraphprotocol/bounties/issues/120#issuecomment-6733168350",
+    "status": "review"
+  },
+  {
+    "issue": 122,
+    "intent": "PURCHASE_ORDER_VERIFY_GENERAL",
+    "rows": 8,
+    "provenance": "attested (1st contributor on network)",
+    "commentUrl": "https://github.com/telegraphprotocol/bounties/issues/122#issuecomment-6733168701",
+    "status": "review"
+  },
+  {
+    "issue": 105,
+    "intent": "VENDOR_VERIFY_GENERAL",
+    "rows": 6,
+    "provenance": "attested",
+    "commentUrl": "https://github.com/telegraphprotocol/bounties/issues/105#issuecomment-6733169054",
+    "status": "review"
+  },
+  {
+    "issue": 104,
+    "intent": "REGULATORY_FILING_MONITOR_GENERAL",
+    "rows": 6,
+    "provenance": "5 attested + 1 truth_source (SEC EDGAR, FedReg, GLEIF)",
+    "commentUrl": "https://github.com/telegraphprotocol/bounties/issues/104#issuecomment-6733169440",
+    "status": "review"
+  },
+  {
+    "issue": null,
+    "intent": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+    "rows": 6,
+    "provenance": "attested",
+    "commentUrl": null,
+    "status": "admitted"
+  },
+  {
+    "issue": null,
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "rows": 8,
+    "provenance": "GLEIF Global LEI Index primary register",
+    "commentUrl": null,
+    "status": "ready"
+  },
+  {
+    "issue": null,
+    "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+    "rows": 8,
+    "provenance": "US Treasury OFAC SDN & Consolidated Sanctions",
+    "commentUrl": null,
+    "status": "ready"
+  }
+]

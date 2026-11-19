@@ -29,72 +29,17 @@ const USDC_ABI = parseAbi([
   'function balanceOf(address account) view returns (uint256)'
 ]);
 
-const BOUNTY_SUBMISSIONS = [
-  {
-    issue: 80,
-    intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
-    rows: 10,
-    provenance: 'attested',
-    commentUrl: 'https://github.com/telegraphprotocol/bounties/issues/80#issuecomment-6733168110',
-    status: 'review'
-  },
-  {
-    issue: 120,
-    intent: 'INVOICE_LEDGER_RECONCILE_GENERAL',
-    rows: 10,
-    provenance: 'attested (1st contributor on network)',
-    commentUrl: 'https://github.com/telegraphprotocol/bounties/issues/120#issuecomment-6733168350',
-    status: 'review'
-  },
-  {
-    issue: 122,
-    intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
-    rows: 8,
-    provenance: 'attested (1st contributor on network)',
-    commentUrl: 'https://github.com/telegraphprotocol/bounties/issues/122#issuecomment-6733168701',
-    status: 'review'
-  },
-  {
-    issue: 105,
-    intent: 'VENDOR_VERIFY_GENERAL',
-    rows: 6,
-    provenance: 'attested',
-    commentUrl: 'https://github.com/telegraphprotocol/bounties/issues/105#issuecomment-6733169054',
-    status: 'review'
-  },
-  {
-    issue: 104,
-    intent: 'REGULATORY_FILING_MONITOR_GENERAL',
-    rows: 6,
-    provenance: '5 attested + 1 truth_source (SEC EDGAR, FedReg, GLEIF)',
-    commentUrl: 'https://github.com/telegraphprotocol/bounties/issues/104#issuecomment-6733169440',
-    status: 'review'
-  },
-  {
-    issue: null,
-    intent: 'CONTRACT_OBLIGATION_AUDIT_GENERAL',
-    rows: 6,
-    provenance: 'attested',
-    commentUrl: null,
-    status: 'admitted'
-  },
-  {
-    issue: null,
-    intent: 'CORPORATE_REGISTRY_LOOKUP_GENERAL',
-    rows: 8,
-    provenance: 'GLEIF Global LEI Index primary register',
-    commentUrl: null,
-    status: 'ready'
-  },
-  {
-    issue: null,
-    intent: 'SANCTIONS_SCREENING_MATCH_GENERAL',
-    rows: 8,
-    provenance: 'US Treasury OFAC SDN & Consolidated Sanctions',
-    commentUrl: null,
-    status: 'ready'
-  }
-];
+function loadFixture(filename, fallback = []) {
+  try {
+    const fPath = path.join(rootDir, 'data', 'fixtures', filename);
+    if (fs.existsSync(fPath)) {
+      return JSON.parse(fs.readFileSync(fPath, 'utf8'));
+    }
+  } catch {}
+  return fallback;
+}
+
+const BOUNTY_SUBMISSIONS = loadFixture('bounty-submissions.json');
 
 // OFAC SDN sanctions data — in-memory cache, initialized from local snapshot + refreshed every 6 hours
 let sdnEntries = null;
@@ -2646,23 +2591,7 @@ const CORP_REG_CACHE = new Map();
 const MAX_CORP_REG_CACHE = 1000;
 
 // Pre-seed top benchmark corporate entities for instant 0.1ms cold-start evaluator evaluation
-const PRESEEDED_GLOBAL_CORPORATES = [
-  { name: 'Apple Inc.', lei: 'HWUPKR0MPOU8FGXBT394', jurisdiction: 'US-CA', country: 'US', active: true, address: 'One Apple Park Way, Cupertino, CA 95014' },
-  { name: 'Microsoft Corporation', lei: 'INR2EJN1ERAN0W5ZP974', jurisdiction: 'US-WA', country: 'US', active: true, address: 'One Microsoft Way, Redmond, WA 98052' },
-  { name: 'Alphabet Inc.', lei: '5493006MHB84DD0ZWV18', jurisdiction: 'US-DE', country: 'US', active: true, address: '1600 Amphitheatre Pkwy, Mountain View, CA' },
-  { name: 'Amazon.com, Inc.', lei: 'ZXTILKJKG63JELOEG630', jurisdiction: 'US-DE', country: 'US', active: true, address: '410 Terry Ave N, Seattle, WA 98109' },
-  { name: 'Tesla, Inc.', lei: '54930043XZGB27CTOV49', jurisdiction: 'US-TX', country: 'US', active: true, address: '13101 Harold Green Rd, Austin, TX 78725' },
-  { name: 'Stripe, Inc.', lei: '549300S4KLFTLO7GSQ80', jurisdiction: 'US-DE', country: 'US', active: true, address: '354 Oyster Point Blvd, South San Francisco, CA' },
-  { name: 'SAP SE', lei: '529900OD015S2V211245', jurisdiction: 'DE-BW', country: 'DE', active: true, address: 'Dietmar-Hopp-Allee 16, 69190 Walldorf' },
-  { name: 'Siemens AG', lei: 'W38RGI023J3WT1HWRP32', jurisdiction: 'DE-BY', country: 'DE', active: true, address: 'Werner-von-Siemens-Strasse 1, 80333 Munich' },
-  { name: 'Barclays PLC', lei: '213800LBQA1Y9L22JB70', jurisdiction: 'GB', country: 'GB', active: true, address: '1 Churchill Place, London, E14 5HP' },
-  { name: 'HSBC Holdings plc', lei: 'MLU0ZO3ML4LN2LL2TL39', jurisdiction: 'GB', country: 'GB', active: true, address: '8 Canada Square, London, E14 5HQ' },
-  { name: 'BP p.l.c.', lei: '213800LH1BZH3DI6G760', jurisdiction: 'GB', country: 'GB', active: true, address: '1 St James\'s Square, London, SW1Y 4PD' },
-  { name: 'Shell plc', lei: '21380068P1DRHMJ8KU70', jurisdiction: 'GB', country: 'GB', active: true, address: 'Shell Centre, London, SE1 7NA' },
-  { name: 'ASML Holding N.V.', lei: '724500Y6DUVHQD6OXN27', jurisdiction: 'NL', country: 'NL', active: true, address: 'De Run 6501, 5504 DR Veldhoven' },
-  { name: 'NVIDIA Corporation', lei: '549300E3M6F9Q9N6Z412', jurisdiction: 'US-DE', country: 'US', active: true, address: '2788 San Tomas Expy, Santa Clara, CA 95051' },
-  { name: 'Meta Platforms, Inc.', lei: 'BQ4BKCS1HXDV9HN80Z93', jurisdiction: 'US-DE', country: 'US', active: true, address: '1 Meta Way, Menlo Park, CA 94025' }
-];
+const PRESEEDED_GLOBAL_CORPORATES = loadFixture('preseeded-corporates.json');
 
 for (const c of PRESEEDED_GLOBAL_CORPORATES) {
   const payload = {
@@ -3806,13 +3735,7 @@ export function loadStoredLedger() {
   };
 }
 
-const DEFAULT_FIVE_JURISDICTION_PORTFOLIO = [
-  { name: 'Tesla, Inc.', jurisdiction: 'US', vatNumber: '' },
-  { name: 'HSBC Holdings plc', jurisdiction: 'GB', vatNumber: '' },
-  { name: 'SAP SE', jurisdiction: 'DE', vatNumber: 'DE143454214' },
-  { name: 'AIA Group Limited', jurisdiction: 'HK', vatNumber: '' },
-  { name: 'DBS Group Holdings Ltd', jurisdiction: 'SG', vatNumber: '' }
-];
+const DEFAULT_FIVE_JURISDICTION_PORTFOLIO = loadFixture('five-jurisdictions.json');
 
 const TRADITIONAL_LAW_FIRM_BENCHMARK = {
   US: { feeUsd: 950, scope: 'Delaware/US corporate good-standing extract, SEC EDGAR 10-K/8-K & OFAC counsel clearance' },
