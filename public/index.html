@@ -1166,6 +1166,19 @@ export const character = {
   plugins: [pramanSpendGuardPlugin] // Enforces OFAC SDN, GLEIF LEI & 651b WASM math
 };</div>
     </div>
+
+    <!-- Code Snippet 7: Paysheet 3-Way Consensus Adapter (Issue #214 / PR #1) -->
+    <div style="font-size:12px; font-weight:600; color:var(--accent); margin:14px 0 4px;">Option G: Paysheet 3-Way Consensus Adapter (Issue #214 / PR #1)</div>
+    <div class="code-block" style="margin-bottom:12px;">
+      <button class="copy-btn" onclick="copySnippet('sdk-paysheet-snip')">Copy</button>
+      <div id="sdk-paysheet-snip">// examples/paysheet-consensus/paysheet-praman-adapter.mjs
+import { executeThreeWayConsensus } from './paysheet-praman-adapter.mjs';
+
+// Evaluate payroll recipient across 3 independent miners (#710637, #64175, Praman Desk #5281):
+const verdict = await executeThreeWayConsensus(payeeAddressOrName);
+if (!verdict.cleared) throw new Error('[PAYROLL HALT] Recipient blocked by sanctions quorum');
+// Sub-25ms in-memory SDN check + GLEIF LEI verification confirmed.</div>
+    </div>
   </div> <!-- End quickstart-card -->
 </div> <!-- End Tab 2: Developer SDK & Agent Integration -->
 
@@ -1173,8 +1186,8 @@ export const character = {
 <div id="tab-panel-network" class="tab-panel" style="display:none;">
 
     <!-- Partner Bridges Section -->
-    <div class="section-title">🤝 Reciprocal Ecosystem Bridges (FakeWatch &amp; RugReceipt) &amp; Contract Evaluator</div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+    <div class="section-title">🤝 Reciprocal Ecosystem Bridges (FakeWatch, RugReceipt &amp; Paysheet) &amp; Contract Evaluator</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; margin-bottom:12px;">
       <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px;">
         <div style="font-size:12px; font-weight:700; color:#38bdf8; margin-bottom:4px;">FakeWatch Shield (#42420)</div>
         <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Combines FakeWatch phishing/dApp domain safety with Praman Desk LEI &amp; OFAC checks. Unknown domains trigger manual CFO review.</p>
@@ -1192,6 +1205,15 @@ export const character = {
           <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testRugReceiptBridge('0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984')">🟢 Test Uniswap V3 Token</button>
         </div>
         <div id="rugreceipt-bridge-out" style="font-family:var(--font-mono); font-size:11px; color:#94a3b8; background:#020617; padding:6px 8px; border-radius:4px; max-height:80px; overflow-y:auto; border:1px solid #1e293b;">Ready for interactive probe.</div>
+      </div>
+      <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px;">
+        <div style="font-size:12px; font-weight:700; color:#34d399; margin-bottom:4px;">Paysheet Consensus Shield (Issue #214 / PR #1)</div>
+        <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Screens automated payroll payouts across 3 independent miners (#710637, #64175, Praman Desk #5281) with sub-25ms in-memory OFAC SDN checks.</p>
+        <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testPaysheetBridge('0x098B716B8Aaf21512996dC57EB0615e2383E2f96')">🔴 Test Lazarus Group Payee</button>
+          <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testPaysheetBridge('Microsoft Corporation')">🟢 Test Microsoft Corp Payee</button>
+        </div>
+        <div id="paysheet-bridge-out" style="font-family:var(--font-mono); font-size:11px; color:#94a3b8; background:#020617; padding:6px 8px; border-radius:4px; max-height:80px; overflow-y:auto; border:1px solid #1e293b;">Ready for interactive probe.</div>
       </div>
     </div>
     <!-- Contract Obligation Evaluator Section -->
@@ -1617,6 +1639,25 @@ Content-Type: application/json
       const data = await res.json();
       el.textContent = `[${data.verdict}] Score: ${data.safetyScore}/100 | Risk: ${data.riskLevel} | Receipt: ${data.receiptId || 'n/a'}`;
       el.style.color = data.verdict === 'VERIFIED_CLEAN' ? '#34d399' : '#f87171';
+    } catch (e) {
+      el.textContent = 'Error: ' + e.message;
+      el.style.color = '#fbbf24';
+    }
+  }
+
+  async function testPaysheetBridge(target) {
+    const el = document.getElementById('paysheet-bridge-out');
+    if (!el) return;
+    el.textContent = 'Probing Paysheet 3-Way Quorum (/api/bridge/paysheet)...';
+    try {
+      const res = await fetch('/api/bridge/paysheet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target, amountUsdc: '500.00', payrollId: 'PAYROLL-DEMO' })
+      });
+      const data = await res.json();
+      el.textContent = `[${data.verdict}] Action: ${data.action} | Consensus: ${data.consensusReached ? '3/3 Quorum' : 'Failed'} | Latency: ${data.latencyMs}ms | Seal: ${data.attestationSeal.slice(0, 16)}...`;
+      el.style.color = data.cleared ? '#34d399' : '#f87171';
     } catch (e) {
       el.textContent = 'Error: ' + e.message;
       el.style.color = '#fbbf24';

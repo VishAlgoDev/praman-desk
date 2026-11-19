@@ -30,6 +30,7 @@ import {
 import { generateComplianceCertificate } from '../src/certificate.mjs';
 import { evaluateCounterpartyShield } from '../src/bridges/fakewatch-bridge.mjs';
 import { generateRugReceiptProof } from '../src/bridges/rugreceipt-bridge.mjs';
+import { evaluatePaysheetConsensus } from '../src/bridges/paysheet-bridge.mjs';
 import { getWasmInstance } from '../comparator/wasm-buffer.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -664,6 +665,31 @@ export const TOOLS = [
       },
     },
   },
+  {
+    name: 'paysheet_consensus_screen',
+    description:
+      '3-Way Consensus Payroll Shield with Paysheet (Issue #214 / PR #1). Evaluates payout recipient across 3 independent Telegraph Season II miners (#731002, #64175, Praman Desk #5281) with sub-25ms in-memory OFAC SDN & EVM screening.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        target: {
+          type: 'string',
+          description: 'Recipient entity name or EVM wallet address (0x...) to screen across consensus quorum.',
+        },
+        amount_usdc: {
+          type: 'string',
+          description: 'Payroll stream or payout amount in USDC (e.g. "500.00").',
+          default: '0.00',
+        },
+        payroll_id: {
+          type: 'string',
+          description: 'Internal payroll batch identifier.',
+          default: 'PAYROLL-DEFAULT',
+        },
+      },
+      required: ['target'],
+    },
+  },
 ];
 
 // Execute an MCP tool deterministically (shared by stdio and Streamable HTTP /api/mcp)
@@ -815,6 +841,14 @@ export async function executeMcpTool(name, inputArgs = {}) {
             contractAddress: args.contract_address,
             deployerAddress: args.deployer_address,
             tokenSymbol: args.token_symbol || 'TOKEN',
+          });
+          break;
+
+        case 'paysheet_consensus_screen':
+          result = await evaluatePaysheetConsensus({
+            target: args.target,
+            amountUsdc: args.amount_usdc || '0.00',
+            payrollId: args.payroll_id || 'PAYROLL-DEFAULT',
           });
           break;
 

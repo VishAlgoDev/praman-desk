@@ -36,10 +36,10 @@ async function runTests() {
   for (const t of toolsResult.tools) {
     console.log(`   - ${t.name}: ${t.description.slice(0, 65)}...`);
   }
-  if (toolsResult.tools.length !== 13) {
-    throw new Error(`Expected 13 tools, found ${toolsResult.tools.length}`);
+  if (toolsResult.tools.length !== 14) {
+    throw new Error(`Expected 14 tools, found ${toolsResult.tools.length}`);
   }
-  console.log('   PASS: All 13 tools registered.\n');
+  console.log('   PASS: All 14 tools registered.\n');
 
   // Test 2: verify_counterparty (STRIPE, LLC)
   console.log('3. Testing tool: verify_counterparty (STRIPE, LLC)...');
@@ -363,8 +363,21 @@ async function runTests() {
   console.log(`   Result: Critical risk flagged | Score: ${rugParsed.safetyScore}/100 | Receipt: ${rugParsed.receiptId}`);
   console.log('   PASS: rugreceipt_contract_screen succeeded.\n');
 
+  // Test 19: paysheet_consensus_screen (Issue #214 3-way consensus)
+  console.log('19. Testing tool: paysheet_consensus_screen (Lazarus Address vs Clean)...');
+  const resPaysheet = await client.callTool({
+    name: 'paysheet_consensus_screen',
+    arguments: { target: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96', amount_usdc: '500.00' },
+  });
+  const psParsed = JSON.parse(resPaysheet.content[0].text);
+  if (psParsed.cleared !== false || psParsed.action !== 'HALT_AND_FREEZE' || !psParsed.consensusReached) {
+    throw new Error(`Expected HALT_AND_FREEZE on Paysheet consensus screen for Lazarus address, got ${JSON.stringify(psParsed)}`);
+  }
+  console.log(`   Result: Consensus HALT | Action: ${psParsed.action} | Seal: ${psParsed.attestationSeal.slice(0, 16)}...`);
+  console.log('   PASS: paysheet_consensus_screen succeeded.\n');
+
   await client.close();
-  console.log('=== All 18 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 19 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {

@@ -16,7 +16,7 @@ export const MINERS = {
   PRAMAN_DESK: {
     id: 5281,
     devnodeId: 5281,
-    diamondRegId: 5305,
+    diamondRegId: 5311,
     slug: 'praman-compliance-miner',
     endpoint: 'https://praman-desk.vercel.app/api/miner/sanctions-screen',
     devnodeAsk: 'https://devnode.telegraphprotocol.com/engine/v1/ask/5281',

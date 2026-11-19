@@ -12,6 +12,7 @@ import { TOOLS as MCP_TOOLS, executeMcpTool } from '../mcp/server.mjs';
 import { generateComplianceCertificate, renderCertificateHtml } from './certificate.mjs';
 import { evaluateCounterpartyShield } from './bridges/fakewatch-bridge.mjs';
 import { generateRugReceiptProof } from './bridges/rugreceipt-bridge.mjs';
+import { evaluatePaysheetConsensus } from './bridges/paysheet-bridge.mjs';
 
 const wasmEngine = await getWasmInstance();
 
@@ -6033,6 +6034,26 @@ export async function handleApiRequest(req, res) {
         chainId: params.chainId ?? params.chain_id ?? 11155111
       });
       return sendJson(res, 200, proof);
+    }
+
+    // 5f. GET / POST /api/bridge/paysheet (Paysheet 3-Way Consensus Payroll Shield - Issue #214)
+    if (pathname === '/api/bridge/paysheet' && (req.method === 'POST' || req.method === 'GET')) {
+      const q = Object.fromEntries(urlObj.searchParams.entries());
+      let body = {};
+      if (req.method === 'POST') {
+        try {
+          body = await readJsonBody(req);
+        } catch {
+          body = {};
+        }
+      }
+      const params = { ...q, ...body };
+      const report = await evaluatePaysheetConsensus({
+        target: params.target || params.recipient || params.payee || params.name || params.address,
+        amountUsdc: params.amountUsdc || params.amount || '0.00',
+        payrollId: params.payrollId || params.payroll_id || 'PAYROLL-DEFAULT'
+      });
+      return sendJson(res, 200, report);
     }
 
     // 6. Replacement Compliance Miner Endpoints (/api/miner/*)
