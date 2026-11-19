@@ -229,6 +229,40 @@
     line-height: 1.4;
   }
 
+  /* 3-Tab Architecture Switcher */
+  .main-tab-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--panel-border);
+    padding-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--ink-muted);
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tab-btn:hover {
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .tab-btn.active {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: var(--accent);
+    color: #60a5fa;
+    box-shadow: 0 0 14px rgba(59, 130, 246, 0.25);
+  }
+
   /* Split-Screen Interactive Playground */
   .playground-grid {
     display: grid;
@@ -717,6 +751,22 @@
     </div>
   </div>
 
+  <!-- 3-Tab Architecture Switcher -->
+  <div class="main-tab-bar">
+    <button class="tab-btn active" id="tab-btn-firewall" onclick="switchMainTab('firewall')">
+      <span>🛡️ Pre-Payment Spend Firewall (Demo)</span>
+    </button>
+    <button class="tab-btn" id="tab-btn-developer" onclick="switchMainTab('developer')">
+      <span>🔌 Developer SDK &amp; Agent Integration</span>
+    </button>
+    <button class="tab-btn" id="tab-btn-network" onclick="switchMainTab('network')">
+      <span>⛓️ Telegraph Network &amp; On-Chain Ledger</span>
+    </button>
+  </div>
+
+  <!-- TAB 1: PRE-PAYMENT SPEND FIREWALL -->
+  <div id="tab-panel-firewall" class="tab-panel">
+
   <!-- 90-Second Walkthrough Video (Prominent) -->
   <div style="background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
@@ -970,13 +1020,15 @@
       <div class="viability-metric">$0.01 <span style="font-size:14px; font-weight:400; color:var(--ink-muted);">Per Pre-Flight Inspection</span></div>
       <ul>
         <li><strong>250,000 : 1 Protection Ratio:</strong> A 1-cent check prevents a $2,500+ loss event.</li>
-        <li><strong>Sub-5ms deterministic gate:</strong> Fits directly into agent tool-calling loops before signing.</li>
+        <li><strong>Sub-25ms deterministic WASM gate:</strong> Fits directly into agent tool-calling loops before signing.</li>
         <li><strong>Telegraph x402 settlement:</strong> Instant micropayment rail, zero balance exposure, zero custody risk.</li>
       </ul>
     </div>
   </div>
+  </div> <!-- End Tab 1: Pre-Payment Spend Firewall -->
 
-  <!-- Developer Quickstart Section -->
+  <!-- TAB 2: DEVELOPER SDK & AGENT INTEGRATION -->
+  <div id="tab-panel-developer" class="tab-panel" style="display:none;">
   <div class="section-title">💻 Developer Integration &amp; 10-Second Quickstart</div>
   <div class="quickstart-card">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
@@ -1058,8 +1110,36 @@ if not clearance["cleared"]:
     raise PermissionError(f"Spend Blocked: {clearance['verdict']}")</div>
     </div>
 
+    <!-- Code Snippet 4: LangChain / Python Autonomous Agent Guard -->
+    <div style="font-size:12px; font-weight:600; color:var(--accent); margin:14px 0 4px;">Option D: Python / LangChain Autonomous Agent Guard (Zero External Dependencies)</div>
+    <div class="code-block" style="margin-bottom:12px;">
+      <button class="copy-btn" onclick="copySnippet('sdk-langchain-snip')">Copy</button>
+      <div id="sdk-langchain-snip"># examples/langchain-agent-guard/spend_guard_agent.py
+from spend_guard_agent import PramanSpendGuard, SpendGuardException
+
+guard = PramanSpendGuard()
+
+try:
+    # Evaluate spend before calling web3.eth.send_transaction
+    verdict = guard.inspect_spend(
+        agent_id="procure-bot-01",
+        recipient_address="0x5462D6334F333C8D0662D8a291F04bE5b736b71b",
+        vendor_name="Anthropic PBC",
+        amount_usdc=250.00,
+        line_items=[{"desc": "Inference Tokens", "qty": 10, "unitPrice": 25.00, "amount": 250.00}]
+    )
+    print(f"✅ Approved for payment! Attestation: {verdict['attestationSha256']}")
+except SpendGuardException as e:
+    print(f"🛑 Blocked by Praman Desk Firewall: {e}")</div>
+    </div>
+  </div> <!-- End quickstart-card -->
+</div> <!-- End Tab 2: Developer SDK & Agent Integration -->
+
+<!-- TAB 3: TELEGRAPH NETWORK & ON-CHAIN LEDGER -->
+<div id="tab-panel-network" class="tab-panel" style="display:none;">
+
     <!-- Partner Bridges Section -->
-    <div style="font-size:12px; font-weight:600; color:#34d399; margin:14px 0 6px;">🤝 Reciprocal Ecosystem Bridges (FakeWatch &amp; RugReceipt) &amp; Contract Evaluator</div>
+    <div class="section-title">🤝 Reciprocal Ecosystem Bridges (FakeWatch &amp; RugReceipt) &amp; Contract Evaluator</div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
       <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px;">
         <div style="font-size:12px; font-weight:700; color:#38bdf8; margin-bottom:4px;">FakeWatch Shield (#42420)</div>
@@ -1193,22 +1273,8 @@ Content-Type: application/json
       </div>
     </details>
 
-    <!-- Accordion 4: Video Screencast -->
-    <details>
-      <summary>
-        <span>🎥 90-Second Screencast Walkthrough & Architecture</span>
-        <span style="font-size:12px; color:var(--accent); font-weight:600;">Watch Walkthrough</span>
-      </summary>
-      <div class="accordion-content">
-        <div style="background:var(--bg); border:1px solid var(--panel-border); border-radius:8px; padding:16px; margin-bottom:12px;">
-          <h4 style="margin:0 0 8px 0; color:#fff;">Live Interception Screencast (Cursor / CLI + Web Playground)</h4>
-          <p style="margin:0 0 12px 0;">Demonstrating how Praman Desk intercepts prompt-injected agent spending in real time before crypto transactions settle.</p>
-          <video controls style="width:100%; max-height:480px; border-radius:6px; background:#000;" src="/praman-desk-walkthrough.mp4"></video>
-        </div>
-      </div>
-    </details>
-
-  </div>
+  </div> <!-- End accordion-group -->
+</div> <!-- End Tab 3: Telegraph Network & On-Chain Ledger -->
 
   <!-- Footer -->
   <footer>
@@ -1292,6 +1358,15 @@ Content-Type: application/json
     });
 
     triggerInspection();
+  }
+
+  function switchMainTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+    const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+    const activePanel = document.getElementById(`tab-panel-${tabId}`);
+    if (activeBtn) activeBtn.classList.add('active');
+    if (activePanel) activePanel.style.display = 'block';
   }
 
   async function triggerInspection() {
