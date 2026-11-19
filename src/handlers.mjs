@@ -23,7 +23,7 @@ const evidenceDir = path.join(rootDir, 'evidence');
 export const NODE_URL = process.env.TELEGRAPH_NODE_URL || 'https://devnode.telegraphprotocol.com';
 export const RPC_URL = process.env.SEPOLIA_RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com';
 export const TEST_USDC = '0xcc194e1a843B658526D0D5C431f670028582Ae17';
-export const DIAMOND_PORT = '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b';
+export const DIAMOND_PORT = '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b';
 export const CONTRIBUTOR_ADDRESS = '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466';
 
 const USDC_ABI = parseAbi([
@@ -4786,7 +4786,7 @@ export async function evaluateExchangeIntegrity(params = {}) {
     telegraphSettlement: {
       intent: 'CORPORATE_REGISTRY_LOOKUP',
       minerId: 5281,
-      diamondRegistration: 5311,
+      diamondRegistration: 6127,
       contractAddress: DIAMOND_PORT,
       status: 'VERIFIED_MICROSETTLEMENT'
     },
@@ -5432,7 +5432,7 @@ export async function handleApiRequest(req, res) {
         ok: true,
         service: 'praman-desk',
         minerId: 5281,
-        diamondRegistration: 5311,
+        diamondRegistration: 6127,
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
@@ -5459,10 +5459,10 @@ export async function handleApiRequest(req, res) {
         ]
       };
       const onchainDiamond = {
-        diamond_address: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
-        active_registration_id: 5311,
-        tx_hash: '0x3fdf3be7c6ebd3c9db95faf910ee7cfd78b68a72630952115badc13018da0945',
-        block_number: 12165894,
+        diamond_address: DIAMOND_PORT,
+        active_registration_id: 6127,
+        tx_hash: '0x0c9d8e9855b1d9346190825f015ca52ba465db121e8f35261d87311cf302e520',
+        block_number: 12167322,
         intents_count: 8,
         bonded_intents: [
           'PURCHASE_ORDER_VERIFY_GENERAL',
@@ -5919,7 +5919,7 @@ export async function handleApiRequest(req, res) {
             request: askPayload,
             primary: primaryObj,
             minerId: refCall?.minerId || 5281,
-            minerName: refCall?.minerName || 'praman-compliance-miner (Diamond 0x3624EB...)',
+            minerName: refCall?.minerName || 'praman-compliance-miner (Diamond 0x72a70e...)',
             endpoint: refCall?.endpoint || `/api/miner/${intent.toLowerCase().replace(/_/g, '-')}`,
             durationMs: executionDurationMs,
             txHash,

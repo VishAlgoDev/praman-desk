@@ -126,10 +126,10 @@ export async function generateRugReceiptProof({
     },
     attestation: {
       sha256Seal: attestationHash,
-      onChainDiamond: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+      onChainDiamond: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       settlementMinerId: 5281,
-      diamondRegistration: 5311,
-      explorerUrl: 'https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b'
+      diamondRegistration: 6127,
+      explorerUrl: 'https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b'
     },
     reciprocalAttribution: {
       collaborator: 'RugReceipt (Issue #208 / Gajanand)',
