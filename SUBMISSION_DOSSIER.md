@@ -104,8 +104,8 @@ npm run mcp:test
 - **Test Vectors**: **`1,043 / 1,043`** vectors passing with zero floating-point discrepancies (`npm run comparator:test`).
 
 ### 3. On-Chain Receipt Ledger
-- **Transactions Settled**: 57 verified on-chain settlements on Ethereum Sepolia Diamond [`0x3624EB01...`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b).
-- **Settlement Amount**: 0.01 test USDC per check, recording cryptographic attestation hash and block height.
+- **Transactions Settled**: 57 on-chain Sepolia Diamond testnet verification settlements generated across 15 miners during automated cross-miner validation on Ethereum Sepolia Diamond [`0x3624EB01...`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b).
+- **Settlement Amount**: 0.01 test USDC per verification check (testnet faucet funds, not production commercial revenue), recording cryptographic attestation hash and block height.
 
 ---
 

@@ -141,7 +141,26 @@ except SpendGuardException as e:
     print(f"🛑 Blocked: {e}")
 ```
 
-### 4. Paysheet 3-Way Consensus Integration (Issue #214)
+### 4. Coinbase AgentKit Spend Guard Integration
+Intercepts `transfer()` and `send_transaction()` in Coinbase AgentKit (`cdp-agentkit-core`):
+```bash
+python examples/coinbase-agentkit-guard/agentkit_spend_guard.py
+```
+```python
+from agentkit_spend_guard import GuardedWalletProvider
+
+guarded_wallet = GuardedWalletProvider(raw_wallet_provider=cdp_wallet)
+# Automatically screens against OFAC SDN, GLEIF LEI, and WASM math before signing
+res = guarded_wallet.guarded_transfer(
+    agent_id="treasury-bot-01",
+    to_address="0x1111111111111111111111111111111111111111",
+    amount_usdc=500.00,
+    vendor_name="Anthropic, PBC",
+    line_items=[{"desc": "Inference Tokens", "qty": 5, "unitPrice": 100.0, "amount": 500.0}]
+)
+```
+
+### 5. Paysheet 3-Way Consensus Integration (Issue #214)
 Runnable consensus adapter for [Timidan/paysheet](https://github.com/Timidan/paysheet/pull/1) in [`examples/paysheet-consensus/`](examples/paysheet-consensus/):
 ```bash
 node examples/paysheet-consensus/paysheet-praman-adapter.mjs
@@ -153,7 +172,7 @@ node examples/paysheet-consensus/paysheet-praman-adapter.mjs
 
 Praman Desk bridges Track 01, Track 02, and Track 03 into a self-reinforcing flywheel:
 
-1. **Active Miner (Track 02):** Bonded on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b` (Registration `#5305`). Serves compliance intelligence on Devnode at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281`.
+1. **Active Miner (Track 02):** Bonded on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b` (Registration `#5311`). Serves compliance intelligence on Devnode at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281`.
 2. **Evaluator Pool (Track 03):** 62 attested bounties scoring external miners against primary registers (SEC EDGAR, GLEIF, OFAC).
 3. **Praman Spend Guard (Track 01):** The user-facing application that consumes high-reputation network miners to verify counterparty parameters before on-chain payment.
 4. **WASM Math Engine:** 651-byte zero-import binary compiled from AssemblyScript with 1,043/1,043 test vectors passing with zero discrepancies.

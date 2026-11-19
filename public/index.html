@@ -1132,6 +1132,26 @@ try:
 except SpendGuardException as e:
     print(f"🛑 Blocked by Praman Desk Firewall: {e}")</div>
     </div>
+
+    <!-- Code Snippet 5: Coinbase AgentKit Wallet Guard -->
+    <div style="font-size:12px; font-weight:600; color:var(--accent); margin:14px 0 4px;">Option E: Coinbase AgentKit Wallet Provider Guard (Base / EVM)</div>
+    <div class="code-block" style="margin-bottom:12px;">
+      <button class="copy-btn" onclick="copySnippet('sdk-agentkit-snip')">Copy</button>
+      <div id="sdk-agentkit-snip"># examples/coinbase-agentkit-guard/agentkit_spend_guard.py
+from agentkit_spend_guard import GuardedWalletProvider
+
+guarded_wallet = GuardedWalletProvider(raw_wallet_provider=cdp_wallet)
+
+# Intercepts transfer() BEFORE cryptographic key signing
+res = guarded_wallet.guarded_transfer(
+    agent_id="coinbase-agent-01",
+    to_address="0x1111111111111111111111111111111111111111",
+    amount_usdc=500.00,
+    vendor_name="Anthropic, PBC",
+    line_items=[{"desc": "Claude 3.5 Sonnet Inference", "qty": 5, "unitPrice": 100.00, "amount": 500.00}]
+)
+print(f"Confirmed on-chain with Attestation Seal: {res['txResult']['txHash']}")</div>
+    </div>
   </div> <!-- End quickstart-card -->
 </div> <!-- End Tab 2: Developer SDK & Agent Integration -->
 
@@ -1180,11 +1200,11 @@ except SpendGuardException as e:
     <!-- Accordion 1: Receipts -->
     <details id="ledger-accordion">
       <summary>
-        <span>📜 On-Chain Receipt Ledger (<span id="ledger-count-label">57</span> Verified Sepolia Transactions)</span>
+        <span>📜 On-Chain Receipt Ledger (<span id="ledger-count-label">57</span> Testnet Verification Settlements)</span>
         <span style="font-size:12px; color:var(--ink-faint); font-family:var(--font-mono);">Live Diamond Port</span>
       </summary>
       <div class="accordion-content">
-        <p style="margin:0 0 12px 0;">All pre-flight spend guard clearances are settled via x402 on Ethereum Sepolia (free test USDC from contributor wallet). Live settlements loaded from <code>/api/ledger</code>:</p>
+        <p style="margin:0 0 12px 0;">57 on-chain Sepolia Diamond testnet verification settlements generated across 15 miners during automated cross-miner testnet validation ($0.01 test USDC each from contributor wallet; testnet verification, not commercial volume). Live testnet receipts loaded from <code>/api/ledger</code>:</p>
         <div style="max-height:420px; overflow-y:auto;">
           <table class="receipt-table">
             <thead>
