@@ -29,7 +29,7 @@ import {
   evaluateContractObligationPrompt,
 } from '../src/handlers.mjs';
 import { generateComplianceCertificate } from '../src/certificate.mjs';
-import { evaluateCounterpartyShield } from '../src/bridges/fakewatch-bridge.mjs';
+import { evaluateCounterpartyShield, checkFakeWatchDomain } from '../src/bridges/fakewatch-bridge.mjs';
 import { generateRugReceiptProof } from '../src/bridges/rugreceipt-bridge.mjs';
 import { evaluatePaysheetConsensus } from '../src/bridges/paysheet-bridge.mjs';
 import { getWasmInstance } from '../comparator/wasm-buffer.mjs';
@@ -55,14 +55,30 @@ function runWasmScore(truth, miner, code, tolerance) {
 // Phishing & Malicious URL Threat Screener (Powered by FakeWatch / ScamSniffer)
 async function checkUrlThreat(url) {
   if (!url || typeof url !== 'string') return null;
+  const trimmed = url.trim();
   try {
-    const res = await fetch(`https://fakewatch.pro/api/v1/url-safe?url=${encodeURIComponent(url.trim())}`, {
-      signal: AbortSignal.timeout(3500),
+    const res = await fetch(`https://fakewatch.pro/api/v1/url-safe?url=${encodeURIComponent(trimmed)}`, {
+      signal: AbortSignal.timeout(2500),
     });
-    if (!res.ok) return { verdict: 'Unavailable', status: res.status };
-    return await res.json();
+    if (res.ok) {
+      return await res.json();
+    }
   } catch (err) {
-    return { verdict: 'Unavailable', error: err.message };
+    // Network timeout or unreachable; fall through to deterministic domain screener
+  }
+
+  // Deterministic local domain screening fallback (offline / CI / rate-limited)
+  try {
+    const fw = await checkFakeWatchDomain(trimmed);
+    if (fw.verdict === 'PHISHING' || fw.verdict === 'MALICIOUS') {
+      return { verdict: 'Malicious', summary: fw.source || 'FakeWatch Phishing Feed', detections: 1, host: fw.domain };
+    }
+    if (fw.verdict === 'SAFE') {
+      return { verdict: 'Safe', summary: fw.source || 'FakeWatch Verified Whitelist', detections: 0, host: fw.domain };
+    }
+    return { verdict: 'Unknown', summary: fw.note || 'Inconclusive domain reputation from FakeWatch/ScamSniffer', detections: 0, host: fw.domain };
+  } catch {
+    return { verdict: 'Unknown', summary: 'Offline fallback', detections: 0 };
   }
 }
 
@@ -93,9 +109,9 @@ export async function clearSpendComposite({
       flags.push(
         `CRITICAL_MALICIOUS_PAYMENT_URL: Phishing/threat reported by FakeWatch (${urlThreatResult.summary || urlThreatResult.detections + ' detections'})`
       );
-    } else if (urlThreatResult && urlThreatResult.verdict === 'Unknown') {
+    } else if (urlThreatResult && (urlThreatResult.verdict === 'Unknown' || urlThreatResult.verdict === 'Unavailable')) {
       flags.push(
-        `UNVERIFIED_PAYMENT_URL: Inconclusive domain reputation from FakeWatch/ScamSniffer; requires secondary administrative review`
+        `UNVERIFIED_PAYMENT_URL: Inconclusive domain reputation from FakeWatch/ScamSniffer (${urlThreatResult.verdict}); requires secondary administrative review`
       );
     }
   }
@@ -172,7 +188,9 @@ export async function clearSpendComposite({
   // Determine Gate Decision
   const isSanctioned = Boolean(sanctionsResult.matches && sanctionsResult.matches.length > 0);
   const isMaliciousUrl = Boolean(urlThreatResult && urlThreatResult.verdict === 'Malicious');
-  const isUnknownUrl = Boolean(urlThreatResult && urlThreatResult.verdict === 'Unknown');
+  const isUnknownUrl = Boolean(
+    urlThreatResult && (urlThreatResult.verdict === 'Unknown' || urlThreatResult.verdict === 'Unavailable')
+  );
   const hasCriticalFailure = !reconResult.reconciled || (docResult && !docResult.authentic);
   const requiresDualSignoff = poResult.status === 'approval_cap_exceeded' && !dual_signoff_present;
 
