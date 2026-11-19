@@ -869,7 +869,7 @@ export async function executeMcpTool(name, inputArgs = {}) {
           break;
 
         case 'audit_contract_obligation':
-          const rawPrompt = args.text || args.query || args.prompt || args.contract || '';
+          const rawPrompt = args.text || args.query || args.prompt || args.contract || args.contractText || args.clause || '';
           result = evaluateContractObligationPrompt(rawPrompt) || {
             verified: false,
             compliant: false,
