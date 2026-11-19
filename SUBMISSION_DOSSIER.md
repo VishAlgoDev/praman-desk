@@ -38,17 +38,19 @@
 
 ---
 
-## SECTION 02: Short Demo (Walkthrough Video)
+## SECTION 02: Short Demo (Walkthrough Videos)
 
-- **Direct MP4 Video Stream**:  
-  [https://praman-desk.vercel.app/praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4)
-- **Developer Screencast Script (90 Seconds)**:  
-  [`docs/SHOWCASE_WALKTHROUGH_SCRIPT.md`](docs/SHOWCASE_WALKTHROUGH_SCRIPT.md)
-- **Walkthrough Flow**:
-  1. `0:00 - 0:15` | **The Threat**: Why autonomous agent spending is broken in 2026. Prompt injection and invoice spoofing cause irreversible crypto loss.
-  2. `0:15 - 0:40` | **Live Cursor / CLI Interception**: An autonomous agent attempting a $4,200 payout to a Lazarus Group OFAC address is intercepted by Praman Desk MCP before `signer.sendTransaction()` can execute.
-  3. `0:40 - 1:10` | **Live Split-Screen Web Playground**: One-click demo of Scenario 2 (Arithmetic Overcharge on NVIDIA Corporation: $100 discrepancy detected by 651-byte WASM + in-browser `.wasm` verification) and Scenario 3 (Compliant Payout: Anthropic PBC invoice, verified GLEIF LEI `984500B6DEB8CEBC4Z70`, approved for execution).
-  4. `1:10 - 1:30` | **Telegraph Protocol Rail & Economics**: Every check settles for $0.01 via Telegraph x402 on Sepolia; unit economics comparison ($0.01 vs $2,500 legal retainer, 250,000:1 protection ratio); 10-second MCP setup (`npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp`).
+- **Video 1: Live Agent Interception Screencast (90 Seconds)**:  
+  [https://praman-desk.vercel.app/praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4)  
+  *Script*: [`docs/SHOWCASE_WALKTHROUGH_SCRIPT.md`](docs/SHOWCASE_WALKTHROUGH_SCRIPT.md)  
+  *Flow*: Live Cursor / Claude Code agent attempting payout to Lazarus Group OFAC-sanctioned address is intercepted by Praman Spend Guard before `signer.sendTransaction()` can execute.
+
+- **Video 2: Two-Mind Spend Guard & $79,373 Benchmark Showcase (1080p HD, 43 Seconds)**:  
+  [https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4)  
+  *Flow*: Clean 1080p HD video with synthesized tech soundbed demonstrating the Two-Mind collaborative guard (Animoca Brands Minds specification reference implementation) and the Counterfactual Policy Evaluation Benchmark ($79,373 in capital loss averted across 5 adversarial vectors).
+
+- **Interactive In-Browser Video Switcher**:  
+  Judges can seamlessly toggle between both videos directly in the header of [https://praman-desk.vercel.app](https://praman-desk.vercel.app).
 
 ---
 
@@ -160,15 +162,21 @@ Praman Desk serves as an autonomous pre-payment spend firewall:
 
 ## SECTION 07: Organic Growth, Education & Community Activation (20 Points)
 
-### 1. Three Meaningful Public Technical Updates on Separate Dates
+### 1. Four Meaningful Public Technical Updates on Separate Dates
 - **Update 1 (Nov 9, 2026)**: Genesis Devnode integration & EIP-191 personal_sign evaluator dataset generation (62 rows across 8 intents).  
   *Link*: [Discord #hackathon Milestone Post](https://discord.com/channels/1438396125609463881/1498654113376899112)
 - **Update 2 (Nov 14, 2026)**: Formal Integration Milestone — 5 on-chain Sepolia settlement receipts (`evidence/nov14-milestone-receipt.json`) & 651-byte WASM comparator engine.  
   *Link*: [Official Milestone Receipt Commit (62d2169)](https://github.com/VishAlgoDev/praman-desk/commit/62d2169d5185060494ccfbbb7f87e8a976aa5a3c)
 - **Update 3 (Nov 17, 2026)**: Launch of the Praman Desk Pre-Payment Firewall (Mission 11 & Mission 02), 10-tool MCP server, and 90-second developer screencast.  
   *Links*: [X Launch Thread (6 tweets)](https://x.com/vishal_karad/status/2122629821050306798) · [Discord Showcase Update](https://discord.com/channels/1438396125609463881/1569379402360553692)
+- **Update 4 (Nov 20, 2026)**: Two-Mind Spend Guard Architecture (Animoca Brands Minds specification reference implementation), Counterfactual Policy Evaluation Benchmark ($79,373 capital loss averted), Upstream Evaluator Adapter [PR #217](https://github.com/telegraphprotocol/bounties/pull/217) for Mission 04 Legal, and Dual-Language SDKs.  
+  *Links*: [Upstream Bounties Progress Update 3](https://github.com/telegraphprotocol/bounties/issues/199#issuecomment-7023625122) · [Discord Showcase Nov 20 Thread Update](https://discord.com/channels/1438396125609463881/1569379402360553692) · [GitHub PR #217](https://github.com/telegraphprotocol/bounties/pull/217)
 
-### 2. Educational Tutorials & Developer Reproducibility
+### 2. Educational Tutorials, Developer SDKs & Reproducibility
+- **Dual-Language Zero-Dependency SDKs (`packages/praman-sdk`)**:
+  - **TypeScript / JavaScript**: Zero-dependency ESM package (`npm run sdk:test` passes 6/6 tests).
+  - **Python**: Zero-dependency standard-library package (`python packages/praman-sdk/test_sdk.py` passes 6/6 tests).
+  - Supports `clearSpend`, `screenSanctions`, `verifyVendor`, `reconcileInvoice`, `auditContractObligation`, `screenStablecoinSettlement`, and `paysheetConsensus`.
 - **Google Colab Training Notebook**: Complete standalone Colab reproducing ModernBERT-base LoRA training for `SANCTIONS_SCREENING_MATCH`:  
   *Colab Link*: [`Train_Sanctions_Evaluator_Adapter.ipynb`](https://colab.research.google.com/github/VishAlgoDev/praman-desk/blob/main/colab/Train_Sanctions_Evaluator_Adapter.ipynb)
 - **Zero-Wallet Quickstart**: Interactive developer testing instructions in `README.md` and live web demo at [https://praman-desk.vercel.app](https://praman-desk.vercel.app).
