@@ -3,16 +3,24 @@
 **The Autonomous Pre-Payment Spend Firewall for AI Agents, DAOs & Treasuries**
 
 [![Live Hosted App](https://img.shields.io/badge/Live%20Firewall-praman--desk.vercel.app-0284c7?style=for-the-badge&logo=vercel)](https://praman-desk.vercel.app)
-[![Active Sepolia Miner](https://img.shields.io/badge/Sepolia%20Miner-Devnode%20%235281%20(%235311)-10b981?style=for-the-badge&logo=ethereum)](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
+[![Active Sepolia Diamond](https://img.shields.io/badge/Sepolia%20Diamond-Port%20%236128%20(Miner%20%236127)-10b981?style=for-the-badge&logo=ethereum)](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
+[![Global Rank #1](https://img.shields.io/badge/Devnode%20Rank-%231%20Document%20Authenticity-059669?style=for-the-badge)](https://devnode.telegraphprotocol.com)
 [![WASM Comparator](https://img.shields.io/badge/WASM%20Engine-651%20Bytes%20Pure%20Binary-f59e0b?style=for-the-badge)](https://praman-desk.vercel.app/comparator.wasm)
-[![MCP Server](https://img.shields.io/badge/MCP-Zero--Install%20GitHub%20npx-6366f1?style=for-the-badge)](https://github.com/VishAlgoDev/praman-desk#10-second-developer-quickstart)
+[![MCP Server](https://img.shields.io/badge/MCP-15%20Tools%20Streamable%20HTTP-6366f1?style=for-the-badge)](https://github.com/VishAlgoDev/praman-desk#10-second-developer-quickstart)
 
 - **Live Split-Screen Interactive Playground:** <https://praman-desk.vercel.app>
 - **Official Screencast Walkthrough (90s):** [Direct MP4 Stream](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) · [Developer Script](docs/SHOWCASE_WALKTHROUGH_SCRIPT.md)
-- **Active Telegraph Miner:** Devnode Miner `#5281` (Sepolia Diamond `#5311`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
+- **Active Telegraph Miner:** Devnode Miner `#6127` (Route `5281` / Sepolia Diamond Registration `#6128`) on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
+- **Devnode Global Leaderboard Standing (Epoch 16):**
+  - 🏆 **Rank #1 Globally:** `DOCUMENT_AUTHENTICITY_GENERAL` (Score: `0.9993`)
+  - 🥈 **Rank #3 Globally:** `SANCTIONS_SCREENING_MATCH_GENERAL` (Score: `1.0000`, 19,565 OFAC records)
+  - 💎 **Rank #6 Globally:** `CORPORATE_REGISTRY_LOOKUP_GENERAL` (Score: `1.0000`, 200+ jurisdictions GLEIF)
+  - 💎 **Prior Rank #1:** `PURCHASE_ORDER_VERIFY_GENERAL`
 - **Telegraph Hackathon Season II Track:** Track 01 — Apps & Agents
   - **Mission 11:** Autonomous Systems (Spend Delegation Approval Caps & Agent Circuit Breakers)
   - **Mission 02:** Stablecoin Treasury Guard (OFAC SDN EVM Address Screening & FATF Travel Rule)
+  - **Mission 01:** Exchange Pre-Listing Counterparty Integrity Screening
+  - **Mission 04:** Legal & Cross-Border Diligence (5 Statutory Registers + 651-byte WASM)
 - **Anjoman App Submission ID:** `9ae7025e-65be-490b-8e59-2aa598f16992`
 - **Contributor / Payer Wallet:** [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466)
 
@@ -36,13 +44,16 @@ If any check fails, the transaction is **frozen before signing**.
 
 ## Interactive Split-Screen Playground
 
-Visit [https://praman-desk.vercel.app](https://praman-desk.vercel.app) to test three realistic threat scenarios with one click:
+Visit [https://praman-desk.vercel.app](https://praman-desk.vercel.app) to test six realistic enterprise threat scenarios with one click:
 
 | Threat Scenario | Challenge | Firewall Verdict | Policy Enforcement |
 |---|---|:---:|---|
 | **1. Phishing & Sanctions Exploit** | Prompt-injected agent attempts $4,200 payout to Lazarus Group OFAC address (`0x098B...2f96`) spoofing a Cloudflare edge bill | **`[ HALT & FREEZE ]`** | Intercepted in <3ms. Recipient flagged on US Treasury SDN list. Zero funds moved. |
 | **2. Arithmetic Overcharge** | NVIDIA Corporation GPU compute invoice claims $450.00, but line items sum to $350.00 (phantom markup) | **`[ HALT & FREEZE ]`** | GLEIF LEI verified (`549300S4KLFTLO7GSQ80`); 651-byte WASM engine catches exact $100.00 (10,000 cents) discrepancy. |
 | **3. Compliant Agent Payout** | Legitimate Anthropic API compute invoice ($250.00 USDC) within $500 single-agent cap | **`[ APPROVED ]`** | OFAC clean, GLEIF LEI verified (`984500B6DEB8CEBC4Z70`), 0.00% math error. Ready for Telegraph x402 settlement. |
+| **4. Dual-Auth Delegation Cap** | High-value infrastructure payout ($2,400 USDC) exceeding $500 single-agent ceiling | **`[ HELD FOR REVIEW ]`** | HELD pending multi-signature supervisor threshold signoff. Protects DAO treasuries from agent overrun. |
+| **5. Contract Obligation Audit** | Commercial escrow release with delayed statutory milestone (MahaRERA Section 18 delayed possession) | **`[ HALT & FREEZE ]`** | 11% p.a. interest penalty liability triggered ($11,550 accrued penalty); disbursement frozen until statutory compliance. |
+| **6. FakeWatch Phishing Shield** | Prompt-injected agent prompted to approve transfer to lookalike phishing domain (`unisvvap.org`) | **`[ HALT & FREEZE ]`** | Intercepted via FakeWatch threat intelligence bridge (bounty #42420); blacklisted spoof domain frozen before signing. |
 
 ---
 
@@ -180,16 +191,30 @@ Runnable consensus adapter for [Timidan/paysheet](https://github.com/Timidan/pay
 node examples/paysheet-consensus/paysheet-praman-adapter.mjs
 ```
 
+### 7. Vercel AI SDK Tool-Calling Spend Guard
+Native tool declaration for Vercel AI SDK (`ai` package) in [`examples/vercel-ai-sdk-guard/`](examples/vercel-ai-sdk-guard/):
+```bash
+node examples/vercel-ai-sdk-guard/test-ai-sdk.mjs
+```
+
+### 8. FakeWatch Phishing Shield & RugReceipt Screens
+Cross-project threat intelligence adapters in [`examples/fakewatch-shield/`](examples/fakewatch-shield/) and [`examples/rugreceipt-screen/`](examples/rugreceipt-screen/):
+```bash
+node examples/fakewatch-shield/test-fakewatch-shield.mjs
+node examples/rugreceipt-screen/test-rugreceipt-screen.mjs
+```
+
 ---
 
 ## Telegraph Protocol Closed-Loop Architecture
 
 Praman Desk bridges Track 01, Track 02, and Track 03 into a self-reinforcing flywheel:
 
-1. **Active Miner (Track 02):** Bonded on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b` (Registration `#5311`). Serves 7 compliance capabilities on Devnode router at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281` with the 8th intent (`CONTRACT_OBLIGATION_AUDIT_GENERAL`) bonded on-chain and served via `/api/miner/contract-obligation-audit`.
+1. **Active Miner (Track 02):** Bonded on active Sepolia Diamond Port [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) (Diamond Registration `#6128`, Devnode Miner `#6127`, Route `5281`). Serves 8 compliance capabilities on Devnode router including verified Rank #1 Global Document Authenticity and Rank #3 Global Sanctions Screening.
 2. **Evaluator Pool (Track 03):** 62 attested bounties scoring external miners against primary registers (SEC EDGAR, GLEIF, OFAC).
 3. **Praman Spend Guard (Track 01):** The user-facing application that consumes high-reputation network miners to verify counterparty parameters before on-chain payment.
 4. **WASM Math Engine:** 651-byte zero-import binary compiled from AssemblyScript with 1,043/1,043 test vectors passing with zero discrepancies.
+5. **15 Streamable MCP Tools:** Fully compliant with MCP specification 2025-03-26 via SSE/JSON-RPC 2.0 at `/api/mcp`.
 
 ---
 
