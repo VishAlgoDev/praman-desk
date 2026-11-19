@@ -452,7 +452,7 @@ async function run() {
 
     // 18. Keyless Streamable HTTP & JSON-RPC 2.0 MCP endpoint (/api/mcp)
     const mcpMeta = await check('/api/mcp');
-    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 13) {
+    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 14) {
       throw new Error(`GET /api/mcp metadata failed: ${JSON.stringify(mcpMeta)}`);
     }
     const mcpInit = await check('/api/mcp', 'POST', {
@@ -476,7 +476,7 @@ async function run() {
       id: 2,
       method: 'tools/list'
     });
-    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 13) {
+    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 14) {
       throw new Error(`POST /api/mcp tools/list failed: ${JSON.stringify(mcpList)}`);
     }
     const mcpCall = await check('/api/mcp', 'POST', {
@@ -519,6 +519,12 @@ async function run() {
     const rugBridge = await check('/api/bridge/rugreceipt', 'POST', { contractAddress: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' });
     if (rugBridge.status !== 200 || rugBridge.json.verdict !== 'CRITICAL_RISK') {
       throw new Error(`POST /api/bridge/rugreceipt failed: ${JSON.stringify(rugBridge)}`);
+    }
+
+    // 22. Paysheet Bridge (/api/bridge/paysheet)
+    const psBridge = await check('/api/bridge/paysheet', 'POST', { target: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' });
+    if (psBridge.status !== 200 || psBridge.json.cleared !== false || psBridge.json.action !== 'HALT_AND_FREEZE') {
+      throw new Error(`POST /api/bridge/paysheet failed: ${JSON.stringify(psBridge)}`);
     }
 
     console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM & MISSION 02 VERIFIED!');
