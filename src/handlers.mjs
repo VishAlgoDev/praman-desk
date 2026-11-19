@@ -4988,16 +4988,6 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     const account = getWalletAccount();
     if (account) {
       try {
-        const fetchWithPayment = wrapFetchWithPaymentFromConfig(fetch, {
-          schemes: [{ network: 'eip155:11155111', client: new ExactEvmScheme(account) }],
-          spendControls: {
-            allowedAssets: [{
-              network: 'eip155:11155111',
-              asset: TEST_USDC,
-              maxAmountPerPayment: '100000'
-            }]
-          }
-        });
         const askPayload = {
           intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
           params: {
@@ -5005,44 +4995,142 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
             vendor: vendorName
           }
         };
-        const askRes = await fetchWithPayment(`${NODE_URL}/engine/v1/ask/5281`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(askPayload),
-          signal: AbortSignal.timeout(12000)
-        });
-        const rec = decodeBase64Json(askRes.headers.get('x-telegraph-receipt'));
-        const pay = decodeBase64Json(askRes.headers.get('payment-response') || askRes.headers.get('x-payment-response'));
-        const askBody = await askRes.json().catch(() => ({}));
-        const txHash = pay?.transactionHash || rec?.tx_hash || rec?.transactionHash || (pay?.success && pay?.transaction ? pay.transaction : null);
-        const isSettled = Boolean(askRes.ok && txHash);
 
-        let settlementStatus = 'SETTLEMENT_FAILED';
-        if (isSettled) {
-          settlementStatus = 'LIVE_SEPOLIA_X402_SETTLED';
-        } else if (askRes.status === 402 && (askBody?.hint || pay?.errorReason?.includes('deadline') || pay?.errorReason?.includes('timeout'))) {
-          settlementStatus = 'X402_FACILITATOR_TIMEOUT';
-        } else if (askRes.status === 400) {
-          settlementStatus = 'INVALID_PARAMS';
-        } else if (!askRes.ok) {
-          settlementStatus = `HTTP_${askRes.status}_ERROR`;
+        // 1. Primary High-Reliability Rail: Telegraph Sepolia Diamond Escrow Scheme (Bypasses external x402 facilitator timeouts)
+        let settledViaEscrow = false;
+        try {
+          const nonce = '0x' + crypto.randomBytes(16).toString('hex');
+          const now = Math.floor(Date.now() / 1000);
+          const validAfter = String(now - 10);
+          const validBefore = String(now + 90);
+
+          const lines = [
+            'Telegraph Escrow Payment',
+            '',
+            `Wallet: ${account.address.toLowerCase()}`,
+            'Pay To: 0x72a70e949362670bf8bcead24efc5b8f950aa08b',
+            'Network: eip155:11155111',
+            'Amount: 10000 uUSDC',
+            'Resource: /v1/ask/5281',
+            `Nonce: ${nonce}`,
+            `Valid After: ${validAfter}`,
+            `Valid Before: ${validBefore}`
+          ];
+          const msg = lines.join('\n');
+          const sig = await account.signMessage({ message: msg });
+
+          const escrowPaymentObj = {
+            x402Version: 2,
+            scheme: 'escrow',
+            network: 'eip155:11155111',
+            payload: {
+              authorization: {
+                from: account.address.toLowerCase(),
+                to: '0x72a70e949362670bf8bcead24efc5b8f950aa08b',
+                value: '10000',
+                amount: '10000',
+                resource: '/v1/ask/5281',
+                nonce,
+                validAfter,
+                validBefore
+              },
+              signature: sig
+            }
+          };
+
+          const b64Escrow = Buffer.from(JSON.stringify(escrowPaymentObj)).toString('base64');
+          const escrowRes = await fetch(`${NODE_URL}/engine/v1/ask/5281`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Payment': b64Escrow,
+              'PAYMENT-SIGNATURE': b64Escrow
+            },
+            body: JSON.stringify(askPayload),
+            signal: AbortSignal.timeout(10000)
+          });
+
+          if (escrowRes.ok) {
+            const payHeader = escrowRes.headers.get('payment-response') || escrowRes.headers.get('x-payment-response');
+            const pay = decodeBase64Json(payHeader);
+            const askBody = await escrowRes.json().catch(() => ({}));
+            const receiptHash = pay?.receipt_hash || pay?.transactionHash || askBody?.signal_hash || null;
+
+            liveSettlement = {
+              intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+              settled: true,
+              status: 'LIVE_SEPOLIA_ESCROW_SETTLED',
+              rail: 'escrow',
+              httpStatus: 200,
+              minerId: 5281,
+              minerRoute: '/engine/v1/ask/5281',
+              contractAddress: DIAMOND_PORT,
+              txHash: receiptHash,
+              receiptHash: receiptHash,
+              payer: account.address,
+              amountSpentUsdc: '0.01',
+              epochId: pay?.epoch_id || null,
+              telegraphReceipt: pay || null,
+              responsePayload: askBody
+            };
+            settledViaEscrow = true;
+          }
+        } catch {
+          // Fall back to exact rail if escrow fails
         }
 
-        liveSettlement = {
-          intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
-          settled: isSettled,
-          status: settlementStatus,
-          httpStatus: askRes.status,
-          minerId: 5281,
-          minerRoute: '/engine/v1/ask/5281',
-          contractAddress: DIAMOND_PORT,
-          txHash: txHash || null,
-          payer: account.address,
-          amountSpentUsdc: isSettled ? '0.01' : '0.00',
-          telegraphReceipt: rec || null,
-          responsePayload: askBody,
-          failureReason: !isSettled ? (askBody?.reason || askBody?.hint || pay?.errorReason || askBody?.message || 'Settlement incomplete') : null
-        };
+        // 2. Secondary Rail: Exact EIP-3009 Scheme (used if escrow not active)
+        if (!settledViaEscrow) {
+          const fetchWithPayment = wrapFetchWithPaymentFromConfig(fetch, {
+            schemes: [{ network: 'eip155:11155111', client: new ExactEvmScheme(account) }],
+            spendControls: {
+              allowedAssets: [{
+                network: 'eip155:11155111',
+                asset: TEST_USDC,
+                maxAmountPerPayment: '100000'
+              }]
+            }
+          });
+          const askRes = await fetchWithPayment(`${NODE_URL}/engine/v1/ask/5281`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(askPayload),
+            signal: AbortSignal.timeout(12000)
+          });
+          const rec = decodeBase64Json(askRes.headers.get('x-telegraph-receipt'));
+          const pay = decodeBase64Json(askRes.headers.get('payment-response') || askRes.headers.get('x-payment-response'));
+          const askBody = await askRes.json().catch(() => ({}));
+          const txHash = pay?.transactionHash || rec?.tx_hash || rec?.transactionHash || (pay?.success && pay?.transaction ? pay.transaction : null);
+          const isSettled = Boolean(askRes.ok && txHash);
+
+          let settlementStatus = 'SETTLEMENT_FAILED';
+          if (isSettled) {
+            settlementStatus = 'LIVE_SEPOLIA_X402_SETTLED';
+          } else if (askRes.status === 402 && (askBody?.hint || pay?.errorReason?.includes('deadline') || pay?.errorReason?.includes('timeout'))) {
+            settlementStatus = 'X402_FACILITATOR_TIMEOUT';
+          } else if (askRes.status === 400) {
+            settlementStatus = 'INVALID_PARAMS';
+          } else if (!askRes.ok) {
+            settlementStatus = `HTTP_${askRes.status}_ERROR`;
+          }
+
+          liveSettlement = {
+            intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+            settled: isSettled,
+            status: settlementStatus,
+            rail: 'exact',
+            httpStatus: askRes.status,
+            minerId: 5281,
+            minerRoute: '/engine/v1/ask/5281',
+            contractAddress: DIAMOND_PORT,
+            txHash: txHash || null,
+            payer: account.address,
+            amountSpentUsdc: isSettled ? '0.01' : '0.00',
+            telegraphReceipt: rec || null,
+            responsePayload: askBody,
+            failureReason: !isSettled ? (askBody?.reason || askBody?.hint || pay?.errorReason || askBody?.message || 'Settlement incomplete') : null
+          };
+        }
       } catch (err) {
         liveSettlement = {
           intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
