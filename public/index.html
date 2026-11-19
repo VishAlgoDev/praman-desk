@@ -767,19 +767,23 @@
   <!-- TAB 1: PRE-PAYMENT SPEND FIREWALL -->
   <div id="tab-panel-firewall" class="tab-panel">
 
-  <!-- 90-Second Walkthrough Video (Prominent) -->
+  <!-- Video Showcases (Interactive Switcher) -->
   <div style="background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
       <div style="display:flex; align-items:center; gap:10px;">
         <span style="font-size:20px;">🎥</span>
         <div>
-          <h3 style="margin:0; font-size:15px; color:#fff;">90-Second Walkthrough: Intercepting Autonomous Agent Exploits</h3>
-          <p style="margin:2px 0 0 0; font-size:12px; color:var(--ink-muted);">Watch Claude Code &amp; Cursor intercept prompt-injected agent spending in real time before crypto transactions settle.</p>
+          <h3 id="showcase-video-title" style="margin:0; font-size:15px; color:#fff;">90-Second Walkthrough: Intercepting Autonomous Agent Exploits</h3>
+          <p id="showcase-video-desc" style="margin:2px 0 0 0; font-size:12px; color:var(--ink-muted);">Watch Claude Code &amp; Cursor intercept prompt-injected agent spending in real time before crypto transactions settle.</p>
         </div>
       </div>
-      <a href="https://github.com/VishAlgoDev/praman-desk" target="_blank" rel="noopener" style="font-size:12px; color:var(--accent); text-decoration:none; font-weight:600;">View Source on GitHub &rarr;</a>
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <button id="btn-video-walkthrough" onclick="switchVideo('walkthrough')" style="background:var(--accent); color:#fff; border:1px solid var(--accent); padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Live Agent Screencast</button>
+        <button id="btn-video-benchmark" onclick="switchVideo('benchmark')" style="background:transparent; color:var(--ink-muted); border:1px solid var(--panel-border); padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Two-Mind 1080p Showcase</button>
+        <a href="https://github.com/VishAlgoDev/praman-desk" target="_blank" rel="noopener" style="font-size:12px; color:var(--accent); text-decoration:none; font-weight:600; margin-left:6px;">GitHub &rarr;</a>
+      </div>
     </div>
-    <video controls style="width:100%; max-height:420px; border-radius:8px; background:#000; display:block;" src="/praman-desk-walkthrough.mp4"></video>
+    <video id="showcase-video" controls style="width:100%; max-height:420px; border-radius:8px; background:#000; display:block;" src="/praman-desk-walkthrough.mp4"></video>
   </div>
 
   <!-- Interactive Scenario Selector -->
@@ -1464,6 +1468,36 @@ Content-Type: application/json
 
   let currentScenario = 'phishing_sanctions';
   window.lastVerdictData = null;
+
+  function switchVideo(type) {
+    const videoEl = document.getElementById('showcase-video');
+    const titleEl = document.getElementById('showcase-video-title');
+    const descEl = document.getElementById('showcase-video-desc');
+    const btn1 = document.getElementById('btn-video-walkthrough');
+    const btn2 = document.getElementById('btn-video-benchmark');
+    if (!videoEl || !titleEl || !descEl || !btn1 || !btn2) return;
+    if (type === 'benchmark') {
+      videoEl.src = '/praman_minds_benchmark_showcase.mp4';
+      titleEl.textContent = 'Two-Mind Spend Guard & $79,373 Benchmark Showcase (1080p HD)';
+      descEl.textContent = 'Animoca Brands Minds specification reference implementation & counterfactual risk prevention benchmark.';
+      btn2.style.background = 'var(--accent)';
+      btn2.style.color = '#fff';
+      btn2.style.borderColor = 'var(--accent)';
+      btn1.style.background = 'transparent';
+      btn1.style.color = 'var(--ink-muted)';
+      btn1.style.borderColor = 'var(--panel-border)';
+    } else {
+      videoEl.src = '/praman-desk-walkthrough.mp4';
+      titleEl.textContent = '90-Second Walkthrough: Intercepting Autonomous Agent Exploits';
+      descEl.textContent = 'Watch Claude Code & Cursor intercept prompt-injected agent spending in real time before crypto transactions settle.';
+      btn1.style.background = 'var(--accent)';
+      btn1.style.color = '#fff';
+      btn1.style.borderColor = 'var(--accent)';
+      btn2.style.background = 'transparent';
+      btn2.style.color = 'var(--ink-muted)';
+      btn2.style.borderColor = 'var(--panel-border)';
+    }
+  }
 
   function selectScenario(key) {
     currentScenario = key;
