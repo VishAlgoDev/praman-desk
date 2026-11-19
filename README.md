@@ -3,13 +3,13 @@
 **The Autonomous Pre-Payment Spend Firewall for AI Agents, DAOs & Treasuries**
 
 [![Live Hosted App](https://img.shields.io/badge/Live%20Firewall-praman--desk.vercel.app-0284c7?style=for-the-badge&logo=vercel)](https://praman-desk.vercel.app)
-[![Active Sepolia Miner](https://img.shields.io/badge/Sepolia%20Miner-%235289%20Active-10b981?style=for-the-badge&logo=ethereum)](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
+[![Active Sepolia Miner](https://img.shields.io/badge/Sepolia%20Miner-Devnode%20%235281%20(%235305)-10b981?style=for-the-badge&logo=ethereum)](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
 [![WASM Comparator](https://img.shields.io/badge/WASM%20Engine-651%20Bytes%20Pure%20Binary-f59e0b?style=for-the-badge)](https://praman-desk.vercel.app/comparator.wasm)
 [![MCP Server](https://img.shields.io/badge/MCP-Zero--Install%20GitHub%20npx-6366f1?style=for-the-badge)](https://github.com/VishAlgoDev/praman-desk#10-second-developer-quickstart)
 
 - **Live Split-Screen Interactive Playground:** <https://praman-desk.vercel.app>
 - **Official Screencast Walkthrough (90s):** [Direct MP4 Stream](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) · [Developer Script](docs/SHOWCASE_WALKTHROUGH_SCRIPT.md)
-- **Active Telegraph Miner (Sepolia Diamond):** ID `#5289` on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
+- **Active Telegraph Miner:** Devnode Miner `#5281` (Sepolia Diamond `#5305`) on [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b)
 - **Telegraph Hackathon Season II Track:** Track 01 — Apps & Agents
   - **Mission 11:** Autonomous Systems (Spend Delegation Approval Caps & Agent Circuit Breakers)
   - **Mission 02:** Stablecoin Treasury Guard (OFAC SDN EVM Address Screening & FATF Travel Rule)
@@ -125,7 +125,7 @@ curl -X POST https://praman-desk.vercel.app/api/spend-guard/evaluate \
 
 Praman Desk bridges Track 01, Track 02, and Track 03 into a self-reinforcing flywheel:
 
-1. **Active Miner `#5289` (Track 02):** Registered and bonded on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`. Serves regulatory filing and compliance intelligence at `https://devnode.telegraphprotocol.com/engine/v1/ask/5289`.
+1. **Active Miner (Track 02):** Bonded on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b` (Registration `#5305`). Serves compliance intelligence on Devnode at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281`.
 2. **Evaluator Pool (Track 03):** 62 attested bounties scoring external miners against primary registers (SEC EDGAR, GLEIF, OFAC).
 3. **Praman Spend Guard (Track 01):** The user-facing application that consumes high-reputation network miners to verify counterparty parameters before on-chain payment.
 4. **WASM Math Engine:** 651-byte zero-import binary compiled from AssemblyScript with 1,043/1,043 test vectors passing with zero discrepancies.

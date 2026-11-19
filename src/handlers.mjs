@@ -2726,11 +2726,16 @@ export async function lookupCorporateRegistry({
   const jurisTrim = String(parsed.jurisdiction || '').trim().toUpperCase();
   const countryCode = resolveJurisdictionCountryCode(parsed.jurisdiction);
 
-  if (!companyTrim) {
+  const hasHtml = /<[^>]*>/i.test(rawCompanyInput);
+  const alphanumericOnly = companyTrim.replace(/[^A-Za-z0-9]/g, '');
+  if (!companyTrim || hasHtml || alphanumericOnly.length < 2) {
+    const reason = hasHtml
+      ? 'Invalid input: query contains HTML tags or script injection.'
+      : 'Insufficient parameters: supply a company name, LEI, or corporate registry inquiry.';
     return {
-      verdict: 'insufficient_evidence',
+      verdict: 'not_found',
       found: false,
-      company: null,
+      company: hasHtml ? null : (companyTrim || null),
       legal_name: null,
       registration_id: null,
       active: false,
@@ -2743,8 +2748,8 @@ export async function lookupCorporateRegistry({
       confidence: 0,
       results: [],
       source: 'GLEIF Global LEI Index (api.gleif.org)',
-      reason: 'Insufficient parameters: supply a company name, LEI, or corporate registry inquiry.',
-      summary: 'Insufficient parameters: supply a company name, LEI, or corporate registry inquiry.'
+      reason,
+      summary: reason
     };
   }
 
@@ -2801,6 +2806,18 @@ export async function lookupCorporateRegistry({
         reason,
         summary: reason
       };
+    }
+  }
+
+  if (records.length > 0) {
+    const normCandTokens = companyTrim.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(t => t.length >= 3 && !['inc', 'ltd', 'llc', 'corp', 'the', 'and', 'plc', 'srl', 'gmbh', 'ag'].includes(t));
+    if (normCandTokens.length > 0) {
+      records = records.filter(r => {
+        const legalName = (r.attributes?.entity?.legalName?.name || '').toLowerCase();
+        const lei = (r.attributes?.lei || '').toLowerCase();
+        if (lei === companyTrim.toLowerCase()) return true;
+        return normCandTokens.some(tok => legalName.includes(tok));
+      });
     }
   }
 

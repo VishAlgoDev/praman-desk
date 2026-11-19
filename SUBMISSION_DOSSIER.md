@@ -90,10 +90,11 @@ npm run mcp:test
 
 ## SECTION 04: Evidence & Verifiable Artifacts
 
-### 1. Active Miner #5289 (Sepolia Diamond)
-- **Miner ID**: `#5289` (`praman-compliance-miner`)
-- **Diamond Registration Tx**: [`0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff`](https://sepolia.etherscan.io/tx/0x81b63b78c749fab27e821a919b9ea988ffa0f9939c687e3f460ea5943ce388ff)
-- **Active Endpoints**: Live HTTP 200 health check maintained by continuous watchdog runner at `https://devnode.telegraphprotocol.com/engine/v1/ask/5289`.
+### 1. Active Miner on Sepolia Diamond (Devnode #5281 / Registration #5305)
+- **Devnode Miner ID**: `5281` (`praman-compliance-miner`)
+- **Sepolia Diamond Registration ID**: `#5305` (updated from `#5289` on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`)
+- **Diamond Registration Tx**: [`0xb9b66532403497a123c633fea7b4e70a4c30ded2c098446de4498b70377ca085`](https://sepolia.etherscan.io/tx/0xb9b66532403497a123c633fea7b4e70a4c30ded2c098446de4498b70377ca085) (Block 12163265)
+- **Active Devnode Engine Endpoint**: Live HTTP 402/200 ask endpoint at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281`.
 
 ### 2. Standalone WASM Arithmetic Comparator
 - **Binary Path**: `public/comparator.wasm`
