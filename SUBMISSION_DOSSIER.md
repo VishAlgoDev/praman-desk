@@ -6,7 +6,7 @@
 - **Primary Track**: Track 01 — Apps & Agents
   - **Mission 11**: Autonomous Systems (Spend Delegation Approval Caps & Circuit Breakers)
   - **Mission 02**: Stablecoin Treasury Guard (OFAC SDN EVM Address Screening & FATF Travel Rule)
-- **Secondary Track**: Track 02 — Miners / Providers (Active Devnode Miner **`5281`** / On-chain Registration **`#5305`**)
+- **Secondary Track**: Track 02 — Miners / Providers (Active Devnode Miner **`5281`** / On-chain Registration **`#5311`**)
 - **Supporting Track**: Track 03 — Evaluators (WASM Deterministic Arithmetic Comparator + 62 Attested Bounties)  
 **Main Competition Deadline**: December 1, 2026, 23:59 UTC  
 **GitHub Repository**: [https://github.com/VishAlgoDev/praman-desk](https://github.com/VishAlgoDev/praman-desk)  
@@ -90,10 +90,10 @@ npm run mcp:test
 
 ## SECTION 04: Evidence & Verifiable Artifacts
 
-### 1. Active Miner on Sepolia Diamond (Devnode #5281 / Registration #5305)
+### 1. Active Miner on Sepolia Diamond (Devnode #5281 / Registration #5311)
 - **Devnode Miner ID**: `5281` (`praman-compliance-miner`)
-- **Sepolia Diamond Registration ID**: `#5305` (updated from `#5289` on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`)
-- **Diamond Registration Tx**: [`0xb9b66532403497a123c633fea7b4e70a4c30ded2c098446de4498b70377ca085`](https://sepolia.etherscan.io/tx/0xb9b66532403497a123c633fea7b4e70a4c30ded2c098446de4498b70377ca085) (Block 12163265)
+- **Sepolia Diamond Registration ID**: `#5311` (updated from `#5305` on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`)
+- **Diamond Registration Tx**: [`0x3fdf3be7c6ebd3c9db95faf910ee7cfd78b68a72630952115badc13018da0945`](https://sepolia.etherscan.io/tx/0x3fdf3be7c6ebd3c9db95faf910ee7cfd78b68a72630952115badc13018da0945) (Block 12165894)
 - **Active Devnode Engine Endpoint**: Live HTTP 402/200 ask endpoint at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281`.
 
 ### 2. Standalone WASM Arithmetic Comparator
