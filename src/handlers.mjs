@@ -4366,20 +4366,38 @@ async function isSafePublicHttpUrl(rawUrl) {
   }
 }
 
-async function evaluateDocumentEndpoint(merged) {
-  const docText = String(merged.document || merged.question || merged.query || merged.prompt || merged.text || '').trim();
+export async function evaluateDocumentEndpoint(merged) {
+  const docText = String(
+    merged.document ||
+    merged.question ||
+    merged.query ||
+    merged.prompt ||
+    merged.text ||
+    merged.input ||
+    merged.content ||
+    merged.message ||
+    merged.doc ||
+    merged.payload ||
+    ''
+  ).trim();
   const docLower = docText.toLowerCase();
 
   const promptMatch = evaluateDocumentAuthenticityPrompt(docText);
   if (promptMatch) {
+    const verdict = promptMatch.verdict || (promptMatch.authentic ? 'AUTHENTIC AND UNALTERED' : 'INVALID / TAMPERED');
+    const summary = promptMatch.summary || promptMatch.explanation || `VERDICT: ${verdict}. ${promptMatch.document}`;
     return {
       document: promptMatch.document,
       authentic: promptMatch.authentic,
-      verdict: promptMatch.verdict,
+      verdict,
       status: promptMatch.status,
       evidence: promptMatch.evidence,
-      summary: promptMatch.summary,
-      explanation: promptMatch.explanation,
+      summary,
+      explanation: promptMatch.explanation || summary,
+      reason: summary,
+      answer: summary,
+      results: [summary],
+      confidence: 1.0,
       intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
       schema_version: 4,
       as_of: new Date().toISOString()
@@ -4405,11 +4423,20 @@ async function evaluateDocumentEndpoint(merged) {
     if (re.test(docText)) findings.push(reason);
   }
   if (findings.length > 0) {
+    const verdict = 'INVALID / TAMPERED';
+    const summary = `VERDICT: ${verdict}. ${findings.join(' ')}`;
     return {
       document: docText || 'Document verification request',
       authentic: false,
-      verdict: 'Forged',
+      verdict,
+      status: 'tampered_or_invalid',
       evidence: findings,
+      summary,
+      explanation: summary,
+      reason: summary,
+      answer: summary,
+      results: [summary],
+      confidence: 0.99,
       intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
       schema_version: 4,
       as_of: new Date().toISOString()
@@ -4425,12 +4452,19 @@ async function evaluateDocumentEndpoint(merged) {
   const faceVal = hasExplicitFace ? parseStrictNumber(merged.pdfFaceAmount) : (faceTextMatch ? parseStrictNumber(faceTextMatch[1]) : NaN);
 
   if ((hasExplicitQr && (!Number.isFinite(qrVal) || qrVal < 0)) || (hasExplicitFace && (!Number.isFinite(faceVal) || faceVal < 0))) {
+    const summary = 'VERDICT: INCONCLUSIVE. Invalid non-numeric or negative amount supplied for signedQrAmount / pdfFaceAmount comparison.';
     return {
       document: docText || 'Document verification request',
       authentic: false,
       verdict: 'Inconclusive',
       status: 'invalid_input',
       evidence: ['Invalid non-numeric or negative amount supplied for signedQrAmount / pdfFaceAmount comparison.'],
+      summary,
+      explanation: summary,
+      reason: summary,
+      answer: summary,
+      results: [summary],
+      confidence: 0.5,
       intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
       schema_version: 4,
       as_of: new Date().toISOString()
@@ -4439,12 +4473,19 @@ async function evaluateDocumentEndpoint(merged) {
 
   const hasOneAmountOnly = (Number.isFinite(qrVal) && !Number.isFinite(faceVal)) || (!Number.isFinite(qrVal) && Number.isFinite(faceVal));
   if (hasOneAmountOnly) {
+    const summary = 'VERDICT: INCONCLUSIVE. Incomplete amount comparison: both signedQrAmount and pdfFaceAmount are required to verify QR-vs-face integrity.';
     return {
       document: docText || 'Document verification request',
       authentic: false,
       verdict: 'Inconclusive',
       status: 'insufficient_evidence',
       evidence: ['Incomplete amount comparison: both signedQrAmount and pdfFaceAmount are required to verify QR-vs-face integrity.'],
+      summary,
+      explanation: summary,
+      reason: summary,
+      answer: summary,
+      results: [summary],
+      confidence: 0.5,
       intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
       schema_version: 4,
       as_of: new Date().toISOString()
@@ -4461,22 +4502,39 @@ async function evaluateDocumentEndpoint(merged) {
     const amountsMismatch = out.delta_amount !== null && Math.abs(out.delta_amount) >= 0.01;
     // Matching numbers alone without a cryptographic 64-hex hash cannot prove document authenticity
     if (!amountsMismatch && !out.digest_valid_hex64) {
+      const summary = 'VERDICT: INCONCLUSIVE. Monetary values match, but no valid 64-hex SHA-256/IRN cryptographic digest was supplied to corroborate document provenance.';
       return {
         document: out.document,
         authentic: false,
         verdict: 'Inconclusive',
         status: 'insufficient_evidence',
         evidence: ['Monetary values match, but no valid 64-hex SHA-256/IRN cryptographic digest was supplied to corroborate document provenance.'],
+        summary,
+        explanation: summary,
+        reason: summary,
+        answer: summary,
+        results: [summary],
+        confidence: 0.5,
         intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
         schema_version: 4,
         as_of: new Date().toISOString()
       };
     }
+
+    const verdict = amountsMismatch ? 'INVALID / AMOUNT TAMPERING' : 'AUTHENTIC AND UNALTERED';
+    const summary = `VERDICT: ${verdict}. ${out.evidence || ''}`.trim();
     return {
       document: out.document,
       authentic: out.authentic,
-      verdict: out.authentic ? 'Authentic' : 'Forged',
+      verdict,
+      status: out.authentic ? 'authentic' : 'forged',
       evidence: [out.evidence],
+      summary,
+      explanation: summary,
+      reason: summary,
+      answer: summary,
+      results: [summary],
+      confidence: 0.99,
       intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
       schema_version: 4,
       as_of: new Date().toISOString()
@@ -4610,38 +4668,53 @@ async function evaluateDocumentEndpoint(merged) {
 
   // Deterministic two-digest comparison when both computed & expected 64-hex digests are provided
   const cleanExpectedField = String(merged.expected_sha256 || merged.hash || '').replace(/^0x/i, '').trim().toLowerCase();
-  const secondHash = /^[0-9a-f]{64}$/.test(cleanExpectedField) && cleanExpectedField !== explicitIrn
+  const secondHash = /^[0-9a-f]{64}$/.test(cleanExpectedField)
     ? cleanExpectedField
     : (allHashes.length >= 2 ? allHashes[1] : '');
   const hasNegation = /(?:^|[^a-z])(?:not|unverified|invalid|forged|tampered|altered|revoked|mismatch|rejected|failed|broken|expired)(?:[^a-z]|$)/i.test(docText);
 
   if (!hasNegation && /^[0-9a-f]{64}$/.test(explicitIrn) && /^[0-9a-f]{64}$/.test(secondHash)) {
     const digMatch = explicitIrn === secondHash;
+    const verdict = digMatch ? 'AUTHENTIC AND UNALTERED' : 'INVALID / TAMPERED';
+    const detail = digMatch
+      ? `Cryptographic SHA-256 digests match cleanly (0x${explicitIrn.slice(0, 12)}...${explicitIrn.slice(-8)}).`
+      : `Cryptographic digest mismatch: 0x${explicitIrn.slice(0, 12)}... !== 0x${secondHash.slice(0, 12)}...`;
+    const summary = `VERDICT: ${verdict}. ${detail}`;
     return {
       document: docText || 'Document verification request',
       authentic: digMatch,
-      verdict: digMatch ? 'Authentic' : 'Forged',
-      evidence: [
-        digMatch
-          ? `Cryptographic SHA-256 digests match cleanly (0x${explicitIrn.slice(0, 12)}...${explicitIrn.slice(-8)}).`
-          : `Cryptographic digest mismatch: 0x${explicitIrn.slice(0, 12)}... !== 0x${secondHash.slice(0, 12)}...`
-      ],
+      verdict,
+      status: digMatch ? 'authentic' : 'tampered',
+      evidence: [detail],
+      summary,
+      explanation: summary,
+      reason: summary,
+      answer: summary,
+      results: [summary],
+      confidence: 0.99,
       intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
       schema_version: 4,
       as_of: new Date().toISOString()
     };
   }
 
+  const detail = /^[0-9a-f]{64}$/.test(explicitIrn)
+    ? `64-hex SHA-256 digest is syntactically well-formed (${explicitIrn.slice(0, 12)}...${explicitIrn.slice(-8)}), but no source bytes, second reference hash, signed QR envelope, or verifiable document URL was provided to corroborate authenticity.`
+    : 'No corroborating cryptographic digest, signed QR payload, or fetchable document URL was supplied for deterministic verification.';
+  const summary = `VERDICT: INCONCLUSIVE. ${detail}`;
   return {
     document: docText || 'Document verification request',
     authentic: false,
     verdict: 'Inconclusive',
+    status: 'inconclusive',
     anomalies: /^[0-9a-f]{64}$/i.test(explicitIrn) ? ['single_uncorroborated_digest_no_source_bytes'] : ['missing_cryptographic_evidence'],
-    evidence: [
-      /^[0-9a-f]{64}$/i.test(explicitIrn)
-        ? `64-hex SHA-256 digest is syntactically well-formed (${explicitIrn.slice(0, 12)}...${explicitIrn.slice(-8)}), but no source bytes, second reference hash, signed QR envelope, or verifiable document URL was provided to corroborate authenticity.`
-        : 'No corroborating cryptographic digest, signed QR payload, or fetchable document URL was supplied for deterministic verification.'
-    ],
+    evidence: [detail],
+    summary,
+    explanation: summary,
+    reason: summary,
+    answer: summary,
+    results: [summary],
+    confidence: 0.5,
     intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
     schema_version: 4,
     as_of: new Date().toISOString()
