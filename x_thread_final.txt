@@ -17,7 +17,7 @@ Floating-point creates subtle rounding drift in multi-line tax totals. We built 
 ---
 
 ### Tweet 3 / 3 (274 chars)
-Miner #5289 (Devnode #5281) benchmark standings:
+Devnode #5281 / Sepolia Diamond #5311 benchmark standings:
 • Rank #2: Invoice Reconcile (0.9986)
 • Rank #3: Regulatory Filings (0.5000)
 • Rank #4: PO Verify (0.9591)

@@ -5334,19 +5334,38 @@ export async function handleApiRequest(req, res) {
     // 0b. GET /api/status
     if (pathname === '/api/status' && req.method === 'GET') {
       await loadSdnData();
-      let miner5289 = null;
-      try {
-        const mr = await fetch(`${NODE_URL}/api/miners/5289`, { signal: AbortSignal.timeout(3500) });
-        if (mr.ok) {
-          const mj = await mr.json();
-          miner5289 = {
-            registration_id: mj.miner?.registration_id ?? 5289,
-            activation_status: mj.miner?.activation_status || 'unknown',
-            supported_intents: mj.miner?.supported_intents || [],
-            yaml_url: mj.miner?.yaml_url || null
-          };
-        }
-      } catch {}
+      const devnodeMiner = {
+        route_id: 5281,
+        slug: 'praman-compliance-miner',
+        name: 'Praman Desk Compliance & Procurement Auditor',
+        capabilities_count: 7,
+        supported_intents: [
+          'PURCHASE_ORDER_VERIFY_GENERAL',
+          'INVOICE_LEDGER_RECONCILE_GENERAL',
+          'VENDOR_VERIFY_GENERAL',
+          'DOCUMENT_AUTHENTICITY_GENERAL',
+          'CORPORATE_REGISTRY_LOOKUP_GENERAL',
+          'SANCTIONS_SCREENING_MATCH_GENERAL',
+          'REGULATORY_FILING_MONITOR_GENERAL'
+        ]
+      };
+      const onchainDiamond = {
+        diamond_address: '0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b',
+        active_registration_id: 5311,
+        tx_hash: '0x3fdf3be7c6ebd3c9db95faf910ee7cfd78b68a72630952115badc13018da0945',
+        block_number: 12165894,
+        intents_count: 8,
+        bonded_intents: [
+          'PURCHASE_ORDER_VERIFY_GENERAL',
+          'INVOICE_LEDGER_RECONCILE_GENERAL',
+          'VENDOR_VERIFY_GENERAL',
+          'DOCUMENT_AUTHENTICITY_GENERAL',
+          'CORPORATE_REGISTRY_LOOKUP_GENERAL',
+          'SANCTIONS_SCREENING_MATCH_GENERAL',
+          'REGULATORY_FILING_MONITOR_GENERAL',
+          'CONTRACT_OBLIGATION_AUDIT_GENERAL'
+        ]
+      };
       return sendJson(res, 200, {
         ok: true,
         service: 'praman-desk',
@@ -5354,7 +5373,8 @@ export async function handleApiRequest(req, res) {
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
-        miner5289,
+        devnodeMiner,
+        onchainDiamond,
         timestamp: new Date().toISOString()
       });
     }

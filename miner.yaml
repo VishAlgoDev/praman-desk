@@ -1,6 +1,6 @@
 version: "1"
 kind: miner
-id: 5289
+id: 5311 # Sepolia Diamond Registration #5311 (Devnode Engine Route #5281)
 slug: praman-compliance-miner
 protocol: generic
 name: Praman Desk Compliance & Procurement Auditor
