@@ -22,16 +22,43 @@ export async function generateRugReceiptProof({
   const cAddr = String(contractAddress || '').trim().toLowerCase();
   const dAddr = String(deployerAddress || '').trim().toLowerCase();
 
-  // 1. Screen contract address
+  // 1. Screen contract address against OFAC SDN
   const contractSanctions = cAddr ? await screenSanctions({ name: cAddr, threshold: 0.70 }) : null;
 
-  // 2. Screen deployer address
+  // 2. Screen deployer address against OFAC SDN
   const deployerSanctions = dAddr ? await screenSanctions({ name: dAddr, threshold: 0.70 }) : null;
 
   const isContractSanctioned = Boolean(contractSanctions && contractSanctions.matched);
   const isDeployerSanctioned = Boolean(deployerSanctions && deployerSanctions.matched);
 
-  // 3. Compute RugReceipt Risk Score (0 = Clean, 100 = Malicious)
+  // 3. Query on-chain Sepolia bytecode to verify contract deployment & code presence
+  let isContractDeployed = false;
+  let bytecodeBytes = 0;
+  if (cAddr && /^0x[0-9a-f]{40}$/i.test(cAddr)) {
+    try {
+      const rpcRes = await fetch('https://ethereum-sepolia-rpc.publicnode.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'eth_getCode',
+          params: [cAddr, 'latest']
+        }),
+        signal: AbortSignal.timeout(2500)
+      });
+      if (rpcRes.ok) {
+        const rpcJson = await rpcRes.json();
+        const code = rpcJson.result || '0x';
+        bytecodeBytes = Math.max(0, (code.length - 2) / 2);
+        isContractDeployed = bytecodeBytes > 0;
+      }
+    } catch {
+      // transient network fallback
+    }
+  }
+
+  // 4. Compute RugReceipt Risk Score (0 = Clean, 100 = Malicious)
   let riskScore = 0;
   const flags = [];
 
@@ -47,7 +74,14 @@ export async function generateRugReceiptProof({
   // Check known exploiters / Lazarus signatures
   const isLazarusAddress = cAddr === '0x098b716b8aaf21512996dc57eb0615e2383e2f96' || dAddr === '0x098b716b8aaf21512996dc57eb0615e2383e2f96';
   if (isLazarusAddress) {
+    riskScore = 100;
     flags.push('LAZARUS_GROUP_CYBER_CRIME_ACTOR');
+  }
+
+  if (cAddr && !isContractDeployed && bytecodeBytes === 0) {
+    flags.push('EOA_OR_UNDEPLOYED_ADDRESS');
+  } else if (isContractDeployed) {
+    flags.push(`BYTECODE_VERIFIED_ON_CHAIN_${bytecodeBytes}_BYTES`);
   }
 
   const safetyScore = Math.max(0, 100 - riskScore);

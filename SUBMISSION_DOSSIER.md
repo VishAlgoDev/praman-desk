@@ -94,7 +94,16 @@ npm run mcp:test
 - **Devnode Miner ID**: `5281` (`praman-compliance-miner`)
 - **Sepolia Diamond Registration ID**: `#5311` (updated from `#5305` on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`)
 - **Diamond Registration Tx**: [`0x3fdf3be7c6ebd3c9db95faf910ee7cfd78b68a72630952115badc13018da0945`](https://sepolia.etherscan.io/tx/0x3fdf3be7c6ebd3c9db95faf910ee7cfd78b68a72630952115badc13018da0945) (Block 12165894)
-- **Active Devnode Engine Endpoint**: Live HTTP 402/200 ask endpoint at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281`.
+- **Active Devnode Engine Endpoint**: Live HTTP 402/200 ask endpoint at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281` (serving 7 core compliance capabilities on Devnode router while indexer syncs the newly bonded 8th intent).
+- **Supported Capabilities (8 Intents on Diamond)**:
+  1. `PURCHASE_ORDER_VERIFY_GENERAL` (Devnode 5281 + Sepolia Diamond)
+  2. `INVOICE_LEDGER_RECONCILE_GENERAL` (Devnode 5281 + Sepolia Diamond)
+  3. `VENDOR_VERIFY_GENERAL` (Devnode 5281 + Sepolia Diamond)
+  4. `DOCUMENT_AUTHENTICITY_GENERAL` (Devnode 5281 + Sepolia Diamond)
+  5. `CORPORATE_REGISTRY_LOOKUP_GENERAL` (Devnode 5281 + Sepolia Diamond)
+  6. `SANCTIONS_SCREENING_MATCH_GENERAL` (Devnode 5281 + Sepolia Diamond)
+  7. `REGULATORY_FILING_MONITOR_GENERAL` (Devnode 5281 + Sepolia Diamond)
+  8. `CONTRACT_OBLIGATION_AUDIT_GENERAL` (Bonded on Sepolia Diamond #5311; served via `/api/miner/contract-obligation-audit` and MCP tool `evaluate_contract_obligation`)
 
 ### 2. Standalone WASM Arithmetic Comparator
 - **Binary Path**: `public/comparator.wasm`

@@ -172,7 +172,7 @@ node examples/paysheet-consensus/paysheet-praman-adapter.mjs
 
 Praman Desk bridges Track 01, Track 02, and Track 03 into a self-reinforcing flywheel:
 
-1. **Active Miner (Track 02):** Bonded on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b` (Registration `#5311`). Serves compliance intelligence on Devnode at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281`.
+1. **Active Miner (Track 02):** Bonded on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b` (Registration `#5311`). Serves 7 compliance capabilities on Devnode router at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281` with the 8th intent (`CONTRACT_OBLIGATION_AUDIT_GENERAL`) bonded on-chain and served via `/api/miner/contract-obligation-audit`.
 2. **Evaluator Pool (Track 03):** 62 attested bounties scoring external miners against primary registers (SEC EDGAR, GLEIF, OFAC).
 3. **Praman Spend Guard (Track 01):** The user-facing application that consumes high-reputation network miners to verify counterparty parameters before on-chain payment.
 4. **WASM Math Engine:** 651-byte zero-import binary compiled from AssemblyScript with 1,043/1,043 test vectors passing with zero discrepancies.
