@@ -1032,18 +1032,37 @@ if not clearance["cleared"]:
     </div>
 
     <!-- Partner Bridges Section -->
-    <div style="font-size:12px; font-weight:600; color:#34d399; margin:14px 0 6px;">🤝 Reciprocal Ecosystem Bridges (FakeWatch &amp; RugReceipt)</div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:6px;">
+    <div style="font-size:12px; font-weight:600; color:#34d399; margin:14px 0 6px;">🤝 Reciprocal Ecosystem Bridges (FakeWatch &amp; RugReceipt) &amp; Contract Evaluator</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
       <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px;">
         <div style="font-size:12px; font-weight:700; color:#38bdf8; margin-bottom:4px;">FakeWatch Shield (#42420)</div>
         <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Combines FakeWatch phishing/dApp domain safety with Praman Desk LEI &amp; OFAC checks. Unknown domains trigger manual CFO review.</p>
-        <code style="font-size:11px; color:#94a3b8;">POST /api/bridge/fakewatch</code>
+        <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testFakeWatchBridge('https://unisvvap.org', 'UNISWAP')">🔴 Test Phishing (unisvvap.org)</button>
+          <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testFakeWatchBridge('https://stripe.com', 'STRIPE')">🟢 Test Safe (stripe.com)</button>
+        </div>
+        <div id="fakewatch-bridge-out" style="font-family:var(--font-mono); font-size:11px; color:#94a3b8; background:#020617; padding:6px 8px; border-radius:4px; max-height:80px; overflow-y:auto; border:1px solid #1e293b;">Ready for interactive probe.</div>
       </div>
       <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px;">
         <div style="font-size:12px; font-weight:700; color:#818cf8; margin-bottom:4px;">RugReceipt Screen (Issue #208)</div>
         <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Screens smart contract and deployer addresses against 19,565 OFAC SDN entities, Lazarus Group, and exploit signatures.</p>
-        <code style="font-size:11px; color:#94a3b8;">POST /api/bridge/rugreceipt</code>
+        <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testRugReceiptBridge('0x098B716B8Aaf21512996dC57EB0615e2383E2f96')">🔴 Test Lazarus Group</button>
+          <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testRugReceiptBridge('0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984')">🟢 Test Uniswap V3 Token</button>
+        </div>
+        <div id="rugreceipt-bridge-out" style="font-family:var(--font-mono); font-size:11px; color:#94a3b8; background:#020617; padding:6px 8px; border-radius:4px; max-height:80px; overflow-y:auto; border:1px solid #1e293b;">Ready for interactive probe.</div>
       </div>
+    </div>
+    <!-- Contract Obligation Evaluator Section -->
+    <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px; margin-bottom:12px;">
+      <div style="font-size:12px; font-weight:700; color:#f59e0b; margin-bottom:4px;">⚖️ Contract Obligation Legal Evaluator (6 Regimes) — Scored Intent #8</div>
+      <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Deterministic statutory delay interest, FIDIC EOT, and retention release evaluator for construction, procurement, and commercial contracts.</p>
+      <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
+        <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testContractObligation('Apartment B-1402 MahaRERA Section 18 delay interest possession')">MahaRERA Delay Interest</button>
+        <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testContractObligation('50 MW Solar FIDIC Silver Book Sub-Clause 20.1 EOT time-barred')">FIDIC Sub-Clause 20.1</button>
+        <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testContractObligation('MEP Turnkey Clause 14.9 Retention release Taking-Over Certificate')">MEP Clause 14.9 Retention</button>
+      </div>
+      <div id="contract-obligation-out" style="font-family:var(--font-mono); font-size:11px; color:#94a3b8; background:#020617; padding:6px 8px; border-radius:4px; max-height:90px; overflow-y:auto; border:1px solid #1e293b;">Select a contractual regime to audit statutory obligations.</div>
     </div>
   </div>
 
@@ -1399,6 +1418,63 @@ Content-Type: application/json
 
     const url = `/api/audit/certificate?vendor=${encodeURIComponent(vendor)}&invoiceAmount=${amount}&poAmount=${po}&format=html`;
     window.open(url, '_blank');
+  }
+
+    async function testFakeWatchBridge(url, brand) {
+    const el = document.getElementById('fakewatch-bridge-out');
+    if (!el) return;
+    el.textContent = 'Probing FakeWatch Shield (/api/bridge/fakewatch)...';
+    try {
+      const res = await fetch('/api/bridge/fakewatch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentUrl: url, brandExpected: brand })
+      });
+      const data = await res.json();
+      el.textContent = `[${data.verdict}] Risk: ${data.compositeRisk} | Action: ${data.action} | FakeWatch: ${data.fakewatchSafety} (${data.fakewatchCategory})`;
+      el.style.color = data.verdict === 'CLEARED' ? '#34d399' : '#f87171';
+    } catch (e) {
+      el.textContent = 'Error: ' + e.message;
+      el.style.color = '#fbbf24';
+    }
+  }
+
+  async function testRugReceiptBridge(addr) {
+    const el = document.getElementById('rugreceipt-bridge-out');
+    if (!el) return;
+    el.textContent = 'Probing RugReceipt Attestation (/api/bridge/rugreceipt)...';
+    try {
+      const res = await fetch('/api/bridge/rugreceipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contractAddress: addr, tokenSymbol: 'AUDIT' })
+      });
+      const data = await res.json();
+      el.textContent = `[${data.verdict}] Score: ${data.safetyScore}/100 | Risk: ${data.riskLevel} | Receipt: ${data.receiptId || 'n/a'}`;
+      el.style.color = data.verdict === 'VERIFIED_CLEAN' ? '#34d399' : '#f87171';
+    } catch (e) {
+      el.textContent = 'Error: ' + e.message;
+      el.style.color = '#fbbf24';
+    }
+  }
+
+  async function testContractObligation(q) {
+    const el = document.getElementById('contract-obligation-out');
+    if (!el) return;
+    el.textContent = 'Evaluating Contract Obligation (/api/miner/contract-obligation)...';
+    try {
+      const res = await fetch('/api/miner/contract-obligation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: q })
+      });
+      const data = await res.json();
+      el.textContent = `[CONF: ${data.confidence}] ${data.verdict}\n${data.summary || data.explanation}`;
+      el.style.color = data.compliant ? '#34d399' : '#fbbf24';
+    } catch (e) {
+      el.textContent = 'Error: ' + e.message;
+      el.style.color = '#fbbf24';
+    }
   }
 
   async function verifyWasmInBrowser() {
