@@ -46,7 +46,7 @@ Train your own model adapter in <30 minutes on a free T4 GPU:
 📓 Run the notebook: https://colab.research.google.com/github/VishAlgoDev/praman-desk/blob/main/colab/Train_Sanctions_Evaluator_Adapter.ipynb
 
 Built with:
-⚡ Active Miner #5289 on Sepolia Diamond
+⚡ Active Miner #6127 (Route #5281) on Sepolia Diamond #6128
 ⛓️ x402 on-chain micro-settlements
 🤝 Verified against primary statutory registries (GLEIF, SEC EDGAR, VIES)
 

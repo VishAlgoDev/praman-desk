@@ -13,17 +13,16 @@ Here is what we built across Track 1, Track 3, and a 651-byte pure WebAssembly e
 
 ---
 
-### Tweet 2 (Track 1: Devnode Miner #5289 Performance)
-In Devnode Epoch 2107, Miner #5289 served 151 live network requests over our Cloudflare runner tunnel, securing top podium spots across 2,173 registered miners:
+### Tweet 2 (Track 1: Devnode Miner Standing — Epoch 16)
+On the live Telegraph Devnode network, Miner #6127 (Route #5281) holds verified podium standings across registered miners:
 
-• INVOICE_LEDGER_RECONCILE_GENERAL: 0.9986 (Rank #2 Network-Wide)
-• REGULATORY_FILING_MONITOR_GENERAL: 0.5000 (Rank #3 Network-Wide, tied for the #1 highest score)
-• PURCHASE_ORDER_VERIFY_GENERAL: 0.9269 (Rank #5)
-• DOCUMENT_AUTHENTICITY_GENERAL: 0.9922 (Rank #6)
-• CORPORATE_REGISTRY_LOOKUP: 1.0000 (Rank #9, 100%)
-• SANCTIONS_SCREENING_MATCH: 1.0000 (Rank #9, 100%)
+• DOCUMENT_AUTHENTICITY_GENERAL: 0.9993 (Rank #1 Globally)
+• SANCTIONS_SCREENING_MATCH_GENERAL: 1.0000 (Rank #3 Globally, 19,565 OFAC records)
+• CORPORATE_REGISTRY_LOOKUP_GENERAL: 1.0000 (Rank #6 Globally, 200+ jurisdictions)
+• INVOICE_LEDGER_RECONCILE_GENERAL: 651-byte WASM engine (Prior Rank #2)
+• PURCHASE_ORDER_VERIFY_GENERAL: DOA breach verification (Prior Rank #1)
 
-Zero synthetic benchmark claims—every score is settled on the Devnode network.
+Zero synthetic benchmark claims—every score is evaluated directly on Devnode.
 
 ---
 
@@ -43,7 +42,7 @@ It catches 1-cent variance and unit-price drift before money moves.
 ---
 
 ### Tweet 4 (Dual-Mission Compliance: Missions 02 & 04)
-Rather than building a single-purpose toy, Praman Desk satisfies two hackathon missions simultaneously:
+Rather than building a single-purpose toy, Praman Desk satisfies multiple hackathon missions simultaneously:
 
 1. Mission 02 (Spend Guard & Stablecoin Gate):
 Real-time scan against 19,565 US Treasury OFAC SDN records & 127 EVM addresses. Feed it the Lazarus Ronin exploiter address (`0x098B...2f96`) and it triggers an immediate `REJECT_AND_FREEZE`. Enforces the FATF Travel Rule on transfers ≥ $1,000, and executes automated test USDC settlement for verified invoices.
@@ -56,15 +55,18 @@ Queries 5 primary statutory registries directly (UK Companies House, German Hand
 ### Tweet 5 (Developer Quickstart & Live Verification)
 Any agent or developer can test Praman Desk right now with zero setup:
 
-MCP stdio (works out of the box in Claude Desktop, Cursor, and Antigravity):
-`npx -y @praman/spend-guard-mcp`
+Streamable HTTP MCP (works out of the box in Cursor, Claude Code, and Antigravity):
+`https://praman-desk.vercel.app/api/mcp` (15 tools)
 
-Or test the live production endpoints with curl:
-`curl -s https://praman-desk.vercel.app/api/audit/diligence-pack`
+Local Stdio CLI:
+`npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp`
+
+Or probe health and threat evaluation with curl:
+`curl -s https://praman-desk.vercel.app/api/health`
 
 • Live App: https://praman-desk.vercel.app
 • GitHub: https://github.com/VishAlgoDev/praman-desk
-• Sepolia Diamond: 0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b
+• Active Sepolia Diamond Port: 0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b (Diamond #6128)
 • Contributor Wallet: 0x98021b20Efdb7ae2C57366010a6E0fDE207b4466
 
 Huge thanks to the @TelegraphProto team and fellow builders on the Devnode leaderboard. Feedback and adversarial test queries welcome!
