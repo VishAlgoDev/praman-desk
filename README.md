@@ -160,7 +160,21 @@ res = guarded_wallet.guarded_transfer(
 )
 ```
 
-### 5. Paysheet 3-Way Consensus Integration (Issue #214)
+### 5. ElizaOS Autonomous Agent Spend Guard Plugin
+Native ElizaOS (`@elizaos/core`) action plugin for autonomous treasury defense:
+```bash
+node examples/elizaos-spend-guard/test-eliza-guard.mjs
+```
+```typescript
+import { pramanSpendGuardPlugin } from './spendGuardPlugin.mjs';
+
+export const agentConfig = {
+  name: "TreasuryAgent",
+  plugins: [pramanSpendGuardPlugin]
+};
+```
+
+### 6. Paysheet 3-Way Consensus Integration (Issue #214)
 Runnable consensus adapter for [Timidan/paysheet](https://github.com/Timidan/paysheet/pull/1) in [`examples/paysheet-consensus/`](examples/paysheet-consensus/):
 ```bash
 node examples/paysheet-consensus/paysheet-praman-adapter.mjs

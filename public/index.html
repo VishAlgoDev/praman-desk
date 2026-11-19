@@ -1152,6 +1152,20 @@ res = guarded_wallet.guarded_transfer(
 )
 print(f"Confirmed on-chain with Attestation Seal: {res['txResult']['txHash']}")</div>
     </div>
+
+    <!-- Code Snippet 6: ElizaOS Autonomous Agent Spend Guard Plugin -->
+    <div style="font-size:12px; font-weight:600; color:var(--accent); margin:14px 0 4px;">Option F: ElizaOS Plugin Action (@elizaos/core)</div>
+    <div class="code-block" style="margin-bottom:12px;">
+      <button class="copy-btn" onclick="copySnippet('sdk-eliza-snip')">Copy</button>
+      <div id="sdk-eliza-snip">// examples/elizaos-spend-guard/spendGuardPlugin.mjs
+import { pramanSpendGuardPlugin } from './spendGuardPlugin.mjs';
+
+// In character.json or agent runtime config:
+export const character = {
+  name: "TreasuryAgent",
+  plugins: [pramanSpendGuardPlugin] // Enforces OFAC SDN, GLEIF LEI & 651b WASM math
+};</div>
+    </div>
   </div> <!-- End quickstart-card -->
 </div> <!-- End Tab 2: Developer SDK & Agent Integration -->
 
