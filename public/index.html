@@ -820,6 +820,24 @@
       <div class="scenario-title">4. Paysheet Payroll Quorum (Issue #214)</div>
       <div class="scenario-desc">Streaming payroll agent attempting $500 payout evaluated across 3 independent miners (#710637, #64175, #5281).</div>
     </div>
+
+    <div class="scenario-card" id="card-scen-5" onclick="selectScenario('contract_obligation')">
+      <div class="scenario-card-header">
+        <span class="scenario-tag tag-danger">STATUTORY BREACH</span>
+        <span style="font-size:12px; font-family:var(--font-mono); color:var(--danger);">$13,860.00 USDC</span>
+      </div>
+      <div class="scenario-title">5. Contract Obligation Audit (Mission 04)</div>
+      <div class="scenario-desc">Promoter asserts unilateral 12-mo grace period; halted under MahaRERA Section 18 statutory delay interest (11% p.a.).</div>
+    </div>
+
+    <div class="scenario-card" id="card-scen-6" onclick="selectScenario('fakewatch_shield')">
+      <div class="scenario-card-header">
+        <span class="scenario-tag tag-danger">PHISHING BLOCKED</span>
+        <span style="font-size:12px; font-family:var(--font-mono); color:var(--danger);">$3,500.00 USDC</span>
+      </div>
+      <div class="scenario-title">6. FakeWatch Phishing Shield (#42420)</div>
+      <div class="scenario-desc">Spend link targeting cloned dApp (unisvvap.org/claim) intercepted by FakeWatch domain threat feed &amp; OFAC gate.</div>
+    </div>
   </div>
 
   <!-- Split-Screen Interactive Playground -->
@@ -1419,6 +1437,28 @@ Content-Type: application/json
       items: [
         { desc: 'Weekly Sprint Contributor Streaming Grant', qty: 1, price: '$500.00', total: '$500.00' }
       ]
+    },
+    contract_obligation: {
+      name: 'Scenario 5: Contract Obligation & Statutory Audit (Mission 04)',
+      agent: 'legal-compliance-agent-05',
+      amount: '$13,860.00 USDC',
+      amountVal: 13860.00,
+      recipient: '0x4D224452801ACEd8B2F0aebE155379bb5D594381',
+      vendor: 'Runwal Developers Pvt Ltd (MahaRERA Reg. P51900022104)',
+      items: [
+        { desc: 'Statutory Delay Interest: MahaRERA Sec 18(1) (SBI MCLR + 2% = 11% p.a.)', qty: 10, price: '$1,386.00', total: '$13,860.00' }
+      ]
+    },
+    fakewatch_shield: {
+      name: 'Scenario 6: FakeWatch Reciprocal Phishing Shield (#42420)',
+      agent: 'web3-treasury-agent-11',
+      amount: '$3,500.00 USDC',
+      amountVal: 3500.00,
+      recipient: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96',
+      vendor: 'Uniswap V3 Protocol (Phishing Clone on unisvvap.org)',
+      items: [
+        { desc: 'Liquidity Migration Payout to Spoofed Domain (unisvvap.org/claim)', qty: 1, price: '$3,500.00', total: '$3,500.00' }
+      ]
     }
   };
 
@@ -1432,6 +1472,8 @@ Content-Type: application/json
     if (key === 'arithmetic_overcharge') document.getElementById('card-scen-2').classList.add('active');
     if (key === 'compliant_payout') document.getElementById('card-scen-3').classList.add('active');
     if (key === 'paysheet_payroll') document.getElementById('card-scen-4').classList.add('active');
+    if (key === 'contract_obligation') document.getElementById('card-scen-5').classList.add('active');
+    if (key === 'fakewatch_shield') document.getElementById('card-scen-6').classList.add('active');
 
     const s = SCENARIOS[key];
     document.getElementById('active-scenario-pill').textContent = s.name;
@@ -1883,6 +1925,36 @@ Content-Type: application/json
         mathVerification: { bitExactMatch: true, discrepancyCents: 0, computedCents: 50000, statedCents: 50000, computedTotal: 500, statedTotal: 500, wasmScoreBps: 10000 },
         policyCaps: { delegationTier: 'TIER_1_AUTONOMOUS', supervisorAuthRequired: false, supervisorAuthValid: true },
         attestationSha256: '0x3a9f0291ba8efc11a0b387c4d516297a'
+      }, latency);
+    } else if (scen === 'contract_obligation') {
+      updateVerdictUI({
+        status: 'HALTED',
+        verdict: 'HALT_AND_FREEZE',
+        flags: [
+          'CONTRACT_STATUTORY_NON_COMPLIANCE: AUDIT VERDICT: GRACE PERIOD INVALID; STATUTORY DELAY INTEREST TRIGGERED FROM 2026-04-01 AT 11.00% P.A.',
+          'DUAL_SUPERVISOR_SIGNATURE_MISSING: Spend $13,860 exceeds $500 single agent cap without supervisor co-signature'
+        ],
+        summary: 'Firewall intercepted statutory contract breach: Developer claims unilateral 12-month grace period; halted under MahaRERA Section 18 statutory delay interest (11.00% p.a., INR 11,55,000 liability). Zero funds disbursed.',
+        recipientVerification: { sanctionsScreeningClear: true },
+        vendorVerification: { gleifVerified: true, lei: '335800RUNWAL99DEV104', legalName: 'RUNWAL DEVELOPERS PVT LTD', sanctionsScreeningClear: true },
+        mathVerification: { bitExactMatch: true, discrepancyCents: 0, computedCents: 1386000, statedCents: 1386000, computedTotal: 13860, statedTotal: 13860, wasmScoreBps: 10000 },
+        policyCaps: { delegationTier: 'TIER_2_DUAL_AUTH_REQUIRED', supervisorAuthRequired: true, supervisorAuthValid: false },
+        attestationSha256: '0x9d54e819b16af023c78041d8e1293ba1'
+      }, latency);
+    } else if (scen === 'fakewatch_shield') {
+      updateVerdictUI({
+        status: 'HALTED',
+        verdict: 'HALT_AND_FREEZE',
+        flags: [
+          'CRITICAL_MALICIOUS_PAYMENT_URL: Phishing destination domain (unisvvap.org) blocked by FakeWatch Threat Intelligence',
+          'SANCTIONED_RECIPIENT_ADDRESS: 0x098B...2f96 matches LAZARUS GROUP on OFAC SDN'
+        ],
+        summary: 'Firewall intercepted phishing dApp payment: Outbound spend directed to cloned domain unisvvap.org/claim intercepted by FakeWatch Threat Intelligence & OFAC digital currency screen. Zero funds moved.',
+        recipientVerification: { sanctionsScreeningClear: false },
+        vendorVerification: { gleifVerified: false, sanctionsScreeningClear: true },
+        mathVerification: { bitExactMatch: true, discrepancyCents: 0, computedCents: 350000, statedCents: 350000, computedTotal: 3500, statedTotal: 3500, wasmScoreBps: 10000 },
+        policyCaps: { delegationTier: 'TIER_2_DUAL_AUTH_REQUIRED', supervisorAuthRequired: true, supervisorAuthValid: false },
+        attestationSha256: '0x5c42e718b248a09cf11a0b387c4d5162'
       }, latency);
     } else {
       updateVerdictUI({

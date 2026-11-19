@@ -10,7 +10,7 @@ import { ExactEvmScheme } from '@x402/evm';
 import { getWasmInstance } from '../comparator/wasm-buffer.mjs';
 import { TOOLS as MCP_TOOLS, executeMcpTool } from '../mcp/server.mjs';
 import { generateComplianceCertificate, renderCertificateHtml } from './certificate.mjs';
-import { evaluateCounterpartyShield } from './bridges/fakewatch-bridge.mjs';
+import { evaluateCounterpartyShield, checkFakeWatchDomain } from './bridges/fakewatch-bridge.mjs';
 import { generateRugReceiptProof } from './bridges/rugreceipt-bridge.mjs';
 import { evaluatePaysheetConsensus } from './bridges/paysheet-bridge.mjs';
 
@@ -4998,6 +4998,44 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       statedTotal: 500.00,
       ...p
     };
+  } else if (scenario === 'contract_obligation') {
+    p = {
+      agentId: p.agentId || 'legal-compliance-agent-05',
+      recipientAddress: p.recipientAddress || '0x4D224452801ACEd8B2F0aebE155379bb5D594381',
+      vendorName: p.vendorName || 'Runwal Developers Pvt Ltd (MahaRERA Reg. P51900022104)',
+      vendorJurisdiction: p.vendorJurisdiction || 'IN',
+      spendAmountUsdc: p.spendAmountUsdc ?? 13860.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 50000,
+      invoiceId: p.invoiceId || 'CLAIM-RERA-SEC18-2026',
+      contractPrompt: p.contractPrompt || 'Audit the contractual and statutory obligations under an Indian Agreement for Sale (MahaRERA Reg. P51900022104) executed on 2023-05-15: Clause 7.1 contemplates a 12-month unilateral grace period extending possession date from 2025-06-30 to 2026-06-30. Determine whether promoter is liable for delay interest under Section 18 of MahaRERA as of April 2026.',
+      lineItems: [
+        { desc: 'Statutory Delay Interest: MahaRERA Section 18(1) (SBI MCLR 9% + 2% = 11% p.a. for 10 months)', qty: 10, unitPrice: 1386.00, amount: 13860.00 }
+      ],
+      statedSubtotal: 13860.00,
+      statedTax: 0,
+      statedTotal: 13860.00,
+      ...p
+    };
+  } else if (scenario === 'fakewatch_shield') {
+    p = {
+      agentId: p.agentId || 'web3-treasury-agent-11',
+      recipientAddress: p.recipientAddress || '0x098B716B8Aaf21512996dC57EB0615e2383E2f96',
+      vendorName: p.vendorName || 'Uniswap V3 Protocol (Phishing Clone)',
+      vendorJurisdiction: p.vendorJurisdiction || 'US',
+      paymentUrl: p.paymentUrl || 'https://unisvvap.org/claim',
+      spendAmountUsdc: p.spendAmountUsdc ?? 3500.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 5000,
+      invoiceId: p.invoiceId || 'CLAIM-PHISH-UNISVVAP',
+      lineItems: [
+        { desc: 'Liquidity Migration Payout to Spoofed Domain', qty: 1, unitPrice: 3500.00, amount: 3500.00 }
+      ],
+      statedSubtotal: 3500.00,
+      statedTax: 0,
+      statedTotal: 3500.00,
+      ...p
+    };
   }
 
   const agentId = String(p.agentId || p.agent || 'agent-procure-v2').trim();
@@ -5064,6 +5102,28 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     flags.push(`UNVERIFIED_COUNTERPARTY_ENTITY: "${vendorName || 'Unknown'}" has no active registration in the official GLEIF Global LEI Index`);
   }
 
+  // Phishing / Malicious URL Screening (Powered by FakeWatch / ScamSniffer)
+  let urlThreatResult = null;
+  if (p.paymentUrl || p.payment_url || p.url) {
+    const targetUrl = p.paymentUrl || p.payment_url || p.url;
+    urlThreatResult = await checkFakeWatchDomain(targetUrl);
+    if (urlThreatResult && (urlThreatResult.verdict === 'PHISHING' || urlThreatResult.verdict === 'MALICIOUS')) {
+      flags.push(`CRITICAL_MALICIOUS_PAYMENT_URL: Phishing destination domain (${urlThreatResult.domain}) blocked by FakeWatch Threat Intelligence`);
+    } else if (urlThreatResult && (urlThreatResult.verdict === 'UNKNOWN' || urlThreatResult.verdict === 'Unavailable')) {
+      flags.push(`UNVERIFIED_PAYMENT_URL: Inconclusive domain reputation from FakeWatch (${urlThreatResult.domain}); requires administrative review`);
+    }
+  }
+
+  // Contract Obligation & Statutory Audit (Mission 04)
+  let contractAuditResult = null;
+  if (p.contractText || p.clause || p.contractPrompt || scenario === 'contract_obligation') {
+    const promptText = p.contractText || p.clause || p.contractPrompt || 'Audit the contractual and statutory obligations under an Indian Agreement for Sale (MahaRERA Reg. P51900022104) executed on 2023-05-15: Clause 7.1 contemplates a 12-month unilateral grace period extending possession date from 2025-06-30 to 2026-06-30. Determine whether promoter is liable for delay interest under Section 18 of MahaRERA as of April 2026.';
+    contractAuditResult = evaluateContractObligationPrompt(promptText);
+    if (contractAuditResult && !contractAuditResult.compliant) {
+      flags.push(`CONTRACT_STATUTORY_NON_COMPLIANCE: ${contractAuditResult.verdict}`);
+    }
+  }
+
   // Delegation Cap Policy
   let delegationTier = 'TIER_1_AUTONOMOUS';
   let supervisorAuthRequired = false;
@@ -5083,9 +5143,13 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   }
 
   // Evaluate Circuit Breaker Status
+  const isMaliciousUrl = Boolean(urlThreatResult && (urlThreatResult.verdict === 'PHISHING' || urlThreatResult.verdict === 'MALICIOUS'));
+  const isContractViolation = Boolean(contractAuditResult && !contractAuditResult.compliant);
   const circuitBreakerTriggered = emergencyHaltFlag ||
     Boolean(sanctionsVendor?.matched) ||
     Boolean(sanctionsAddress?.matched) ||
+    isMaliciousUrl ||
+    isContractViolation ||
     !gleifVerified ||
     !wasmMatch ||
     wasmDiscrepancyCents > 0 ||
@@ -5097,7 +5161,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
 
   if (circuitBreakerTriggered) {
     policyDecision = 'CIRCUIT_BREAKER_TRIGGERED';
-    riskLevel = (sanctionsVendor?.matched || sanctionsAddress?.matched) ? 'CRITICAL' : 'HIGH';
+    riskLevel = (sanctionsVendor?.matched || sanctionsAddress?.matched || isMaliciousUrl) ? 'CRITICAL' : 'HIGH';
   } else if (supervisorAuthRequired) {
     policyDecision = 'DUAL_AUTHORIZED_AGENT_SPEND';
     riskLevel = 'LOW';
