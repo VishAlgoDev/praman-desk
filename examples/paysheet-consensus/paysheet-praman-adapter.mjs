@@ -5,7 +5,7 @@
  * to screen payout counterparties across 3 independent Telegraph Season II miners:
  *  - Miner #710637
  *  - Miner #64175
- *  - Miner #5289 (Praman Desk - in-memory <25ms OFAC SDN lookup)
+ *  - Miner #5281 (Praman Desk - in-memory <25ms OFAC SDN lookup)
  * 
  * Demonstrates both:
  *  1. Direct keyless HTTP query fallback
@@ -14,9 +14,12 @@
 
 export const MINERS = {
   PRAMAN_DESK: {
-    id: 5289,
+    id: 5281,
+    devnodeId: 5281,
+    diamondRegId: 5305,
     slug: 'praman-compliance-miner',
     endpoint: 'https://praman-desk.vercel.app/api/miner/sanctions-screen',
+    devnodeAsk: 'https://devnode.telegraphprotocol.com/engine/v1/ask/5281',
     diamondRegistered: true
   },
   MINER_710637: {
@@ -43,7 +46,7 @@ export async function screenWithPramanDesk(target) {
     matched: Boolean(json.matched),
     entity: target,
     matches: json.matches || [],
-    provider: 'Praman Desk (#5289)'
+    provider: 'Praman Desk (#5281)'
   };
 }
 
@@ -59,9 +62,9 @@ export async function executeThreeWayConsensus(target) {
 
   const votes = results.map((r, i) => {
     if (r.status === 'fulfilled') {
-      return { miner: 'Praman Desk (#5289)', success: true, matched: r.value.matched };
+      return { miner: 'Praman Desk (#5281)', success: true, matched: r.value.matched };
     }
-    return { miner: 'Praman Desk (#5289)', success: false, error: r.reason.message };
+    return { miner: 'Praman Desk (#5281)', success: false, error: r.reason.message };
   });
 
   const validVotes = votes.filter(v => v.success);

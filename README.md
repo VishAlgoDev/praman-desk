@@ -119,6 +119,34 @@ curl -X POST https://praman-desk.vercel.app/api/spend-guard/evaluate \
   }'
 ```
 
+### 3. Python / LangChain Autonomous Agent Spend Guard
+Run the zero-dependency Python guard directly from [`examples/langchain-agent-guard/`](examples/langchain-agent-guard/):
+
+```python
+from spend_guard_agent import PramanSpendGuard, SpendGuardException
+
+guard = PramanSpendGuard()
+
+try:
+    # 1. Pre-flight check before signing web3.eth.send_transaction()
+    verdict = guard.inspect_spend(
+        agent_id="procurement-bot-01",
+        recipient_address="0x5462D6334F333C8D0662D8a291F04bE5b736b71b",
+        vendor_name="Anthropic PBC",
+        amount_usdc=250.00,
+        line_items=[{"desc": "Inference Tokens", "qty": 10, "unitPrice": 25.00, "amount": 250.00}]
+    )
+    print(f"✅ Approved! Attestation Seal: {verdict['attestationSha256']}")
+except SpendGuardException as e:
+    print(f"🛑 Blocked: {e}")
+```
+
+### 4. Paysheet 3-Way Consensus Integration (Issue #214)
+Runnable consensus adapter for [Timidan/paysheet](https://github.com/Timidan/paysheet/pull/1) in [`examples/paysheet-consensus/`](examples/paysheet-consensus/):
+```bash
+node examples/paysheet-consensus/paysheet-praman-adapter.mjs
+```
+
 ---
 
 ## Telegraph Protocol Closed-Loop Architecture

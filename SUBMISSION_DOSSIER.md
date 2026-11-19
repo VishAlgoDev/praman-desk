@@ -6,7 +6,7 @@
 - **Primary Track**: Track 01 — Apps & Agents
   - **Mission 11**: Autonomous Systems (Spend Delegation Approval Caps & Circuit Breakers)
   - **Mission 02**: Stablecoin Treasury Guard (OFAC SDN EVM Address Screening & FATF Travel Rule)
-- **Secondary Track**: Track 02 — Miners / Providers (Active Sepolia Miner **`#5289`**)
+- **Secondary Track**: Track 02 — Miners / Providers (Active Devnode Miner **`5281`** / On-chain Registration **`#5305`**)
 - **Supporting Track**: Track 03 — Evaluators (WASM Deterministic Arithmetic Comparator + 62 Attested Bounties)  
 **Main Competition Deadline**: December 1, 2026, 23:59 UTC  
 **GitHub Repository**: [https://github.com/VishAlgoDev/praman-desk](https://github.com/VishAlgoDev/praman-desk)  
