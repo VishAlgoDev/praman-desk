@@ -36,10 +36,10 @@ async function runTests() {
   for (const t of toolsResult.tools) {
     console.log(`   - ${t.name}: ${t.description.slice(0, 65)}...`);
   }
-  if (toolsResult.tools.length !== 14) {
-    throw new Error(`Expected 14 tools, found ${toolsResult.tools.length}`);
+  if (toolsResult.tools.length !== 15) {
+    throw new Error(`Expected 15 tools, found ${toolsResult.tools.length}`);
   }
-  console.log('   PASS: All 14 tools registered.\n');
+  console.log('   PASS: All 15 tools registered.\n');
 
   // Test 2: verify_counterparty (STRIPE, LLC)
   console.log('3. Testing tool: verify_counterparty (STRIPE, LLC)...');
@@ -376,8 +376,21 @@ async function runTests() {
   console.log(`   Result: Consensus HALT | Action: ${psParsed.action} | Seal: ${psParsed.attestationSeal.slice(0, 16)}...`);
   console.log('   PASS: paysheet_consensus_screen succeeded.\n');
 
+  // Test 20: audit_contract_obligation (Mission 04 / Intent 8)
+  console.log('20. Testing tool: audit_contract_obligation (MahaRERA Section 18 delay interest)...');
+  const resContract = await client.callTool({
+    name: 'audit_contract_obligation',
+    arguments: { text: 'MahaRERA Registration P51900022104 Apartment B-1402 delay interest under Section 18 with Clause 7.1 grace period' },
+  });
+  const coParsed = JSON.parse(resContract.content[0].text);
+  if (!coParsed.verdict || coParsed.status !== 'delay_interest_triggered' || coParsed.interest_rate_pct !== 11.00) {
+    throw new Error(`Expected delay_interest_triggered at 11.00% p.a., got ${JSON.stringify(coParsed)}`);
+  }
+  console.log(`   Result: Statutory delay interest triggered | Rate: ${coParsed.interest_rate_pct}% p.a. | Liability: INR ${coParsed.accrued_liability}`);
+  console.log('   PASS: audit_contract_obligation succeeded.\n');
+
   await client.close();
-  console.log('=== All 19 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 20 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {

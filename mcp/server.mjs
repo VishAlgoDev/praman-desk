@@ -26,6 +26,7 @@ import {
   lookupCorporateRegistry,
   monitorRegulatoryFiling,
   evaluateStablecoinGate,
+  evaluateContractObligationPrompt,
 } from '../src/handlers.mjs';
 import { generateComplianceCertificate } from '../src/certificate.mjs';
 import { evaluateCounterpartyShield } from '../src/bridges/fakewatch-bridge.mjs';
@@ -690,6 +691,21 @@ export const TOOLS = [
       required: ['target'],
     },
   },
+  {
+    name: 'audit_contract_obligation',
+    description:
+      'Mission 04 & CONTRACT_OBLIGATION_AUDIT_GENERAL: Audit contractual terms, statutory regimes (MahaRERA delay interest, FIDIC Sub-Clause 20.1 time-bar, MSMED Act 45-day statutory payment, CAM caps, FIDIC retention release, price variation deadband), and return deterministic compliance verdicts.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        text: {
+          type: 'string',
+          description: 'Contract clause, dispute prompt, or legal terms to audit (e.g. "MahaRERA Section 18 delay interest", "FIDIC Sub-Clause 20.1 EOT notice").',
+        },
+      },
+      required: ['text'],
+    },
+  },
 ];
 
 // Execute an MCP tool deterministically (shared by stdio and Streamable HTTP /api/mcp)
@@ -852,6 +868,17 @@ export async function executeMcpTool(name, inputArgs = {}) {
           });
           break;
 
+        case 'audit_contract_obligation':
+          const rawPrompt = args.text || args.query || args.prompt || args.contract || '';
+          result = evaluateContractObligationPrompt(rawPrompt) || {
+            verified: false,
+            compliant: false,
+            verdict: 'Insufficient Evidence',
+            status: 'insufficient_evidence',
+            summary: 'Insufficient parameters: supply contract text or clause to audit (?text=...).',
+          };
+          break;
+
         default:
           return {
             content: [{ type: 'text', text: `Unknown tool: ${name}` }],
@@ -886,7 +913,7 @@ export async function startServer() {
   if (cliArgs.includes('--help') || cliArgs.includes('-h') || cliArgs.includes('--version') || cliArgs.includes('-v')) {
     console.log([
       'Praman Spend Guard MCP Server v1.0.0',
-      'Autonomous Pre-Payment Firewall for AI Agents & DAOs (10 deterministic tools)',
+      'Autonomous Pre-Payment Firewall for AI Agents & DAOs (15 deterministic tools)',
       '',
       'Usage:',
       '  npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp [options]',

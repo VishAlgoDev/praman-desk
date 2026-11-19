@@ -1050,10 +1050,10 @@
     </p>
 
     <!-- Code Snippet 1A: Streamable HTTP MCP (Recommended) -->
-    <div style="font-size:12px; font-weight:600; color:var(--accent); margin-bottom:4px;">Option A: Keyless Streamable HTTP MCP (Cursor / Claude Code / Remote Agents)</div>
+    <div style="font-size:12px; font-weight:600; color:var(--accent); margin-bottom:4px;">Option A: Keyless Streamable HTTP MCP (Cursor / Claude Code / Remote Agents — 15 Tools Live)</div>
     <div class="code-block" style="margin-bottom:12px;">
       <button class="copy-btn" onclick="copySnippet('mcp-http-snip')">Copy</button>
-      <div id="mcp-http-snip">// In claude_desktop_config.json or Cursor MCP settings (Zero local binaries required):
+      <div id="mcp-http-snip">// In claude_desktop_config.json or Cursor MCP settings (Zero local binaries required, 15 tools):
 {
   "mcpServers": {
     "praman-spend-guard": {
@@ -1064,7 +1064,7 @@
     </div>
 
     <!-- Code Snippet 1B: Stdio MCP -->
-    <div style="font-size:12px; font-weight:600; color:var(--ink-muted); margin-bottom:4px;">Option B: Stdio CLI via GitHub npx (Local Process)</div>
+    <div style="font-size:12px; font-weight:600; color:var(--ink-muted); margin-bottom:4px;">Option B: Stdio CLI via GitHub npx (Local Process — 15 Tools Live)</div>
     <div class="code-block">
       <button class="copy-btn" onclick="copySnippet('mcp-snip')">Copy</button>
       <div id="mcp-snip">// In claude_desktop_config.json or Cursor MCP settings:
@@ -1233,6 +1233,9 @@ if (!verdict.cleared) throw new Error('[PAYROLL HALT] Recipient blocked by sanct
         <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testContractObligation('Apartment B-1402 MahaRERA Section 18 delay interest possession')">MahaRERA Delay Interest</button>
         <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testContractObligation('50 MW Solar FIDIC Silver Book Sub-Clause 20.1 EOT time-barred')">FIDIC Sub-Clause 20.1</button>
         <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testContractObligation('MEP Turnkey Clause 14.9 Retention release Taking-Over Certificate')">MEP Clause 14.9 Retention</button>
+        <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testContractObligation('MSMED Act Section 15 pay-when-paid void clause infraCorp Precision Electricals')">MSMED 45-Day Payment</button>
+        <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testContractObligation('Commercial Grade-A Office Lease Clause 4.2 escalation and Clause 5.3 CAM cap reconciliation')">CAM Cap & Lease</button>
+        <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testContractObligation('Civil Highway and Bridge Contract Clause 10.4 price variation deadband deduction')">Clause 10.4 Deadband</button>
       </div>
       <div id="contract-obligation-out" style="font-family:var(--font-mono); font-size:11px; color:#94a3b8; background:#020617; padding:6px 8px; border-radius:4px; max-height:90px; overflow-y:auto; border:1px solid #1e293b;">Select a contractual regime to audit statutory obligations.</div>
     </div>
