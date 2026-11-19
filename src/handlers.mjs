@@ -2158,7 +2158,7 @@ export function verifyPurchaseOrderPrimary({
   prompt = '',
   text = ''
 }) {
-  const queryText = [question, query, prompt, text].filter(Boolean).join(' ');
+  const queryText = [question, query, prompt, text, poNumber].filter(Boolean).join(' ');
   const gov = evaluatePoGovernancePrompt(queryText);
   if (gov) {
     return {
@@ -6404,39 +6404,6 @@ export async function handleApiRequest(req, res) {
         const hasExplicitAmounts = rawAmount !== undefined && rawAmount !== null && String(rawAmount).trim() !== '';
         const hasExplicitCap = rawCap !== undefined && rawCap !== null && String(rawCap).trim() !== '';
 
-        if (hasExplicitAmounts) {
-          const parsedAmt = parseNumber(rawAmount);
-          const parsedCap = hasExplicitCap ? parseNumber(rawCap) : Math.max(50000, parsedAmt);
-          const out = verifyPurchaseOrderPrimary({
-            poNumber: poNumber || 'PO-2026-AUTOGEN',
-            vendor: vendor || 'Authorized Vendor',
-            poAmount: parsedAmt,
-            approvalCap: parsedCap,
-            currency: merged.currency || 'USD',
-            dualSignoffPresent: merged.dual_signoff ?? merged.dualSignoffPresent ?? false
-          });
-          const ans = out.explanation;
-          return sendJson(res, 200, {
-            po_number: out.po_number,
-            verified: out.verified,
-            verdict: out.verified ? 'Verified' : 'Discrepancy found',
-            status: out.status,
-            amount: out.amount,
-            approval_cap: out.approval_cap,
-            vendor: out.vendor,
-            confidence: out.verified ? 0.99 : 0.95,
-            checks_passed: out.verified ? [ans] : [],
-            discrepancies: out.verified ? [] : [ans],
-            explanation: ans,
-            summary: ans,
-            answer: ans,
-            results: [ans],
-            intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
-            schema_version: 4,
-            as_of: new Date().toISOString()
-          });
-        }
-
         const rawText = [
           merged.question,
           merged.query,
@@ -6456,6 +6423,32 @@ export async function handleApiRequest(req, res) {
           if (poMatch) poNumber = poMatch[1];
         }
 
+        // Priority 1: Governance & DOA control prompt evaluation
+        const govResult = evaluatePoGovernancePrompt(rawText);
+        if (govResult) {
+          const ans = govResult.explanation;
+          return sendJson(res, 200, {
+            po_number: govResult.po_number || poNumber || 'PO-GOV',
+            verified: govResult.verified,
+            verdict: govResult.verdict,
+            status: govResult.status,
+            amount: govResult.amount,
+            approval_cap: govResult.approval_cap || null,
+            vendor: govResult.vendor || vendor || null,
+            confidence: govResult.confidence || 0.99,
+            checks_passed: govResult.checks_passed || [],
+            discrepancies: govResult.discrepancies || [],
+            explanation: ans,
+            summary: ans,
+            answer: ans,
+            results: [ans],
+            intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+            schema_version: 4,
+            as_of: new Date().toISOString()
+          });
+        }
+
+        // Priority 2: Inline or structured arithmetic reconciliation
         const inlineMath = evaluateStructuredPoMath(merged) || parseInlinePoMath(rawText);
         if (inlineMath) {
           const ans = inlineMath.explanation;
@@ -6480,20 +6473,34 @@ export async function handleApiRequest(req, res) {
           });
         }
 
-        const govResult = evaluatePoGovernancePrompt(rawText);
-        if (govResult) {
-          const ans = govResult.explanation;
+        // Priority 3: Explicit PO amount vs approval cap check
+        if (hasExplicitAmounts) {
+          const parsedAmt = parseNumber(rawAmount);
+          const parsedCap = hasExplicitCap ? parseNumber(rawCap) : Math.max(50000, parsedAmt);
+          const out = verifyPurchaseOrderPrimary({
+            poNumber: poNumber || 'PO-2026-AUTOGEN',
+            vendor: vendor || 'Authorized Vendor',
+            poAmount: parsedAmt,
+            approvalCap: parsedCap,
+            currency: merged.currency || 'USD',
+            dualSignoffPresent: merged.dual_signoff ?? merged.dualSignoffPresent ?? false,
+            question: merged.question,
+            query: merged.query,
+            prompt: merged.prompt,
+            text: merged.text
+          });
+          const ans = out.explanation;
           return sendJson(res, 200, {
-            po_number: govResult.po_number || poNumber || 'PO-GOV',
-            verified: govResult.verified,
-            verdict: govResult.verdict,
-            status: govResult.status,
-            amount: govResult.amount,
-            approval_cap: govResult.approval_cap || null,
-            vendor: govResult.vendor || vendor || null,
-            confidence: govResult.confidence || 0.99,
-            checks_passed: govResult.checks_passed || [],
-            discrepancies: govResult.discrepancies || [],
+            po_number: out.po_number,
+            verified: out.verified,
+            verdict: out.verified ? 'Verified' : 'Discrepancy found',
+            status: out.status,
+            amount: out.amount,
+            approval_cap: out.approval_cap,
+            vendor: out.vendor,
+            confidence: out.verified ? 0.99 : 0.95,
+            checks_passed: out.verified ? [ans] : [],
+            discrepancies: out.verified ? [] : [ans],
             explanation: ans,
             summary: ans,
             answer: ans,
