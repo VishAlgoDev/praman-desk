@@ -5240,7 +5240,7 @@ export async function evaluateExchangeIntegrity(params = {}) {
     telegraphSettlement: {
       intent: 'CORPORATE_REGISTRY_LOOKUP',
       minerId: 5281,
-      diamondRegistration: 6136,
+      diamondRegistration: 6137,
       contractAddress: DIAMOND_PORT,
       status: 'VERIFIED_MICROSETTLEMENT'
     },
@@ -6020,7 +6020,7 @@ export async function handleApiRequest(req, res) {
         ok: true,
         service: 'praman-desk',
         minerId: 5281,
-        diamondRegistration: 6136,
+        diamondRegistration: 6137,
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
@@ -6048,9 +6048,9 @@ export async function handleApiRequest(req, res) {
       };
       const onchainDiamond = {
         diamond_address: DIAMOND_PORT,
-        active_registration_id: 6136,
-        tx_hash: '0xca74c81d803ff56263b134927e27347efc0ea7ba32e924b73180e579f88f7c74',
-        block_number: 12175768,
+        active_registration_id: 6137,
+        tx_hash: '0x4f70dfc13a742ad0550d47fd72070d7510844ce01f88e4c825872d1b11389fd1',
+        block_number: 12175772,
         intents_count: 9,
         bonded_intents: [
           'PURCHASE_ORDER_VERIFY_GENERAL',

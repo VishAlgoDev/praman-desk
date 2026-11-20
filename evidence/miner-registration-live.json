@@ -1,12 +1,12 @@
 {
-  "previousRegistrationId": "6135",
-  "registrationId": "6136",
-  "txHash": "0xca74c81d803ff56263b134927e27347efc0ea7ba32e924b73180e579f88f7c74",
-  "blockNumber": 12175768,
+  "previousRegistrationId": "6136",
+  "registrationId": "6137",
+  "txHash": "0x4f70dfc13a742ad0550d47fd72070d7510844ce01f88e4c825872d1b11389fd1",
+  "blockNumber": 12175772,
   "diamond": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
   "miner": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
-  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/ab604d4/miner.yaml",
-  "yamlHash": "0x5e1b89e0a3eec744ec157af1efc53077ad975832e30fe80ba5f5160835d6fa3d",
+  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/b56d96f/miner.yaml",
+  "yamlHash": "0x1cf170b6687df2866eb7236648cef90d8e5e08baae96073f39171255361a39f5",
   "supportedIntents": [
     "PURCHASE_ORDER_VERIFY_GENERAL",
     "INVOICE_LEDGER_RECONCILE_GENERAL",
@@ -18,5 +18,5 @@
     "CONTRACT_OBLIGATION_AUDIT_GENERAL",
     "GRID_POWER_PRICE_GENERAL"
   ],
-  "updatedAt": "2026-11-20T14:29:02.637Z"
+  "updatedAt": "2026-11-20T14:30:00.790Z"
 }
