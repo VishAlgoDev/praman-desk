@@ -43,6 +43,7 @@ const PROTECTED_BRANDS = [
 export async function checkFakeWatchDomain(urlOrDomain) {
   const tStart = performance.now();
   let domain = String(urlOrDomain || '').trim();
+  const rawInput = domain;
   try {
     if (domain.startsWith('http://') || domain.startsWith('https://')) {
       const u = new URL(domain);
@@ -54,7 +55,54 @@ export async function checkFakeWatchDomain(urlOrDomain) {
     // keep raw domain
   }
 
-  // 1. Generalized Heuristic Typosquat Detection
+  const targetUrl = (rawInput.startsWith('http://') || rawInput.startsWith('https://'))
+    ? rawInput
+    : `https://${domain}`;
+
+  // 1. Live FakeWatch API Query (Miner #42420 / https://fakewatch.pro/tools/url-check-api)
+  try {
+    const res = await fetch(`https://fakewatch.pro/api/v1/url-safe?url=${encodeURIComponent(targetUrl)}`, {
+      signal: AbortSignal.timeout(2500),
+      headers: { 'Accept': 'application/json', 'User-Agent': 'PramanDesk-SpendGuard/2.0' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const rawVerdict = String(data.verdict || '').toUpperCase();
+      let verdict = 'UNKNOWN';
+      let risk_score = 50;
+
+      if (rawVerdict === 'MALICIOUS' || data.safe === false) {
+        verdict = 'PHISHING';
+        risk_score = Math.max(90, Math.round((data.confidence || 0.95) * 100));
+      } else if (rawVerdict === 'SUSPICIOUS') {
+        verdict = 'SUSPICIOUS';
+        risk_score = 75;
+      } else if (rawVerdict === 'SAFE' || data.safe === true) {
+        verdict = 'SAFE';
+        risk_score = Math.max(0, Math.round((1 - (data.confidence || 0.8)) * 10));
+      }
+
+      return {
+        domain,
+        url: targetUrl,
+        verdict,
+        raw_verdict: data.verdict,
+        safe: data.safe,
+        risk_score,
+        detections: data.detections || 0,
+        sources: data.sources || [],
+        summary: data.summary || '',
+        confidence: data.confidence !== undefined ? data.confidence : 0.95,
+        source: 'FakeWatch Live Network (Miner #42420)',
+        details: data,
+        latency_ms: Math.round(performance.now() - tStart)
+      };
+    }
+  } catch {
+    // fall through to deterministic offline heuristics
+  }
+
+  // 2. Offline / Fallback: Generalized Heuristic Typosquat Detection
   const sld = domain.toLowerCase().split('.')[0].replace(/[^a-z0-9]/g, '');
   for (const brand of PROTECTED_BRANDS) {
     if (sld !== brand && Math.abs(sld.length - brand.length) <= 2) {
@@ -71,7 +119,7 @@ export async function checkFakeWatchDomain(urlOrDomain) {
     }
   }
 
-  // 2. Check deterministic local heuristic / blacklist
+  // 3. Offline / Fallback: Check deterministic local heuristic / blacklist
   for (const rx of KNOWN_PHISHING_REGEXES) {
     if (rx.test(domain)) {
       return {
@@ -82,27 +130,6 @@ export async function checkFakeWatchDomain(urlOrDomain) {
         latency_ms: Math.round(performance.now() - tStart)
       };
     }
-  }
-
-  // 2. Query live FakeWatch API if available with fast 1.5s timeout
-  try {
-    const res = await fetch(`https://fakewatch.pro/api/check?domain=${encodeURIComponent(domain)}`, {
-      signal: AbortSignal.timeout(1500),
-      headers: { 'Accept': 'application/json', 'User-Agent': 'PramanDesk-Bridge/1.0' }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      return {
-        domain,
-        verdict: (data.verdict || data.status || 'SAFE').toUpperCase(),
-        risk_score: data.risk_score || (data.verdict === 'PHISHING' ? 95 : 5),
-        source: 'FakeWatch Live Network',
-        details: data,
-        latency_ms: Math.round(performance.now() - tStart)
-      };
-    }
-  } catch {
-    // fall through to deterministic resolution
   }
 
   // 3. Fallback heuristic for unrecognized domains: triggers UNKNOWN
