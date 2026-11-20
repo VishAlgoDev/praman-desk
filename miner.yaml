@@ -1,6 +1,6 @@
 version: "1"
 kind: miner
-id: 6137 # Sepolia Diamond Registration #6137 (Devnode Route #5281; yaml pin b56d96f+)
+id: 6142 # Sepolia Diamond Registration #6142 (Devnode Route #5281; on-chain yaml pin 59454bd)
 slug: praman-compliance-miner
 protocol: generic
 name: Praman Desk Compliance & Procurement Auditor
