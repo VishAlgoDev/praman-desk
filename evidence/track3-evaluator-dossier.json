@@ -1,5 +1,5 @@
 {
-  "submissionTimestamp": "2026-11-19T18:31:35.926Z",
+  "submissionTimestamp": "2026-11-20T01:20:43.099Z",
   "submitterAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
   "network": "Telegraph Protocol Season II Devnode (Chain ID 11155111)",
   "datasets": [
@@ -10,8 +10,8 @@
       "file": "contract_obligation_audit_general.jsonl",
       "rowCount": 6,
       "bodySha256": "ff9976d383ccb5dbad1ffeb7672820ff0b8bd83bb852a1fa29af2f166093080c",
-      "nonce": "ee6834f6bf547a4021aef03d1fa299d0",
-      "signature": "0x1c7a1f174fb603bdbe8a63c22906b3fa249ac057a9e4a2affaf6950f99788a697b481b6c4e8890d62560d8fbf32555070a93cf4e874e1549070ff9faf69af0721b",
+      "nonce": "5401af640f93dd34a4a3b8138fd8e890",
+      "signature": "0x5c7b3a3243ff4c8c1be0a1d3f4e56ab9691904398f417ba4f11b8845dc3c8cd9660b9b3a7607a2e6afe4dceb786593044a618587916444eac41267cf89707d311c",
       "targetBountyIssue": 192,
       "uploadReceipt": {
         "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
@@ -36,8 +36,8 @@
       "file": "purchase_order_verify_general.jsonl",
       "rowCount": 8,
       "bodySha256": "3ad30696e1e21be2a5c54a8717018e29be12a10575259f6c49759ed23596fea0",
-      "nonce": "7d33a5ffceda9f3df74117786d92ca2a",
-      "signature": "0x5aef1b8487a91b0f43ca03972aff9199838d18fd02a23fc502b2bc4986bcd45b29c28ef23d26fb8535979a4f535b00455f3d6614e5e74b963040829942dd1e871b",
+      "nonce": "4672b74f588c5134c7b515fb00f302e0",
+      "signature": "0x35f180a50376e6a459cabfd43fd8b96d00649fe1ee4fc69b5b5399c43b2c2b03445adde44461907511775a5816b6fde265e4255f981175e01de677150b663f8d1b",
       "targetBountyIssue": 122,
       "uploadReceipt": {
         "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
@@ -62,8 +62,8 @@
       "file": "invoice_ledger_reconcile_general.jsonl",
       "rowCount": 10,
       "bodySha256": "450a9208f632d54f9fc3e0af0fb4fe981f2887ce0b1db3a48ea8efe30d84bce7",
-      "nonce": "d5b14210efe917f8737c32fab6a01a66",
-      "signature": "0x6122a8e00a2613ef5b423c03dcaffb4bf2ee6ef328abeb3c0467d7e8c378b42a01edca1145a5882db1cf9a0633b568efa6f10d237fab265fb6741d765518dc6d1b",
+      "nonce": "0d002f6fcf5d7b296b4e14fe811a5782",
+      "signature": "0x7f794e95722412c9d9adb90a85e4a1e2a94dca769cb2d9972b5d4d22108c8dfd26161d3d1fcf7c126aabd58127e71c8ea7b8ab7d4ef1974c45cd6c9ebf85f4be1c",
       "targetBountyIssue": 120,
       "uploadReceipt": {
         "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
@@ -79,6 +79,31 @@
         }
       },
       "samplePrompt": "Perform a 3-way reconciliation between Purchase Order PO-2026-4410, Goods Receipt Note GRN-2026-889, and Tax Invoice INV-STL-902 for Fe-550D..."
+    },
+    {
+      "intentId": "MINING_INTELLIGENCE_GENERAL",
+      "title": "Geological Survey of Queensland (GSQ) Historical Mining Ground Truths",
+      "domain": "Gold Rush Challenge / Historical Mining Intelligence (Track 3 Evaluator)",
+      "file": "gold_rush_queensland_mines.jsonl",
+      "rowCount": 6,
+      "bodySha256": "26bc22c0fb90db04a9d061b4e6f1de79df5ef979b46b2ee4a9e76b459b79dda1",
+      "nonce": "4995d31bb58ed31ed0401ee4970cdec7",
+      "signature": "0x0d4e9eea52a25b96bd9fd7dd5427299a9562cf7fdd7f1626ab5854b4cbc17df532bb9738ea368c95b37102380bcd63ec34279ea1a76a102889186eacddf8f8791b",
+      "targetBountyIssue": 218,
+      "uploadReceipt": {
+        "intent_id": "MINING_INTELLIGENCE_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 6,
+        "accepted": 6,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 6,
+        "state_counts": {
+          "admitted": 6
+        }
+      },
+      "samplePrompt": "Investigate historical gold mining in Queensland at the Mount Morgan Mine: Who discovered and owned the deposit, how much total gold and sec..."
     }
   ]
 }

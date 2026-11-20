@@ -47,6 +47,13 @@ const TARGET_INTENTS = [
     title: '3-Way Invoice vs ERP General Ledger Reconciliation Ground Truths',
     domain: 'Treasury & Financial Clearing (Mission 03)',
     bountyIssue: 120
+  },
+  {
+    intentId: 'MINING_INTELLIGENCE_GENERAL',
+    file: 'gold_rush_queensland_mines.jsonl',
+    title: 'Geological Survey of Queensland (GSQ) Historical Mining Ground Truths',
+    domain: 'Gold Rush Challenge / Historical Mining Intelligence (Track 3 Evaluator)',
+    bountyIssue: 218
   }
 ];
 

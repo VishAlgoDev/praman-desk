@@ -452,7 +452,7 @@ async function run() {
 
     // 18. Keyless Streamable HTTP & JSON-RPC 2.0 MCP endpoint (/api/mcp)
     const mcpMeta = await check('/api/mcp');
-    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 15) {
+    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 16) {
       throw new Error(`GET /api/mcp metadata failed: ${JSON.stringify(mcpMeta)}`);
     }
     const mcpInit = await check('/api/mcp', 'POST', {
@@ -476,7 +476,7 @@ async function run() {
       id: 2,
       method: 'tools/list'
     });
-    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 15) {
+    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 16) {
       throw new Error(`POST /api/mcp tools/list failed: ${JSON.stringify(mcpList)}`);
     }
     const mcpCall = await check('/api/mcp', 'POST', {
@@ -525,6 +525,18 @@ async function run() {
     const psBridge = await check('/api/bridge/paysheet', 'POST', { target: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' });
     if (psBridge.status !== 200 || psBridge.json.cleared !== false || psBridge.json.action !== 'HALT_AND_FREEZE') {
       throw new Error(`POST /api/bridge/paysheet failed: ${JSON.stringify(psBridge)}`);
+    }
+
+    // 23. Gold Rush Mining Intelligence (/api/miner/mining-intelligence)
+    const miningCheck = await check('/api/miner/mining-intelligence?query=' + encodeURIComponent('Mount Morgan Mine VHMS gold and copper production Queensland'));
+    if (miningCheck.status !== 200 || miningCheck.json.verdict !== 'VERIFIED_HISTORICAL_RECORD' || miningCheck.json.production?.gold_tonnes !== 262.0) {
+      throw new Error(`GET /api/miner/mining-intelligence failed: ${JSON.stringify(miningCheck)}`);
+    }
+
+    // 24. Contract Obligation Audit (/api/miner/contract-obligation)
+    const contractCheck = await check('/api/miner/contract-obligation?text=' + encodeURIComponent('MahaRERA Section 18 delay interest Registration P51900022104 Apartment B-1402'));
+    if (contractCheck.status !== 200 || contractCheck.json.status !== 'delay_interest_triggered') {
+      throw new Error(`GET /api/miner/contract-obligation failed: ${JSON.stringify(contractCheck)}`);
     }
 
     console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM & MISSION 02 VERIFIED!');

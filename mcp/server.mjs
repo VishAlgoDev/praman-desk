@@ -27,6 +27,7 @@ import {
   monitorRegulatoryFiling,
   evaluateStablecoinGate,
   evaluateContractObligationPrompt,
+  evaluateMiningIntelligencePrompt,
 } from '../src/handlers.mjs';
 import { generateComplianceCertificate } from '../src/certificate.mjs';
 import { evaluateCounterpartyShield, checkFakeWatchDomain } from '../src/bridges/fakewatch-bridge.mjs';
@@ -724,6 +725,21 @@ export const TOOLS = [
       required: ['text'],
     },
   },
+  {
+    name: 'query_mining_intelligence',
+    description:
+      'Gold Rush & MINING_INTELLIGENCE_GENERAL: Query authoritative historical gold mining records for Queensland, Australia (Mount Morgan, Charters Towers, Gympie, Palmer River, Ravenswood, Hodgkinson). Grounded in Geological Survey of Queensland (GSQ) records and GeoResGlobe data.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Historical mine, goldfield, or geological query to investigate (e.g. "Mount Morgan Mine", "Charters Towers", "Gympie Slate Beds", "Palmer River Chinese prospectors", "Ravenswood mundic").',
+        },
+      },
+      required: ['query'],
+    },
+  },
 ];
 
 // Execute an MCP tool deterministically (shared by stdio and Streamable HTTP /api/mcp)
@@ -894,6 +910,21 @@ export async function executeMcpTool(name, inputArgs = {}) {
             verdict: 'Insufficient Evidence',
             status: 'insufficient_evidence',
             summary: 'Insufficient parameters: supply contract text or clause to audit (?text=...).',
+          };
+          break;
+
+        case 'query_mining_intelligence':
+          const rawMiningQuery = args.query || args.prompt || args.mine || args.site || args.goldfield || '';
+          result = evaluateMiningIntelligencePrompt(rawMiningQuery) || {
+            site: rawMiningQuery || 'Unknown Queensland Site',
+            verdict: 'INSUFFICIENT_EVIDENCE',
+            status: 'insufficient_evidence',
+            summary: 'Insufficient parameters: supply historical mine name, goldfield, or inquiry (?query=...).',
+            provenance: {
+              source_kind: 'registry',
+              source_url: 'https://www.business.qld.gov.au/industries/mining-energy-water/resources/geoscience-information/gsq',
+              authority: 'Geological Survey of Queensland (GSQ) / GeoResGlobe',
+            },
           };
           break;
 

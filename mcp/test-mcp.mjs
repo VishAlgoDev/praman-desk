@@ -36,10 +36,10 @@ async function runTests() {
   for (const t of toolsResult.tools) {
     console.log(`   - ${t.name}: ${t.description.slice(0, 65)}...`);
   }
-  if (toolsResult.tools.length !== 15) {
-    throw new Error(`Expected 15 tools, found ${toolsResult.tools.length}`);
+  if (toolsResult.tools.length !== 16) {
+    throw new Error(`Expected 16 tools, found ${toolsResult.tools.length}`);
   }
-  console.log('   PASS: All 15 tools registered.\n');
+  console.log('   PASS: All 16 tools registered.\n');
 
   // Test 2: verify_counterparty (STRIPE, LLC)
   console.log('3. Testing tool: verify_counterparty (STRIPE, LLC)...');
@@ -389,8 +389,21 @@ async function runTests() {
   console.log(`   Result: Statutory delay interest triggered | Rate: ${coParsed.interest_rate_pct}% p.a. | Liability: INR ${coParsed.accrued_liability}`);
   console.log('   PASS: audit_contract_obligation succeeded.\n');
 
+  // Test 21: query_mining_intelligence (Gold Rush / Track 2 & 3)
+  console.log('21. Testing tool: query_mining_intelligence (Mount Morgan Mine GSQ record)...');
+  const resMining = await client.callTool({
+    name: 'query_mining_intelligence',
+    arguments: { query: 'Investigate Mount Morgan Mine Queensland VHMS geology and historical gold production' },
+  });
+  const miningParsed = JSON.parse(resMining.content[0].text);
+  if (miningParsed.verdict !== 'VERIFIED_HISTORICAL_RECORD' || miningParsed.production?.gold_tonnes !== 262.0) {
+    throw new Error(`Expected Mount Morgan GSQ verified record with 262.0t Au, got ${JSON.stringify(miningParsed)}`);
+  }
+  console.log(`   Result: GSQ Verified Record | Site: ${miningParsed.site} | Gold: ${miningParsed.production.gold_tonnes}t Au | Copper: ${miningParsed.production.copper_tonnes}t Cu`);
+  console.log('   PASS: query_mining_intelligence succeeded.\n');
+
   await client.close();
-  console.log('=== All 20 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 21 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {

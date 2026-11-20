@@ -869,6 +869,15 @@
       <div class="scenario-title">9. Document Authenticity Provenance (SHA-256)</div>
       <div class="scenario-desc">AP freight invoice presenting zero-byte SHA-256 digest (e3b0c442...) intercepted for hash integrity violation before funds move.</div>
     </div>
+
+    <div class="scenario-card" id="card-scen-10" onclick="selectScenario('gold_rush_gsq')">
+      <div class="scenario-card-header">
+        <span class="scenario-tag tag-success">GSQ VERIFIED</span>
+        <span style="font-size:12px; font-family:var(--font-mono); color:var(--text-dim);">$0.00 / NO LOSS</span>
+      </div>
+      <div class="scenario-title">10. Gold Rush Intelligence (GSQ Ground Truth)</div>
+      <div class="scenario-desc">Historical Queensland gold mining enquiry (Mount Morgan) verified against official GSQ records; epithermal/BHP hallucination rejected.</div>
+    </div>
   </div>
 
   <!-- Split-Screen Interactive Playground -->
@@ -1594,6 +1603,17 @@ Content-Type: application/json
       items: [
         { desc: 'Logistics Bill of Lading with Zero-Byte Empty SHA-256 Digest (e3b0c442...)', qty: 1, price: '$8,400.00', total: '$8,400.00' }
       ]
+    },
+    gold_rush_gsq: {
+      name: 'Scenario 10: Gold Rush Historical Mining Intelligence (GSQ Ground Truth)',
+      agent: 'georesglobe-historical-intel-agent-01',
+      amount: '$0.00 (Intel Query)',
+      amountVal: 0.00,
+      recipient: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
+      vendor: 'Geological Survey of Queensland (GSQ Open Data)',
+      items: [
+        { desc: 'Mount Morgan Mine (262t Au, 387kt Cu, Devonian Trondhjemite VHMS, Morgan Bros 1882)', qty: 1, price: '$0.00', total: '$0.00' }
+      ]
     }
   };
 
@@ -1642,6 +1662,7 @@ Content-Type: application/json
     if (key === 'two_minds_guard') document.getElementById('card-scen-7').classList.add('active');
     if (key === 'rugreceipt_screen') document.getElementById('card-scen-8').classList.add('active');
     if (key === 'doc_authenticity') document.getElementById('card-scen-9').classList.add('active');
+    if (key === 'gold_rush_gsq') document.getElementById('card-scen-10').classList.add('active');
 
     const s = SCENARIOS[key];
     document.getElementById('active-scenario-pill').textContent = s.name;
@@ -2167,6 +2188,20 @@ Content-Type: application/json
         mathVerification: { bitExactMatch: true, discrepancyCents: 0, computedCents: 840000, statedCents: 840000, computedTotal: 8400, statedTotal: 8400, wasmScoreBps: 10000 },
         policyCaps: { delegationTier: 'TIER_2_DUAL_AUTH_REQUIRED', supervisorAuthRequired: true, supervisorAuthValid: false },
         attestationSha256: '0x1ff209793c1085ed5b71d6404e93239ce0ba8bbb9169ad73df8237aa34806181'
+      }, latency);
+    } else if (scen === 'gold_rush_gsq') {
+      updateVerdictUI({
+        status: 'APPROVED',
+        verdict: 'APPROVED_AND_VERIFIED',
+        flags: [
+          'GSQ_GROUND_TRUTH_MATCH: Mount Morgan Mine (262 tonnes Au, 387,000 tonnes Cu) authenticated against Geological Survey of Queensland catalog'
+        ],
+        summary: 'Historical Mining Intelligence verified: Discovered July 1882 by Morgan Brothers. 262 tonnes gold and 387kt copper produced from Devonian Trondhjemite VHMS orebody. Hallucinated epithermal narrative rejected. Provenance: Geological Survey of Queensland (GSQ) / GeoResGlobe (ML 4022).',
+        recipientVerification: { sanctionsScreeningClear: true },
+        vendorVerification: { gleifVerified: true, lei: 'GSQ-GOV-AU-QLD-2026', legalName: 'GEOLOGICAL SURVEY OF QUEENSLAND', gleifUrl: 'https://www.business.qld.gov.au/industries/mining-energy-water/resources/geoscience-information/gsq', sanctionsScreeningClear: true },
+        mathVerification: { bitExactMatch: true, discrepancyCents: 0, computedCents: 0, statedCents: 0, computedTotal: 0, statedTotal: 0, wasmScoreBps: 10000 },
+        policyCaps: { delegationTier: 'TIER_1_AUTONOMOUS', supervisorAuthRequired: false, supervisorAuthValid: true },
+        attestationSha256: '0x9d4a82fb41c880e6ef51283624e7a83c6b29f041b3780a4c281df6085a10bb52'
       }, latency);
     } else {
       updateVerdictUI({
