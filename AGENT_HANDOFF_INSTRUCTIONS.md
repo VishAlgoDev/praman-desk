@@ -31,7 +31,7 @@ Before running any mutating command or altering any file:
 - **Devnode Miner Coordinates**:
   - Miner ID: `#6127`
   - Route ID: `#5281` (`praman-compliance-miner`)
-  - Diamond Registration: `#6128`
+  - Diamond Registration: `#6137` (supersedes #6128; 9 bonded intents incl. GRID)
   - Diamond Contract (Sepolia): `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`
   - Contributor Wallet: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
 - **On-Chain Settlements Moat**: Exactly **57 verified paid Sepolia Diamond receipts** accessible live at `https://praman-desk.vercel.app/api/ledger`.
