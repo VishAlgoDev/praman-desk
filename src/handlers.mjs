@@ -13,6 +13,9 @@ import { generateComplianceCertificate, renderCertificateHtml } from './certific
 import { evaluateCounterpartyShield, checkFakeWatchDomain } from './bridges/fakewatch-bridge.mjs';
 import { generateRugReceiptProof } from './bridges/rugreceipt-bridge.mjs';
 import { evaluatePaysheetConsensus } from './bridges/paysheet-bridge.mjs';
+import { GoldRushAggregator } from '../examples/gold-rush-aggregator/gold-rush-aggregator.mjs';
+
+const goldRushAggregator = new GoldRushAggregator();
 
 const wasmEngine = await getWasmInstance();
 
@@ -6885,8 +6888,8 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, 200, report);
     }
 
-    // 6. Replacement Compliance Miner Endpoints (/api/miner/*)
-    if (pathname.startsWith('/api/miner/')) {
+    // 6. Replacement Compliance Miner & Gold Rush Endpoints (/api/miner/*, /api/gold-rush/*)
+    if (pathname.startsWith('/api/miner/') || pathname.startsWith('/api/gold-rush/')) {
       let body = {};
       if (req.method === 'POST') {
         try {
@@ -7475,6 +7478,31 @@ export async function handleApiRequest(req, res) {
           intent: 'MINING_INTELLIGENCE_GENERAL',
           schema_version: 1,
           as_of: new Date().toISOString()
+        });
+      }
+
+      if (pathname === '/api/gold-rush/aggregate' || pathname === '/api/miner/mining-aggregate') {
+        const site = String(merged.site || merged.query || merged.mine || 'Mount Morgan Mine').trim();
+        let candidateMiners = Array.isArray(merged.candidates) && merged.candidates.length > 0 ? merged.candidates : null;
+
+        if (!candidateMiners) {
+          const primaryEval = evaluateMiningIntelligencePrompt(site);
+          candidateMiners = [
+            {
+              minerId: 'miner-6127-praman',
+              content: primaryEval ? primaryEval.summary : `Queensland deposit ${site}`
+            },
+            {
+              minerId: 'miner-unverified-competitor',
+              content: `${site} was discovered in 1895 by BHP Corporation and yielded 45 million ounces from an epithermal quartz reef with zero copper content.`
+            }
+          ];
+        }
+
+        const aggregationResult = goldRushAggregator.aggregateResponses(site, candidateMiners);
+        return sendJson(res, 200, {
+          ok: true,
+          ...aggregationResult
         });
       }
     }

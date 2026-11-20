@@ -36,10 +36,10 @@ async function runTests() {
   for (const t of toolsResult.tools) {
     console.log(`   - ${t.name}: ${t.description.slice(0, 65)}...`);
   }
-  if (toolsResult.tools.length !== 16) {
-    throw new Error(`Expected 16 tools, found ${toolsResult.tools.length}`);
+  if (toolsResult.tools.length !== 17) {
+    throw new Error(`Expected 17 tools, found ${toolsResult.tools.length}`);
   }
-  console.log('   PASS: All 16 tools registered.\n');
+  console.log('   PASS: All 17 tools registered.\n');
 
   // Test 2: verify_counterparty (STRIPE, LLC)
   console.log('3. Testing tool: verify_counterparty (STRIPE, LLC)...');
@@ -402,8 +402,21 @@ async function runTests() {
   console.log(`   Result: GSQ Verified Record | Site: ${miningParsed.site} | Gold: ${miningParsed.production.gold_tonnes}t Au | Copper: ${miningParsed.production.copper_tonnes}t Cu`);
   console.log('   PASS: query_mining_intelligence succeeded.\n');
 
+  // Test 22: arbitrate_mining_discrepancies (Gold Rush Multi-Miner Aggregator)
+  console.log('22. Testing tool: arbitrate_mining_discrepancies (Mount Morgan Mine contradiction arbitration)...');
+  const resArb = await client.callTool({
+    name: 'arbitrate_mining_discrepancies',
+    arguments: { site: 'Mount Morgan Mine' },
+  });
+  const arbParsed = JSON.parse(resArb.content[0].text);
+  if (arbParsed.status !== 'SYNTHESIS_ARBITRATED' || arbParsed.discrepancies?.length === 0 || !arbParsed.arbitrationDigest) {
+    throw new Error(`Expected SYNTHESIS_ARBITRATED with flagged discrepancies, got ${JSON.stringify(arbParsed)}`);
+  }
+  console.log(`   Result: Status: ${arbParsed.status} | Discrepancies caught: ${arbParsed.discrepancies.length} | Seal: ${arbParsed.arbitrationDigest.slice(0, 18)}...`);
+  console.log('   PASS: arbitrate_mining_discrepancies succeeded.\n');
+
   await client.close();
-  console.log('=== All 21 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 22 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {

@@ -34,6 +34,9 @@ import { evaluateCounterpartyShield, checkFakeWatchDomain } from '../src/bridges
 import { generateRugReceiptProof } from '../src/bridges/rugreceipt-bridge.mjs';
 import { evaluatePaysheetConsensus } from '../src/bridges/paysheet-bridge.mjs';
 import { getWasmInstance } from '../comparator/wasm-buffer.mjs';
+import { GoldRushAggregator } from '../examples/gold-rush-aggregator/gold-rush-aggregator.mjs';
+
+const goldRushAggregator = new GoldRushAggregator();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -740,6 +743,21 @@ export const TOOLS = [
       required: ['query'],
     },
   },
+  {
+    name: 'arbitrate_mining_discrepancies',
+    description:
+      'Gold Rush Multi-Miner Aggregator: Aggregate candidate intelligence from multiple Telegraph miners for a Queensland mining site, detect geological/production contradictions, and arbitrate against official GSQ ground truths with cryptographic proof seal.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        site: {
+          type: 'string',
+          description: 'Historical Queensland site or goldfield to arbitrate (e.g. "Mount Morgan Mine", "Charters Towers").',
+        },
+      },
+      required: ['site'],
+    },
+  },
 ];
 
 // Execute an MCP tool deterministically (shared by stdio and Streamable HTTP /api/mcp)
@@ -926,6 +944,22 @@ export async function executeMcpTool(name, inputArgs = {}) {
               authority: 'Geological Survey of Queensland (GSQ) / GeoResGlobe',
             },
           };
+          break;
+
+        case 'arbitrate_mining_discrepancies':
+          const targetSite = args.site || args.query || args.mine || 'Mount Morgan Mine';
+          const primaryInfo = evaluateMiningIntelligencePrompt(targetSite);
+          const candidates = Array.isArray(args.candidates) && args.candidates.length > 0 ? args.candidates : [
+            {
+              minerId: 'miner-6127-praman',
+              content: primaryInfo ? primaryInfo.summary : `Queensland deposit ${targetSite}`
+            },
+            {
+              minerId: 'miner-unverified-hallucinated',
+              content: `${targetSite} was discovered in 1895 by BHP Corporation and yielded 45 million ounces from an epithermal quartz reef with zero copper content.`
+            }
+          ];
+          result = goldRushAggregator.aggregateResponses(targetSite, candidates);
           break;
 
         default:

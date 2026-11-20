@@ -452,7 +452,7 @@ async function run() {
 
     // 18. Keyless Streamable HTTP & JSON-RPC 2.0 MCP endpoint (/api/mcp)
     const mcpMeta = await check('/api/mcp');
-    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 16) {
+    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 17) {
       throw new Error(`GET /api/mcp metadata failed: ${JSON.stringify(mcpMeta)}`);
     }
     const mcpInit = await check('/api/mcp', 'POST', {
@@ -476,7 +476,7 @@ async function run() {
       id: 2,
       method: 'tools/list'
     });
-    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 16) {
+    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 17) {
       throw new Error(`POST /api/mcp tools/list failed: ${JSON.stringify(mcpList)}`);
     }
     const mcpCall = await check('/api/mcp', 'POST', {
@@ -537,6 +537,12 @@ async function run() {
     const contractCheck = await check('/api/miner/contract-obligation?text=' + encodeURIComponent('MahaRERA Section 18 delay interest Registration P51900022104 Apartment B-1402'));
     if (contractCheck.status !== 200 || contractCheck.json.status !== 'delay_interest_triggered') {
       throw new Error(`GET /api/miner/contract-obligation failed: ${JSON.stringify(contractCheck)}`);
+    }
+
+    // 25. Gold Rush Multi-Miner Aggregator (/api/gold-rush/aggregate)
+    const aggCheck = await check('/api/gold-rush/aggregate?site=Mount%20Morgan%20Mine');
+    if (aggCheck.status !== 200 || aggCheck.json.status !== 'SYNTHESIS_ARBITRATED' || aggCheck.json.discrepancies?.length === 0 || !aggCheck.json.arbitrationDigest) {
+      throw new Error(`GET /api/gold-rush/aggregate failed: ${JSON.stringify(aggCheck)}`);
     }
 
     console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM & MISSION 02 VERIFIED!');

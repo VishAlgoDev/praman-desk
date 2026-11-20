@@ -1163,6 +1163,88 @@
       </table>
     </div>
   </div>
+
+  <!-- Gold Rush Geospatial Intelligence & Multi-Miner Arbitrator -->
+  <div style="margin-top: 20px; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 18px 20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+      <div>
+        <h4 style="margin:0; font-size:15px; color:#fff;">🧭 Gold Rush: Queensland Historical Mining Intelligence &amp; Multi-Miner Arbitrator</h4>
+        <p style="margin:2px 0 0 0; font-size:12px; color:var(--ink-muted);">Cross-track flagship challenge: multi-miner inquiry, geospatial grounding, contradiction arbitration &amp; Geological Survey of Queensland (GSQ) provenance.</p>
+      </div>
+      <span class="pill" style="color:var(--accent); border-color:var(--accent);">6 Benchmark Goldfields • GSQ Grounded</span>
+    </div>
+
+    <!-- 6 Queensland Goldfield Cards Grid -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:14px;">
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Mount Morgan Mine')">
+        <div style="font-weight:700; color:#fff; font-size:13px;">1. Mount Morgan</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-23.6450°, 150.3867°</div>
+        <div style="font-size:11px; color:var(--accent);">262t Au • 387kt Cu • VHMS</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Charters Towers Goldfield')">
+        <div style="font-weight:700; color:#fff; font-size:13px;">2. Charters Towers</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-20.0764°, 146.2614°</div>
+        <div style="font-size:11px; color:var(--accent);">&gt;6.6M oz Au • Fissure Reefs</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Gympie Goldfield')">
+        <div style="font-weight:700; color:#fff; font-size:13px;">3. Gympie ('Nashville')</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-26.1892°, 152.6641°</div>
+        <div style="font-size:11px; color:var(--accent);">4.1M oz Au • Slate Beds</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Palmer River Goldfield')">
+        <div style="font-weight:700; color:#fff; font-size:13px;">4. Palmer River</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-16.0333°, 144.0667°</div>
+        <div style="font-size:11px; color:var(--accent);">1.33M oz • 17k Chinese Miners</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Ravenswood Goldfield')">
+        <div style="font-weight:700; color:#fff; font-size:13px;">5. Ravenswood</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-20.1000°, 146.8833°</div>
+        <div style="font-size:11px; color:var(--accent);">900k oz • Mundic Crisis • CIL</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Hodgkinson Goldfield')">
+        <div style="font-weight:700; color:#fff; font-size:13px;">6. Hodgkinson</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-16.7833°, 145.0500°</div>
+        <div style="font-size:11px; color:var(--accent);">300k oz • Stibnite / Antimony</div>
+      </div>
+    </div>
+
+    <!-- Active Multi-Miner Arbitration Display -->
+    <div id="goldrush-loading" style="display:none; text-align:center; padding:15px; color:var(--ink-muted); font-size:12px;">
+      Querying parallel Telegraph miners and arbitrating against Geological Survey of Queensland (GSQ) records...
+    </div>
+
+    <div id="goldrush-results-box" style="display:block; background:rgba(0,0,0,0.3); border:1px solid var(--panel-border); border-radius:8px; padding:14px; font-family:var(--font-mono); font-size:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; border-bottom:1px solid var(--panel-border); padding-bottom:8px;">
+        <div>
+          <span style="color:var(--ink-muted);">Target Site:</span> <strong id="gr-site-title" style="color:#fff;">Mount Morgan Mine (Click any goldfield above to test)</strong>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span id="gr-status-pill" class="pill" style="color:var(--success); border-color:var(--success-border);">SYNTHESIS_ARBITRATED</span>
+          <span style="color:var(--ink-muted); font-size:11px;">Discrepancies Caught: <strong id="gr-discrepancies-count" style="color:var(--danger);">2</strong></span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <div style="font-weight:700; color:var(--warn); margin-bottom:4px;">🔍 Multi-Miner Contradictions Caught &amp; Neutralized:</div>
+        <ul id="gr-discrepancies-list" style="margin:0; padding-left:18px; color:#fca5a5; font-size:11px;">
+          <li style="margin-bottom:4px;"><strong>⚠️ Caught:</strong> CONTRADICTION: miner-unverified claims deposit is 'Epithermal Quartz' (GSQ ground truth: VHMS replacement in Mount Morgan Trondhjemite).</li>
+          <li><strong>⚠️ Caught:</strong> HALLUCINATION: miner-unverified cited hallucinated BHP ownership or 45M oz extraction (GSQ ground truth: Morgan Brothers 1882, ~262t / 8.4M oz Au).</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:8px;">
+        <div style="font-weight:700; color:var(--accent); margin-bottom:4px;">📜 Verified GSQ Consensus Evidence:</div>
+        <div id="gr-evidence-box" style="background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:6px; color:#e2e8f0; font-size:11px; line-height:1.4;">
+          HISTORICAL MINING INTELLIGENCE: MOUNT MORGAN MINE (QUEENSLAND). (1) Discovery &amp; Ownership: Discovered July 1882 by Morgan Brothers. (2) Cumulative Production: ~262 tonnes (~8.4M oz) gold and 387,000 tonnes copper from 50M tonnes ore. (3) Closure: Underground ended 1927 following fires; open-cut ceased 1981 on reserve depletion; tailings re-treatment ended 1990; legacy acid rock drainage managed under QLD Department of Resources rehabilitation program. (4) Geology: Giant subvolcanic VHMS pipe in Devonian Mount Morgan Trondhjemite; refractory pyritic halo remains prospective under ML 4022.
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; font-size:11px; color:var(--ink-muted); margin-top:8px;">
+        <div>Provenance: <a href="https://www.business.qld.gov.au/industries/mining-energy-water/resources/geoscience-information/gsq" target="_blank" style="color:var(--accent);">Geological Survey of Queensland (GSQ) / GeoResGlobe</a></div>
+        <div>Arbitration Digest: <code id="gr-digest" style="color:#60a5fa;">0x757a48490e6c015b9b1756ff...</code></div>
+      </div>
+    </div>
+  </div>
   </div> <!-- End Tab 1: Pre-Payment Spend Firewall -->
 
   <!-- TAB 2: DEVELOPER SDK & AGENT INTEGRATION -->
@@ -2264,6 +2346,49 @@ Content-Type: application/json
     navigator.clipboard.writeText(text).then(() => {
       alert('Snippet copied to clipboard!');
     });
+  }
+
+  async function runGoldRushExplorer(siteName) {
+    const outputEl = document.getElementById('goldrush-results-box');
+    const loadingEl = document.getElementById('goldrush-loading');
+    if (!outputEl) return;
+    if (loadingEl) loadingEl.style.display = 'block';
+    outputEl.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/gold-rush/aggregate?site=' + encodeURIComponent(siteName));
+      const data = await res.json();
+      if (loadingEl) loadingEl.style.display = 'none';
+      outputEl.style.display = 'block';
+
+      document.getElementById('gr-site-title').textContent = data.site;
+      document.getElementById('gr-status-pill').textContent = data.status;
+      document.getElementById('gr-status-pill').style.color = data.status === 'SYNTHESIS_ARBITRATED' ? 'var(--success)' : 'var(--warn)';
+
+      document.getElementById('gr-discrepancies-count').textContent = data.discrepancies?.length || 0;
+      document.getElementById('gr-digest').textContent = (data.arbitrationDigest || '0x...').slice(0, 26) + '...';
+
+      const discList = document.getElementById('gr-discrepancies-list');
+      discList.innerHTML = '';
+      if (data.discrepancies && data.discrepancies.length > 0) {
+        data.discrepancies.forEach(d => {
+          const li = document.createElement('li');
+          li.style.marginBottom = '4px';
+          li.style.color = '#fca5a5';
+          li.innerHTML = `<strong>⚠️ Caught:</strong> ${escapeHtml(d)}`;
+          discList.appendChild(li);
+        });
+      } else {
+        discList.innerHTML = '<li style="color:var(--success);">Zero discrepancies detected across queried providers.</li>';
+      }
+
+      const evBox = document.getElementById('gr-evidence-box');
+      evBox.textContent = typeof data.consensusEvidence === 'string' ? data.consensusEvidence : JSON.stringify(data.consensusEvidence, null, 2);
+    } catch (err) {
+      if (loadingEl) loadingEl.style.display = 'none';
+      outputEl.style.display = 'block';
+      outputEl.innerHTML = `<div style="color:var(--danger);">Error querying aggregator: ${err.message}</div>`;
+    }
   }
 
   // Auto-run Scenario 1 & hydrate live on-chain receipt ledger on load
