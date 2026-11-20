@@ -6031,20 +6031,27 @@ export async function handleApiRequest(req, res) {
     // 0b. GET /api/status
     if (pathname === '/api/status' && req.method === 'GET') {
       await loadSdnData();
+      const bondedIntents = [
+        'PURCHASE_ORDER_VERIFY_GENERAL',
+        'INVOICE_LEDGER_RECONCILE_GENERAL',
+        'VENDOR_VERIFY_GENERAL',
+        'DOCUMENT_AUTHENTICITY_GENERAL',
+        'CORPORATE_REGISTRY_LOOKUP_GENERAL',
+        'SANCTIONS_SCREENING_MATCH_GENERAL',
+        'REGULATORY_FILING_MONITOR_GENERAL',
+        'CONTRACT_OBLIGATION_AUDIT_GENERAL',
+        'GRID_POWER_PRICE_GENERAL'
+      ];
       const devnodeMiner = {
         route_id: 5281,
+        miner_index: 6127,
         slug: 'praman-compliance-miner',
         name: 'Praman Desk Compliance & Procurement Auditor',
-        capabilities_count: 7,
-        supported_intents: [
-          'PURCHASE_ORDER_VERIFY_GENERAL',
-          'INVOICE_LEDGER_RECONCILE_GENERAL',
-          'VENDOR_VERIFY_GENERAL',
-          'DOCUMENT_AUTHENTICITY_GENERAL',
-          'CORPORATE_REGISTRY_LOOKUP_GENERAL',
-          'SANCTIONS_SCREENING_MATCH_GENERAL',
-          'REGULATORY_FILING_MONITOR_GENERAL'
-        ]
+        capabilities_count: bondedIntents.length,
+        supported_intents: bondedIntents,
+        http_only_intents: ['MINING_INTELLIGENCE_GENERAL'],
+        devnode_scored_index_note:
+          'Devnode EvalPool may still index 7 legacy intents until network re-sync; on-chain bond and HTTP manifest are authoritative on this status object.'
       };
       const onchainDiamond = {
         diamond_address: DIAMOND_PORT,
@@ -6052,18 +6059,8 @@ export async function handleApiRequest(req, res) {
         tx_hash: '0x31f127785ae58f6b9a71b6816ef3005531a7af527d6f490be446a2ba84b62619',
         block_number: 12175886,
         yaml_pin_commit: '59454bd',
-        intents_count: 9,
-        bonded_intents: [
-          'PURCHASE_ORDER_VERIFY_GENERAL',
-          'INVOICE_LEDGER_RECONCILE_GENERAL',
-          'VENDOR_VERIFY_GENERAL',
-          'DOCUMENT_AUTHENTICITY_GENERAL',
-          'CORPORATE_REGISTRY_LOOKUP_GENERAL',
-          'SANCTIONS_SCREENING_MATCH_GENERAL',
-          'REGULATORY_FILING_MONITOR_GENERAL',
-          'CONTRACT_OBLIGATION_AUDIT_GENERAL',
-          'GRID_POWER_PRICE_GENERAL'
-        ]
+        intents_count: bondedIntents.length,
+        bonded_intents: bondedIntents
       };
       return sendJson(res, 200, {
         ok: true,
