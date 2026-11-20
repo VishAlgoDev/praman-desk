@@ -20,14 +20,13 @@ import { fileURLToPath } from 'node:url';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { getWasmInstance } from '../../comparator/wasm-buffer.mjs';
-import {
-  screenSanctions,
-  lookupCorporateRegistry,
-  monitorRegulatoryFiling,
-  verifyVendorPrimary
-} from '../../src/handlers.mjs';
-import { checkFakeWatchDomain } from '../../src/bridges/fakewatch-bridge.mjs';
 import { MultiMinerAggregator } from '../../examples/gold-rush-aggregator/multi-miner-aggregator.mjs';
+import {
+  createPramanTelegraphClient,
+  screenSanctionsViaTelegraph,
+  lookupCorporateViaTelegraph,
+  checkPaymentDomainViaTelegraph
+} from '../lib/telegraph-specialists.mjs';
 
 const execFileAsync = promisify(execFile);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -40,8 +39,9 @@ const anjomanScript = path.join(rootDir, '.agents', 'skills', 'anjoman', 'script
 export class GeneralPurposeMind {
   constructor(config = {}) {
     this.name = config.name || 'Praman-Universal-Verification-Mind';
-    this.version = '2.0.0-minds-general';
+    this.version = '2.1.0-telegraph-mcp-remote';
     this.wasmPromise = getWasmInstance();
+    this.telegraph = createPramanTelegraphClient(config);
   }
 
   /**
@@ -112,7 +112,7 @@ export class GeneralPurposeMind {
       const taskBrief = typeof taskInput === 'string' ? taskInput : (taskInput.summary || taskInput.description || JSON.stringify(taskInput).slice(0, 300));
       try {
         const { stdout } = await execFileAsync('node', [anjomanScript, 'ask', `Analyze for fraud, regulatory non-compliance, and errors: ${taskBrief}`], {
-          timeout: 4000,
+          timeout: Math.min(Number(process.env.ANJOMAN_ASK_TIMEOUT_MS || 60000), 120000),
           env: process.env
         });
         anjomanSignal = { source: 'Anjoman Intelligence Layer', raw: stdout.trim(), success: true };
@@ -124,7 +124,7 @@ export class GeneralPurposeMind {
     // B. Discipline 1: Sanctions & Terrorist Financing Check
     if (classification.detectedDisciplines.includes('SANCTIONS_SCREENING')) {
       const target = taskInput.counterparty || taskInput.vendor || taskInput.address || taskInput.recipient || '';
-      const sanctionsRes = await screenSanctions({ name: target, threshold: 0.70 });
+      const sanctionsRes = await screenSanctionsViaTelegraph(this.telegraph, { name: target, threshold: 0.70 });
       if (sanctionsRes.matched) {
         anomalies.push({
           discipline: 'SANCTIONS_SCREENING',
@@ -142,9 +142,12 @@ export class GeneralPurposeMind {
     // C. Discipline 2: Corporate Registry & Legal Standing
     if (classification.detectedDisciplines.includes('CORPORATE_REGISTRY')) {
       const query = taskInput.lei || taskInput.vendor || taskInput.company || '';
-      const corpRes = await lookupCorporateRegistry({ query, jurisdiction: taskInput.jurisdiction || '' });
+      const corpRes = await lookupCorporateViaTelegraph(this.telegraph, {
+        query,
+        jurisdiction: taskInput.jurisdiction || ''
+      });
       const found = Boolean(corpRes.found);
-      const active = corpRes.status === 'ISSUED' || corpRes.registration_status === 'ACTIVE';
+      const active = corpRes.active === true || corpRes.status === 'ISSUED' || corpRes.registration_status === 'ACTIVE';
 
       if (!found) {
         anomalies.push({
@@ -164,8 +167,8 @@ export class GeneralPurposeMind {
     if (classification.detectedDisciplines.includes('DOMAIN_REPUTATION')) {
       const domain = taskInput.domain || taskInput.url ? String(taskInput.domain || taskInput.url).replace(/^https?:\/\//i, '').split('/')[0] : '';
       if (domain) {
-        const fakeWatchRes = await checkFakeWatchDomain(domain);
-        if (fakeWatchRes.verdict === 'PHISHING' || fakeWatchRes.risk_score >= 80) {
+        const fakeWatchRes = await checkPaymentDomainViaTelegraph(this.telegraph, domain, taskInput.vendor || '');
+        if (fakeWatchRes?.verdict === 'PHISHING' || (fakeWatchRes?.risk_score ?? 0) >= 80) {
           anomalies.push({
             discipline: 'DOMAIN_REPUTATION',
             severity: 'CRITICAL',
@@ -175,7 +178,7 @@ export class GeneralPurposeMind {
           finalVerdict = 'HALT_AND_FREEZE';
           primaryReason = `Critical Block: Payment URL (${domain}) flagged as phishing by FakeWatch.`;
           capitalAvertedUsd += Number(taskInput.amount || taskInput.potentialLoss || 0);
-        } else if (fakeWatchRes.verdict === 'UNKNOWN') {
+        } else if (fakeWatchRes?.verdict === 'UNKNOWN') {
           anomalies.push({
             discipline: 'DOMAIN_REPUTATION',
             severity: 'MEDIUM',

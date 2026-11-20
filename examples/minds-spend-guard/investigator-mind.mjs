@@ -20,8 +20,14 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { screenSanctions, lookupCorporateRegistry } from '../../src/handlers.mjs';
-import { checkFakeWatchDomain } from '../../src/bridges/fakewatch-bridge.mjs';
+import {
+  createPramanTelegraphClient,
+  screenSanctionsViaTelegraph,
+  lookupCorporateViaTelegraph,
+  checkPaymentDomainViaTelegraph
+} from '../lib/telegraph-specialists.mjs';
+
+const telegraphClient = createPramanTelegraphClient();
 
 const execFileAsync = promisify(execFile);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -40,7 +46,7 @@ const REFERENCE_FX_RATES = {
  * Queries Anjoman via the official skill CLI if an API key is provisioned,
  * otherwise falls back to deterministic local specialists.
  */
-async function queryAnjomanSkill(prompt, timeoutMs = 8000) {
+async function queryAnjomanSkill(prompt, timeoutMs = 60000) {
   if (fs.existsSync(anjomanScript)) {
     try {
       const apiKey = process.env.ANJOMAN_API_KEY;
@@ -63,7 +69,7 @@ async function queryAnjomanSkill(prompt, timeoutMs = 8000) {
     }
   }
   return {
-    source: 'Praman Desk In-Memory Specialist (Telegraph Protocol Miner #6127)',
+    source: 'Praman Desk Live Specialist API (Route #5281 / https://praman-desk.vercel.app/api/mcp)',
     raw: null,
     success: false
   };
@@ -120,19 +126,20 @@ export async function investigateProcurement(request) {
   const targetDomain = request.domain || (request.vendor ? `${request.vendor.toLowerCase().replace(/[^a-z0-9]/g, '')}.com` : '');
   const [sanctionsRes, corporateRes, domainRes, anjomanRes] = await Promise.all([
     // A. OFAC Sanctions screening
-    screenSanctions({
+    screenSanctionsViaTelegraph(telegraphClient, {
       name: request.recipientAddress || request.vendor,
       threshold: 0.70
     }).catch(err => ({ error: err.message, matched: false })),
 
-    // B. GLEIF Corporate Registry lookup
-    lookupCorporateRegistry({
+    // B. GLEIF Corporate Registry lookup (live production miner)
+    lookupCorporateViaTelegraph(telegraphClient, {
       query: request.lei || request.vendor,
+      lei: request.lei,
       jurisdiction: request.country || ''
     }).catch(err => ({ error: err.message, found: false })),
 
-    // C. FakeWatch Domain Safety check
-    targetDomain ? checkFakeWatchDomain(targetDomain).catch(err => ({
+    // C. FakeWatch Domain Safety check (live /api/bridge/fakewatch)
+    targetDomain ? checkPaymentDomainViaTelegraph(telegraphClient, targetDomain, request.vendor).catch(err => ({
       verdict: 'UNKNOWN',
       domain: targetDomain,
       risk_score: 50

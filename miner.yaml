@@ -285,6 +285,35 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Clause or sub-clause under audit"
+  - path: /api/miner/mining-intelligence
+    external_path: /api/miner/mining-intelligence
+    method: GET
+    intents:
+      - MINING_INTELLIGENCE_GENERAL
+    description: >-
+      Deep historical mining & geological intelligence across GSQ, GSWA, USGS, CGS, GSI, and NRCan
+      open survey records. Returns verified deposit metrics, jurisdiction, provenance, and confidence.
+      Accepts mine name, site, or natural-language query (?question=...).
+    params:
+      query:
+        optional:
+          - name: site
+            type: string
+            intents: ["*"]
+            description: "Mine name, goldfield, or deposit identifier"
+          - name: mine
+            type: string
+            intents: ["*"]
+            description: "Alias for site"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Full verbatim mining intelligence query"
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Legacy query alias for question"
+
   - path: /api/miner/grid-power-price
     external_path: /api/miner/grid-power-price
     method: GET
@@ -329,6 +358,7 @@ semantics:
     - REGULATORY_FILING_MONITOR_GENERAL
     - CONTRACT_OBLIGATION_AUDIT_GENERAL
     - GRID_POWER_PRICE_GENERAL
+    - MINING_INTELLIGENCE_GENERAL
 
 docs:
   repository: https://github.com/VishAlgoDev/praman-desk

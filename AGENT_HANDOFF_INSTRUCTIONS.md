@@ -27,7 +27,7 @@ Before running any mutating command or altering any file:
 ## 2. CURRENT GROUND-TRUTH TELEMETRY & COORDINATES
 
 - **Live Production URL**: `https://praman-desk.vercel.app` (Deployment `dpl_DXKgyordnq794HZzdcitz8KzjsXE` active and aliased).
-- **Git State**: Clean working tree on branch `main` at commit `a4052a3`, synchronized with `origin/main`.
+- **Git State**: Clean working tree on branch `main` (see `git log -1` for latest hash), synchronized with `origin/main`.
 - **Devnode Miner Coordinates**:
   - Miner ID: `#6127`
   - Route ID: `#5281` (`praman-compliance-miner`)
