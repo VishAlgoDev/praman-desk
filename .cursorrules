@@ -1,0 +1,10 @@
+# Cursor Rules — Praman Desk (Telegraph Season II)
+
+- Always read `AGENT_HANDOFF_INSTRUCTIONS.md` and `MASTER_OMNIBUS_COMPETITION_PLAN.md` first.
+- Working directory for commands: `c:\Users\Public\My Agent\telegraph-h2`.
+- Verification command: `npm test` (all 15 stages must pass).
+- Deploy command: `vercel --prod --yes`.
+- Production URL: `https://praman-desk.vercel.app`.
+- Devnode Miner: `#6127` / Route `#5281` / Diamond `#6128`.
+- The "Score Illusion" is cured via `src/intelligence/dynamic-solver.mjs` (handling arbitrary natural language prompts). Do not revert to brittle regexes!
+- Obey universal constitution in `../AGENTS.md` and append significant changes to `../audit/AUDIT_LOG.md`.
