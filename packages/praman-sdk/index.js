@@ -159,6 +159,34 @@ export class PramanDesk {
       payPeriod
     });
   }
+
+  /**
+   * Mission 12 / GRID_POWER_PRICE_GENERAL: Wholesale Locational Marginal Pricing (CAISO / ERCOT).
+   */
+  async getGridPowerPrice({ hub = 'NP15', iso = 'CAISO', market = 'RTM', query = '' } = {}) {
+    const q = new URLSearchParams({ hub, iso, market, query }).toString();
+    return this._request(`/api/miner/grid-power-price?${q}`, 'GET');
+  }
+
+  /**
+   * Mission 12 / MINING_INTELLIGENCE_GENERAL: Sovereign Geological Survey Mining Intelligence.
+   */
+  async queryMiningIntelligence({ site = '', entity = '', jurisdiction = '' } = {}) {
+    const target = site || entity;
+    const q = new URLSearchParams({ site: target, jurisdiction }).toString();
+    return this._request(`/api/miner/gold-rush?${q}`, 'GET');
+  }
+
+  /**
+   * Universal Multi-Miner Discrepancy Arbitrator & Consensus Synthesizer.
+   */
+  async arbitrateMiningDiscrepancies({ site = '', entity = '', miners = [] } = {}) {
+    const target = site || entity;
+    return this._request('/api/gold-rush/aggregate', 'POST', {
+      site: target,
+      miners
+    });
+  }
 }
 
 export default PramanDesk;

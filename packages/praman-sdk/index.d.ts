@@ -54,6 +54,9 @@ export declare class PramanDesk {
   auditContractObligation(input: { contractText?: string; invoiceAmount?: number; invoiceDate?: string; paymentDueDate?: string; interestRatePct?: number }): Promise<any>;
   screenStablecoinSettlement(input: { recipientAddress: string; amount: number; asset?: string; purpose?: string; dryRun?: boolean }): Promise<any>;
   paysheetConsensus(input: { payeeAddress: string; grossAmount: number; deductions?: number; netPayable?: number; payPeriod?: string }): Promise<any>;
+  getGridPowerPrice(input?: { hub?: string; iso?: string; market?: string; query?: string }): Promise<any>;
+  queryMiningIntelligence(input?: { site?: string; entity?: string; jurisdiction?: string }): Promise<any>;
+  arbitrateMiningDiscrepancies(input?: { site?: string; entity?: string; miners?: any[] }): Promise<any>;
 }
 
 export default PramanDesk;

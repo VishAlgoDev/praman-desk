@@ -6,6 +6,8 @@ Official zero-dependency SDKs (TypeScript / JavaScript and Python) for autonomou
 - **<25ms OFAC SDN Screening**: In-memory hash checking across 19,565 global sanctions entities and blacklisted EVM addresses (including Lazarus Group).
 - **GLEIF LEI Registry**: Instant corporate registry verification.
 - **651-Byte WebAssembly Comparator**: Float-drift-free, bit-exact line item reconciliation.
+- **Wholesale Power Settlement**: CAISO / ERCOT Locational Marginal Pricing (LMP) breakdown via `getGridPowerPrice`.
+- **Universal Multi-Miner Arbitrator**: Dynamic discrepancy & contradiction arbitration across competing miners via `arbitrateMiningDiscrepancies`.
 - **On-Chain Settlement**: Anchored to Ethereum Sepolia Diamond proxy (`0x3624EB01...`) via x402 protocol.
 - **Reciprocal Ecosystem Bridges**: Integrated with FakeWatch (`fakewatch.pro`) and RugReceipt.
 

@@ -44,7 +44,23 @@ async function run() {
   assert.ok(contractRes.intent === 'CONTRACT_OBLIGATION_AUDIT_GENERAL' || contractRes.status, 'Contract obligation must respond');
   console.log('   PASS ✅ status:', contractRes.status, 'accrued:', contractRes.accruedLiability || contractRes.accrued_liability);
 
-  console.log('=== All JS/TS SDK Tests Passed (6/6) ✅ ===');
+  console.log('7. Testing getGridPowerPrice (CAISO NP15)...');
+  const powerRes = await client.getGridPowerPrice({ hub: 'NP15' });
+  assert.strictEqual(powerRes.intent, 'GRID_POWER_PRICE_GENERAL', 'Power price must return GRID_POWER_PRICE_GENERAL');
+  assert.ok(powerRes.price_mwh > 0, 'Price per MWh must be positive');
+  console.log('   PASS ✅ hub:', powerRes.hub, 'price_mwh:', powerRes.price_mwh);
+
+  console.log('8. Testing queryMiningIntelligence (Mount Morgan)...');
+  const mineRes = await client.queryMiningIntelligence({ site: 'Mount Morgan Mine' });
+  assert.ok(mineRes.summary || mineRes.verdict, 'Mining intelligence must return summary or verdict');
+  console.log('   PASS ✅ site:', mineRes.site || 'Mount Morgan Mine', 'verdict:', mineRes.verdict);
+
+  console.log('9. Testing arbitrateMiningDiscrepancies (Universal Multi-Miner Arbitrator)...');
+  const arbRes = await client.arbitrateMiningDiscrepancies({ site: 'Mount Morgan Mine' });
+  assert.ok(arbRes.status === 'SYNTHESIS_ARBITRATED' || arbRes.status === 'DISCREPANCY_FLAGGED', 'Arbitration must flag or arbitrate');
+  console.log('   PASS ✅ status:', arbRes.status, 'discrepancies:', arbRes.discrepancies_found);
+
+  console.log('=== All JS/TS SDK Tests Passed (9/9) ✅ ===');
 }
 
 run().catch((err) => {

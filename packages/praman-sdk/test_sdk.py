@@ -47,7 +47,23 @@ def main():
     assert contract.get("intent") == "CONTRACT_OBLIGATION_AUDIT_GENERAL" or "status" in contract, "Contract audit response required"
     print(f"   PASS ✅ status: {contract.get('status')} accrued: {contract.get('accruedLiability') or contract.get('accrued_liability')}")
 
-    print("=== All Python SDK Tests Passed (6/6) ✅ ===")
+    print("7. Testing get_grid_power_price (CAISO NP15)...")
+    power = client.get_grid_power_price(hub="NP15")
+    assert power.get("intent") == "GRID_POWER_PRICE_GENERAL", "Power price must return GRID_POWER_PRICE_GENERAL"
+    assert power.get("price_mwh", 0) > 0, "Price per MWh must be positive"
+    print(f"   PASS ✅ hub: {power.get('hub')} price_mwh: {power.get('price_mwh')}")
+
+    print("8. Testing query_mining_intelligence (Mount Morgan)...")
+    mine = client.query_mining_intelligence(site="Mount Morgan Mine")
+    assert "summary" in mine or "verdict" in mine, "Mining intelligence response required"
+    print(f"   PASS ✅ site: {mine.get('site', 'Mount Morgan Mine')} verdict: {mine.get('verdict')}")
+
+    print("9. Testing arbitrate_mining_discrepancies (Universal Multi-Miner Arbitrator)...")
+    arb = client.arbitrate_mining_discrepancies(site="Mount Morgan Mine")
+    assert arb.get("status") in ("SYNTHESIS_ARBITRATED", "DISCREPANCY_FLAGGED"), "Arbitration status required"
+    print(f"   PASS ✅ status: {arb.get('status')} discrepancies: {arb.get('discrepancies_found')}")
+
+    print("=== All Python SDK Tests Passed (9/9) ✅ ===")
 
 if __name__ == "__main__":
     main()

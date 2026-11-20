@@ -153,3 +153,39 @@ class PramanDesk:
             "payPeriod": pay_period
         })
 
+    def get_grid_power_price(
+        self,
+        hub: str = "NP15",
+        iso: str = "CAISO",
+        market: str = "RTM",
+        query: str = ""
+    ) -> Dict[str, Any]:
+        """Mission 12 / GRID_POWER_PRICE_GENERAL: Wholesale Locational Marginal Pricing."""
+        params = urllib.parse.urlencode({"hub": hub, "iso": iso, "market": market, "query": query})
+        return self._request(f"/api/miner/grid-power-price?{params}", method="GET")
+
+    def query_mining_intelligence(
+        self,
+        site: str = "Mount Morgan Mine",
+        entity: str = "",
+        jurisdiction: str = ""
+    ) -> Dict[str, Any]:
+        """Mission 12 / MINING_INTELLIGENCE_GENERAL: Sovereign Geological Survey Mining Intelligence."""
+        target = site or entity
+        params = urllib.parse.urlencode({"site": target, "jurisdiction": jurisdiction})
+        return self._request(f"/api/miner/gold-rush?{params}", method="GET")
+
+    def arbitrate_mining_discrepancies(
+        self,
+        site: str = "Mount Morgan Mine",
+        entity: str = "",
+        miners: Optional[list] = None
+    ) -> Dict[str, Any]:
+        """Universal Multi-Miner Discrepancy Arbitrator & Consensus Synthesizer."""
+        target = site or entity
+        return self._request("/api/gold-rush/aggregate", method="POST", payload={
+            "site": target,
+            "miners": miners or []
+        })
+
+
