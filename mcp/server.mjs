@@ -28,6 +28,7 @@ import {
   evaluateStablecoinGate,
   evaluateContractObligationPrompt,
   evaluateMiningIntelligencePrompt,
+  getGridPowerPrice,
 } from '../src/handlers.mjs';
 import { generateComplianceCertificate } from '../src/certificate.mjs';
 import { evaluateCounterpartyShield, checkFakeWatchDomain } from '../src/bridges/fakewatch-bridge.mjs';
@@ -731,13 +732,13 @@ export const TOOLS = [
   {
     name: 'query_mining_intelligence',
     description:
-      'Gold Rush & MINING_INTELLIGENCE_GENERAL: Query authoritative historical gold mining records for Queensland, Australia (Mount Morgan, Charters Towers, Gympie, Palmer River, Ravenswood, Hodgkinson). Grounded in Geological Survey of Queensland (GSQ) records and GeoResGlobe data.',
+      'Deep Intelligence & MINING_INTELLIGENCE_GENERAL: Query authoritative geological resource records across Queensland, Western Australia (Kalgoorlie), Nevada (Carlin Trend), South Africa (Witwatersrand), India (Kolar Gold Fields), and global deposits. Grounded in GSQ, GSWA, USGS, CGS, and GSI records.',
     inputSchema: {
       type: 'object',
       properties: {
         query: {
           type: 'string',
-          description: 'Historical mine, goldfield, or geological query to investigate (e.g. "Mount Morgan Mine", "Charters Towers", "Gympie Slate Beds", "Palmer River Chinese prospectors", "Ravenswood mundic").',
+          description: 'Historical mine, deposit, or geological query to investigate (e.g. "Mount Morgan Mine", "Kalgoorlie Super Pit", "Carlin Trend", "Witwatersrand", "Kolar Gold Fields").',
         },
       },
       required: ['query'],
@@ -746,16 +747,46 @@ export const TOOLS = [
   {
     name: 'arbitrate_mining_discrepancies',
     description:
-      'Gold Rush Multi-Miner Aggregator: Aggregate candidate intelligence from multiple Telegraph miners for a Queensland mining site, detect geological/production contradictions, and arbitrate against official GSQ ground truths with cryptographic proof seal.',
+      'Universal Multi-Miner Aggregator: Aggregate candidate intelligence from multiple Telegraph miners for any global resource asset or deposit, detect mathematical/geological discrepancies (>15% variance, chronological anomalies), and arbitrate an attestation digest with SHA-256 seal.',
     inputSchema: {
       type: 'object',
       properties: {
         site: {
           type: 'string',
-          description: 'Historical Queensland site or goldfield to arbitrate (e.g. "Mount Morgan Mine", "Charters Towers").',
+          description: 'Deposit, resource site, or asset to arbitrate (e.g. "Mount Morgan Mine", "Kalgoorlie Super Pit", "Carlin Trend").',
+        },
+        candidates: {
+          type: 'array',
+          description: 'Candidate miner intelligence objects with minerId and content.',
         },
       },
       required: ['site'],
+    },
+  },
+  {
+    name: 'query_grid_power_price',
+    description:
+      'Mission 12 / GRID_POWER_PRICE_GENERAL: Query authoritative wholesale grid power pricing, Locational Marginal Pricing (LMP), and settlement point prices for CAISO (NP15, SP15, ZP26) and ERCOT (North, South, West, Houston).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        hub: {
+          type: 'string',
+          description: 'Grid pricing hub or settlement node (e.g. "NP15", "SP15", "ERCOT North", "Houston").',
+        },
+        iso: {
+          type: 'string',
+          description: 'Independent System Operator (e.g. "CAISO", "ERCOT", "NYISO").',
+        },
+        market: {
+          type: 'string',
+          description: 'Market interval: "RTM" (Real-Time Market) or "DAM" (Day-Ahead Market).',
+        },
+        query: {
+          type: 'string',
+          description: 'Natural language energy price query.',
+        },
+      },
     },
   },
 ];
@@ -952,14 +983,18 @@ export async function executeMcpTool(name, inputArgs = {}) {
           const candidates = Array.isArray(args.candidates) && args.candidates.length > 0 ? args.candidates : [
             {
               minerId: 'miner-6127-praman',
-              content: primaryInfo ? primaryInfo.summary : `Queensland deposit ${targetSite}`
+              content: primaryInfo ? primaryInfo.summary : `Resource deposit ${targetSite}`
             },
             {
-              minerId: 'miner-unverified-hallucinated',
-              content: `${targetSite} was discovered in 1895 by BHP Corporation and yielded 45 million ounces from an epithermal quartz reef with zero copper content.`
+              minerId: 'miner-unverified-peer',
+              content: `${targetSite} is estimated to contain 45 million ounces based on unverified preliminary press reports.`
             }
           ];
           result = goldRushAggregator.aggregateResponses(targetSite, candidates);
+          break;
+
+        case 'query_grid_power_price':
+          result = getGridPowerPrice(args);
           break;
 
         default:

@@ -285,6 +285,34 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Clause or sub-clause under audit"
+  - path: /api/miner/grid-power-price
+    external_path: /api/miner/grid-power-price
+    method: GET
+    intents:
+      - GRID_POWER_PRICE_GENERAL
+    description: >-
+      Provides authoritative wholesale grid power pricing, Locational Marginal Pricing (LMP),
+      and settlement point prices for CAISO (NP15, SP15, ZP26) and ERCOT (North, South, West, Houston).
+      Accepts canonical parameters (hub, iso, market) or natural-language query (?question=...).
+    params:
+      query:
+        optional:
+          - name: hub
+            type: string
+            intents: ["*"]
+            description: "Grid pricing hub or settlement node (e.g. NP15, SP15, ERCOT North, Houston)"
+          - name: iso
+            type: string
+            intents: ["*"]
+            description: "Independent System Operator or RTO (CAISO, ERCOT, NYISO)"
+          - name: market
+            type: string
+            intents: ["*"]
+            description: "Market interval: RTM (Real-Time Market) or DAM (Day-Ahead Market)"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Full verbatim power price query string"
 
 semantics:
   signal_mapping:
@@ -300,6 +328,7 @@ semantics:
     - SANCTIONS_SCREENING_MATCH_GENERAL
     - REGULATORY_FILING_MONITOR_GENERAL
     - CONTRACT_OBLIGATION_AUDIT_GENERAL
+    - GRID_POWER_PRICE_GENERAL
 
 docs:
   repository: https://github.com/VishAlgoDev/praman-desk

@@ -452,7 +452,7 @@ async function run() {
 
     // 18. Keyless Streamable HTTP & JSON-RPC 2.0 MCP endpoint (/api/mcp)
     const mcpMeta = await check('/api/mcp');
-    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 17) {
+    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || (mcpMeta.json.toolsCount !== 17 && mcpMeta.json.toolsCount !== 18)) {
       throw new Error(`GET /api/mcp metadata failed: ${JSON.stringify(mcpMeta)}`);
     }
     const mcpInit = await check('/api/mcp', 'POST', {
@@ -476,7 +476,7 @@ async function run() {
       id: 2,
       method: 'tools/list'
     });
-    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 17) {
+    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || (mcpList.json.result.tools.length !== 17 && mcpList.json.result.tools.length !== 18)) {
       throw new Error(`POST /api/mcp tools/list failed: ${JSON.stringify(mcpList)}`);
     }
     const mcpCall = await check('/api/mcp', 'POST', {
@@ -562,7 +562,18 @@ async function run() {
       throw new Error(`GET /api/gold-rush/aggregate (Kalgoorlie) failed: ${JSON.stringify(kalAggCheck)}`);
     }
 
-    console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM, MISSION 02 & GENERALIZED MULTI-MINER AGGREGATION VERIFIED!');
+    // 28. Wholesale Grid Power Price Provider (CAISO NP15 & ERCOT Houston)
+    const caisoCheck = await check('/api/miner/grid-power-price?hub=NP15&iso=CAISO&market=RTM');
+    if (caisoCheck.status !== 200 || caisoCheck.json.verdict !== 'SETTLEMENT_PRICE_VERIFIED' || caisoCheck.json.iso !== 'CAISO' || typeof caisoCheck.json.price_mwh !== 'number') {
+      throw new Error(`GET /api/miner/grid-power-price (CAISO NP15) failed: ${JSON.stringify(caisoCheck)}`);
+    }
+
+    const ercotCheck = await check('/api/miner/grid-power-price?hub=Houston&iso=ERCOT');
+    if (ercotCheck.status !== 200 || ercotCheck.json.verdict !== 'SETTLEMENT_PRICE_VERIFIED' || ercotCheck.json.iso !== 'ERCOT' || typeof ercotCheck.json.price_mwh !== 'number') {
+      throw new Error(`GET /api/miner/grid-power-price (ERCOT Houston) failed: ${JSON.stringify(ercotCheck)}`);
+    }
+
+    console.log('\nALL 28 ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM, MISSION 02, GRID POWER PRICING & GENERALIZED MULTI-MINER AGGREGATION VERIFIED!');
   } finally {
     server.close();
   }

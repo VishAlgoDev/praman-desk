@@ -36,10 +36,10 @@ async function runTests() {
   for (const t of toolsResult.tools) {
     console.log(`   - ${t.name}: ${t.description.slice(0, 65)}...`);
   }
-  if (toolsResult.tools.length !== 17) {
-    throw new Error(`Expected 17 tools, found ${toolsResult.tools.length}`);
+  if (toolsResult.tools.length !== 18) {
+    throw new Error(`Expected 18 tools, found ${toolsResult.tools.length}`);
   }
-  console.log('   PASS: All 17 tools registered.\n');
+  console.log('   PASS: All 18 tools registered.\n');
 
   // Test 2: verify_counterparty (STRIPE, LLC)
   console.log('3. Testing tool: verify_counterparty (STRIPE, LLC)...');
@@ -415,8 +415,21 @@ async function runTests() {
   console.log(`   Result: Status: ${arbParsed.status} | Discrepancies caught: ${arbParsed.discrepancies.length} | Seal: ${arbParsed.arbitrationDigest.slice(0, 18)}...`);
   console.log('   PASS: arbitrate_mining_discrepancies succeeded.\n');
 
+  // Test 23: query_grid_power_price (Mission 12 / GRID_POWER_PRICE_GENERAL)
+  console.log('23. Testing tool: query_grid_power_price (CAISO NP15 wholesale settlement LMP)...');
+  const resPower = await client.callTool({
+    name: 'query_grid_power_price',
+    arguments: { hub: 'NP15', iso: 'CAISO', market: 'RTM' },
+  });
+  const powerParsed = JSON.parse(resPower.content[0].text);
+  if (powerParsed.verdict !== 'SETTLEMENT_PRICE_VERIFIED' || typeof powerParsed.price_mwh !== 'number' || powerParsed.iso !== 'CAISO') {
+    throw new Error(`Expected SETTLEMENT_PRICE_VERIFIED for CAISO NP15, got ${JSON.stringify(powerParsed)}`);
+  }
+  console.log(`   Result: Verified LMP | Hub: ${powerParsed.hub} | Price: $${powerParsed.price_mwh}/MWh | Node: ${powerParsed.node_id}`);
+  console.log('   PASS: query_grid_power_price succeeded.\n');
+
   await client.close();
-  console.log('=== All 22 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 23 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {
