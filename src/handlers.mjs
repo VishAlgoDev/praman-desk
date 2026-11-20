@@ -1506,6 +1506,10 @@ export function evaluateInvoiceReconcilePrompt(rawText = '') {
     };
   }
 
+  // Dynamic generalized reconciliation for arbitrary / novel prompts (curing the score illusion)
+  const dynamicResult = parseDynamicInvoiceReconciliation(text);
+  if (dynamicResult) return dynamicResult;
+
   return null;
 }
 
@@ -2418,6 +2422,10 @@ export function evaluateContractObligationPrompt(rawText = '') {
     };
   }
 
+  // Dynamic generalized contract obligation & LD solver for arbitrary clauses (curing the score illusion)
+  const dynamicLegal = parseDynamicContractObligation(text);
+  if (dynamicLegal) return dynamicLegal;
+
   return null;
 }
 
@@ -2736,8 +2744,9 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
  */
 // Decoupled Mining and Wholesale Power Intelligence Modules
 import { evaluateMiningIntelligencePrompt } from './intelligence/mining-intelligence.mjs';
+import { parseDynamicInvoiceReconciliation, parseDynamicContractObligation } from './intelligence/dynamic-solver.mjs';
 import { getGridPowerPrice } from './intelligence/grid-power-intelligence.mjs';
-export { evaluateMiningIntelligencePrompt, getGridPowerPrice };
+export { evaluateMiningIntelligencePrompt, getGridPowerPrice, parseDynamicInvoiceReconciliation, parseDynamicContractObligation };
 
 export function verifyDocumentAuthenticityPrimary({
   documentRef = 'Cryptographic e-Invoice / Spend Receipt',
@@ -6766,9 +6775,9 @@ export async function handleApiRequest(req, res) {
       delete merged.params;
 
       if (pathname === '/api/miner/invoice-reconcile') {
-        const invoiceStr = String(merged.invoice || merged.question || merged.query || merged.prompt || '');
+        const invoiceStr = String(merged.invoice || '');
         const ledgerStr = String(merged.ledger || '');
-        const queryText = [invoiceStr, ledgerStr, merged.question, merged.query, merged.prompt].filter(Boolean).join(' ');
+        const queryText = Array.from(new Set([merged.question, merged.query, merged.prompt, invoiceStr, ledgerStr].filter(Boolean).map(s => String(s).trim()))).join(' ');
         const nlEval = evaluateInvoiceReconcilePrompt(queryText);
         if (nlEval) {
           return sendJson(res, 200, {
