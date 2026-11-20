@@ -56,7 +56,7 @@ Queries 5 primary statutory registries directly (UK Companies House, German Hand
 Any agent or developer can test Praman Desk right now with zero setup:
 
 Streamable HTTP MCP (works out of the box in Cursor, Claude Code, and Antigravity):
-`https://praman-desk.vercel.app/api/mcp` (15 tools)
+`https://praman-desk.vercel.app/api/mcp` (18 tools)
 
 Local Stdio CLI:
 `npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp`
