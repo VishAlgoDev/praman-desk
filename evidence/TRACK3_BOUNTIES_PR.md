@@ -16,7 +16,7 @@
     - MahaRERA Section 18 statutory delay interest vs ordinary force majeure claims
     - FIDIC Silver Book Sub-Clause 20.1 28-day notice time-bars on EOT claims
     - MEP turnkey 50/50 retention money bank guarantee validity windows
-    - Multi-jurisdictional tax rounding, cross-currency payment tolerances, and statutory interest overrides
+    - Statutory delay interest overrides and cross-jurisdictional contractual penalties
 
 
 - **Intent**: `PURCHASE_ORDER_VERIFY_GENERAL` (Bounty #122)
@@ -25,10 +25,10 @@
   - **SHA-256**: `3ad30696e1e21be2a5c54a8717018e29be12a10575259f6c49759ed23596fea0`
   - **Domain Coverage**: Enterprise AP / Procurement (Mission 03 & 04)
   - **Key Edge Cases Covered**:
-    - MahaRERA Section 18 statutory delay interest vs ordinary force majeure claims
-    - FIDIC Silver Book Sub-Clause 20.1 28-day notice time-bars on EOT claims
-    - MEP turnkey 50/50 retention money bank guarantee validity windows
-    - Multi-jurisdictional tax rounding, cross-currency payment tolerances, and statutory interest overrides
+    - 2-way vs 3-way line item price and quantity tolerance thresholds (100 bps)
+    - Cross-currency PO matching with European VAT and Indian GST split-rate structures
+    - Detection of unapproved line-item quantity inflation vs original authorized PO
+    - Encumbered vendor accounts and altered payment disbursement instructions
 
 
 - **Intent**: `INVOICE_LEDGER_RECONCILE_GENERAL` (Bounty #120)
@@ -37,22 +37,24 @@
   - **SHA-256**: `450a9208f632d54f9fc3e0af0fb4fe981f2887ce0b1db3a48ea8efe30d84bce7`
   - **Domain Coverage**: Treasury & Financial Clearing (Mission 03)
   - **Key Edge Cases Covered**:
-    - MahaRERA Section 18 statutory delay interest vs ordinary force majeure claims
-    - FIDIC Silver Book Sub-Clause 20.1 28-day notice time-bars on EOT claims
-    - MEP turnkey 50/50 retention money bank guarantee validity windows
-    - Multi-jurisdictional tax rounding, cross-currency payment tolerances, and statutory interest overrides
+    - Sub-cent floating point rounding drift in fractional tax allocations
+    - Inverted foreign exchange cross-rates in international supplier settlements
+    - Duplicate invoice submission with minor variance in alphanumeric numbering
+    - Unmatched credit notes and unapplied retention offsets in general ledger postings
 
 
 - **Intent**: `MINING_INTELLIGENCE_GENERAL` (Bounty #218)
-  - **Title**: Geological Survey of Queensland (GSQ) Historical Mining Ground Truths
+  - **Title**: Authoritative Geological Survey Historical Mining Ground Truths
   - **Rows**: 6 high-fidelity preference pairs (`chosen` vs `rejected`)
   - **SHA-256**: `26bc22c0fb90db04a9d061b4e6f1de79df5ef979b46b2ee4a9e76b459b79dda1`
-  - **Domain Coverage**: Gold Rush Challenge / Historical Mining Intelligence (Track 3 Evaluator)
+  - **Domain Coverage**: Gold Rush Challenge / Deep Geological Intelligence (Track 3 Evaluator)
   - **Key Edge Cases Covered**:
-    - MahaRERA Section 18 statutory delay interest vs ordinary force majeure claims
-    - FIDIC Silver Book Sub-Clause 20.1 28-day notice time-bars on EOT claims
-    - MEP turnkey 50/50 retention money bank guarantee validity windows
-    - Multi-jurisdictional tax rounding, cross-currency payment tolerances, and statutory interest overrides
+    - Conflicting historical yield estimates between colonial gazettes and modern resource audits (alluvial vs lode mining yields)
+    - Inconsistent deposit classifications (e.g. VHMS replacement vs epithermal quartz reef vs mesothermal shear zones)
+    - Historical discoverer and syndicate attribution disputes across statutory tenement gazettes
+    - Unit conversion discrepancies (long tons vs short tons vs metric tonnes; troy ounces vs avoirdupois ounces)
+    - Historical flooding, mundic sulfide refractory treatment crises, and tailings retreatment yields
+    - Distinguishing active exploration tenements from historical heritage-listed reserves in open data portals
 
 
 #### Cryptographic EvalPool Evidence
@@ -76,23 +78,24 @@ All datasets have been cryptographically signed with EIP-191 personal signatures
   {
     "intentId": "INVOICE_LEDGER_RECONCILE_GENERAL",
     "sha256": "450a9208f632d54f9fc3e0af0fb4fe981f2887ce0b1db3a48ea8efe30d84bce7",
-    "signature": "0x7f794e95722412c9d9...",
+    "signature": "0x892a019485bb34892c...",
     "uploadStatus": "accepted"
   },
   {
     "intentId": "MINING_INTELLIGENCE_GENERAL",
     "sha256": "26bc22c0fb90db04a9d061b4e6f1de79df5ef979b46b2ee4a9e76b459b79dda1",
-    "signature": "0x0d4e9eea52a25b96bd...",
+    "signature": "0x6f9175d710d80c0587...",
     "uploadStatus": "accepted"
   }
 ]
 ```
 
-#### Verification Instructions
+#### Reproducible Evaluation Runner
 
 ```bash
-# Verify integrity of datasets
-node scripts/submit-track3-evaluator-dataset.mjs
-# Check live pool status
-node scripts/check-eval-status.mjs
+# Execute deterministic evaluation adapter across ground-truth suite
+node examples/gold-rush-evaluator/gold-rush-evaluator-adapter.mjs
+
+# Run cross-miner discrepancy arbitrator
+node examples/gold-rush-aggregator/gold-rush-aggregator.mjs
 ```

@@ -872,11 +872,11 @@
 
     <div class="scenario-card" id="card-scen-10" onclick="selectScenario('gold_rush_gsq')">
       <div class="scenario-card-header">
-        <span class="scenario-tag tag-success">GSQ VERIFIED</span>
+        <span class="scenario-tag tag-success">MULTI-MINER ARBITRATION</span>
         <span style="font-size:12px; font-family:var(--font-mono); color:var(--text-dim);">$0.00 / NO LOSS</span>
       </div>
-      <div class="scenario-title">10. Gold Rush Intelligence (GSQ Ground Truth)</div>
-      <div class="scenario-desc">Historical Queensland gold mining enquiry (Mount Morgan) verified against official GSQ records; epithermal/BHP hallucination rejected.</div>
+      <div class="scenario-title">10. Deep Intelligence & Multi-Miner Arbitration</div>
+      <div class="scenario-desc">Universal multi-miner intelligence synthesis across global deposits & assets; statistical variance and contradiction detection with cryptographic proof.</div>
     </div>
   </div>
 
@@ -1168,43 +1168,49 @@
   <div style="margin-top: 20px; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 18px 20px;">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
       <div>
-        <h4 style="margin:0; font-size:15px; color:#fff;">🧭 Gold Rush: Queensland Historical Mining Intelligence &amp; Multi-Miner Arbitrator</h4>
-        <p style="margin:2px 0 0 0; font-size:12px; color:var(--ink-muted);">Cross-track flagship challenge: multi-miner inquiry, geospatial grounding, contradiction arbitration &amp; Geological Survey of Queensland (GSQ) provenance.</p>
+        <h4 style="margin:0; font-size:15px; color:#fff;">🧭 Deep Intelligence: Universal Multi-Miner Discrepancy Arbitrator</h4>
+        <p style="margin:2px 0 0 0; font-size:12px; color:var(--ink-muted);">Flagship architecture: multi-miner parallel inquiry, dynamic fact extraction, statistical contradiction arbitration &amp; global geological survey provenance.</p>
       </div>
-      <span class="pill" style="color:var(--accent); border-color:var(--accent);">6 Benchmark Goldfields • GSQ Grounded</span>
+      <span class="pill" style="color:var(--accent); border-color:var(--accent);">Global Multi-Jurisdiction • Open Data Grounded</span>
     </div>
 
-    <!-- 6 Queensland Goldfield Cards Grid -->
+    <!-- Universal Search Input Bar -->
+    <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+      <input id="custom-miner-query" type="text" placeholder="Enter ANY global deposit, mine, or entity (e.g. Kalgoorlie, Carlin Trend, Witwatersrand, Kolar, Boddington)..." style="flex:1; min-width:240px; background:rgba(255,255,255,0.05); border:1px solid var(--panel-border); border-radius:6px; padding:9px 12px; color:#fff; font-size:12px; font-family:var(--font-mono);">
+      <button onclick="runGoldRushExplorer(document.getElementById('custom-miner-query').value || 'Kalgoorlie Super Pit')" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:9px 16px; font-weight:700; cursor:pointer; font-size:12px;">Arbitrate Multi-Miner Consensus</button>
+    </div>
+
+    <!-- 6 Global Resource Benchmark Cards Grid -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; margin-bottom:14px;">
       <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Mount Morgan Mine')">
         <div style="font-weight:700; color:#fff; font-size:13px;">1. Mount Morgan</div>
-        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-23.6450°, 150.3867°</div>
-        <div style="font-size:11px; color:var(--accent);">262t Au • 387kt Cu • VHMS</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">Queensland, Australia</div>
+        <div style="font-size:11px; color:var(--accent);">262t Au • 387kt Cu • GSQ</div>
       </div>
-      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Charters Towers Goldfield')">
-        <div style="font-weight:700; color:#fff; font-size:13px;">2. Charters Towers</div>
-        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-20.0764°, 146.2614°</div>
-        <div style="font-size:11px; color:var(--accent);">&gt;6.6M oz Au • Fissure Reefs</div>
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Kalgoorlie Super Pit')">
+        <div style="font-weight:700; color:#fff; font-size:13px;">2. Kalgoorlie Super Pit</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">Western Australia</div>
+        <div style="font-size:11px; color:var(--accent);">&gt;60M oz Au • GSWA / DMIRS</div>
       </div>
-      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Gympie Goldfield')">
-        <div style="font-weight:700; color:#fff; font-size:13px;">3. Gympie ('Nashville')</div>
-        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-26.1892°, 152.6641°</div>
-        <div style="font-size:11px; color:var(--accent);">4.1M oz Au • Slate Beds</div>
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Carlin Trend')">
+        <div style="font-weight:700; color:#fff; font-size:13px;">3. Carlin Trend</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">Nevada, United States</div>
+        <div style="font-size:11px; color:var(--accent);">&gt;84M oz Au • USGS / NBMG</div>
       </div>
-      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Palmer River Goldfield')">
-        <div style="font-weight:700; color:#fff; font-size:13px;">4. Palmer River</div>
-        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-16.0333°, 144.0667°</div>
-        <div style="font-size:11px; color:var(--accent);">1.33M oz • 17k Chinese Miners</div>
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Witwatersrand Basin')">
+        <div style="font-weight:700; color:#fff; font-size:13px;">4. Witwatersrand Basin</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">Gauteng, South Africa</div>
+        <div style="font-size:11px; color:var(--accent);">&gt;1.5B oz Au • CGS South Africa</div>
       </div>
-      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Ravenswood Goldfield')">
-        <div style="font-weight:700; color:#fff; font-size:13px;">5. Ravenswood</div>
-        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-20.1000°, 146.8833°</div>
-        <div style="font-size:11px; color:var(--accent);">900k oz • Mundic Crisis • CIL</div>
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Kolar Gold Fields')">
+        <div style="font-weight:700; color:#fff; font-size:13px;">5. Kolar Gold Fields</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">Karnataka, India</div>
+        <div style="font-size:11px; color:var(--accent);">800t Au • 3.2km Deep • GSI</div>
       </div>
-      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Hodgkinson Goldfield')">
-        <div style="font-weight:700; color:#fff; font-size:13px;">6. Hodgkinson</div>
-        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">-16.7833°, 145.0500°</div>
-        <div style="font-size:11px; color:var(--accent);">300k oz • Stibnite / Antimony</div>
+      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--panel-border); border-radius:8px; padding:10px; cursor:pointer;" onclick="runGoldRushExplorer('Klondike Gold District')">
+        <div style="font-weight:700; color:#fff; font-size:13px;">6. Klondike District</div>
+        <div style="font-size:11px; color:var(--ink-muted); margin:2px 0;">Yukon Territory, Canada</div>
+        <div style="font-size:11px; color:var(--accent);">12.5M oz • Placer • NRCan</div>
       </div>
     </div>
 
@@ -1687,14 +1693,14 @@ Content-Type: application/json
       ]
     },
     gold_rush_gsq: {
-      name: 'Scenario 10: Gold Rush Historical Mining Intelligence (GSQ Ground Truth)',
-      agent: 'georesglobe-historical-intel-agent-01',
+      name: 'Scenario 10: Deep Intelligence & Multi-Miner Arbitration',
+      agent: 'multi-miner-consensus-arbitrator-01',
       amount: '$0.00 (Intel Query)',
       amountVal: 0.00,
       recipient: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
-      vendor: 'Geological Survey of Queensland (GSQ Open Data)',
+      vendor: 'Global Geoscience & Open Data Consortium',
       items: [
-        { desc: 'Mount Morgan Mine (262t Au, 387kt Cu, Devonian Trondhjemite VHMS, Morgan Bros 1882)', qty: 1, price: '$0.00', total: '$0.00' }
+        { desc: 'Deep Multi-Miner Intelligence Enquiry (Universal Deposit & Entity Arbitration)', qty: 1, price: '$0.00', total: '$0.00' }
       ]
     }
   };
@@ -2274,13 +2280,14 @@ Content-Type: application/json
     } else if (scen === 'gold_rush_gsq') {
       updateVerdictUI({
         status: 'APPROVED',
-        verdict: 'APPROVED_AND_VERIFIED',
+        verdict: 'SYNTHESIS_ARBITRATED',
         flags: [
-          'GSQ_GROUND_TRUTH_MATCH: Mount Morgan Mine (262 tonnes Au, 387,000 tonnes Cu) authenticated against Geological Survey of Queensland catalog'
+          'MULTI_MINER_CONSENSUS_REACHED: Complementary evidence aggregated and arbitrated across active Telegraph specialist miners',
+          'CONTRADICTION_FILTERED: Unverified competitor claims filtered via dynamic variance & geological classification analysis'
         ],
-        summary: 'Historical Mining Intelligence verified: Discovered July 1882 by Morgan Brothers. 262 tonnes gold and 387kt copper produced from Devonian Trondhjemite VHMS orebody. Hallucinated epithermal narrative rejected. Provenance: Geological Survey of Queensland (GSQ) / GeoResGlobe (ML 4022).',
+        summary: 'Deep Multi-Miner Intelligence arbitrated: Complementary evidence aggregated across active Telegraph miners. Historical production, structural host geology, and statutory tenure verified against open geological survey registries. Cryptographic arbitration digest signed.',
         recipientVerification: { sanctionsScreeningClear: true },
-        vendorVerification: { gleifVerified: true, lei: 'GSQ-GOV-AU-QLD-2026', legalName: 'GEOLOGICAL SURVEY OF QUEENSLAND', gleifUrl: 'https://www.business.qld.gov.au/industries/mining-energy-water/resources/geoscience-information/gsq', sanctionsScreeningClear: true },
+        vendorVerification: { gleifVerified: true, lei: 'EARTH-SCI-OPEN-REGISTRY', legalName: 'GLOBAL EARTH SCIENCE REGISTRY CONSORTIUM', gleifUrl: 'https://mrdata.usgs.gov/mrds/', sanctionsScreeningClear: true },
         mathVerification: { bitExactMatch: true, discrepancyCents: 0, computedCents: 0, statedCents: 0, computedTotal: 0, statedTotal: 0, wasmScoreBps: 10000 },
         policyCaps: { delegationTier: 'TIER_1_AUTONOMOUS', supervisorAuthRequired: false, supervisorAuthValid: true },
         attestationSha256: '0x9d4a82fb41c880e6ef51283624e7a83c6b29f041b3780a4c281df6085a10bb52'

@@ -545,7 +545,24 @@ async function run() {
       throw new Error(`GET /api/gold-rush/aggregate failed: ${JSON.stringify(aggCheck)}`);
     }
 
-    console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM & MISSION 02 VERIFIED!');
+    // 26. Generalized Global Mining Intelligence (Kalgoorlie & Carlin Trend)
+    const kalgoorlieCheck = await check('/api/miner/mining-intelligence?query=' + encodeURIComponent('Kalgoorlie Super Pit Western Australia'));
+    if (kalgoorlieCheck.status !== 200 || kalgoorlieCheck.json.verdict !== 'VERIFIED_HISTORICAL_RECORD' || kalgoorlieCheck.json.country !== 'Australia' || kalgoorlieCheck.json.state !== 'Western Australia') {
+      throw new Error(`GET /api/miner/mining-intelligence (Kalgoorlie) failed: ${JSON.stringify(kalgoorlieCheck)}`);
+    }
+
+    const carlinCheck = await check('/api/miner/mining-intelligence?query=' + encodeURIComponent('Carlin Trend Nevada United States'));
+    if (carlinCheck.status !== 200 || carlinCheck.json.verdict !== 'VERIFIED_HISTORICAL_RECORD' || carlinCheck.json.country !== 'United States' || carlinCheck.json.state !== 'Nevada') {
+      throw new Error(`GET /api/miner/mining-intelligence (Carlin Trend) failed: ${JSON.stringify(carlinCheck)}`);
+    }
+
+    // 27. Universal Multi-Miner Discrepancy Aggregator for Non-Queensland Deposit (Kalgoorlie)
+    const kalAggCheck = await check('/api/gold-rush/aggregate?site=' + encodeURIComponent('Kalgoorlie Super Pit'));
+    if (kalAggCheck.status !== 200 || kalAggCheck.json.status !== 'SYNTHESIS_ARBITRATED' || kalAggCheck.json.discrepancies?.length === 0) {
+      throw new Error(`GET /api/gold-rush/aggregate (Kalgoorlie) failed: ${JSON.stringify(kalAggCheck)}`);
+    }
+
+    console.log('\nALL ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM, MISSION 02 & GENERALIZED MULTI-MINER AGGREGATION VERIFIED!');
   } finally {
     server.close();
   }
