@@ -5240,7 +5240,7 @@ export async function evaluateExchangeIntegrity(params = {}) {
     telegraphSettlement: {
       intent: 'CORPORATE_REGISTRY_LOOKUP',
       minerId: 5281,
-      diamondRegistration: 6135,
+      diamondRegistration: 6136,
       contractAddress: DIAMOND_PORT,
       status: 'VERIFIED_MICROSETTLEMENT'
     },
@@ -6020,7 +6020,7 @@ export async function handleApiRequest(req, res) {
         ok: true,
         service: 'praman-desk',
         minerId: 5281,
-        diamondRegistration: 6135,
+        diamondRegistration: 6136,
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
@@ -6048,10 +6048,10 @@ export async function handleApiRequest(req, res) {
       };
       const onchainDiamond = {
         diamond_address: DIAMOND_PORT,
-        active_registration_id: 6135,
-        tx_hash: '0x7e29f6a575a469f6ea2034bae02ad3808ea67e53db124c6f05b01b48b9c79a46',
-        block_number: 12167468,
-        intents_count: 8,
+        active_registration_id: 6136,
+        tx_hash: '0xca74c81d803ff56263b134927e27347efc0ea7ba32e924b73180e579f88f7c74',
+        block_number: 12175768,
+        intents_count: 9,
         bonded_intents: [
           'PURCHASE_ORDER_VERIFY_GENERAL',
           'INVOICE_LEDGER_RECONCILE_GENERAL',
@@ -6060,7 +6060,8 @@ export async function handleApiRequest(req, res) {
           'CORPORATE_REGISTRY_LOOKUP_GENERAL',
           'SANCTIONS_SCREENING_MATCH_GENERAL',
           'REGULATORY_FILING_MONITOR_GENERAL',
-          'CONTRACT_OBLIGATION_AUDIT_GENERAL'
+          'CONTRACT_OBLIGATION_AUDIT_GENERAL',
+          'GRID_POWER_PRICE_GENERAL'
         ]
       };
       return sendJson(res, 200, {
