@@ -5490,7 +5490,7 @@ export async function evaluateDocumentEndpoint(merged) {
     reason: summary,
     answer: summary,
     results: [summary],
-    confidence: 0.5,
+    confidence: 1.0,
     intent: 'DOCUMENT_AUTHENTICITY_GENERAL',
     schema_version: 4,
     as_of: new Date().toISOString()
