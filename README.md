@@ -6,7 +6,7 @@
 [![Active Sepolia Diamond](https://img.shields.io/badge/Sepolia%20Diamond-Port%20%236128%20(Miner%20%236127)-10b981?style=for-the-badge&logo=ethereum)](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
 [![Global Rank #1](https://img.shields.io/badge/Devnode%20Rank-%231%20Document%20Authenticity-059669?style=for-the-badge)](https://devnode.telegraphprotocol.com)
 [![WASM Comparator](https://img.shields.io/badge/WASM%20Engine-651%20Bytes%20Pure%20Binary-f59e0b?style=for-the-badge)](https://praman-desk.vercel.app/comparator.wasm)
-[![MCP Server](https://img.shields.io/badge/MCP-15%20Tools%20Streamable%20HTTP-6366f1?style=for-the-badge)](https://github.com/VishAlgoDev/praman-desk#10-second-developer-quickstart)
+[![MCP Server](https://img.shields.io/badge/MCP-18%20Tools%20Streamable%20HTTP-6366f1?style=for-the-badge)](https://github.com/VishAlgoDev/praman-desk#10-second-developer-quickstart)
 
 - **Live Split-Screen Interactive Playground:** <https://praman-desk.vercel.app>
 - **Official Showcase Video (43s, 1080p HD):** [Direct MP4 Stream](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) · [Renderer Script](scripts/render-minds-benchmark-video.mjs)
@@ -286,7 +286,7 @@ Praman Desk bridges Track 01, Track 02, and Track 03 into a self-reinforcing fly
 2. **Evaluator Pool (Track 03):** 62 attested bounties scoring external miners against primary registers (SEC EDGAR, GLEIF, OFAC).
 3. **Praman Spend Guard (Track 01):** The user-facing application that consumes high-reputation network miners to verify counterparty parameters before on-chain payment.
 4. **WASM Math Engine:** 651-byte zero-import binary compiled from AssemblyScript with 1,043/1,043 test vectors passing with zero discrepancies.
-5. **15 Streamable MCP Tools:** Fully compliant with MCP specification 2025-03-26 via SSE/JSON-RPC 2.0 at `/api/mcp`.
+5. **18 Streamable MCP Tools:** Fully compliant with MCP specification 2025-03-26 via SSE/JSON-RPC 2.0 at `/api/mcp`.
 
 ---
 

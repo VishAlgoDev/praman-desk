@@ -85,7 +85,7 @@ curl -X POST https://praman-desk.vercel.app/api/spend-guard/evaluate \
   -d '{"scenario": "compliant_payout"}'
 ```
 
-### Option C: 14-Tool Model Context Protocol (MCP) Server
+### Option C: 18-Tool Model Context Protocol (MCP) Server
 AI agents (Cursor, Claude Code, Windsurf) can run Praman Desk with zero install directly from GitHub:
 ```bash
 # Direct MCP Execution & Self-Test via GitHub npx
