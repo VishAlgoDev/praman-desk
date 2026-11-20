@@ -5211,6 +5211,61 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       statedTotal: 3500.00,
       ...p
     };
+  } else if (scenario === 'two_minds_guard') {
+    p = {
+      agentId: p.agentId || 'animoca-minds-diligence-mind',
+      recipientAddress: p.recipientAddress || '0x4D224452801ACEd8B2F0aebE155379bb5D594381',
+      vendorName: p.vendorName || 'Stripe, LLC',
+      vendorJurisdiction: p.vendorJurisdiction || 'US',
+      spendAmountUsdc: p.spendAmountUsdc ?? 10500.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 50000,
+      invoiceId: p.invoiceId || 'MINDS-FX-DIVERGENCE-001',
+      lineItems: [
+        { desc: 'Cross-Border SaaS Settlement (Claimed EUR/USD 0.9216 vs True ECB 1.085 Parity: $1,373 FX Phantom Markup)', qty: 1, unitPrice: 9127.00, amount: 9127.00 }
+      ],
+      statedSubtotal: 10500.00,
+      statedTax: 0,
+      statedTotal: 10500.00,
+      ...p
+    };
+  } else if (scenario === 'rugreceipt_screen') {
+    p = {
+      agentId: p.agentId || 'web3-contract-investigator-04',
+      recipientAddress: p.recipientAddress || '0x098B716B8Aaf21512996dC57EB0615e2383E2f96',
+      vendorName: p.vendorName || 'Lazarus Exploit Contract / Tornado Cash Router',
+      vendorJurisdiction: p.vendorJurisdiction || 'US',
+      spendAmountUsdc: p.spendAmountUsdc ?? 25000.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 50000,
+      invoiceId: p.invoiceId || 'RUGRECEIPT-CONTRACT-SCREEN-208',
+      lineItems: [
+        { desc: 'Unverified Contract Interaction Targeting Known Exploit Address (Issue #208)', qty: 1, unitPrice: 25000.00, amount: 25000.00 }
+      ],
+      statedSubtotal: 25000.00,
+      statedTax: 0,
+      statedTotal: 25000.00,
+      ...p
+    };
+  } else if (scenario === 'doc_authenticity') {
+    p = {
+      agentId: p.agentId || 'ap-invoice-audit-agent-04',
+      recipientAddress: p.recipientAddress || '0x4D224452801ACEd8B2F0aebE155379bb5D594381',
+      vendorName: p.vendorName || 'Apex Logistics Ltd',
+      vendorJurisdiction: p.vendorJurisdiction || 'US',
+      spendAmountUsdc: p.spendAmountUsdc ?? 8400.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 50000,
+      invoiceId: p.invoiceId || 'CLAIM-ZERO-BYTE-DIGEST-TAMPER',
+      irnOrSha256: p.irnOrSha256 || 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+      lineItems: [
+        { desc: 'Logistics Bill of Lading with Tampered / Zero-Byte SHA-256 Digest', qty: 1, unitPrice: 8400.00, amount: 8400.00 }
+      ],
+      statedSubtotal: 8400.00,
+      statedTax: 0,
+      statedTotal: 8400.00,
+      ...p
+    };
   }
 
   const agentId = String(p.agentId || p.agent || 'agent-procure-v2').trim();
@@ -5299,6 +5354,19 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     }
   }
 
+  // Document Authenticity & Cryptographic Provenance Screen
+  let docAuthResult = null;
+  if (p.irnOrSha256 || p.expected_sha256 || p.documentRef || scenario === 'doc_authenticity') {
+    docAuthResult = await evaluateDocumentEndpoint({
+      document: p.documentRef || p.document || 'e-Invoice / Spend Receipt Verification',
+      irnOrSha256: p.irnOrSha256 || '',
+      expected_sha256: p.expected_sha256 || ''
+    });
+    if (docAuthResult && !docAuthResult.authentic) {
+      flags.push(`DOCUMENT_PROVENANCE_TAMPER_DETECTED: ${docAuthResult.summary || docAuthResult.verdict}`);
+    }
+  }
+
   // Delegation Cap Policy
   let delegationTier = 'TIER_1_AUTONOMOUS';
   let supervisorAuthRequired = false;
@@ -5320,11 +5388,13 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   // Evaluate Circuit Breaker Status
   const isMaliciousUrl = Boolean(urlThreatResult && (urlThreatResult.verdict === 'PHISHING' || urlThreatResult.verdict === 'MALICIOUS'));
   const isContractViolation = Boolean(contractAuditResult && !contractAuditResult.compliant);
+  const isDocAuthFailure = Boolean(docAuthResult && !docAuthResult.authentic);
   const circuitBreakerTriggered = emergencyHaltFlag ||
     Boolean(sanctionsVendor?.matched) ||
     Boolean(sanctionsAddress?.matched) ||
     isMaliciousUrl ||
     isContractViolation ||
+    isDocAuthFailure ||
     !gleifVerified ||
     !wasmMatch ||
     wasmDiscrepancyCents > 0 ||
