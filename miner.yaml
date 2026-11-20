@@ -1,6 +1,6 @@
 version: "1"
 kind: miner
-id: 6128 # Sepolia Diamond Registration #6128 (Devnode Engine Route #5281)
+id: 6135 # Sepolia Diamond Registration #6135 (Devnode Engine Route #5281; superseded #6128 on-chain 2026-11-20)
 slug: praman-compliance-miner
 protocol: generic
 name: Praman Desk Compliance & Procurement Auditor
