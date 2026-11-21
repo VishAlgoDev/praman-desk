@@ -21,13 +21,24 @@ export async function getWasmInstance() {
   const specPtr = imw_alloc(16);
   const view = new DataView(memory.buffer);
 
+  const toBigInt = (v) => {
+    if (typeof v === 'bigint') return v;
+    if (typeof v === 'number') return BigInt(Math.round(v));
+    if (typeof v === 'string') {
+      const s = v.trim();
+      if (s.includes('.')) return BigInt(Math.round(Number(s)));
+      return BigInt(s || 0);
+    }
+    return BigInt(0);
+  };
+
   function scoreDeterministic(truth, miner, code = 2, tolerance = 500) {
     // code: 0 = Exact, 1 = AbsTol, 2 = RelTol, 3 = PassFail
     // tolerance: e.g. 500 = 500 basis points (5.00%)
     view.setInt32(specPtr, code, true);
     view.setInt32(specPtr + 4, 0, true);
-    view.setBigInt64(specPtr + 8, BigInt(tolerance), true);
-    return Number(imw_score_deterministic(BigInt(truth), BigInt(miner), specPtr));
+    view.setBigInt64(specPtr + 8, toBigInt(tolerance), true);
+    return Number(imw_score_deterministic(toBigInt(truth), toBigInt(miner), specPtr));
   }
 
   cachedInstance = {

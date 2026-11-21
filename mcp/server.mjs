@@ -1031,7 +1031,7 @@ export async function startServer() {
   if (cliArgs.includes('--help') || cliArgs.includes('-h') || cliArgs.includes('--version') || cliArgs.includes('-v')) {
     console.log([
       'Praman Spend Guard MCP Server v1.0.0',
-      'Autonomous Pre-Payment Firewall for AI Agents & DAOs (15 deterministic tools)',
+      'Autonomous Pre-Payment Firewall for AI Agents & DAOs (18 deterministic tools)',
       '',
       'Usage:',
       '  npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp [options]',

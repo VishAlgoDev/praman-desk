@@ -431,6 +431,12 @@ async function fetchJsonWithRetry(url, options = {}, attempts = 2, timeoutMs = 6
 
 const LEI_PATTERN = /^[0-9A-Z]{18}[0-9]{2}$/;
 
+export function validateLeiMod97(lei) {
+  if (!/^[0-9A-Z]{18}[0-9]{2}$/.test(lei)) return false;
+  const digits = String(lei).toUpperCase().replace(/[A-Z]/g, ch => ch.charCodeAt(0) - 55);
+  return BigInt(digits) % 97n === 1n;
+}
+
 const JURISDICTION_COUNTRY_MAP = {
   US: 'US', USA: 'US', 'UNITED STATES': 'US', 'UNITED STATES OF AMERICA': 'US',
   DELAWARE: 'US', CALIFORNIA: 'US', NEWYORK: 'US', 'NEW YORK': 'US', TEXAS: 'US', NEVADA: 'US', FLORIDA: 'US', WYOMING: 'US',
