@@ -9,7 +9,7 @@
 
 ## Core Architecture & State
 - **Live App**: `https://praman-desk.vercel.app`
-- **Miner Coordinates**: Devnode `#6127` / Route `#5281` / Diamond `#6128`
+- **Miner Coordinates**: Devnode `#6127` / Route `#5281` / Diamond registration `#6142` (9 bonded; MINING HTTP-only off-chain)
 - **Contributor Wallet**: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
 - **Upstream PRs**: PRs #217–#222 on `telegraphprotocol/bounties` (31/31 unit tests passing)
 - **On-Chain Moat**: 57 paid Sepolia settlements recorded in `/api/ledger`

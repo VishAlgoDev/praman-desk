@@ -4,7 +4,7 @@
 **Date**: November 20, 2026 (Official Community Showcase Day)  
 **Target Repository**: `c:\Users\Public\My Agent\telegraph-h2` | Fork: `VishAlgoDev/praman-desk`  
 **Live Production URL**: `https://praman-desk.vercel.app`  
-**Devnode Miner Coordinates**: Miner `#6127` / Route `#5281` / Diamond `#6128`  
+**Devnode Miner Coordinates**: Miner `#6127` / Route `#5281` / Diamond registration `#6142` (on-chain yaml pin `59454bd`; 9 bonded intents + `MINING_INTELLIGENCE_GENERAL` HTTP-only)  
 **Contributor Wallet**: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`  
 **Discord Guild**: Telegraph Protocol (`1438396125609463881`)  
   • Community Showcase Forum: `1562464334263881759`  
@@ -201,7 +201,7 @@ To preserve every historical vulnerability, gap, and bug identified across all s
 | **W6** | **Copy-Pasted Slop in Track 3 Dossier** | Medium | MahaRERA and FIDIC delay clauses copy-pasted into mining evidence dossier. | Purged in commit `ad8f43c` and replaced with authentic geological benchmark deposit profiles. |
 | **W7** | **Ecosystem Visibility on GitHub Mission Issues** | High | Bounties repo issues lacked official `/claim` and `/progress` records. | Commented `/claim` and `/progress` on Issues #190, #191, #192, #199, and #200, linking PRs #217–#222. |
 | **W8** | **Frontend Stale Tool Count References** | Low | `public/index.html` cited "15 Tools" instead of 18 tools. | Updated `public/index.html` (lines 1270, 1273, 1284) and `docs/X_TECHNICAL_THREAD.md` to "18 Tools Live". |
-| **W9** | **Community Showcase Thread Freshness** | High | Showcase thread `#1569379402360553692` lacked Day 20 milestone update. | Day 20 showcase + fact-checked coord pin (10:32 PM); thread title → #6127/#5281/#6142; manual message pin optional. |
+| **W9** | **Community Showcase Thread Freshness** | High | Showcase thread `#1569379402360553692` lacked Day 20 milestone update. | Day 20 showcase + fact-checked coord bump (10:32 PM); thread title → #6127/#5281/#6142; **forum threads have no per-message Pin** (verified Nov 21) — use **Edit Post** on starter or a coord bump reply. |
 | **W10** | **Peer Builder Activation (Anjoman Outage)** | Medium | Builders hitting 500 wallet provisioning errors on Anjoman. | Offered keyless `/api/mcp` and curl endpoints for instant OFAC/vendor screening in `#hackathon`. |
 | **W11** | **Mining Evaluator Hardcoded to Queensland** | High | Adapter scored 0 bps on any mine outside Queensland. | Generalized `gold-rush-evaluator-adapter.mjs` across 11 global deposits (GSQ, GSWA, USGS, CGS, GSI, NRCan). |
 | **W12** | **Python Evaluator Parity** | Medium | Python unit tests only validated Queensland datasets. | Generalized `test_gold_rush.py` across global datasets; passing 2/2 tests cleanly on Python 3.12. |
@@ -283,7 +283,7 @@ All six evaluator pull requests are submitted, active, and mergeable on `telegra
 🏆 **Praman Desk — Season II Community Showcase: Triple-Track Dominance**
 **Live App**: https://praman-desk.vercel.app | **Repo**: https://github.com/VishAlgoDev/praman-desk
 **Streamable MCP**: https://praman-desk.vercel.app/api/mcp (18 Tools Live)
-**Miner**: Devnode #6127 / Route #5281 / Diamond #6128 | **Contributor**: 0x98021b20Efdb7ae2C57366010a6E0fDE207b4466
+**Miner**: Devnode #6127 / Route #5281 / Diamond #6142 | **Contributor**: 0x98021b20Efdb7ae2C57366010a6E0fDE207b4466
 **Video (43s 1080p)**: https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4
 
 Here is our Day 20 Showcase submission across all three competition tracks:
@@ -401,10 +401,13 @@ Feel free to use them to unblock your agent testing!
 │ • /api/status, novel invoice-reconcile, ledger 57, MCP 18 tools.                       │
 │ • Status: ✅ VERIFIED (2026-11-20).                                                    │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ GATE 8: DISCORD COMMUNITY SHOWCASE PUBLICATION                                         │
-│ • Showcase (2:28 PM) + Minds (6:40 PM) posted; duplicate 6:41 showcase removed by user. │
-│ • Minds follow-up draft: docs/drafts/MINDS_AHMED_FOLLOWUP.md.                           │
-│ • Status: ✅ DONE (follow-up optional).                                                 │
+│ GATE 8: DISCORD PUBLICATION (message-id verified Nov 21)                                 │
+│ • Minds `1573324613700558930` — **6:40 PM Nov 20** six-criteria entry (benchmark MP4 link). │
+│ • Showcase bumps: **2:28 PM** triple-track, **12:53 AM** Two-Mind + benchmark MP4, **10:32 PM** coords. │
+│ • Showcase `1573325021202489448` (Day 20 cited in handoff): **not present** in thread scroll → assume removed/merged. │
+│ • #hackathon `1573325413600460873`: **unverified** by content; MEE6 link warn **6:43 PM** same night. │
+│ • Video policy: submit **`praman-desk-walkthrough.mp4`**; swap FFmpeg benchmark before judges click old links. │
+│ • Status: ⏳ Follow-ups + benchmark re-record (core entry posted).                        │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ GATE 9: MANDATORY AUDIT LOGGING & MEMORY PERSISTENCE                                   │
 │ • audit/AUDIT_LOG.md + memory/EXPERIENCE.md updated.                                   │
@@ -422,22 +425,42 @@ Feel free to use them to unblock your agent testing!
 | Track | Grade | Hard truth |
 | :--- | :---: | :--- |
 | **Apps & Minds** | **B+** | Two-Mind + general-purpose Mind pass tests; specialists now hit **live production API** (not local `handlers.mjs`). Beat **Supplier Detective** by posting one Siemens-style case + limitations. |
-| **Miners** | **B−** | Dynamic solver + 10 intent `miner.yaml`; traffic volume still low vs 1,500+ request leaders. On-chain YAML pin may lag until `updateMiner` with GRID + MINING. |
+| **Miners** | **B−** | Dynamic solver + `miner.yaml` (9 bonded on Diamond, MINING HTTP-only); traffic volume still low vs 1,500+ request leaders. On-chain pin `59454bd`; git HEAD may be 1–2 commits ahead without new reg id. |
 | **Evaluators** | **B−** | PRs **#217–#222** MERGEABLE, **0 merges**; issue **#200** `/progress` filed. |
 | **Docs honesty** | **B** | This plan synced; avoid "dominance" until PRs merge. |
 
-**P0 backlog (next 72h):** (1) **Pin** coord message in showcase thread (manual), (2) **Watch/engage** PR #222–#217 reviews, (3) **Issue #200** `/progress` refresh after Diamond #6142 pin, (4) **Devnode sync** — 7 router capabilities vs 9 on-chain bonds, (5) **Anjoman** final submission form when it opens, (6) **Ask Telegraph** when `MINING_INTELLIGENCE_GENERAL` is bondable on Diamond.
+**P0 backlog (next 72h):**
+
+| # | Item | Status (2026-11-21) |
+|:-:|:---|:---|
+| 1 | **Coord visibility** in showcase `1569379402360553692` (no Pin in forum) | ⏳ **Edit Post** on thread starter and/or short bump; coord already in 10:32 PM reply + title |
+| 2 | Watch/engage PR #222–#217 | ⏳ MERGEABLE, 0 reviews; nudge on #222; no spam |
+| 3 | Issue #200 `/progress` at Diamond #6142 | ✅ Posted; MINING follow-up comment #7047517426 |
+| 4 | Devnode sync (7 vs 9 bonds) | ⏳ Wait for network; `/api/status` is canonical |
+| 5 | Anjoman final submission form | ⏳ "Opens later" on dashboard |
+| 6 | MINING Diamond bondability | ⏳ GitHub ask filed; #hackathon paste manual |
+| 7 | Doc drift #6128 → #6142 + 9+1 honesty | ✅ Repo sweep (local; push when user asks) |
+| 8 | Minds **follow-ups** (entry `1573324613700558930` done) | ⏳ Reply Ahmed **9:47 PM**; Supplier compare; **video correction** under 6:40 post |
+| 9 | Replace benchmark video (FFmpeg slop) | ⏳ Script `docs/SHOWCASE_BENCHMARK_VIDEO_SCRIPT.md`; re-record → swap MP4 + deploy |
+| 10 | Fix Discord/docs linking benchmark MP4 as “demo” | ⏳ Walkthrough first in `MINDS_SHOWCASE_POST.md` + showcase correction bump |
 
 **Competitor watch:** Chrysolite494 *Supplier Detective* (Minds), Athar *Tina* (evaluators + form questions).
 
 ---
 
-## 10. PUBLISHED DISCORD ARTIFACTS (VERIFIED IN IDE BROWSER)
+## 10. DISCORD GROUND TRUTH (MESSAGE-LINK VERIFIED, 2026-11-21)
 
-| Channel | When | Notes |
-| :--- | :--- | :--- |
-| Showcase `1569379402360553692` | Nov 20 ~2:28 PM | Triple-Track showcase (duplicate 6:41 PM removed by user) |
-| Minds `1573287348689567774` | Nov 20 6:40 PM | Six-criteria entry + video/app links |
-| #hackathon `1498654113376899112` | Handoff cites builder help | Confirm via search if not in recent scroll |
+| Channel | Message / event | Verified |
+| :--- | :--- | :---: |
+| Minds `1573287348689567774` | [`1573324613700558930`](https://discord.com/channels/1438396125609463881/1573287348689567774/1573324613700558930) — six criteria, **benchmark MP4** | ✅ |
+| Minds | Ahmed **`157332…`** thread **9:47 PM** — wallet + Anjoman bazaar skill @antikunpiece | ✅ |
+| Showcase `1569379402360553692` | **2:28 PM** triple-track; **12:53 AM** Two-Mind + benchmark MP4; **10:32 PM** coords; title **#6142** | ✅ |
+| Showcase | [`1573325021202489448`](https://discord.com/channels/1438396125609463881/1569379402360553692/1573325021202489448) Day 20 (handoff) | ❌ not in thread |
+| #hackathon | [`1573325413600460873`](https://discord.com/channels/1438396125609463881/1498654113376899112/1573325413600460873) builder help (handoff) | ⚠️ unconfirmed |
+| #hackathon | MEE6 **6:43 PM** warn antikunpiece “Posted a link” | ✅ |
+
+**Forum UX:** Starter **⋯ More** = Jump / **Edit Post** / Tags / Favorites / Close / Delete — **no Pin Message** (menu captured Nov 21).
+
+**Agent failure mode:** Scrolling the *bottom* of Minds hid the **6:40 PM** OP message — always jump by **message ID** or Search before claiming “not posted.”
 
 **Coordinates (canonical):** Devnode **#6127** / Route **#5281** | Diamond **#6142** | Contributor `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`

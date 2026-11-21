@@ -21,6 +21,6 @@ Hi @1xAhmed @muhammadtalha198 — friendly review nudge on our Season II evaluat
 
 **Repro:** Clone https://github.com/VishAlgoDev/praman-desk → each adapter lives under `examples/gold-rush-evaluator/` or sibling paths referenced in the PR.
 
-**Live miner (Provider track):** https://praman-desk.vercel.app — Route #5281, Diamond #6128, 18 streamable MCP tools.
+**Live miner (Provider track):** https://praman-desk.vercel.app — Route #5281, Diamond #6142 (9 bonded + MINING HTTP-only), 18 streamable MCP tools.
 
 Happy to adjust formatting, provenance rows, or test assertions within 24h of any review feedback. Thank you for stewarding the bounty queue.

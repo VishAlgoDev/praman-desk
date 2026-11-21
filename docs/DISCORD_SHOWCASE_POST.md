@@ -2,7 +2,7 @@
 
 **App**: https://praman-desk.vercel.app | **Repo**: https://github.com/VishAlgoDev/praman-desk
 **Video (43s 1080p)**: https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4
-**Miner**: Devnode #6127 / Route #5281 / Diamond #6128 | **Port**: `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`
+**Miner**: Devnode #6127 / Route #5281 / Diamond #6142 | **Port**: `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`
 
 **1. Two-Mind Spend Guard (Minds Architecture)**:
 Following @1xahmed's guidance, built a 2-Mind collaborative guard for Mission 04 & 03:

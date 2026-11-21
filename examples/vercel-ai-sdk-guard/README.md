@@ -11,7 +11,7 @@ When autonomous agents use tool calling to move money, standard LLM boundaries a
 - Rogue sub-agents can bypass internal delegation limits ($500 single-agent automatic / $5,000 multi-agent dual-approval).
 
 ## The Solution
-`pramanSpendGuardTool` intercepts outbound payment tool calls before transaction broadcasting, querying **Praman Desk** (Telegraph Protocol Miner `#6128` / Devnode `#5281`) to verify:
+`pramanSpendGuardTool` intercepts outbound payment tool calls before transaction broadcasting, querying **Praman Desk** (Praman Desk Route `#5281` / Devnode miner `#6127` / Diamond `#6142`) to verify:
 1. **OFAC SDN Sanctions Screening**: Sub-25ms in-memory verification against 19,571 US Treasury SDN entities and EVM addresses.
 2. **Statutory Entity Verification**: Live GLEIF Global LEI Index validation across 200+ jurisdictions.
 3. **Deterministic Math Engine**: 651-byte zero-import WebAssembly comparator validating line items against stated totals.

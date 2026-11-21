@@ -72,7 +72,7 @@ async function main() {
     functionName: 'quoteMinerBond',
     args: [BigInt(SUPPORTED_INTENTS.length)]
   });
-  console.log('Bond quote (10 intents) usd/machina:', bondQuote);
+  console.log(`Bond quote (${SUPPORTED_INTENTS.length} bonded intents) usd/machina:`, bondQuote);
 
   let simulatedNewRegId = null;
   const sim = await client.simulateContract({

@@ -2,7 +2,7 @@
 **Methodology: Counterfactual Policy Evaluation & Risk Prevention**
 
 > **Evaluation Suite**: Praman Desk Autonomous Spend Guard Benchmark  
-> **Timestamp**: 2026-11-20T14:07:24.714Z  
+> **Timestamp**: 2026-11-21T03:23:21.100Z  
 > **Test Ground**: 5 High-Stakes Procurement, Legal & Web3 Adversarial Vectors  
 > **Methodology**: Compares ungrounded agent parameter pass-through (without live truth oracles or deterministic WASM) against the Praman Two-Mind Spend Guard.  
 > **Network Coordinates**: Devnode Miner #6127 | FakeWatch Miner #42420 | Sepolia Diamond Port `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`
@@ -19,7 +19,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1
 | **Direct Capital Loss** | **$79,373 USD** | **$0.00 USD** | **$79,373 Averted (100%)** |
 | **Arithmetic Precision** | Approximate / Loose | **Deterministic 651-byte WASM** | **0 Drift down to sub-cent** |
 | **Auditability & Receipts** | None (Opaque Text) | **EIP-191 & Sepolia Diamond** | **100% Cryptographic Proof** |
-| **Average Decision Latency** | 1,250 ms | 1093 ms | **Enterprise Real-Time (<2.5s)** |
+| **Average Decision Latency** | 1,250 ms | 1254 ms | **Enterprise Real-Time (<2.5s)** |
 
 ---
 
@@ -37,7 +37,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1
 | **Financial Outcome** | **-$1,373 Loss** | **$0.00 Loss ($1,373 Saved)** |
 | **Detection Mechanism** | Unverified text inference (hallucination) | Payment held: Inverted/abnormal FX rate detected (0.9216 vs market 1.085, deviation: 15.06%). Potential financial overcharge prevented. |
 | **Blocking Flags** | None | `INVERTED_FX_OVERCHARGE_PREVENTED` |
-| **Verification Artifact** | None | Digest: `0xe950ad7a96a54034...` |
+| **Verification Artifact** | None | Digest: `0xb8c1af92315fe54e...` |
 
 ---
 
@@ -52,7 +52,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1
 | **Financial Outcome** | **-$24,500 Loss** | **$0.00 Loss ($24,500 Saved)** |
 | **Detection Mechanism** | Unverified text inference (hallucination) | Payment held: Vendor LEI (529900EXAMPLELAPSED) has non-active statutory status 'LAPSED' on official corporate registry. |
 | **Blocking Flags** | None | `LAPSED_CORPORATE_LEI_STATUS` |
-| **Verification Artifact** | None | Digest: `0x4e83cff3232179f9...` |
+| **Verification Artifact** | None | Digest: `0xbe6e41ded9f5eff3...` |
 
 ---
 
@@ -67,7 +67,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1
 | **Financial Outcome** | **-$15,000 Loss** | **$0.00 Loss ($15,000 Saved)** |
 | **Detection Mechanism** | Unverified text inference (hallucination) | Hard block: Payment domain (unisvvap.org) confirmed as phishing site by FakeWatch Miner #42420. |
 | **Blocking Flags** | None | `PHISHING_DOMAIN_HARD_BLOCK` |
-| **Verification Artifact** | None | Digest: `0x35aab038053f7c61...` |
+| **Verification Artifact** | None | Digest: `0x8517997f5a921062...` |
 
 ---
 
@@ -82,7 +82,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1
 | **Financial Outcome** | **-$500 Loss** | **$0.00 Loss ($500 Saved)** |
 | **Detection Mechanism** | Unverified text inference (hallucination) | Payment held: 651-byte WASM comparator detected arithmetic drift of 500 USD (claimed: 20490, computed: 19990). |
 | **Blocking Flags** | None | `WASM_ARITHMETIC_DRIFT_DETECTED` |
-| **Verification Artifact** | None | Digest: `0x4c7804a2109aea70...` |
+| **Verification Artifact** | None | Digest: `0x756e6cf5768a49e0...` |
 
 ---
 
@@ -97,7 +97,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (`1
 | **Financial Outcome** | **-$38,000 Loss** | **$0.00 Loss ($38,000 Saved)** |
 | **Detection Mechanism** | Unverified text inference (hallucination) | Hard block: Counterparty flagged on US Treasury OFAC SDN sanctions list (Viktor Anatolijevitch Bout Logistics Group). |
 | **Blocking Flags** | None | `OFAC_SDN_SANCTIONS_BLOCK` |
-| **Verification Artifact** | None | Digest: `0xfb52e3105430d5ab...` |
+| **Verification Artifact** | None | Digest: `0xf7a1f3fa7eb717b7...` |
 
 
 ---

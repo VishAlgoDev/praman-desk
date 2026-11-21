@@ -14,7 +14,7 @@ const replacement = `**Submission Tracks**:
   - **Mission 03**: Institutional Markets & Counterparty Clearing (FakeWatch Phishing Shield, FX Parity)
   - **Mission 11**: Autonomous Systems (Spend Delegation Approval Caps & Circuit Breakers)
   - **Mission 02**: Stablecoin Treasury Guard (OFAC SDN EVM Address Screening & FATF Travel Rule)
-- **Secondary Track**: Track 02 — Miners / Providers (Active Devnode Miner #6127 / Route 5281 / Diamond Registration #6128)
+- **Secondary Track**: Track 02 — Miners / Providers (Active Devnode Miner #6127 / Route 5281 / Diamond registration #6142)
   - 🏆 **Rank #1 Globally**: CONTRACT_OBLIGATION_AUDIT_GENERAL (Score: 0.5000)
   - 🏆 **Rank #1 Globally**: PURCHASE_ORDER_VERIFY_GENERAL (Score: 0.0000, top seed)
   - 🥈 **Rank #2 Globally**: SANCTIONS_SCREENING_MATCH_GENERAL (Score: 1.0000, 19,565 OFAC records)

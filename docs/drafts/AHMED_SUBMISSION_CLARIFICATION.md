@@ -12,7 +12,7 @@ Hey @1xAhmed — quick logistics check for **@antikunpiece** / Praman Desk befor
 
 **Our triple-track snapshot (single entry, if helpful):**
 - **App:** Two-Mind spend guard + general-purpose verification Mind (Minds thread posted today)
-- **Miner:** Devnode Route #5281 / Diamond #6128, 57 paid Sepolia ledger receipts
+- **Miner:** Devnode Route #5281 / Diamond #6142 (9 bonded intents), 57 paid Sepolia ledger receipts
 - **Evaluators:** Six open PRs (#217–#222), mergeable
 
 No rush if you're still on the wallet upstream fix — just want to submit correctly once the form opens. Thanks for the Minds rubric today; we're aligning orchestration to live Telegraph MCP rather than local imports.

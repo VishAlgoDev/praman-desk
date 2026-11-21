@@ -9,7 +9,7 @@
   - **Mission 03**: Institutional Markets & Counterparty Clearing (FakeWatch Phishing Shield, FX Parity)
   - **Mission 11**: Autonomous Systems (Spend Delegation Approval Caps & Circuit Breakers)
   - **Mission 02**: Stablecoin Treasury Guard (OFAC SDN EVM Address Screening & FATF Travel Rule)
-- **Secondary Track**: Track 02 — Miners / Providers (Active Devnode Miner #6127 / Route 5281 / Diamond Registration #6128)
+- **Secondary Track**: Track 02 — Miners / Providers (Devnode miner #6127 / Route #5281 / Diamond registration #6142, 9 bonded intents)
   - 🏆 **Rank #1 Globally**: CONTRACT_OBLIGATION_AUDIT_GENERAL (Score: 0.5000)
   - 🏆 **Rank #1 Globally**: PURCHASE_ORDER_VERIFY_GENERAL (Score: 0.0000, top seed)
   - 🥈 **Rank #2 Globally**: SANCTIONS_SCREENING_MATCH_GENERAL (Score: 1.0000, 19,565 OFAC records)
@@ -32,7 +32,7 @@
 - **GitHub Account**: [`https://github.com/VishAlgoDev`](https://github.com/VishAlgoDev)
 - **Primary Contributor & Fee Address**: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
 - **Network**: Ethereum Sepolia Testnet + Telegraph Protocol Devnode (`https://devnode.telegraphprotocol.com`)
-- **Sepolia Diamond Contract (Port #6128 / Miner #6127)**: [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
+- **Sepolia Diamond Contract (registration #6142 / Devnode miner #6127 / route #5281)**: [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
 - **Test USDC Contract**: [`0xcc194e1a843B658526D0D5C431f670028582Ae17`](https://sepolia.etherscan.io/address/0xcc194e1a843B658526D0D5C431f670028582Ae17)
 - **Anjoman App Registry**: Submission ID `9ae7025e-65be-490b-8e59-2aa598f16992` (`In review`)
 

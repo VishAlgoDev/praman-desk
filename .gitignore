@@ -18,5 +18,8 @@ public/scene_*.mp4
 public/concat_list.txt
 scripts/test*
 scratch/
+
+# Regenerated each full `npm test` (benchmark stage)
+benchmark/benchmark-results.json
 .vercel
 .env*

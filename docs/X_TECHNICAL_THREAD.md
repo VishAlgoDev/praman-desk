@@ -66,7 +66,7 @@ Or probe health and threat evaluation with curl:
 
 • Live App: https://praman-desk.vercel.app
 • GitHub: https://github.com/VishAlgoDev/praman-desk
-• Active Sepolia Diamond Port: 0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b (Diamond #6128)
+• Active Sepolia Diamond Port: 0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b (Diamond registration #6142)
 • Contributor Wallet: 0x98021b20Efdb7ae2C57366010a6E0fDE207b4466
 
 Huge thanks to the @TelegraphProto team and fellow builders on the Devnode leaderboard. Feedback and adversarial test queries welcome!

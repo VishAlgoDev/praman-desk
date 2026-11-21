@@ -3,7 +3,7 @@
 **The Autonomous Pre-Payment Spend Firewall for AI Agents, DAOs & Treasuries**
 
 [![Live Hosted App](https://img.shields.io/badge/Live%20Firewall-praman--desk.vercel.app-0284c7?style=for-the-badge&logo=vercel)](https://praman-desk.vercel.app)
-[![Active Sepolia Diamond](https://img.shields.io/badge/Sepolia%20Diamond-Port%20%236128%20(Miner%20%236127)-10b981?style=for-the-badge&logo=ethereum)](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
+[![Active Sepolia Diamond](https://img.shields.io/badge/Sepolia%20Diamond-Reg%20%236142%20(Miner%20%236127)-10b981?style=for-the-badge&logo=ethereum)](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
 [![Global Rank #1](https://img.shields.io/badge/Devnode%20Rank-%231%20Document%20Authenticity-059669?style=for-the-badge)](https://devnode.telegraphprotocol.com)
 [![WASM Comparator](https://img.shields.io/badge/WASM%20Engine-651%20Bytes%20Pure%20Binary-f59e0b?style=for-the-badge)](https://praman-desk.vercel.app/comparator.wasm)
 [![MCP Server](https://img.shields.io/badge/MCP-18%20Tools%20Streamable%20HTTP-6366f1?style=for-the-badge)](https://github.com/VishAlgoDev/praman-desk#10-second-developer-quickstart)
@@ -12,7 +12,7 @@
 - **Official Showcase Video (43s, 1080p HD):** [Direct MP4 Stream](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) · [Renderer Script](scripts/render-minds-benchmark-video.mjs)
 - **Two-Mind Spend Guard Architecture:** [Reference Implementation of the Animoca Brands Minds Specification](examples/minds-spend-guard/) (Diligence Investigator + Escrow Reviewer Minds)
 - **Empirical Benchmark Report:** [With vs Without Telegraph ($79,373 Averted)](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md)
-- **Active Telegraph Miner:** Devnode Miner `#6127` (Route `5281` / Sepolia Diamond Registration `#6128`) on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
+- **Active Telegraph Miner:** Devnode Miner `#6127` (Route `5281` / Sepolia Diamond registration `#6142`, **9 bonded intents** + `MINING_INTELLIGENCE_GENERAL` HTTP-only) on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
 - **Devnode Global Leaderboard Standing (Epoch 18):**
   - 🏆 **Rank #1 Globally:** `CONTRACT_OBLIGATION_AUDIT_GENERAL` (Score: `0.5000`)
   - 🏆 **Rank #1 Globally:** `PURCHASE_ORDER_VERIFY_GENERAL` (Score: `0.0000`, top seed)
@@ -282,7 +282,7 @@ node examples/rugreceipt-screen/test-rugreceipt-screen.mjs
 
 Praman Desk bridges Track 01, Track 02, and Track 03 into a self-reinforcing flywheel:
 
-1. **Active Miner (Track 02):** Bonded on active Sepolia Diamond Port [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) (Diamond Registration `#6128`, Devnode Miner `#6127`, Route `5281`). Serves 8 compliance capabilities on Devnode router including verified Rank #1 Global Document Authenticity and Rank #3 Global Sanctions Screening.
+1. **Active Miner (Track 02):** Bonded on active Sepolia Diamond [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) (Diamond registration `#6142`, Devnode miner `#6127`, Route `5281`). **Nine** intents on-chain; mining intelligence live on HTTP/MCP pending Diamond bond support.
 2. **Evaluator Pool (Track 03):** 62 attested bounties scoring external miners against primary registers (SEC EDGAR, GLEIF, OFAC).
 3. **Praman Spend Guard (Track 01):** The user-facing application that consumes high-reputation network miners to verify counterparty parameters before on-chain payment.
 4. **WASM Math Engine:** 651-byte zero-import binary compiled from AssemblyScript with 1,043/1,043 test vectors passing with zero discrepancies.

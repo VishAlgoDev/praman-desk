@@ -138,7 +138,7 @@ if (verdict.approved) {
 ## Live Telegraph Network Coordinates
 
 - **Devnode Miner ID**: `#6127` (Route `#5281`)
-- **Sepolia Diamond Registration**: `#6128`
+- **Sepolia Diamond Registration**: `#6142`
 - **Diamond Escrow Port**: `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`
 - **Rank Standings**:
   - `CONTRACT_OBLIGATION_AUDIT_GENERAL`: **Rank #1**

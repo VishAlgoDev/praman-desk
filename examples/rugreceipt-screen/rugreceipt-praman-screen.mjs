@@ -11,7 +11,7 @@
 
 export const PRAMAN_DESK_CONFIG = {
   minerId: 5281,
-  registrationId: 6128,
+  registrationId: 6142,
   diamondPort: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
   endpoint: 'https://praman-desk.vercel.app/api/miner/sanctions-screen',
   mcpEndpoint: 'https://praman-desk.vercel.app/api/mcp'

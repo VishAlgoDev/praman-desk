@@ -1,6 +1,6 @@
 # FakeWatch x Praman Desk Counterparty Shield Adapter
 
-Reciprocal enterprise spend protection combining **FakeWatch domain safety (Miner #42420)** with **Praman Desk compliance verification (Miner #6128 / Devnode #5281)**.
+Reciprocal enterprise spend protection combining **FakeWatch domain safety (Miner #42420)** with **Praman Desk compliance verification (Diamond #6142 / Route #5281 / Devnode miner #6127)**.
 
 ---
 

@@ -26,8 +26,8 @@ Before running any mutating command or altering any file:
 
 ## 2. CURRENT GROUND-TRUTH TELEMETRY & COORDINATES
 
-- **Live Production URL**: `https://praman-desk.vercel.app` (Deployment `dpl_DXKgyordnq794HZzdcitz8KzjsXE` active and aliased).
-- **Git State**: Clean working tree on branch `main` (see `git log -1` for latest hash), synchronized with `origin/main`.
+- **Live Production URL**: `https://praman-desk.vercel.app` (Production deployment `dpl_G8AaZdauaLTT5B5DJjzA7jNZpsy3` as of 2026-11-21 doc/coord sweep; re-check with `vercel inspect https://praman-desk.vercel.app`).
+- **Git State**: Branch `main` synced with `origin/main` at `952dae7`; `npm test` may rewrite `benchmark/benchmark-results.json` and `docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md` (regenerated artifacts—do not commit unless intentional).
 - **Devnode Miner Coordinates**:
   - Miner ID: `#6127`
   - Route ID: `#5281` (`praman-compliance-miner`)
@@ -70,7 +70,7 @@ Before running any mutating command or altering any file:
    - When open, submit all official links:
      - Live App: `https://praman-desk.vercel.app`
      - GitHub Repo: `https://github.com/VishAlgoDev/praman-desk`
-     - Demo Video: `https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4`
+     - Demo Video: `https://praman-desk.vercel.app/praman-desk-walkthrough.mp4` (do **not** submit FFmpeg benchmark MP4)
      - Wallet: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
 3. **Maintain Zero-Defect Code**:
    - Whenever any code is touched, run `npm test`.
