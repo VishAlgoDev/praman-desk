@@ -24,14 +24,16 @@
 
 ## Shot list (45–55 seconds total)
 
-### Act 1 — Repro first (0:00–0:12) “Others can run this”
+### Act 1 — Dashboard first (0:00–0:12)
+
+**Rule:** First frame = **praman-desk.vercel.app** (or local dashboard). **Never** open with terminal, fake script HTML, or raw JSON.
 
 | Time | Visual | On-screen / VO |
 |------|--------|----------------|
-| 0:00–0:05 | Terminal in repo root: `npm run general-mind:test` or `node examples/minds-spend-guard/test-two-minds.mjs` scrolling **PASS** lines | VO: “This is not a deck. Run the test; it hits live Praman on Vercel.” |
-| 0:05–0:12 | Same terminal: last lines showing **production URL** in test output (or `curl -s praman-desk.vercel.app/api/status \| jq .onchainDiamond.active_registration_id`) → **6142**, **9** intents | VO: “Diamond registration six-one-four-two, nine bonded intents; mining is HTTP-only until the protocol allows bond.” |
+| 0:00–0:05 | Praman Desk header, badges (#6142 / #5281), hero line | VO: “This is the live spend firewall — not a slide deck.” |
+| 0:05–0:12 | Scroll scenario cards; land on **Scenario 7 Two-Mind** | VO: “Two-Mind spend guard for Minds + Telegraph.” |
 
-**Do not** show Epoch 18 rank claims or “#1 network-wide” text.
+**Do not** show Epoch 18 rank claims or “#1 network-wide” text. **Repro command** only in the **site footer / quickstart** section, not a terminal window.
 
 ---
 
