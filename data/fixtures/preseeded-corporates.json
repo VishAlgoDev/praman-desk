@@ -5,6 +5,7 @@
   { "name": "Amazon.com, Inc.", "lei": "ZXTILKJKG63JELOEG630", "jurisdiction": "US-DE", "country": "US", "active": true, "address": "410 Terry Ave N, Seattle, WA 98109" },
   { "name": "Tesla, Inc.", "lei": "54930043XZGB27CTOV49", "jurisdiction": "US-TX", "country": "US", "active": true, "address": "13101 Harold Green Rd, Austin, TX 78725" },
   { "name": "Stripe, Inc.", "lei": "549300S4KLFTLO7GSQ80", "jurisdiction": "US-DE", "country": "US", "active": true, "address": "354 Oyster Point Blvd, South San Francisco, CA" },
+  { "name": "STRIPE, LLC", "lei": "549300CLHGIPTCYHQ143", "jurisdiction": "US-DE", "country": "US", "active": true, "address": "354 Oyster Point Blvd, South San Francisco, CA" },
   { "name": "SAP SE", "lei": "529900OD015S2V211245", "jurisdiction": "DE-BW", "country": "DE", "active": true, "address": "Dietmar-Hopp-Allee 16, 69190 Walldorf" },
   { "name": "Siemens AG", "lei": "W38RGI023J3WT1HWRP32", "jurisdiction": "DE-BY", "country": "DE", "active": true, "address": "Werner-von-Siemens-Strasse 1, 80333 Munich" },
   { "name": "Barclays PLC", "lei": "213800LBQA1Y9L22JB70", "jurisdiction": "GB", "country": "GB", "active": true, "address": "1 Churchill Place, London, E14 5HP" },
