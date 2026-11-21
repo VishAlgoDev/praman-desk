@@ -371,74 +371,70 @@ All 5 claimed mission issues (#190, #191, #192, #199, #200) are submitted and in
 ```
 
 ### 7.2 Ahmed Ali's Minds Thread Reply (`1573287348689567774`)
-*(Character count: 1,822 chars — strictly under Discord's 2,000 char limit; masks URLs to prevent embed flood)*
+*(Character count: 1,210 chars — strictly under Discord's 2,000 char limit; crisp, humble, direct)*
 
 ```markdown
-Hey @1xAhmed — thank you for the direct feedback! Here is the full end-to-end working showing exactly how simple the integration is:
+Hey @1xAhmed — following up on your note about showing the actual working and ease of integration:
 
-**1. How Simple It Is (One Skill / One MCP Command)**:
-You don't write custom scaffolding or local registry parsers. You add our streamable MCP endpoint:
+Here is the entire integration — literally one command to equip 18 live tools:
 `agy mcp add praman https://praman-desk.vercel.app/api/mcp`
-Or in `mcpServers`:
+Or add to `mcpServers`:
 `{"praman": {"url": "https://praman-desk.vercel.app/api/mcp"}}`
-That exposes 18 verified tools (OFAC sanctions, GLEIF registry, FakeWatch phishing, wholesale power, and dispute arbitration).
 
-**2. Full End-to-End Working (5.23m Walkthrough)**:
-We recorded an unedited 5.23m live Screen Studio walkthrough demonstrating the end-to-end flow:
+No API keys, wallets, or local scaffolding required.
+
+Here is the unedited 5.23m live walkthrough showing raw prompt → miner query → WASM consensus check → Sepolia attestation:
 <https://praman-desk.vercel.app/praman-desk-walkthrough.mp4>
-Shows:
-• Raw enterprise prompt submission
-• Investigator Mind querying live Telegraph miners (#6127 / Route #5281)
-• Reviewer Mind checking multi-miner consensus via our 651-byte zero-import WASM arithmetic engine
-• On-chain cryptographic attestation recorded on Sepolia (Diamond #6142)
 
-**3. Interactive Live Playground (No Auth Required)**:
-Anyone can test arbitrary prompts directly in the browser:
+Anyone can test live spend requests directly in the browser:
 <https://praman-desk.vercel.app/#playground>
-Try the presets or type your own:
-• Sanctioned entity detection (Lazarus Group)
-• Lookalike phishing checkout links (unisvvap.org)
-• Mathematical retainage escrow calculation
-• Prompt injection jailbreak attempts
+(Presets include sanctioned entities, typosquatted phishing domains, and retainage math calculations)
 
-**4. Empirical "With vs Without Telegraph" Benchmark**:
-Tested across 5 adversarial spend scenarios:
-• 100% catch rate with Telegraph vs 0% without
-• $79,373 USD in simulated capital loss prevented
-• Full data & reproduction script: <https://github.com/VishAlgoDev/praman-desk/blob/main/docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md>
+We also ran the Two-Mind Spend Guard head-to-head against an unassisted LLM across 5 real spend vectors ($79k simulated loss prevented, 100% vs 0% catch rate):
+<https://github.com/VishAlgoDev/praman-desk/blob/main/docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md>
 
 Open source repo: <https://github.com/VishAlgoDev/praman-desk>
 ```
 
 ### 7.2B Ahmed Ali's Gold Rush Thread Reply (`1573264855526547577`)
-*(Character count: 1,316 chars — strictly under Discord's 2,000 char limit)*
+*(Character count: 1,480 chars — strictly under Discord's 2,000 char limit; answers historical era reconciliation)*
 
 ```markdown
-Hey @1xAhmed @Fexx @NFT KING 👑 — regarding your note on Mount Morgan and Charters Towers Brilliant Lode:
+Hey @1xAhmed @Fexx @NFT KING 👑 — regarding reconciling conflicting historical numbers on Mount Morgan and Brilliant Lode:
 
-We built and open-sourced the **Universal Multi-Miner Discrepancy Arbitrator & Evaluator Adapter**:
-Repo: <https://github.com/VishAlgoDev/praman-desk/tree/main/examples/gold-rush-evaluator>
+We built and deployed the multi-miner discrepancy arbitrator live on Praman Desk:
+<https://praman-desk.vercel.app/#goldrush>
 
-**How it handles Mount Morgan & Brilliant Lode**:
-1. **Statutory Baseline**: Grounded in Queensland Open Data / Department of Resources historical records (11 benchmark deposits).
-2. **Deterministic Conflict Arbitration**:
-   When competing miners report divergent data on the same deposit (e.g. Miner A reports 8.4M oz gold while an unverified miner reports 45M oz, or divergent geology like VHMS vs Epithermal Quartz), our WASM engine flags the variance, quantifies the metric delta, and halts automated approval.
-3. **Unfamiliar Site Generalization**:
-   The arbitrator is not hardcoded to Queensland. It evaluates Western Australia (Kalgoorlie Super Pit), Nevada (Carlin Trend), and global sites (Muruntau) under identical deterministic logic.
+Here is how our aggregator reconciles the exact discrepancies you highlighted:
 
-Live API:
-`curl -X POST https://praman-desk.vercel.app/api/miner/mining-intelligence -H "Content-Type: application/json" -d '{"prompt":"Query historical production for Mount Morgan Mine"}'`
+1. **Mount Morgan (294 t survey total vs 250 t baseline)**:
+   The 44-tonne gap isn't a miner error. The 250 t figure (~8.0M oz) reflects primary underground/open-cut ore extraction up to mine closure in 1927. The 294 t total includes the 56 tonnes of gold recovered during the 1983–1990 tailings dump retreatment project. Our aggregator flags the variance, maps the distinct operational eras from GSQ survey records, and passes the numbers to our 651-byte WASM comparator to verify mathematical tolerance.
 
-Test suite passes 100%: `python examples/gold-rush-evaluator/test_gold_rush.py`
+2. **Charters Towers / Brilliant Lode (22.8k oz vs 51.5 t)**:
+   22,843 oz was extracted specifically from the Brilliant Deeps shaft (1908–1916). 51,483 kg reflects the entire Brilliant reef complex, while 205 t (~6.6M oz) is the aggregate Charters Towers goldfield. The UI separates shaft-level records from field totals.
+
+3. **Generalization to Unfamiliar Sites**:
+   The arbitrator isn't locked to Queensland. Click the presets to test Carlin Trend (Nevada), Kalgoorlie Super Pit (WA), or Muruntau (Uzbekistan).
+
+Try it live or download the JSON arbitration dossier:
+<https://praman-desk.vercel.app/#goldrush>
+Code: <https://github.com/VishAlgoDev/praman-desk/tree/main/examples/gold-rush-evaluator>
 ```
 
-### 7.2C Reply to Bangdrop / Takar Second Opinion in Minds Agents
-*(Character count: 430 chars — strictly under Discord's 2,000 char limit)*
+### 7.2C Reply to Bangdrop / Takar Second Opinion in Minds Agents (`1573287348689567774`)
+*(Character count: 680 chars — strictly under Discord's 2,000 char limit; acknowledges live settlement & clarifies IDs)*
 
 ```markdown
-Hey @Bangdrop — congrats on the Takar Second Opinion launch on Bazaar! 74 Sepolia attestations is serious execution.
+Hey @Bangdrop — awesome to see TakarSettle v3 (`0xf977660CD28704Fa97D8f6B72835646F62E2502b`) in action!
 
-Our Reviewer Mind is designed precisely to consume independent reviewer signals like Takar. You can query our streamable MCP tools directly (`<https://praman-desk.vercel.app/api/mcp>`) or run cross-miner arbitration. Would be great to run a joint test where Takar and Praman cross-verify the same escrow release.
+Glad our live MCP (`https://praman-desk.vercel.app/api/mcp`) flagged Bank Rossiya under SDN UID 16681 to trigger the refund condition.
+
+Just to clarify the IDs for your records:
+• Devnode Miner: `#6127` (Route `#5281`)
+• Sepolia Diamond Registration: `#6137` (pinned at commit `59454bd`, updated to `#6142`)
+Both hit the exact same live engine.
+
+We've equipped Takar Second Opinion on our Mind as well. We'd love to take you up on that second resolver seat on-chain — our contributor wallet is `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`. Let's settle more escrow together!
 ```
 
 ### 7.3 Discord `#hackathon` Assistance Message (`1498654113376899112`)
@@ -566,8 +562,10 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ GATE 8.5: CROSS-ECOSYSTEM ON-CHAIN SETTLEMENT WITH TAKAR                               │
 │ • Competitor Bangdrop independently tested & integrated Praman's MCP endpoint          │
-│   (screen_sanctions) and miner 6137 into live on-chain Sepolia contract TakarSettle v3│
+│   (screen_sanctions) into live on-chain Sepolia contract TakarSettle v3                │
 │   (0xf977660CD28704Fa97D8f6B72835646F62E2502b) for conditional supplier release.      │
+│ • Miner ID coordinates verified: Devnode miner #6127 (Route #5281) & Sepolia Diamond   │
+│   registration #6137 (at commit 59454bd, updated to #6142) route to same engine.       │
 │ • Settled Siemens AG (cleared/paid) and Bank Rossiya (SDN 16681 flagged/refunded).     │
 │ • Second resolver seat on-chain formally offered to Praman wallet                      │
 │   (0x98021b20Efdb7ae2C57366010a6E0fDE207b4466).                                       │
@@ -577,8 +575,9 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 │ • Ingested live competitor intelligence: Takar dossiers, OathCast miner 64176, and    │
 │   NFT KING miner 7310050.                                                              │
 │ • Landed 4th interactive tab on praman-desk.vercel.app (#goldrush) with 1-click        │
-│   WASM arbitration across Mount Morgan (294t vs 250t resolved via 56t dump retreatment)│
-│   and Brilliant Lode (22.8k oz shaft resolved vs 51.5t primary reef).                  │
+│   multi-miner arbitration across Mount Morgan (294t vs 250t resolved via 56t dump     │
+│   retreatment) and Brilliant Lode (22.8k oz shaft resolved vs 51.5t primary reef).     │
+│ • Historical era mapping executed via GSQ data in JS; 651B WASM validates tolerance.  │
 │ • Discrepancy digest cryptographically anchored on Sepolia Diamond #6142.             │
 │ • Status: ✅ LANDED, TESTED (100% DETERMINISM) & DEPLOYED (2026-11-21).                 │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
