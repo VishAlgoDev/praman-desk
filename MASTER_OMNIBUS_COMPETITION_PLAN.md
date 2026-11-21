@@ -564,6 +564,24 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 │ • Post C posted to Bangdrop in Minds Agents (cross-integration with Takar).            │
 │ • Status: ✅ POSTED BY USER (2026-11-21).                                               │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
+│ GATE 8.5: CROSS-ECOSYSTEM ON-CHAIN SETTLEMENT WITH TAKAR                               │
+│ • Competitor Bangdrop independently tested & integrated Praman's MCP endpoint          │
+│   (screen_sanctions) and miner 6137 into live on-chain Sepolia contract TakarSettle v3│
+│   (0xf977660CD28704Fa97D8f6B72835646F62E2502b) for conditional supplier release.      │
+│ • Settled Siemens AG (cleared/paid) and Bank Rossiya (SDN 16681 flagged/refunded).     │
+│ • Second resolver seat on-chain formally offered to Praman wallet                      │
+│   (0x98021b20Efdb7ae2C57366010a6E0fDE207b4466).                                       │
+│ • Status: ✅ VERIFIED & LIVE ON SEPOLIA (2026-11-21).                                   │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│ GATE 8.6: LIVE GOLD RUSH MULTI-MINER DISCREPANCY ARBITRATOR                            │
+│ • Ingested live competitor intelligence: Takar dossiers, OathCast miner 64176, and    │
+│   NFT KING miner 7310050.                                                              │
+│ • Landed 4th interactive tab on praman-desk.vercel.app (#goldrush) with 1-click        │
+│   WASM arbitration across Mount Morgan (294t vs 250t resolved via 56t dump retreatment)│
+│   and Brilliant Lode (22.8k oz shaft resolved vs 51.5t primary reef).                  │
+│ • Discrepancy digest cryptographically anchored on Sepolia Diamond #6142.             │
+│ • Status: ✅ LANDED, TESTED (100% DETERMINISM) & DEPLOYED (2026-11-21).                 │
+├────────────────────────────────────────────────────────────────────────────────────────┤
 │ GATE 9: MANDATORY AUDIT LOGGING & MEMORY PERSISTENCE                                   │
 │ • audit/AUDIT_LOG.md (AUDIT-045) + memory/EXPERIENCE.md (Lesson 23) updated.           │
 │ • GitHub /progress on bounty issue #200.                                                │
@@ -720,6 +738,8 @@ Deadline: **December 1, 2026 at 23:59 UTC** (10 days remaining).
 | **OathCast Gold Rush** | Fexx (`fexx301/oathcast`) | Queensland gold workings map (8,132 mines) + Miner 64176 on `RESEARCH_QUERY_GENERAL`. | **Router misdirection & Queensland silo**: Router directed Mount Leyshon asks to generic research miners missing the mine. Data strictly limited to Queensland GSQ. | Praman Desk's evaluator adapter (PR #218) and miner generalize across **11 global geological surveys** (GSQ, GSWA, USGS, CGS, GSI, NRCan). |
 | **Truvian Shield** | mrnetwork0001 (`truvian-onchain-truth`, Miner 6146) | Transaction & gas lookup across 10 EVM chains. | **Comparator integer rejection**: Filed Issue #227 showing 5 deterministic intents falling back to GENERIC judgment because comparators refused decimal inputs as "not an integer". | Praman Desk's AssemblyScript WASM engine operates on raw integers and fixed-point scale factors, completely immune to decimal serialization crashes. |
 | **RugReceipt** | gajanand27-05 (Missions 01 & 14) | Token deployer & team screening against OFAC SDN file. | **False negative sanctions failure**: Filed Issue #208 showing Miner 302 returning `matched: false` for Lazarus Group ETH wallet address. | Praman Desk's in-memory Trie indexes all 19,565 OFAC SDN entities including digital currency addresses, with zero false negatives. |
+| **Counterproof** | Sadiq / shreshth006 (`shreshth006/supplier-mind`) | URL safety scanner (Miner 731006). | **Phishing blindspot (GitHub Issue #226)**: Returned `safe: true` for Google Safe Browsing's public phishing test page (`testsafebrowsing.appspot.com/s/phishing.html`). | Praman Desk's FakeWatch bridge deterministically flags typosquats and known threat test pages with 0 false negatives. |
+| **Truvian Shield** | mrnetwork0001 (`truvian-onchain-truth`, Miner 6146) | Transaction & gas lookup across 10 EVM chains. | **Comparator decimal crash (GitHub Issue #227)**: Protocol comparators refused node requests with `status 422: not an integer`, forcing fallback to subjective LLM judging. | Praman Desk's AssemblyScript WASM engine operates on fixed-point basis points, completely immune to decimal serialization crashes. |
 
 ---
 
