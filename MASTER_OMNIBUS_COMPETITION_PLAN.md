@@ -69,7 +69,8 @@ This document is the **definitive, uncompromised, and all-inclusive Master Plan*
 │ TRACK 3: EVALUATORS & BOUNTIES (UPSTREAM PRs #217–#222)                                │
 │ • 6 Open Pull Requests on telegraphprotocol/bounties (PRs #217, #218, #219, #220,     │
 │   #221, #222) — all active, compliant, and mergeable.                                  │
-│ • 5 Bounty Missions Claimed & Submitted: Issues #190, #191, #192, #199, #200.          │
+│ • 7 Bounty Missions Claimed & Submitted: Issues #189, #190, #191, #192, #199, #200,   │
+│   #201 (All officially verified in status:review by github-actions).                   │
 │ • 31/31 Passing Upstream Python Unit Tests resolving 7 stalled comparator families.   │
 │ • Global Deep Intelligence Gold Rush Suite: Scoring 11 benchmark deposits worldwide.   │
 └────────────────────────────────────────────────────────────────────────────────────────┘
@@ -212,7 +213,7 @@ To preserve every historical vulnerability, gap, and bug identified across all s
 | **W4** | **Local Intelligence Fallback in Minds** | High | `investigator-mind.mjs` imported local handlers directly, violating Ahmed Ali's Rule #1. | Built `examples/general-purpose-mind/` orchestrating via Anjoman and Telegraph MCP with WASM arbitration. |
 | **W5** | **Discord Unresponsive Threat Shield** | High | FakeWatch bridge responded on wrong endpoint `/api/v1/url-safe`. | Patched `/api/bridge/fakewatch` with ScamSniffer attribution and deployed live in commit `b3aeda8`. |
 | **W6** | **Copy-Pasted Slop in Track 3 Dossier** | Medium | MahaRERA and FIDIC delay clauses copy-pasted into mining evidence dossier. | Purged in commit `ad8f43c` and replaced with authentic geological benchmark deposit profiles. Full forensic audit on Nov 21 purged residual FIDIC strings in `public/index.html` (lines 2447 & 2507) and verified 0 hits on live production. |
-| **W7** | **Ecosystem Visibility on GitHub Mission Issues** | High | Bounties repo issues lacked official `/claim` and `/progress` records. | Commented `/claim` and `/progress` on Issues #190, #191, #192, #199, and #200, linking PRs #217–#222. |
+| **W7** | **Ecosystem Visibility on GitHub Mission Issues** | High | Bounties repo issues lacked official `/claim`, `/progress`, and `/submit` records. | Formally claimed, updated progress, and submitted `/submit` across all 7 core Mission Issues: #189, #190, #191, #192, #199, #200, and #201. All 7 are officially verified in `status:review` by github-actions. |
 | **W8** | **Frontend Stale Tool Count References** | Low | `public/index.html` cited "15 Tools" instead of 18 tools. | Updated `public/index.html` (lines 1270, 1273, 1284) and `docs/X_TECHNICAL_THREAD.md` to "18 Tools Live". |
 | **W9** | **Community Showcase Thread Freshness** | High | Showcase thread `#1569379402360553692` lacked Day 20 milestone update. | Day 20 showcase + fact-checked coord bump (10:32 PM); thread title → #6127/#5281/#6142; **forum threads have no per-message Pin** (verified Nov 21) — use **Edit Post** on starter or a coord bump reply. |
 | **W10** | **Peer Builder Activation (Anjoman Outage)** | Medium | Builders hitting 500 wallet provisioning errors on Anjoman. | Offered keyless `/api/mcp` and curl endpoints for instant OFAC/vendor screening in `#hackathon`. |
@@ -638,7 +639,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 | :--- | :---: | :--- |
 | **Apps & Minds** | **B+** | Two-Mind + general-purpose Mind pass tests; specialists now hit **live production API** (not local `handlers.mjs`). Beat **Supplier Detective** by posting one Siemens-style case + limitations. |
 | **Miners** | **B−** | Dynamic solver + `miner.yaml` (9 bonded on Diamond, MINING HTTP-only); traffic volume still low vs 1,500+ request leaders. On-chain pin `59454bd`; git HEAD may be 1–2 commits ahead without new reg id. |
-| **Evaluators** | **B−** | PRs **#217–#222** MERGEABLE, **0 merges**; issue **#200** `/progress` filed. |
+| **Evaluators** | **B−** | PRs **#217–#222** MERGEABLE, **0 merges**; issues **#189–#192, #199–#201** all submitted to review. |
 | **Docs honesty** | **B** | This plan synced; avoid "dominance" until PRs merge. |
 
 **P0 backlog (next 72h):**
@@ -647,7 +648,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 |:-:|:---|:---|
 | 1 | **Coord visibility** in showcase `1569379402360553692` (no Pin in forum) | ✅ **COMPLETED & VERIFIED** (User edited thread starter post with canonical coordinates block; browser screenshot verified) |
 | 2 | Watch/engage PR #222–#217 | ⏳ MERGEABLE, 0 reviews; nudge on #222; no spam |
-| 3 | Issue #200 `/progress` at Diamond #6142 | ✅ Posted; MINING follow-up comment #7047517426 |
+| 3 | Issue #200 (/submit) and Issue #201 (/claim, /progress, /submit) | ✅ **COMPLETED & VERIFIED** (Both submitted and officially verified in `status:review` by github-actions bot; 7 core missions in review) |
 | 4 | Devnode sync (7 vs 9 bonds) | ⏳ Wait for network; `/api/status` is canonical |
 | 5 | Anjoman app submission & review | ✅ **SUBMITTED & IN REVIEW** (Submission ID: `9ae7025e-65be-490b-8e59-2aa598f16992` at `/dashboard/apps/mine`) |
 | 6 | MINING Diamond bondability | ⏳ GitHub ask filed; #hackathon paste manual |

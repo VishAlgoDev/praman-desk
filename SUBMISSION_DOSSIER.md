@@ -11,10 +11,13 @@
     - **Cross-Team Production Wiring**: Competitor Bangdrop (Takar) has actively wired `/api/gold-rush/aggregate` into all live Takar dossiers (`https://takar-telegraph.vercel.app/goldrush.html`) as an external verification check.
     - **Accepted Resolver Seat**: Second resolver seat on Sepolia contract [`0xf977660CD28704Fa97D8f6B72835646F62E2502b`](https://sepolia.etherscan.io/address/0xf977660CD28704Fa97D8f6B72835646F62E2502b) for contributor wallet `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`.
   - **Universal General-Purpose Mind**: Directly fulfilling Co-Founder Ahmed Ali's Golden Challenge (arbitrating enterprise procurement, payroll, retention release, and prompt injection)
-  - **Mission 04**: Statutory Corporate & Contractual Diligence (GLEIF LEI, Statutory Corporate Registers, OFAC)
-  - **Mission 03**: Institutional Markets & Counterparty Clearing (FakeWatch Phishing Shield, FX Parity)
-  - **Mission 11**: Autonomous Systems (Spend Delegation Approval Caps & Circuit Breakers)
-  - **Mission 02**: Stablecoin Treasury Guard (OFAC SDN EVM Address Screening & FATF Travel Rule)
+  - **Mission 01**: Exchange Integrity & Token Pre-Listing Statutory Diligence (#189 — In Review)
+  - **Mission 02**: Stablecoin Treasury Guard (OFAC SDN EVM Address Screening & FATF Travel Rule — #190 — In Review)
+  - **Mission 03**: Institutional Markets & Counterparty Clearing (FakeWatch Phishing Shield, FX Parity — #191 — In Review)
+  - **Mission 04**: Statutory Corporate & Contractual Diligence (GLEIF LEI, Statutory Corporate Registers, OFAC — #192 — In Review)
+  - **Mission 11**: Autonomous Systems (Spend Delegation Approval Caps & Circuit Breakers — #199 — In Review)
+  - **Mission 12**: Mining & Power (Sovereign Mining Reserves, Wholesale Grid Power LMP & Cross-Miner Scope Arbitration — #200 — In Review)
+  - **Mission 13**: Asset Management (Open Research with Receipts & Defensible Private Asset Marks — #201 — In Review)
 - **Secondary Track**: Track 02 — Miners / Providers (Devnode miner #6127 / Route #5281 / Diamond registration #6142, 9 bonded intents)
   - 🏆 **Rank #1 Globally**: CONTRACT_OBLIGATION_AUDIT_GENERAL (Score: 0.5000)
   - 🏆 **Rank #1 Globally**: PURCHASE_ORDER_VERIFY_GENERAL (Score: 0.0000, top seed)
@@ -22,7 +25,15 @@
   - 💎 **Rank #6 Globally**: CORPORATE_REGISTRY_LOOKUP_GENERAL (Score: 1.0000, 200+ jurisdictions GLEIF)
   - **Gold Rush Autonomous Multi-Miner Aggregator & Scope Resolution Engine**: Ingesting and arbitrating live competitor dossiers (Takar, OathCast miner 64176, NFT KING miner 7310050) with automated hierarchical scope resolution (shaft vs reef vs field) and on-chain EAS Sepolia attestations ([UID 0x33d85bed...](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115))
   - 164 live network requests served on Devnode
-- **Supporting Track**: Track 03 — Evaluators & Truth Sources (62 Attested Rows in EvalPool + [Upstream PR #217](https://github.com/telegraphprotocol/bounties/pull/217) for Mission 04 Legal Evaluator Adapter #192)  
+- **Supporting Track**: Track 03 — Evaluators & Truth Sources:
+  - 62 Attested Rows in EvalPool
+  - **Upstream PR #217**: `CONTRACT_OBLIGATION` adapter (Mission 04 / #192)
+  - **Upstream PR #218**: `MINING_INTELLIGENCE` & `MINING_RESERVE` adapter (Mission 12 / #200)
+  - **Upstream PR #219**: `SANCTIONS_SCREENING_MATCH` adapter (Mission 02 / #190)
+  - **Upstream PR #220**: `CORPORATE_REGISTRY_LOOKUP` adapter (Mission 03 / #191, Mission 13 / #201)
+  - **Upstream PR #221**: `REGULATORY_FILING_MONITOR` adapter (Mission 04 / #192, Mission 13 / #201)
+  - **Upstream PR #222**: `GRID_POWER_PRICE` adapter (Mission 11 / #199, Mission 12 / #200)
+  *(All 6 PRs open, 100% MERGEABLE, passing CI)*  
 - **Benchmark & Policy Evaluation**: "With vs Without Telegraph" ($79,373 Capital Loss Averted across 5 Adversarial Scenarios, 100% Catch Rate vs 0% Ungrounded Baseline)  
 - **Main Competition Deadline**: December 1, 2026, 23:59 UTC  
 - **GitHub Repository**: [https://github.com/VishAlgoDev/praman-desk](https://github.com/VishAlgoDev/praman-desk)  
