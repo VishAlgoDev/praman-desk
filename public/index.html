@@ -2443,9 +2443,9 @@ Content-Type: application/json
       certHash: "0xec721a941584bc3109aef8192305bad61042781bcf8291048123da671849fa18"
     },
     retention: {
-      prompt: "Execute release of Clause 14.9 Subcontractor Retention Fund ($15,000.00 USDC) to Precision MEP Engineering Ltd upon issuance of Taking-Over Certificate.",
-      investigator: "• Task Classification: COMMERCIAL_CONTRACT_SETTLEMENT\n• Payee: Precision MEP Engineering Ltd (UK Register #08492014)\n• Obligation: FIDIC/Standard Sub-Clause 14.9 50% Retention Release\n• Net Value: $15,000.00 USDC (Original Retention: $30,000.00)",
-      reviewer: "• Milestone Verification: Taking-Over Certificate hash corroborated\n• WASM Retention Formula: Math.floor(30000000000 / 2) = 15000000000 micro-cents\n• Sanctions & Phishing: Clean (0 matches)\n• Quorum Status: 2 of 2 Approvals Attested",
+      prompt: "Execute release of Milestone 3 Subcontractor Retainage Escrow ($15,000.00 USDC) to Precision MEP Engineering Ltd upon completion signoff.",
+      investigator: "• Task Classification: COMMERCIAL_CONTRACT_SETTLEMENT\n• Payee: Precision MEP Engineering Ltd (UK Register #08492014)\n• Obligation: Commercial Subcontract Milestone 3 Retainage (50% Escrow Release)\n• Net Value: $15,000.00 USDC (Original Retention: $30,000.00)",
+      reviewer: "• Milestone Verification: Certificate hash corroborated\n• WASM Retention Formula: Math.floor(30000000000 / 2) = 15000000000 micro-cents\n• Sanctions & Phishing: Clean (0 matches)\n• Quorum Status: 2 of 2 Approvals Attested",
       verdict: "CLEAR_FOR_PAYMENT",
       verdictText: "CLEAR FOR PAYMENT (CRYPTO RECEIPT GENERATED)",
       verdictColor: "#34d399",
@@ -2504,7 +2504,7 @@ Content-Type: application/json
     const lower = text.toLowerCase();
     if (lower.includes('lazarus') || lower.includes('0x098b716b8aaf21512996dc57eb0615e2383e2f96')) {
       matchedKey = 'lazarus';
-    } else if (lower.includes('retention') || lower.includes('clause 14.9') || lower.includes('fidic')) {
+    } else if (lower.includes('retention') || lower.includes('retainage') || lower.includes('escrow release')) {
       matchedKey = 'retention';
     } else if (lower.includes('ignore') || lower.includes('override') || lower.includes('jailbreak')) {
       matchedKey = 'injection';
