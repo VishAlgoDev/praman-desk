@@ -70,7 +70,7 @@ Before running any mutating command or altering any file:
    - When open, submit all official links:
      - Live App: `https://praman-desk.vercel.app`
      - GitHub Repo: `https://github.com/VishAlgoDev/praman-desk`
-     - Demo Video: `https://praman-desk.vercel.app/praman-desk-walkthrough.mp4` (do **not** submit FFmpeg benchmark MP4)
+     - Demo Video: `https://praman-desk.vercel.app/praman-desk-walkthrough.mp4` (see `docs/VIDEO_PRODUCTION_STANDARD.md`; short benchmark URL is walkthrough excerpt only)
      - Wallet: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
 3. **Maintain Zero-Defect Code**:
    - Whenever any code is touched, run `npm test`.

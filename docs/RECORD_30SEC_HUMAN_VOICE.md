@@ -1,6 +1,7 @@
-# Record your own 30-second demo (no robot voice)
+# Optional: record your own voice (not required)
 
-You speak. The screen shows your real site. One file for Discord and the hackathon.
+**Default policy:** use `praman-desk-walkthrough.mp4` only — see `docs/VIDEO_PRODUCTION_STANDARD.md`.  
+This doc is optional polish if you prefer a human narrator over edge-tts.
 
 ## What you need
 
