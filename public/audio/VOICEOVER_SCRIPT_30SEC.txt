@@ -1,0 +1,13 @@
+READ THIS OUT LOUD WHILE RECORDING THE SCREEN (about 25–35 seconds — slow and natural):
+
+---
+Hi. This is Praman Desk — a guard that checks payments before an AI wallet signs.
+
+I'm clicking Scenario Seven — Two-Mind for Minds.
+
+See the red halt? Inverted exchange rate on a Stripe payout — ten thousand five hundred dollars stopped.
+
+For the full narrated tour, use the ninety-second walkthrough on this same page.
+---
+
+Tips: Don't rush. Pause when the red "transaction blocked" banner appears.
