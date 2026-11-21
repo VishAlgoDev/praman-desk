@@ -583,6 +583,19 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 │ • Historical era mapping executed via GSQ data in JS; 651B WASM validates tolerance.  │
 │ • Discrepancy digest cryptographically anchored on Sepolia Diamond #6142.             │
 │ • Status: ✅ LIVE IN PRODUCTION, VERIFIED & TESTED (2026-11-21).                        │
+├──────────────────────────────────────────────────────────────────────────────────────────┤
+│ GATE 8.7: ETHEREUM ATTESTATION SERVICE (EAS) SEPOLIA ATTESTATION & SCOPE BREAKDOWN       │
+│ • Responded to Bangdrop's 12:24 AM Nov 22 confirmation: Praman Desk /api/gold-rush/     │
+│   aggregate confirmed wired into all Takar dossiers (https://takar-telegraph.vercel.app).│
+│ • Broadcasted on-chain arbitration attestation to EAS on Sepolia against Schema UID     │
+│   0x351bc4ecf778660c8de0d42eb111e758469e1fe5ffc1b993899e399c9c056741.                  │
+│ • Tx: 0xda523c5e9426c8512f50996cc292537ac7ed1e4b7b0b8411520332b23ef3f2d0 (Block 12183759)│
+│ • Attestation UID: 0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115. │
+│ • Praman Desk (0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) is now the 2nd attester on   │
+│   the public open record alongside Takar.                                               │
+│ • Enhanced /api/gold-rush/aggregate with explicit scopeBreakdown for Brilliant Lode,   │
+│   Ravenswood, and Mount Morgan; deployed live to Vercel production.                     │
+│ • Status: ✅ VERIFIED ON-CHAIN (SEPOLIA) & DEPLOYED TO PROD (2026-11-22).                │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ GATE 9: MANDATORY AUDIT LOGGING & MEMORY PERSISTENCE                                   │
 │ • audit/AUDIT_LOG.md (AUDIT-053) + memory/EXPERIENCE.md (Lesson 26) updated.           │
@@ -656,6 +669,8 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 | Minds | Ahmed **`157332…`** thread **9:47 PM** — wallet + Anjoman bazaar skill @antikunpiece | ⏳ Logged (reply pending) |
 | Showcase `1569379402360553692` | **2:28 PM** triple-track; **12:53 AM** Two-Mind + benchmark MP4; **10:32 PM** coords; title **#6142** | ✅ |
 | Showcase | [`1573325021202489448`](https://discord.com/channels/1438396125609463881/1569379402360553692/1573325021202489448) Day 20 (handoff) | ❌ not in thread |
+| Gold Rush `1573264855526547577` | Bangdrop confirms cross-team integration of `/api/gold-rush/aggregate` into all Takar dossiers (12:24 AM Nov 22) | ✅ |
+| Sepolia EAS Attestation | Schema `0x351bc4ec...` UID `0x33d85bed...` (Tx `0xda523c5e...` Block 12183759) — 2nd attester on record | ✅ |
 | #hackathon | [`1573325413600460873`](https://discord.com/channels/1438396125609463881/1498654113376899112/1573325413600460873) builder help (handoff) | ⚠️ unconfirmed |
 | #hackathon | MEE6 **6:43 PM** warn antikunpiece “Posted a link” | ✅ |
 
