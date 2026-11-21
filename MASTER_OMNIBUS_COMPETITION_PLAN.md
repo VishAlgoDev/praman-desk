@@ -645,7 +645,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 
 | # | Item | Status (2026-11-21) |
 |:-:|:---|:---|
-| 1 | **Coord visibility** in showcase `1569379402360553692` (no Pin in forum) | ⏳ **Edit Post** on thread starter and/or short bump; coord already in 10:32 PM reply + title |
+| 1 | **Coord visibility** in showcase `1569379402360553692` (no Pin in forum) | ✅ **COMPLETED & VERIFIED** (User edited thread starter post with canonical coordinates block; browser screenshot verified) |
 | 2 | Watch/engage PR #222–#217 | ⏳ MERGEABLE, 0 reviews; nudge on #222; no spam |
 | 3 | Issue #200 `/progress` at Diamond #6142 | ✅ Posted; MINING follow-up comment #7047517426 |
 | 4 | Devnode sync (7 vs 9 bonds) | ⏳ Wait for network; `/api/status` is canonical |
@@ -654,7 +654,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 | 7 | Doc drift #6128 → #6142 + 9+1 honesty | ✅ Repo sweep (local; push when user asks) |
 | 8 | Minds **follow-ups** (entry `1573324613700558930` done) | ⏳ Reply Ahmed **9:47 PM**; Supplier compare; **video correction** under 6:40 post |
 | 9 | Replace benchmark video (FFmpeg slop) | ✅ **COMPLETED** (5.23m 1080p master walkthrough rendered, Prabhat founder audio mastered, committed in `7c446dd`, and deployed live) |
-| 10 | Fix docs & showcase starter linking benchmark MP4 as “demo” | ✅ Docs/binaries unified; starter edit queued |
+| 10 | Fix docs & showcase starter linking benchmark MP4 as “demo” | ✅ **COMPLETED & VERIFIED** (Docs unified, binaries verified on Vercel, starter post updated) |
 | 11 | Post prepared Minds replies (Ahmed 9:47, Supplier compare, Bangdrop #6142) | ⏳ Drafts ready on disk; queueing for dispatch |
 
 **Competitor watch:** Chrysolite494 *Supplier Detective* (Minds), Athar *Tina* (evaluators + form questions).
