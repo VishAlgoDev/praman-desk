@@ -1676,6 +1676,9 @@ Content-Type: application/json
           <button type="button" class="btn-preset" id="btn-pre-takar_live" onclick="loadGoldRushTakarLive()" style="background:#0f172a; border:1px solid #38bdf8; color:#38bdf8; padding:8px 14px; border-radius:6px; font-size:12px; cursor:pointer; font-weight:700;">
             🔗 Arbitrate Live Takar Dossier (Mount Morgan)
           </button>
+          <a href="https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115" target="_blank" rel="noopener noreferrer" style="background:#0f172a; border:1px solid #10b981; color:#10b981; padding:8px 14px; border-radius:6px; font-size:12px; text-decoration:none; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+            🛡️ View On-Chain EAS Attestation
+          </a>
         </div>
       </div>
 
@@ -2788,7 +2791,12 @@ Content-Type: application/json
       document.getElementById('goldrush-cert-hash').textContent = `Receipt Hash: ${receiptDigest}`;
       document.getElementById('goldrush-col1-content').textContent = preset.gsq;
       document.getElementById('goldrush-col2-content').textContent = preset.competitors;
-      document.getElementById('goldrush-col3-content').textContent = preset.wasm;
+      let wasmText = preset.wasm;
+      if (serverResult && serverResult.scopeBreakdown) {
+        const sb = serverResult.scopeBreakdown;
+        wasmText += `\n\n🎯 HIERARCHICAL SCOPE RESOLUTION:\n• Target Scope: ${sb.targetScope}\n• Resolution Note: ${sb.reconciliationNote || 'Operational scopes resolved'}\n• EAS Attestation (Sepolia): 0x33d85bed... (Schema 0x351bc4ec...)`;
+      }
+      document.getElementById('goldrush-col3-content').textContent = wasmText;
     } finally {
       btn.innerHTML = '<span>⚡ Arbitrate Discrepancies with WASM</span>';
       btn.disabled = false;

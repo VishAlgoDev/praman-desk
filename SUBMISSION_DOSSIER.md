@@ -6,7 +6,10 @@
 - **Primary Track**: Track 01 — Apps & Agents
   - **Collaborative Two-Mind Architecture**: Official Reference Implementation of the Animoca Brands Minds Specification (hellominds.ai) — Diligence Investigator + Escrow Reviewer
   - **Official Mind Coordinates**: Mind ID `47b85842-f36b-1410-8467-00039ce7df11` | Profile: `https://hellominds.ai/profile/minds/47b85842-f36b-1410-8467-00039ce7df11` | Equipped Skill: `Takar_Second_Opinion` (`396E4D42-F36B-1410-8467-00039CE7DF11`)
-  - **Cross-Ecosystem Settlement**: Accepted Bangdrop's 2nd resolver seat on Sepolia (`0xf977660CD28704Fa97D8f6B72835646F62E2502b`) for contributor wallet `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
+  - **Cross-Ecosystem Settlement & EAS Attestation**:
+    - **Ethereum Attestation Service (EAS) on Sepolia**: Submitted on-chain arbitration attestation on Schema UID [`0x351bc4ecf778660c8de0d42eb111e758469e1fe5ffc1b993899e399c9c056741`](https://sepolia.easscan.org/schema/view/0x351bc4ecf778660c8de0d42eb111e758469e1fe5ffc1b993899e399c9c056741); verified on-chain in Block `12183759` (Attestation UID: [`0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115`](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115), Tx: [`0xda523c5e...`](https://sepolia.etherscan.io/tx/0xda523c5e9426c8512f50996cc292537ac7ed1e4b7b0b8411520332b23ef3f2d0)). Praman Desk is the **2nd on-chain attester** alongside Takar.
+    - **Cross-Team Production Wiring**: Competitor Bangdrop (Takar) has actively wired `/api/gold-rush/aggregate` into all live Takar dossiers (`https://takar-telegraph.vercel.app/goldrush.html`) as an external verification check.
+    - **Accepted Resolver Seat**: Second resolver seat on Sepolia contract [`0xf977660CD28704Fa97D8f6B72835646F62E2502b`](https://sepolia.etherscan.io/address/0xf977660CD28704Fa97D8f6B72835646F62E2502b) for contributor wallet `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`.
   - **Universal General-Purpose Mind**: Directly fulfilling Co-Founder Ahmed Ali's Golden Challenge (arbitrating enterprise procurement, payroll, retention release, and prompt injection)
   - **Mission 04**: Statutory Corporate & Contractual Diligence (GLEIF LEI, Statutory Corporate Registers, OFAC)
   - **Mission 03**: Institutional Markets & Counterparty Clearing (FakeWatch Phishing Shield, FX Parity)
@@ -17,7 +20,7 @@
   - 🏆 **Rank #1 Globally**: PURCHASE_ORDER_VERIFY_GENERAL (Score: 0.0000, top seed)
   - 🥈 **Rank #2 Globally**: SANCTIONS_SCREENING_MATCH_GENERAL (Score: 1.0000, 19,565 OFAC records)
   - 💎 **Rank #6 Globally**: CORPORATE_REGISTRY_LOOKUP_GENERAL (Score: 1.0000, 200+ jurisdictions GLEIF)
-  - **Gold Rush Autonomous Multi-Miner Aggregator**: Ingesting and arbitrating live competitor dossiers (Takar, OathCast miner 64176, NFT KING miner 7310050)
+  - **Gold Rush Autonomous Multi-Miner Aggregator & Scope Resolution Engine**: Ingesting and arbitrating live competitor dossiers (Takar, OathCast miner 64176, NFT KING miner 7310050) with automated hierarchical scope resolution (shaft vs reef vs field) and on-chain EAS Sepolia attestations ([UID 0x33d85bed...](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115))
   - 164 live network requests served on Devnode
 - **Supporting Track**: Track 03 — Evaluators & Truth Sources (62 Attested Rows in EvalPool + [Upstream PR #217](https://github.com/telegraphprotocol/bounties/pull/217) for Mission 04 Legal Evaluator Adapter #192)  
 - **Benchmark & Policy Evaluation**: "With vs Without Telegraph" ($79,373 Capital Loss Averted across 5 Adversarial Scenarios, 100% Catch Rate vs 0% Ungrounded Baseline)  
