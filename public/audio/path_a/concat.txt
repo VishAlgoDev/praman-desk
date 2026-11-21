@@ -1,8 +1,0 @@
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/path_a/section_1_intro_state.mp3'
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/path_a/silence_1.mp3'
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/path_a/section_2_two_minds_scen_7.mp3'
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/path_a/silence_2.mp3'
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/path_a/section_3_sanctions_and_payout.mp3'
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/path_a/silence_3.mp3'
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/path_a/section_4_ledger_closing.mp3'
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/path_a/silence_4.mp3'

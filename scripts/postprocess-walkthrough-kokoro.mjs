@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const rawVideo = 'C:\\Users\\visha\\AppData\\Local\\raw_walkthrough_kokoro.mp4';
+const rawVideo = 'C:\\Users\\visha\\AppData\\Local\\raw_walkthrough_kokoro_clean.mp4';
 const narration = 'C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\audio\\master_narration.mp3';
 const outMaster = 'C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\praman-desk-walkthrough.mp4';
 const outShowcase = 'C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\praman_minds_benchmark_showcase.mp4';

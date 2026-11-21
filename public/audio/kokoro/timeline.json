@@ -1,0 +1,50 @@
+[
+  {
+    "section": "section_1_problem",
+    "title": "The Vulnerability in Agentic Finance",
+    "start": 0.0,
+    "end": 36.41,
+    "duration": 36.41,
+    "post_pause": 0.8
+  },
+  {
+    "section": "section_2_architecture",
+    "title": "Praman Desk Architecture & Live Telemetry",
+    "start": 37.21,
+    "end": 84.11,
+    "duration": 46.9,
+    "post_pause": 0.8
+  },
+  {
+    "section": "section_3_threat_simulator",
+    "title": "Threat Simulator: Lazarus Intercept & Arithmetic Drift",
+    "start": 84.91,
+    "end": 140.81,
+    "duration": 55.9,
+    "post_pause": 0.8
+  },
+  {
+    "section": "section_4_two_minds_and_compliant",
+    "title": "Animoca Minds Spend Guard & Compliant Settlement",
+    "start": 141.61,
+    "end": 198.52,
+    "duration": 56.91,
+    "post_pause": 0.8
+  },
+  {
+    "section": "section_5_bridges_and_mcp",
+    "title": "Ecosystem Bridges & Model Context Protocol Server",
+    "start": 199.32,
+    "end": 246.48,
+    "duration": 47.16,
+    "post_pause": 0.8
+  },
+  {
+    "section": "section_6_ledger_and_closing",
+    "title": "On-Chain Ledger & Empirical Benchmark Verification",
+    "start": 247.28,
+    "end": 287.15,
+    "duration": 39.87,
+    "post_pause": 1.2
+  }
+]
