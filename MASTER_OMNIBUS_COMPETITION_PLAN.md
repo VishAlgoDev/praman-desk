@@ -7,6 +7,7 @@
 **Devnode Miner Coordinates**: Miner `#6127` / Route `#5281` / Active Diamond Registration `#6142` (on-chain yaml pin `59454bd`; 9 bonded intents + `MINING_INTELLIGENCE_GENERAL` HTTP-only)  
 **Contributor Wallet**: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`  
 **Anjoman Directory Status**: **SUBMITTED & IN REVIEW** (Submission ID: `9ae7025e-65be-490b-8e59-2aa598f16992` at `https://anjoman.ai/dashboard/apps/mine`)  
+**Minds Platform Coordinates (hellominds.ai)**: Mind Name `Praman.Spend.Guard` | Mind ID `47b85842-f36b-1410-8467-00039ce7df11` | Profile: `https://hellominds.ai/profile/minds/47b85842-f36b-1410-8467-00039ce7df11` | Status: `Online` (598.21 Cognitions) | Equipped Skill: `Takar_Second_Opinion` (`396E4D42-F36B-1410-8467-00039CE7DF11`)  
 **Canonical Master Video**: `https://praman-desk.vercel.app/praman-desk-walkthrough.mp4` (5.23m 1080p Screen Studio walkthrough, `en-IN-PrabhatNeural` founder audio, 18,321,790 bytes)  
 **Showcase Benchmark Mirror**: `https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4` (18,321,790 bytes, mirrored directly from canonical walkthrough)  
 **Discord Guild**: Telegraph Protocol (`1438396125609463881`)  
