@@ -596,11 +596,12 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 │ • Committed (commit fbf67fb) and deployed to Vercel production.                        │
 │ • Status: ✅ VERIFIED & LANDED (2026-11-21).                                           │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
-│ GATE 11: SHOWCASE THREAD MILESTONE 3 WRAP-UP & UPSTREAM PR NUDGE                       │
+│ GATE 11: SHOWCASE THREAD MILESTONE 3 WRAP-UP & UPSTREAM PR MONITORING                 │
 │ • Post Milestone 3 update in our Showcase Thread (1569379402360553692).                │
-│ • Post umbrella review comment on bounties PR #222 linking PRs #217–#222.              │
-│ • Monitor active Discord threads for organizer / judge responses.                     │
-│ • Status: ⏳ READY FOR EXECUTION.                                                       │
+│ • PR #222 umbrella comment verified already anchored (comments 7041677181 &           │
+│   7048056526); no redundant comments to respect maintainer zero-spam rule.             │
+│ • Monitor active Discord threads and Anjoman dashboard for maintainer sign-off.       │
+│ • Status: ⏳ READY FOR SHOWCASE POST DISPATCH.                                         │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
