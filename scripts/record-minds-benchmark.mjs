@@ -1,5 +1,5 @@
 /**
- * Minds benchmark clip — starts on Praman Desk dashboard only (no terminal / fake script pages).
+ * Minds benchmark clip — dashboard-first + narrated voice (minds_benchmark_narration.mp3).
  */
 import { chromium } from 'playwright';
 import { execSync } from 'child_process';
@@ -10,7 +10,7 @@ import { spawn } from 'child_process';
 const LOCAL = 'http://127.0.0.1:3402/';
 const OUT_MP4 = path.join('public', 'praman_minds_benchmark_showcase.mp4');
 const REC_DIR = path.join('public', 'recorded_benchmark');
-const TARGET_SECONDS = 45;
+const NARRATION = path.join('public', 'audio', 'minds_benchmark_narration.mp3');
 
 async function hold(page, ms, label) {
   console.log(`  ${(ms / 1000).toFixed(1)}s — ${label}`);
@@ -29,8 +29,23 @@ async function waitTwoMindVerdict(page, timeoutMs = 30000) {
   );
 }
 
+function narrationDurationSec() {
+  if (!fs.existsSync(NARRATION)) {
+    execSync('node scripts/generate-minds-benchmark-narration.mjs', { stdio: 'inherit', cwd: process.cwd() });
+  }
+  return parseFloat(
+    execSync(
+      `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${NARRATION}"`
+    )
+      .toString()
+      .trim()
+  );
+}
+
 async function record() {
-  console.log('=== Minds benchmark (dashboard-first) ===');
+  const audioSec = narrationDurationSec();
+  const targetVideoSec = Math.ceil(audioSec + 0.5);
+  console.log(`=== Minds benchmark (dashboard + voice, ~${audioSec.toFixed(1)}s) ===`);
 
   execSync('node examples/minds-spend-guard/test-two-minds.mjs', {
     encoding: 'utf8',
@@ -62,38 +77,30 @@ async function record() {
   try {
     await page.goto(LOCAL, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForSelector('#card-scen-7', { timeout: 20000 });
-    await hold(page, 3500, 'dashboard open — header + scenario cards');
+    const ms = (frac) => Math.round(targetVideoSec * 1000 * frac);
 
-    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
-    await page.locator('.hero-banner, .header-badges').first().scrollIntoViewIfNeeded().catch(() => {});
-    await hold(page, 2500, 'Praman Desk hero');
+    await hold(page, ms(0.12), 'dashboard open');
+    await hold(page, ms(0.1), 'hero');
 
     await page.locator('#card-scen-7').click();
     await waitTwoMindVerdict(page);
-    await hold(page, 6000, 'Scenario 7 — Two-Mind FX halt (verdict)');
+    await hold(page, ms(0.28), 'Scenario 7 Two-Mind halt');
 
     await page.evaluate(() => {
       const v = document.getElementById('verdict-banner');
       if (v) v.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
-    await hold(page, 4000, 'verdict detail');
+    await hold(page, ms(0.18), 'verdict detail');
 
     await page.evaluate(() => {
-      const h = document.querySelector('h4');
       const nodes = [...document.querySelectorAll('h4')];
       const bench = nodes.find((n) => n.textContent?.includes('79,373'));
       if (bench) bench.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
-    await hold(page, 5000, '$79,373 benchmark table on site');
-
-    await page.evaluate(() => {
-      const q = document.querySelector('.quickstart-card') || document.getElementById('mcp-snip');
-      if (q) q.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-    await hold(page, 5000, 'repro commands on page (not terminal)');
+    await hold(page, ms(0.22), 'benchmark table');
 
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
-    await hold(page, 2500, 'end — back to dashboard top');
+    await hold(page, ms(0.1), 'close');
   } finally {
     await context.close();
     await browser.close();
@@ -102,8 +109,10 @@ async function record() {
 
   const webm = fs.readdirSync(REC_DIR).find((f) => f.endsWith('.webm'));
   if (!webm) throw new Error('No recording');
+  const rawWebm = path.join(REC_DIR, webm);
+
   execSync(
-    `ffmpeg -y -i "${path.join(REC_DIR, webm)}" -t ${TARGET_SECONDS} -c:v libx264 -pix_fmt yuv420p -preset medium -crf 22 -an -movflags +faststart "${OUT_MP4}"`,
+    `ffmpeg -y -i "${rawWebm}" -i "${NARRATION}" -t ${targetVideoSec} -c:v libx264 -pix_fmt yuv420p -preset medium -crf 22 -c:a aac -b:a 192k -shortest -movflags +faststart "${OUT_MP4}"`,
     { stdio: 'inherit' }
   );
   console.log('DONE:', OUT_MP4, fs.statSync(OUT_MP4).size);
