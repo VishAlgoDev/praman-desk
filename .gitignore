@@ -21,5 +21,7 @@ scratch/
 
 # Regenerated each full `npm test` (benchmark stage)
 benchmark/benchmark-results.json
+public/recorded_benchmark/
+public/benchmark-recording-shell.html
 .vercel
 .env*

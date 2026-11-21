@@ -7,13 +7,14 @@
 
 ---
 
-## Recording method (pick one)
+## Recording method
 
-| Method | Command / tool | When to use |
-|--------|----------------|-------------|
-| **A. Playwright (recommended)** | Extend `scripts/record-capptivo-style.mjs` pattern: record **production** `https://praman-desk.vercel.app` + one terminal window | Repeatable, matches walkthrough pipeline |
-| **B. OBS / Xbox Game Bar** | Manual, follow shot list below | Fastest if Playwright env flaky |
-| **C. Terminal-only short** | OBS captures only PowerShell + browser side-by-side | Minimal, very credible |
+**Default (no OBS):** `npm run video:record-benchmark` — Playwright captures real test output + live **praman-desk.vercel.app** + `/api/status`.
+
+| Fallback | When |
+|----------|------|
+| Xbox Game Bar / phone screen record | Only if Playwright fails on your machine |
+| Legacy slideshow | `npm run video:render` — **do not use for judges** |
 
 **Audio:** Human voiceover from lines below **or** quiet room + on-screen text only (no synthetic sine bed).
 
