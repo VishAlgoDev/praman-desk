@@ -9,8 +9,8 @@
 [![MCP Server](https://img.shields.io/badge/MCP-18%20Tools%20Streamable%20HTTP-6366f1?style=for-the-badge)](https://github.com/VishAlgoDev/praman-desk#10-second-developer-quickstart)
 
 - **Live Split-Screen Interactive Playground:** <https://praman-desk.vercel.app>
-- **Primary demo (narrated walkthrough):** [praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4)
-- **Short Minds repro clip:** [praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) · record via `npm run video:record-benchmark` (do **not** use `video:render` slideshow)
+- **Official demo (use this for judges & forms):** [praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4)
+- **Short URL (legacy links):** [praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) = **52s excerpt of the walkthrough** (`npm run video:record-benchmark`). Do **not** use `video:render` or separate TTS scripts.
 - **Two-Mind Spend Guard Architecture:** [Reference Implementation of the Animoca Brands Minds Specification](examples/minds-spend-guard/) (Diligence Investigator + Escrow Reviewer Minds)
 - **Empirical Benchmark Report:** [With vs Without Telegraph ($79,373 Averted)](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md)
 - **Active Telegraph Miner:** Devnode Miner `#6127` (Route `5281` / Sepolia Diamond registration `#6142`, **9 bonded intents** + `MINING_INTELLIGENCE_GENERAL` HTTP-only) on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)

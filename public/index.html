@@ -779,7 +779,7 @@
       </div>
       <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
         <button id="btn-video-walkthrough" onclick="switchVideo('walkthrough')" style="background:var(--accent); color:#fff; border:1px solid var(--accent); padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Live Agent Screencast</button>
-        <button id="btn-video-benchmark" onclick="switchVideo('benchmark')" style="background:transparent; color:var(--ink-muted); border:1px solid var(--panel-border); padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Two-Mind 1080p Showcase</button>
+        <button id="btn-video-benchmark" onclick="switchVideo('benchmark')" style="background:transparent; color:var(--ink-muted); border:1px solid var(--panel-border); padding:5px 12px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">52s Highlight (from walkthrough)</button>
         <a href="https://github.com/VishAlgoDev/praman-desk" target="_blank" rel="noopener" style="font-size:12px; color:var(--accent); text-decoration:none; font-weight:600; margin-left:6px;">GitHub &rarr;</a>
       </div>
     </div>
@@ -1717,8 +1717,8 @@ Content-Type: application/json
     if (!videoEl || !titleEl || !descEl || !btn1 || !btn2) return;
     if (type === 'benchmark') {
       videoEl.src = '/praman_minds_benchmark_showcase.mp4';
-      titleEl.textContent = 'Two-Mind Spend Guard — test repro + Scenario 7 (FX halt)';
-      descEl.textContent = 'Opens with live npm run minds:test output, then Scenario 7 Two-Mind FX halt on the spend firewall. For narrated full product demo use Live Agent Screencast.';
+      titleEl.textContent = '52-Second Highlight (same narrator as full walkthrough)';
+      descEl.textContent = 'Clip cut from the official walkthrough — not a second robot script. For Minds Two-Mind on the site, open Scenario 7 on the dashboard below.';
       btn2.style.background = 'var(--accent)';
       btn2.style.color = '#fff';
       btn2.style.borderColor = 'var(--accent)';

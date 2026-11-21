@@ -18,7 +18,7 @@
     "general-mind:test": "node examples/general-purpose-mind/test-general-purpose-mind.mjs",
     "benchmark": "node benchmark/with-vs-without-telegraph.mjs",
     "video:render": "node scripts/render-minds-benchmark-video.mjs",
-    "video:record-benchmark": "node scripts/generate-minds-benchmark-narration.mjs && node scripts/record-minds-benchmark.mjs",
+    "video:record-benchmark": "node scripts/excerpt-walkthrough-benchmark.mjs",
     "track3:submit": "node scripts/submit-track3-evaluator-dataset.mjs",
     "sdk:test": "node packages/praman-sdk/test-sdk.mjs && python packages/praman-sdk/test_sdk.py",
     "test": "node comparator/test-comparator.mjs && node mcp/test-mcp.mjs && node scripts/test-endpoints-local.mjs && node examples/minds-spend-guard/test-two-minds.mjs && node examples/general-purpose-mind/test-general-purpose-mind.mjs && node benchmark/with-vs-without-telegraph.mjs && node examples/paysheet-consensus/paysheet-praman-adapter.mjs && node examples/fakewatch-shield/fakewatch-praman-shield.mjs && node examples/rugreceipt-screen/rugreceipt-praman-screen.mjs && node examples/vercel-ai-sdk-guard/ai-sdk-agent-guard.mjs && node examples/gold-rush-evaluator/gold-rush-evaluator-adapter.mjs && python examples/gold-rush-evaluator/test_gold_rush.py && node examples/gold-rush-aggregator/gold-rush-aggregator.mjs && node packages/praman-sdk/test-sdk.mjs && python packages/praman-sdk/test_sdk.py",

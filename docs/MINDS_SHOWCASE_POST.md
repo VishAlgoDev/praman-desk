@@ -15,9 +15,7 @@ Orchestrates Telegraph specialists via Anjoman & MCP to verify ANY arbitrary spe
    • *Sanctions & Phishing*: Live OFAC SDN + FakeWatch ScamSniffer feeds halt malicious transfers.
 4. **Transparent Economics**: Costs ~1,500 micro-USDC (~$0.0015) per multi-specialist verification; 57 on-chain Sepolia settlement receipts logged.
 5. **1-Click Reproducibility**: `npm run general-mind:test` passes 4/4 diverse scenarios with 100% determinism.
-6. **Demo Video (1080p)**:
-   • **Primary (full product):** https://praman-desk.vercel.app/praman-desk-walkthrough.mp4
-   • **Short repro clip (re-record screencast, not slideshow):** https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4 — see `docs/SHOWCASE_BENCHMARK_VIDEO_SCRIPT.md`
+6. **Demo Video (1080p)**: https://praman-desk.vercel.app/praman-desk-walkthrough.mp4 (official narrated walkthrough; ~90s)
 
 🤝 **Cross-Mind Collaboration**:
 • @Diablo: RugReceipt contract screens integrated into our composite spend gate.
