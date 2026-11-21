@@ -1693,36 +1693,6 @@ Content-Type: application/json
   let currentScenario = 'phishing_sanctions';
   window.lastVerdictData = null;
 
-  function switchVideo(type) {
-    const videoEl = document.getElementById('showcase-video');
-    const titleEl = document.getElementById('showcase-video-title');
-    const descEl = document.getElementById('showcase-video-desc');
-    const btn1 = document.getElementById('btn-video-walkthrough');
-    const btn2 = document.getElementById('btn-video-benchmark');
-    if (!videoEl || !titleEl || !descEl || !btn1 || !btn2) return;
-    if (type === 'benchmark') {
-      videoEl.src = '/praman_minds_benchmark_showcase.mp4';
-      titleEl.textContent = 'Minds Highlight — Scenario 7 clip (same walkthrough narrator)';
-      descEl.textContent = 'Cut from Act 5 of the official walkthrough (Two-Mind FX halt). One script, one recording — open Scenario 7 below to replay live.';
-      btn2.style.background = 'var(--accent)';
-      btn2.style.color = '#fff';
-      btn2.style.borderColor = 'var(--accent)';
-      btn1.style.background = 'transparent';
-      btn1.style.color = 'var(--ink-muted)';
-      btn1.style.borderColor = 'var(--panel-border)';
-    } else {
-      videoEl.src = '/praman-desk-walkthrough.mp4';
-      titleEl.textContent = '~2 min Walkthrough: Intercepting Autonomous Agent Exploits';
-      descEl.textContent = 'Watch Claude Code & Cursor intercept prompt-injected agent spending in real time before crypto transactions settle.';
-      btn1.style.background = 'var(--accent)';
-      btn1.style.color = '#fff';
-      btn1.style.borderColor = 'var(--accent)';
-      btn2.style.background = 'transparent';
-      btn2.style.color = 'var(--ink-muted)';
-      btn2.style.borderColor = 'var(--panel-border)';
-    }
-  }
-
   function selectScenario(key) {
     currentScenario = key;
     document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));

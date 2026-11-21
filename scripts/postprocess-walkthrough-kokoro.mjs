@@ -51,8 +51,8 @@ const cmd = [
 console.log('Running FFmpeg rendering command...');
 execSync(cmd, { stdio: 'inherit', shell: 'cmd.exe' });
 
-console.log('=== MIRRORING ASSET ===');
-fs.copyFileSync(outMaster, outShowcase);
+console.log('=== MINDS SHORT CLIP ===');
+execSync('node scripts/excerpt-walkthrough-benchmark.mjs', { stdio: 'inherit' });
 
 const masterStats = fs.statSync(outMaster);
 const showcaseStats = fs.statSync(outShowcase);

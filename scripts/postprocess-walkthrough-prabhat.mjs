@@ -51,13 +51,21 @@ const cmd = [
 console.log('Running FFmpeg rendering command...');
 execSync(cmd, { stdio: 'inherit', shell: 'cmd.exe' });
 
-console.log('=== MIRRORING ASSET ===');
-fs.copyFileSync(outMaster, outShowcase);
-
 const masterStats = fs.statSync(outMaster);
-const showcaseStats = fs.statSync(outShowcase);
 console.log(`Master walkthrough: ${outMaster} (${masterStats.size} bytes)`);
-console.log(`Showcase video: ${outShowcase} (${showcaseStats.size} bytes)`);
+
+console.log('=== ACT 4 VIDEO SYNC (Scenario 7 on screen with Prabhat audio) ===');
+try {
+  execSync('node scripts/record-act4-two-minds-patch.mjs', { stdio: 'inherit' });
+  execSync('node scripts/splice-walkthrough-act4.mjs', { stdio: 'inherit' });
+} catch (e) {
+  console.warn('Act 4 splice skipped or failed — run video:fix-act4 manually:', e.message);
+}
+
+console.log('=== MINDS SHORT CLIP (not a duplicate of master) ===');
+execSync('node scripts/excerpt-walkthrough-benchmark.mjs', { stdio: 'inherit' });
+const showcaseStats = fs.statSync(outShowcase);
+console.log(`Showcase excerpt: ${outShowcase} (${showcaseStats.size} bytes)`);
 
 console.log('=== EXTRACTING VISUAL AUDIT FRAMES ===');
 const auditTimes = [
