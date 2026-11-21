@@ -18,6 +18,7 @@
     "general-mind:test": "node examples/general-purpose-mind/test-general-purpose-mind.mjs",
     "benchmark": "node benchmark/with-vs-without-telegraph.mjs",
     "video:render": "node scripts/render-minds-benchmark-video.mjs",
+    "video:walkthrough": "node scripts/generate-narration.mjs && node scripts/record-capptivo-style.mjs && node scripts/excerpt-walkthrough-benchmark.mjs",
     "video:record-benchmark": "node scripts/excerpt-walkthrough-benchmark.mjs",
     "video:mux-user": "node scripts/mux-user-voice.mjs",
     "video:silent-dashboard": "node scripts/record-minds-dashboard-silent.mjs",

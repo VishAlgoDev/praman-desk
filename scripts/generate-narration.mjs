@@ -26,6 +26,11 @@ const sections = [
     id: 4,
     name: 'economics_quickstart',
     text: "A one-cent check on Telegraph prevents a twenty-five-hundred-dollar forensic legal loss, a two-hundred-fifty-thousand-to-one protection ratio. Every verification receipt in our fifty-seven-transaction ledger links directly to Sepolia Etherscan, and any engineer can plug the ten-tool firewall into Cursor or Claude Code in ten seconds via GitHub npx."
+  },
+  {
+    id: 5,
+    name: 'two_minds_scenario_7',
+    text: "Scenario seven is the Two-Mind spend guard on hellominds dot ai. Stripe invoices ten thousand five hundred USDC while the euro rate inverts fifteen percent below market parity. Diligence and reviewer minds align, WASM shows thirteen hundred seventy-three dollars phantom drift, and the halt banner holds before Sepolia release."
   }
 ];
 

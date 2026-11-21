@@ -1717,8 +1717,8 @@ Content-Type: application/json
     if (!videoEl || !titleEl || !descEl || !btn1 || !btn2) return;
     if (type === 'benchmark') {
       videoEl.src = '/praman_minds_benchmark_showcase.mp4';
-      titleEl.textContent = '52-Second Highlight (same narrator as full walkthrough)';
-      descEl.textContent = 'Clip cut from the official walkthrough — not a second robot script. For Minds Two-Mind on the site, open Scenario 7 on the dashboard below.';
+      titleEl.textContent = 'Minds Highlight — Scenario 7 clip (same walkthrough narrator)';
+      descEl.textContent = 'Cut from Act 5 of the official walkthrough (Two-Mind FX halt). One script, one recording — open Scenario 7 below to replay live.';
       btn2.style.background = 'var(--accent)';
       btn2.style.color = '#fff';
       btn2.style.borderColor = 'var(--accent)';
@@ -1727,7 +1727,7 @@ Content-Type: application/json
       btn1.style.borderColor = 'var(--panel-border)';
     } else {
       videoEl.src = '/praman-desk-walkthrough.mp4';
-      titleEl.textContent = '90-Second Walkthrough: Intercepting Autonomous Agent Exploits';
+      titleEl.textContent = '~105s Walkthrough: Intercepting Autonomous Agent Exploits';
       descEl.textContent = 'Watch Claude Code & Cursor intercept prompt-injected agent spending in real time before crypto transactions settle.';
       btn1.style.background = 'var(--accent)';
       btn1.style.color = '#fff';

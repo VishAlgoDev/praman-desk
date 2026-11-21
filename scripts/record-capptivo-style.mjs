@@ -144,9 +144,30 @@ async function recordCapptivoStyle() {
   };
 
   const recordingStart = Date.now();
+  const sectionTimestamps = [];
+
+  const waitTwoMindVerdict = async () => {
+    await page.waitForFunction(
+      () => {
+        const active = document.getElementById('card-scen-7')?.classList.contains('active');
+        const t = document.getElementById('verdict-summary')?.textContent || '';
+        const headline = document.getElementById('verdict-headline')?.textContent || '';
+        return (
+          active &&
+          (headline.includes('HALT') ||
+            t.includes('Two-Mind') ||
+            t.includes('inverted') ||
+            t.includes('9127') ||
+            t.includes('WASM_3WAY'))
+        );
+      },
+      { timeout: 45000 }
+    );
+  };
 
   const runSection = async (name, targetDurationSeconds, actionFn) => {
     const sectionStart = Date.now();
+    sectionTimestamps.push({ name, startSec: (sectionStart - recordingStart) / 1000 });
     const globalElapsed = ((sectionStart - recordingStart) / 1000).toFixed(1);
     console.log(`[${globalElapsed}s] Starting ${name} (target duration: ${targetDurationSeconds}s)...`);
     await actionFn();
@@ -228,7 +249,26 @@ async function recordCapptivoStyle() {
     await page.waitForTimeout(1500);
   });
 
-  console.log('=== All 4 Sections Successfully Completed ===');
+  // ==========================================
+  // SECTION 5: TWO-MIND SCENARIO 7 (MINDS TRACK)
+  // ==========================================
+  await runSection('Section 5: Scenario 7 Two-Mind FX Halt', dur(5, 18.0), async () => {
+    await smoothScrollTo('#card-scen-7', 'center', 700);
+    await clickAt('#card-scen-7', 1200);
+    await waitTwoMindVerdict();
+    await glideTo('#disp-vendor', 0, 0, 2000);
+    await glideTo('#verdict-banner', 0, 0, 2800);
+    await glideTo('#verdict-summary', 0, 0, 2600);
+    await glideTo('#badge-wasm', 0, 0, 2200);
+    await glideTo('#badge-gleif', 0, 0, 1800);
+  });
+
+  fs.writeFileSync(
+    path.join('public', 'audio', 'video_section_timestamps.json'),
+    JSON.stringify(sectionTimestamps, null, 2)
+  );
+
+  console.log('=== All 5 Sections Successfully Completed ===');
   console.log('Closing browser context...');
   await context.close();
   await browser.close();

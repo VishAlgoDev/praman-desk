@@ -15,10 +15,19 @@ const TARGET = 35;
 async function waitTwoMind(page) {
   await page.waitForFunction(
     () => {
+      const active = document.getElementById('card-scen-7')?.classList.contains('active');
       const t = document.getElementById('verdict-summary')?.textContent || '';
-      return t.includes('Two-Mind') || t.includes('inverted');
+      const headline = document.getElementById('verdict-headline')?.textContent || '';
+      return (
+        active &&
+        (headline.includes('HALT') ||
+          t.includes('Two-Mind') ||
+          t.includes('inverted') ||
+          t.includes('9127') ||
+          t.includes('WASM_3WAY'))
+      );
     },
-    { timeout: 30000 }
+    { timeout: 45000 }
   );
 }
 

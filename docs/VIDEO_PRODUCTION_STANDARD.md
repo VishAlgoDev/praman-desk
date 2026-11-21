@@ -70,7 +70,7 @@ Ahmed’s criteria reward **workflow + limitations + reproduction**, not animati
 | URL | Content |
 |-----|---------|
 | `praman-desk-walkthrough.mp4` | **Submit this** to forms, Ahmed, dossier |
-| `praman_minds_benchmark_showcase.mp4` | **First ~52s of walkthrough** (`excerpt-walkthrough-benchmark.mjs`) until we add Scenario 7 to the **same** walkthrough pipeline |
+| `praman_minds_benchmark_showcase.mp4` | **~24s cut from Act 5 / Scenario 7** in walkthrough (`excerpt-walkthrough-benchmark.mjs` + `video_section_timestamps.json`) |
 
 **Do not** submit the short URL alone as the only demo unless excerpt is clearly labeled “clip from main walkthrough”.
 

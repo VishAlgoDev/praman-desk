@@ -1,7 +1,7 @@
 # Praman Desk: Developer Screencast Walkthrough Script (90 Seconds)
 
 **Target Video:** `public/praman-desk-walkthrough.mp4`  
-**Duration:** 90 Seconds  
+**Duration:** ~105 Seconds (Acts 1–5)  
 **Format:** 1920x1080 @ 30fps Developer Screencast (Cursor IDE + Split-Screen Web Playground)  
 **Live Application:** https://praman-desk.vercel.app  
 **GitHub Repository:** https://github.com/VishAlgoDev/praman-desk  
@@ -35,10 +35,17 @@
 
 ---
 
-## Act 4: Unit Economics, Zero-Install MCP & On-Chain Receipts (1:06 – 1:30)
+## Act 4: Unit Economics, Zero-Install MCP & On-Chain Receipts (1:06 – 1:28)
 * **Visual:** Smooth scroll to Unit Economics ($0.01 check vs $2,500+ loss), 10-second MCP quickstart (`npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp`), and expand the 57-transaction Sepolia Receipt Ledger accordion.
 * **Voiceover:**
   > "A one-cent check on Telegraph prevents a twenty-five-hundred-dollar forensic loss — a 250,000-to-one protection ratio. Every settlement receipt in our fifty-seven-transaction ledger links straight to Sepolia Etherscan, and any builder can wire the ten-tool firewall into Cursor or Claude Code in seconds with npx from GitHub."
+
+---
+
+## Act 5: Two-Mind Scenario 7 — Inverted FX Halt (1:28 – 1:45)
+* **Visual:** Scroll to **Scenario 7** (`#card-scen-7`). Click card; wait until verdict summary mentions **Two-Mind** and **inverted FX**. Hold on halt banner, Stripe vendor line, and WASM mismatch badge (no cut before verdict paints).
+* **Voiceover:**
+  > "Scenario seven is the Two-Mind spend guard for hellominds.ai. A ten-thousand-five-hundred-dollar Stripe invoice inverts the euro rate against live parity. Diligence and reviewer minds agree: thirteen hundred seventy-three dollars of phantom FX drift on screen — settlement halts before Sepolia release."
 
 ---
 
