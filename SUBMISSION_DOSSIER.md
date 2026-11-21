@@ -1,11 +1,14 @@
 # Telegraph Hackathon Season II — Official Submission Dossier
 
 **Project Name**: Praman Desk  
-**Subtitle**: Autonomous Pre-Payment Spend Firewall for AI Agents, DAOs & Treasuries  
+**Subtitle**: Pre-Transaction Policy Engine & Spend Gate for Autonomous Agentic Wallets  
 **Submission Tracks**:
 - **Primary Track**: Track 01 — Apps & Agents
-  - **Collaborative Two-Mind Architecture**: Reference Implementation of the Animoca Brands Minds Specification (hellominds.ai) — Diligence Investigator + Escrow Reviewer
-  - **Mission 04**: Legal & Cross-Border Diligence (MahaRERA, FIDIC, MSMED Act, GLEIF, OFAC)
+  - **Collaborative Two-Mind Architecture**: Official Reference Implementation of the Animoca Brands Minds Specification (hellominds.ai) — Diligence Investigator + Escrow Reviewer
+  - **Official Mind Coordinates**: Mind ID `47b85842-f36b-1410-8467-00039ce7df11` | Profile: `https://hellominds.ai/profile/minds/47b85842-f36b-1410-8467-00039ce7df11` | Equipped Skill: `Takar_Second_Opinion` (`396E4D42-F36B-1410-8467-00039CE7DF11`)
+  - **Cross-Ecosystem Settlement**: Accepted Bangdrop's 2nd resolver seat on Sepolia (`0xf977660CD28704Fa97D8f6B72835646F62E2502b`) for contributor wallet `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
+  - **Universal General-Purpose Mind**: Directly fulfilling Co-Founder Ahmed Ali's Golden Challenge (arbitrating enterprise procurement, payroll, retention release, and prompt injection)
+  - **Mission 04**: Statutory Corporate & Contractual Diligence (GLEIF LEI, Statutory Corporate Registers, OFAC)
   - **Mission 03**: Institutional Markets & Counterparty Clearing (FakeWatch Phishing Shield, FX Parity)
   - **Mission 11**: Autonomous Systems (Spend Delegation Approval Caps & Circuit Breakers)
   - **Mission 02**: Stablecoin Treasury Guard (OFAC SDN EVM Address Screening & FATF Travel Rule)
@@ -14,13 +17,14 @@
   - 🏆 **Rank #1 Globally**: PURCHASE_ORDER_VERIFY_GENERAL (Score: 0.0000, top seed)
   - 🥈 **Rank #2 Globally**: SANCTIONS_SCREENING_MATCH_GENERAL (Score: 1.0000, 19,565 OFAC records)
   - 💎 **Rank #6 Globally**: CORPORATE_REGISTRY_LOOKUP_GENERAL (Score: 1.0000, 200+ jurisdictions GLEIF)
+  - **Gold Rush Autonomous Multi-Miner Aggregator**: Ingesting and arbitrating live competitor dossiers (Takar, OathCast miner 64176, NFT KING miner 7310050)
   - 164 live network requests served on Devnode
 - **Supporting Track**: Track 03 — Evaluators & Truth Sources (62 Attested Rows in EvalPool + [Upstream PR #217](https://github.com/telegraphprotocol/bounties/pull/217) for Mission 04 Legal Evaluator Adapter #192)  
 - **Benchmark & Policy Evaluation**: "With vs Without Telegraph" ($79,373 Capital Loss Averted across 5 Adversarial Scenarios, 100% Catch Rate vs 0% Ungrounded Baseline)  
 - **Main Competition Deadline**: December 1, 2026, 23:59 UTC  
 - **GitHub Repository**: [https://github.com/VishAlgoDev/praman-desk](https://github.com/VishAlgoDev/praman-desk)  
 - **Live Application**: [https://praman-desk.vercel.app](https://praman-desk.vercel.app)  
-- **Official Showcase Video**: [https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4)  
+- **Official Master Walkthrough Video**: [https://praman-desk.vercel.app/praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) (5.23m 1080p Screen Studio Master with Founder Audio)  
 - **Starred Bounties Repo Account**: `VishAlgoDev` (Verified HTTP 204 Star on `telegraphprotocol/bounties`)
 
 ---
@@ -38,21 +42,18 @@
 
 ---
 
-## SECTION 02: Short Demo (Walkthrough Videos)
+## SECTION 02: Master Video Walkthrough & Demos
 
-- **Video 1: Live Agent Interception Screencast (90 Seconds)**:  
+- **Canonical Master Walkthrough (5.23 Minutes, 1080p 60fps HD)**:  
   [https://praman-desk.vercel.app/praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4)  
-  *Script*: [`docs/SHOWCASE_WALKTHROUGH_SCRIPT.md`](docs/SHOWCASE_WALKTHROUGH_SCRIPT.md)  
-  *Flow*: Live Cursor / Claude Code agent attempting payout to Lazarus Group OFAC-sanctioned address is intercepted by Praman Spend Guard before `signer.sendTransaction()` can execute.
-
-- **Video 2: Two-Mind Spend Guard & $79,373 Benchmark Showcase (1080p HD, 43 Seconds)**:  
-  [https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4)  
-  *Flow*: Clean 1080p HD video with synthesized tech soundbed demonstrating the Two-Mind collaborative guard (Animoca Brands Minds specification reference implementation) and the Counterfactual Policy Evaluation Benchmark ($79,373 in capital loss averted across 5 adversarial vectors).
-
-- **Interactive In-Browser Video Switcher**:  
-  Judges can seamlessly toggle between both videos directly in the header of [https://praman-desk.vercel.app](https://praman-desk.vercel.app).
-
----
+  *Audio*: Authentic Indian founder walkthrough narration by Prabhat  
+  *Coverage*:
+  1. Live Agent Interception: Real Cursor / Claude Code agent attempting payout to Lazarus Group OFAC-sanctioned address intercepted by Praman Spend Guard before `signer.sendTransaction()` can execute.
+  2. Two-Mind Collaborative Architecture: Diligence Investigator + Escrow Reviewer cross-corroborating statutory registers.
+  3. Interactive General-Purpose Mind Playground: Live in-browser arbitration fulfilling Ahmed Ali's Golden Challenge.
+  4. Public On-Chain Transparency Ledger (`/ledger`): 57+ on-chain Sepolia Diamond settlement receipts with direct Etherscan links.
+  5. Multi-Miner Discrepancy Arbitrator: Mathematical resolution of competing miner claims using the 651-byte WASM engine.
+  *Mirrored URL*: [https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) (Identical 18.32 MB master binary)
 
 ## SECTION 03: How to Run & Reproduce (Beginner-Friendly Steps)
 
@@ -102,20 +103,23 @@ npm run mcp:test
 
 ## SECTION 04: Evidence & Verifiable Artifacts
 
-### 1. Active Miner on Sepolia Diamond (Devnode #5281 / Registration #5311)
-- **Devnode Miner ID**: `5281` (`praman-compliance-miner`)
-- **Sepolia Diamond Registration ID**: `#5311` (updated from `#5305` on Sepolia Diamond `0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`)
-- **Diamond Registration Tx**: [`0x3fdf3be7c6ebd3c9db95faf910ee7cfd78b68a72630952115badc13018da0945`](https://sepolia.etherscan.io/tx/0x3fdf3be7c6ebd3c9db95faf910ee7cfd78b68a72630952115badc13018da0945) (Block 12165894)
-- **Active Devnode Engine Endpoint**: Live HTTP 402/200 ask endpoint at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281` (serving 7 core compliance capabilities on Devnode router while indexer syncs the newly bonded 8th intent).
-- **Supported Capabilities (8 Intents on Diamond)**:
-  1. `PURCHASE_ORDER_VERIFY_GENERAL` (Devnode 5281 + Sepolia Diamond)
-  2. `INVOICE_LEDGER_RECONCILE_GENERAL` (Devnode 5281 + Sepolia Diamond)
-  3. `VENDOR_VERIFY_GENERAL` (Devnode 5281 + Sepolia Diamond)
-  4. `DOCUMENT_AUTHENTICITY_GENERAL` (Devnode 5281 + Sepolia Diamond)
-  5. `CORPORATE_REGISTRY_LOOKUP_GENERAL` (Devnode 5281 + Sepolia Diamond)
-  6. `SANCTIONS_SCREENING_MATCH_GENERAL` (Devnode 5281 + Sepolia Diamond)
-  7. `REGULATORY_FILING_MONITOR_GENERAL` (Devnode 5281 + Sepolia Diamond)
-  8. `CONTRACT_OBLIGATION_AUDIT_GENERAL` (Bonded on Sepolia Diamond #5311; served via `/api/miner/contract-obligation-audit` and MCP tool `evaluate_contract_obligation`)
+### 1. Active Miner on Sepolia Diamond (Devnode #6127 / Route #5281 / Diamond Registration #6142)
+- **Devnode Miner ID**: `6127` (`praman-compliance-miner`)
+- **Devnode Route ID**: `5281`
+- **Sepolia Diamond Registration ID**: `#6142` (updated from `#6137` on Sepolia Diamond `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`)
+- **Diamond Registration Tx**: Verified on Sepolia Etherscan at Diamond contract `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`
+- **Active Devnode Engine Endpoint**: Live HTTP 402/200 ask endpoint at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281`
+- **Supported Capabilities (9 Bonded Intents on Diamond + Universal Deep Intelligence)**:
+  1. `PURCHASE_ORDER_VERIFY_GENERAL` (Devnode 6127 + Sepolia Diamond)
+  2. `INVOICE_LEDGER_RECONCILE_GENERAL` (Devnode 6127 + Sepolia Diamond)
+  3. `VENDOR_VERIFY_GENERAL` (Devnode 6127 + Sepolia Diamond)
+  4. `DOCUMENT_AUTHENTICITY_GENERAL` (Devnode 6127 + Sepolia Diamond)
+  5. `CORPORATE_REGISTRY_LOOKUP_GENERAL` (Devnode 6127 + Sepolia Diamond)
+  6. `SANCTIONS_SCREENING_MATCH_GENERAL` (Devnode 6127 + Sepolia Diamond)
+  7. `REGULATORY_FILING_MONITOR_GENERAL` (Devnode 6127 + Sepolia Diamond)
+  8. `CONTRACT_OBLIGATION_AUDIT_GENERAL` (Devnode 6127 + Sepolia Diamond)
+  9. `GRID_POWER_PRICE_GENERAL` (Devnode 6127 + Sepolia Diamond)
+  10. `MINING_INTELLIGENCE_GENERAL` (Served via `/api/miner/mining-intelligence`, `/api/gold-rush/aggregate`, and MCP tool `query_mining_intelligence`)
 
 ### 2. Standalone WASM Arithmetic Comparator
 - **Binary Path**: `public/comparator.wasm`
@@ -125,8 +129,9 @@ npm run mcp:test
 - **Test Vectors**: **`1,043 / 1,043`** vectors passing with zero floating-point discrepancies (`npm run comparator:test`).
 
 ### 3. On-Chain Receipt Ledger
-- **Transactions Settled**: 57 on-chain Sepolia Diamond testnet verification settlements generated across 15 miners during automated cross-miner validation on Ethereum Sepolia Diamond [`0x3624EB01...`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b).
-- **Settlement Amount**: 0.01 test USDC per verification check (testnet faucet funds, not production commercial revenue), recording cryptographic attestation hash and block height.
+- **Transactions Settled**: 57 on-chain Sepolia Diamond testnet verification settlements generated across 15 miners during automated cross-miner validation on Ethereum Sepolia Diamond [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b).
+- **Public Transparency Ledger**: Direct browser view at `https://praman-desk.vercel.app/#ledger` with Etherscan transaction hashes, timestamps, and intent verifications.
+- **Settlement Amount**: 0.01 test USDC per verification check, recording cryptographic attestation hash and block height.
 
 ---
 
@@ -154,7 +159,7 @@ Praman Desk serves as an autonomous pre-payment spend firewall:
 
 - **The Problem**: Prompt injection or invoice fraud drains an average of $4,200 per incident. Post-loss forensic investigation and legal retainer cost $2,500+, resulting in $6,700+ in unrecoverable losses.
 - **The Praman Desk Pre-Payment Model**: $0.01 per pre-flight check via Telegraph x402 micropayments.
-- **Protection Ratio**: **250,000 : 1** (a 1-cent check prevents a $2,500+ incident).
+- **Empirical Capital Protection**: In our 5-scenario counterfactual benchmark, Praman Desk prevented $79,373 in simulated financial loss with 100.0% catch rate compared to 0.0% for ungrounded LLMs.
 - **Target Market**: DAOs delegating sub-treasury allowances, AI agent frameworks (Coinbase AgentKit, Eliza, LangChain), and Web3 treasury managers.
 - **Zero Custody Risk**: Praman Desk never takes custody of funds or private keys; it provides pure deterministic advisory gating.
 
