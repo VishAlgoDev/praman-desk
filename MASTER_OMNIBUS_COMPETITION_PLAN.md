@@ -432,7 +432,7 @@ Glad our live MCP (`https://praman-desk.vercel.app/api/mcp`) flagged Bank Rossiy
 
 Just to clarify the IDs for your records:
 • Devnode Miner: `#6127` (Route `#5281`)
-• Sepolia Diamond Registration: `#6137` (pinned at commit `59454bd`, updated to `#6142`)
+• Sepolia Diamond Registration: `#6142` (contract `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`)
 Both hit the exact same live engine.
 
 We've equipped Takar Second Opinion on our Mind as well. We'd love to take you up on that second resolver seat on-chain — our contributor wallet is `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`. Let's settle more escrow together!
@@ -566,7 +566,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 │   (screen_sanctions) into live on-chain Sepolia contract TakarSettle v3                │
 │   (0xf977660CD28704Fa97D8f6B72835646F62E2502b) for conditional supplier release.      │
 │ • Miner ID coordinates verified: Devnode miner #6127 (Route #5281) & Sepolia Diamond   │
-│   registration #6137 (at commit 59454bd, updated to #6142) route to same engine.       │
+│   registration #6142 (contract 0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) route to same engine.       │
 │ • Settled Siemens AG (cleared/paid) and Bank Rossiya (SDN 16681 flagged/refunded).     │
 │ • Second resolver seat on-chain formally offered to Praman wallet                      │
 │   (0x98021b20Efdb7ae2C57366010a6E0fDE207b4466).                                       │
@@ -641,7 +641,8 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 | 7 | Doc drift #6128 → #6142 + 9+1 honesty | ✅ Repo sweep (local; push when user asks) |
 | 8 | Minds **follow-ups** (entry `1573324613700558930` done) | ⏳ Reply Ahmed **9:47 PM**; Supplier compare; **video correction** under 6:40 post |
 | 9 | Replace benchmark video (FFmpeg slop) | ✅ **COMPLETED** (5.23m 1080p master walkthrough rendered, Prabhat founder audio mastered, committed in `7c446dd`, and deployed live) |
-| 10 | Fix Discord/docs linking benchmark MP4 as “demo” | ✅ **COMPLETED** (Canonical walkthrough linked first in all docs and index) |
+| 10 | Fix docs & showcase starter linking benchmark MP4 as “demo” | ✅ Docs/binaries unified; starter edit queued |
+| 11 | Post prepared Minds replies (Ahmed 9:47, Supplier compare, Bangdrop #6142) | ⏳ Drafts ready on disk; queueing for dispatch |
 
 **Competitor watch:** Chrysolite494 *Supplier Detective* (Minds), Athar *Tina* (evaluators + form questions).
 
@@ -652,7 +653,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 | Channel | Message / event | Verified |
 | :--- | :--- | :---: |
 | Minds `1573287348689567774` | [`1573324613700558930`](https://discord.com/channels/1438396125609463881/1573287348689567774/1573324613700558930) — six criteria, **benchmark MP4** | ✅ |
-| Minds | Ahmed **`157332…`** thread **9:47 PM** — wallet + Anjoman bazaar skill @antikunpiece | ✅ |
+| Minds | Ahmed **`157332…`** thread **9:47 PM** — wallet + Anjoman bazaar skill @antikunpiece | ⏳ Logged (reply pending) |
 | Showcase `1569379402360553692` | **2:28 PM** triple-track; **12:53 AM** Two-Mind + benchmark MP4; **10:32 PM** coords; title **#6142** | ✅ |
 | Showcase | [`1573325021202489448`](https://discord.com/channels/1438396125609463881/1569379402360553692/1573325021202489448) Day 20 (handoff) | ❌ not in thread |
 | #hackathon | [`1573325413600460873`](https://discord.com/channels/1438396125609463881/1498654113376899112/1573325413600460873) builder help (handoff) | ⚠️ unconfirmed |

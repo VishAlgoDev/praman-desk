@@ -53,7 +53,10 @@
   3. Interactive General-Purpose Mind Playground: Live in-browser arbitration fulfilling Ahmed Ali's Golden Challenge.
   4. Public On-Chain Transparency Ledger (`/ledger`): 57+ on-chain Sepolia Diamond settlement receipts with direct Etherscan links.
   5. Multi-Miner Discrepancy Arbitrator: Mathematical resolution of competing miner claims using the 651-byte WASM engine.
-  *Mirrored URL*: [https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) (Identical 18.32 MB master binary)
+
+- **Minds Two-Mind Highlight Excerpt (47 Seconds, 1080p HD)**:  
+  [https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) (~1.42 MB)  
+  *Flow*: Focused 47s Act 4 excerpt demonstrating the Animoca Brands Two-Mind collaborative spend guard (Investigator + Reviewer) intercepting arithmetic overcharge and authorizing escrow release.
 
 ## SECTION 03: How to Run & Reproduce (Beginner-Friendly Steps)
 
