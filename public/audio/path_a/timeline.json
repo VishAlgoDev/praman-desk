@@ -1,0 +1,57 @@
+{
+  "totalDuration": 88.833542,
+  "manifest": [
+    {
+      "id": 1,
+      "name": "intro_state",
+      "text": "Welcome to Praman Desk, the autonomous pre-payment spend firewall for AI agents and DAOs on Telegraph Protocol. Operating live on Devnode Miner sixty-one twenty-seven, bonded on Sepolia Diamond sixty-one forty-two with eighteen active tools.",
+      "holdAfterSec": 1.5,
+      "audioFile": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\audio\\path_a\\section_1_intro_state.mp3",
+      "silenceFile": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\audio\\path_a\\silence_1.mp3",
+      "audioDuration": 18.144,
+      "holdDuration": 1.5,
+      "totalDuration": 19.644,
+      "startTime": 0,
+      "endTime": 19.644
+    },
+    {
+      "id": 2,
+      "name": "two_minds_scen_7",
+      "text": "Here is Scenario Seven: the Two-Mind spend guard on hellominds dot ai. An agent attempts a ten thousand five hundred dollar payout with an inverted exchange rate. The firewall reconciles the transaction in our six-hundred-fifty-one byte WebAssembly engine, catches the thirteen hundred seventy-three dollar discrepancy, and halts execution before signing.",
+      "holdAfterSec": 2,
+      "audioFile": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\audio\\path_a\\section_2_two_minds_scen_7.mp3",
+      "silenceFile": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\audio\\path_a\\silence_2.mp3",
+      "audioDuration": 25.128,
+      "holdDuration": 2,
+      "totalDuration": 27.128,
+      "startTime": 19.644,
+      "endTime": 46.772
+    },
+    {
+      "id": 3,
+      "name": "sanctions_and_payout",
+      "text": "Scenario One screens counterparty addresses against US Treasury OFAC records, catching a Lazarus Group match in three milliseconds. Scenario Three clears a compliant payout to Anthropic, validating legal entity identifiers in GLEIF and authorizing instant settlement.",
+      "holdAfterSec": 2,
+      "audioFile": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\audio\\path_a\\section_3_sanctions_and_payout.mp3",
+      "silenceFile": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\audio\\path_a\\silence_3.mp3",
+      "audioDuration": 20.064,
+      "holdDuration": 2,
+      "totalDuration": 22.064,
+      "startTime": 46.772,
+      "endTime": 68.836
+    },
+    {
+      "id": 4,
+      "name": "ledger_closing",
+      "text": "Every verified transaction commits to our immutable Sepolia Diamond ledger. Fifty-seven on-chain receipts are published with verifiable Etherscan transaction hashes. Praman Desk prevents catastrophic capital loss before any wallet signs.",
+      "holdAfterSec": 2.5,
+      "audioFile": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\audio\\path_a\\section_4_ledger_closing.mp3",
+      "silenceFile": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\audio\\path_a\\silence_4.mp3",
+      "audioDuration": 17.496,
+      "holdDuration": 2.5,
+      "totalDuration": 19.996,
+      "startTime": 68.836,
+      "endTime": 88.832
+    }
+  ]
+}
