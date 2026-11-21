@@ -125,19 +125,19 @@ Visit [https://praman-desk.vercel.app](https://praman-desk.vercel.app) to test s
 | **2. Arithmetic Overcharge** | NVIDIA Corporation GPU compute invoice claims $450.00, but line items sum to $350.00 (phantom markup) | **`[ HALT & FREEZE ]`** | GLEIF LEI verified (`549300S4KLFTLO7GSQ80`); 651-byte WASM engine catches exact $100.00 (10,000 cents) discrepancy. |
 | **3. Compliant Agent Payout** | Legitimate Anthropic API compute invoice ($250.00 USDC) within $500 single-agent cap | **`[ APPROVED ]`** | OFAC clean, GLEIF LEI verified (`984500B6DEB8CEBC4Z70`), 0.00% math error. Ready for Telegraph x402 settlement. |
 | **4. Dual-Auth Delegation Cap** | High-value infrastructure payout ($2,400 USDC) exceeding $500 single-agent ceiling | **`[ HELD FOR REVIEW ]`** | HELD pending multi-signature supervisor threshold signoff. Protects DAO treasuries from agent overrun. |
-| **5. Contract Obligation Audit** | Commercial escrow release with delayed statutory milestone (MahaRERA Section 18 delayed possession) | **`[ HALT & FREEZE ]`** | 11% p.a. interest penalty liability triggered ($11,550 accrued penalty); disbursement frozen until statutory compliance. |
+| **5. Treasury Delegation Cap & Multisig Halt** | Autonomous agent attempting $13,860.00 infrastructure grant exceeding $500 single-agent delegation cap | **`[ HALT & FREEZE ]`** | Intercepted for delegation limit breach without supervisor multisig authorization; disbursement frozen before key signing. |
 | **6. FakeWatch Phishing Shield** | Prompt-injected agent prompted to approve transfer to lookalike phishing domain (`unisvvap.org`) | **`[ HALT & FREEZE ]`** | Intercepted via FakeWatch threat intelligence bridge (bounty #42420); blacklisted spoof domain frozen before signing. |
 
 ---
 
-## Commercial Viability & Unit Economics
+## Operational Economics & Risk Metrics
 
 Why DAOs and agent frameworks integrate Praman Desk:
 
-- **The Cost of Agent Failure:** An exploited agent draining $4,200 requires an average forensic audit and legal retainer of $2,500+, totaling $6,700+ in irreversible losses.
-- **The Cost of Praman Desk:** $0.01 per pre-flight inspection settled via Telegraph's x402 micro-payment rail.
-- **Protection Ratio:** **250,000 : 1** (a 1-cent check prevents a $2,500+ incident).
-- **Zero Custody Risk:** Praman Desk never holds user or treasury keys. It only acts as an advisory pre-flight gate.
+- **The Cost of Agent Exploits:** Unverified autonomous agent transactions risk catastrophic treasury drain, rogue smart contract interactions, and regulatory sanctions violations.
+- **The Cost of Praman Desk:** $0.01 per pre-flight verification settled via Telegraph's x402 micro-payment rail.
+- **Deterministic Latency:** Sub-25 ms pre-flight policy evaluation with zero cloud dependency using our compiled 651-byte WebAssembly arithmetic engine.
+- **Zero Custody Risk:** Praman Desk never touches private keys or custody. It operates purely as an advisory pre-transaction gate before on-chain signing.
 
 ---
 
