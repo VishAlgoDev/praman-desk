@@ -1,20 +1,68 @@
-# Praman Desk: Master Technical Walkthrough Script (4.5 Minutes)
-# Voice: Kokoro am_adam (Conversational, Authoritative, Natural Pacing)
+# Praman Desk: Master Technical Founder Walkthrough Script
 
-[SECTION_1_THESIS_AND_PROBLEM]
-When you give an autonomous AI agent an Ethereum wallet, you are effectively handing it a blank check. In 2026, agents are negotiating deals, buying API compute, and paying suppliers directly on-chain. But language models are probabilistic. If an agent encounters a prompt injection, a hallucinated invoice, or a lookalike vendor domain, funds move irreversibly in seconds. You cannot rely on another probabilistic LLM to catch financial fraud. What you need is deterministic, mathematical, and cryptographic verification before a single transaction is signed.
+**Speaker Persona**: Indian Engineering Founder (`en-IN-PrabhatNeural`)  
+**Tone**: Technical, authoritative, clear, zero marketing fluff, zero AI-slop  
+**Target Duration**: ~3.5 – 4.0 minutes  
+**Focus**: Autonomous AI Agent Treasury Spend Security, Deterministic WASM, Telegraph Protocol x402, Animoca Minds Two-Mind Guard, Sepolia On-Chain Ledger
 
-[SECTION_2_ARCHITECTURE_OVERVIEW]
-That is why we built Praman Desk. Praman Desk is an autonomous pre-payment spend firewall and counterparty clearing desk built on the Telegraph Protocol. It intercepts agent payment requests before the wallet signs, executing pre-flight checks in under twenty-five milliseconds. In the header here, you can see our live deployment: connected to the Sepolia Diamond contract, routing queries through Telegraph Protocol Miner Node fifty-two eighty-one, and executing our six hundred and fifty-one byte standalone WebAssembly arithmetic engine. Praman Desk enforces three layers of defense: authoritative legal identity verification through the GLEIF Global LEI registry, sanctions screening against the US Treasury OFAC Specially Designated Nationals list, and bit-exact integer math.
+---
 
-[SECTION_3_THREAT_SIMULATOR_SCENARIO_1_AND_2]
-Let us look at how this works in real time through our threat simulator. Here in Scenario One, a compromised autonomous agent is attempting to settle a forty-two hundred dollar infrastructure bill, but the payee address belongs to the Lazarus Group, who were responsible for the Ronin Bridge exploit. The moment the agent initiates payment, Praman Desk intercepts the transaction. The OFAC screening engine matches the digital currency address in eighteen milliseconds, triggers an immediate halt and freeze, and stops the outbound transfer before a single cent leaves the treasury. In Scenario Two, an agent receives a GPU cloud invoice claiming four hundred and fifty dollars. However, when our WebAssembly engine sums the individual GPU compute hours with integer precision, it calculates the true total as three hundred and fifty dollars. The firewall catches the one hundred dollar phantom markup, flags an arithmetic mismatch, and safely holds the funds.
+### Act 1: The Thesis — Unchecked Autonomous Spending (00:00 - 00:35)
 
-[SECTION_4_TWO_MIND_AND_COMPLIANT_PAYOUT]
-Now let us examine Scenario Seven, our Two-Mind Spend Guard built for Animoca Brands Minds. Here, an agent is processing a cross-border SaaS payment to Stripe for ten thousand five hundred USDC, using an inverted exchange rate. The Diligence Mind analyzes the invoice and detects a thirteen hundred and seventy-three dollar phantom foreign exchange overcharge, while the Reviewer Mind verifies that the total exceeds the agent's five hundred dollar delegation cap. Both minds coordinate through Telegraph to lock down the escrow. On the other hand, look at Scenario Three. This is a legitimate two hundred and fifty dollar invoice from Anthropic. The counterparty is verified in the GLEIF corporate registry, the address passes sanctions screening, the math reconciles to the penny, and the spend is within delegation limits. The firewall generates a cryptographic clearance certificate, and authorizes the transaction for live on-chain settlement over the x402 protocol.
+In decentralized networks, autonomous AI agents now hold private keys and sign on-chain transactions directly. But what happens when an agent is prompt-injected, receives a manipulated invoice, or encounters a malicious smart contract?
 
-[SECTION_5_ECOSYSTEM_BRIDGES_AND_DEVELOPER_STACK]
-Beyond our native checks, Praman Desk establishes reciprocal bridges across the Telegraph ecosystem. We integrate with FakeWatch to catch phishing lookalike domains, and RugReceipt to audit smart contract deployer addresses before funds are committed. But Praman Desk is not just a web dashboard. For developers, it runs as an open-standard Model Context Protocol server called praman-spend-guard, featuring eighteen native tools. Any agent built with the Vercel AI SDK, LangChain, or Claude Code can call clear_spend, screen_sanctions, or verify_counterparty natively in their tool chain. Furthermore, our Universal Multi-Miner Discrepancy Arbitrator queries independent Telegraph specialists, detecting numerical variances and temporal contradictions to reach deterministic consensus.
+On public blockchains, transactions are irreversible. Once private keys sign, treasury funds are permanently lost.
 
-[SECTION_6_ONCHAIN_LEDGER_AND_CLOSING]
-Finally, if we switch over to the Telegraph Network and On-Chain Ledger tab, you can inspect the actual cryptographic record. Here are fifty-seven verified micro-settlement receipts executed on Ethereum Sepolia, proving that every single evaluation is recorded transparently on-chain. In our empirical benchmarks across real-world adversarial attacks, Praman Desk achieved a one hundred percent catch rate, averting over seventy-nine thousand dollars in capital loss with a two hundred and fifty thousand to one protection ratio. As autonomous agents take over global finance, Praman Desk ensures they do so safely, deterministically, and with zero unverified spend.
+Praman Desk is a deterministic pre-transaction spend gate that intercepts transactions before cryptographic signing. It verifies counterparties, audits line-item arithmetic, screens sanctions, and enforces organizational delegation caps before funds can move.
+
+---
+
+### Act 2: Architecture & Deterministic Policy Gate (00:35 - 01:15)
+
+Our architecture is built on deterministic WebAssembly. At the core is a 651-byte AssemblyScript math engine with zero external runtime imports. The firewall executes in under twenty-five milliseconds directly within an agent's tool-calling loop.
+
+Counterparties are resolved against the official GLEIF Global Legal Entity Identifier index across two hundred jurisdictions, and recipient addresses are screened in-memory against the US Treasury OFAC Specially Designated Nationals list.
+
+Every pre-flight check settles via the Telegraph Protocol x402 micropayment rail for one cent on Sepolia, generating an EIP-191 cryptographic attestation seal.
+
+---
+
+### Act 3: Live Threat Simulator — Scenarios 1, 2 & 5 (01:15 - 02:15)
+
+Let us examine this in action on the live dashboard.
+
+In Scenario One, an autonomous infrastructure agent receives a spoofed vendor invoice directing a forty-two hundred dollar payment to a Lazarus Group exploit address. The agent calls our pre-flight gate. The firewall matches the destination EVM address against the OFAC sanctions index and immediately halts signing. Zero funds move.
+
+Next, in Scenario Two: a cloud GPU provider submits a four hundred and fifty dollar invoice, but the line items calculate to three hundred and fifty dollars. Our 651-byte WASM engine detects the one hundred dollar arithmetic discrepancy in three milliseconds and blocks the payment.
+
+In Scenario Five, an agent attempts an unauthorized thirteen thousand eight hundred and sixty dollar treasury grant. Our delegation policy intercepts the transfer for exceeding the five hundred dollar single-agent ceiling without supervisor multisig co-signatures.
+
+---
+
+### Act 4: Animoca Minds Two-Mind Spend Guard (02:15 - 03:00)
+
+Praman Desk natively powers the Animoca Minds architecture through a two-mind spend guard.
+
+In Scenario Seven, an agent processes an international SaaS settlement with an inverted Euro-to-Dollar exchange rate. The Diligence Mind detects a fifteen percent divergence from official European Central Bank reference rates, averting a thirteen hundred dollar overcharge. The Reviewer Mind verifies the discrepancy and withholds signing authority before on-chain Sepolia Diamond release.
+
+Conversely, in Scenario Three, a verified Anthropic API invoice clears all four policy checks and is authorized for instant x402 settlement.
+
+---
+
+### Act 5: Reciprocal Ecosystem Bridges & Developer SDKs (03:00 - 03:40)
+
+Praman Desk integrates bi-directionally across the Telegraph ecosystem.
+
+Our FakeWatch bridge checks payment destinations against real-time threat intelligence to block typosquatted phishing domains like unisvvap.org. The RugReceipt bridge screens smart contract bytecode verification and deployer history. And our Paysheet adapter validates recurring contributor payroll across a three-miner validator quorum.
+
+Developers can integrate Praman Desk in seconds: through our eighteen-tool remote Model Context Protocol server for Cursor and Claude Code, or using our lightweight Python and TypeScript SDKs.
+
+---
+
+### Act 6: On-Chain Settlement Ledger & Benchmark Verification (03:40 - 04:15)
+
+Every verification is permanently recorded on the Sepolia Diamond contract at Route 5281. The live ledger displays fifty-seven testnet verification settlements generated across fifteen independent miners.
+
+Our complete test suite of one thousand forty-three deterministic test vectors passes with zero discrepancies.
+
+Praman Desk delivers production-grade financial safety for autonomous agents: verifiable, deterministic, and non-custodial.

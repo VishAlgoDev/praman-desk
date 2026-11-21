@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Praman Desk — Autonomous Pre-Payment Spend Firewall for AI Agents & DAOs</title>
+<title>Praman Desk — Pre-Transaction Spend Gate for AI Agents & DAOs</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<meta name="description" content="Deterministic pre-payment firewall for AI agents, DAOs, and ERPs. Checks counterparties against official registers and runs bit-exact WASM arithmetic before crypto funds move.">
+<meta name="description" content="Pre-transaction policy engine for autonomous agents and treasuries. Verifies counterparties against official registers and runs bit-exact WASM arithmetic before signing crypto transactions.">
 <style>
   :root {
     --bg: #0b0f19;
@@ -707,7 +707,7 @@
       <div class="brand-logo">🛡️</div>
       <div>
         <h1>Praman Desk</h1>
-        <p>The Autonomous Pre-Payment Spend Firewall for AI Agents & DAOs</p>
+        <p>Pre-Transaction Policy Engine &amp; Spend Gate for Agentic Wallets</p>
       </div>
     </div>
     <div class="header-badges">
@@ -727,7 +727,7 @@
         <a href="https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466" target="_blank" rel="noopener">0x9802...466</a>
       </div>
       <div class="pill">
-        <a href="/praman-desk-walkthrough.mp4" target="_blank" rel="noopener" style="font-weight:600; color:#38bdf8;">🎥 4.8m Technical Walkthrough</a>
+        <a href="/praman-desk-walkthrough.mp4" target="_blank" rel="noopener" style="font-weight:600; color:#38bdf8;">🎥 Live Walkthrough</a>
       </div>
     </div>
   </header>
@@ -735,17 +735,17 @@
   <!-- Hero Pitch Callout -->
   <div class="hero-banner">
     <div>
-      <h2>In 2026, AI Agents hold private keys. Who checks the spend before signing?</h2>
-      <p>If an autonomous agent is prompt-injected or fed a spoofed invoice, funds move irreversibly in seconds. Praman Desk intercepts crypto transactions <em>before</em> signing via authoritative GLEIF identity, OFAC address screening, and bit-exact WASM math over Telegraph Protocol.</p>
+      <h2>Autonomous agents sign on-chain transactions without human review.</h2>
+      <p>When an AI agent receives a manipulated prompt or spoofed invoice, crypto transfers cannot be reversed. Praman Desk intercepts transactions <em>before</em> signing, enforcing sanctions screening, corporate registry verification, and line-item WASM math over the Telegraph Protocol.</p>
     </div>
     <div class="hero-stats">
       <div class="hero-stat-item">
         <div class="hero-stat-val">$0.01</div>
-        <div class="hero-stat-lbl">Per Pre-Flight Check</div>
+        <div class="hero-stat-lbl">x402 Pre-Flight Query</div>
       </div>
       <div class="hero-stat-item">
-        <div class="hero-stat-val">250,000 : 1</div>
-        <div class="hero-stat-lbl">Protection Ratio</div>
+        <div class="hero-stat-val">651 bytes</div>
+        <div class="hero-stat-lbl">WASM Arithmetic Engine</div>
       </div>
       <div class="hero-stat-item">
         <div class="hero-stat-val">&lt;25 ms</div>
@@ -757,7 +757,7 @@
   <!-- 3-Tab Architecture Switcher -->
   <div class="main-tab-bar">
     <button class="tab-btn active" id="tab-btn-firewall" onclick="switchMainTab('firewall')">
-      <span>🛡️ Pre-Payment Spend Firewall (Demo)</span>
+      <span>🛡️ Pre-Payment Policy Firewall (Demo)</span>
     </button>
     <button class="tab-btn" id="tab-btn-developer" onclick="switchMainTab('developer')">
       <span>🔌 Developer SDK &amp; Agent Integration</span>
@@ -779,8 +779,8 @@
         <span class="scenario-tag tag-danger">THREAT DETECTED</span>
         <span style="font-size:12px; font-family:var(--font-mono); color:var(--danger);">$4,200.00 USDC</span>
       </div>
-      <div class="scenario-title">1. Phishing & Sanctions Exploit</div>
-      <div class="scenario-desc">Compromised agent attempting payout to Lazarus Group OFAC-sanctioned address spoofing a Cloudflare invoice.</div>
+      <div class="scenario-title">1. OFAC Sanctions Screening</div>
+      <div class="scenario-desc">Autonomous agent attempting payout to Lazarus Group OFAC-sanctioned address masquerading as a vendor invoice.</div>
     </div>
 
     <div class="scenario-card" id="card-scen-2" onclick="selectScenario('arithmetic_overcharge')">
@@ -788,8 +788,8 @@
         <span class="scenario-tag tag-warn">DISCREPANCY DETECTED</span>
         <span style="font-size:12px; font-family:var(--font-mono); color:var(--warn);">$450.00 USDC</span>
       </div>
-      <div class="scenario-title">2. Arithmetic Overcharge</div>
-      <div class="scenario-desc">GPU cloud invoice claims $450.00, but line items calculate to $350.00 ($100 phantom markup caught by 651b WASM).</div>
+      <div class="scenario-title">2. Line-Item Invoice Reconciliation</div>
+      <div class="scenario-desc">Cloud GPU invoice states $450.00 total, but line items sum to $350.00 ($100.00 mismatch detected by WASM arithmetic).</div>
     </div>
 
     <div class="scenario-card" id="card-scen-3" onclick="selectScenario('compliant_payout')">
@@ -797,8 +797,8 @@
         <span class="scenario-tag tag-success">CLEARED FOR PAYMENT</span>
         <span style="font-size:12px; font-family:var(--font-mono); color:var(--success);">$250.00 USDC</span>
       </div>
-      <div class="scenario-title">3. Compliant Agent Payout</div>
-      <div class="scenario-desc">Anthropic API token invoice ($250), verified GLEIF LEI, clean OFAC screen, within $500 autonomous cap.</div>
+      <div class="scenario-title">3. Verified Autonomous API Payout</div>
+      <div class="scenario-desc">Anthropic API token invoice ($250), verified active GLEIF LEI, clean OFAC screen, within $500 autonomous cap.</div>
     </div>
 
     <div class="scenario-card" id="card-scen-4" onclick="selectScenario('paysheet_payroll')">
@@ -806,17 +806,17 @@
         <span class="scenario-tag tag-danger">QUORUM HALT</span>
         <span style="font-size:12px; font-family:var(--font-mono); color:var(--danger);">$500.00 USDC</span>
       </div>
-      <div class="scenario-title">4. Paysheet Payroll Quorum (Issue #214)</div>
-      <div class="scenario-desc">Streaming payroll agent attempting $500 payout evaluated across 3 independent miners (#710637, #64175, #5281).</div>
+      <div class="scenario-title">4. Multi-Validator Payroll Quorum</div>
+      <div class="scenario-desc">Streaming contributor payroll disbursement evaluated across 3 independent Telegraph validators before releasing funds.</div>
     </div>
 
     <div class="scenario-card" id="card-scen-5" onclick="selectScenario('contract_obligation')">
       <div class="scenario-card-header">
-        <span class="scenario-tag tag-danger">STATUTORY BREACH</span>
+        <span class="scenario-tag tag-danger">DELEGATION BREACH</span>
         <span style="font-size:12px; font-family:var(--font-mono); color:var(--danger);">$13,860.00 USDC</span>
       </div>
-      <div class="scenario-title">5. Contract Obligation Audit (Mission 04)</div>
-      <div class="scenario-desc">Promoter asserts unilateral 12-mo grace period; halted under MahaRERA Section 18 statutory delay interest (11% p.a.).</div>
+      <div class="scenario-title">5. Treasury Delegation Cap &amp; Multisig Halt</div>
+      <div class="scenario-desc">Agent attempting $13,860.00 treasury grant; halted for exceeding $500 single-agent autonomous cap without supervisor multisig.</div>
     </div>
 
     <div class="scenario-card" id="card-scen-6" onclick="selectScenario('fakewatch_shield')">
@@ -824,8 +824,8 @@
         <span class="scenario-tag tag-danger">PHISHING BLOCKED</span>
         <span style="font-size:12px; font-family:var(--font-mono); color:var(--danger);">$3,500.00 USDC</span>
       </div>
-      <div class="scenario-title">6. FakeWatch Phishing Shield (#42420)</div>
-      <div class="scenario-desc">Spend link targeting cloned dApp (unisvvap.org/claim) intercepted by FakeWatch domain threat feed &amp; OFAC gate.</div>
+      <div class="scenario-title">6. Phishing Domain Verification</div>
+      <div class="scenario-desc">Outbound payment link targeting cloned dApp (unisvvap.org/claim) intercepted by threat intelligence feed and OFAC screen.</div>
     </div>
 
     <div class="scenario-card" id="card-scen-7" onclick="selectScenario('two_minds_guard')">
@@ -833,8 +833,8 @@
         <span class="scenario-tag tag-warn">FX OVERCHARGE AVERTED</span>
         <span style="font-size:12px; font-family:var(--font-mono); color:var(--warn);">$10,500.00 USDC</span>
       </div>
-      <div class="scenario-title">7. Two-Mind Spend Guard (hellominds.ai)</div>
-      <div class="scenario-desc">Diligence Mind catches 15.06% inverted FX divergence ($1,373 phantom markup); Reviewer Mind halts settlement before Sepolia Diamond release.</div>
+      <div class="scenario-title">7. Dual-Agent FX Rate Audit</div>
+      <div class="scenario-desc">Diligence agent catches 15.06% inverted EUR/USD exchange rate divergence ($1,373 overcharge); Reviewer agent halts settlement.</div>
     </div>
 
     <div class="scenario-card" id="card-scen-8" onclick="selectScenario('rugreceipt_screen')">
@@ -842,8 +842,8 @@
         <span class="scenario-tag tag-danger">EXPLOIT INTERCEPTED</span>
         <span style="font-size:12px; font-family:var(--font-mono); color:var(--danger);">$25,000.00 USDC</span>
       </div>
-      <div class="scenario-title">8. RugReceipt Contract Screen (Issue #208)</div>
-      <div class="scenario-desc">Unverified smart contract interaction targeting Lazarus exploit address intercepted by 19,565 OFAC SDN index &amp; RugReceipt screen.</div>
+      <div class="scenario-title">8. Smart Contract Vulnerability Screen</div>
+      <div class="scenario-desc">Target contract code unverified and deployer address linked to known exploit signatures; transaction halted before interaction.</div>
     </div>
 
     <div class="scenario-card" id="card-scen-9" onclick="selectScenario('doc_authenticity')">
@@ -851,17 +851,17 @@
         <span class="scenario-tag tag-danger">TAMPER DETECTED</span>
         <span style="font-size:12px; font-family:var(--font-mono); color:var(--danger);">$8,400.00 USDC</span>
       </div>
-      <div class="scenario-title">9. Document Authenticity Provenance (SHA-256)</div>
-      <div class="scenario-desc">AP freight invoice presenting zero-byte SHA-256 digest (e3b0c442...) intercepted for hash integrity violation before funds move.</div>
+      <div class="scenario-title">9. Document Hash Integrity (SHA-256)</div>
+      <div class="scenario-desc">Vendor invoice presenting empty zero-byte SHA-256 digest (e3b0c442...) halted for checksum mismatch before signing.</div>
     </div>
 
     <div class="scenario-card" id="card-scen-10" onclick="selectScenario('gold_rush_gsq')">
       <div class="scenario-card-header">
-        <span class="scenario-tag tag-success">MULTI-MINER ARBITRATION</span>
+        <span class="scenario-tag tag-success">CONSENSUS ARBITRATED</span>
         <span style="font-size:12px; font-family:var(--font-mono); color:var(--text-dim);">$0.00 / NO LOSS</span>
       </div>
-      <div class="scenario-title">10. Deep Intelligence & Multi-Miner Arbitration</div>
-      <div class="scenario-desc">Universal multi-miner intelligence synthesis across global deposits & assets; statistical variance and contradiction detection with cryptographic proof.</div>
+      <div class="scenario-title">10. Cross-Validator Consensus Engine</div>
+      <div class="scenario-desc">Queries parallel Telegraph validator nodes to detect factual discrepancies and flag conflicting claims against public registry ground truth.</div>
     </div>
   </div>
 
@@ -965,10 +965,10 @@
       <!-- Dynamic Visual Verdict Banner -->
       <div class="verdict-banner halt" id="verdict-banner">
         <div class="verdict-headline" id="verdict-headline">
-          <span>🛑 HALT &amp; FREEZE — TRANSACTION BLOCKED</span>
+          <span>🛑 TRANSACTION REJECTED — POLICY VIOLATION</span>
         </div>
         <p class="verdict-summary" id="verdict-summary">
-          Firewall intercepted unsafe spend request: Recipient address matches Lazarus Group on US Treasury OFAC SDN list. Zero funds moved.
+          Firewall intercepted unsafe spend request: Recipient address matches Lazarus Group on US Treasury OFAC SDN list. Signing authorization withheld.
         </p>
       </div>
 
@@ -1053,39 +1053,39 @@
     </div>
   </div>
 
-  <!-- Commercial Viability Section -->
+  <!-- Operational Economics & Risk Metrics -->
   <div class="section-divider"></div>
-  <div class="section-title">📊 Commercial Viability &amp; Unit Economics</div>
+  <div class="section-title">📊 Operational Economics &amp; Risk Metrics</div>
   <div class="viability-grid">
     <div class="viability-card bad">
-      <h4>Without Praman Desk (Unguarded Agent Spending)</h4>
-      <div class="viability-metric">$6,700+ <span style="font-size:14px; font-weight:400; color:var(--ink-muted);">Loss Per Incident</span></div>
+      <h4>Unguarded Autonomous Spending</h4>
+      <div class="viability-metric">Direct Loss <span style="font-size:14px; font-weight:400; color:var(--ink-muted);">+ Treasury Drain</span></div>
       <ul>
-        <li><strong>Prompt injection &amp; invoice fraud:</strong> $4,200 average drain before human notices.</li>
-        <li><strong>Post-loss forensic investigation &amp; legal counsel:</strong> $2,500+ minimum retainer.</li>
-        <li><strong>Irreversible on-chain settlement:</strong> Zero chargebacks, zero recourse on public blockchains.</li>
+        <li><strong>Prompt injection &amp; spoofed invoices:</strong> Unchecked agent signing allows rapid treasury drainage before detection.</li>
+        <li><strong>Zero chargebacks on public blockchains:</strong> On-chain cryptocurrency transfers are completely non-refundable.</li>
+        <li><strong>Sanctions compliance exposure:</strong> Regulatory liability for transfers touching OFAC-flagged exploit addresses.</li>
       </ul>
     </div>
 
     <div class="viability-card good">
-      <h4>With Praman Desk Pre-Payment Firewall</h4>
-      <div class="viability-metric">$0.01 <span style="font-size:14px; font-weight:400; color:var(--ink-muted);">Per Pre-Flight Inspection</span></div>
+      <h4>With Praman Policy Firewall</h4>
+      <div class="viability-metric">$0.01 <span style="font-size:14px; font-weight:400; color:var(--ink-muted);">Per Pre-Flight Query</span></div>
       <ul>
-        <li><strong>250,000 : 1 Protection Ratio:</strong> A 1-cent check prevents a $2,500+ loss event.</li>
-        <li><strong>Sub-25ms deterministic WASM gate:</strong> Fits directly into agent tool-calling loops before signing.</li>
-        <li><strong>Telegraph x402 settlement:</strong> Instant micropayment rail, zero balance exposure, zero custody risk.</li>
+        <li><strong>Sub-25ms deterministic WASM gate:</strong> Executes in-memory directly within agent tool-calling loops before signing.</li>
+        <li><strong>Telegraph x402 settlement:</strong> Instant micropayment rail with zero custodial liability and zero treasury risk.</li>
+        <li><strong>Cryptographic EIP-191 attestation:</strong> Tamper-evident audit trail for treasury signers and DAO governors.</li>
       </ul>
     </div>
   </div>
 
-  <!-- Counterfactual Risk Prevention Benchmark -->
+  <!-- Security Evaluation Benchmark -->
   <div style="margin-top: 20px; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 18px 20px;">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
       <div>
-        <h4 style="margin:0; font-size:15px; color:#fff;">🛡️ Empirical Risk Prevention Benchmark: $79,373 Capital Loss Averted</h4>
-        <p style="margin:2px 0 0 0; font-size:12px; color:var(--ink-muted);">Counterfactual Policy Evaluation comparing unguarded LLM agents against the Praman Two-Mind Spend Guard across 5 adversarial vectors.</p>
+        <h4 style="margin:0; font-size:15px; color:#fff;">🛡️ Security Evaluation Benchmark: 5 Attack Vectors Intercepted</h4>
+        <p style="margin:2px 0 0 0; font-size:12px; color:var(--ink-muted);">Empirical evaluation comparing standard LLM execution loops against policy-enforced pre-payment verification across common failure modes.</p>
       </div>
-      <span class="pill" style="color:var(--success); border-color:var(--success-border);">100% Catch Rate (5/5 Vectors)</span>
+      <span class="pill" style="color:var(--success); border-color:var(--success-border);">100% Interception Rate (5/5 Vectors)</span>
     </div>
     
     <div style="overflow-x:auto;">
@@ -1108,7 +1108,7 @@
             <td style="padding:8px 6px; color:var(--ink-muted);">15.06% rate divergence vs ECB market parity</td>
           </tr>
           <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-            <td style="padding:8px 6px; color:#fff;">2. Lapsed Legal Entity LEI Status</td>
+            <td style="padding:8px 6px; color:#fff;">2. Lapsed Counterparty Legal Entity</td>
             <td style="padding:8px 6px; color:var(--warn);">$24,500 USD</td>
             <td style="padding:8px 6px; color:var(--danger);">-$24,500 Loss (Unverified)</td>
             <td style="padding:8px 6px; color:var(--success);">$0.00 (100% Averted)</td>
@@ -1122,7 +1122,7 @@
             <td style="padding:8px 6px; color:var(--ink-muted);">FakeWatch threat intelligence domain classification</td>
           </tr>
           <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-            <td style="padding:8px 6px; color:#fff;">4. Sub-Cent WASM Arithmetic Drift</td>
+            <td style="padding:8px 6px; color:#fff;">4. Line-Item Arithmetic Drift</td>
             <td style="padding:8px 6px; color:var(--warn);">$500 USD</td>
             <td style="padding:8px 6px; color:var(--danger);">-$500 Loss (Math error)</td>
             <td style="padding:8px 6px; color:var(--success);">$0.00 (100% Averted)</td>
@@ -1149,20 +1149,20 @@
     </div>
   </div>
 
-  <!-- Gold Rush Geospatial Intelligence & Multi-Miner Arbitrator -->
+  <!-- Multi-Validator Data Consensus Engine -->
   <div style="margin-top: 20px; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 10px; padding: 18px 20px;">
     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
       <div>
-        <h4 style="margin:0; font-size:15px; color:#fff;">🧭 Deep Intelligence: Universal Multi-Miner Discrepancy Arbitrator</h4>
-        <p style="margin:2px 0 0 0; font-size:12px; color:var(--ink-muted);">Flagship architecture: multi-miner parallel inquiry, dynamic fact extraction, statistical contradiction arbitration &amp; global geological survey provenance.</p>
+        <h4 style="margin:0; font-size:15px; color:#fff;">🧭 Multi-Validator Data Consensus Engine</h4>
+        <p style="margin:2px 0 0 0; font-size:12px; color:var(--ink-muted);">Queries parallel Telegraph validator nodes to detect factual discrepancies and verify claims against authoritative public registries.</p>
       </div>
-      <span class="pill" style="color:var(--accent); border-color:var(--accent);">Global Multi-Jurisdiction • Open Data Grounded</span>
+      <span class="pill" style="color:var(--accent); border-color:var(--accent);">Decentralized Quorum • Public Registry Ground Truth</span>
     </div>
 
     <!-- Universal Search Input Bar -->
     <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
-      <input id="custom-miner-query" type="text" placeholder="Enter ANY global deposit, mine, or entity (e.g. Kalgoorlie, Carlin Trend, Witwatersrand, Kolar, Boddington)..." style="flex:1; min-width:240px; background:rgba(255,255,255,0.05); border:1px solid var(--panel-border); border-radius:6px; padding:9px 12px; color:#fff; font-size:12px; font-family:var(--font-mono);">
-      <button onclick="runGoldRushExplorer(document.getElementById('custom-miner-query').value || 'Kalgoorlie Super Pit')" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:9px 16px; font-weight:700; cursor:pointer; font-size:12px;">Arbitrate Multi-Miner Consensus</button>
+      <input id="custom-miner-query" type="text" placeholder="Query consensus across active validator nodes (e.g. Kalgoorlie, Carlin Trend, Mount Morgan)..." style="flex:1; min-width:240px; background:rgba(255,255,255,0.05); border:1px solid var(--panel-border); border-radius:6px; padding:9px 12px; color:#fff; font-size:12px; font-family:var(--font-mono);">
+      <button onclick="runGoldRushExplorer(document.getElementById('custom-miner-query').value || 'Kalgoorlie Super Pit')" style="background:var(--accent); color:#000; border:none; border-radius:6px; padding:9px 16px; font-weight:700; cursor:pointer; font-size:12px;">Arbitrate Validator Consensus</button>
     </div>
 
     <!-- 6 Global Resource Benchmark Cards Grid -->
@@ -1400,8 +1400,8 @@ if (!verdict.cleared) throw new Error('[PAYROLL HALT] Recipient blocked by sanct
     <div class="section-title">🤝 Reciprocal Ecosystem Bridges (FakeWatch, RugReceipt &amp; Paysheet) &amp; Contract Evaluator</div>
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:12px; margin-bottom:12px;">
       <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px;">
-        <div style="font-size:12px; font-weight:700; color:#38bdf8; margin-bottom:4px;">FakeWatch Shield (#42420)</div>
-        <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Combines FakeWatch phishing/dApp domain safety with Praman Desk LEI &amp; OFAC checks. Unknown domains trigger manual CFO review.</p>
+        <div style="font-size:12px; font-weight:700; color:#38bdf8; margin-bottom:4px;">FakeWatch Phishing Shield</div>
+        <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Combines FakeWatch phishing/dApp domain safety with Praman Desk LEI &amp; OFAC checks. Unknown domains trigger manual review.</p>
         <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
           <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testFakeWatchBridge('https://unisvvap.org', 'UNISWAP')">🔴 Test Phishing (unisvvap.org)</button>
           <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testFakeWatchBridge('https://stripe.com', 'STRIPE')">🟢 Test Safe (stripe.com)</button>
@@ -1409,8 +1409,8 @@ if (!verdict.cleared) throw new Error('[PAYROLL HALT] Recipient blocked by sanct
         <div id="fakewatch-bridge-out" style="font-family:var(--font-mono); font-size:11px; color:#94a3b8; background:#020617; padding:6px 8px; border-radius:4px; max-height:80px; overflow-y:auto; border:1px solid #1e293b;">Ready for interactive probe.</div>
       </div>
       <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px;">
-        <div style="font-size:12px; font-weight:700; color:#818cf8; margin-bottom:4px;">RugReceipt Screen (Issue #208)</div>
-        <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Screens smart contract and deployer addresses against 19,565 OFAC SDN entities, Lazarus Group, and exploit signatures.</p>
+        <div style="font-size:12px; font-weight:700; color:#818cf8; margin-bottom:4px;">RugReceipt Smart Contract Screen</div>
+        <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Screens smart contract and deployer addresses against OFAC SDN entities, Lazarus Group, and exploit signatures.</p>
         <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
           <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testRugReceiptBridge('0x098B716B8Aaf21512996dC57EB0615e2383E2f96')">🔴 Test Lazarus Group</button>
           <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testRugReceiptBridge('0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984')">🟢 Test Uniswap V3 Token</button>
@@ -1418,8 +1418,8 @@ if (!verdict.cleared) throw new Error('[PAYROLL HALT] Recipient blocked by sanct
         <div id="rugreceipt-bridge-out" style="font-family:var(--font-mono); font-size:11px; color:#94a3b8; background:#020617; padding:6px 8px; border-radius:4px; max-height:80px; overflow-y:auto; border:1px solid #1e293b;">Ready for interactive probe.</div>
       </div>
       <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px;">
-        <div style="font-size:12px; font-weight:700; color:#34d399; margin-bottom:4px;">Paysheet Consensus Shield (Issue #214 / PR #1)</div>
-        <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Screens automated payroll payouts across 3 independent miners (#710637, #64175, Praman Desk #5281) with sub-25ms in-memory OFAC SDN checks.</p>
+        <div style="font-size:12px; font-weight:700; color:#34d399; margin-bottom:4px;">Paysheet Payroll Consensus Shield</div>
+        <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Screens automated payroll payouts across 3 independent Telegraph validators with sub-25ms in-memory OFAC SDN checks.</p>
         <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
           <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testPaysheetBridge('0x098B716B8Aaf21512996dC57EB0615e2383E2f96')">🔴 Test Lazarus Group Payee</button>
           <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testPaysheetBridge('Microsoft Corporation')">🟢 Test Microsoft Corp Payee</button>
@@ -1429,7 +1429,7 @@ if (!verdict.cleared) throw new Error('[PAYROLL HALT] Recipient blocked by sanct
     </div>
     <!-- Contract Obligation Evaluator Section -->
     <div style="background:#0b1120; border:1px solid #1e293b; border-radius:8px; padding:12px; margin-bottom:12px;">
-      <div style="font-size:12px; font-weight:700; color:#f59e0b; margin-bottom:4px;">⚖️ Contract Obligation Legal Evaluator (6 Regimes) — Scored Intent #8</div>
+      <div style="font-size:12px; font-weight:700; color:#f59e0b; margin-bottom:4px;">⚖️ Contract Obligation Legal Evaluator (6 Regimes)</div>
       <p style="font-size:11.5px; color:var(--ink-muted); margin:0 0 8px;">Deterministic statutory delay interest, FIDIC EOT, and retention release evaluator for construction, procurement, and commercial contracts.</p>
       <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
         <button type="button" class="btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="testContractObligation('Apartment B-1402 MahaRERA Section 18 delay interest possession')">MahaRERA Delay Interest</button>
@@ -1623,18 +1623,18 @@ Content-Type: application/json
       ]
     },
     contract_obligation: {
-      name: 'Scenario 5: Contract Obligation & Statutory Audit (Mission 04)',
-      agent: 'legal-compliance-agent-05',
+      name: 'Scenario 5: Treasury Delegation Cap & Multisig Halt',
+      agent: 'treasury-governance-agent-05',
       amount: '$13,860.00 USDC',
       amountVal: 13860.00,
       recipient: '0x4D224452801ACEd8B2F0aebE155379bb5D594381',
-      vendor: 'Runwal Developers Pvt Ltd (MahaRERA Reg. P51900022104)',
+      vendor: 'Runwal Infrastructure Partners',
       items: [
-        { desc: 'Statutory Delay Interest: MahaRERA Sec 18(1) (SBI MCLR + 2% = 11% p.a.)', qty: 10, price: '$1,386.00', total: '$13,860.00' }
+        { desc: 'Autonomous Infrastructure Grant Disbursement (Exceeds $500 Cap)', qty: 1, price: '$13,860.00', total: '$13,860.00' }
       ]
     },
     fakewatch_shield: {
-      name: 'Scenario 6: FakeWatch Reciprocal Phishing Shield (#42420)',
+      name: 'Scenario 6: Phishing Domain Verification',
       agent: 'web3-treasury-agent-11',
       amount: '$3,500.00 USDC',
       amountVal: 3500.00,
@@ -1645,7 +1645,7 @@ Content-Type: application/json
       ]
     },
     two_minds_guard: {
-      name: 'Scenario 7: Two-Mind Spend Guard (hellominds.ai & Animoca Minds)',
+      name: 'Scenario 7: Dual-Agent FX Rate Audit (Animoca Minds)',
       agent: 'animoca-minds-diligence-mind',
       amount: '$10,500.00 USDC',
       amountVal: 10500.00,
@@ -1656,18 +1656,18 @@ Content-Type: application/json
       ]
     },
     rugreceipt_screen: {
-      name: 'Scenario 8: RugReceipt Contract Screen (Issue #208)',
+      name: 'Scenario 8: Smart Contract Vulnerability Screen',
       agent: 'web3-contract-investigator-04',
       amount: '$25,000.00 USDC',
       amountVal: 25000.00,
       recipient: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96',
       vendor: 'Lazarus Exploit Contract / Tornado Cash Router',
       items: [
-        { desc: 'Unverified Contract Interaction Targeting Known Exploit Address (Issue #208)', qty: 1, price: '$25,000.00', total: '$25,000.00' }
+        { desc: 'Unverified Contract Interaction Targeting Known Exploit Address', qty: 1, price: '$25,000.00', total: '$25,000.00' }
       ]
     },
     doc_authenticity: {
-      name: 'Scenario 9: Document Authenticity Provenance (SHA-256 Digest)',
+      name: 'Scenario 9: Document Hash Integrity (SHA-256 Digest)',
       agent: 'ap-invoice-audit-agent-04',
       amount: '$8,400.00 USDC',
       amountVal: 8400.00,
@@ -1678,14 +1678,14 @@ Content-Type: application/json
       ]
     },
     gold_rush_gsq: {
-      name: 'Scenario 10: Deep Intelligence & Multi-Miner Arbitration',
-      agent: 'multi-miner-consensus-arbitrator-01',
+      name: 'Scenario 10: Cross-Validator Consensus Engine',
+      agent: 'multi-validator-consensus-01',
       amount: '$0.00 (Intel Query)',
       amountVal: 0.00,
       recipient: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
-      vendor: 'Global Geoscience & Open Data Consortium',
+      vendor: 'Decentralized Consensus Consortium',
       items: [
-        { desc: 'Deep Multi-Miner Intelligence Enquiry (Universal Deposit & Entity Arbitration)', qty: 1, price: '$0.00', total: '$0.00' }
+        { desc: 'Parallel Validator Consensus Query across Telegraph Network', qty: 1, price: '$0.00', total: '$0.00' }
       ]
     }
   };
@@ -2193,12 +2193,12 @@ Content-Type: application/json
         status: 'HALTED',
         verdict: 'HALT_AND_FREEZE',
         flags: [
-          'CONTRACT_STATUTORY_NON_COMPLIANCE: AUDIT VERDICT: GRACE PERIOD INVALID; STATUTORY DELAY INTEREST TRIGGERED FROM 2026-04-01 AT 11.00% P.A.',
-          'DUAL_SUPERVISOR_SIGNATURE_MISSING: Spend $13,860 exceeds $500 single agent cap without supervisor co-signature'
+          'SPEND_DELEGATION_BREACH: Proposed spend $13,860.00 exceeds $500.00 single-agent delegation cap',
+          'SUPERVISOR_MULTISIG_REQUIRED: Missing co-signature from treasury supervisor multisig'
         ],
-        summary: 'Firewall intercepted statutory contract breach: Developer claims unilateral 12-month grace period; halted under MahaRERA Section 18 statutory delay interest (11.00% p.a., INR 11,55,000 liability). Zero funds disbursed.',
+        summary: 'Firewall intercepted spend delegation breach: Proposed transfer of $13,860.00 exceeds the $500.00 autonomous single-agent limit. Requires treasury supervisor multisig authorization. Zero funds disbursed.',
         recipientVerification: { sanctionsScreeningClear: true },
-        vendorVerification: { gleifVerified: true, lei: '335800RUNWAL99DEV104', legalName: 'RUNWAL DEVELOPERS PVT LTD', sanctionsScreeningClear: true },
+        vendorVerification: { gleifVerified: true, lei: '335800RUNWAL99DEV104', legalName: 'RUNWAL INFRASTRUCTURE PARTNERS', sanctionsScreeningClear: true },
         mathVerification: { bitExactMatch: true, discrepancyCents: 0, computedCents: 1386000, statedCents: 1386000, computedTotal: 13860, statedTotal: 13860, wasmScoreBps: 10000 },
         policyCaps: { delegationTier: 'TIER_2_DUAL_AUTH_REQUIRED', supervisorAuthRequired: true, supervisorAuthValid: false },
         attestationSha256: '0x9d54e819b16af023c78041d8e1293ba1'
@@ -2267,12 +2267,12 @@ Content-Type: application/json
         status: 'APPROVED',
         verdict: 'SYNTHESIS_ARBITRATED',
         flags: [
-          'MULTI_MINER_CONSENSUS_REACHED: Complementary evidence aggregated and arbitrated across active Telegraph specialist miners',
-          'CONTRADICTION_FILTERED: Unverified competitor claims filtered via dynamic variance & geological classification analysis'
+          'MULTI_VALIDATOR_CONSENSUS_REACHED: Data verified across independent Telegraph network validator nodes',
+          'CONTRADICTION_RESOLVED: Inconsistent external claims arbitrated against authoritative registry ground truth'
         ],
-        summary: 'Deep Multi-Miner Intelligence arbitrated: Complementary evidence aggregated across active Telegraph miners. Historical production, structural host geology, and statutory tenure verified against open geological survey registries. Cryptographic arbitration digest signed.',
+        summary: 'Cross-Validator Consensus arbitrated: Data claims cross-checked across active Telegraph validator nodes and reconciled against official public registry records. Cryptographic consensus digest verified.',
         recipientVerification: { sanctionsScreeningClear: true },
-        vendorVerification: { gleifVerified: true, lei: 'EARTH-SCI-OPEN-REGISTRY', legalName: 'GLOBAL EARTH SCIENCE REGISTRY CONSORTIUM', gleifUrl: 'https://mrdata.usgs.gov/mrds/', sanctionsScreeningClear: true },
+        vendorVerification: { gleifVerified: true, lei: 'OPEN-DATA-REGISTRY-CONSORTIUM', legalName: 'OPEN DATA REGISTRY CONSORTIUM', gleifUrl: 'https://mrdata.usgs.gov/mrds/', sanctionsScreeningClear: true },
         mathVerification: { bitExactMatch: true, discrepancyCents: 0, computedCents: 0, statedCents: 0, computedTotal: 0, statedTotal: 0, wasmScoreBps: 10000 },
         policyCaps: { delegationTier: 'TIER_1_AUTONOMOUS', supervisorAuthRequired: false, supervisorAuthValid: true },
         attestationSha256: '0x9d4a82fb41c880e6ef51283624e7a83c6b29f041b3780a4c281df6085a10bb52'

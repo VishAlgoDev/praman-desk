@@ -1,0 +1,50 @@
+{
+  "voice": "en-IN-PrabhatNeural",
+  "persona": "Indian Engineering Founder (Natural Prosody)",
+  "total_duration": 313.78,
+  "file_size": 7532396,
+  "acts": [
+    {
+      "act": "act_1_thesis",
+      "title": "Act 1: Thesis \u2014 Unchecked Autonomous Spending",
+      "start": 0.0,
+      "end": 49.15,
+      "duration": 49.15
+    },
+    {
+      "act": "act_2_architecture",
+      "title": "Act 2: Architecture & Deterministic Policy Gate",
+      "start": 50.65,
+      "end": 103.6,
+      "duration": 52.94
+    },
+    {
+      "act": "act_3_threat_simulator",
+      "title": "Act 3: Live Threat Simulator \u2014 Scenarios 1, 2 & 5",
+      "start": 105.1,
+      "end": 178.97,
+      "duration": 73.87
+    },
+    {
+      "act": "act_4_two_minds",
+      "title": "Act 4: Animoca Minds Two-Mind Spend Guard",
+      "start": 180.47,
+      "end": 229.57,
+      "duration": 49.1
+    },
+    {
+      "act": "act_5_bridges_mcp",
+      "title": "Act 5: Reciprocal Bridges & Developer SDKs",
+      "start": 231.07,
+      "end": 277.1,
+      "duration": 46.03
+    },
+    {
+      "act": "act_6_ledger_closing",
+      "title": "Act 6: On-Chain Settlement Ledger & Benchmark Verification",
+      "start": 278.6,
+      "end": 313.52,
+      "duration": 34.92
+    }
+  ]
+}
