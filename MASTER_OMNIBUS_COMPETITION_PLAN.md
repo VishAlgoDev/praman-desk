@@ -337,37 +337,38 @@ All six evaluator pull requests are submitted, active, and mergeable on `telegra
 ## 7. COMPLETE COMMUNITY SHOWCASE & PUBLISHING DOSSIER
 
 ### 7.1 Discord Showcase Post (Thread `1569379402360553692`)
+*(Character count: 1,843 chars — strictly under Discord's 2,000 char limit; masked URLs; zero hype/slop)*
 
 ```markdown
-🏆 **Praman Desk — Season II Community Showcase: Triple-Track Dominance**
-**Live App**: https://praman-desk.vercel.app | **Repo**: https://github.com/VishAlgoDev/praman-desk
-**Streamable MCP**: https://praman-desk.vercel.app/api/mcp (18 Tools Live)
-**Miner**: Devnode #6127 / Route #5281 / Diamond #6142 | **Contributor**: 0x98021b20Efdb7ae2C57366010a6E0fDE207b4466
-**Master Walkthrough Video (5.23m 1080p)**: https://praman-desk.vercel.app/praman-desk-walkthrough.mp4
-**Benchmark Showcase Mirror**: https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4
+🏛️ **PRAMAN DESK — MILESTONE 3: TRIPLE-TRACK PRODUCTION RELEASE**
+*Telegraph Season II Hackathon | Miner #6127 | Route #5281 | Sepolia Diamond #6142*
 
-Here is our Day 20 Showcase submission across all three competition tracks:
+Milestone 3 production release unites all three hackathon tracks into an audited, verifiable spend & intelligence firewall:
 
-**1. Track 1 (Apps & Agents)**:
-• **Two-Mind Spend Guard**: Implements the Animoca Brands multi-agent firewall standard (Mind 1 Investigator + Mind 2 Reviewer) preventing prompt injection, phishing, arithmetic drift, and sanctions breaches.
-• **100% Protection Benchmark**: 100% error catch rate vs 0% without Telegraph, averting **$79,373 USD** in capital loss across 1,043 WASM test vectors.
-• **57 On-Chain Sepolia Settlements**: Real testnet receipts verifiable at `/api/ledger`.
-• **18 Enterprise MCP Tools & SDKs**: Full JS/TS and Python SDKs with 100% test coverage.
+**1. Live Deployment & Interactive Playground**:
+• **App**: <https://praman-desk.vercel.app>
+• **Mind Playground**: <https://praman-desk.vercel.app/#playground> (Test arbitrary spend, sanctions & phishing prompts live in-browser)
+• **Public Ledger**: <https://praman-desk.vercel.app/#ledger> (57+ cryptographic receipts anchored on Sepolia Diamond #6142)
 
-**2. Track 2 (Miners & Providers)**:
-• Active across 9 intents on Devnode Miner #6127 / Route #5281 with dynamic generalized NLP & arithmetic solvers.
-• Live wholesale electricity provider (`GRID_POWER_PRICE_GENERAL`) with authentic CAISO (NP15, SP15, ZP26) and ERCOT (North, South, West, Houston) LMP settlements.
-• **Universal Multi-Miner Discrepancy Arbitrator**: Open-sourced consensus arbitration logic allowing agents to cross-check competing miners and flag divergences before spend occurs.
+**2. Two-Mind Architecture & General-Purpose Mind**:
+• Investigator Mind queries live Telegraph miners via streamable MCP (`/api/mcp`)
+• Reviewer Mind enforces multi-miner discrepancy arbitration via 651-byte zero-import WASM arithmetic
+• Golden Challenge: general-purpose Mind processes diverse enterprise tasks (invoices, retainage escrow, token grants) without custom code
 
-**3. Track 3 (Evaluators & Bounties)**:
-We have contributed **six (6) deterministic evaluator adapters** to `telegraphprotocol/bounties`:
-• **PR #222**: `GRID_POWER_PRICE` LMP settlement adapter (Missions 11 & 12).
-• **PR #221**: `REGULATORY_FILING_MONITOR` SEC EDGAR accession adapter (Missions 04 & 13).
-• **PR #220**: `CORPORATE_REGISTRY_LOOKUP` ISO 17442 LEI checksum adapter (Mission 03).
-• **PR #219**: `SANCTIONS_SCREENING_MATCH` zero-tolerance fail-closed adapter (Mission 02).
-• **PR #218**: `MINING_INTELLIGENCE` global 11-deposit geological adapter (Mission 12).
-• **PR #217**: `CONTRACT_OBLIGATION` deterministic legal milestone adapter (Mission 04).
-All 5 claimed mission issues (#190, #191, #192, #199, #200) are submitted and in review.
+**3. Empirical "With vs Without Telegraph" Benchmark**:
+• Catch Rate: 100% with Telegraph vs 0% without
+• Capital Saved: **$79,373 USD** simulated loss prevented across 5 adversarial vectors
+• Report: <https://github.com/VishAlgoDev/praman-desk/blob/main/docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md>
+
+**4. Canonical Master Walkthrough (5.23m 1080p)**:
+<https://praman-desk.vercel.app/praman-desk-walkthrough.mp4>
+Unedited end-to-end working: raw prompt → miner query → WASM arbitration → Sepolia attestation.
+
+**5. Ecosystem & Open Source Assets**:
+• **Repo**: <https://github.com/VishAlgoDev/praman-desk>
+• **Keyless MCP Suite**: `https://praman-desk.vercel.app/api/mcp` (18 tools)
+• **Anjoman Apps Submission**: ID `9ae7025e-65be-490b-8e59-2aa598f16992`
+• **Upstream PRs**: PRs #217–#222 on `telegraphprotocol/bounties` (all mergeable)
 ```
 
 ### 7.2 Ahmed Ali's Minds Thread Reply (`1573287348689567774`)
@@ -558,7 +559,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 │ • Post A posted to Ahmed Ali in Minds Agents (1573287348689567774) on Nov 21.          │
 │ • Post B posted to Ahmed Ali / Fexx / NFT KING in Gold Rush (1573264855526547577).     │
 │ • Post C posted to Bangdrop in Minds Agents (cross-integration with Takar).            │
-│ • Status: ✅ POSTED BY USER (2026-11-21).                                               │
+│ • Status: ⏳ STAGED & READY FOR USER DISPATCH (2026-11-21).                             │
 ├────────────────────────────────────────────────────────────────────────────────────────┤
 │ GATE 8.5: CROSS-ECOSYSTEM ON-CHAIN SETTLEMENT WITH TAKAR                               │
 │ • Competitor Bangdrop independently tested & integrated Praman's MCP endpoint          │
@@ -605,7 +606,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 
 ---
 
-## 9. BRUTAL SCORECARD & ACTIVE BACKLOG (2026-11-20)
+## 9. BRUTAL SCORECARD & ACTIVE BACKLOG (2026-11-21)
 
 **Last verified:** `npm test` exit 0 | Git `main` post-sprint push | Production `https://praman-desk.vercel.app`
 
