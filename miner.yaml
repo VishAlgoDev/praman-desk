@@ -103,10 +103,22 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legal company name or business trading name"
+          - name: name
+            type: string
+            intents: ["*"]
+            description: "Vendor entity name alias"
+          - name: company
+            type: string
+            intents: ["*"]
+            description: "Company name alias"
           - name: vat_number
             type: string
             intents: ["*"]
             description: "VAT, EIN, GSTIN, or LEI tax identifier"
+          - name: tax_id
+            type: string
+            intents: ["*"]
+            description: "Tax identifier or VAT alias"
           - name: lei
             type: string
             intents: ["*"]
