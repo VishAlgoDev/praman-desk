@@ -1015,7 +1015,7 @@ export async function verifyVendorPrimary({
       vat_valid: gov.valid,
       tax_id_valid: gov.valid,
       status: gov.status,
-      registered_name: gov.registered_name,
+      registered_name: gov.valid ? gov.registered_name : null,
       registered_address: null,
       lei: null,
       registration_status: gov.valid ? 'ISSUED' : 'UNVERIFIED',
@@ -1268,8 +1268,10 @@ export async function verifyVendorPrimary({
       : vatRegistryUnavailable
       ? 'vat_registry_unavailable'
       : (valid ? 'verified' : 'unverified'),
-    registered_name: entity?.legalName?.name || vatName || null,
-    registered_address: addressStr || vatAddr || null,
+    registered_name: valid ? (vatName || entity?.legalName?.name || null) : null,
+    registered_address: valid ? (vatAddr || addressStr || null) : null,
+    gleif_name: entity?.legalName?.name || null,
+    gleif_address: addressStr || null,
     lei: attr?.lei || (leiRegex.test(leiTrim) ? leiTrim : null),
     registration_status: vatEntityMismatch
       ? 'VAT_ENTITY_MISMATCH'
