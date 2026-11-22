@@ -6823,7 +6823,7 @@ export async function handleApiRequest(req, res) {
             const expl = 'Invalid numeric invoice parameters: billedQty, acceptedQty, unitPrice, and taxRatePct must all be finite non-negative numbers.';
             return sendJson(res, 200, {
               reconciled: false,
-              discrepancy: null,
+              discrepancy: 0,
               verdict: 'INVALID_INPUTS',
               status: 'invalid_inputs',
               explanation: expl,
@@ -6910,8 +6910,8 @@ export async function handleApiRequest(req, res) {
 
         const expl = 'RECONCILIATION AUDIT: Insufficient monetary evidence: neither line-item quantities/unit prices nor monetary totals were present on both invoice and ledger entries (bare reference numbers cannot prove reconciliation).';
         return sendJson(res, 200, {
-          reconciled: null,
-          discrepancy: null,
+          reconciled: false,
+          discrepancy: 0,
           verdict: 'INSUFFICIENT_EVIDENCE',
           status: 'insufficient_evidence',
           explanation: expl,
@@ -7071,7 +7071,7 @@ export async function handleApiRequest(req, res) {
           verified: false,
           verdict: 'Insufficient information',
           status: 'insufficient_evidence',
-          amount: null,
+          amount: 0,
           approval_cap: null,
           budget_delta: null,
           vendor: vendor || null,
