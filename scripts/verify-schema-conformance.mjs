@@ -118,11 +118,35 @@ const TEST_MATRIX = [
     method: 'GET',
     schemaProps: ['ok', 'task', 'consensus', 'discrepancy_detected', 'arbitrated_verdict', 'sha256_receipt'],
     validate: (data) => data.ok === true && typeof data.sha256_receipt === 'string'
+  },
+  {
+    name: '15. Token Total Supply Verification (EVM RPC)',
+    intent: 'TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL',
+    url: `${PROD_BASE}/api/miner/token-supply?token_address=0xd68305cA83C7AF42A4F720144E7416fB53F8AaF4&chain=sepolia`,
+    method: 'GET',
+    schemaProps: ['status', 'token_address', 'chain', 'decimals', 'total_supply_raw', 'total_supply', 'confidence'],
+    validate: (data) => data.status === 'confirmed' && typeof data.total_supply === 'number'
+  },
+  {
+    name: '16. Wallet Balance Check (EVM RPC)',
+    intent: 'WALLET_BALANCE_CHECK_GENERAL',
+    url: `${PROD_BASE}/api/miner/wallet-balance?wallet_address=0x98021b20Efdb7ae2C57366010a6E0fDE207b4466&chain=sepolia`,
+    method: 'GET',
+    schemaProps: ['status', 'wallet_address', 'chain', 'balance_wei', 'balance_eth', 'confidence'],
+    validate: (data) => data.status === 'confirmed' && typeof data.balance_eth === 'number'
+  },
+  {
+    name: '17. Deep Research Query (Multi-Source Attribution)',
+    intent: 'RESEARCH_QUERY_GENERAL',
+    url: `${PROD_BASE}/api/miner/research-query?query=Autonomous%20AI%20agent%20compliance%20architecture`,
+    method: 'GET',
+    schemaProps: ['status', 'query', 'summary', 'key_findings', 'sources', 'confidence'],
+    validate: (data) => data.status === 'ok' && Array.isArray(data.key_findings) && Array.isArray(data.sources)
   }
 ];
 
 async function runVerification() {
-  console.log(`[Schema Verifier] Testing 14 endpoints across 11 intents + meta-arbitration on ${PROD_BASE}...\n`);
+  console.log(`[Schema Verifier] Testing 17 endpoints across 14 intents + meta-arbitration on ${PROD_BASE}...\n`);
   const results = [];
 
   for (const item of TEST_MATRIX) {

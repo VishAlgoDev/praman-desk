@@ -395,6 +395,99 @@ endpoints:
             intents: ["*"]
             description: "Query containing transaction hash"
 
+  - path: /api/miner/token-supply
+    external_path: /api/miner/token-supply
+    method: GET
+    intents:
+      - TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL
+    description: >-
+      Deterministic ERC-20 token total supply and decimals verification directly via multi-chain JSON-RPC.
+    params:
+      query:
+        optional:
+          - name: token_address
+            type: string
+            intents: ["*"]
+            description: "ERC-20 token contract address"
+          - name: address
+            type: string
+            intents: ["*"]
+            description: "Contract address alias"
+          - name: chain
+            type: string
+            intents: ["*"]
+            description: "Target EVM chain"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Natural language query containing token address"
+
+  - path: /api/miner/wallet-balance
+    external_path: /api/miner/wallet-balance
+    method: GET
+    intents:
+      - WALLET_BALANCE_CHECK_GENERAL
+    description: >-
+      Deterministic native and ERC-20 token wallet balance verification directly via multi-chain JSON-RPC.
+    params:
+      query:
+        optional:
+          - name: wallet_address
+            type: string
+            intents: ["*"]
+            description: "Target EVM wallet address"
+          - name: token_address
+            type: string
+            intents: ["*"]
+            description: "Optional ERC-20 token contract address for token balance"
+          - name: chain
+            type: string
+            intents: ["*"]
+            description: "Target EVM chain"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Query containing wallet address"
+
+  - path: /api/miner/research-query
+    external_path: /api/miner/research-query
+    method: GET
+    intents:
+      - RESEARCH_QUERY_GENERAL
+    description: >-
+      Deep analytical research query synthesis with multi-source attribution and key findings.
+    params:
+      query:
+        optional:
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Research topic or query"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Natural language research question"
+
+  - path: /api/miner/arbitrate
+    external_path: /api/miner/arbitrate
+    method: POST
+    intents:
+      - MULTI_MINER_DISCREPANCY_ARBITRATION
+    description: >-
+      Meta-arbitration engine comparing multi-miner verdicts, measuring basis-point tolerance variance, and issuing cryptographic consensus receipts.
+    params:
+      body:
+        optional:
+          - name: prompt
+            type: string
+            description: "Task or claim being arbitrated across miners"
+          - name: intent
+            type: string
+            description: "Target intent family"
+          - name: candidates
+            type: array
+            description: "Candidate miner outputs to arbitrate"
+
 semantics:
   signal_mapping:
     confidence_field: confidence
@@ -412,6 +505,9 @@ semantics:
     - GRID_POWER_PRICE_GENERAL
     - WEB_SEARCH_GENERAL
     - ONCHAIN_TX_LOOKUP_GENERAL
+    - TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL
+    - WALLET_BALANCE_CHECK_GENERAL
+    - RESEARCH_QUERY_GENERAL
     - MINING_INTELLIGENCE_GENERAL
 
 docs:

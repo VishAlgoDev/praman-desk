@@ -14,7 +14,7 @@ import { evaluateCounterpartyShield, checkFakeWatchDomain } from './bridges/fake
 import { generateRugReceiptProof } from './bridges/rugreceipt-bridge.mjs';
 import { evaluatePaysheetConsensus } from './bridges/paysheet-bridge.mjs';
 import { GoldRushAggregator } from '../examples/gold-rush-aggregator/gold-rush-aggregator.mjs';
-import { executeWebSearch, lookupOnchainTx, arbitrateMultiMiner } from './universal-intents.mjs';
+import { executeWebSearch, lookupOnchainTx, verifyTokenTotalSupply, checkWalletBalance, executeResearchQuery, arbitrateMultiMiner } from './universal-intents.mjs';
 
 const goldRushAggregator = new GoldRushAggregator();
 
@@ -6130,7 +6130,10 @@ export async function handleApiRequest(req, res) {
         'CONTRACT_OBLIGATION_AUDIT_GENERAL',
         'GRID_POWER_PRICE_GENERAL',
         'WEB_SEARCH_GENERAL',
-        'ONCHAIN_TX_LOOKUP_GENERAL'
+        'ONCHAIN_TX_LOOKUP_GENERAL',
+        'TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL',
+        'WALLET_BALANCE_CHECK_GENERAL',
+        'RESEARCH_QUERY_GENERAL'
       ];
       const devnodeMiner = {
         route_id: 5281,
@@ -7664,7 +7667,25 @@ export async function handleApiRequest(req, res) {
         return sendJson(res, 200, out);
       }
 
-      // 12. GET / POST /api/miner/arbitrate (MULTI_MINER_DISCREPANCY_ARBITRATION)
+      // 12. GET / POST /api/miner/token-supply (TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL)
+      if (pathname === '/api/miner/token-supply' || pathname === '/api/token-supply') {
+        const out = await verifyTokenTotalSupply(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 13. GET / POST /api/miner/wallet-balance (WALLET_BALANCE_CHECK_GENERAL)
+      if (pathname === '/api/miner/wallet-balance' || pathname === '/api/wallet-balance') {
+        const out = await checkWalletBalance(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 14. GET / POST /api/miner/research-query (RESEARCH_QUERY_GENERAL)
+      if (pathname === '/api/miner/research-query' || pathname === '/api/research-query') {
+        const out = await executeResearchQuery(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 15. GET / POST /api/miner/arbitrate (MULTI_MINER_DISCREPANCY_ARBITRATION)
       if (pathname === '/api/miner/arbitrate' || pathname === '/api/arbitrate') {
         const out = await arbitrateMultiMiner(merged);
         return sendJson(res, 200, out);
