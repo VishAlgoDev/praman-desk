@@ -1,12 +1,12 @@
 {
-  "previousRegistrationId": "6137",
-  "registrationId": "6142",
-  "txHash": "0x31f127785ae58f6b9a71b6816ef3005531a7af527d6f490be446a2ba84b62619",
-  "blockNumber": 12175886,
+  "previousRegistrationId": "6142",
+  "registrationId": "6162",
+  "txHash": "0x5566d8c5ac693a018c5799dc890221d55f42ea8ddd888e689143a97caca130b6",
+  "blockNumber": 12187735,
   "diamond": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
   "miner": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
-  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/59454bd/miner.yaml",
-  "yamlHash": "0xe95a79da42fa698e88ff5acb06cea27fd358c292b278d238fd4312a31152327f",
+  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/cfae72e/miner.yaml",
+  "yamlHash": "0x72f4dee98ac5860a61680f9c88f33f500330cc20736effc39a4d235e0910d2c0",
   "supportedIntents": [
     "PURCHASE_ORDER_VERIFY_GENERAL",
     "INVOICE_LEDGER_RECONCILE_GENERAL",
@@ -16,7 +16,12 @@
     "SANCTIONS_SCREENING_MATCH_GENERAL",
     "REGULATORY_FILING_MONITOR_GENERAL",
     "CONTRACT_OBLIGATION_AUDIT_GENERAL",
-    "GRID_POWER_PRICE_GENERAL"
+    "GRID_POWER_PRICE_GENERAL",
+    "WEB_SEARCH_GENERAL",
+    "ONCHAIN_TX_LOOKUP_GENERAL",
+    "TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL",
+    "WALLET_BALANCE_CHECK_GENERAL",
+    "RESEARCH_QUERY_GENERAL"
   ],
-  "updatedAt": "2026-11-20T14:55:11.575Z"
+  "updatedAt": "2026-11-22T08:57:17.261Z"
 }

@@ -300,6 +300,66 @@ const WORKFLOW_SCENARIOS = [
       recipient: '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466',
       amount_usdc: 1000
     }
+  },
+
+  // 11. Universal Web Search Intelligence
+  {
+    intent: 'WEB_SEARCH_GENERAL',
+    endpoint: '/api/miner/web-search',
+    method: 'GET',
+    params: { query: 'Ethereum London Hard Fork EIP-1559 burn mechanism' }
+  },
+  {
+    intent: 'WEB_SEARCH_GENERAL',
+    endpoint: '/api/miner/web-search',
+    method: 'GET',
+    params: { query: 'European Union Corporate Sustainability Due Diligence Directive' }
+  },
+
+  // 12. On-Chain EVM Transaction Lookup
+  {
+    intent: 'ONCHAIN_TX_LOOKUP_GENERAL',
+    endpoint: '/api/miner/onchain-tx',
+    method: 'GET',
+    params: { tx_hash: '0x31f127785ae58f6b9a71b6816ef3005531a7af527d6f490be446a2ba84b62619', chain: 'sepolia' }
+  },
+  {
+    intent: 'ONCHAIN_TX_LOOKUP_GENERAL',
+    endpoint: '/api/miner/onchain-tx',
+    method: 'GET',
+    params: { tx_hash: '0x5566d8c5ac693a018c5799dc890221d55f42ea8ddd888e689143a97caca130b6', chain: 'sepolia' }
+  },
+
+  // 13. Deterministic Token Total Supply
+  {
+    intent: 'TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL',
+    endpoint: '/api/miner/token-supply',
+    method: 'GET',
+    params: { token_address: '0xd68305cA83C7AF42A4F720144E7416fB53F8AaF4', chain: 'sepolia' }
+  },
+
+  // 14. Deterministic Wallet Balance Check
+  {
+    intent: 'WALLET_BALANCE_CHECK_GENERAL',
+    endpoint: '/api/miner/wallet-balance',
+    method: 'GET',
+    params: { wallet_address: '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466', chain: 'sepolia' }
+  },
+
+  // 15. Deep Research Query
+  {
+    intent: 'RESEARCH_QUERY_GENERAL',
+    endpoint: '/api/miner/research-query',
+    method: 'GET',
+    params: { query: 'Multi-agent consensus verification architectures for decentralized AI oracles' }
+  },
+
+  // 16. Multi-Miner Discrepancy Arbitration
+  {
+    intent: 'DISCREPANCY_ARBITRATION_GENERAL',
+    endpoint: '/api/miner/arbitrate',
+    method: 'GET',
+    params: { query: 'Sanctions status of Bank Rossiya vs SDN List', intent: 'SANCTIONS_SCREENING_MATCH_GENERAL' }
   }
 ];
 
