@@ -6,11 +6,11 @@
 
 ## Summary Scores
 
-| System | Classification | Correct / 10 | Hallucinations | Accuracy |
+| System | Architecture | Correct / 10 | Hallucinations | Accuracy |
 |---|---|---|---|---|
-| **Praman Desk** | **Cryptographically Grounded Agent (Telegraph Protocol Season II)** | **10/10** | **0** | **100%** |
-| Frontier Reasoning LLM (gpt-5) | Foundation Model (Weights-Only / Non-Grounded) | — | — | — |
-| Frontier Multi-Modal LLM (claude-sonnet-4-6) | Foundation Model (Weights-Only / Non-Grounded) | — | — | — |
+| **Praman Desk** | **Cryptographically Grounded Verification (Telegraph Season II)** | **10/10** | **0** | **100%** |
+| Frontier Reasoning LLM | Weights-Only Foundation Model (Non-Grounded) | — | — | — |
+| Frontier Generalist LLM | Weights-Only Foundation Model (Non-Grounded) | — | — | — |
 
 > 🚨 = Hallucination (confident wrong assertion) | ✅ = Correct (verified ground truth) | ❌ = Wrong / Incomplete | — = Offline / unconfigured
 
