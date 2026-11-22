@@ -15,18 +15,19 @@
   - **Mission 02**: Stablecoin Treasury Guard (OFAC SDN EVM Address Screening & FATF Travel Rule — #190 — In Review)
   - **Mission 03**: Institutional Markets & Counterparty Clearing (FakeWatch Phishing Shield, FX Parity — #191 — In Review)
   - **Mission 04**: Statutory Corporate & Contractual Diligence (GLEIF LEI, Statutory Corporate Registers, OFAC — #192 — In Review)
+  - **Mission 07**: Consumer Platform (Personal AI Assistant Spend Guard & Phishing Interception — #195 — Claimed)
   - **Mission 11**: Autonomous Systems (Spend Delegation Approval Caps & Circuit Breakers — #199 — In Review)
   - **Mission 12**: Mining & Power (Sovereign Mining Reserves, Wholesale Grid Power LMP & Cross-Miner Scope Arbitration — #200 — In Review)
   - **Mission 13**: Asset Management (Open Research with Receipts & Defensible Private Asset Marks — #201 — In Review)
 - **Secondary Track**: Track 02 — Miners / Providers (Devnode miner #6127 / Route #5281 / Diamond registration #6142, 9 bonded intents)
   - 🏆 **Rank #1 Globally**: CONTRACT_OBLIGATION_AUDIT_GENERAL (Score: 0.5000)
   - 🏆 **Rank #1 Globally**: PURCHASE_ORDER_VERIFY_GENERAL (Score: 0.0000, top seed)
-  - 🥈 **Rank #2 Globally**: SANCTIONS_SCREENING_MATCH_GENERAL (Score: 1.0000, 19,565 OFAC records)
+  - 🥈 **Rank #2 Globally**: SANCTIONS_SCREENING_MATCH_GENERAL (Score: 1.0000, 19,599 OFAC records + 127 EVM digital currency addresses)
   - 💎 **Rank #6 Globally**: CORPORATE_REGISTRY_LOOKUP_GENERAL (Score: 1.0000, 200+ jurisdictions GLEIF)
   - **Gold Rush Autonomous Multi-Miner Aggregator & Scope Resolution Engine**: Ingesting and arbitrating live competitor dossiers (Takar, OathCast miner 64176, NFT KING miner 7310050) with automated hierarchical scope resolution (shaft vs reef vs field) and on-chain EAS Sepolia attestations ([UID 0x33d85bed...](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115))
-  - 164 live network requests served on Devnode
+  - 172 live network requests served on Devnode
 - **Supporting Track**: Track 03 — Evaluators & Truth Sources:
-  - 62 Attested Rows in EvalPool
+  - 68 Attested Rows in EvalPool (100% Eligible across 8 Intents)
   - **Upstream PR #217**: `CONTRACT_OBLIGATION` adapter (Mission 04 / #192)
   - **Upstream PR #218**: `MINING_INTELLIGENCE` & `MINING_RESERVE` adapter (Mission 12 / #200)
   - **Upstream PR #219**: `SANCTIONS_SCREENING_MATCH` adapter (Mission 02 / #190)
@@ -38,7 +39,9 @@
 - **Main Competition Deadline**: December 1, 2026, 23:59 UTC  
 - **GitHub Repository**: [https://github.com/VishAlgoDev/praman-desk](https://github.com/VishAlgoDev/praman-desk)  
 - **Live Application**: [https://praman-desk.vercel.app](https://praman-desk.vercel.app)  
+- **Multi-Miner Truth Matrix**: [https://praman-desk.vercel.app/#matrix](https://praman-desk.vercel.app/#matrix)  
 - **Official Master Walkthrough Video**: [https://praman-desk.vercel.app/praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) (5.23m 1080p Screen Studio Master with Founder Audio)  
+- **Fast-Track Executive Demo (47s Video)**: [https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) (Immediate Visual Threat Interception Demo)  
 - **Starred Bounties Repo Account**: `VishAlgoDev` (Verified HTTP 204 Star on `telegraphprotocol/bounties`)
 
 ---
