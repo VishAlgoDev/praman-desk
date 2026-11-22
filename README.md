@@ -4,20 +4,22 @@
 
 [![Live Hosted App](https://img.shields.io/badge/Live%20Firewall-praman--desk.vercel.app-0284c7?style=for-the-badge&logo=vercel)](https://praman-desk.vercel.app)
 [![Active Sepolia Diamond](https://img.shields.io/badge/Sepolia%20Diamond-Reg%20%236142%20(Miner%20%236127)-10b981?style=for-the-badge&logo=ethereum)](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
-[![Global Rank #1](https://img.shields.io/badge/Devnode%20Rank-%231%20Document%20Authenticity-059669?style=for-the-badge)](https://devnode.telegraphprotocol.com)
+[![Sepolia EAS Attested](https://img.shields.io/badge/Sepolia%20EAS-UID%200x33d85bed...-8b5cf6?style=for-the-badge&logo=ethereum)](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115)
+[![Multi-Miner Truth Matrix](https://img.shields.io/badge/Truth%20Matrix-Live%20Arbitrator-ec4899?style=for-the-badge)](https://praman-desk.vercel.app/#matrix)
 [![WASM Comparator](https://img.shields.io/badge/WASM%20Engine-651%20Bytes%20Pure%20Binary-f59e0b?style=for-the-badge)](https://praman-desk.vercel.app/comparator.wasm)
 [![MCP Server](https://img.shields.io/badge/MCP-18%20Tools%20Streamable%20HTTP-6366f1?style=for-the-badge)](https://github.com/VishAlgoDev/praman-desk#10-second-developer-quickstart)
 
 - **Live Split-Screen Interactive Playground:** <https://praman-desk.vercel.app>
-- **Official demo (use this for judges & forms):** [praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) (5.23 min, Screen Studio + Prabhat narration; script: `docs/MASTER_TECHNICAL_WALKTHROUGH_SCRIPT.md`).
-- **Minds short URL:** [praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) = **47s Act 4 Two-Mind excerpt** (~1.42 MB) from the master walkthrough (`npm run video:record-benchmark`).
+- **Universal Multi-Miner Contradiction & Truth Matrix:** <https://praman-desk.vercel.app/#matrix>
+- **Official Master Walkthrough (Full Deep Dive):** [praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) (5.23 min, Screen Studio + Founder narration).
+- **Fast-Track Executive Demo (47s Video):** [praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) (47s Two-Mind Threat Interception demo).
 - **Two-Mind Spend Guard Architecture:** [Reference Implementation of the Animoca Brands Minds Specification](examples/minds-spend-guard/) (Diligence Investigator + Escrow Reviewer Minds)
 - **Empirical Benchmark Report:** [With vs Without Telegraph ($79,373 Averted)](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md)
 - **Active Telegraph Miner:** Devnode Miner `#6127` (Route `5281` / Sepolia Diamond registration `#6142`, **9 bonded intents** + `MINING_INTELLIGENCE_GENERAL` HTTP-only) on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
 - **Devnode Global Leaderboard Standing (Epoch 18):**
   - 🏆 **Rank #1 Globally:** `CONTRACT_OBLIGATION_AUDIT_GENERAL` (Score: `0.5000`)
   - 🏆 **Rank #1 Globally:** `PURCHASE_ORDER_VERIFY_GENERAL` (Score: `0.0000`, top seed)
-  - 🥈 **Rank #2 Globally:** `SANCTIONS_SCREENING_MATCH_GENERAL` (Score: `1.0000`, 19,565 OFAC records)
+  - 🥈 **Rank #2 Globally:** `SANCTIONS_SCREENING_MATCH_GENERAL` (Score: `1.0000`, 19,599 OFAC records + 127 EVM digital currency addresses)
   - 💎 **Rank #6 Globally:** `CORPORATE_REGISTRY_LOOKUP_GENERAL` (Score: `1.0000`, 200+ jurisdictions GLEIF)
   - 💎 **Rank #6 Globally:** `REGULATORY_FILING_MONITOR_GENERAL`
   - 💎 **Rank #6 Globally:** `VENDOR_VERIFY_GENERAL`
@@ -25,7 +27,7 @@
 - **Telegraph Hackathon Season II Tracks Covered:**
   - **Track 01 (Apps & Agents):** Praman Desk Collaborative Two-Mind Spend Guard (Reference Implementation of the Animoca Brands Minds Specification on `hellominds.ai`; Mission 04: Legal & Mission 03: Institutional Markets)
   - **Track 02 (Miners/Providers):** Miner `#6127` holding Rank #1 standings across 8 active compliance intents
-  - **Track 03 (Evaluators/Truth Sources):** 62 eligible rows in Devnode EvalPool + Upstream Ground-Truth Dossier for Bounties #120, #122, #192
+  - **Track 03 (Evaluators/Truth Sources):** 68 eligible rows across 8 intents in Devnode EvalPool + Upstream Ground-Truth Dossier for Bounties #120, #122, #192
 - **Anjoman App Submission ID:** `9ae7025e-65be-490b-8e59-2aa598f16992`
 - **Contributor / Payer Wallet:** [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466)
 
