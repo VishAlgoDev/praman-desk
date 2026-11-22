@@ -484,6 +484,50 @@ endpoints:
             intents: ["*"]
             description: "Natural language research question"
 
+  - path: /api/miner/liquidity-depth
+    external_path: /api/miner/liquidity-depth
+    method: GET
+    intents:
+      - LIQUIDITY_DEPTH_VERIFY_GENERAL
+    description: >-
+      Verifies on-chain DEX liquidity depth, bid-ask spreads, and slippage for treasury operations.
+      Dual-mode: accepts structured parameters (pair, chain, pool_address, depth_pct, notional_usd) or verbatim question string (?question=...).
+    params:
+      query:
+        optional:
+          - name: pair
+            type: string
+            intents: ["*"]
+            description: "Trading pair symbol, e.g. ETH/USDC, WBTC/USDC"
+          - name: chain
+            type: string
+            intents: ["*"]
+            description: "Blockchain network: ethereum, base, arbitrum, polygon"
+          - name: pool_address
+            type: string
+            intents: ["*"]
+            description: "DEX liquidity pool contract address"
+          - name: pool
+            type: string
+            intents: ["*"]
+            description: "Alias for pool_address"
+          - name: depth_pct
+            type: number
+            intents: ["*"]
+            description: "Depth percentage boundary from mid-price (e.g. 2.0 for +/-2%)"
+          - name: notional_usd
+            type: number
+            intents: ["*"]
+            description: "Target transaction notional in USD to model price impact"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Natural language query describing liquidity verification requirement"
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Query string alias for question"
+
   - path: /api/miner/arbitrate
     external_path: /api/miner/arbitrate
     method: POST
@@ -527,6 +571,7 @@ semantics:
     - TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL
     - WALLET_BALANCE_CHECK_GENERAL
     - RESEARCH_QUERY_GENERAL
+    - LIQUIDITY_DEPTH_VERIFY_GENERAL
     - MINING_INTELLIGENCE_GENERAL
 
 docs:

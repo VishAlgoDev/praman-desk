@@ -14,7 +14,7 @@ import { evaluateCounterpartyShield, checkFakeWatchDomain } from './bridges/fake
 import { generateRugReceiptProof } from './bridges/rugreceipt-bridge.mjs';
 import { evaluatePaysheetConsensus } from './bridges/paysheet-bridge.mjs';
 import { GoldRushAggregator } from '../examples/gold-rush-aggregator/gold-rush-aggregator.mjs';
-import { executeWebSearch, lookupOnchainTx, verifyTokenTotalSupply, checkWalletBalance, executeResearchQuery, arbitrateMultiMiner } from './universal-intents.mjs';
+import { executeWebSearch, lookupOnchainTx, verifyTokenTotalSupply, checkWalletBalance, executeResearchQuery, arbitrateMultiMiner, verifyLiquidityDepth } from './universal-intents.mjs';
 
 const goldRushAggregator = new GoldRushAggregator();
 
@@ -7688,6 +7688,12 @@ export async function handleApiRequest(req, res) {
       // 15. GET / POST /api/miner/arbitrate (MULTI_MINER_DISCREPANCY_ARBITRATION)
       if (pathname === '/api/miner/arbitrate' || pathname === '/api/arbitrate') {
         const out = await arbitrateMultiMiner(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 16. GET / POST /api/miner/liquidity-depth (LIQUIDITY_DEPTH_VERIFY_GENERAL)
+      if (pathname === '/api/miner/liquidity-depth' || pathname === '/api/liquidity-depth') {
+        const out = await verifyLiquidityDepth(merged);
         return sendJson(res, 200, out);
       }
     }

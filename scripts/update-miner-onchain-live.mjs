@@ -18,7 +18,7 @@ const evidenceDir = path.join(rootDir, 'evidence');
 const RPC = process.env.SEPOLIA_RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com';
 const COMMIT_HASH = process.env.MINER_YAML_COMMIT || '09927be';
 const PINNED_URL = `https://raw.githubusercontent.com/VishAlgoDev/praman-desk/${COMMIT_HASH}/miner.yaml`;
-const PREVIOUS_REGISTRATION_ID = BigInt(process.env.MINER_REGISTRATION_ID || '6163');
+const PREVIOUS_REGISTRATION_ID = BigInt(process.env.MINER_REGISTRATION_ID || '6164');
 const DRY_RUN = process.argv.includes('--dry-run');
 
 const MACHINA = '0xd68305cA83C7AF42A4F720144E7416fB53F8AaF4';
@@ -37,7 +37,8 @@ const SUPPORTED_INTENTS = [
   'ONCHAIN_TX_LOOKUP_GENERAL',
   'TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL',
   'WALLET_BALANCE_CHECK_GENERAL',
-  'RESEARCH_QUERY_GENERAL'
+  'RESEARCH_QUERY_GENERAL',
+  'LIQUIDITY_DEPTH_VERIFY_GENERAL'
   // MINING_INTELLIGENCE_GENERAL: served via HTTP/miner.yaml but not yet bondable on Diamond (reverts unsupported intent).
 ];
 
