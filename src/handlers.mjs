@@ -3328,8 +3328,10 @@ function cleanSanctionsQuery(raw = '') {
       q = quoted[1].trim();
     } else {
       q = q
-        .replace(/^(?:please\s+)?(?:screen|check|verify|search|is|does|are|whether)(?:\s+(?:if|whether))?\s+(?:the\s+)?(?:person|company|entity|vessel|ship|wallet|address|individual|organization|bank|vendor)?\s*/i, '')
-        .replace(/\s+(?:is\s+)?(?:against|on|in|for|under|appears?\s+on|listed\s+on|listed\s+in|sanctioned|designated)\s+(?:a\s+|an\s+|the\s+)?(?:ofac|sdn|eu|un|uk|us(?:\s+treasury)?|sanctions|consolidated|list|lists)\b.*$/i, '')
+        // Only strip generic introductory nouns if they are followed by 'called/named' or lowercase to avoid truncating proper names like Bank Rossiya
+        .replace(/^(?:please\s+)?(?:screen|check|verify|search|is|does|are|whether)(?:\s+(?:if|whether))?\s+(?:the\s+)?(?:entity|individual|person|vessel|ship|wallet|address)?\s*(?:called|named)?\s*/i, '')
+        .replace(/\s+(?:is\s+)?(?:against|on|in|for|under|appears?\s+on|listed\s+on|listed\s+in|sanctioned|designated)\s+(?:a\s+|an\s+|the\s+|any\s+|all\s+)?(?:ofac|sdn|eu|un|uk|us(?:\s+treasury)?|sanctions?|consolidated|blacklist|watch|block)?\s*(?:list|lists)?\b.*$/i, '')
+        .replace(/\s+(?:is\s+)?(?:on|in)\s+(?:any\s+|a\s+|an\s+|the\s+)?(?:sanctions?|ofac|sdn|watch|black)?\s*(?:list|lists)?\b.*$/i, '')
         .replace(/\s+(?:is\s+)?(?:sanctioned|listed|designated|blocked)\??$/i, '')
         .replace(/[?!.]+$/g, '')
         .trim();

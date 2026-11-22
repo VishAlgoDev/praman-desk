@@ -107,35 +107,52 @@ export async function executeWebSearch({ query, question, q }) {
 
   // 2. Dynamic crypto / token spot price query check
   if (!answer) {
-    const cryptoMatch = rawQuery.match(/(?:price|rate|cost|value)(?:\s+of)?\s+(\$?[a-zA-Z0-9]+)/i) ||
-                        rawQuery.match(/(\$?[a-zA-Z0-9]+)\s+(?:price|rate|cost|value)/i);
-    if (cryptoMatch && cryptoMatch[1]) {
-      const sym = cryptoMatch[1].replace('$', '').toUpperCase();
-      const cryptoMap = {
-        'ETH': 'ETHUSDT', 'ETHEREUM': 'ETHUSDT',
-        'BTC': 'BTCUSDT', 'BITCOIN': 'BTCUSDT',
-        'SOL': 'SOLUSDT', 'SOLANA': 'SOLUSDT',
-        'USDC': 'USDCUSDT', 'BNB': 'BNBUSDT',
-        'DOGE': 'DOGEUSDT', 'XRP': 'XRPUSDT',
-        'ADA': 'ADAUSDT', 'AVAX': 'AVAXUSDT'
-      };
-      const pair = cryptoMap[sym];
-      if (pair) {
-        try {
-          const cRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${pair}`, {
-            signal: AbortSignal.timeout(3000)
-          });
-          if (cRes.ok) {
-            const cData = await cRes.json();
-            if (cData && cData.price) {
-              const formattedPrice = Number(cData.price).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-              answer = `Current spot price of ${sym}: ${formattedPrice} (via live exchange ticker).`;
-              brief = `${sym} Price: ${formattedPrice}`.slice(0, 80);
-              sources.push('https://api.binance.com');
-            }
-          }
-        } catch (e) {}
+    const cryptoMap = {
+      'ETH': 'ETHUSDT', 'ETHEREUM': 'ETHUSDT', 'ETHUSDT': 'ETHUSDT',
+      'BTC': 'BTCUSDT', 'BITCOIN': 'BTCUSDT', 'BTCUSDT': 'BTCUSDT',
+      'SOL': 'SOLUSDT', 'SOLANA': 'SOLUSDT', 'SOLUSDT': 'SOLUSDT',
+      'USDC': 'USDCUSDT', 'BNB': 'BNBUSDT', 'BNBUSDT': 'BNBUSDT',
+      'DOGE': 'DOGEUSDT', 'XRP': 'XRPUSDT', 'XRPUSDT': 'XRPUSDT',
+      'ADA': 'ADAUSDT', 'AVAX': 'AVAXUSDT'
+    };
+
+    const isPriceQuery = /\b(?:price|rate|cost|value|quote|spot|worth|trading\s+at)\b/i.test(rawQuery);
+    const symRegex = /\b(BTCUSDT|ETHUSDT|SOLUSDT|BNBUSDT|XRPUSDT|BTC|BITCOIN|ETH|ETHEREUM|SOL|SOLANA|USDC|BNB|DOGE|XRP|ADA|AVAX)\b/i;
+    const directMatch = rawQuery.match(symRegex);
+
+    let targetSym = null;
+    let targetPair = null;
+
+    if (isPriceQuery && directMatch) {
+      targetSym = directMatch[1].toUpperCase();
+      targetPair = cryptoMap[targetSym];
+    } else {
+      const cryptoMatch = rawQuery.match(/(?:price|rate|cost|value)(?:\s+of)?\s+(\$?[a-zA-Z0-9]+)/i) ||
+                          rawQuery.match(/(\$?[a-zA-Z0-9]+)\s+(?:price|rate|cost|value)/i);
+      if (cryptoMatch && cryptoMatch[1]) {
+        const s = cryptoMatch[1].replace('$', '').toUpperCase();
+        if (cryptoMap[s]) {
+          targetSym = s;
+          targetPair = cryptoMap[s];
+        }
       }
+    }
+
+    if (targetPair) {
+      try {
+        const cRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${targetPair}`, {
+          signal: AbortSignal.timeout(3000)
+        });
+        if (cRes.ok) {
+          const cData = await cRes.json();
+          if (cData && cData.price) {
+            const formattedPrice = Number(cData.price).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            answer = `Current spot price of ${targetSym}: ${formattedPrice} (via live exchange ticker).`;
+            brief = `${targetSym} Price: ${formattedPrice}`.slice(0, 80);
+            sources.push('https://api.binance.com');
+          }
+        }
+      } catch (e) {}
     }
   }
 
