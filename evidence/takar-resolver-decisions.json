@@ -28,9 +28,10 @@
     "provided_screen_hash": "0x2222222222222222222222222222222222222222222222222222222222222222",
     "bundle_sha256": "0x53c34bfe70fb2b545b4e8aa829e342d85bf70c2af6f4fbd5331a9b68f904109c",
     "seconded": true,
-    "tx_hash": "0xsim_c61e3fc11f862dcf9605eb20bc7bb8521104d7018c1a779700d1bcf1",
+    "tx_hash": null,
     "reason": "All 7 claims verified compliant",
-    "execution_note": "Simulated execution verified (dry-run / pending deployment)"
+    "execution_note": "Pre-flight dry-run evaluation verified; on-chain second() armed for Sepolia contract 0x310275e6D66818E068245326bB9e398822304248 (awaiting counterparty propose())",
+    "dry_run_hash": "0xsim_c61e3fc11f862dcf9605eb20bc7bb8521104d7018c1a779700d1bcf1"
   },
   {
     "timestamp": "2026-11-22T11:46:52.159Z",
@@ -62,9 +63,10 @@
     "provided_screen_hash": "0x2222222222222222222222222222222222222222222222222222222222222222",
     "bundle_sha256": "0x7b2969d248ecb1097132462d7e6a04d8ee719d7da15efbd0f71cc417222f4caf",
     "seconded": true,
-    "tx_hash": "0xsim_fee56df0adcfb10bc9a3ca00b875aea6cb249f61b029d068a3bdd3a5",
+    "tx_hash": null,
     "reason": "All 7 claims verified compliant",
-    "execution_note": "Simulated execution verified (dry-run / pending deployment)"
+    "execution_note": "Pre-flight dry-run evaluation verified; on-chain second() armed for Sepolia contract 0x310275e6D66818E068245326bB9e398822304248 (awaiting counterparty propose())",
+    "dry_run_hash": "0xsim_fee56df0adcfb10bc9a3ca00b875aea6cb249f61b029d068a3bdd3a5"
   },
   {
     "timestamp": "2026-11-22T13:41:20.633Z",
@@ -96,9 +98,10 @@
     "provided_screen_hash": "0x2222222222222222222222222222222222222222222222222222222222222222",
     "bundle_sha256": "0x9c81955b183bfee1f808f563aaa531bd037aca0a22a48344baa419649b5b5c2f",
     "seconded": true,
-    "tx_hash": "0xsim_e794b35bd8f7b029cb51462f7985445efed0ae79728d4b019b0694a6",
+    "tx_hash": null,
     "reason": "All 7 claims verified compliant",
-    "execution_note": "Simulated execution verified (dry-run / pending deployment)"
+    "execution_note": "Pre-flight dry-run evaluation verified; on-chain second() armed for Sepolia contract 0x310275e6D66818E068245326bB9e398822304248 (awaiting counterparty propose())",
+    "dry_run_hash": "0xsim_e794b35bd8f7b029cb51462f7985445efed0ae79728d4b019b0694a6"
   },
   {
     "timestamp": "2026-11-22T13:50:30.144Z",
@@ -130,9 +133,10 @@
     "provided_screen_hash": "0x2222222222222222222222222222222222222222222222222222222222222222",
     "bundle_sha256": "0x677771a1d57d4c8669c446f237712e29e1f0b640bf6137fcee5255c9981d9ad0",
     "seconded": true,
-    "tx_hash": "0xsim_6402d118640ebad3799bda094c60ba2b11b9140a36522db3dda08c64",
+    "tx_hash": null,
     "reason": "All 7 claims verified compliant",
-    "execution_note": "Simulated execution verified (dry-run / pending deployment)"
+    "execution_note": "Pre-flight dry-run evaluation verified; on-chain second() armed for Sepolia contract 0x310275e6D66818E068245326bB9e398822304248 (awaiting counterparty propose())",
+    "dry_run_hash": "0xsim_6402d118640ebad3799bda094c60ba2b11b9140a36522db3dda08c64"
   },
   {
     "timestamp": "2026-11-22T14:03:16.769Z",
@@ -163,9 +167,10 @@
     "authorized": true,
     "bundle_sha256": "0x191ec8a9fd74df73792e3b7898e4f8cfe6d1648ba8f74b3a34285b7376df57da",
     "seconded": true,
-    "tx_hash": "0xsim_c98c1947ecaaae019cb5e11320d962046c9db76f68098e86696ef24a",
+    "tx_hash": null,
     "reason": "All 7 claims verified compliant",
-    "execution_note": "Simulated execution verified (dry-run mode)"
+    "execution_note": "Pre-flight dry-run evaluation verified; on-chain second() armed for Sepolia contract 0x310275e6D66818E068245326bB9e398822304248 (awaiting counterparty propose())",
+    "dry_run_hash": "0xsim_c98c1947ecaaae019cb5e11320d962046c9db76f68098e86696ef24a"
   },
   {
     "timestamp": "2026-11-22T15:09:43.602Z",
@@ -178,6 +183,39 @@
     "verdict": "REJECT_PAYMENT",
     "authorized": false,
     "bundle_sha256": "0x9112a208929eac2652ee75acdf301fc8b1078f10af70555fae6ae18785f70655",
+    "seconded": false,
+    "tx_hash": null,
+    "reason": "OFAC_SDN_SANCTIONS_HARD_BLOCK",
+    "execution_note": "Declined by Resolver 3: OFAC_SDN_SANCTIONS_HARD_BLOCK"
+  },
+  {
+    "timestamp": "2026-11-22T15:18:23.674Z",
+    "resolver_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "deal_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+    "counterparty_name": "Siemens AG",
+    "payer": "0x1000000000000000000000000000000000000001",
+    "payee": "0x2000000000000000000000000000000000000002",
+    "amount_usd": 50000,
+    "verdict": "APPROVE_PAYMENT",
+    "authorized": true,
+    "bundle_sha256": "0xb2df6599e44828c9bbccf5b126a2334913249b4105b444d5eb036f9575abe49a",
+    "seconded": true,
+    "tx_hash": null,
+    "reason": "All 7 claims verified compliant",
+    "execution_note": "Pre-flight dry-run evaluation verified; on-chain second() armed for Sepolia contract 0x310275e6D66818E068245326bB9e398822304248 (awaiting counterparty propose())",
+    "dry_run_hash": "0xsim_7db8670214cd5d49755fd51f25077e22a716fe351b46f7d0943be791"
+  },
+  {
+    "timestamp": "2026-11-22T15:18:26.803Z",
+    "resolver_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "deal_id": "0x3333333333333333333333333333333333333333333333333333333333333333",
+    "counterparty_name": "Bank Rossiya",
+    "payer": "0x3000000000000000000000000000000000000003",
+    "payee": "0x4000000000000000000000000000000000000004",
+    "amount_usd": 150000,
+    "verdict": "REJECT_PAYMENT",
+    "authorized": false,
+    "bundle_sha256": "0xfd876c0537d190c0a8c5205d1120ec86f139207269c3470cfc7f9cb0adef3682",
     "seconded": false,
     "tx_hash": null,
     "reason": "OFAC_SDN_SANCTIONS_HARD_BLOCK",

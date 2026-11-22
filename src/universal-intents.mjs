@@ -629,6 +629,7 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
             wallet_address: targetWallet,
             token_address: targetToken,
             chain: targetChain,
+            balance: rawBalance.toString(),
             balance_raw: rawBalance.toString(),
             confidence: 1.0,
             summary: `Wallet ${targetWallet} token balance on ${targetChain} is ${rawBalance.toString()}`
@@ -656,6 +657,7 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
             status: 'confirmed',
             wallet_address: targetWallet,
             chain: targetChain,
+            balance: ethBalance,
             balance_wei: rawBalance.toString(),
             balance_eth: ethBalance,
             confidence: 1.0,
@@ -673,7 +675,7 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
     wallet_address: targetWallet,
     chain: targetChain,
     balance: null,
-    confidence: 1.0,
+    confidence: 0.0,
     summary: `Failed to retrieve balance for ${targetWallet} on ${targetChain}`
   };
 }

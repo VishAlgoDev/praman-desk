@@ -1,5 +1,5 @@
 {
-  "submissionTimestamp": "2026-11-20T01:20:43.099Z",
+  "submissionTimestamp": "2026-11-22T16:47:45.114Z",
   "submitterAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
   "network": "Telegraph Protocol Season II Devnode (Chain ID 11155111)",
   "datasets": [
@@ -10,8 +10,8 @@
       "file": "contract_obligation_audit_general.jsonl",
       "rowCount": 6,
       "bodySha256": "ff9976d383ccb5dbad1ffeb7672820ff0b8bd83bb852a1fa29af2f166093080c",
-      "nonce": "5401af640f93dd34a4a3b8138fd8e890",
-      "signature": "0x5c7b3a3243ff4c8c1be0a1d3f4e56ab9691904398f417ba4f11b8845dc3c8cd9660b9b3a7607a2e6afe4dceb786593044a618587916444eac41267cf89707d311c",
+      "nonce": "9ad8b8de8ec7f1d69179e2cb2c5dbd34",
+      "signature": "0x5b9ce2a2bafc7f18955eef7248a9ce259c26bce56caa72cb95c37460a9555d0c5ebabd0453ad4d06e12670f47aeb36ee8870e9d9d8a81e3b16bb68d1d76e80771b",
       "targetBountyIssue": 192,
       "uploadReceipt": {
         "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
@@ -36,8 +36,8 @@
       "file": "purchase_order_verify_general.jsonl",
       "rowCount": 8,
       "bodySha256": "3ad30696e1e21be2a5c54a8717018e29be12a10575259f6c49759ed23596fea0",
-      "nonce": "4672b74f588c5134c7b515fb00f302e0",
-      "signature": "0x35f180a50376e6a459cabfd43fd8b96d00649fe1ee4fc69b5b5399c43b2c2b03445adde44461907511775a5816b6fde265e4255f981175e01de677150b663f8d1b",
+      "nonce": "6f0075097934c3cfc64d797be26f2af0",
+      "signature": "0x9cc708008c596910f7917a8a1c861c18869142dce1ff66a139bf434355619a5f11069e330a2e19bb9fcf7e7fd465c362811e390e6f10d16e2bdd30a89522fd621b",
       "targetBountyIssue": 122,
       "uploadReceipt": {
         "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
@@ -49,6 +49,7 @@
         "rejected": 0,
         "curated": 0,
         "state_counts": {
+          "admitted": 8,
           "eligible": 199,
           "quarantine": 179
         }
@@ -62,8 +63,8 @@
       "file": "invoice_ledger_reconcile_general.jsonl",
       "rowCount": 10,
       "bodySha256": "450a9208f632d54f9fc3e0af0fb4fe981f2887ce0b1db3a48ea8efe30d84bce7",
-      "nonce": "0d002f6fcf5d7b296b4e14fe811a5782",
-      "signature": "0x7f794e95722412c9d9adb90a85e4a1e2a94dca769cb2d9972b5d4d22108c8dfd26161d3d1fcf7c126aabd58127e71c8ea7b8ab7d4ef1974c45cd6c9ebf85f4be1c",
+      "nonce": "75470d1ffacf0a1bdd4c20dddcd5cda9",
+      "signature": "0x130906a1eb397a66c48e6e26a160c695cb9d13811fa57da1ae06b8633a950d1b0298407e60fad1c74d69c2dfd29477dd21dfd34fd067b992007196d5a3b972d81b",
       "targetBountyIssue": 120,
       "uploadReceipt": {
         "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
@@ -75,6 +76,7 @@
         "rejected": 0,
         "curated": 0,
         "state_counts": {
+          "admitted": 116,
           "eligible": 14
         }
       },
@@ -85,22 +87,30 @@
       "title": "Geological Survey of Queensland (GSQ) Historical Mining Ground Truths",
       "domain": "Gold Rush Challenge / Historical Mining Intelligence (Track 3 Evaluator)",
       "file": "gold_rush_queensland_mines.jsonl",
-      "rowCount": 6,
-      "bodySha256": "26bc22c0fb90db04a9d061b4e6f1de79df5ef979b46b2ee4a9e76b459b79dda1",
-      "nonce": "4995d31bb58ed31ed0401ee4970cdec7",
-      "signature": "0x0d4e9eea52a25b96bd9fd7dd5427299a9562cf7fdd7f1626ab5854b4cbc17df532bb9738ea368c95b37102380bcd63ec34279ea1a76a102889186eacddf8f8791b",
+      "rowCount": 11,
+      "bodySha256": "399a56d534f64dcbe0def62201c118a710b0eb3db80245599d0cd303c018f850",
+      "nonce": "55523971c7375dea5940d565bbd85c85",
+      "signature": "0x972a18f6c74a06dca5f713cc3cf69ff20e2d43268c47102578f1a8170dcd556734e22cb9da65b6daca586e7ae020909d12076920f863d6732406f89b634988fd1b",
       "targetBountyIssue": 218,
       "uploadReceipt": {
         "intent_id": "MINING_INTELLIGENCE_GENERAL",
         "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
         "signed": true,
-        "received": 6,
-        "accepted": 6,
-        "duplicate": 0,
-        "rejected": 0,
-        "curated": 6,
+        "received": 11,
+        "accepted": 0,
+        "duplicate": 6,
+        "rejected": 5,
+        "errors": [
+          "row 7: truth_source requires a non-empty source (the API description in the miner YAML schema)",
+          "row 8: truth_source requires a non-empty source (the API description in the miner YAML schema)",
+          "row 9: truth_source requires a non-empty source (the API description in the miner YAML schema)",
+          "row 10: truth_source requires a non-empty source (the API description in the miner YAML schema)",
+          "row 11: truth_source requires a non-empty source (the API description in the miner YAML schema)"
+        ],
+        "curated": 0,
         "state_counts": {
-          "admitted": 6
+          "admitted": 12,
+          "eligible": 6
         }
       },
       "samplePrompt": "Investigate historical gold mining in Queensland at the Mount Morgan Mine: Who discovered and owned the deposit, how much total gold and sec..."
