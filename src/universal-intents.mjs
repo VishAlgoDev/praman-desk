@@ -139,20 +139,48 @@ export async function executeWebSearch({ query, question, q }) {
     }
 
     if (targetPair) {
+      // 1. Try Coinbase Public Ticker first (globally accessible without geo-blocking in US/Vercel)
+      const baseCoin = targetSym.replace(/USDT?$/i, '');
       try {
-        const cRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${targetPair}`, {
+        const cbRes = await fetch(`https://api.coinbase.com/v2/prices/${baseCoin}-USD/spot`, {
           signal: AbortSignal.timeout(3000)
         });
-        if (cRes.ok) {
-          const cData = await cRes.json();
-          if (cData && cData.price) {
-            const formattedPrice = Number(cData.price).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-            answer = `Current spot price of ${targetSym}: ${formattedPrice} (via live exchange ticker).`;
+        if (cbRes.ok) {
+          const cbData = await cbRes.json();
+          const amount = cbData?.data?.amount;
+          if (amount && Number(amount) > 0) {
+            const formattedPrice = Number(amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            answer = `Current spot price of ${targetSym}: ${formattedPrice} (via Coinbase live exchange spot).`;
             brief = `${targetSym} Price: ${formattedPrice}`.slice(0, 80);
-            sources.push('https://api.binance.com');
+            sources.push('https://api.coinbase.com');
           }
         }
       } catch (e) {}
+
+      // 2. Fallback to Binance US / Global Binance
+      if (!answer) {
+        try {
+          const endpoints = [
+            `https://api.binance.us/api/v3/ticker/price?symbol=${targetPair}`,
+            `https://api.binance.com/api/v3/ticker/price?symbol=${targetPair}`
+          ];
+          for (const ep of endpoints) {
+            try {
+              const cRes = await fetch(ep, { signal: AbortSignal.timeout(3000) });
+              if (cRes.ok) {
+                const cData = await cRes.json();
+                if (cData && cData.price) {
+                  const formattedPrice = Number(cData.price).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                  answer = `Current spot price of ${targetSym}: ${formattedPrice} (via live exchange ticker).`;
+                  brief = `${targetSym} Price: ${formattedPrice}`.slice(0, 80);
+                  sources.push(ep.includes('binance.us') ? 'https://api.binance.us' : 'https://api.binance.com');
+                  break;
+                }
+              }
+            } catch (errEp) {}
+          }
+        } catch (e) {}
+      }
     }
   }
 
