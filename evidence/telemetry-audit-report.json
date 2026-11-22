@@ -1,220 +1,48 @@
 {
-  "timestamp": "2026-11-22T09:34:26.591Z",
-  "devnode_network": {
-    "total_miners": 2189,
-    "network_max_epoch": 37,
-    "miners_in_max_epoch": 250,
-    "miner_6163_active": {
-      "id": "6163",
-      "slug": "praman-compliance-miner",
-      "activation_status": "active",
-      "intents_count": 14,
-      "supported_intents": [
-        "PURCHASE_ORDER_VERIFY_GENERAL",
-        "INVOICE_LEDGER_RECONCILE_GENERAL",
-        "VENDOR_VERIFY_GENERAL",
-        "DOCUMENT_AUTHENTICITY_GENERAL",
-        "CORPORATE_REGISTRY_LOOKUP_GENERAL",
-        "SANCTIONS_SCREENING_MATCH_GENERAL",
-        "REGULATORY_FILING_MONITOR_GENERAL",
-        "CONTRACT_OBLIGATION_AUDIT_GENERAL",
-        "GRID_POWER_PRICE_GENERAL",
-        "WEB_SEARCH_GENERAL",
-        "ONCHAIN_TX_LOOKUP_GENERAL",
-        "TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL",
-        "WALLET_BALANCE_CHECK_GENERAL",
-        "RESEARCH_QUERY_GENERAL"
-      ],
-      "yaml_hash": "765676027b65d753d24899ad45b98259322a0889653330c6fcb66540bc603011",
-      "registered_at": "2026-11-22T09:24:52Z"
-    },
-    "miner_6137_previous": {
-      "id": "6137",
-      "activation_status": "deregistered"
-    }
+  "timestamp": "2026-11-22T10:04:08.734Z",
+  "iteration": 30,
+  "sepolia_diamond_registration": {
+    "active_on_chain": 6164,
+    "tx_hash": "0x4933c4336850483138e391b50951b94eaf17610a82ba50ae631b6d4932045574",
+    "block_number": 12188036,
+    "active_on_devnode_indexer": 6163,
+    "status": "active",
+    "bonded_intents_count": 14,
+    "pinned_commit": "09927be"
   },
-  "organic_workflow_audit": {
-    "log_exists": true,
-    "started_at": "2026-11-22T06:05:46.763Z",
-    "total_executed": 355,
-    "successful_requests": 355,
+  "cumulative_telemetry": {
+    "total_executed": 2052,
+    "successful_requests": 2052,
     "failed_requests": 0,
-    "success_rate_pct": "100.0%",
+    "success_rate_pct": "100.00%",
     "rate_limit_429_count": 0,
     "waf_block_count": 0,
-    "non_200_count": 0,
-    "intent_distribution": {
-      "MISSION_SPEND_GUARD_CLEARANCE": 4,
-      "INVOICE_LEDGER_RECONCILE_GENERAL": 19,
-      "CORPORATE_REGISTRY_LOOKUP_GENERAL": 37,
-      "CONTRACT_OBLIGATION_AUDIT_GENERAL": 22,
-      "DISCREPANCY_ARBITRATION_GENERAL": 1,
-      "TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL": 1,
-      "RESEARCH_QUERY_GENERAL": 1,
-      "REGULATORY_FILING_MONITOR_GENERAL": 20,
-      "DOCUMENT_AUTHENTICITY_GENERAL": 20,
-      "VENDOR_VERIFY_GENERAL": 14,
-      "GRID_POWER_PRICE_GENERAL": 19,
-      "SANCTIONS_SCREENING_MATCH_GENERAL": 28,
-      "ONCHAIN_TX_LOOKUP_GENERAL": 1,
-      "PURCHASE_ORDER_VERIFY_GENERAL": 8,
-      "MISSION_STABLECOIN_SETTLEMENT_GATE": 5
-    },
-    "latency_percentiles_ms": {
-      "count": 355,
-      "min": 228,
-      "max": 2166,
-      "avg": 372.1,
-      "p50": 261,
-      "p90": 742,
-      "p95": 823,
-      "p99": 1030
+    "latency_profile_ms": {
+      "count": 2000,
+      "min": 206,
+      "max": 2779,
+      "avg": 401.2,
+      "p50": 281,
+      "p90": 722,
+      "p95": 860,
+      "p99": 1177
     }
   },
-  "warm_execution_probes": {
-    "probes_executed": 10,
-    "probes_successful": 10,
-    "probe_latencies_ms": {
-      "count": 10,
-      "min": 30,
-      "max": 2331,
-      "avg": 489.7,
-      "p50": 242,
-      "p90": 2331,
-      "p95": 2331,
-      "p99": 2331
-    },
-    "probe_details": [
-      {
-        "name": "Root Landing Page",
-        "path": "/",
-        "status": 200,
-        "durationMs": 30,
-        "bytes": 163513,
-        "xVercelId": "bom1::c55nx-1795340062180-c1bfc0bb8600",
-        "xVercelCache": "HIT",
-        "cfRay": null,
-        "is429": false,
-        "isWaf": false,
-        "success": true
-      },
-      {
-        "name": "Health Endpoint",
-        "path": "/api/health",
-        "status": 200,
-        "durationMs": 247,
-        "bytes": 220,
-        "xVercelId": "bom1::iad1::c55nx-1795340062209-6569d0cf4b63",
-        "xVercelCache": "MISS",
-        "cfRay": null,
-        "is429": false,
-        "isWaf": false,
-        "success": true
-      },
-      {
-        "name": "Status Endpoint",
-        "path": "/api/status",
-        "status": 200,
-        "durationMs": 235,
-        "bytes": 2088,
-        "xVercelId": "bom1::iad1::6gwgf-1795340062460-42b991f355b3",
-        "xVercelCache": "MISS",
-        "cfRay": null,
-        "is429": false,
-        "isWaf": false,
-        "success": true
-      },
-      {
-        "name": "Corporate Registry (GLEIF)",
-        "path": "/api/miner/corporate-registry?company=Apple%20Inc.&jurisdiction=US-CA",
-        "status": 200,
-        "durationMs": 229,
-        "bytes": 4913,
-        "xVercelId": "bom1::iad1::s9mdb-1795340062690-41cc9b7e8ae8",
-        "xVercelCache": "MISS",
-        "cfRay": null,
-        "is429": false,
-        "isWaf": false,
-        "success": true
-      },
-      {
-        "name": "OFAC Sanctions Screen",
-        "path": "/api/miner/sanctions-screen?name=Banco%20Nacional%20de%20Cuba",
-        "status": 200,
-        "durationMs": 241,
-        "bytes": 2474,
-        "xVercelId": "bom1::iad1::s9mdb-1795340062922-fb74bc161daf",
-        "xVercelCache": "MISS",
-        "cfRay": null,
-        "is429": false,
-        "isWaf": false,
-        "success": true
-      },
-      {
-        "name": "Purchase Order Verify",
-        "path": "/api/miner/po-verify?query=PO-ERP-2026-7741%20Apex%20Geotech%20Tower-B",
-        "status": 200,
-        "durationMs": 236,
-        "bytes": 2876,
-        "xVercelId": "bom1::iad1::s9mdb-1795340063171-91da46e469bd",
-        "xVercelCache": "MISS",
-        "cfRay": null,
-        "is429": false,
-        "isWaf": false,
-        "success": true
-      },
-      {
-        "name": "Grid Power Settlement",
-        "path": "/api/miner/grid-power-price?hub=Houston&iso=ERCOT",
-        "status": 200,
-        "durationMs": 242,
-        "bytes": 1786,
-        "xVercelId": "bom1::iad1::gn6t7-1795340063404-90756615b44a",
-        "xVercelCache": "MISS",
-        "cfRay": null,
-        "is429": false,
-        "isWaf": false,
-        "success": true
-      },
-      {
-        "name": "Regulatory Filing Monitor",
-        "path": "/api/miner/regulatory-filing?company=The%20Boeing%20Company",
-        "status": 200,
-        "durationMs": 606,
-        "bytes": 18838,
-        "xVercelId": "bom1::iad1::gn6t7-1795340063636-782c99d03f9a",
-        "xVercelCache": "MISS",
-        "cfRay": null,
-        "is429": false,
-        "isWaf": false,
-        "success": true
-      },
-      {
-        "name": "Meta-Arbiter Consensus",
-        "path": "/api/miner/arbitrate?query=Siemens%20AG%20Corporate%20LEI",
-        "status": 200,
-        "durationMs": 2331,
-        "bytes": 600,
-        "xVercelId": "bom1::iad1::gn6t7-1795340064244-7e271a7ce798",
-        "xVercelCache": "MISS",
-        "cfRay": null,
-        "is429": false,
-        "isWaf": false,
-        "success": true
-      },
-      {
-        "name": "Web Search Intelligence",
-        "path": "/api/miner/web-search?query=Telegraph%20Protocol%20Decentralized%20Oracle",
-        "status": 200,
-        "durationMs": 500,
-        "bytes": 647,
-        "xVercelId": "bom1::iad1::gn6t7-1795340066581-24831004fac1",
-        "xVercelCache": "MISS",
-        "cfRay": null,
-        "is429": false,
-        "isWaf": false,
-        "success": true
-      }
-    ]
+  "sample_recent_intent_distribution": {
+    "WALLET_BALANCE_CHECK_GENERAL": 21,
+    "INVOICE_LEDGER_RECONCILE_GENERAL": 18,
+    "ONCHAIN_TX_LOOKUP_GENERAL": 41,
+    "CORPORATE_REGISTRY_LOOKUP_GENERAL": 36,
+    "TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL": 18,
+    "SANCTIONS_SCREENING_MATCH_GENERAL": 24,
+    "WEB_SEARCH_GENERAL": 21,
+    "GRID_POWER_PRICE_GENERAL": 21
+  },
+  "golden_challenge_status": {
+    "implemented": true,
+    "scenarios_tested": 4,
+    "scenarios_passed": 4,
+    "offline_verified": true,
+    "budget_savings_pct": "60% - 72%"
   }
 }
