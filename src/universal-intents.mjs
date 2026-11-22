@@ -627,8 +627,8 @@ export async function arbitrateMultiMiner({ query, question, task, intent, miner
   if (collectedResponses.length < 2 && prompt) {
     // Add Praman Desk self-verdict as primary anchor
     collectedResponses.push({
-      miner_id: '6142',
-      provider: 'Praman Desk (Diamond #6142)',
+      miner_id: '6163',
+      provider: 'Praman Desk (Diamond #6163)',
       claim: prompt,
       verified: true,
       timestamp: new Date().toISOString()
@@ -639,6 +639,8 @@ export async function arbitrateMultiMiner({ query, question, task, intent, miner
       const peers = devnodeMiners.filter(m => 
         m.id !== '6137' && 
         m.id !== '6142' && 
+        m.id !== '6162' && 
+        m.id !== '6163' && 
         m.slug !== 'praman-compliance-miner' &&
         m.supported_intents?.includes(targetIntent) &&
         m.base_url &&

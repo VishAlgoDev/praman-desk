@@ -1,6 +1,6 @@
 version: "1"
 kind: miner
-id: 6162 # Sepolia Diamond Registration #6162 (Devnode Route #5281; on-chain yaml pin cfae72e)
+id: 6163 # Sepolia Diamond Registration #6163 (Devnode Route #5281; on-chain yaml pin e8ac057)
 slug: praman-compliance-miner
 protocol: generic
 name: Praman Desk Compliance & Procurement Auditor
@@ -330,6 +330,14 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Grid pricing hub or settlement node (e.g. NP15, SP15, ERCOT North, Houston)"
+          - name: node_or_zone
+            type: string
+            intents: ["*"]
+            description: "Settlement node or ISO pricing zone (e.g. NP15, SP15, Houston)"
+          - name: interval_start
+            type: string
+            intents: ["*"]
+            description: "ISO-8601 UTC timestamp or interval starting time"
           - name: iso
             type: string
             intents: ["*"]
@@ -409,6 +417,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "ERC-20 token contract address"
+          - name: token
+            type: string
+            intents: ["*"]
+            description: "Target ERC-20 token contract address or symbol"
           - name: address
             type: string
             intents: ["*"]
@@ -436,6 +448,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Target EVM wallet address"
+          - name: address
+            type: string
+            intents: ["*"]
+            description: "Target EVM account or wallet address"
           - name: token_address
             type: string
             intents: ["*"]
