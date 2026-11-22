@@ -140,7 +140,16 @@ export async function executeWebSearch({ query, question, q }) {
 
     if (targetPair) {
       // 1. Try Coinbase Public Ticker first (globally accessible without geo-blocking in US/Vercel)
-      const baseCoin = targetSym.replace(/USDT?$/i, '');
+      const tickerSymbolMap = {
+        'BITCOIN': 'BTC', 'BTC': 'BTC', 'BTCUSDT': 'BTC',
+        'ETHEREUM': 'ETH', 'ETH': 'ETH', 'ETHUSDT': 'ETH',
+        'SOLANA': 'SOL', 'SOL': 'SOL', 'SOLUSDT': 'SOL',
+        'BINANCECOIN': 'BNB', 'BNB': 'BNB', 'BNBUSDT': 'BNB',
+        'DOGECOIN': 'DOGE', 'DOGE': 'DOGE', 'DOGEUSDT': 'DOGE',
+        'RIPPLE': 'XRP', 'XRP': 'XRP', 'XRPUSDT': 'XRP',
+        'CARDANO': 'ADA', 'ADA': 'ADA', 'AVALANCHE': 'AVAX', 'AVAX': 'AVAX'
+      };
+      const baseCoin = tickerSymbolMap[targetSym] || targetSym.replace(/USDT?$/i, '');
       try {
         const cbRes = await fetch(`https://api.coinbase.com/v2/prices/${baseCoin}-USD/spot`, {
           signal: AbortSignal.timeout(3000)
