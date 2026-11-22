@@ -9,18 +9,45 @@ const auditLogPath = path.join(rootDir, 'evidence', 'organic-workflow-audit-log.
 const PROD_BASE = 'https://praman-desk.vercel.app';
 const DEVNODE_API = 'https://devnode.telegraphprotocol.com/api/miners';
 const TARGET_MINER_ID = '6137';
+const NEW_REGISTRATION_ID = '6162';
 
-async function fetchDevnodeMiner() {
+async function fetchDevnodeMiners() {
   const res = await fetch(DEVNODE_API);
   if (!res.ok) {
     throw new Error(`Failed to fetch Devnode miners: HTTP ${res.status}`);
   }
   const data = await res.json();
   const list = Array.isArray(data) ? data : data.miners || [];
-  const target = list.find(m => String(m.id) === TARGET_MINER_ID || String(m.minerId) === TARGET_MINER_ID);
+
+  const epochs = list.map(m => m.last_scored_epoch).filter(x => typeof x === 'number');
+  const maxEpoch = Math.max(...epochs);
+  const inMaxEpoch = list.filter(m => m.last_scored_epoch === maxEpoch);
+
+  // Also query direct miner endpoints for exact status
+  let direct6137 = null;
+  let direct6162 = null;
+  try {
+    const r6137 = await fetch(`${DEVNODE_API}/${TARGET_MINER_ID}`);
+    if (r6137.ok) {
+      const d = await r6137.json();
+      direct6137 = d.miner || d;
+    }
+  } catch {}
+
+  try {
+    const r6162 = await fetch(`${DEVNODE_API}/${NEW_REGISTRATION_ID}`);
+    if (r6162.ok) {
+      const d = await r6162.json();
+      direct6162 = d.miner || d;
+    }
+  } catch {}
+
   return {
     totalMinersInNetwork: list.length,
-    miner: target || null
+    maxEpochNetwork: maxEpoch,
+    minersInMaxEpoch: inMaxEpoch.length,
+    miner6137: direct6137,
+    miner6162: direct6162
   };
 }
 
@@ -32,7 +59,10 @@ async function probeWarmEndpoints() {
     { name: 'Corporate Registry (GLEIF)', path: '/api/miner/corporate-registry?company=Apple%20Inc.&jurisdiction=US-CA' },
     { name: 'OFAC Sanctions Screen', path: '/api/miner/sanctions-screen?name=Banco%20Nacional%20de%20Cuba' },
     { name: 'Purchase Order Verify', path: '/api/miner/po-verify?query=PO-ERP-2026-7741%20Apex%20Geotech%20Tower-B' },
-    { name: 'Grid Power Settlement', path: '/api/miner/grid-power-price?hub=Houston&iso=ERCOT' }
+    { name: 'Grid Power Settlement', path: '/api/miner/grid-power-price?hub=Houston&iso=ERCOT' },
+    { name: 'Regulatory Filing Monitor', path: '/api/miner/regulatory-filing?company=The%20Boeing%20Company' },
+    { name: 'Meta-Arbiter Consensus', path: '/api/miner/arbitrate?query=Siemens%20AG%20Corporate%20LEI' },
+    { name: 'Web Search Intelligence', path: '/api/miner/web-search?query=Telegraph%20Protocol%20Decentralized%20Oracle' }
   ];
 
   const results = [];
@@ -48,7 +78,7 @@ async function probeWarmEndpoints() {
     let bodyLen = 0;
 
     try {
-      const res = await fetch(url, { headers: { 'User-Agent': 'PramanDeskTelemetryAuditor/1.0' } });
+      const res = await fetch(url, { headers: { 'User-Agent': 'PramanDeskTelemetryAuditor/2.0' } });
       const elapsed = performance.now() - t0;
       status = res.status;
       ok = res.ok;
@@ -58,7 +88,6 @@ async function probeWarmEndpoints() {
       const text = await res.text();
       bodyLen = text.length;
 
-      // Check for rate limit / WAF triggers
       const is429 = status === 429;
       const isWaf = status === 403 || text.includes('cf-browser-verification') || text.includes('Attention Required! | Cloudflare') || text.includes('Just a moment...');
 
@@ -134,12 +163,13 @@ function computeLatencyPercentiles(latencies) {
 }
 
 async function runAudit() {
-  console.log('=== STARTING DEVNODE TELEMETRY & PERFORMANCE AUDIT ===\n');
+  console.log('=== STARTING DEVNODE TELEMETRY & UNIVERSAL PERFORMANCE AUDIT ===\n');
 
   // 1. Devnode Miner Query
-  console.log('Fetching miner #6137 status from Devnode API...');
-  const devnode = await fetchDevnodeMiner();
-  const miner = devnode.miner;
+  console.log('Fetching miner #6137 and registration #6162 from Devnode API...');
+  const devnode = await fetchDevnodeMiners();
+  const miner6137 = devnode.miner6137;
+  const miner6162 = devnode.miner6162;
 
   // 2. Audit Evidence Log
   console.log('Reading organic-workflow-audit-log.json...');
@@ -160,7 +190,7 @@ async function runAudit() {
   }
 
   // 3. Probe Warm Endpoints
-  console.log('Probing warm execution & edge routing on praman-desk.vercel.app...');
+  console.log('Probing warm execution & edge routing on praman-desk.vercel.app across 10 endpoints...');
   const probeResults = await probeWarmEndpoints();
   const probeLatencies = probeResults.filter(p => p.success).map(p => p.durationMs);
   const probePercentiles = computeLatencyPercentiles(probeLatencies);
@@ -169,17 +199,31 @@ async function runAudit() {
     timestamp: new Date().toISOString(),
     devnode_network: {
       total_miners: devnode.totalMinersInNetwork,
-      miner_id: TARGET_MINER_ID,
-      slug: miner?.slug,
-      name: miner?.name,
-      activation_status: miner?.activation_status,
-      total_requests_served: miner?.total_requests_served,
-      wallet_address: miner?.wallet_address,
-      base_url: miner?.base_url,
-      scored: miner?.scored,
-      last_scored_epoch: miner?.last_scored_epoch,
-      last_scored_at: miner?.last_scored_at,
-      scores: miner?.scores || []
+      network_max_epoch: devnode.maxEpochNetwork,
+      miners_in_max_epoch: devnode.minersInMaxEpoch,
+      miner_6137: {
+        id: TARGET_MINER_ID,
+        slug: miner6137?.slug,
+        name: miner6137?.name,
+        activation_status: miner6137?.activation_status,
+        total_requests_served: miner6137?.total_requests_served,
+        wallet_address: miner6137?.wallet_address,
+        base_url: miner6137?.base_url,
+        scored: miner6137?.scored,
+        last_scored_epoch: miner6137?.last_scored_epoch,
+        last_scored_at: miner6137?.last_scored_at,
+        scores_count: miner6137?.scores?.length || 0,
+        scores: miner6137?.scores || []
+      },
+      miner_6162_ingestion: {
+        id: NEW_REGISTRATION_ID,
+        ingested: miner6162 !== null,
+        details: miner6162 ? {
+          slug: miner6162.slug,
+          status: miner6162.activation_status,
+          intents_count: miner6162.supported_intents?.length
+        } : 'Pending Devnode cron / indexer sync from Sepolia Diamond tx 0x5566d8c5... (block 12187735)'
+      }
     },
     organic_workflow_audit: {
       log_exists: auditLog.exists,
@@ -205,16 +249,16 @@ async function runAudit() {
   };
 
   console.log('\n=== AUDIT SUMMARY REPORT ===');
-  console.log(`Miner: #${report.devnode_network.miner_id} (${report.devnode_network.name})`);
-  console.log(`Status: ${report.devnode_network.activation_status} | Devnode Network Total Requests Served: ${report.devnode_network.total_requests_served}`);
-  console.log(`Scored: ${report.devnode_network.scored} (Epoch: ${report.devnode_network.last_scored_epoch}, At: ${report.devnode_network.last_scored_at})`);
-  console.log(`Scores Count: ${report.devnode_network.scores.length}`);
-  console.log(`--- Organic Workflow Batch ---`);
+  console.log(`Devnode Network: ${report.devnode_network.total_miners} Miners | Network Max Epoch: ${report.devnode_network.network_max_epoch} (${report.devnode_network.miners_in_max_epoch} miners transitioned)`);
+  console.log(`Miner #6137: ${report.devnode_network.miner_6137.activation_status} | Requests Served: ${report.devnode_network.miner_6137.total_requests_served}`);
+  console.log(`Miner #6137 Scored Intents: ${report.devnode_network.miner_6137.scores_count} intents in Epoch ${report.devnode_network.miner_6137.last_scored_epoch}`);
+  console.log(`Miner #6162 Ingestion Status: ${report.devnode_network.miner_6162_ingestion.ingested ? 'INGESTED' : 'PENDING DEVNODE SYNC'}`);
+  console.log(`--- Organic Workflow Cumulative Batch ---`);
   console.log(`Total Executed: ${report.organic_workflow_audit.total_executed}`);
   console.log(`Successful: ${report.organic_workflow_audit.successful_requests} | Failed: ${report.organic_workflow_audit.failed_requests} (Success Rate: ${report.organic_workflow_audit.success_rate_pct})`);
   console.log(`Rate-limit 429: ${report.organic_workflow_audit.rate_limit_429_count} | WAF Blocks: ${report.organic_workflow_audit.waf_block_count}`);
   console.log(`Organic Batch Latencies (ms) -> Min: ${percentiles.min}, Avg: ${percentiles.avg}, P50: ${percentiles.p50}, P90: ${percentiles.p90}, P95: ${percentiles.p95}, Max: ${percentiles.max}`);
-  console.log(`--- Warm Live Probe Latencies ---`);
+  console.log(`--- Warm Live Probe Latencies (10 Endpoints) ---`);
   console.log(`Live Probe Latencies (ms) -> Min: ${probePercentiles.min}, Avg: ${probePercentiles.avg}, P50: ${probePercentiles.p50}, P95: ${probePercentiles.p95}, Max: ${probePercentiles.max}`);
   
   return report;

@@ -480,12 +480,15 @@ endpoints:
         optional:
           - name: prompt
             type: string
+            intents: ["*"]
             description: "Task or claim being arbitrated across miners"
           - name: intent
             type: string
+            intents: ["*"]
             description: "Target intent family"
           - name: candidates
             type: array
+            intents: ["*"]
             description: "Candidate miner outputs to arbitrate"
 
 semantics:
