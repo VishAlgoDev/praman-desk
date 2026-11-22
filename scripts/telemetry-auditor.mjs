@@ -8,8 +8,8 @@ const rootDir = path.resolve(__dirname, '..');
 const auditLogPath = path.join(rootDir, 'evidence', 'organic-workflow-audit-log.json');
 const PROD_BASE = 'https://praman-desk.vercel.app';
 const DEVNODE_API = 'https://devnode.telegraphprotocol.com/api/miners';
-const TARGET_MINER_ID = '6137';
-const NEW_REGISTRATION_ID = '6162';
+const TARGET_MINER_ID = '6163';
+const PREVIOUS_MINER_ID = '6137';
 
 async function fetchDevnodeMiners() {
   const res = await fetch(DEVNODE_API);
@@ -24,21 +24,21 @@ async function fetchDevnodeMiners() {
   const inMaxEpoch = list.filter(m => m.last_scored_epoch === maxEpoch);
 
   // Also query direct miner endpoints for exact status
+  let direct6163 = null;
   let direct6137 = null;
-  let direct6162 = null;
   try {
-    const r6137 = await fetch(`${DEVNODE_API}/${TARGET_MINER_ID}`);
-    if (r6137.ok) {
-      const d = await r6137.json();
-      direct6137 = d.miner || d;
+    const r6163 = await fetch(`${DEVNODE_API}/${TARGET_MINER_ID}`);
+    if (r6163.ok) {
+      const d = await r6163.json();
+      direct6163 = d.miner || d;
     }
   } catch {}
 
   try {
-    const r6162 = await fetch(`${DEVNODE_API}/${NEW_REGISTRATION_ID}`);
-    if (r6162.ok) {
-      const d = await r6162.json();
-      direct6162 = d.miner || d;
+    const r6137 = await fetch(`${DEVNODE_API}/${PREVIOUS_MINER_ID}`);
+    if (r6137.ok) {
+      const d = await r6137.json();
+      direct6137 = d.miner || d;
     }
   } catch {}
 
@@ -46,8 +46,8 @@ async function fetchDevnodeMiners() {
     totalMinersInNetwork: list.length,
     maxEpochNetwork: maxEpoch,
     minersInMaxEpoch: inMaxEpoch.length,
-    miner6137: direct6137,
-    miner6162: direct6162
+    miner6163: direct6163,
+    miner6137: direct6137
   };
 }
 
@@ -166,10 +166,10 @@ async function runAudit() {
   console.log('=== STARTING DEVNODE TELEMETRY & UNIVERSAL PERFORMANCE AUDIT ===\n');
 
   // 1. Devnode Miner Query
-  console.log('Fetching miner #6137 and registration #6162 from Devnode API...');
+  console.log('Fetching active miner #6163 and previous #6137 from Devnode API...');
   const devnode = await fetchDevnodeMiners();
+  const miner6163 = devnode.miner6163;
   const miner6137 = devnode.miner6137;
-  const miner6162 = devnode.miner6162;
 
   // 2. Audit Evidence Log
   console.log('Reading organic-workflow-audit-log.json...');
@@ -201,28 +201,18 @@ async function runAudit() {
       total_miners: devnode.totalMinersInNetwork,
       network_max_epoch: devnode.maxEpochNetwork,
       miners_in_max_epoch: devnode.minersInMaxEpoch,
-      miner_6137: {
+      miner_6163_active: {
         id: TARGET_MINER_ID,
-        slug: miner6137?.slug,
-        name: miner6137?.name,
-        activation_status: miner6137?.activation_status,
-        total_requests_served: miner6137?.total_requests_served,
-        wallet_address: miner6137?.wallet_address,
-        base_url: miner6137?.base_url,
-        scored: miner6137?.scored,
-        last_scored_epoch: miner6137?.last_scored_epoch,
-        last_scored_at: miner6137?.last_scored_at,
-        scores_count: miner6137?.scores?.length || 0,
-        scores: miner6137?.scores || []
+        slug: miner6163?.slug,
+        activation_status: miner6163?.activation_status,
+        intents_count: miner6163?.supported_intents?.length || 0,
+        supported_intents: miner6163?.supported_intents || [],
+        yaml_hash: miner6163?.yaml_hash,
+        registered_at: miner6163?.registered_at
       },
-      miner_6162_ingestion: {
-        id: NEW_REGISTRATION_ID,
-        ingested: miner6162 !== null,
-        details: miner6162 ? {
-          slug: miner6162.slug,
-          status: miner6162.activation_status,
-          intents_count: miner6162.supported_intents?.length
-        } : 'Pending Devnode cron / indexer sync from Sepolia Diamond tx 0x5566d8c5... (block 12187735)'
+      miner_6137_previous: {
+        id: PREVIOUS_MINER_ID,
+        activation_status: miner6137?.activation_status
       }
     },
     organic_workflow_audit: {
@@ -250,9 +240,8 @@ async function runAudit() {
 
   console.log('\n=== AUDIT SUMMARY REPORT ===');
   console.log(`Devnode Network: ${report.devnode_network.total_miners} Miners | Network Max Epoch: ${report.devnode_network.network_max_epoch} (${report.devnode_network.miners_in_max_epoch} miners transitioned)`);
-  console.log(`Miner #6137: ${report.devnode_network.miner_6137.activation_status} | Requests Served: ${report.devnode_network.miner_6137.total_requests_served}`);
-  console.log(`Miner #6137 Scored Intents: ${report.devnode_network.miner_6137.scores_count} intents in Epoch ${report.devnode_network.miner_6137.last_scored_epoch}`);
-  console.log(`Miner #6162 Ingestion Status: ${report.devnode_network.miner_6162_ingestion.ingested ? 'INGESTED' : 'PENDING DEVNODE SYNC'}`);
+  console.log(`Active Miner #6163: ${report.devnode_network.miner_6163_active.activation_status} | Intents: ${report.devnode_network.miner_6163_active.intents_count} bonded intents`);
+  console.log(`Previous Registration #6137: ${report.devnode_network.miner_6137_previous.activation_status}`);
   console.log(`--- Organic Workflow Cumulative Batch ---`);
   console.log(`Total Executed: ${report.organic_workflow_audit.total_executed}`);
   console.log(`Successful: ${report.organic_workflow_audit.successful_requests} | Failed: ${report.organic_workflow_audit.failed_requests} (Success Rate: ${report.organic_workflow_audit.success_rate_pct})`);
