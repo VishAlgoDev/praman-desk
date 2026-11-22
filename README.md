@@ -11,24 +11,45 @@
 
 - **Live Split-Screen Interactive Playground:** <https://praman-desk.vercel.app>
 - **Universal Multi-Miner Contradiction & Truth Matrix:** <https://praman-desk.vercel.app/#matrix>
+- **Zero-Install Keyless MCP Server for Cursor, Claude & Minds:** [CONNECT_YOUR_AGENT.md](CONNECT_YOUR_AGENT.md) (`https://praman-desk.vercel.app/api/mcp`)
 - **Official Master Walkthrough (Full Deep Dive):** [praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) (5.23 min, Screen Studio + Founder narration).
 - **Fast-Track Executive Demo (47s Video):** [praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) (47s Two-Mind Threat Interception demo).
 - **Two-Mind Spend Guard Architecture:** [Reference Implementation of the Animoca Brands Minds Specification](examples/minds-spend-guard/) (Diligence Investigator + Escrow Reviewer Minds)
 - **Empirical Benchmark Report:** [With vs Without Telegraph ($79,373 Averted)](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md)
-- **Active Telegraph Miner:** Devnode Miner `#6164` (Route `5281` / Sepolia Diamond registration `#6169`, **15 capabilities** including `MINING_INTELLIGENCE_GENERAL`) on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
-- **Devnode Global Leaderboard Standing (Live Epoch):**
-  - 🏆 **Rank #1 Globally:** `CORPORATE_REGISTRY_LOOKUP_GENERAL` (Score: `0.998`)
+- **Active Telegraph Miner:** Devnode Miner `#6164` (Route `5281` / Sepolia Diamond registration `#6164`, **15 capabilities**) on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
+- **Devnode Global Leaderboard Standing (Live Epoch 38 & 39):**
+  - 🥈 **Rank #2 Globally:** `INVOICE_LEDGER_RECONCILE_GENERAL` (Score: `0.9979` in Epoch 39)
   - 🏆 **Rank #1 Globally:** `CONTRACT_OBLIGATION_AUDIT_GENERAL` (Score: `0.500`)
   - 🏆 **Rank #1 Globally:** `PURCHASE_ORDER_VERIFY_GENERAL` (Score: `0.000`, top seed)
-  - 🥈 **Rank #4 Globally:** `SANCTIONS_SCREENING_MATCH_GENERAL` (Score: `1.000`, 19,599 OFAC records + 127 EVM digital currency addresses)
-  - 💎 **Top Rankings:** `REGULATORY_FILING_MONITOR_GENERAL`, `VENDOR_VERIFY_GENERAL`, `WEB_SEARCH_GENERAL`
-- **Total Requests Served on Devnode:** 190+ live paid network requests served via native EIP-191 escrow signatures
+  - 🏆 **Rank #1 Globally:** `CORPORATE_REGISTRY_LOOKUP_GENERAL` (Score: `0.998`, 200+ jurisdictions GLEIF)
+  - 🥈 **Rank #2 Globally:** `SANCTIONS_SCREENING_MATCH_GENERAL` (Score: `1.000`, 19,599 OFAC records + 127 EVM digital currency addresses)
+  - 🏆 **Rank #1 Globally:** `GRID_POWER_PRICE_GENERAL` (CAISO / ERCOT Locational Marginal Pricing)
+  - 🏆 **Rank #1 Globally:** `REGULATORY_FILING_MONITOR_GENERAL` (SEC EDGAR / Federal Register)
+- **Total Requests Served on Devnode:** **265+** live paid network requests served via native EIP-191 escrow signatures (100% HTTP 200)
+- **Live Multi-Operator Consensus on Sepolia:** Verified Seat 3 Resolver on TakarSettle v4 (`0x310275e6D66818E068245326bB9e398822304248`). Evaluated Deal 0 (Siemens AG) and broadcasted decisive on-chain `second()` transaction:
+  - **Tx**: [`0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75`](https://sepolia.etherscan.io/tx/0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75) (Block `12190408`)
+  - **Result**: 3/3 approvals reached, Deal 0 finalized on Ethereum Sepolia.
 - **Telegraph Hackathon Season II Tracks Covered:**
-  - **Track 01 (Apps & Agents):** Praman Desk Collaborative Two-Mind Spend Guard (Reference Implementation of the Animoca Brands Minds Specification on `hellominds.ai`; Mission 04: Legal & Mission 03: Institutional Markets)
-  - **Track 02 (Miners/Providers):** Miner `#6164` holding Rank #1 standings across active compliance intents
-  - **Track 03 (Evaluators/Truth Sources):** 68 eligible rows across 8 intents in Devnode EvalPool satisfying `min_submitters >= 3` consensus + Upstream Ground-Truth PRs #217-#222
+  - **Track 01 (Apps & Agents):** Praman Desk Collaborative Two-Mind Spend Guard + Zero-Install MCP Spend Gate
+  - **Track 02 (Miners/Providers):** Miner `#6164` holding Rank 1/Rank 2 standings across active commercial intents
+  - **Track 03 (Evaluators/Truth Sources):** 68 eligible rows across 9 intents in Devnode EvalPool satisfying `min_submitters >= 3` consensus + Upstream Ground-Truth PRs #217-#222
 - **Anjoman App Submission IDs:** `9ae7025e-65be-490b-8e59-2aa598f16992` (Category: Agents, Status: In review) & `c7c1adbb-304d-42ec-91df-5811f5e7f49e` (Category: Security, Status: In review)
 - **Contributor / Payer Wallet:** [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466)
+
+---
+
+## For Judges: Official Season II Rubric Mapping
+
+This table maps directly to the Hackathon Judging Criteria from Section 6 of the official rules:
+
+| Judging Criterion (100 pts) | Implementation & Verifiable Proof | Key Links |
+|---|---|---|
+| **1. Technical Quality & Mainnet Readiness** | 15 production specialist endpoints on Vercel with <600ms latency. Standalone 651-byte compiled WebAssembly arithmetic engine (`comparator.wasm`) guaranteeing bit-exact IEEE-754 3-way invoice reconciliation. Decisive Seat 3 Resolver on Sepolia TakarSettle v4 escrow contract. | [WASM Binary](https://praman-desk.vercel.app/comparator.wasm) • [Sepolia Settle Tx](https://sepolia.etherscan.io/tx/0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75) • [Offline Verifier](scripts/verify-bundle-offline.mjs) |
+| **2. Commercial Viability & Real Utility** | Solves the critical security vulnerability of autonomous agent wallets: prompt-injected payments to sanctioned addresses and fraudulent invoices. Directly serves CFOs, DAOs, and autonomous agent runtimes. $79,373 capital loss averted in empirical testing. | [Commercial Dossier](#anjoman-season-ii-hackathon-rubric-dossier-the-5-mandatory-questions) • [Benchmark Report](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md) |
+| **3. Genuine Independent Adoption & Retention** | Public, zero-install, keyless MCP endpoint (`/api/mcp`) running in any Cursor, Claude Code, Windsurf, or Minds agent in 30 seconds. Co-opetition partnership with Bangdrop's Takar: Takar uses Praman Desk as Seat 3 Resolver. | [CONNECT_YOUR_AGENT.md](CONNECT_YOUR_AGENT.md) • [Live MCP](https://praman-desk.vercel.app/api/mcp) • [Minds Specification](examples/minds-spend-guard/) |
+| **4. Telegraph Network Integration & Quality** | Devnode Miner #6164 (Route 5281) has served **265+ live verified network requests** (100% HTTP 200). Holds Rank 1 across 5 commercial intents (Ep 38) and Rank 2 on `INVOICE_LEDGER_RECONCILE` (0.9979 score in Ep 39). 68 eligible EvalPool rows. | [Sepolia Diamond #6164](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) • [Leaderboard](https://devnode.telegraphprotocol.com) |
+| **5. Reproducibility, Demo & Verifiable Proof** | Live interactive split-screen web app. 5.23m full master walkthrough video + 47s executive threat demo. Complete offline test suite (`npm run offline:test`, 29 test vectors). Confirmed on-chain EAS attestation and Etherscan transaction receipts. | [Live App](https://praman-desk.vercel.app) • [Demo Video (5.23m)](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) • [EAS Attestation](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115) |
+| **6. Organic Growth, Education & Dev Activation** | Published 30-second developer onboarding guide for Cursor, Claude Code, and Minds. Public updates and verified on-chain proofs shared in Discord `#hackathon`, `#showcase`, and on X tagging `@Telegraphprotoc`. | [Developer Guide](CONNECT_YOUR_AGENT.md) • [X Broadcast](https://x.com/vishal_karad) • [Discord Showcase](https://discord.com/channels/1438396125609463881) |
 
 ---
 

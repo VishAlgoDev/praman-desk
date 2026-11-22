@@ -252,5 +252,22 @@
     "tx_hash": null,
     "reason": "OFAC_SDN_SANCTIONS_HARD_BLOCK",
     "execution_note": "Declined by Resolver 3: OFAC_SDN_SANCTIONS_HARD_BLOCK"
+  },
+  {
+    "timestamp": "2026-11-22T18:15:19.964Z",
+    "resolver_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "deal_id": "0",
+    "counterparty_name": "Siemens AG",
+    "payer": "0x39D2bae5EAedA9283535dDC98F1991c81eD5Cd7E",
+    "payee": "0xF6c2CC14fF024225e0473c92B5c9F6336427108C",
+    "amount_usd": 1,
+    "verdict": "APPROVE_PAYMENT",
+    "authorized": true,
+    "proposal_hash": "0x4197241b6c4f3641c5de8d94de28c2d59412b1b1594333e2a23ae4d2fbd4f25a",
+    "bundle_sha256": "0x58328da3b6b587420a7e5ff00ad97ab82bca1cb693aabfdb31f2dc6ab983e020",
+    "seconded": true,
+    "tx_hash": "0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75",
+    "reason": "All 7 claims verified compliant",
+    "execution_note": "Confirmed in block 12190408"
   }
 ]

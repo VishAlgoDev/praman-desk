@@ -28,7 +28,7 @@
   - 🥈 **Rank #2 Globally**: SANCTIONS_SCREENING_MATCH_GENERAL (Score: 1.0000, 19,599 OFAC records + 127 EVM digital currency addresses)
   - 💎 **Rank #6 Globally**: CORPORATE_REGISTRY_LOOKUP_GENERAL (Score: 1.0000, 200+ jurisdictions GLEIF)
   - **Gold Rush Autonomous Multi-Miner Aggregator & Scope Resolution Engine**: Ingesting and arbitrating live competitor dossiers (Takar, OathCast miner 64176, NFT KING miner 7310050) with automated hierarchical scope resolution (shaft vs reef vs field) and on-chain EAS Sepolia attestations ([UID 0x33d85bed...](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115))
-  - 255+ live network requests served on Devnode Miner #6164
+  - 265+ live network requests served on Devnode Miner #6164 (100% HTTP 200)
 - **Supporting Track**: Track 03 — Evaluators & Truth Sources:
   - 68 Attested Rows in EvalPool (100% Eligible across 9 Intents)
   - **Upstream PR #217**: `CONTRACT_OBLIGATION` adapter (Mission 04 / #192)
