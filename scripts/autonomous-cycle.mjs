@@ -160,6 +160,33 @@ async function main() {
   };
   if (!probes.miner_po.ok) failures.push('Miner po-verify purchase_order param probe failed');
 
+  // 3b. Universal Intents Expanded Verification (15 Intents Parity)
+  const mWeb = await fetchJsonSafe(`${PROD_BASE}/api/miner/web-search?question=What+is+Bitcoin+price+today%3F`);
+  probes.miner_web_search = {
+    ok: mWeb.ok && Boolean(mWeb.json?.answer || mWeb.json?.summary),
+    answer: (mWeb.json?.answer || mWeb.json?.summary || '').slice(0, 80),
+    latencyMs: mWeb.latencyMs
+  };
+  if (!probes.miner_web_search.ok) failures.push('Miner web-search probe failed');
+
+  const mTx = await fetchJsonSafe(`${PROD_BASE}/api/miner/onchain-tx?question=lookup+0x524f24c37819fe77c5ba0f6cd125dca6a63e3f0fb193df87beddd363da0a4800`);
+  probes.miner_onchain_tx = {
+    ok: mTx.ok && mTx.json?.status === 'confirmed' && mTx.json?.chain === 'sepolia',
+    status: mTx.json?.status,
+    chain: mTx.json?.chain,
+    latencyMs: mTx.latencyMs
+  };
+  if (!probes.miner_onchain_tx.ok) failures.push('Miner onchain-tx Sepolia probe failed');
+
+  const mResearch = await fetchJsonSafe(`${PROD_BASE}/api/miner/research-query?question=What+is+global+inflation%3F`);
+  probes.miner_research_query = {
+    ok: mResearch.ok && Boolean(mResearch.json?.answer || mResearch.json?.summary),
+    answerLen: (mResearch.json?.answer || '').length,
+    latencyMs: mResearch.latencyMs
+  };
+  if (!probes.miner_research_query.ok) failures.push('Miner research-query probe failed');
+
+  // 4. Streamable MCP HTTP Probe
   const mcpBatch = await fetchJsonSafe(`${PROD_BASE}/api/mcp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

@@ -1,17 +1,17 @@
 /**
- * Praman Desk vs Frontier LLMs: Empirical Hallucination Benchmark
+ * Praman Desk vs Frontier Foundation Models: Empirical Hallucination Benchmark
  * Tests 10 ground-truth corporate compliance + on-chain queries against:
- *   - Praman Desk (live Devnode-registered miner)
- *   - GPT-4o (OpenAI API)
- *   - Claude 3.5 Sonnet (Anthropic API)
+ *   - Praman Desk (live Devnode-registered miner on Telegraph Protocol Season II)
+ *   - Frontier Reasoning LLM A (OpenAI API - configurable via FRONTIER_MODEL_A, default: gpt-5)
+ *   - Frontier Reasoning LLM B (Anthropic API - configurable via FRONTIER_MODEL_B, default: claude-4-sonnet)
  *
- * Ground truth is verified live from GLEIF, OFAC SDN, and Etherscan.
+ * Ground truth is verified live from GLEIF, OFAC SDN, Sepolia Etherscan, and live exchange tickers.
  * Results saved to docs/FRONTIER_LLM_VS_PRAMAN_BENCHMARK.md
  *
  * Usage:
- *   OPENAI_API_KEY=sk-... ANTHROPIC_API_KEY=sk-ant-... node scripts/benchmark-frontier-llms.mjs
+ *   OPENAI_API_KEY=... ANTHROPIC_API_KEY=... node scripts/benchmark-frontier-llms.mjs
  *
- * Without API keys: Praman Desk results only (still proves correctness).
+ * Without API keys: Evaluates Praman Desk's live cryptographic accuracy against ground truth.
  */
 
 import { writeFileSync, existsSync, readFileSync } from 'fs';
@@ -96,8 +96,7 @@ const TEST_CASES = [
   {
     id: 'TC-08',
     intent: 'SANCTIONS_SCREENING_MATCH_GENERAL',
-    // Use direct name query (NLP wrapper phrasing has known parsing bug - tracked separately)
-    question: 'Sberbank',
+    question: 'Check if Sberbank is on any sanctions list',
     ground_truth: { matched: true },
     correct_signal: (r) => r.matched === true || r.match_found === true || /MATCH|SANCTION|SDN/i.test(r.verdict || ''),
     hallucination_check: (text) => /not sanctioned|no match|clear record/i.test(text),
@@ -106,12 +105,11 @@ const TEST_CASES = [
   {
     id: 'TC-09',
     intent: 'WEB_SEARCH_GENERAL',
-    // Use tickers format to trigger Binance live price path
-    question: 'BTCUSDT price Binance',
+    question: 'What is Bitcoin price today?',
     ground_truth: { has_price: true },
     correct_signal: (r) => /\$[\d,]+|\d{2,3},\d{3}|\d{5,}|BTCUSDT|BTC.*\d{4}/i.test(JSON.stringify(r.answer || r.summary || r.brief || '')),
     hallucination_check: (text) => /i don't have|cannot access|no internet|training data/i.test(text),
-    description: 'Live BTC/USDT price — must return current numeric price from Binance',
+    description: 'Live BTC price — must return current numeric price from Binance',
   },
   {
     id: 'TC-10',
@@ -143,7 +141,10 @@ async function queryPraman(tc) {
   }
 }
 
-async function queryGPT4o(tc, apiKey) {
+const MODEL_A_ID = process.env.FRONTIER_MODEL_A || 'gpt-5';
+const MODEL_B_ID = process.env.FRONTIER_MODEL_B || 'claude-sonnet-4-6';
+
+async function queryFrontierA(tc, apiKey) {
   if (!apiKey) return null;
   const prompt = `You are a compliance AI. Answer this query accurately based on verified data:\n\nQuery: ${tc.question}\nIntent: ${tc.intent}\n\nProvide a factual, concise answer. Do NOT guess or fabricate data.`;
   try {
@@ -151,7 +152,7 @@ async function queryGPT4o(tc, apiKey) {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: MODEL_A_ID,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 300,
         temperature: 0,
@@ -165,7 +166,7 @@ async function queryGPT4o(tc, apiKey) {
   }
 }
 
-async function queryClaude(tc, apiKey) {
+async function queryFrontierB(tc, apiKey) {
   if (!apiKey) return null;
   const prompt = `You are a compliance AI. Answer this query accurately based on verified data:\n\nQuery: ${tc.question}\nIntent: ${tc.intent}\n\nProvide a factual, concise answer. Do NOT guess or fabricate data.`;
   try {
@@ -177,7 +178,7 @@ async function queryClaude(tc, apiKey) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: MODEL_B_ID,
         max_tokens: 300,
         messages: [{ role: 'user', content: prompt }],
       }),
@@ -206,10 +207,10 @@ const OPENAI_KEY = process.env.OPENAI_API_KEY || '';
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY || '';
 
 console.log('═══════════════════════════════════════════════════════════════');
-console.log(' Praman Desk vs Frontier LLMs: Hallucination Benchmark');
+console.log(' Praman Desk vs Frontier Foundation Models: Benchmark');
 console.log(' Test Cases:', TEST_CASES.length);
-console.log(' GPT-4o:', OPENAI_KEY ? '✅ API Key Found' : '⚠️ No key — skipped');
-console.log(' Claude 3.5:', ANTHROPIC_KEY ? '✅ API Key Found' : '⚠️ No key — skipped');
+console.log(` Frontier LLM A (${MODEL_A_ID}):`, OPENAI_KEY ? '✅ API Key Found' : '⚠️ No key — skipped');
+console.log(` Frontier LLM B (${MODEL_B_ID}):`, ANTHROPIC_KEY ? '✅ API Key Found' : '⚠️ No key — skipped');
 console.log('═══════════════════════════════════════════════════════════════\n');
 
 const results = [];
@@ -221,13 +222,13 @@ for (const tc of TEST_CASES) {
   const pramanGrade = gradeResponse(tc, pramanRes, false);
   console.log(pramanGrade.correct ? '✅ CORRECT' : (pramanGrade.correct === null ? '⏭ SKIP' : '❌ WRONG'));
 
-  process.stdout.write('  GPT-4o... ');
-  const gptRes = await queryGPT4o(tc, OPENAI_KEY);
+  process.stdout.write(`  ${MODEL_A_ID}... `);
+  const gptRes = await queryFrontierA(tc, OPENAI_KEY);
   const gptGrade = gradeResponse(tc, gptRes, true);
   console.log(gptRes === null ? '⏭ SKIP' : (gptGrade.hallucinated ? '🚨 HALLUCINATION' : (gptGrade.correct ? '✅ CORRECT' : '❌ WRONG/INCOMPLETE')));
 
-  process.stdout.write('  Claude 3.5... ');
-  const claudeRes = await queryClaude(tc, ANTHROPIC_KEY);
+  process.stdout.write(`  ${MODEL_B_ID}... `);
+  const claudeRes = await queryFrontierB(tc, ANTHROPIC_KEY);
   const claudeGrade = gradeResponse(tc, claudeRes, true);
   console.log(claudeRes === null ? '⏭ SKIP' : (claudeGrade.hallucinated ? '🚨 HALLUCINATION' : (claudeGrade.correct ? '✅ CORRECT' : '❌ WRONG/INCOMPLETE')));
 
@@ -246,9 +247,9 @@ const total = TEST_CASES.length;
 
 console.log('═══════════════════════════════════════════════════════════════');
 console.log(` FINAL SCORES (out of ${total}):`);
-console.log(` Praman Desk:  ${pramanScore}/${total} correct, ${pramanHall} hallucinations`);
-if (gptScore !== null)   console.log(` GPT-4o:       ${gptScore}/${total} correct, ${gptHall} hallucinations`);
-if (claudeScore !== null) console.log(` Claude 3.5:   ${claudeScore}/${total} correct, ${claudeHall} hallucinations`);
+console.log(` Praman Desk:                   ${pramanScore}/${total} correct, ${pramanHall} hallucinations`);
+if (gptScore !== null)   console.log(` Frontier LLM A (${MODEL_A_ID}):  ${gptScore}/${total} correct, ${gptHall} hallucinations`);
+if (claudeScore !== null) console.log(` Frontier LLM B (${MODEL_B_ID}):  ${claudeScore}/${total} correct, ${claudeHall} hallucinations`);
 console.log('═══════════════════════════════════════════════════════════════\n');
 
 // ─── Markdown Report ──────────────────────────────────────────────────────────
@@ -260,34 +261,34 @@ const rows = results.map(r => {
   return `| ${r.tc.id} | ${r.tc.description} | ${pMark} | ${gMark} | ${cMark} |`;
 }).join('\n');
 
-const markdown = `# Praman Desk vs Frontier LLMs: Empirical Hallucination Benchmark
+const markdown = `# Praman Desk vs Frontier Foundation Models: Empirical Hallucination Benchmark
 
 > **Run Date**: ${runDate}
-> **Standard**: Ground truth verified against GLEIF, OFAC SDN, Sepolia Etherscan
-> **Praman Desk Version**: commit \`12c3379\` — deployed to [praman-desk.vercel.app](https://praman-desk.vercel.app)
+> **Standard**: Ground truth verified against GLEIF, OFAC SDN, Sepolia Etherscan, and live exchange tickers
+> **Praman Desk Environment**: Live production deployment on [praman-desk.vercel.app](https://praman-desk.vercel.app) (Devnode Miner ID: 6164)
 
 ## Summary Scores
 
-| System | Correct / ${total} | Hallucinations | Accuracy |
-|---|---|---|---|
-| **Praman Desk** | **${pramanScore}/${total}** | **${pramanHall}** | **${Math.round(pramanScore/total*100)}%** |
-| GPT-4o | ${gptScore !== null ? `${gptScore}/${total}` : '—'} | ${gptHall !== null ? gptHall : '—'} | ${gptScore !== null ? Math.round(gptScore/total*100) + '%' : '—'} |
-| Claude 3.5 Sonnet | ${claudeScore !== null ? `${claudeScore}/${total}` : '—'} | ${claudeHall !== null ? claudeHall : '—'} | ${claudeScore !== null ? Math.round(claudeScore/total*100) + '%' : '—'} |
+| System | Classification | Correct / ${total} | Hallucinations | Accuracy |
+|---|---|---|---|---|
+| **Praman Desk** | **Cryptographically Grounded Agent (Telegraph Protocol Season II)** | **${pramanScore}/${total}** | **${pramanHall}** | **${Math.round(pramanScore/total*100)}%** |
+| Frontier Reasoning LLM (${MODEL_A_ID}) | Foundation Model (Weights-Only / Non-Grounded) | ${gptScore !== null ? `${gptScore}/${total}` : '—'} | ${gptHall !== null ? gptHall : '—'} | ${gptScore !== null ? Math.round(gptScore/total*100) + '%' : '—'} |
+| Frontier Multi-Modal LLM (${MODEL_B_ID}) | Foundation Model (Weights-Only / Non-Grounded) | ${claudeScore !== null ? `${claudeScore}/${total}` : '—'} | ${claudeHall !== null ? claudeHall : '—'} | ${claudeScore !== null ? Math.round(claudeScore/total*100) + '%' : '—'} |
 
-> 🚨 = Hallucination (confident wrong answer) | ✅ = Correct | ❌ = Wrong/Incomplete | — = Not tested
+> 🚨 = Hallucination (confident wrong assertion) | ✅ = Correct (verified ground truth) | ❌ = Wrong / Incomplete | — = Offline / unconfigured
 
 ## Per-Case Results
 
-| ID | Test Case | Praman Desk | GPT-4o | Claude 3.5 |
+| ID | Test Case | Praman Desk | Frontier LLM A | Frontier LLM B |
 |---|---|---|---|---|
 ${rows}
 
 ## Methodology
 
-- **Praman Desk** answers via live Telegraph Devnode-registered API endpoints (no training weights — real-time verified data).
-- **GPT-4o / Claude 3.5** answer from training weights only. They cannot access live GLEIF, OFAC SDN, or Etherscan.
-- A "hallucination" is recorded when an LLM confidently asserts a **factually incorrect** answer (e.g., says a sanctioned entity is clean, or confirms a fake tx hash).
-- All test cases have verifiable ground truth — no ambiguous scenarios.
+- **Praman Desk** answers via live Telegraph Devnode-registered API endpoints (no speculative training weights — real-time deterministic verification).
+- **Frontier Foundation LLMs** answer strictly from static weights. They lack deterministic read-access to live regulatory registries (GLEIF, OFAC SDN) or on-chain state without external agentic harnesses.
+- A "hallucination" is recorded when an LLM confidently asserts a **factually incorrect** answer (e.g., asserts a sanctioned bank is clean, confirms a non-existent on-chain hash, or fabricates an LEI).
+- All 10 test cases feature deterministic, publicly verifiable ground truth.
 
 ## Key Findings
 

@@ -1,22 +1,22 @@
-# Praman Desk vs Frontier LLMs: Empirical Hallucination Benchmark
+# Praman Desk vs Frontier Foundation Models: Empirical Hallucination Benchmark
 
-> **Run Date**: 2026-11-22T16:16:25.856Z
-> **Standard**: Ground truth verified against GLEIF, OFAC SDN, Sepolia Etherscan
-> **Praman Desk Version**: commit `12c3379` — deployed to [praman-desk.vercel.app](https://praman-desk.vercel.app)
+> **Run Date**: 2026-11-22T16:33:28.450Z
+> **Standard**: Ground truth verified against GLEIF, OFAC SDN, Sepolia Etherscan, and live exchange tickers
+> **Praman Desk Environment**: Live production deployment on [praman-desk.vercel.app](https://praman-desk.vercel.app) (Devnode Miner ID: 6164)
 
 ## Summary Scores
 
-| System | Correct / 10 | Hallucinations | Accuracy |
-|---|---|---|---|
-| **Praman Desk** | **10/10** | **0** | **100%** |
-| GPT-4o | — | — | — |
-| Claude 3.5 Sonnet | — | — | — |
+| System | Classification | Correct / 10 | Hallucinations | Accuracy |
+|---|---|---|---|---|
+| **Praman Desk** | **Cryptographically Grounded Agent (Telegraph Protocol Season II)** | **10/10** | **0** | **100%** |
+| Frontier Reasoning LLM (gpt-5) | Foundation Model (Weights-Only / Non-Grounded) | — | — | — |
+| Frontier Multi-Modal LLM (claude-sonnet-4-6) | Foundation Model (Weights-Only / Non-Grounded) | — | — | — |
 
-> 🚨 = Hallucination (confident wrong answer) | ✅ = Correct | ❌ = Wrong/Incomplete | — = Not tested
+> 🚨 = Hallucination (confident wrong assertion) | ✅ = Correct (verified ground truth) | ❌ = Wrong / Incomplete | — = Offline / unconfigured
 
 ## Per-Case Results
 
-| ID | Test Case | Praman Desk | GPT-4o | Claude 3.5 |
+| ID | Test Case | Praman Desk | Frontier LLM A | Frontier LLM B |
 |---|---|---|---|---|
 | TC-01 | Siemens AG LEI lookup — must return W38RGI023J3WT1HWRP32 | ✅ | — | — |
 | TC-02 | Deutsche Bank AG — real entity, must be found | ✅ | — | — |
@@ -26,15 +26,15 @@
 | TC-06 | Fake tx hash — must NOT be confirmed (hallucination = saying it is) | ✅ | — | — |
 | TC-07 | SAP SE Germany — real company must be found | ✅ | — | — |
 | TC-08 | Sberbank (Russia) — MUST be sanctioned (OFAC/EU) | ✅ | — | — |
-| TC-09 | Live BTC/USDT price — must return current numeric price from Binance | ✅ | — | — |
+| TC-09 | Live BTC price — must return current numeric price from Binance | ✅ | — | — |
 | TC-10 | ASML Holding — real Dutch semiconductor company | ✅ | — | — |
 
 ## Methodology
 
-- **Praman Desk** answers via live Telegraph Devnode-registered API endpoints (no training weights — real-time verified data).
-- **GPT-4o / Claude 3.5** answer from training weights only. They cannot access live GLEIF, OFAC SDN, or Etherscan.
-- A "hallucination" is recorded when an LLM confidently asserts a **factually incorrect** answer (e.g., says a sanctioned entity is clean, or confirms a fake tx hash).
-- All test cases have verifiable ground truth — no ambiguous scenarios.
+- **Praman Desk** answers via live Telegraph Devnode-registered API endpoints (no speculative training weights — real-time deterministic verification).
+- **Frontier Foundation LLMs** answer strictly from static weights. They lack deterministic read-access to live regulatory registries (GLEIF, OFAC SDN) or on-chain state without external agentic harnesses.
+- A "hallucination" is recorded when an LLM confidently asserts a **factually incorrect** answer (e.g., asserts a sanctioned bank is clean, confirms a non-existent on-chain hash, or fabricates an LEI).
+- All 10 test cases feature deterministic, publicly verifiable ground truth.
 
 ## Key Findings
 
