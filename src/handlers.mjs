@@ -2784,7 +2784,14 @@ export function verifyDocumentAuthenticityPrimary({
   const amountsMatch = amountsFinite && Math.abs(amountDelta) < 0.01;
   const authentic = isHex64 && amountsMatch;
 
-  const verdict = authentic
+  const stdVerdict = authentic
+    ? 'Authentic'
+    : !isHex64 || !amountsFinite
+    ? 'Inconclusive'
+    : 'Forged';
+
+  const verdict = stdVerdict;
+  const auditVerdict = authentic
     ? 'Authentic'
     : !isHex64
     ? 'Invalid Digest Format'
@@ -2802,7 +2809,8 @@ export function verifyDocumentAuthenticityPrimary({
     document: documentRef,
     authentic,
     verdict,
-    evidence,
+    audit_verdict: auditVerdict,
+    evidence: [evidence],
     digest_valid_hex64: isHex64,
     signed_qr_amount: Number.isFinite(qrAmt) ? qrAmt : null,
     pdf_face_amount: Number.isFinite(faceAmt) ? faceAmt : null,
@@ -4543,14 +4551,19 @@ export async function evaluateDocumentEndpoint(merged) {
 
   const promptMatch = evaluateDocumentAuthenticityPrompt(docText);
   if (promptMatch) {
-    const verdict = promptMatch.verdict || (promptMatch.authentic ? 'AUTHENTIC AND UNALTERED' : 'INVALID / TAMPERED');
-    const summary = promptMatch.summary || promptMatch.explanation || `VERDICT: ${verdict}. ${promptMatch.document}`;
+    const stdVerdict = promptMatch.authentic ? 'Authentic' : 'Forged';
+    const auditVerdict = promptMatch.verdict || (promptMatch.authentic ? 'AUTHENTIC AND UNALTERED' : 'INVALID / TAMPERED');
+    const summary = promptMatch.summary || promptMatch.explanation || `VERDICT: ${stdVerdict}. ${promptMatch.document}`;
+    const evidenceList = Array.isArray(promptMatch.evidence)
+      ? promptMatch.evidence
+      : [promptMatch.explanation || promptMatch.summary || summary];
     return {
       document: promptMatch.document,
       authentic: promptMatch.authentic,
-      verdict,
+      verdict: stdVerdict,
+      audit_verdict: auditVerdict,
       status: promptMatch.status,
-      evidence: promptMatch.evidence,
+      evidence: evidenceList,
       summary,
       explanation: promptMatch.explanation || summary,
       reason: summary,
@@ -4582,12 +4595,14 @@ export async function evaluateDocumentEndpoint(merged) {
     if (re.test(docText)) findings.push(reason);
   }
   if (findings.length > 0) {
-    const verdict = 'INVALID / TAMPERED';
+    const verdict = 'Forged';
+    const auditVerdict = 'INVALID / TAMPERED';
     const summary = `VERDICT: ${verdict}. ${findings.join(' ')}`;
     return {
       document: docText || 'Document verification request',
       authentic: false,
       verdict,
+      audit_verdict: auditVerdict,
       status: 'tampered_or_invalid',
       evidence: findings,
       summary,
@@ -4680,14 +4695,16 @@ export async function evaluateDocumentEndpoint(merged) {
       };
     }
 
-    const verdict = amountsMismatch ? 'INVALID / AMOUNT TAMPERING' : 'AUTHENTIC AND UNALTERED';
-    const summary = `VERDICT: ${verdict}. ${out.evidence || ''}`.trim();
+    const verdict = amountsMismatch ? 'Forged' : 'Authentic';
+    const auditVerdict = amountsMismatch ? 'INVALID / AMOUNT TAMPERING' : 'AUTHENTIC AND UNALTERED';
+    const summary = `VERDICT: ${verdict}. ${Array.isArray(out.evidence) ? out.evidence[0] : (out.evidence || '')}`.trim();
     return {
       document: out.document,
       authentic: out.authentic,
       verdict,
+      audit_verdict: auditVerdict,
       status: out.authentic ? 'authentic' : 'forged',
-      evidence: [out.evidence],
+      evidence: Array.isArray(out.evidence) ? out.evidence : [out.evidence],
       summary,
       explanation: summary,
       reason: summary,
@@ -4834,7 +4851,8 @@ export async function evaluateDocumentEndpoint(merged) {
 
   if (!hasNegation && /^[0-9a-f]{64}$/.test(explicitIrn) && /^[0-9a-f]{64}$/.test(secondHash)) {
     const digMatch = explicitIrn === secondHash;
-    const verdict = digMatch ? 'AUTHENTIC AND UNALTERED' : 'INVALID / TAMPERED';
+    const verdict = digMatch ? 'Authentic' : 'Forged';
+    const auditVerdict = digMatch ? 'AUTHENTIC AND UNALTERED' : 'INVALID / TAMPERED';
     const detail = digMatch
       ? `Cryptographic SHA-256 digests match cleanly (0x${explicitIrn.slice(0, 12)}...${explicitIrn.slice(-8)}).`
       : `Cryptographic digest mismatch: 0x${explicitIrn.slice(0, 12)}... !== 0x${secondHash.slice(0, 12)}...`;
@@ -4843,6 +4861,7 @@ export async function evaluateDocumentEndpoint(merged) {
       document: docText || 'Document verification request',
       authentic: digMatch,
       verdict,
+      audit_verdict: auditVerdict,
       status: digMatch ? 'authentic' : 'tampered',
       evidence: [detail],
       summary,
@@ -7282,9 +7301,24 @@ export async function handleApiRequest(req, res) {
             /CAM/i.test(rawText) ? ['Lease Clause 4.2', 'Lease Clause 5.3'] :
             ['Contract Obligation Standards']
           );
+          // Devnode Official Schema Enum: ["Compliant", "Partially compliant", "Non-compliant", "Unclear"]
+          let standardVerdict = "Non-compliant";
+          if (evalResult.compliant === true) {
+            standardVerdict = "Compliant";
+          } else if (evalResult.partially_compliant === true || /partial/i.test(evalResult.status || '')) {
+            standardVerdict = "Partially compliant";
+          } else if (evalResult.unclear === true) {
+            standardVerdict = "Unclear";
+          } else {
+            standardVerdict = "Non-compliant";
+          }
+
           return sendJson(res, 200, {
             ...evalResult,
-            verdict: evalResult.verdict || 'BREACH',
+            verdict: standardVerdict,
+            audit_verdict: evalResult.verdict || standardVerdict,
+            obligations: Array.isArray(evalResult.obligations) ? evalResult.obligations : citations,
+            clauses: Array.isArray(evalResult.clauses) ? evalResult.clauses : citations,
             penalty_amount: penaltyAmount,
             citations,
             summary,
@@ -7306,7 +7340,10 @@ export async function handleApiRequest(req, res) {
         return sendJson(res, 200, {
           verified: false,
           compliant: false,
-          verdict: rawText ? 'UNDER_REVIEW' : 'INSUFFICIENT_EVIDENCE',
+          verdict: 'Unclear',
+          audit_verdict: rawText ? 'UNDER_REVIEW' : 'INSUFFICIENT_EVIDENCE',
+          obligations: ['Statutory Contract Standards'],
+          clauses: ['General Contract Terms'],
           status: rawText ? 'review_pending' : 'insufficient_evidence',
           penalty_amount: 0.0,
           citations: ['Statutory Contract Standards'],
