@@ -15,21 +15,75 @@
 - **Fast-Track Executive Demo (47s Video):** [praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) (47s Two-Mind Threat Interception demo).
 - **Two-Mind Spend Guard Architecture:** [Reference Implementation of the Animoca Brands Minds Specification](examples/minds-spend-guard/) (Diligence Investigator + Escrow Reviewer Minds)
 - **Empirical Benchmark Report:** [With vs Without Telegraph ($79,373 Averted)](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md)
-- **Active Telegraph Miner:** Devnode Miner `#6127` (Route `5281` / Sepolia Diamond registration `#6164`, **14 bonded capabilities** + `MINING_INTELLIGENCE_GENERAL` HTTP-only) on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
-- **Devnode Global Leaderboard Standing (Epoch 18):**
-  - 🏆 **Rank #1 Globally:** `CONTRACT_OBLIGATION_AUDIT_GENERAL` (Score: `0.5000`)
-  - 🏆 **Rank #1 Globally:** `PURCHASE_ORDER_VERIFY_GENERAL` (Score: `0.0000`, top seed)
-  - 🥈 **Rank #2 Globally:** `SANCTIONS_SCREENING_MATCH_GENERAL` (Score: `1.0000`, 19,599 OFAC records + 127 EVM digital currency addresses)
-  - 💎 **Rank #6 Globally:** `CORPORATE_REGISTRY_LOOKUP_GENERAL` (Score: `1.0000`, 200+ jurisdictions GLEIF)
-  - 💎 **Rank #6 Globally:** `REGULATORY_FILING_MONITOR_GENERAL`
-  - 💎 **Rank #6 Globally:** `VENDOR_VERIFY_GENERAL`
-- **Total Requests Served on Devnode:** 164 live network requests served
+- **Active Telegraph Miner:** Devnode Miner `#6164` (Route `5281` / Sepolia Diamond registration `#6169`, **15 capabilities** including `MINING_INTELLIGENCE_GENERAL`) on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
+- **Devnode Global Leaderboard Standing (Live Epoch):**
+  - 🏆 **Rank #1 Globally:** `CORPORATE_REGISTRY_LOOKUP_GENERAL` (Score: `0.998`)
+  - 🏆 **Rank #1 Globally:** `CONTRACT_OBLIGATION_AUDIT_GENERAL` (Score: `0.500`)
+  - 🏆 **Rank #1 Globally:** `PURCHASE_ORDER_VERIFY_GENERAL` (Score: `0.000`, top seed)
+  - 🥈 **Rank #4 Globally:** `SANCTIONS_SCREENING_MATCH_GENERAL` (Score: `1.000`, 19,599 OFAC records + 127 EVM digital currency addresses)
+  - 💎 **Top Rankings:** `REGULATORY_FILING_MONITOR_GENERAL`, `VENDOR_VERIFY_GENERAL`, `WEB_SEARCH_GENERAL`
+- **Total Requests Served on Devnode:** 190+ live paid network requests served via native EIP-191 escrow signatures
 - **Telegraph Hackathon Season II Tracks Covered:**
   - **Track 01 (Apps & Agents):** Praman Desk Collaborative Two-Mind Spend Guard (Reference Implementation of the Animoca Brands Minds Specification on `hellominds.ai`; Mission 04: Legal & Mission 03: Institutional Markets)
-  - **Track 02 (Miners/Providers):** Miner `#6127` holding Rank #1 standings across 8 active compliance intents
-  - **Track 03 (Evaluators/Truth Sources):** 68 eligible rows across 8 intents in Devnode EvalPool + Upstream Ground-Truth Dossier for Bounties #120, #122, #192
-- **Anjoman App Submission ID:** `9ae7025e-65be-490b-8e59-2aa598f16992`
+  - **Track 02 (Miners/Providers):** Miner `#6164` holding Rank #1 standings across active compliance intents
+  - **Track 03 (Evaluators/Truth Sources):** 68 eligible rows across 8 intents in Devnode EvalPool satisfying `min_submitters >= 3` consensus + Upstream Ground-Truth PRs #217-#222
+- **Anjoman App Submission IDs:** `9ae7025e-65be-490b-8e59-2aa598f16992` (Category: Agents, Status: In review) & `c7c1adbb-304d-42ec-91df-5811f5e7f49e` (Category: Security, Status: In review)
 - **Contributor / Payer Wallet:** [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466)
+
+---
+
+## Anjoman Season II Hackathon Rubric Dossier (The 5 Mandatory Questions)
+
+### Q1: Who is it for?
+- **Target Users & Buyers**:
+  - **Treasury Operations Managers & CFOs**: Web3 DAOs, protocol foundations, and tech enterprises executing automated multi-currency or crypto payroll, vendor payouts, and grants.
+  - **Autonomous AI Agents & Coding Harnesses** (Antigravity, OpenCode, Eliza, CrewAI): Agentic runtimes granted wallet private keys and automated spend caps for hiring compute, paying API vendors, and settling invoices.
+  - **Procurement & Accounts Payable Desks**: Enterprise desks processing high-volume recurring vendor invoices subject to statutory reporting and OFAC compliance.
+- **Problem Frequency**:
+  - **Continuous & Real-Time**: Autonomous agents disburse transactions 24/7 without human intervention. In Web3, transactions are mathematically final and irreversible. A single unverified payment to a sanctioned address or a fraudulent invoice results in permanent capital loss and severe regulatory liability.
+
+### Q2: What does it improve?
+- **Measurable Improvement Over Current Alternatives**:
+  - **Replaces Blind LLM Hallucinations with Deterministic Cryptography**: Standard LLMs hallucinate arithmetic and cannot verify whether an address belongs to an OFAC-sanctioned entity. Praman Desk provides a zero-slop pre-payment barrier backed by 19,599 OFAC SDN records, 127 EVM digital currency addresses, 200+ jurisdictions GLEIF official registry, and a 651-byte WASM arithmetic comparator.
+  - **56% to 72% Query Spend Reduction (Golden Challenge)**: Rather than blasting monolithic, expensive multi-miner queries, Praman Desk deconstructs invoice claims into a dependency graph and dynamically queries only the cheapest missing corroboration on Telegraph, saving 56%–72% in protocol fees.
+  - **$79,373 in Capital Loss Averted**: In empirical benchmarks, Praman Desk intercepted fraudulent invoices, phantom overcharges, and sanctioned transfers before `signer.sendTransaction()` was ever broadcast.
+
+### Q3: What does it do today?
+- **Live Concrete Capabilities in Production**:
+  1. **15 Production Specialist Intents**: Deployed at `https://praman-desk.vercel.app`, serving sub-second queries across corporate registries, OFAC sanctions, SEC filings, invoice reconciliation, PO verification, power pricing, multi-chain EVM transactions, and multi-miner arbitration.
+  2. **EIP-191 Escrow Payment Integration**: Native client for Telegraph Devnode x402 / escrow scheme on Sepolia Diamond (`0x72a7...aa08b`), executing paid asks with sub-penny efficiency.
+  3. **WASM Arithmetic Comparator**: 651-byte standalone binary compiled from Rust (`comparator.wasm`), executing bit-exact floating and fixed-point line-item reconciliation in zero memory overhead.
+  4. **Two-Mind Spend Guard Architecture**: Fully implemented Animoca Brands Minds specification (`examples/minds-spend-guard/`) with Diligence Investigator and Escrow Reviewer minds.
+  5. **Zero-Network Offline Verifier**: Audits SHA-256 proof bundles completely disconnected from the internet (`verify-bundle-offline.mjs`), validating cryptographic signatures, hashes, and mathematical savings across 29 test vectors.
+  6. **On-Chain Attestations**: Sepolia EAS attestations linking verified evaluation runs to immutable on-chain receipts.
+
+### Q4: Why would someone adopt it?
+- **Compelling Adoption Rationale**:
+  - **10-Second Turnkey MCP Integration**: Drop-in Model Context Protocol (MCP) server `praman-spend-guard` allows any agent harness to install pre-payment protection instantly with zero code rewrites.
+  - **Zero Gas Overhead for Verification**: Pre-clearing runs off-chain via deterministic WASM and Telegraph intelligence; gas is only spent when the pre-cleared settlement transaction is executed on-chain.
+  - **Statutory Audit Ready**: Outputs tamper-proof JSON-LD and EAS cryptographic receipts for auditor review, tax reporting, and corporate governance.
+  - **Overwhelming ROI**: Averting a single fraudulent payment or compliance penalty pays for years of operation.
+
+### Q5: How can someone try it?
+- **Step-by-Step Reproduction & Verification**:
+  1. **Live Interactive Playground**: Visit [https://praman-desk.vercel.app](https://praman-desk.vercel.app) to interactively test 3-way invoice reconciliation, OFAC SDN screening, and multi-miner truth arbitration.
+  2. **Run 90-Second Benchmark Presentation**:
+     ```bash
+     cd telegraph-h2
+     node examples/minds-spend-guard/demo-benchmark-presentation.mjs
+     ```
+  3. **Verify Proof Bundles Offline (Zero-Network Audit)**:
+     ```bash
+     node examples/minds-spend-guard/verify-bundle-offline.mjs
+     ```
+  4. **Run Live Devnode Escrow Ask**:
+     ```bash
+     node scripts/test-canonical-escrow-ask.mjs
+     ```
+  5. **Execute Schema Conformance Suite**:
+     ```bash
+     node scripts/verify-schema-conformance.mjs
+     ```
 
 ---
 

@@ -83,39 +83,119 @@ export async function executeWebSearch({ query, question, q }) {
   let answer = '';
   let brief = '';
 
-  // 1. Try Wikipedia REST / Search API for factual & encyclopedic questions
-  try {
-    const wikiSearchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(rawQuery)}&utf8=&format=json`;
-    const wRes = await fetch(wikiSearchUrl, { headers: { 'User-Agent': 'PramanDesk-Intelligence/2.0' } });
-    if (wRes.ok) {
-      const wData = await wRes.json();
-      const firstHit = wData.query?.search?.[0];
-      if (firstHit && firstHit.title) {
-        const pageTitle = firstHit.title;
-        const pageUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle.replace(/ /g, '_'))}`;
-        sources.push(pageUrl);
+  // 1. Dynamic weather query check
+  const weatherMatch = rawQuery.match(/(?:weather|temperature|forecast)(?:\s+(?:in|for|at))?\s+([a-zA-Z\s]+)/i) ||
+                       rawQuery.match(/([a-zA-Z\s]+)\s+(?:weather|temperature|forecast)/i);
+  if (weatherMatch && weatherMatch[1]) {
+    const city = weatherMatch[1].trim().replace(/\b(?:today|tomorrow|now|current|this week)\b/gi, '').trim();
+    if (city.length >= 2 && city.length <= 40) {
+      try {
+        const wRes = await fetch(`https://wttr.in/${encodeURIComponent(city)}?format=3`, {
+          signal: AbortSignal.timeout(3000)
+        });
+        if (wRes.ok) {
+          const wText = (await wRes.text()).trim();
+          if (wText && !wText.includes('<html>') && !wText.includes('Unknown location')) {
+            answer = `Current weather report for ${city}: ${wText}`;
+            brief = wText.slice(0, 80);
+            sources.push(`https://wttr.in/${encodeURIComponent(city)}`);
+          }
+        }
+      } catch (e) {}
+    }
+  }
 
-        // Fetch direct summary extract
-        const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pageTitle.replace(/ /g, '_'))}`;
-        const sRes = await fetch(summaryUrl, { headers: { 'User-Agent': 'PramanDesk-Intelligence/2.0' } });
-        if (sRes.ok) {
-          const sData = await sRes.json();
-          if (sData.extract) {
-            answer = sData.extract;
-            brief = (sData.description || sData.extract.split('.')[0] || pageTitle).slice(0, 80);
+  // 2. Dynamic crypto / token spot price query check
+  if (!answer) {
+    const cryptoMatch = rawQuery.match(/(?:price|rate|cost|value)(?:\s+of)?\s+(\$?[a-zA-Z0-9]+)/i) ||
+                        rawQuery.match(/(\$?[a-zA-Z0-9]+)\s+(?:price|rate|cost|value)/i);
+    if (cryptoMatch && cryptoMatch[1]) {
+      const sym = cryptoMatch[1].replace('$', '').toUpperCase();
+      const cryptoMap = {
+        'ETH': 'ETHUSDT', 'ETHEREUM': 'ETHUSDT',
+        'BTC': 'BTCUSDT', 'BITCOIN': 'BTCUSDT',
+        'SOL': 'SOLUSDT', 'SOLANA': 'SOLUSDT',
+        'USDC': 'USDCUSDT', 'BNB': 'BNBUSDT',
+        'DOGE': 'DOGEUSDT', 'XRP': 'XRPUSDT',
+        'ADA': 'ADAUSDT', 'AVAX': 'AVAXUSDT'
+      };
+      const pair = cryptoMap[sym];
+      if (pair) {
+        try {
+          const cRes = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${pair}`, {
+            signal: AbortSignal.timeout(3000)
+          });
+          if (cRes.ok) {
+            const cData = await cRes.json();
+            if (cData && cData.price) {
+              const formattedPrice = Number(cData.price).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+              answer = `Current spot price of ${sym}: ${formattedPrice} (via live exchange ticker).`;
+              brief = `${sym} Price: ${formattedPrice}`.slice(0, 80);
+              sources.push('https://api.binance.com');
+            }
+          }
+        } catch (e) {}
+      }
+    }
+  }
+
+  // 3. Wikipedia search with direct snippet synthesis (answers direct factual questions e.g. "capital of Australia")
+  if (!answer) {
+    try {
+      const wikiSearchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(rawQuery)}&utf8=&format=json`;
+      const wRes = await fetch(wikiSearchUrl, {
+        headers: { 'User-Agent': 'PramanDesk-Intelligence/2.0' },
+        signal: AbortSignal.timeout(4000)
+      });
+      if (wRes.ok) {
+        const wData = await wRes.json();
+        const hits = wData.query?.search || [];
+        if (hits.length > 0) {
+          const bestHit = hits[0];
+          const pageTitle = bestHit.title;
+          const pageUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle.replace(/ /g, '_'))}`;
+          sources.push(pageUrl);
+
+          const cleanSnippets = hits.slice(0, 3)
+            .map(h => (h.snippet || '').replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&#039;/g, "'").trim())
+            .filter(Boolean);
+
+          let extract = '';
+          try {
+            const summaryUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pageTitle.replace(/ /g, '_'))}`;
+            const sRes = await fetch(summaryUrl, {
+              headers: { 'User-Agent': 'PramanDesk-Intelligence/2.0' },
+              signal: AbortSignal.timeout(3000)
+            });
+            if (sRes.ok) {
+              const sData = await sRes.json();
+              if (sData.extract) extract = sData.extract;
+              if (sData.description) brief = sData.description;
+            }
+          } catch (e) {}
+
+          if (cleanSnippets.length > 0 && extract) {
+            answer = `${extract}\n\nSearch Context:\n` + cleanSnippets.map((s, idx) => `[${idx + 1}] ${s}`).join('\n');
+          } else {
+            answer = extract || cleanSnippets.join(' ') || `Factual verification for ${pageTitle}.`;
+          }
+
+          if (!brief) {
+            brief = (cleanSnippets[0] || extract || pageTitle).slice(0, 80);
           }
         }
       }
-    }
-  } catch (e) {
-    // Wikipedia fallback handled below
+    } catch (e) {}
   }
 
-  // 2. Try Google News RSS for current news, market events, or regulatory filings
+  // 4. Google News RSS fallback for news/current events
   if (!answer || answer.length < 50) {
     try {
       const newsUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(rawQuery)}&hl=en-US&gl=US&ceid=US:en`;
-      const nRes = await fetch(newsUrl, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } });
+      const nRes = await fetch(newsUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+        signal: AbortSignal.timeout(3000)
+      });
       if (nRes.ok) {
         const text = await nRes.text();
         const items = text.match(/<item>[\s\S]*?<\/item>/g) || [];
@@ -139,33 +219,10 @@ export async function executeWebSearch({ query, question, q }) {
           }
         }
       }
-    } catch (e) {
-      // News fallback handled below
-    }
+    } catch (e) {}
   }
 
-  // 3. Try DuckDuckGo Instant Answer API fallback
-  if (!answer) {
-    try {
-      const ddgUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(rawQuery)}&format=json&no_html=1&skip_disambig=1`;
-      const dRes = await fetch(ddgUrl, { headers: { 'User-Agent': 'PramanDesk-Intelligence/2.0' } });
-      if (dRes.ok) {
-        const dData = await dRes.json();
-        if (dData.AbstractText) {
-          answer = dData.AbstractText;
-          if (dData.AbstractURL) sources.push(dData.AbstractURL);
-          brief = (dData.Heading || rawQuery).slice(0, 80);
-        } else if (dData.Answer) {
-          answer = dData.Answer;
-          brief = (dData.Answer.toString()).slice(0, 80);
-        }
-      }
-    } catch (e) {
-      // DuckDuckGo fallback handled below
-    }
-  }
-
-  // 4. Default factual synthesis if external scrapers were rate-limited
+  // 5. Default fallback
   if (!answer) {
     answer = `Web search verification for query: "${rawQuery}". No authoritative public index entry returned.`;
     brief = rawQuery.slice(0, 80);
@@ -261,81 +318,11 @@ export async function lookupOnchainTx({ tx_hash, hash, chain, question, query })
     };
   }
 
-  // Iterate through available RPCs for the target chain
-  const rpcs = RPC_ENDPOINTS[targetChain] || RPC_ENDPOINTS.ethereum;
-  for (const rpc of rpcs) {
-    try {
-      const txRes = await fetch(rpc, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'eth_getTransactionByHash',
-          params: [targetHash]
-        }),
-        signal: AbortSignal.timeout(4000)
-      });
-
-      if (!txRes.ok) continue;
-      const txData = await txRes.json();
-      const tx = txData.result;
-
-      if (tx && tx.hash) {
-        let status = 'confirmed';
-        let blockNumber = tx.blockNumber ? parseInt(tx.blockNumber, 16) : null;
-
-        try {
-          const receiptRes = await fetch(rpc, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              jsonrpc: '2.0',
-              id: 2,
-              method: 'eth_getTransactionReceipt',
-              params: [targetHash]
-            }),
-            signal: AbortSignal.timeout(4000)
-          });
-
-          if (receiptRes.ok) {
-            const receiptData = await receiptRes.json();
-            const receipt = receiptData.result;
-            if (receipt) {
-              status = receipt.status === '0x1' ? 'confirmed' : 'reverted';
-              if (receipt.blockNumber) {
-                blockNumber = parseInt(receipt.blockNumber, 16);
-              }
-            } else if (!blockNumber) {
-              status = 'pending';
-            }
-          }
-        } catch (re) {
-          // Receipt lookup fallback
-        }
-
-        const valueEth = tx.value ? parseInt(tx.value, 16) / 1e18 : 0;
-
-        return {
-          tx_hash: tx.hash,
-          status,
-          from: tx.from,
-          to: tx.to,
-          block_number: blockNumber,
-          value_eth: valueEth,
-          chain: targetChain,
-          confidence: 1.0,
-          summary: `Transaction ${tx.hash} is ${status} in block ${blockNumber || 'pending'} on ${targetChain} (value: ${valueEth} ETH)`
-        };
-      }
-    } catch (e) {
-      // Continue to next RPC
-    }
-  }
-
-  // Check Ethereum mainnet if chain wasn't explicitly specified
-  if (targetChain !== 'ethereum') {
-    for (const rpc of RPC_ENDPOINTS.ethereum) {
+  // Iterate through available RPCs for the target chain and fallback chains
+  const candidateChains = [targetChain, ...Object.keys(RPC_ENDPOINTS).filter(c => c !== targetChain)];
+  for (const c of candidateChains) {
+    const rpcs = RPC_ENDPOINTS[c] || [];
+    for (const rpc of rpcs) {
       try {
         const txRes = await fetch(rpc, {
           method: 'POST',
@@ -346,7 +333,7 @@ export async function lookupOnchainTx({ tx_hash, hash, chain, question, query })
             method: 'eth_getTransactionByHash',
             params: [targetHash]
           }),
-          signal: AbortSignal.timeout(4000)
+          signal: AbortSignal.timeout(3000)
         });
 
         if (!txRes.ok) continue;
@@ -356,7 +343,36 @@ export async function lookupOnchainTx({ tx_hash, hash, chain, question, query })
         if (tx && tx.hash) {
           let status = 'confirmed';
           let blockNumber = tx.blockNumber ? parseInt(tx.blockNumber, 16) : null;
-          const valueEth = tx.value ? parseInt(tx.value, 16) / 1e18 : 0;
+
+          try {
+            const receiptRes = await fetch(rpc, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                jsonrpc: '2.0',
+                id: 2,
+                method: 'eth_getTransactionReceipt',
+                params: [targetHash]
+              }),
+              signal: AbortSignal.timeout(3000)
+            });
+
+            if (receiptRes.ok) {
+              const receiptData = await receiptRes.json();
+              const receipt = receiptData.result;
+              if (receipt) {
+                status = receipt.status === '0x1' ? 'confirmed' : 'reverted';
+                if (receipt.blockNumber) {
+                  blockNumber = parseInt(receipt.blockNumber, 16);
+                }
+              } else if (!blockNumber) {
+                status = 'pending';
+              }
+            }
+          } catch (re) {}
+
+          const valueEth = tx.value ? Number(BigInt(tx.value) / 100000000000000n) / 10000 : 0;
+
           return {
             tx_hash: tx.hash,
             status,
@@ -364,13 +380,13 @@ export async function lookupOnchainTx({ tx_hash, hash, chain, question, query })
             to: tx.to,
             block_number: blockNumber,
             value_eth: valueEth,
-            chain: 'ethereum',
+            chain: c,
             confidence: 1.0,
-            summary: `Transaction ${tx.hash} is ${status} in block ${blockNumber || 'pending'} on ethereum (value: ${valueEth} ETH)`
+            summary: `Transaction ${tx.hash} is ${status} in block ${blockNumber || 'pending'} on ${c} (value: ${valueEth} ETH)`
           };
         }
       } catch (e) {
-        // Fall through
+        // Continue to next RPC
       }
     }
   }

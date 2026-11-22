@@ -85,34 +85,54 @@ export function verifyProofBundleOffline(bundle) {
 
 // CLI direct execution
 if (process.argv[1] && process.argv[1].endsWith('verify-bundle-offline.mjs')) {
-  const filePath = process.argv[2];
-  if (!filePath) {
-    console.error('Usage: node verify-bundle-offline.mjs <path-to-bundle.json>');
+  let filePaths = [];
+  if (process.argv[2]) {
+    filePaths = [path.resolve(process.argv[2])];
+  } else {
+    const bundlesDir = path.join(path.dirname(process.argv[1]), 'test-bundles');
+    if (fs.existsSync(bundlesDir)) {
+      const files = fs.readdirSync(bundlesDir).filter(f => f.endsWith('.json'));
+      filePaths = files.map(f => path.join(bundlesDir, f));
+    }
+  }
+
+  if (filePaths.length === 0) {
+    console.error('Usage: node verify-bundle-offline.mjs <path-to-bundle.json> (or run with no args to verify all bundles in test-bundles/)');
     process.exit(1);
   }
 
-  const raw = fs.readFileSync(path.resolve(filePath), 'utf8');
-  const bundle = JSON.parse(raw);
-  const report = verifyProofBundleOffline(bundle);
-
   console.log('========================================================================');
   console.log(' 🔒 PRAMAN DESK: ZERO-NETWORK OFFLINE PROOF BUNDLE VERIFICATION');
-  console.log('========================================================================');
-  console.log(`Case ID:              ${report.bundle_case_id}`);
-  console.log(`Declared Hash:        ${report.declared_sha256}`);
-  console.log(`Recomputed Hash:      ${report.recomputed_sha256}`);
-  console.log(`Hash Matches:         ${report.hash_match ? '✅ EXACT MATCH' : '❌ MISMATCH'}`);
-  console.log(`Receipts Verified:    ${report.receipts_valid}/${report.receipts_checked}`);
-  console.log(`Claims Audited:       ${report.claims_audited} (Fail-Closed: ${report.fail_closed_valid ? '✅ ENFORCED' : '❌ VIOLATED'})`);
-  console.log(`Verdict:              ${report.decision?.verdict}`);
-  console.log(`Budget Spent:         $${report.budget?.spent_usdc} / $${report.budget?.allocated_usdc} (${report.budget?.savings_pct}% saved)`);
-  console.log(`Extra Opinions:       ${report.budget?.extra_opinions_bought}`);
-  console.log('------------------------------------------------------------------------');
-  if (report.verified) {
-    console.log('🎉 BUNDLE INTEGRITY 100% CRYPTOGRAPHICALLY VERIFIED OFFLINE WITH 0 NETWORK SOCKETS!');
+  console.log(` Verifying ${filePaths.length} proof bundle(s) offline with 0 network sockets...`);
+  console.log('========================================================================\n');
+
+  let allPass = true;
+  for (const filePath of filePaths) {
+    const raw = fs.readFileSync(filePath, 'utf8');
+    const bundle = JSON.parse(raw);
+    const report = verifyProofBundleOffline(bundle);
+
+    console.log(`Case ID:              ${report.bundle_case_id}`);
+    console.log(`Declared Hash:        ${report.declared_sha256}`);
+    console.log(`Recomputed Hash:      ${report.recomputed_sha256}`);
+    console.log(`Hash Matches:         ${report.hash_match ? '✅ EXACT MATCH' : '❌ MISMATCH'}`);
+    console.log(`Receipts Verified:    ${report.receipts_valid}/${report.receipts_checked}`);
+    console.log(`Claims Audited:       ${report.claims_audited} (Fail-Closed: ${report.fail_closed_valid ? '✅ ENFORCED' : '❌ VIOLATED'})`);
+    console.log(`Verdict:              ${report.decision?.verdict}`);
+    console.log(`Budget Spent:         $${report.budget?.spent_usdc} / $${report.budget?.allocated_usdc} (${report.budget?.savings_pct}% saved)`);
+    console.log(`Extra Opinions:       ${report.budget?.extra_opinions_bought}`);
+    console.log('------------------------------------------------------------------------');
+
+    if (!report.verified) {
+      console.error('❌ BUNDLE VERIFICATION FAILED:', report.errors);
+      allPass = false;
+    }
+  }
+
+  if (allPass) {
+    console.log('🎉 100% CRYPTOGRAPHIC PASS: ALL BUNDLES VERIFIED OFFLINE WITH 0 NETWORK SOCKETS!');
     process.exit(0);
   } else {
-    console.error('❌ BUNDLE VERIFICATION FAILED:', report.errors);
     process.exit(1);
   }
 }

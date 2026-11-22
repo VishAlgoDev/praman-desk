@@ -5328,7 +5328,7 @@ export async function evaluateExchangeIntegrity(params = {}) {
     telegraphSettlement: {
       intent: 'CORPORATE_REGISTRY_LOOKUP',
       minerId: 5281,
-      diamondRegistration: 6164,
+      diamondRegistration: 6169,
       contractAddress: DIAMOND_PORT,
       status: 'VERIFIED_MICROSETTLEMENT'
     },
@@ -6108,7 +6108,7 @@ export async function handleApiRequest(req, res) {
         ok: true,
         service: 'praman-desk',
         minerId: 5281,
-        diamondRegistration: 6164,
+        diamondRegistration: 6169,
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
@@ -6133,7 +6133,8 @@ export async function handleApiRequest(req, res) {
         'ONCHAIN_TX_LOOKUP_GENERAL',
         'TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL',
         'WALLET_BALANCE_CHECK_GENERAL',
-        'RESEARCH_QUERY_GENERAL'
+        'RESEARCH_QUERY_GENERAL',
+        'LIQUIDITY_DEPTH_VERIFY_GENERAL'
       ];
       const devnodeMiner = {
         route_id: 5281,
@@ -6148,10 +6149,10 @@ export async function handleApiRequest(req, res) {
       };
       const onchainDiamond = {
         diamond_address: DIAMOND_PORT,
-        active_registration_id: 6164,
-        tx_hash: '0x4933c4336850483138e391b50951b94eaf17610a82ba50ae631b6d4932045574',
-        block_number: 12188036,
-        yaml_pin_commit: '09927be',
+        active_registration_id: 6169,
+        tx_hash: '0x524f24c37819fe77c5ba0f6cd125dca6a63e3f0fb193df87beddd363da0a4800',
+        block_number: 12189046,
+        yaml_pin_commit: '43278de',
         intents_count: bondedIntents.length,
         bonded_intents: bondedIntents
       };
