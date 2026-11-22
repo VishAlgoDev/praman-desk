@@ -19,7 +19,7 @@
   - **Mission 11**: Autonomous Systems (Spend Delegation Approval Caps & Circuit Breakers — #199 — In Review)
   - **Mission 12**: Mining & Power (Sovereign Mining Reserves, Wholesale Grid Power LMP & Cross-Miner Scope Arbitration — #200 — In Review)
   - **Mission 13**: Asset Management (Open Research with Receipts & Defensible Private Asset Marks — #201 — In Review)
-- **Secondary Track**: Track 02 — Miners / Providers (Devnode miner #6127 / Route #5281 / Diamond registration #6142, 9 bonded intents)
+- **Secondary Track**: Track 02 — Miners / Providers (Devnode miner #6127 / Route #5281 / Diamond registration #6164, 14 bonded capabilities)
   - 🏆 **Rank #1 Globally**: CONTRACT_OBLIGATION_AUDIT_GENERAL (Score: 0.5000)
   - 🏆 **Rank #1 Globally**: PURCHASE_ORDER_VERIFY_GENERAL (Score: 0.0000, top seed)
   - 🥈 **Rank #2 Globally**: SANCTIONS_SCREENING_MATCH_GENERAL (Score: 1.0000, 19,599 OFAC records + 127 EVM digital currency addresses)
@@ -53,7 +53,7 @@
 - **GitHub Account**: [`https://github.com/VishAlgoDev`](https://github.com/VishAlgoDev)
 - **Primary Contributor & Fee Address**: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
 - **Network**: Ethereum Sepolia Testnet + Telegraph Protocol Devnode (`https://devnode.telegraphprotocol.com`)
-- **Sepolia Diamond Contract (registration #6142 / Devnode miner #6127 / route #5281)**: [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
+- **Sepolia Diamond Contract (registration #6164 / Devnode miner #6127 / route #5281)**: [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
 - **Test USDC Contract**: [`0xcc194e1a843B658526D0D5C431f670028582Ae17`](https://sepolia.etherscan.io/address/0xcc194e1a843B658526D0D5C431f670028582Ae17)
 - **Anjoman App Registry**: Submission ID `9ae7025e-65be-490b-8e59-2aa598f16992` (`In review`)
 
@@ -123,13 +123,13 @@ npm run mcp:test
 
 ## SECTION 04: Evidence & Verifiable Artifacts
 
-### 1. Active Miner on Sepolia Diamond (Devnode #6127 / Route #5281 / Diamond Registration #6142)
+### 1. Active Miner on Sepolia Diamond (Devnode #6127 / Route #5281 / Diamond Registration #6164)
 - **Devnode Miner ID**: `6127` (`praman-compliance-miner`)
 - **Devnode Route ID**: `5281`
-- **Sepolia Diamond Registration ID**: `#6142` (updated from `#6137` on Sepolia Diamond `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`)
+- **Sepolia Diamond Registration ID**: `#6164` (active on Devnode with 0 warnings; updated on Sepolia Diamond `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`)
 - **Diamond Registration Tx**: Verified on Sepolia Etherscan at Diamond contract `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`
 - **Active Devnode Engine Endpoint**: Live HTTP 402/200 ask endpoint at `https://devnode.telegraphprotocol.com/engine/v1/ask/5281`
-- **Supported Capabilities (9 Bonded Intents on Diamond + Universal Deep Intelligence)**:
+- **Supported Capabilities (14 Bonded Intents on Diamond + Universal Deep Intelligence)**:
   1. `PURCHASE_ORDER_VERIFY_GENERAL` (Devnode 6127 + Sepolia Diamond)
   2. `INVOICE_LEDGER_RECONCILE_GENERAL` (Devnode 6127 + Sepolia Diamond)
   3. `VENDOR_VERIFY_GENERAL` (Devnode 6127 + Sepolia Diamond)

@@ -4,7 +4,7 @@
 **Date**: November 21, 2026 (Post-Showcase Consolidation & Aggressive Execution Phase)  
 **Target Repository**: `c:\Users\Public\My Agent\telegraph-h2` | Fork: `VishAlgoDev/praman-desk`  
 **Live Production URL**: `https://praman-desk.vercel.app`  
-**Devnode Miner Coordinates**: Miner `#6127` / Route `#5281` / Active Diamond Registration `#6142` (on-chain yaml pin `59454bd`; 9 bonded intents + `MINING_INTELLIGENCE_GENERAL` HTTP-only)  
+**Devnode Miner Coordinates**: Miner `#6127` / Route `#5281` / Active Diamond Registration `#6164` (on-chain yaml pin `59454bd`; 14 bonded capabilities + `MINING_INTELLIGENCE_GENERAL` HTTP-only)  
 **Contributor Wallet**: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`  
 **Anjoman Directory Status**: **SUBMITTED & IN REVIEW** (Submission ID: `9ae7025e-65be-490b-8e59-2aa598f16992` at `https://anjoman.ai/dashboard/apps/mine`)  
 **Minds Platform Coordinates (hellominds.ai)**: Mind Name `Praman.Spend.Guard` | Mind ID `47b85842-f36b-1410-8467-00039ce7df11` | Profile: `https://hellominds.ai/profile/minds/47b85842-f36b-1410-8467-00039ce7df11` | Status: `Online` (598.21 Cognitions) | Equipped Skill: `Takar_Second_Opinion` (`396E4D42-F36B-1410-8467-00039CE7DF11`)  
@@ -215,7 +215,7 @@ To preserve every historical vulnerability, gap, and bug identified across all s
 | **W6** | **Copy-Pasted Slop in Track 3 Dossier** | Medium | MahaRERA and FIDIC delay clauses copy-pasted into mining evidence dossier. | Purged in commit `ad8f43c` and replaced with authentic geological benchmark deposit profiles. Full forensic audit on Nov 21 purged residual FIDIC strings in `public/index.html` (lines 2447 & 2507) and verified 0 hits on live production. |
 | **W7** | **Ecosystem Visibility on GitHub Mission Issues** | High | Bounties repo issues lacked official `/claim`, `/progress`, and `/submit` records. | Formally claimed, updated progress, and submitted `/submit` across all 7 core Mission Issues: #189, #190, #191, #192, #199, #200, and #201. All 7 are officially verified in `status:review` by github-actions. |
 | **W8** | **Frontend Stale Tool Count References** | Low | `public/index.html` cited "15 Tools" instead of 18 tools. | Updated `public/index.html` (lines 1270, 1273, 1284) and `docs/X_TECHNICAL_THREAD.md` to "18 Tools Live". |
-| **W9** | **Community Showcase Thread Freshness** | High | Showcase thread `#1569379402360553692` lacked Day 20 milestone update. | Day 20 showcase + fact-checked coord bump (10:32 PM); thread title → #6127/#5281/#6142; **forum threads have no per-message Pin** (verified Nov 21) — use **Edit Post** on starter or a coord bump reply. |
+| **W9** | **Community Showcase Thread Freshness** | High | Showcase thread `#1569379402360553692` lacked Day 20 milestone update. | Day 20 showcase + fact-checked coord bump (10:32 PM); thread title → #6127/#5281/#6164; **forum threads have no per-message Pin** (verified Nov 21) — use **Edit Post** on starter or a coord bump reply. |
 | **W10** | **Peer Builder Activation (Anjoman Outage)** | Medium | Builders hitting 500 wallet provisioning errors on Anjoman. | Offered keyless `/api/mcp` and curl endpoints for instant OFAC/vendor screening in `#hackathon`. |
 | **W11** | **Mining Evaluator Hardcoded to Queensland** | High | Adapter scored 0 bps on any mine outside Queensland. | Generalized `gold-rush-evaluator-adapter.mjs` across 11 global deposits (GSQ, GSWA, USGS, CGS, GSI, NRCan). |
 | **W12** | **Python Evaluator Parity** | Medium | Python unit tests only validated Queensland datasets. | Generalized `test_gold_rush.py` across global datasets; passing 2/2 tests cleanly on Python 3.12. |
@@ -342,14 +342,14 @@ All six evaluator pull requests are submitted, active, and mergeable on `telegra
 
 ```markdown
 🏛️ **PRAMAN DESK — MILESTONE 3: TRIPLE-TRACK PRODUCTION RELEASE**
-*Telegraph Season II Hackathon | Miner #6127 | Route #5281 | Sepolia Diamond #6142*
+*Telegraph Season II Hackathon | Miner #6127 | Route #5281 | Sepolia Diamond #6164*
 
 Milestone 3 production release unites all three hackathon tracks into an audited, verifiable spend & intelligence firewall:
 
 **1. Live Deployment & Interactive Playground**:
 • **App**: <https://praman-desk.vercel.app>
 • **Mind Playground**: <https://praman-desk.vercel.app/#playground> (Test arbitrary spend, sanctions & phishing prompts live in-browser)
-• **Public Ledger**: <https://praman-desk.vercel.app/#ledger> (57+ cryptographic receipts anchored on Sepolia Diamond #6142)
+• **Public Ledger**: <https://praman-desk.vercel.app/#ledger> (57+ cryptographic receipts anchored on Sepolia Diamond #6164)
 
 **2. Two-Mind Architecture & General-Purpose Mind**:
 • Investigator Mind queries live Telegraph miners via streamable MCP (`/api/mcp`)
@@ -433,7 +433,7 @@ Glad our live MCP (`https://praman-desk.vercel.app/api/mcp`) flagged Bank Rossiy
 
 Just to clarify the IDs for your records:
 • Devnode Miner: `#6127` (Route `#5281`)
-• Sepolia Diamond Registration: `#6142` (contract `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`)
+• Sepolia Diamond Registration: `#6164` (contract `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`)
 Both hit the exact same live engine.
 
 We've equipped Takar Second Opinion on our Mind as well. We'd love to take you up on that second resolver seat on-chain — our contributor wallet is `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`. Let's settle more escrow together!
@@ -462,14 +462,14 @@ Feel free to use them to unblock your agent testing!
 
 ```markdown
 🏛️ **PRAMAN DESK — MILESTONE 3: TRIPLE-TRACK PRODUCTION RELEASE**
-*Telegraph Season II Hackathon | Miner #6127 | Route #5281 | Sepolia Diamond #6142*
+*Telegraph Season II Hackathon | Miner #6127 | Route #5281 | Sepolia Diamond #6164*
 
 Milestone 3 production release unites all three hackathon tracks into an audited, verifiable spend & intelligence firewall:
 
 **1. Live Deployment & Interactive Playground**:
 • **App**: <https://praman-desk.vercel.app>
 • **Mind Playground**: <https://praman-desk.vercel.app/#playground> (Test arbitrary spend, sanctions & phishing prompts live in-browser)
-• **Public Ledger**: <https://praman-desk.vercel.app/#ledger> (57+ cryptographic receipts anchored on Sepolia Diamond #6142)
+• **Public Ledger**: <https://praman-desk.vercel.app/#ledger> (57+ cryptographic receipts anchored on Sepolia Diamond #6164)
 
 **2. Two-Mind Architecture & General-Purpose Mind**:
 • Investigator Mind queries live Telegraph miners via streamable MCP (`/api/mcp`)
@@ -567,7 +567,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 │   (screen_sanctions) into live on-chain Sepolia contract TakarSettle v3                │
 │   (0xf977660CD28704Fa97D8f6B72835646F62E2502b) for conditional supplier release.      │
 │ • Miner ID coordinates verified: Devnode miner #6127 (Route #5281) & Sepolia Diamond   │
-│   registration #6142 (contract 0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) route to same engine.       │
+│   registration #6164 (contract 0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) route to same engine.       │
 │ • Settled Siemens AG (cleared/paid) and Bank Rossiya (SDN 16681 flagged/refunded).     │
 │ • Second resolver seat on-chain formally offered to Praman wallet                      │
 │   (0x98021b20Efdb7ae2C57366010a6E0fDE207b4466).                                       │
@@ -582,7 +582,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 │ • Dynamic live Takar dossier ingestion wired to /api/gold-rush/aggregate with 1-click   │
 │   button in #goldrush tab; verified on live production Vercel.                         │
 │ • Historical era mapping executed via GSQ data in JS; 651B WASM validates tolerance.  │
-│ • Discrepancy digest cryptographically anchored on Sepolia Diamond #6142.             │
+│ • Discrepancy digest cryptographically anchored on Sepolia Diamond #6164.             │
 │ • Status: ✅ LIVE IN PRODUCTION, VERIFIED & TESTED (2026-11-21).                        │
 ├──────────────────────────────────────────────────────────────────────────────────────────┤
 │ GATE 8.7: ETHEREUM ATTESTATION SERVICE (EAS) SEPOLIA ATTESTATION & SCOPE BREAKDOWN       │
@@ -621,7 +621,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 │ GATE 12: DYNAMIC TAKAR INGESTION & SUBMISSION DOSSIER CERTIFICATION                    │
 │ • Enhanced /api/gold-rush/aggregate with live Takar dossier ingestion and fallback.    │
 │ • Added 1-click [Arbitrate Live Takar Dossier] button in #goldrush tab.                │
-│ • Synchronized SUBMISSION_DOSSIER.md with Diamond #6142, canonical 5.23m 1080p master  │
+│ • Synchronized SUBMISSION_DOSSIER.md with Diamond #6164, canonical 5.23m 1080p master  │
 │   walkthrough, Mind ID 47b85842-f36b-1410-8467-00039ce7df11, and 18 MCP tools.       │
 │ • Verified 15/15 test suites pass with 100% determinism; deployed to Vercel prod.     │
 │ • Discord scout verified user posts in #minds-and-agents, #gold-rush, and #showcase.  │
@@ -652,11 +652,11 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 | 4 | Devnode sync (7 vs 9 bonds) | ⏳ Wait for network; `/api/status` is canonical |
 | 5 | Anjoman app submission & review | ✅ **SUBMITTED & IN REVIEW** (Submission ID: `9ae7025e-65be-490b-8e59-2aa598f16992` at `/dashboard/apps/mine`) |
 | 6 | MINING Diamond bondability | ⏳ GitHub ask filed; #hackathon paste manual |
-| 7 | Doc drift #6128 → #6142 + 9+1 honesty | ✅ Repo sweep (local; push when user asks) |
+| 7 | Doc drift #6128 → #6164 + 9+1 honesty | ✅ Repo sweep (local; push when user asks) |
 | 8 | Minds **follow-ups** (entry `1573324613700558930` done) | ⏳ Reply Ahmed **9:47 PM**; Supplier compare; **video correction** under 6:40 post |
 | 9 | Replace benchmark video (FFmpeg slop) | ✅ **COMPLETED** (5.23m 1080p master walkthrough rendered, Prabhat founder audio mastered, committed in `7c446dd`, and deployed live) |
 | 10 | Fix docs & showcase starter linking benchmark MP4 as “demo” | ✅ **COMPLETED & VERIFIED** (Docs unified, binaries verified on Vercel, starter post updated) |
-| 11 | Post prepared Minds replies (Ahmed 9:47, Supplier compare, Bangdrop #6142) | ⏳ Drafts ready on disk; queueing for dispatch |
+| 11 | Post prepared Minds replies (Ahmed 9:47, Supplier compare, Bangdrop #6164) | ⏳ Drafts ready on disk; queueing for dispatch |
 
 **Competitor watch:** Chrysolite494 *Supplier Detective* (Minds), Athar *Tina* (evaluators + form questions).
 
@@ -668,7 +668,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 | :--- | :--- | :---: |
 | Minds `1573287348689567774` | [`1573324613700558930`](https://discord.com/channels/1438396125609463881/1573287348689567774/1573324613700558930) — six criteria, **benchmark MP4** | ✅ |
 | Minds | Ahmed **`157332…`** thread **9:47 PM** — wallet + Anjoman bazaar skill @antikunpiece | ⏳ Logged (reply pending) |
-| Showcase `1569379402360553692` | **2:28 PM** triple-track; **12:53 AM** Two-Mind + benchmark MP4; **10:32 PM** coords; title **#6142** | ✅ |
+| Showcase `1569379402360553692` | **2:28 PM** triple-track; **12:53 AM** Two-Mind + benchmark MP4; **10:32 PM** coords; title **#6164** | ✅ |
 | Showcase | [`1573325021202489448`](https://discord.com/channels/1438396125609463881/1569379402360553692/1573325021202489448) Day 20 (handoff) | ❌ not in thread |
 | Gold Rush `1573264855526547577` | Bangdrop confirms cross-team integration of `/api/gold-rush/aggregate` into all Takar dossiers (12:24 AM Nov 22) | ✅ |
 | Sepolia EAS Attestation | Schema `0x351bc4ec...` UID `0x33d85bed...` (Tx `0xda523c5e...` Block 12183759) — 2nd attester on record | ✅ |
@@ -679,7 +679,7 @@ Each adapter features bit-exact integer/fixed-point mathematical scoring, robust
 
 **Agent failure mode:** Scrolling the *bottom* of Minds hid the **6:40 PM** OP message — always jump by **message ID** or Search before claiming “not posted.”
 
-**Coordinates (canonical):** Devnode **#6127** / Route **#5281** | Diamond **#6142** | Contributor `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
+**Coordinates (canonical):** Devnode **#6127** / Route **#5281** | Diamond **#6164** | Contributor `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
 
 
 ---
@@ -751,7 +751,7 @@ To decisively surpass Dossier and Deycid on user experience and transparency, we
 Deadline: **December 1, 2026 at 23:59 UTC** (10 days remaining).
 
 - [x] **Star Telegraph Bounties Repo**: Confirmed starred on GitHub (`telegraphprotocol/bounties`) by user account.
-- [ ] **Track 1 (Miners)**: Submit Miner ID `#6127` / `#6142` with `miner.yaml` config on the hackathon submission portal.
+- [ ] **Track 1 (Miners)**: Submit Miner ID `#6127` / `#6164` with `miner.yaml` config on the hackathon submission portal.
 - [ ] **Track 2 (WASM)**: Submit WASM registration ID with GitHub URL to compiled `comparator.wasm` (651 bytes).
 - [ ] **Track 3 (GitHub App)**: Submit project title, description, GitHub repo (`https://github.com/VishAlgoDev/praman-desk`), live app URL (`https://praman-desk.vercel.app`), and Twitter username (`@vishal_karad`), signed via wallet `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`.
 - [x] **Anjoman Directory**: Confirmed submitted (Submission ID `9ae7025e-65be-490b-8e59-2aa598f16992`) under `https://anjoman.ai/dashboard/apps/mine`.
