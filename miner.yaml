@@ -343,6 +343,58 @@ endpoints:
             intents: ["*"]
             description: "Full verbatim power price query string"
 
+  - path: /api/miner/web-search
+    external_path: /api/miner/web-search
+    method: GET
+    intents:
+      - WEB_SEARCH_GENERAL
+    description: >-
+      Authoritative, multi-source keyless web intelligence across Wikipedia REST API, Google News RSS,
+      and DuckDuckGo Instant Answers. Returns structured answer, source URLs, and concise <=80-char brief.
+    params:
+      query:
+        optional:
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "What to search for"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Natural-language query string"
+          - name: q
+            type: string
+            intents: ["*"]
+            description: "Compact query alias"
+
+  - path: /api/miner/onchain-tx
+    external_path: /api/miner/onchain-tx
+    method: GET
+    intents:
+      - ONCHAIN_TX_LOOKUP_GENERAL
+    description: >-
+      Source-attributed EVM transaction verification directly via public archive JSON-RPC nodes.
+      Resolves execution status (confirmed, reverted, pending, not_found), block number, from, to, and value in ETH.
+    params:
+      query:
+        optional:
+          - name: tx_hash
+            type: string
+            intents: ["*"]
+            description: "64-character transaction hash"
+          - name: hash
+            type: string
+            intents: ["*"]
+            description: "Alias for tx_hash"
+          - name: chain
+            type: string
+            intents: ["*"]
+            description: "Target EVM chain (ethereum, sepolia, base, arbitrum, optimism, polygon)"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Query containing transaction hash"
+
 semantics:
   signal_mapping:
     confidence_field: confidence
@@ -358,6 +410,8 @@ semantics:
     - REGULATORY_FILING_MONITOR_GENERAL
     - CONTRACT_OBLIGATION_AUDIT_GENERAL
     - GRID_POWER_PRICE_GENERAL
+    - WEB_SEARCH_GENERAL
+    - ONCHAIN_TX_LOOKUP_GENERAL
     - MINING_INTELLIGENCE_GENERAL
 
 docs:

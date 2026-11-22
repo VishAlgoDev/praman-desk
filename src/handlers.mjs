@@ -14,6 +14,7 @@ import { evaluateCounterpartyShield, checkFakeWatchDomain } from './bridges/fake
 import { generateRugReceiptProof } from './bridges/rugreceipt-bridge.mjs';
 import { evaluatePaysheetConsensus } from './bridges/paysheet-bridge.mjs';
 import { GoldRushAggregator } from '../examples/gold-rush-aggregator/gold-rush-aggregator.mjs';
+import { executeWebSearch, lookupOnchainTx, arbitrateMultiMiner } from './universal-intents.mjs';
 
 const goldRushAggregator = new GoldRushAggregator();
 
@@ -6127,7 +6128,9 @@ export async function handleApiRequest(req, res) {
         'SANCTIONS_SCREENING_MATCH_GENERAL',
         'REGULATORY_FILING_MONITOR_GENERAL',
         'CONTRACT_OBLIGATION_AUDIT_GENERAL',
-        'GRID_POWER_PRICE_GENERAL'
+        'GRID_POWER_PRICE_GENERAL',
+        'WEB_SEARCH_GENERAL',
+        'ONCHAIN_TX_LOOKUP_GENERAL'
       ];
       const devnodeMiner = {
         route_id: 5281,
@@ -7647,6 +7650,24 @@ export async function handleApiRequest(req, res) {
           ...(scopeBreakdown ? { scopeBreakdown } : {}),
           ...(takarLiveMetadata ? { takarLive: takarLiveMetadata } : {})
         });
+      }
+
+      // 10. GET / POST /api/miner/web-search (WEB_SEARCH_GENERAL)
+      if (pathname === '/api/miner/web-search' || pathname === '/api/web-search') {
+        const out = await executeWebSearch(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 11. GET / POST /api/miner/onchain-tx (ONCHAIN_TX_LOOKUP_GENERAL)
+      if (pathname === '/api/miner/onchain-tx' || pathname === '/api/onchain-tx') {
+        const out = await lookupOnchainTx(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 12. GET / POST /api/miner/arbitrate (MULTI_MINER_DISCREPANCY_ARBITRATION)
+      if (pathname === '/api/miner/arbitrate' || pathname === '/api/arbitrate') {
+        const out = await arbitrateMultiMiner(merged);
+        return sendJson(res, 200, out);
       }
     }
 

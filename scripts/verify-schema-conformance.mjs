@@ -94,11 +94,35 @@ const TEST_MATRIX = [
     method: 'GET',
     schemaProps: ['mission', 'network', 'cleared', 'action', 'riskLevel', 'flags'],
     validate: (data) => typeof data.cleared === 'boolean' && typeof data.action === 'string'
+  },
+  {
+    name: '12. Web Search Intelligence (Wikipedia + News)',
+    intent: 'WEB_SEARCH_GENERAL',
+    url: `${PROD_BASE}/api/miner/web-search?query=Ethereum%20London%20Hard%20Fork`,
+    method: 'GET',
+    schemaProps: ['answer', 'sources', 'brief', 'status', 'confidence'],
+    validate: (data) => data.status === 'ok' && typeof data.answer === 'string' && Array.isArray(data.sources)
+  },
+  {
+    name: '13. On-Chain Transaction Lookup (EVM RPC)',
+    intent: 'ONCHAIN_TX_LOOKUP_GENERAL',
+    url: `${PROD_BASE}/api/miner/onchain-tx?tx_hash=0x31f127785ae58f6b9a71b6816ef3005531a7af527d6f490be446a2ba84b62619&chain=sepolia`,
+    method: 'GET',
+    schemaProps: ['tx_hash', 'status', 'from', 'to', 'block_number', 'value_eth', 'confidence'],
+    validate: (data) => data.status === 'confirmed' && data.block_number === 12175886
+  },
+  {
+    name: '14. Multi-Miner Discrepancy Arbitration (Meta-Arbiter)',
+    intent: 'DISCREPANCY_ARBITRATION_GENERAL',
+    url: `${PROD_BASE}/api/miner/arbitrate?query=Sanctions%20Bank%20Rossiya`,
+    method: 'GET',
+    schemaProps: ['ok', 'task', 'consensus', 'discrepancy_detected', 'arbitrated_verdict', 'sha256_receipt'],
+    validate: (data) => data.ok === true && typeof data.sha256_receipt === 'string'
   }
 ];
 
 async function runVerification() {
-  console.log(`[Schema Verifier] Testing 11 endpoints across 9 intents + spend gates on ${PROD_BASE}...\n`);
+  console.log(`[Schema Verifier] Testing 14 endpoints across 11 intents + meta-arbitration on ${PROD_BASE}...\n`);
   const results = [];
 
   for (const item of TEST_MATRIX) {
