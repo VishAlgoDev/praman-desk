@@ -9,7 +9,10 @@
   - **Cross-Ecosystem Settlement & EAS Attestation**:
     - **Ethereum Attestation Service (EAS) on Sepolia**: Submitted on-chain arbitration attestation on Schema UID [`0x351bc4ecf778660c8de0d42eb111e758469e1fe5ffc1b993899e399c9c056741`](https://sepolia.easscan.org/schema/view/0x351bc4ecf778660c8de0d42eb111e758469e1fe5ffc1b993899e399c9c056741); verified on-chain in Block `12183759` (Attestation UID: [`0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115`](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115), Tx: [`0xda523c5e...`](https://sepolia.etherscan.io/tx/0xda523c5e9426c8512f50996cc292537ac7ed1e4b7b0b8411520332b23ef3f2d0)). Praman Desk is the **2nd on-chain attester** alongside Takar.
     - **Cross-Ecosystem Ingestion & Arbitration**: Praman Desk ingests and arbitrates live competitor dossiers from Takar (`https://takar-telegraph.vercel.app/goldrush.html`), OathCast miner 64176, and NFT KING miner 7310050, publishing verified EAS attestations on Sepolia on the shared schema registered by Takar.
-    - **Proposed Resolver Integration**: Proposed second resolver integration on TakarSettle v3 Sepolia contract [`0xf977660CD28704Fa97D8f6B72835646F62E2502b`](https://sepolia.etherscan.io/address/0xf977660CD28704Fa97D8f6B72835646F62E2502b) for contributor wallet `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`.
+    - **Active Multi-Operator Resolver on TakarSettle v4**: Verified Resolver Seat 3 on TakarSettle v4 Sepolia escrow contract [`0x310275e6D66818E068245326bB9e398822304248`](https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248). On November 22, 2026, Praman Desk evaluated the on-chain statutory dispute on Deal 0 (Siemens AG) against live OFAC SDN records and broadcasted the decisive `second()` transaction:
+      - **Seconding Tx**: [`0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75`](https://sepolia.etherscan.io/tx/0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75)
+      - **Confirmed Block**: `12190408` (Status: Success)
+      - **On-Chain Terms Fulfilled**: Enforced 2-of-3 quorum to finalize multi-operator escrow payout.
   - **Universal General-Purpose Mind**: Directly fulfilling Co-Founder Ahmed Ali's Golden Challenge (arbitrating enterprise procurement, payroll, retention release, and prompt injection)
   - **Mission 01**: Exchange Integrity & Token Pre-Listing Statutory Diligence (#189 — In Review)
   - **Mission 02**: Stablecoin Treasury Guard (OFAC SDN EVM Address Screening & FATF Travel Rule — #190 — In Review)
@@ -25,9 +28,9 @@
   - 🥈 **Rank #2 Globally**: SANCTIONS_SCREENING_MATCH_GENERAL (Score: 1.0000, 19,599 OFAC records + 127 EVM digital currency addresses)
   - 💎 **Rank #6 Globally**: CORPORATE_REGISTRY_LOOKUP_GENERAL (Score: 1.0000, 200+ jurisdictions GLEIF)
   - **Gold Rush Autonomous Multi-Miner Aggregator & Scope Resolution Engine**: Ingesting and arbitrating live competitor dossiers (Takar, OathCast miner 64176, NFT KING miner 7310050) with automated hierarchical scope resolution (shaft vs reef vs field) and on-chain EAS Sepolia attestations ([UID 0x33d85bed...](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115))
-  - 172 live network requests served on Devnode
+  - 245+ live network requests served on Devnode Miner #6164
 - **Supporting Track**: Track 03 — Evaluators & Truth Sources:
-  - 68 Attested Rows in EvalPool (100% Eligible across 8 Intents)
+  - 68 Attested Rows in EvalPool (100% Eligible across 9 Intents)
   - **Upstream PR #217**: `CONTRACT_OBLIGATION` adapter (Mission 04 / #192)
   - **Upstream PR #218**: `MINING_INTELLIGENCE` & `MINING_RESERVE` adapter (Mission 12 / #200)
   - **Upstream PR #219**: `SANCTIONS_SCREENING_MATCH` adapter (Mission 02 / #190)
