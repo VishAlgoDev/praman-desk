@@ -309,3 +309,15 @@
 - **Dossier Aligned**: Updated SUBMISSION_DOSSIER.md to consistently reference active on-chain registration #6164 (Route 5281).
 - **Test Suites Verified**: 1,043/1,043 comparator tests passed (0 discrepancies); 23/23 MCP tools verified; 68/68 EvalPool rows confirmed eligible on Devnode.
 
+
+## [2026-11-22T23:05:00Z] Sentinel Cycle Iteration 10: Live Network Verification & Sepolia Escrow Audit
+- **TakarSettle v4 Live Contract Verified**: Inspected Sepolia contract 0x310275e6D66818E068245326bB9e398822304248. Deal 0 confirmed in disputed state (payerDisputed=true, payeeDisputed=true). Confirmed proposalHash is 0x0; Praman Desk resolver node is primed and awaiting Bangdrop on-chain propose() to execute second().
+- **Live Vercel Production Validated**: Successfully queried https://praman-desk.vercel.app/api/status and /api/miner/vendor-verify. Baltic Precision eval prompt returned 100% exact match (status: conditional_hold_false_positive_and_expired_cert, confidence: 0.99).
+- **Miner Standing Confirmed**: Devnode Miner 6164 confirmed active with 234 total requests served and 15 bonded intents. Global Rank 1 maintained on 5 intents in Epoch 38. Epoch 39 scoring cycle monitored.
+
+
+## [2026-11-22T23:15:00Z] Step-by-Step Blueprint Execution: Schema Hardening & Escrow Pacer Run
+- **miner.yaml Updated**: Added missing parameter aliases (name, company, tax_id) under /api/miner/vendor-verify. Validated with scripts/validate-yaml-params.mjs (0 missing intents). Pushed to GitHub (commit e6bb712).
+- **Production Schema Conformance**: Ran scripts/verify-schema-conformance.mjs against https://praman-desk.vercel.app. 17/17 endpoints passed with 100% bit-exact conformance (average latency 571ms).
+- **Pacer Escrow Engine Executed**: Ran 5 live asks through Devnode to Miner #6164 (5/5 HTTP 200). Total requests served scaled from 234 to 239.
+
