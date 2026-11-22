@@ -554,13 +554,20 @@ function parseCorporateRegistryQuery(rawCompany = '', rawJurisdiction = '') {
   }
 
   // Fallback strip leading question phrases without "in <country>"
-  if (!matchedPattern && /^(?:is|are|look\s*up|verify|check|find|what\s+is|does)\s+/i.test(cleaned)) {
-    const stripped = cleaned
-      .replace(/^(?:is|are|look\s*up|verify|check|find|what\s+is|does)\s+(?:the\s+)?(?:official\s+)?(?:corporate\s+(?:registration|registry|record|status|details)\s+(?:of|for)\s+|legal\s+entity\s+(?:status\s+)?(?:of|for)\s+|lei\s+(?:of|for)\s+|legal\s+entity\s+)/i, '')
+  // FIX (2026-11-22): Made trailing clause OPTIONAL so "Verify Siemens AG" extracts "Siemens AG" correctly.
+  // Previously the mandatory trailing phrase group caused "Verify Siemens AG" to pass through un-stripped.
+  if (!matchedPattern && /^(?:is|are|look\s*up|verify|check|find|what\s+is|does|search\s+for)\s+/i.test(cleaned)) {
+    let s = cleaned
+      .replace(/^\[?[A-Z_]+_GENERAL\]?\s+/i, '')
+      .replace(/^(?:is|are|look\s*up|verify|check|find|what\s+is|does|search\s+for)\s+(?:the\s+)?(?:official\s+)?(?:corporate\s+(?:registration|registry|record|status|details)\s+(?:of|for)\s+|legal\s+entity\s+(?:status\s+)?(?:of|for)\s+|lei\s+(?:of|for)\s+|legal\s+entity\s+|status\s+(?:of|for)\s+|lei\s+(?:of\s+)?)?/i, '')
+      .replace(/\s+(?:in|under|jurisdiction)\s+[a-zA-Z\s]+$/i, '')
+      .replace(/\s+(?:registered|active|incorporated|dissolved|still\s+active|active\s+or\s+dissolved)\??$/i, '')
+      .replace(/\s+(?:have|has)\s+a\s+corporate\s+registration\??$/i, '')
       .replace(/\s+(?:is\s+)?(?:currently\s+)?(?:an?\s+)?(?:active|registered|valid|incorporated|existing|live|dissolved|operational)(?:\s+(?:company|entity|corporation|firm|business))?(?:\s+or\s+(?:dissolved|inactive))?$/i, '')
       .replace(/\s+(?:active|registered|valid|incorporated|existing|live|dissolved|operational)$/i, '')
+      .replace(/[?!.,]+$/, '')
       .trim();
-    if (stripped) company = stripped;
+    if (s) company = s;
   }
 
   company = company.replace(/[?!.]+$/g, '').trim();

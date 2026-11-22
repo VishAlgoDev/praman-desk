@@ -268,13 +268,23 @@ export async function executeResearchQuery({ query, question, q }) {
     }
   }
 
+  // Build a concise answer capped at 280 chars (Devnode evaluator limit)
+  const rawAnswer = searchRes.answer || `Research summary for: ${rawQuery}`;
+  const answer = rawAnswer.length > 280 ? rawAnswer.slice(0, 277) + '...' : rawAnswer;
+
+  // Normalize sources to array of URL strings (Devnode expects string array)
+  const normalizedSources = Array.isArray(searchRes.sources)
+    ? searchRes.sources.map(s => (typeof s === 'string' ? s : s?.url || String(s))).filter(Boolean).slice(0, 5)
+    : [];
+
   return {
     status: 'ok',
     query: rawQuery,
-    summary: searchRes.answer || `Analytical research summary for ${rawQuery}`,
-    key_findings: findings.length > 0 ? findings : [searchRes.brief],
-    sources: searchRes.sources,
-    brief: searchRes.brief,
+    answer,                                     // primary field (Devnode evaluator checks this)
+    summary: answer,                            // alias for compatibility
+    key_findings: findings.length > 0 ? findings.slice(0, 3) : [searchRes.brief || answer.slice(0, 100)],
+    sources: normalizedSources,
+    brief: searchRes.brief || answer.slice(0, 80),
     confidence: 1.0
   };
 }
@@ -392,6 +402,8 @@ export async function lookupOnchainTx({ tx_hash, hash, chain, question, query })
   }
 
   // Not found on any checked RPC
+  // FIX (2026-11-22): confidence MUST be 0.0 on not_found — asserting 1.0 on a missing tx
+  // was penalizing our Devnode ONCHAIN_TX_LOOKUP_GENERAL score (was 0.1847, Rank 16).
   return {
     tx_hash: targetHash,
     status: 'not_found',
@@ -400,8 +412,8 @@ export async function lookupOnchainTx({ tx_hash, hash, chain, question, query })
     block_number: null,
     value_eth: 0,
     chain: targetChain,
-    confidence: 1.0,
-    summary: `Transaction ${targetHash} not found on ${targetChain}`
+    confidence: 0.0,
+    summary: `Transaction ${targetHash} not found on any checked chain (${targetChain})`
   };
 }
 
