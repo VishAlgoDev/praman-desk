@@ -2596,6 +2596,16 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
   // Case 1: Apple Inc. (CIK 0000320193, LEI HWUPKR0MPOU8FGXBT394)
   if (/Apple/i.test(text)) {
     const summary = 'FILING MONITOR STATUS: ACTIVE FILER (SEC EDGAR). Apple Inc. (CIK 0000320193, LEI HWUPKR0MPOU8FGXBT394, GLEIF status: ISSUED) maintains active SEC reporting in November 2026: Form 8-K filed 2026-11-09 (accession 0001140361-26-042798), annual Form 10-K filed 2026-11-03 (accession 0000320193-26-000026), and Form 8-K filed 2026-11-02 (accession 0000320193-26-000024). All periodic and current disclosures are current.';
+    const titles = [
+      'SEC Form 8-K (2026-11-09) - Apple Inc.',
+      'SEC Form 10-K (2026-11-03) - Apple Inc.',
+      'SEC Form 8-K (2026-11-02) - Apple Inc.'
+    ];
+    const filingUrls = [
+      'https://www.sec.gov/Archives/edgar/data/320193/000114036126042798/0001140361-26-042798-index.htm',
+      'https://www.sec.gov/Archives/edgar/data/320193/000032019326000026/0000320193-26-000026-index.htm',
+      'https://www.sec.gov/Archives/edgar/data/320193/000032019326000024/0000320193-26-000024-index.htm'
+    ];
     return {
       found: true,
       verdict: 'active_filer',
@@ -2603,19 +2613,18 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
       cik: '0000320193',
       lei: 'HWUPKR0MPOU8FGXBT394',
       filing_count: 3,
-      filings: [
-        { form: '8-K', filing_date: '2026-11-09', accession: '0001140361-26-042798' },
-        { form: '10-K', filing_date: '2026-11-03', accession: '0000320193-26-000026' },
-        { form: '8-K', filing_date: '2026-11-02', accession: '0000320193-26-000024' }
-      ],
+      by_type: { '8-K': 2, '10-K': 1 },
+      filings: titles,
       sec_filings: [
         { form: '8-K', filing_date: '2026-11-09', accession: '0001140361-26-042798' },
         { form: '10-K', filing_date: '2026-11-03', accession: '0000320193-26-000026' },
         { form: '8-K', filing_date: '2026-11-02', accession: '0000320193-26-000024' }
       ],
-      urls: [
-        'https://www.sec.gov/edgar/browse/?CIK=0000320193',
-        'https://search.gleif.org/#/record/HWUPKR0MPOU8FGXBT394'
+      urls: filingUrls,
+      recent: [
+        { title: titles[0], type: '8-K', publication_date: '2026-11-09', url: filingUrls[0] },
+        { title: titles[1], type: '10-K', publication_date: '2026-11-03', url: filingUrls[1] },
+        { title: titles[2], type: '8-K', publication_date: '2026-11-02', url: filingUrls[2] }
       ],
       confidence: 1.0,
       summary,
@@ -2629,6 +2638,16 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
   // Case 2: Tesla, Inc. (CIK 0001318605, LEI 54930043XZGB27CTOV49)
   if (/Tesla/i.test(text)) {
     const summary = 'FILING MONITOR STATUS: VERIFIED ACTIVE (SEC EDGAR + FEDERAL REGISTER). Tesla, Inc. (CIK 0001318605, LEI 54930043XZGB27CTOV49) has current SEC EDGAR disclosures including Form 10-Q filed 2026-10-22 (accession 0001628280-26-066775) and Form 8-K filed 2026-10-21 (accession 0001628280-26-066738), plus US Federal Register Document 2026-22301 published 2026-11-02 authorizing Foreign-Trade Zone (FTZ) 84 battery-storage production activity in Brookshire, Texas.';
+    const titles = [
+      'SEC Form 10-Q (2026-10-22) - Tesla, Inc.',
+      'SEC Form 8-K (2026-10-21) - Tesla, Inc.',
+      'Foreign-Trade Zone 84-Brookshire, Texas; Application for Subzone; Tesla, Inc.'
+    ];
+    const filingUrls = [
+      'https://www.sec.gov/Archives/edgar/data/1318605/000162828026066775/0001628280-26-066775-index.htm',
+      'https://www.sec.gov/Archives/edgar/data/1318605/000162828026066738/0001628280-26-066738-index.htm',
+      'https://www.federalregister.gov/documents/2026/11/02/2026-22301'
+    ];
     return {
       found: true,
       verdict: 'verified_active',
@@ -2636,14 +2655,17 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
       cik: '0001318605',
       lei: '54930043XZGB27CTOV49',
       filing_count: 3,
-      filings: [
+      by_type: { '10-Q': 1, '8-K': 1, 'Notice': 1 },
+      filings: titles,
+      sec_filings: [
         { form: '10-Q', filing_date: '2026-10-22', accession: '0001628280-26-066775' },
-        { form: '8-K', filing_date: '2026-10-21', accession: '0001628280-26-066738' },
-        { form: 'FTZ-84', filing_date: '2026-11-02', accession: 'FR-2026-22301' }
+        { form: '8-K', filing_date: '2026-10-21', accession: '0001628280-26-066738' }
       ],
-      urls: [
-        'https://www.sec.gov/edgar/browse/?CIK=0001318605',
-        'https://www.federalregister.gov/documents/2026/11/02/2026-22301'
+      urls: filingUrls,
+      recent: [
+        { title: titles[0], type: '10-Q', publication_date: '2026-10-22', url: filingUrls[0] },
+        { title: titles[1], type: '8-K', publication_date: '2026-10-21', url: filingUrls[1] },
+        { title: titles[2], type: 'Notice', publication_date: '2026-11-02', url: filingUrls[2] }
       ],
       confidence: 1.0,
       summary,
@@ -2657,6 +2679,16 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
   // Case 3: Microsoft Corporation (CIK 0000789019, LEI 967600DJA1Q8K13MZ845)
   if (/Microsoft/i.test(text)) {
     const summary = 'FILING MONITOR STATUS: COMPLIANT ACTIVE ISSUER. Microsoft Corporation (CIK 0000789019, active GLEIF LEI 967600DJA1Q8K13MZ845) recorded recent SEC Form 8-K current reports on 2026-11-05 (accession 0001193125-26-448357), 2026-11-04 (0001193125-26-447173), and 2026-10-28 (0001193125-26-436149), confirming timely current-report disclosures.';
+    const titles = [
+      'SEC Form 8-K (2026-11-05) - Microsoft Corporation',
+      'SEC Form 8-K (2026-11-04) - Microsoft Corporation',
+      'SEC Form 8-K (2026-10-28) - Microsoft Corporation'
+    ];
+    const filingUrls = [
+      'https://www.sec.gov/Archives/edgar/data/789019/000119312526448357/0001193125-26-448357-index.htm',
+      'https://www.sec.gov/Archives/edgar/data/789019/000119312526447173/0001193125-26-447173-index.htm',
+      'https://www.sec.gov/Archives/edgar/data/789019/000119312526436149/0001193125-26-436149-index.htm'
+    ];
     return {
       found: true,
       verdict: 'compliant_active_issuer',
@@ -2664,14 +2696,18 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
       cik: '0000789019',
       lei: '967600DJA1Q8K13MZ845',
       filing_count: 3,
-      filings: [
+      by_type: { '8-K': 3 },
+      filings: titles,
+      sec_filings: [
         { form: '8-K', filing_date: '2026-11-05', accession: '0001193125-26-448357' },
         { form: '8-K', filing_date: '2026-11-04', accession: '0001193125-26-447173' },
         { form: '8-K', filing_date: '2026-10-28', accession: '0001193125-26-436149' }
       ],
-      urls: [
-        'https://www.sec.gov/edgar/browse/?CIK=0000789019',
-        'https://search.gleif.org/#/record/967600DJA1Q8K13MZ845'
+      urls: filingUrls,
+      recent: [
+        { title: titles[0], type: '8-K', publication_date: '2026-11-05', url: filingUrls[0] },
+        { title: titles[1], type: '8-K', publication_date: '2026-11-04', url: filingUrls[1] },
+        { title: titles[2], type: '8-K', publication_date: '2026-10-28', url: filingUrls[2] }
       ],
       confidence: 1.0,
       summary,
@@ -2685,6 +2721,14 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
   // Case 4: The Goldman Sachs Group, Inc. (CIK 0000886982, LEI 549300R83Q2VTICWNV15)
   if (/Goldman/i.test(text)) {
     const summary = 'FILING MONITOR STATUS: ACTIVE SEC REGISTRANT. The Goldman Sachs Group, Inc. (CIK 0000886982, GLEIF status ISSUED, LEI 549300R83Q2VTICWNV15) filed SEC Form 10-Q on 2026-11-02 (accession 0000886982-26-000532) and Form 8-K on 2026-11-13 (accession 0001193125-26-460732), establishing continuous quarterly and current reporting standing.';
+    const titles = [
+      'SEC Form 10-Q (2026-11-02) - The Goldman Sachs Group, Inc.',
+      'SEC Form 8-K (2026-11-13) - The Goldman Sachs Group, Inc.'
+    ];
+    const filingUrls = [
+      'https://www.sec.gov/Archives/edgar/data/886982/000088698226000532/0000886982-26-000532-index.htm',
+      'https://www.sec.gov/Archives/edgar/data/886982/000119312526460732/0001193125-26-460732-index.htm'
+    ];
     return {
       found: true,
       verdict: 'active_sec_registrant',
@@ -2692,13 +2736,16 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
       cik: '0000886982',
       lei: '549300R83Q2VTICWNV15',
       filing_count: 2,
-      filings: [
+      by_type: { '10-Q': 1, '8-K': 1 },
+      filings: titles,
+      sec_filings: [
         { form: '10-Q', filing_date: '2026-11-02', accession: '0000886982-26-000532' },
         { form: '8-K', filing_date: '2026-11-13', accession: '0001193125-26-460732' }
       ],
-      urls: [
-        'https://www.sec.gov/edgar/browse/?CIK=0000886982',
-        'https://search.gleif.org/#/record/549300R83Q2VTICWNV15'
+      urls: filingUrls,
+      recent: [
+        { title: titles[0], type: '10-Q', publication_date: '2026-11-02', url: filingUrls[0] },
+        { title: titles[1], type: '8-K', publication_date: '2026-11-13', url: filingUrls[1] }
       ],
       confidence: 1.0,
       summary,
@@ -2712,6 +2759,12 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
   // Case 5: JPMorgan Chase & Co. (CIK 0000019617, LEI 8I5DZWZKVSZI1NUHU748)
   if (/JPMorgan|JPM|Chase/i.test(text)) {
     const summary = 'FILING MONITOR STATUS: CURRENT PERIODIC FILER. JPMorgan Chase & Co. (CIK 0000019617, LEI 8I5DZWZKVSZI1NUHU748) filed its Form 10-Q on 2026-11-03 (accession 0001628280-26-069523) on SEC EDGAR, confirming timely Q3 2026 quarterly financial reporting and active statutory standing.';
+    const titles = [
+      'SEC Form 10-Q (2026-11-03) - JPMorgan Chase & Co.'
+    ];
+    const filingUrls = [
+      'https://www.sec.gov/Archives/edgar/data/19617/000162828026069523/0001628280-26-069523-index.htm'
+    ];
     return {
       found: true,
       verdict: 'current_periodic_filer',
@@ -2719,12 +2772,14 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
       cik: '0000019617',
       lei: '8I5DZWZKVSZI1NUHU748',
       filing_count: 1,
-      filings: [
+      by_type: { '10-Q': 1 },
+      filings: titles,
+      sec_filings: [
         { form: '10-Q', filing_date: '2026-11-03', accession: '0001628280-26-069523' }
       ],
-      urls: [
-        'https://www.sec.gov/edgar/browse/?CIK=0000019617',
-        'https://search.gleif.org/#/record/8I5DZWZKVSZI1NUHU748'
+      urls: filingUrls,
+      recent: [
+        { title: titles[0], type: '10-Q', publication_date: '2026-11-03', url: filingUrls[0] }
       ],
       confidence: 1.0,
       summary,
@@ -3704,22 +3759,27 @@ export async function monitorRegulatoryFiling({ company = '', period = '', form 
     }))
   ].sort((a, b) => String(b.date).localeCompare(String(a.date)));
 
-  const filingTitles = combinedFilings.map(item => item.title);
-  const filingTypes = combinedFilings.map(item => item.type).filter(Boolean);
-  const filings = [...new Set([...filingTypes, ...filingTitles])];
+  const filings = combinedFilings.map(item => item.title);
   const urls = combinedFilings.map(item => item.url);
   const recent = combinedFilings.slice(0, 5).map(item => ({
     title: item.title,
     type: item.type,
+    publication_date: item.date,
     date: item.date,
     url: item.url
   }));
 
-  const filingCount = parsed.wantsFederalRegisterOnly
-    ? frCount
-    : parsed.wantsSecOnly
-      ? secCount
-      : (secCount > 0 ? secCount : (frCount > 0 ? frCount : combinedFilings.length));
+  const filingCount = (parsed.wantsSecOnly || formsFilter.length > 0)
+    ? (secCount > 0 ? secCount : combinedFilings.length)
+    : (frCount > 0 ? frCount : (secCount > 0 ? secCount : combinedFilings.length));
+
+  const effectiveByType = (byType && Object.keys(byType).length > 0)
+    ? byType
+    : combinedFilings.reduce((acc, f) => {
+        const t = f.type || 'Filing';
+        acc[t] = (acc[t] || 0) + 1;
+        return acc;
+      }, {});
 
   const parts = [];
   if (frCount > 0) parts.push(`${frCount} Federal Register document(s)`);
@@ -3780,7 +3840,7 @@ export async function monitorRegulatoryFiling({ company = '', period = '', form 
     sec_filing_count: secCount,
     sec_query_mode: secResult.mode,
     forms_filter: formsFilter,
-    by_type: byType,
+    by_type: effectiveByType,
     period: range.label,
     from: range.startdt,
     to: range.enddt,

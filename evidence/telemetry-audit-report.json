@@ -1,0 +1,194 @@
+{
+  "timestamp": "2026-11-22T06:36:57.360Z",
+  "devnode_network": {
+    "total_miners": 2189,
+    "miner_id": "6137",
+    "slug": "praman-compliance-miner",
+    "name": "Praman Desk Compliance & Procurement Auditor",
+    "activation_status": "active",
+    "total_requests_served": 172,
+    "wallet_address": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+    "base_url": "https://praman-desk.vercel.app",
+    "scored": true,
+    "last_scored_epoch": 36,
+    "last_scored_at": "2026-11-22T06:35:27Z",
+    "scores": [
+      {
+        "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+        "epoch_id": 36,
+        "rank": 3,
+        "score": 0.5,
+        "scored_at": "2026-11-22T05:21:11.31224Z"
+      },
+      {
+        "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+        "epoch_id": 36,
+        "rank": 4,
+        "score": 0,
+        "scored_at": "2026-11-22T05:16:14.521267Z"
+      },
+      {
+        "intent_id": "SANCTIONS_SCREENING_MATCH_GENERAL",
+        "epoch_id": 36,
+        "rank": 9,
+        "score": 1,
+        "scored_at": "2026-11-22T04:49:25.828738Z"
+      },
+      {
+        "intent_id": "VENDOR_VERIFY_GENERAL",
+        "epoch_id": 36,
+        "rank": 9,
+        "score": 0,
+        "scored_at": "2026-11-22T05:46:02.457489Z"
+      },
+      {
+        "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+        "epoch_id": 36,
+        "rank": 12,
+        "score": 0,
+        "scored_at": "2026-11-22T06:35:27.36957Z"
+      }
+    ]
+  },
+  "organic_workflow_audit": {
+    "log_exists": true,
+    "started_at": "2026-11-22T06:05:46.763Z",
+    "total_executed": 53,
+    "successful_requests": 53,
+    "failed_requests": 0,
+    "success_rate_pct": "100.0%",
+    "rate_limit_429_count": 0,
+    "waf_block_count": 0,
+    "non_200_count": 0,
+    "intent_distribution": {
+      "REGULATORY_FILING_MONITOR_GENERAL": 9,
+      "CORPORATE_REGISTRY_LOOKUP_GENERAL": 14,
+      "SANCTIONS_SCREENING_MATCH_GENERAL": 6,
+      "CONTRACT_OBLIGATION_AUDIT_GENERAL": 4,
+      "INVOICE_LEDGER_RECONCILE_GENERAL": 5,
+      "DOCUMENT_AUTHENTICITY_GENERAL": 4,
+      "GRID_POWER_PRICE_GENERAL": 4,
+      "MISSION_SPEND_GUARD_CLEARANCE": 1,
+      "VENDOR_VERIFY_GENERAL": 3,
+      "PURCHASE_ORDER_VERIFY_GENERAL": 2,
+      "MISSION_STABLECOIN_SETTLEMENT_GATE": 1
+    },
+    "latency_percentiles_ms": {
+      "count": 53,
+      "min": 231,
+      "max": 855,
+      "avg": 392.4,
+      "p50": 260,
+      "p90": 769,
+      "p95": 820,
+      "p99": 855
+    }
+  },
+  "warm_execution_probes": {
+    "probes_executed": 7,
+    "probes_successful": 7,
+    "probe_latencies_ms": {
+      "count": 7,
+      "min": 235,
+      "max": 834,
+      "avg": 447.9,
+      "p50": 442,
+      "p90": 834,
+      "p95": 834,
+      "p99": 834
+    },
+    "probe_details": [
+      {
+        "name": "Root Landing Page",
+        "path": "/",
+        "status": 200,
+        "durationMs": 613,
+        "bytes": 163513,
+        "xVercelId": "bom1::92j7j-1795329418796-6f82b89fbd7f",
+        "xVercelCache": "MISS",
+        "cfRay": null,
+        "is429": false,
+        "isWaf": false,
+        "success": true
+      },
+      {
+        "name": "Health Endpoint",
+        "path": "/api/health",
+        "status": 200,
+        "durationMs": 455,
+        "bytes": 220,
+        "xVercelId": "bom1::iad1::q7k6r-1795329419403-942487b0d2e8",
+        "xVercelCache": "MISS",
+        "cfRay": null,
+        "is429": false,
+        "isWaf": false,
+        "success": true
+      },
+      {
+        "name": "Status Endpoint",
+        "path": "/api/status",
+        "status": 200,
+        "durationMs": 319,
+        "bytes": 1734,
+        "xVercelId": "bom1::iad1::j27qh-1795329419862-bce66d30c76e",
+        "xVercelCache": "MISS",
+        "cfRay": null,
+        "is429": false,
+        "isWaf": false,
+        "success": true
+      },
+      {
+        "name": "Corporate Registry (GLEIF)",
+        "path": "/api/miner/corporate-registry?company=Apple%20Inc.&jurisdiction=US-CA",
+        "status": 200,
+        "durationMs": 235,
+        "bytes": 4913,
+        "xVercelId": "bom1::iad1::2xc7b-1795329420179-148cadbc5046",
+        "xVercelCache": "MISS",
+        "cfRay": null,
+        "is429": false,
+        "isWaf": false,
+        "success": true
+      },
+      {
+        "name": "OFAC Sanctions Screen",
+        "path": "/api/miner/sanctions-screen?name=Banco%20Nacional%20de%20Cuba",
+        "status": 200,
+        "durationMs": 834,
+        "bytes": 2437,
+        "xVercelId": "bom1::iad1::2xc7b-1795329420412-85173d3dcc1f",
+        "xVercelCache": "MISS",
+        "cfRay": null,
+        "is429": false,
+        "isWaf": false,
+        "success": true
+      },
+      {
+        "name": "Purchase Order Verify",
+        "path": "/api/miner/po-verify?query=PO-ERP-2026-7741%20Apex%20Geotech%20Tower-B",
+        "status": 200,
+        "durationMs": 442,
+        "bytes": 2876,
+        "xVercelId": "bom1::iad1::99gtx-1795329421252-3692b13ccab0",
+        "xVercelCache": "MISS",
+        "cfRay": null,
+        "is429": false,
+        "isWaf": false,
+        "success": true
+      },
+      {
+        "name": "Grid Power Settlement",
+        "path": "/api/miner/grid-power-price?hub=Houston&iso=ERCOT",
+        "status": 200,
+        "durationMs": 237,
+        "bytes": 1786,
+        "xVercelId": "bom1::iad1::99gtx-1795329421687-92dea1c2c63e",
+        "xVercelCache": "MISS",
+        "cfRay": null,
+        "is429": false,
+        "isWaf": false,
+        "success": true
+      }
+    ]
+  }
+}
