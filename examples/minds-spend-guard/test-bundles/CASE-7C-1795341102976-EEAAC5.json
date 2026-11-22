@@ -1,0 +1,237 @@
+{
+  "bundle_version": "1.0.0",
+  "case_id": "CASE-7C-1795341102976-EEAAC5",
+  "created_at": "2026-11-22T09:51:44.508Z",
+  "bundle_sha256": "0xda64b2453cd5addc6ef8cde883a7b1a759f6e33d6e66b92685bc4a273b26b4e9",
+  "duration_ms": 1532,
+  "payload": {
+    "case_id": "CASE-7C-1795341102976-EEAAC5",
+    "subject": {
+      "vendor": "Siemens Aktiengesellschaft",
+      "invoiceNumber": "INV-2026-SIE-FX-ATTACK",
+      "totalAmount": 8400,
+      "currency": "EUR",
+      "recipientAddress": null
+    },
+    "budget": {
+      "allocated_usdc": 0.25,
+      "spent_usdc": 0.105,
+      "asks_issued": 10,
+      "extra_opinions_bought": 2,
+      "savings_usdc": 0.145,
+      "savings_pct": 58
+    },
+    "claims": [
+      {
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "statement": "Counterparty 'Siemens Aktiengesellschaft' is a legally registered active entity",
+        "passed": false,
+        "discrepancy_triggered": true,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_OFAC_SANCTIONS_CLEARANCE",
+        "statement": "Counterparty 'Siemens Aktiengesellschaft' is completely clear of OFAC SDN sanctions",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "statement": "Billing portal 'siemensaktiengesellschaft.com' is authentic and free from phishing compromise",
+        "passed": true,
+        "discrepancy_triggered": true,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_MATHEMATICAL_INTEGRITY",
+        "statement": "Line-item totals match invoice face amount with 0 sub-cent arithmetic drift",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_CURRENCY_AND_FX_PARITY",
+        "statement": "FX conversion rate conforms to authoritative market corridor without inverse arbitrage",
+        "passed": false,
+        "discrepancy_triggered": true,
+        "load_bearing": false
+      },
+      {
+        "claim_id": "CLAIM_ONCHAIN_WALLET_SOLVENCY",
+        "statement": "Destination account '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466' is a verified solvent EVM recipient",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_REGULATORY_AND_ADVERSE_NEWS",
+        "statement": "Counterparty has no critical statutory cease-and-desist or bankruptcy filings",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": false
+      }
+    ],
+    "facts": [
+      {
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "dimension": "Corporate Statutory Existence",
+        "vendor": "Siemens Aktiengesellschaft",
+        "legal_name": "52990000000000000000",
+        "lei": "52990000000000000000",
+        "status": "DISCREPANCY_OR_MISSING"
+      },
+      {
+        "claim_id": "CLAIM_OFAC_SANCTIONS_CLEARANCE",
+        "dimension": "OFAC SDN Sanctions Screening",
+        "entity": "Siemens Aktiengesellschaft",
+        "sanctioned": false,
+        "similarity_score": 0,
+        "matches": []
+      },
+      {
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "dimension": "Domain Safety & Anti-Phishing",
+        "domain": "siemensaktiengesellschaft.com",
+        "verdict": "SAFE",
+        "risk_score": 60
+      },
+      {
+        "claim_id": "CLAIM_MATHEMATICAL_INTEGRITY",
+        "dimension": "Sub-Cent Arithmetic & Line-Item Audit",
+        "computedSum": 8400,
+        "claimedSum": 8400,
+        "driftCents": 0,
+        "wasmScore": 10000
+      },
+      {
+        "claim_id": "CLAIM_CURRENCY_AND_FX_PARITY",
+        "dimension": "Foreign Exchange Rate Parity",
+        "pair": "EUR_USD",
+        "claimedRate": 0.9216,
+        "expectedRate": 1.085,
+        "fxPassed": false
+      },
+      {
+        "claim_id": "CLAIM_ONCHAIN_WALLET_SOLVENCY",
+        "dimension": "On-Chain Destination Verification",
+        "address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "solvent": true
+      },
+      {
+        "claim_id": "CLAIM_REGULATORY_AND_ADVERSE_NEWS",
+        "dimension": "Regulatory & Statutory Clearances",
+        "standing": "CLEAR_GOOD_STANDING"
+      }
+    ],
+    "receipts": [
+      {
+        "receipt_id": "rcpt-1-e7433895",
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "miner_id": "6163",
+        "miner_name": "Praman Desk (Diamond #6163)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "NOT_FOUND",
+        "response_digest": "0x3478c9fe7171af79054239e9b2820760eb791f02a18d062eff364d5155018656",
+        "timestamp": "2026-11-22T09:51:43.816Z"
+      },
+      {
+        "receipt_id": "rcpt-2-8f182911",
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "miner_id": "20261117",
+        "miner_name": "Takar Global Registry (#20261117)",
+        "role": "secondary",
+        "cost_usdc": 0.015,
+        "verdict": "NOT_FOUND_IN_SECONDARY",
+        "response_digest": "0x3aabab75b3190f032529e626976db891deaf8bb4fb16980f48f6852d5ce2db60",
+        "timestamp": "2026-11-22T09:51:43.816Z"
+      },
+      {
+        "receipt_id": "rcpt-3-d64be0b9",
+        "claim_id": "CLAIM_OFAC_SANCTIONS_CLEARANCE",
+        "miner_id": "6163",
+        "miner_name": "Praman Desk OFAC Engine (#6163)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "CLEAN",
+        "response_digest": "0xd08060b617aac6d24381948a48389a853ef52f97f53900a3af7fdf9c2a890150",
+        "timestamp": "2026-11-22T09:51:44.058Z"
+      },
+      {
+        "receipt_id": "rcpt-4-3a0608bc",
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "miner_id": "42420",
+        "miner_name": "FakeWatch Shield Miner (#42420)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "UNKNOWN",
+        "response_digest": "0x8e4c4ee299fdfb9d0956988ed276ce8eeb958304ef4c7d0e000459878627d4cf",
+        "timestamp": "2026-11-22T09:51:44.508Z"
+      },
+      {
+        "receipt_id": "rcpt-5-97f16621",
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "miner_id": "6163",
+        "miner_name": "Praman Desk Phishing Shield (#6163)",
+        "role": "secondary",
+        "cost_usdc": 0.01,
+        "verdict": "SAFE",
+        "response_digest": "0x50d4c1ab7d27ee16eb9649dbf1ffbd3d71f26b595aff42bf1fe9492a94a6edd9",
+        "timestamp": "2026-11-22T09:51:44.508Z"
+      },
+      {
+        "receipt_id": "rcpt-wasm-98a870",
+        "claim_id": "CLAIM_MATHEMATICAL_INTEGRITY",
+        "miner_id": "wasm-deterministic-651b",
+        "miner_name": "Praman 651-Byte WASM Comparator Engine",
+        "role": "deterministic-wasm",
+        "cost_usdc": 0,
+        "verdict": "BIT_EXACT_MATCH",
+        "response_digest": "0xcbbe731d0950cfda466f5e519b6a52eb0d0b0b3aa505e4116e91e8e3a654da75",
+        "timestamp": "2026-11-22T09:51:44.508Z"
+      },
+      {
+        "receipt_id": "rcpt-fx-365341",
+        "claim_id": "CLAIM_CURRENCY_AND_FX_PARITY",
+        "miner_id": "telegraph-fx-oracle",
+        "miner_name": "Praman Telegraph FX Feed",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "INVERTED_RATE",
+        "response_digest": "0x33f33d975f043e91d785ff651e9823c9a5cfe59a464a9a2bc3073a4f089ba4f2",
+        "timestamp": "2026-11-22T09:51:44.508Z"
+      },
+      {
+        "receipt_id": "rcpt-8-9da786a6",
+        "claim_id": "CLAIM_ONCHAIN_WALLET_SOLVENCY",
+        "miner_id": "6163",
+        "miner_name": "Praman Desk EVM Validator (#6163)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "ACTIVE_SOLVENT",
+        "response_digest": "0xf8f723c39f4ba452fcd3b2c9498c68e0b043f8bf2f1d7308953402b9d6d0e5af",
+        "timestamp": "2026-11-22T09:51:44.508Z"
+      },
+      {
+        "receipt_id": "rcpt-10-1e0e2c9a",
+        "claim_id": "CLAIM_REGULATORY_AND_ADVERSE_NEWS",
+        "miner_id": "6163",
+        "miner_name": "Praman Desk Universal Intelligence (#6163)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "CLEAR_GOOD_STANDING",
+        "response_digest": "0x936ea9b316bb57aec3cf0b61917eebb39c6037e788bb441377def4e37d3b2d1f",
+        "timestamp": "2026-11-22T09:51:44.508Z"
+      }
+    ],
+    "decision": {
+      "verdict": "HELD_FOR_MANUAL_REVIEW",
+      "blocking_flags": [
+        "FAILED_CLAIM_CORPORATE_EXISTENCE"
+      ],
+      "escrow_release_authorized": false,
+      "timestamp": "2026-11-22T09:51:44.508Z"
+    }
+  }
+}

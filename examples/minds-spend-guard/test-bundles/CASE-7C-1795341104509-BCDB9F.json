@@ -1,0 +1,227 @@
+{
+  "bundle_version": "1.0.0",
+  "case_id": "CASE-7C-1795341104509-BCDB9F",
+  "created_at": "2026-11-22T09:51:47.560Z",
+  "bundle_sha256": "0xc9c2d47e810b838f5fa895ef0b550e62c3a41e825fc4ebf1a89b3e31f329c533",
+  "duration_ms": 3051,
+  "payload": {
+    "case_id": "CASE-7C-1795341104509-BCDB9F",
+    "subject": {
+      "vendor": "Authorized Enterprise Vendor",
+      "invoiceNumber": "INV-2026-DRIFT-001",
+      "totalAmount": 8450,
+      "currency": "USD",
+      "recipientAddress": null
+    },
+    "budget": {
+      "allocated_usdc": 0.25,
+      "spent_usdc": 0.095,
+      "asks_issued": 9,
+      "extra_opinions_bought": 2,
+      "savings_usdc": 0.155,
+      "savings_pct": 62
+    },
+    "claims": [
+      {
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "statement": "Counterparty 'Authorized Enterprise Vendor' is a legally registered active entity",
+        "passed": false,
+        "discrepancy_triggered": true,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_OFAC_SANCTIONS_CLEARANCE",
+        "statement": "Counterparty 'Authorized Enterprise Vendor' is completely clear of OFAC SDN sanctions",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "statement": "Billing portal 'authorizedenterprisevendor.com' is authentic and free from phishing compromise",
+        "passed": true,
+        "discrepancy_triggered": true,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_MATHEMATICAL_INTEGRITY",
+        "statement": "Line-item totals match invoice face amount with 0 sub-cent arithmetic drift",
+        "passed": false,
+        "discrepancy_triggered": false,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_CURRENCY_AND_FX_PARITY",
+        "statement": "FX conversion rate conforms to authoritative market corridor without inverse arbitrage",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": false
+      },
+      {
+        "claim_id": "CLAIM_ONCHAIN_WALLET_SOLVENCY",
+        "statement": "Destination account '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466' is a verified solvent EVM recipient",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_REGULATORY_AND_ADVERSE_NEWS",
+        "statement": "Counterparty has no critical statutory cease-and-desist or bankruptcy filings",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": false
+      }
+    ],
+    "facts": [
+      {
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "dimension": "Corporate Statutory Existence",
+        "vendor": "Authorized Enterprise Vendor",
+        "legal_name": "Authorized Enterprise Vendor",
+        "lei": null,
+        "status": "DISCREPANCY_OR_MISSING"
+      },
+      {
+        "claim_id": "CLAIM_OFAC_SANCTIONS_CLEARANCE",
+        "dimension": "OFAC SDN Sanctions Screening",
+        "entity": "Authorized Enterprise Vendor",
+        "sanctioned": false,
+        "similarity_score": 0,
+        "matches": []
+      },
+      {
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "dimension": "Domain Safety & Anti-Phishing",
+        "domain": "authorizedenterprisevendor.com",
+        "verdict": "SAFE",
+        "risk_score": 60
+      },
+      {
+        "claim_id": "CLAIM_MATHEMATICAL_INTEGRITY",
+        "dimension": "Sub-Cent Arithmetic & Line-Item Audit",
+        "computedSum": 8400,
+        "claimedSum": 8450,
+        "driftCents": 5000,
+        "wasmScore": 0
+      },
+      {
+        "claim_id": "CLAIM_CURRENCY_AND_FX_PARITY",
+        "dimension": "Foreign Exchange Rate Parity",
+        "pair": "USD_USD",
+        "claimedRate": 1,
+        "expectedRate": 1,
+        "fxPassed": true
+      },
+      {
+        "claim_id": "CLAIM_ONCHAIN_WALLET_SOLVENCY",
+        "dimension": "On-Chain Destination Verification",
+        "address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "solvent": true
+      },
+      {
+        "claim_id": "CLAIM_REGULATORY_AND_ADVERSE_NEWS",
+        "dimension": "Regulatory & Statutory Clearances",
+        "standing": "CLEAR_GOOD_STANDING"
+      }
+    ],
+    "receipts": [
+      {
+        "receipt_id": "rcpt-1-6196941b",
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "miner_id": "6163",
+        "miner_name": "Praman Desk (Diamond #6163)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "NOT_FOUND",
+        "response_digest": "0xd71dd274c3660fd624463624adda3f41536442e5a7bbd671d5bc94ae74101ce4",
+        "timestamp": "2026-11-22T09:51:45.146Z"
+      },
+      {
+        "receipt_id": "rcpt-2-8ee6b0b9",
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "miner_id": "20261117",
+        "miner_name": "Takar Global Registry (#20261117)",
+        "role": "secondary",
+        "cost_usdc": 0.015,
+        "verdict": "NOT_FOUND_IN_SECONDARY",
+        "response_digest": "0x894cdb0f4ca3cbba454e68ededcc8c6f5b8d19c2e474ed8601fd7acb13e4dac4",
+        "timestamp": "2026-11-22T09:51:45.146Z"
+      },
+      {
+        "receipt_id": "rcpt-3-4de7e1e6",
+        "claim_id": "CLAIM_OFAC_SANCTIONS_CLEARANCE",
+        "miner_id": "6163",
+        "miner_name": "Praman Desk OFAC Engine (#6163)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "CLEAN",
+        "response_digest": "0xd70457ee2f58b6b5e829753632d60e359b7d484ae04ba308b0262c224d44a33c",
+        "timestamp": "2026-11-22T09:51:46.066Z"
+      },
+      {
+        "receipt_id": "rcpt-4-f30e2541",
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "miner_id": "42420",
+        "miner_name": "FakeWatch Shield Miner (#42420)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "UNKNOWN",
+        "response_digest": "0x3cb540ba90e144c3c4a98528831b3ecfb0315c5370837051ded468836f9d08f3",
+        "timestamp": "2026-11-22T09:51:47.560Z"
+      },
+      {
+        "receipt_id": "rcpt-5-6ab59e17",
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "miner_id": "6163",
+        "miner_name": "Praman Desk Phishing Shield (#6163)",
+        "role": "secondary",
+        "cost_usdc": 0.01,
+        "verdict": "SAFE",
+        "response_digest": "0xa681ca0b1f58ecb0acb3535501df0ec8867b9e92ab6c83cea91435cac0a23549",
+        "timestamp": "2026-11-22T09:51:47.560Z"
+      },
+      {
+        "receipt_id": "rcpt-wasm-0b7558",
+        "claim_id": "CLAIM_MATHEMATICAL_INTEGRITY",
+        "miner_id": "wasm-deterministic-651b",
+        "miner_name": "Praman 651-Byte WASM Comparator Engine",
+        "role": "deterministic-wasm",
+        "cost_usdc": 0,
+        "verdict": "ARITHMETIC_DRIFT",
+        "response_digest": "0x930d226b967d2054f31cbb82c844795d3e68596df0e9d97d659aeac24751c757",
+        "timestamp": "2026-11-22T09:51:47.560Z"
+      },
+      {
+        "receipt_id": "rcpt-7-478a881e",
+        "claim_id": "CLAIM_ONCHAIN_WALLET_SOLVENCY",
+        "miner_id": "6163",
+        "miner_name": "Praman Desk EVM Validator (#6163)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "ACTIVE_SOLVENT",
+        "response_digest": "0xf8f723c39f4ba452fcd3b2c9498c68e0b043f8bf2f1d7308953402b9d6d0e5af",
+        "timestamp": "2026-11-22T09:51:47.560Z"
+      },
+      {
+        "receipt_id": "rcpt-9-c4498e0e",
+        "claim_id": "CLAIM_REGULATORY_AND_ADVERSE_NEWS",
+        "miner_id": "6163",
+        "miner_name": "Praman Desk Universal Intelligence (#6163)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "CLEAR_GOOD_STANDING",
+        "response_digest": "0x5a22045fcbb13d9ec97373451ea59c21a3248af099d826c6d60b2d46575a56ba",
+        "timestamp": "2026-11-22T09:51:47.560Z"
+      }
+    ],
+    "decision": {
+      "verdict": "HELD_FOR_MANUAL_REVIEW",
+      "blocking_flags": [
+        "FAILED_CLAIM_CORPORATE_EXISTENCE",
+        "FAILED_CLAIM_MATHEMATICAL_INTEGRITY"
+      ],
+      "escrow_release_authorized": false,
+      "timestamp": "2026-11-22T09:51:47.560Z"
+    }
+  }
+}
