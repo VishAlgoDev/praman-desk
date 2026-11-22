@@ -6108,7 +6108,7 @@ export async function handleApiRequest(req, res) {
         ok: true,
         service: 'praman-desk',
         minerId: 5281,
-        diamondRegistration: 6163,
+        diamondRegistration: 6164,
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),

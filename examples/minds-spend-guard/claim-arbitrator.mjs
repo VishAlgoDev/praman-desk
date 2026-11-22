@@ -27,23 +27,23 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Known authoritative Telegraph miners for peer opinion buying
 const PEER_MINERS = {
   CORPORATE: [
-    { id: '6163', name: 'Praman Desk (Diamond #6163)', base_cost: 0.01, role: 'primary' },
+    { id: '6164', name: 'Praman Desk (Diamond #6164)', base_cost: 0.01, role: 'primary' },
     { id: '20261117', name: 'Takar Global Registry (#20261117)', base_cost: 0.015, role: 'secondary' }
   ],
   SANCTIONS: [
-    { id: '6163', name: 'Praman Desk OFAC Engine (#6163)', base_cost: 0.01, role: 'primary' },
+    { id: '6164', name: 'Praman Desk OFAC Engine (#6164)', base_cost: 0.01, role: 'primary' },
     { id: '200001', name: 'GoPlus Security Intelligence (#200001)', base_cost: 0.015, role: 'secondary' }
   ],
   DOMAIN: [
     { id: '42420', name: 'FakeWatch Shield Miner (#42420)', base_cost: 0.01, role: 'primary' },
-    { id: '6163', name: 'Praman Desk Phishing Shield (#6163)', base_cost: 0.01, role: 'secondary' }
+    { id: '6164', name: 'Praman Desk Phishing Shield (#6164)', base_cost: 0.01, role: 'secondary' }
   ],
   ONCHAIN_TX: [
-    { id: '6163', name: 'Praman Desk EVM Validator (#6163)', base_cost: 0.01, role: 'primary' },
+    { id: '6164', name: 'Praman Desk EVM Validator (#6164)', base_cost: 0.01, role: 'primary' },
     { id: '9002', name: 'TxLens Universal Gateway (#9002)', base_cost: 0.02, role: 'secondary' }
   ],
   WEB_RESEARCH: [
-    { id: '6163', name: 'Praman Desk Universal Intelligence (#6163)', base_cost: 0.01, role: 'primary' },
+    { id: '6164', name: 'Praman Desk Universal Intelligence (#6164)', base_cost: 0.01, role: 'primary' },
     { id: '5001', name: 'ChainSight Web Intelligence (#5001)', base_cost: 0.015, role: 'secondary' }
   ]
 };

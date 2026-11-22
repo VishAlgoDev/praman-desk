@@ -1,0 +1,256 @@
+{
+  "bundle_version": "1.0.0",
+  "case_id": "CASE-7C-1795343630477-5BC763",
+  "created_at": "2026-11-22T10:33:53.433Z",
+  "bundle_sha256": "0xad1150388d062cbec56bdd59ef14aef9344a49c44795fe3862b84ad4cbf30551",
+  "duration_ms": 2956,
+  "payload": {
+    "case_id": "CASE-7C-1795343630477-5BC763",
+    "subject": {
+      "vendor": "Bank Rossiya",
+      "invoiceNumber": "INV-2026-RU-9921",
+      "totalAmount": 150000,
+      "currency": "USD",
+      "recipientAddress": null
+    },
+    "budget": {
+      "allocated_usdc": 0.25,
+      "spent_usdc": 0.11,
+      "asks_issued": 10,
+      "extra_opinions_bought": 3,
+      "savings_usdc": 0.14,
+      "savings_pct": 56
+    },
+    "claims": [
+      {
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "statement": "Counterparty 'Bank Rossiya' is a legally registered active entity",
+        "passed": false,
+        "discrepancy_triggered": true,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_OFAC_SANCTIONS_CLEARANCE",
+        "statement": "Counterparty 'Bank Rossiya' is completely clear of OFAC SDN sanctions",
+        "passed": false,
+        "discrepancy_triggered": true,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "statement": "Billing portal 'bankrossiya.com' is authentic and free from phishing compromise",
+        "passed": true,
+        "discrepancy_triggered": true,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_MATHEMATICAL_INTEGRITY",
+        "statement": "Line-item totals match invoice face amount with 0 sub-cent arithmetic drift",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_CURRENCY_AND_FX_PARITY",
+        "statement": "FX conversion rate conforms to authoritative market corridor without inverse arbitrage",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": false
+      },
+      {
+        "claim_id": "CLAIM_ONCHAIN_WALLET_SOLVENCY",
+        "statement": "Destination account '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466' is a verified solvent EVM recipient",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": true
+      },
+      {
+        "claim_id": "CLAIM_REGULATORY_AND_ADVERSE_NEWS",
+        "statement": "Counterparty has no critical statutory cease-and-desist or bankruptcy filings",
+        "passed": true,
+        "discrepancy_triggered": false,
+        "load_bearing": false
+      }
+    ],
+    "facts": [
+      {
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "dimension": "Corporate Statutory Existence",
+        "vendor": "Bank Rossiya",
+        "legal_name": "Bank Rossiya",
+        "lei": null,
+        "status": "DISCREPANCY_OR_MISSING"
+      },
+      {
+        "claim_id": "CLAIM_OFAC_SANCTIONS_CLEARANCE",
+        "dimension": "OFAC SDN Sanctions Screening",
+        "entity": "Bank Rossiya",
+        "sanctioned": true,
+        "similarity_score": 1,
+        "matches": [
+          {
+            "sdn_uid": "16681",
+            "matched_name": "BANK ROSSIYA",
+            "match_type": "Entity",
+            "programs": "UKRAINE-EO13661",
+            "similarity_score": 1,
+            "matched_via": "primary_name",
+            "matched_alias": null
+          },
+          {
+            "sdn_uid": "51760",
+            "matched_name": "ROSSITA BANK",
+            "match_type": "Entity",
+            "programs": "RUSSIA-EO14024",
+            "similarity_score": 0.9086,
+            "matched_via": "primary_name",
+            "matched_alias": null
+          }
+        ]
+      },
+      {
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "dimension": "Domain Safety & Anti-Phishing",
+        "domain": "bankrossiya.com",
+        "verdict": "SAFE",
+        "risk_score": 60
+      },
+      {
+        "claim_id": "CLAIM_MATHEMATICAL_INTEGRITY",
+        "dimension": "Sub-Cent Arithmetic & Line-Item Audit",
+        "computedSum": 150000,
+        "claimedSum": 150000,
+        "driftCents": 0,
+        "wasmScore": 10000
+      },
+      {
+        "claim_id": "CLAIM_CURRENCY_AND_FX_PARITY",
+        "dimension": "Foreign Exchange Rate Parity",
+        "pair": "USD_USD",
+        "claimedRate": 1,
+        "expectedRate": 1,
+        "fxPassed": true
+      },
+      {
+        "claim_id": "CLAIM_ONCHAIN_WALLET_SOLVENCY",
+        "dimension": "On-Chain Destination Verification",
+        "address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+        "solvent": true
+      },
+      {
+        "claim_id": "CLAIM_REGULATORY_AND_ADVERSE_NEWS",
+        "dimension": "Regulatory & Statutory Clearances",
+        "standing": "CLEAR_GOOD_STANDING"
+      }
+    ],
+    "receipts": [
+      {
+        "receipt_id": "rcpt-1-10bee5c7",
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "miner_id": "6164",
+        "miner_name": "Praman Desk (Diamond #6164)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "NOT_FOUND",
+        "response_digest": "0x4bf2ba7a91e1bd939a276399c82949ed8863f637afa2ffbda6eb9bb762c7c7fa",
+        "timestamp": "2026-11-22T10:33:51.029Z"
+      },
+      {
+        "receipt_id": "rcpt-2-61b92e59",
+        "claim_id": "CLAIM_CORPORATE_EXISTENCE",
+        "miner_id": "20261117",
+        "miner_name": "Takar Global Registry (#20261117)",
+        "role": "secondary",
+        "cost_usdc": 0.015,
+        "verdict": "NOT_FOUND_IN_SECONDARY",
+        "response_digest": "0x5de7c096868672bd0fcba4c92c82e7368c9e81e29609f8fde3777c1e975d255f",
+        "timestamp": "2026-11-22T10:33:51.029Z"
+      },
+      {
+        "receipt_id": "rcpt-3-15fbf564",
+        "claim_id": "CLAIM_OFAC_SANCTIONS_CLEARANCE",
+        "miner_id": "6164",
+        "miner_name": "Praman Desk OFAC Engine (#6164)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "SANCTIONED",
+        "response_digest": "0xe85a37873288319e83247ebfd8b4a49cfcc5bd84607e921c81607670b6e63aff",
+        "timestamp": "2026-11-22T10:33:52.025Z"
+      },
+      {
+        "receipt_id": "rcpt-4-a3e274e1",
+        "claim_id": "CLAIM_OFAC_SANCTIONS_CLEARANCE",
+        "miner_id": "200001",
+        "miner_name": "GoPlus Security Intelligence (#200001)",
+        "role": "secondary",
+        "cost_usdc": 0.015,
+        "verdict": "CONFIRMED_SANCTIONED",
+        "response_digest": "0x31ccbfb7b57c11b706205335d27b6338971de019553d489effa8d94dc3a42912",
+        "timestamp": "2026-11-22T10:33:52.025Z"
+      },
+      {
+        "receipt_id": "rcpt-5-b2c4da07",
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "miner_id": "42420",
+        "miner_name": "FakeWatch Shield Miner (#42420)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "UNKNOWN",
+        "response_digest": "0xd8a675be5754075e834ec84fd8de1aab721d44b018f781ca68aa21cfc4443a0f",
+        "timestamp": "2026-11-22T10:33:53.433Z"
+      },
+      {
+        "receipt_id": "rcpt-6-17f3cba1",
+        "claim_id": "CLAIM_DOMAIN_AND_PHISHING_REPUTATION",
+        "miner_id": "6164",
+        "miner_name": "Praman Desk Phishing Shield (#6164)",
+        "role": "secondary",
+        "cost_usdc": 0.01,
+        "verdict": "SAFE",
+        "response_digest": "0x87e5cccd08722988ccaf9bb86017aba6ef1e18448be24ab9bfd22a525cc2c06e",
+        "timestamp": "2026-11-22T10:33:53.433Z"
+      },
+      {
+        "receipt_id": "rcpt-wasm-523c42",
+        "claim_id": "CLAIM_MATHEMATICAL_INTEGRITY",
+        "miner_id": "wasm-deterministic-651b",
+        "miner_name": "Praman 651-Byte WASM Comparator Engine",
+        "role": "deterministic-wasm",
+        "cost_usdc": 0,
+        "verdict": "BIT_EXACT_MATCH",
+        "response_digest": "0xe23f580d5df3d206f7d4cbc4e942547e97affdc08dea61c6900b7c17ca68439a",
+        "timestamp": "2026-11-22T10:33:53.433Z"
+      },
+      {
+        "receipt_id": "rcpt-8-b097df76",
+        "claim_id": "CLAIM_ONCHAIN_WALLET_SOLVENCY",
+        "miner_id": "6164",
+        "miner_name": "Praman Desk EVM Validator (#6164)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "ACTIVE_SOLVENT",
+        "response_digest": "0xf8f723c39f4ba452fcd3b2c9498c68e0b043f8bf2f1d7308953402b9d6d0e5af",
+        "timestamp": "2026-11-22T10:33:53.433Z"
+      },
+      {
+        "receipt_id": "rcpt-10-d9fa43b1",
+        "claim_id": "CLAIM_REGULATORY_AND_ADVERSE_NEWS",
+        "miner_id": "6164",
+        "miner_name": "Praman Desk Universal Intelligence (#6164)",
+        "role": "primary",
+        "cost_usdc": 0.01,
+        "verdict": "CLEAR_GOOD_STANDING",
+        "response_digest": "0xbaa0fb912d914965211f839ea53acc7b108571d1e3d670ada3ea5f9cef2ee952",
+        "timestamp": "2026-11-22T10:33:53.433Z"
+      }
+    ],
+    "decision": {
+      "verdict": "REJECT_PAYMENT",
+      "blocking_flags": [
+        "OFAC_SDN_SANCTIONS_HARD_BLOCK"
+      ],
+      "escrow_release_authorized": false,
+      "timestamp": "2026-11-22T10:33:53.433Z"
+    }
+  }
+}
