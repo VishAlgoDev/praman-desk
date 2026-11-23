@@ -18,6 +18,7 @@
   "private": true,
   "scripts": {
     "gate": "node bin/praman-gate.mjs",
+    "alibaba:demo": "node examples/alibaba-trade-assurance/alibaba-trade-assurance-demo.mjs",
     "agent:demo": "node examples/minds-spend-guard/demo-minds-spend-guard.mjs",
     "takar:demo": "node examples/takar-second-opinion/takar-praman-escrow-bridge.mjs",
     "mcp:start": "node mcp/server.mjs",

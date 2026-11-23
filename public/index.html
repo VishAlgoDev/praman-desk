@@ -824,6 +824,7 @@
     <!-- Secondary Quick Scenario Pills -->
     <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; align-items:center;">
       <span style="font-size:11px; color:#64748b; font-weight:600;">Other Tests:</span>
+      <button type="button" class="btn-secondary" style="font-size:11px; padding:3px 7px; background:#1e1b4b; color:#a5b4fc; border:1px solid #6366f1;" onclick="triggerScenario('alibaba_trade')">🏢 Alibaba Trade Assurance ($100k vs $80k Shortfall)</button>
       <button type="button" class="btn-secondary" style="font-size:11px; padding:3px 7px;" onclick="triggerScenario('retention')">Contract Retention Release ($15,000)</button>
       <button type="button" class="btn-secondary" style="font-size:11px; padding:3px 7px;" onclick="triggerScenario('injection')">Prompt Injection Attack</button>
     </div>
@@ -2823,6 +2824,15 @@ Content-Type: application/json
       verdictText: "⚠️ INVOICE DISCREPANCY BLOCKED (WASM LINE-ITEM MATH DRIFT DETECTED)",
       verdictColor: "#f87171",
       certHash: "0x78a192bca8192039bafe10928374819203847192830192830192830192830103"
+    },
+    alibaba_trade: {
+      prompt: "Alibaba Trade Assurance Settlement: Settle Invoice #ALI-9021 for $100,000.00 USD (100 units @ $1,000) against PO #PO-ALI-9021. Warehouse delivery inspection confirms 80 units accepted, 20 rejected.",
+      investigator: "• Task Classification: TRADE_ASSURANCE_DELIVERY_ARBITRATION\n• Platform: Alibaba Trade Assurance Contract #ALI-9021\n• PO Commitment: 100 industrial units @ $1,000.00 = $100,000.00 USD\n• Delivery & Warehouse Evidence: Bill of Lading & Inspection Receipt confirms 80 units accepted, 20 rejected/damaged\n• Supplier Claim: Invoiced full 100 units ($100,000.00 USD)",
+      reviewer: "• Variance Detection: 20-unit shortfall (-$20,000.00 variance / -20% drift)\n• WASM Arbitration: Full $100k payment condition UNSATISFIED (WASM_3WAY_MATH_MISMATCH)\n• Takar Escrow Panel (Sepolia 3-of-3): Consensus reached across 2 independent verifiers\n• Circuit Breaker: Blocked unauthorized $100k release; Reconciled partial settlement ($80k) queued pending buyer signoff",
+      verdict: "HALT_AND_FREEZE",
+      verdictText: "🛑 ALIBABA TRADE ASSURANCE HALT ($20,000 SHORTFALL BLOCKED BEFORE RELEASE)",
+      verdictColor: "#f87171",
+      certHash: "0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75"
     }
   };
 

@@ -10,6 +10,7 @@
  * Commands:
  *   demo                 Run a 5-second end-to-end evaluation benchmark (Approval, Sanctions Block, Phishing Shield, Math Discrepancy)
  *   agent-demo           Run the Animoca Minds Agent spend guard demo (exploit drain vs circuit breaker vs clean settlement)
+ *   alibaba              Run the Alibaba Trade Assurance B2B cross-border escrow arbitration demo (Discrepancy vs Reconciled)
  *   takar                Run the Bangdrop Takar cross-miner escrow clearing bridge (Two-Miner consensus)
  *   check "<prompt>"     Audit any payment prompt or transaction with Two-Mind synthesis & WASM comparator
  *   miner                Check live telemetry on Sepolia Diamond Miner #6169 (Devnode Route #5281)
@@ -223,6 +224,18 @@ async function main() {
       });
       await new Promise((resolve, reject) => {
         child.on('close', code => (code === 0 ? resolve() : reject(new Error(`Agent demo exited with code ${code}`))));
+        child.on('error', reject);
+      });
+      break;
+    }
+    case 'alibaba':
+    case 'trade-assurance': {
+      const child = spawn(process.execPath, [path.join(rootDir, 'examples', 'alibaba-trade-assurance', 'alibaba-trade-assurance-demo.mjs')], {
+        stdio: 'inherit',
+        cwd: rootDir
+      });
+      await new Promise((resolve, reject) => {
+        child.on('close', code => (code === 0 ? resolve() : reject(new Error(`Alibaba demo exited with code ${code}`))));
         child.on('error', reject);
       });
       break;
