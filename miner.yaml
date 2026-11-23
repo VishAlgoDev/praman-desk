@@ -45,6 +45,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legacy query alias for question"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim evaluation prompt string"
           - name: purchase_order
             type: string
             intents: ["*"]
@@ -86,6 +90,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legacy query alias for question"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim evaluation prompt string"
 
   - path: /api/miner/vendor-verify
     external_path: /api/miner/vendor-verify
@@ -131,6 +139,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legacy query alias for question"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim evaluation prompt string"
 
   - path: /api/miner/doc-authenticity
     external_path: /api/miner/doc-authenticity
@@ -159,6 +171,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legacy query alias for question"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim evaluation prompt string"
 
   # --- NEW COMPLIANCE INTENTS (H2 EXPANSION) ---
 
@@ -196,6 +212,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legacy query alias for question"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim evaluation prompt string"
 
   - path: /api/miner/sanctions-screen
     external_path: /api/miner/sanctions-screen
@@ -223,6 +243,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legacy query alias for question"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim evaluation prompt string"
 
   - path: /api/miner/regulatory-filing
     external_path: /api/miner/regulatory-filing
@@ -258,6 +282,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legacy query alias for question"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim evaluation prompt string"
           - name: filter[entity.legalName]
             type: string
             intents: ["*"]
@@ -289,6 +317,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legacy query alias for question"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim evaluation prompt string"
           - name: contract
             type: string
             intents: ["*"]
@@ -325,6 +357,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Legacy query alias for question"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim evaluation prompt string"
 
   - path: /api/miner/grid-power-price
     external_path: /api/miner/grid-power-price
@@ -386,6 +422,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Compact query alias"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim query prompt string"
 
   - path: /api/miner/onchain-tx
     external_path: /api/miner/onchain-tx
@@ -414,6 +454,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Query containing transaction hash"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim query prompt string"
 
   - path: /api/miner/token-supply
     external_path: /api/miner/token-supply
@@ -445,6 +489,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Natural language query containing token address"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim query prompt string"
 
   - path: /api/miner/wallet-balance
     external_path: /api/miner/wallet-balance
@@ -476,6 +524,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Query containing wallet address"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim query prompt string"
 
   - path: /api/miner/research-query
     external_path: /api/miner/research-query
@@ -495,6 +547,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Natural language research question"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim query prompt string"
 
   - path: /api/miner/liquidity-depth
     external_path: /api/miner/liquidity-depth
@@ -539,6 +595,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Query string alias for question"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Verbatim query prompt string"
 
   - path: /api/miner/arbitrate
     external_path: /api/miner/arbitrate

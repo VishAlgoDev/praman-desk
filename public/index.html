@@ -2807,7 +2807,7 @@ Content-Type: application/json
     if (statusEl) statusEl.textContent = `Loaded preset: ${key}`;
   }
 
-  function runMindPlayground() {
+  async function runMindPlayground() {
     const inputEl = document.getElementById('mind-playground-input');
     const text = (inputEl ? inputEl.value : '').trim();
     if (!text) {
@@ -2826,20 +2826,38 @@ Content-Type: application/json
     btn.disabled = true;
     statusEl.textContent = 'Orchestrating Two Minds via Telegraph miners & WASM...';
 
-    // Check if input matches preset keywords or dynamic prompt
-    let matchedKey = 'siemens';
-    const lower = text.toLowerCase();
-    if (lower.includes('lazarus') || lower.includes('0x098b716b8aaf21512996dc57eb0615e2383e2f96')) {
-      matchedKey = 'lazarus';
-    } else if (lower.includes('retention') || lower.includes('retainage') || lower.includes('escrow release')) {
-      matchedKey = 'retention';
-    } else if (lower.includes('ignore') || lower.includes('override') || lower.includes('jailbreak')) {
-      matchedKey = 'injection';
-    } else if (lower.includes('unisvvap') || lower.includes('phishing') || lower.includes('checkout link')) {
-      matchedKey = 'phishing_link';
-    }
+    const start = performance.now();
+    try {
+      const res = await fetch('/api/spend-guard/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: text })
+      });
+      const data = await res.json();
+      const latency = Math.round(performance.now() - start);
 
-    setTimeout(() => {
+      resInv.textContent = data.investigatorFindings || data.summary || 'Investigation complete.';
+      resRev.textContent = data.reviewerFindings || (data.circuitBreaker?.triggered ? `HALTED: ${data.flags?.join(', ')}` : 'APPROVED');
+      resBadge.textContent = data.verdictText || (data.status === 'APPROVED' ? '✅ DELEGATED EXECUTION APPROVED' : '🛑 CIRCUIT BREAKER TRIGGERED');
+      resBadge.style.color = data.verdictColor || (data.status === 'APPROVED' ? '#34d399' : '#f87171');
+      resCert.textContent = `Cryptographic Attestation Receipt: ${data.certHash || data.attestationSha256 || '0x...'}`;
+      resBox.style.display = 'block';
+
+      statusEl.textContent = `Live arbitration complete in ${latency}ms (WASM bit-exact verified).`;
+    } catch (err) {
+      console.warn('API error in playground, using fallback:', err);
+      // Fallback only if offline/network error
+      let matchedKey = 'siemens';
+      const lower = text.toLowerCase();
+      if (lower.includes('lazarus') || lower.includes('0x098b716b8aaf21512996dc57eb0615e2383e2f96')) {
+        matchedKey = 'lazarus';
+      } else if (lower.includes('retention') || lower.includes('retainage') || lower.includes('escrow release')) {
+        matchedKey = 'retention';
+      } else if (lower.includes('ignore') || lower.includes('override') || lower.includes('jailbreak')) {
+        matchedKey = 'injection';
+      } else if (lower.includes('unisvvap') || lower.includes('phishing') || lower.includes('checkout link')) {
+        matchedKey = 'phishing_link';
+      }
       const data = MIND_PLAYGROUND_SCENARIOS[matchedKey];
       resInv.textContent = data.investigator;
       resRev.textContent = data.reviewer;
@@ -2847,10 +2865,10 @@ Content-Type: application/json
       resBadge.style.color = data.verdictColor;
       resCert.textContent = `Cryptographic Attestation Receipt: ${data.certHash}`;
       resBox.style.display = 'block';
-
-      statusEl.textContent = `Arbitration complete in 18ms (WASM bit-exact verified).`;
+      statusEl.textContent = `Local verification fallback executed.`;
+    } finally {
       btn.disabled = false;
-    }, 450);
+    }
   }
 
   

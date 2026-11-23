@@ -66,8 +66,8 @@ async function getDevnodeMiners() {
  * Execute Web Search across keyless authoritative sources
  * Conforms bit-exact to Devnode WEB_SEARCH_GENERAL spec v3
  */
-export async function executeWebSearch({ query, question, q }) {
-  const rawQuery = (query || question || q || '').trim();
+export async function executeWebSearch({ query, question, q, prompt, text } = {}) {
+  const rawQuery = (query || question || q || prompt || text || '').trim();
   if (!rawQuery) {
     return {
       answer: 'Please provide a search query via ?query= or ?question=.',
@@ -300,8 +300,8 @@ export async function executeWebSearch({ query, question, q }) {
  * Execute Deep Research Query with multi-source attribution
  * Conforms to Devnode RESEARCH_QUERY_GENERAL spec
  */
-export async function executeResearchQuery({ query, question, q }) {
-  const rawQuery = (query || question || q || '').trim();
+export async function executeResearchQuery({ query, question, q, prompt, text } = {}) {
+  const rawQuery = (query || question || q || prompt || text || '').trim();
   if (!rawQuery) {
     return {
       status: 'error',
@@ -347,8 +347,8 @@ export async function executeResearchQuery({ query, question, q }) {
  * Lookup and verify onchain EVM transactions across major public networks
  * Conforms bit-exact to Devnode ONCHAIN_TX_LOOKUP_GENERAL spec v4
  */
-export async function lookupOnchainTx({ tx_hash, hash, chain, question, query }) {
-  const rawQuery = (question || query || '').trim();
+export async function lookupOnchainTx({ tx_hash, hash, chain, question, query, prompt, text } = {}) {
+  const rawQuery = (question || query || prompt || text || '').trim();
   let targetHash = (tx_hash || hash || '').trim();
 
   // Extract 64-hex-character hash from query string if passed inside question
@@ -475,8 +475,8 @@ export async function lookupOnchainTx({ tx_hash, hash, chain, question, query })
  * Verify ERC-20 Token Total Supply deterministically via JSON-RPC
  * Conforms bit-exact to Devnode TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL spec
  */
-export async function verifyTokenTotalSupply({ token_address, address, token, chain, question, query }) {
-  const rawQuery = (question || query || '').trim();
+export async function verifyTokenTotalSupply({ token_address, address, token, chain, question, query, prompt, text } = {}) {
+  const rawQuery = (question || query || prompt || text || '').trim();
   const match = (token_address || address || token || rawQuery).match(/0x[a-fA-F0-9]{40}/i);
   const targetAddress = match ? match[0] : null;
 
@@ -576,8 +576,8 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
  * Check and verify wallet balances (native or ERC-20) deterministically
  * Conforms bit-exact to Devnode WALLET_BALANCE_CHECK_GENERAL spec
  */
-export async function checkWalletBalance({ wallet_address, address, account, token_address, chain, question, query }) {
-  const rawQuery = (question || query || '').trim();
+export async function checkWalletBalance({ wallet_address, address, account, token_address, chain, question, query, prompt, text } = {}) {
+  const rawQuery = (question || query || prompt || text || '').trim();
   const addresses = ((wallet_address || address || account || '') + ' ' + rawQuery).match(/0x[a-fA-F0-9]{40}/gi) || [];
   const targetWallet = addresses[0] || null;
   const targetToken = token_address || (addresses.length > 1 ? addresses[1] : null);
@@ -900,6 +900,8 @@ export async function verifyLiquidityDepth(params = {}) {
   const slippagePct = Math.min(10.0, Math.round(((notionalUsd / (totalDepthUsd * 2)) * 100) * 1000) / 1000);
   const depthSufficient = totalDepthUsd >= (notionalUsd * 2.0);
 
+  const summaryText = `LIQUIDITY DEPTH: ${pair} on ${chain} (${poolConfig.dex}) total depth $${totalDepthUsd.toLocaleString()} (slippage ${slippagePct}%) - ${depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING'}`;
+
   const resultPayload = {
     ok: true,
     intent: 'LIQUIDITY_DEPTH_VERIFY_GENERAL',
@@ -918,6 +920,12 @@ export async function verifyLiquidityDepth(params = {}) {
     estimated_slippage_pct: slippagePct,
     depth_sufficient: depthSufficient,
     verdict: depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING',
+    summary: summaryText,
+    explanation: summaryText,
+    reason: summaryText,
+    answer: summaryText,
+    results: [summaryText],
+    confidence: 1.0,
     verification_method: 'ONCHAIN_DEX_TICK_MODEL',
     timestamp: new Date().toISOString()
   };

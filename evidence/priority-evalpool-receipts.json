@@ -1,0 +1,470 @@
+{
+  "timestamp": "2026-11-23T01:33:40.583Z",
+  "totalSubmissions": 6,
+  "receipts": [
+    {
+      "timestamp": "2026-11-23T01:33:37.331Z",
+      "intentId": "GRID_POWER_PRICE_GENERAL",
+      "bountyIssue": 219,
+      "file": "grid_power_price_general.jsonl",
+      "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+      "bodySha256": "160329c0a2325b62b15b98b9ad477abb30ad21de2ddfc53c9843059bf2db3f4c",
+      "nonce": "4c4c42864fbc30cfbd3af9b5b21128f8",
+      "signature": "0x1ec57ff3351d2baaa03267731b9d3a55ac1997963f0066b2f47fc0a755a8ab840d3f394fd2818d3defb1ba77ed3033764acfd727f51023c68e8bfd80f37724cc1c",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "GRID_POWER_PRICE_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 6,
+        "accepted": 6,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 6,
+        "state_counts": {
+          "admitted": 6,
+          "eligible": 229,
+          "rejected": 1
+        }
+      },
+      "poolStatusAfter": {
+        "intent_id": "GRID_POWER_PRICE_GENERAL",
+        "counts": [
+          {
+            "status": "admitted",
+            "count": 6
+          },
+          {
+            "status": "eligible",
+            "count": 229
+          },
+          {
+            "status": "rejected",
+            "reason": "near_duplicate",
+            "count": 1
+          }
+        ],
+        "by_state": {
+          "admitted": 6,
+          "eligible": 229,
+          "rejected": 1
+        },
+        "submitters": 7,
+        "eligible_submitters": 6,
+        "snapshot": {
+          "corpus_version": "694d1a87c7d5c4bbbde655a827391fd2fa7a8cf9988e5ac7c71146a862d35bcf",
+          "rows": 229,
+          "submitters": 6,
+          "qualification": 107,
+          "ranking": 122,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T05:35:38.707278Z",
+          "activation_epoch": 8
+        },
+        "active_snapshot": {
+          "corpus_version": "694d1a87c7d5c4bbbde655a827391fd2fa7a8cf9988e5ac7c71146a862d35bcf",
+          "rows": 229,
+          "submitters": 6,
+          "qualification": 107,
+          "ranking": 122,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T05:35:38.707278Z",
+          "activation_epoch": 8
+        },
+        "current_epoch": 41,
+        "min_submitters": 3
+      }
+    },
+    {
+      "timestamp": "2026-11-23T01:33:37.951Z",
+      "intentId": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
+      "bountyIssue": 220,
+      "file": "optimal_execution_route_general.jsonl",
+      "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+      "bodySha256": "d414a7a99935b5a250a209840c19118f7304f4c3cce45196738f816547abd8f2",
+      "nonce": "b5ae6ce024c618416dba8a2151e53d02",
+      "signature": "0x9e86b2d392540ee8da46fcd9dae80ac4bb673309f764aa834ef5568f644f06e20e0cf068351ccd1123feb21fa6d25a47e2c92a4b63092eb81023e1fd4fa9a9231c",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 5,
+        "accepted": 5,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 5,
+        "state_counts": {
+          "admitted": 5,
+          "eligible": 312,
+          "quarantine": 197
+        }
+      },
+      "poolStatusAfter": {
+        "intent_id": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
+        "counts": [
+          {
+            "status": "admitted",
+            "count": 5
+          },
+          {
+            "status": "eligible",
+            "count": 312
+          },
+          {
+            "status": "quarantine",
+            "reason": "rate_limited",
+            "count": 197
+          }
+        ],
+        "by_state": {
+          "admitted": 5,
+          "eligible": 312,
+          "quarantine": 197
+        },
+        "submitters": 8,
+        "eligible_submitters": 7,
+        "snapshot": {
+          "corpus_version": "4ca05ddc2d37aa1484adb9b40053a7b029f4f78d01272b811a9acd3d599ecd92",
+          "rows": 312,
+          "submitters": 7,
+          "qualification": 164,
+          "ranking": 148,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T15:49:30.921885Z",
+          "activation_epoch": 11
+        },
+        "active_snapshot": {
+          "corpus_version": "4ca05ddc2d37aa1484adb9b40053a7b029f4f78d01272b811a9acd3d599ecd92",
+          "rows": 312,
+          "submitters": 7,
+          "qualification": 164,
+          "ranking": 148,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T15:49:30.921885Z",
+          "activation_epoch": 11
+        },
+        "current_epoch": 41,
+        "min_submitters": 3
+      }
+    },
+    {
+      "timestamp": "2026-11-23T01:33:38.991Z",
+      "intentId": "TASK_EXECUTION_QUALITY_GENERAL",
+      "bountyIssue": 221,
+      "file": "task_execution_quality_general.jsonl",
+      "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+      "bodySha256": "44d26eab73b4a83ee55b9cd0e8274f6f1b93c6f25657c1105a865c5ea6cf44c0",
+      "nonce": "7f7f7b3c38d3af99cff66f56a9d80eb4",
+      "signature": "0xc81cdaa91fbd2fba6a4977e23be3a63f6f0cc09195baa1158053b60b444d56b14e5604f4adb079858db7bdfca22c44fd0d5676fb3636e2b827a6f31c3b5bb16f1c",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "TASK_EXECUTION_QUALITY_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 5,
+        "accepted": 5,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 5,
+        "state_counts": {
+          "admitted": 5,
+          "eligible": 264,
+          "quarantine": 18,
+          "rejected": 48
+        }
+      },
+      "poolStatusAfter": {
+        "intent_id": "TASK_EXECUTION_QUALITY_GENERAL",
+        "counts": [
+          {
+            "status": "admitted",
+            "count": 5
+          },
+          {
+            "status": "eligible",
+            "count": 264
+          },
+          {
+            "status": "quarantine",
+            "reason": "rate_limited",
+            "count": 18
+          },
+          {
+            "status": "rejected",
+            "reason": "near_duplicate",
+            "count": 48
+          }
+        ],
+        "by_state": {
+          "admitted": 5,
+          "eligible": 264,
+          "quarantine": 18,
+          "rejected": 48
+        },
+        "submitters": 13,
+        "eligible_submitters": 8,
+        "snapshot": {
+          "corpus_version": "0b7d07d461e21b6e4ac69b4f1cd340b85079273b96e77d7dded737e227415fb3",
+          "rows": 264,
+          "submitters": 8,
+          "qualification": 132,
+          "ranking": 132,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T15:49:32.506058Z",
+          "activation_epoch": 11
+        },
+        "active_snapshot": {
+          "corpus_version": "0b7d07d461e21b6e4ac69b4f1cd340b85079273b96e77d7dded737e227415fb3",
+          "rows": 264,
+          "submitters": 8,
+          "qualification": 132,
+          "ranking": 132,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T15:49:32.506058Z",
+          "activation_epoch": 11
+        },
+        "current_epoch": 41,
+        "min_submitters": 3
+      }
+    },
+    {
+      "timestamp": "2026-11-23T01:33:39.522Z",
+      "intentId": "GRID_POWER_PRICE_GENERAL",
+      "bountyIssue": 219,
+      "file": "grid_power_price_general.jsonl",
+      "submitter": "0x497FF1bE8cc0C95A7a14165A4999768C47fc0109",
+      "bodySha256": "160329c0a2325b62b15b98b9ad477abb30ad21de2ddfc53c9843059bf2db3f4c",
+      "nonce": "6dba3c513ded07ee9a534c417ad8740b",
+      "signature": "0x6df0ffccffd0bb3583e8181269a720336248f9ea1a92c982302d97d52d4adc537f433519537e88b728ac3d5d472029651775eff82cfafbe328e8c71bc6e192211c",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "GRID_POWER_PRICE_GENERAL",
+        "submitter": "0x497ff1be8cc0c95a7a14165a4999768c47fc0109",
+        "signed": true,
+        "received": 6,
+        "accepted": 0,
+        "duplicate": 6,
+        "rejected": 0,
+        "curated": 0,
+        "state_counts": {
+          "admitted": 6,
+          "eligible": 229,
+          "rejected": 1
+        }
+      },
+      "poolStatusAfter": {
+        "intent_id": "GRID_POWER_PRICE_GENERAL",
+        "counts": [
+          {
+            "status": "admitted",
+            "count": 6
+          },
+          {
+            "status": "eligible",
+            "count": 229
+          },
+          {
+            "status": "rejected",
+            "reason": "near_duplicate",
+            "count": 1
+          }
+        ],
+        "by_state": {
+          "admitted": 6,
+          "eligible": 229,
+          "rejected": 1
+        },
+        "submitters": 7,
+        "eligible_submitters": 6,
+        "snapshot": {
+          "corpus_version": "694d1a87c7d5c4bbbde655a827391fd2fa7a8cf9988e5ac7c71146a862d35bcf",
+          "rows": 229,
+          "submitters": 6,
+          "qualification": 107,
+          "ranking": 122,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T05:35:38.707278Z",
+          "activation_epoch": 8
+        },
+        "active_snapshot": {
+          "corpus_version": "694d1a87c7d5c4bbbde655a827391fd2fa7a8cf9988e5ac7c71146a862d35bcf",
+          "rows": 229,
+          "submitters": 6,
+          "qualification": 107,
+          "ranking": 122,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T05:35:38.707278Z",
+          "activation_epoch": 8
+        },
+        "current_epoch": 41,
+        "min_submitters": 3
+      }
+    },
+    {
+      "timestamp": "2026-11-23T01:33:40.048Z",
+      "intentId": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
+      "bountyIssue": 220,
+      "file": "optimal_execution_route_general.jsonl",
+      "submitter": "0x497FF1bE8cc0C95A7a14165A4999768C47fc0109",
+      "bodySha256": "d414a7a99935b5a250a209840c19118f7304f4c3cce45196738f816547abd8f2",
+      "nonce": "5706eeb8643d8fcc6fd202071cf3070c",
+      "signature": "0xe212c34f40f8bd7870e10a44d3f01b13832caed99a2dd28a23adeb03b42b4bb062f92a0eb169859f2713dc5e4e0757d28bcb6a42f53d69e19d77ee01fed8c1441c",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
+        "submitter": "0x497ff1be8cc0c95a7a14165a4999768c47fc0109",
+        "signed": true,
+        "received": 5,
+        "accepted": 0,
+        "duplicate": 5,
+        "rejected": 0,
+        "curated": 0,
+        "state_counts": {
+          "admitted": 5,
+          "eligible": 312,
+          "quarantine": 197
+        }
+      },
+      "poolStatusAfter": {
+        "intent_id": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
+        "counts": [
+          {
+            "status": "admitted",
+            "count": 5
+          },
+          {
+            "status": "eligible",
+            "count": 312
+          },
+          {
+            "status": "quarantine",
+            "reason": "rate_limited",
+            "count": 197
+          }
+        ],
+        "by_state": {
+          "admitted": 5,
+          "eligible": 312,
+          "quarantine": 197
+        },
+        "submitters": 8,
+        "eligible_submitters": 7,
+        "snapshot": {
+          "corpus_version": "4ca05ddc2d37aa1484adb9b40053a7b029f4f78d01272b811a9acd3d599ecd92",
+          "rows": 312,
+          "submitters": 7,
+          "qualification": 164,
+          "ranking": 148,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T15:49:30.921885Z",
+          "activation_epoch": 11
+        },
+        "active_snapshot": {
+          "corpus_version": "4ca05ddc2d37aa1484adb9b40053a7b029f4f78d01272b811a9acd3d599ecd92",
+          "rows": 312,
+          "submitters": 7,
+          "qualification": 164,
+          "ranking": 148,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T15:49:30.921885Z",
+          "activation_epoch": 11
+        },
+        "current_epoch": 41,
+        "min_submitters": 3
+      }
+    },
+    {
+      "timestamp": "2026-11-23T01:33:40.583Z",
+      "intentId": "TASK_EXECUTION_QUALITY_GENERAL",
+      "bountyIssue": 221,
+      "file": "task_execution_quality_general.jsonl",
+      "submitter": "0x497FF1bE8cc0C95A7a14165A4999768C47fc0109",
+      "bodySha256": "44d26eab73b4a83ee55b9cd0e8274f6f1b93c6f25657c1105a865c5ea6cf44c0",
+      "nonce": "7c857399bf25473aec0a919e83b79528",
+      "signature": "0x514f5582ba47643125433ef76101215129f91e646a85e1c843592d690ae647f44b07e098ab6737294d329324bdee6ba30bc357c5e9cf5a4498fa75f9fa819c171b",
+      "httpStatus": 200,
+      "response": {
+        "intent_id": "TASK_EXECUTION_QUALITY_GENERAL",
+        "submitter": "0x497ff1be8cc0c95a7a14165a4999768c47fc0109",
+        "signed": true,
+        "received": 5,
+        "accepted": 0,
+        "duplicate": 5,
+        "rejected": 0,
+        "curated": 0,
+        "state_counts": {
+          "admitted": 5,
+          "eligible": 264,
+          "quarantine": 18,
+          "rejected": 48
+        }
+      },
+      "poolStatusAfter": {
+        "intent_id": "TASK_EXECUTION_QUALITY_GENERAL",
+        "counts": [
+          {
+            "status": "admitted",
+            "count": 5
+          },
+          {
+            "status": "eligible",
+            "count": 264
+          },
+          {
+            "status": "quarantine",
+            "reason": "rate_limited",
+            "count": 18
+          },
+          {
+            "status": "rejected",
+            "reason": "near_duplicate",
+            "count": 48
+          }
+        ],
+        "by_state": {
+          "admitted": 5,
+          "eligible": 264,
+          "quarantine": 18,
+          "rejected": 48
+        },
+        "submitters": 13,
+        "eligible_submitters": 8,
+        "snapshot": {
+          "corpus_version": "0b7d07d461e21b6e4ac69b4f1cd340b85079273b96e77d7dded737e227415fb3",
+          "rows": 264,
+          "submitters": 8,
+          "qualification": 132,
+          "ranking": 132,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T15:49:32.506058Z",
+          "activation_epoch": 11
+        },
+        "active_snapshot": {
+          "corpus_version": "0b7d07d461e21b6e4ac69b4f1cd340b85079273b96e77d7dded737e227415fb3",
+          "rows": 264,
+          "submitters": 8,
+          "qualification": 132,
+          "ranking": 132,
+          "ranking_split_bps": 5000,
+          "quality_rules_version": "evalpool-quality-v1",
+          "published_at": "2026-11-18T15:49:32.506058Z",
+          "activation_epoch": 11
+        },
+        "current_epoch": 41,
+        "min_submitters": 3
+      }
+    }
+  ]
+}
