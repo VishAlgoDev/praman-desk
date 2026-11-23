@@ -1,9 +1,9 @@
 [
   {
-    "issue": 219,
+    "missionIssue": 200,
     "intent": "GRID_POWER_PRICE_GENERAL",
-    "branch": "eval/grid-power-price-219",
-    "title": "feat(eval): add 6 verified preference pairs for GRID_POWER_PRICE_GENERAL (#219)",
+    "branch": "eval/grid-power-price-m12",
+    "title": "feat(eval): add 6 verified preference pairs for GRID_POWER_PRICE_GENERAL (Mission 12 / #200)",
     "dataFile": "eval-data/grid_power_price_general.jsonl",
     "rowCount": 6,
     "devnodeConsensus": {
@@ -11,20 +11,20 @@
       "eligible": 229,
       "active": true
     },
-    "docPath": "C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_219_GRID_POWER_PRICE_GENERAL.md",
+    "docPath": "C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_MISSION_200_GRID_POWER_PRICE_GENERAL.md",
     "cliCommands": [
-      "git checkout -b eval/grid-power-price-219",
+      "git checkout -b eval/grid-power-price-m12",
       "git add eval-data/grid_power_price_general.jsonl",
-      "git commit -m \"feat(eval): add 6 verified preference pairs for GRID_POWER_PRICE_GENERAL (#219)\"",
-      "git push origin eval/grid-power-price-219",
-      "gh pr create --repo telegraphprotocol/bounties --base main --head eval/grid-power-price-219 --title \"feat(eval): add 6 verified preference pairs for GRID_POWER_PRICE_GENERAL (#219)\" --body-file \"C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_219_GRID_POWER_PRICE_GENERAL.md\""
+      "git commit -m \"feat(eval): add 6 verified preference pairs for GRID_POWER_PRICE_GENERAL (Mission 12 / #200)\"",
+      "git push origin eval/grid-power-price-m12",
+      "gh pr create --repo telegraphprotocol/bounties --base main --head eval/grid-power-price-m12 --title \"feat(eval): add 6 verified preference pairs for GRID_POWER_PRICE_GENERAL (Mission 12 / #200)\" --body-file \"C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_MISSION_200_GRID_POWER_PRICE_GENERAL.md\""
     ]
   },
   {
-    "issue": 220,
+    "missionIssue": 202,
     "intent": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
-    "branch": "eval/optimal-execution-route-220",
-    "title": "feat(eval): add 6 verified preference pairs for OPTIMAL_EXECUTION_ROUTE_GENERAL (#220)",
+    "branch": "eval/optimal-execution-route-m14",
+    "title": "feat(eval): add 5 verified preference pairs for OPTIMAL_EXECUTION_ROUTE_GENERAL (Mission 14 / #202)",
     "dataFile": "eval-data/optimal_execution_route_general.jsonl",
     "rowCount": 5,
     "devnodeConsensus": {
@@ -32,20 +32,20 @@
       "eligible": 312,
       "active": true
     },
-    "docPath": "C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_220_OPTIMAL_EXECUTION_ROUTE_GENERAL.md",
+    "docPath": "C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_MISSION_202_OPTIMAL_EXECUTION_ROUTE_GENERAL.md",
     "cliCommands": [
-      "git checkout -b eval/optimal-execution-route-220",
+      "git checkout -b eval/optimal-execution-route-m14",
       "git add eval-data/optimal_execution_route_general.jsonl",
-      "git commit -m \"feat(eval): add 6 verified preference pairs for OPTIMAL_EXECUTION_ROUTE_GENERAL (#220)\"",
-      "git push origin eval/optimal-execution-route-220",
-      "gh pr create --repo telegraphprotocol/bounties --base main --head eval/optimal-execution-route-220 --title \"feat(eval): add 6 verified preference pairs for OPTIMAL_EXECUTION_ROUTE_GENERAL (#220)\" --body-file \"C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_220_OPTIMAL_EXECUTION_ROUTE_GENERAL.md\""
+      "git commit -m \"feat(eval): add 5 verified preference pairs for OPTIMAL_EXECUTION_ROUTE_GENERAL (Mission 14 / #202)\"",
+      "git push origin eval/optimal-execution-route-m14",
+      "gh pr create --repo telegraphprotocol/bounties --base main --head eval/optimal-execution-route-m14 --title \"feat(eval): add 5 verified preference pairs for OPTIMAL_EXECUTION_ROUTE_GENERAL (Mission 14 / #202)\" --body-file \"C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_MISSION_202_OPTIMAL_EXECUTION_ROUTE_GENERAL.md\""
     ]
   },
   {
-    "issue": 221,
+    "missionIssue": 203,
     "intent": "TASK_EXECUTION_QUALITY_GENERAL",
-    "branch": "eval/task-execution-quality-221",
-    "title": "feat(eval): add 6 verified preference pairs for TASK_EXECUTION_QUALITY_GENERAL (#221)",
+    "branch": "eval/task-execution-quality-m15",
+    "title": "feat(eval): add 5 verified preference pairs for TASK_EXECUTION_QUALITY_GENERAL (Mission 15 / #203)",
     "dataFile": "eval-data/task_execution_quality_general.jsonl",
     "rowCount": 5,
     "devnodeConsensus": {
@@ -53,13 +53,13 @@
       "eligible": 264,
       "active": true
     },
-    "docPath": "C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_221_TASK_EXECUTION_QUALITY_GENERAL.md",
+    "docPath": "C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_MISSION_203_TASK_EXECUTION_QUALITY_GENERAL.md",
     "cliCommands": [
-      "git checkout -b eval/task-execution-quality-221",
+      "git checkout -b eval/task-execution-quality-m15",
       "git add eval-data/task_execution_quality_general.jsonl",
-      "git commit -m \"feat(eval): add 6 verified preference pairs for TASK_EXECUTION_QUALITY_GENERAL (#221)\"",
-      "git push origin eval/task-execution-quality-221",
-      "gh pr create --repo telegraphprotocol/bounties --base main --head eval/task-execution-quality-221 --title \"feat(eval): add 6 verified preference pairs for TASK_EXECUTION_QUALITY_GENERAL (#221)\" --body-file \"C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_221_TASK_EXECUTION_QUALITY_GENERAL.md\""
+      "git commit -m \"feat(eval): add 5 verified preference pairs for TASK_EXECUTION_QUALITY_GENERAL (Mission 15 / #203)\"",
+      "git push origin eval/task-execution-quality-m15",
+      "gh pr create --repo telegraphprotocol/bounties --base main --head eval/task-execution-quality-m15 --title \"feat(eval): add 5 verified preference pairs for TASK_EXECUTION_QUALITY_GENERAL (Mission 15 / #203)\" --body-file \"C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_MISSION_203_TASK_EXECUTION_QUALITY_GENERAL.md\""
     ]
   }
 ]

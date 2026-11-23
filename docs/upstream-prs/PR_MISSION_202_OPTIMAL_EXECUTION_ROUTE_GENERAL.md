@@ -1,5 +1,5 @@
 ### Summary of Changes
-Closes #220
+Supports Mission Issue #202
 
 Adds `5` curated, schema-compliant `preference_pair` evaluation rows for **`OPTIMAL_EXECUTION_ROUTE_GENERAL`**.
 

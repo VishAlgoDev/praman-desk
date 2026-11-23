@@ -22,11 +22,11 @@ const NODE_URL = process.env.TELEGRAPH_NODE_URL || 'https://devnode.telegraphpro
 
 const UPSTREAM_TARGETS = [
   {
-    issue: 219,
+    missionIssue: 200,
     intent: 'GRID_POWER_PRICE_GENERAL',
     dataFile: 'eval-data/grid_power_price_general.jsonl',
-    branch: 'eval/grid-power-price-219',
-    title: 'feat(eval): add 6 verified preference pairs for GRID_POWER_PRICE_GENERAL (#219)',
+    branch: 'eval/grid-power-price-m12',
+    title: 'feat(eval): add 6 verified preference pairs for GRID_POWER_PRICE_GENERAL (Mission 12 / #200)',
     description: 'Ground-truth preference pairs for CAISO, ERCOT, and PJM wholesale locational marginal power settlements with official ISO provenance citations.',
     sources: [
       'CAISO Open Access Same-time Information System (OASIS): http://oasis.caiso.com/',
@@ -35,11 +35,11 @@ const UPSTREAM_TARGETS = [
     ]
   },
   {
-    issue: 220,
+    missionIssue: 202,
     intent: 'OPTIMAL_EXECUTION_ROUTE_GENERAL',
     dataFile: 'eval-data/optimal_execution_route_general.jsonl',
-    branch: 'eval/optimal-execution-route-220',
-    title: 'feat(eval): add 6 verified preference pairs for OPTIMAL_EXECUTION_ROUTE_GENERAL (#220)',
+    branch: 'eval/optimal-execution-route-m14',
+    title: 'feat(eval): add 5 verified preference pairs for OPTIMAL_EXECUTION_ROUTE_GENERAL (Mission 14 / #202)',
     description: 'Ground-truth cross-chain and DEX routing preference pairs comparing Uniswap v3 concentrated liquidity, Curve stable pools, and L2 bridge latencies.',
     sources: [
       'Uniswap v3 Subgraph & Math Specification',
@@ -48,11 +48,11 @@ const UPSTREAM_TARGETS = [
     ]
   },
   {
-    issue: 221,
+    missionIssue: 203,
     intent: 'TASK_EXECUTION_QUALITY_GENERAL',
     dataFile: 'eval-data/task_execution_quality_general.jsonl',
-    branch: 'eval/task-execution-quality-221',
-    title: 'feat(eval): add 6 verified preference pairs for TASK_EXECUTION_QUALITY_GENERAL (#221)',
+    branch: 'eval/task-execution-quality-m15',
+    title: 'feat(eval): add 5 verified preference pairs for TASK_EXECUTION_QUALITY_GENERAL (Mission 15 / #203)',
     description: 'Deterministic quality evaluation pairs measuring hallucination detection, prompt injection mitigation, and bit-exact WebAssembly math adherence.',
     sources: [
       'Praman Desk WebAssembly IEEE-754 Comparator Engine',
@@ -99,7 +99,7 @@ async function preparePRs() {
     }
 
     console.log(`------------------------------------------------------------------------`);
-    console.log(`Target Issue #${t.issue}: ${t.intent}`);
+    console.log(`Target Mission Issue #${t.missionIssue}: ${t.intent}`);
     console.log(`Dataset File: ${t.dataFile} (${rowCount} rows verified on disk)`);
 
     const evalStatus = await fetchEvalPoolStatus(t.intent);
@@ -110,7 +110,7 @@ async function preparePRs() {
     console.log(`Devnode Consensus: Submitters: ${submitters} | Eligible Rows: ${eligible} | Active: ${active ? 'YES ✅' : 'PENDING ⏳'}`);
 
     const prBody = `### Summary of Changes
-Closes #${t.issue}
+Supports Mission Issue #${t.missionIssue}
 
 Adds \`${rowCount}\` curated, schema-compliant \`preference_pair\` evaluation rows for **\`${t.intent}\`**.
 
@@ -134,11 +134,11 @@ npm run test
 \`\`\`
 `;
 
-    const prDocPath = path.join(outputDocsDir, `PR_ISSUE_${t.issue}_${t.intent}.md`);
+    const prDocPath = path.join(outputDocsDir, `PR_MISSION_${t.missionIssue}_${t.intent}.md`);
     fs.writeFileSync(prDocPath, prBody, 'utf8');
 
     const dossier = {
-      issue: t.issue,
+      missionIssue: t.missionIssue,
       intent: t.intent,
       branch: t.branch,
       title: t.title,
