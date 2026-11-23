@@ -5,11 +5,13 @@
   "type": "module",
   "main": "mcp/server.mjs",
   "bin": {
+    "praman-gate": "./bin/praman-gate.mjs",
     "praman-spend-guard": "./mcp/server.mjs",
     "praman-spend-guard-mcp": "./mcp/server.mjs"
   },
   "private": true,
   "scripts": {
+    "gate": "node bin/praman-gate.mjs",
     "mcp:start": "node mcp/server.mjs",
     "mcp:test": "node mcp/test-mcp.mjs",
     "comparator:test": "node comparator/test-comparator.mjs",
