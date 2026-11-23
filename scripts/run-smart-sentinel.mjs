@@ -33,7 +33,7 @@ async function executeSentinelCycle() {
   for (const url of endpoints) {
     const start = Date.now();
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
       const lat = Date.now() - start;
       probeResults.push({ url, status: res.status, latencyMs: lat, ok: res.ok });
       console.log(`   ✓ Probed ${url.split('?')[0].replace('https://praman-desk.vercel.app', '') || '/'} -> HTTP ${res.status} (${lat}ms)`);
