@@ -49,10 +49,42 @@
   - **SHA-256**: `399a56d534f64dcbe0def62201c118a710b0eb3db80245599d0cd303c018f850`
   - **Domain Coverage**: Gold Rush Challenge / Historical Mining Intelligence (Track 3 Evaluator)
   - **Key Edge Cases Covered**:
-    - MahaRERA Section 18 statutory delay interest vs ordinary force majeure claims
-    - FIDIC Silver Book Sub-Clause 20.1 28-day notice time-bars on EOT claims
-    - MEP turnkey 50/50 retention money bank guarantee validity windows
-    - Multi-jurisdictional tax rounding, cross-currency payment tolerances, and statutory interest overrides
+    - Mount Morgan Mine historical production records (262t Au, 387,000t Cu)
+    - Gympie, Charters Towers, and Palmer River goldfield historical yields
+    - Open-source GSQ and Queensland DNRME survey record validation
+
+
+- **Intent**: `GRID_POWER_PRICE_GENERAL` (Bounty #219)
+  - **Title**: ISO Wholesale Locational Marginal Power Price Ground Truths
+  - **Rows**: 6 high-fidelity preference pairs (`chosen` vs `rejected`)
+  - **Domain Coverage**: CAISO, ERCOT, and PJM Wholesale Power Settlement (Track 3 Evaluator)
+  - **Devnode EvalPool Consensus**: 7 submitters, 229 eligible consensual rows (ACTIVE)
+  - **Key Edge Cases Covered**:
+    - CAISO NP15 evening duck curve net load ramp vs day-ahead LMP ($142.80 vs $54.20/MWh)
+    - ERCOT Houston Hub vs West Zone negative wind curtailment pricing basis differentials
+    - PJM Western Hub peak summer heatwave transmission line thermal de-rates & MCC components
+
+
+- **Intent**: `OPTIMAL_EXECUTION_ROUTE_GENERAL` (Bounty #220)
+  - **Title**: Cross-Chain & DEX Optimal Execution Routing Truths
+  - **Rows**: 5 high-fidelity preference pairs (`chosen` vs `rejected`)
+  - **Domain Coverage**: EVM DEX Aggregation, Concentrated Liquidity & L2 Bridge Latencies
+  - **Devnode EvalPool Consensus**: 8 submitters, 312 eligible consensual rows (ACTIVE)
+  - **Key Edge Cases Covered**:
+    - Uniswap v3 fee tier tick math (0.05% vs 0.30% vs 1.00%) for deep liquidity pairs
+    - Curve Stableswap amplification coefficient dynamic peg invariance
+    - Native L2 canonical bridge security vs fast third-party liquidity bridge slippage
+
+
+- **Intent**: `TASK_EXECUTION_QUALITY_GENERAL` (Bounty #221)
+  - **Title**: Autonomous Agent Task Execution & Math Fidelity Ground Truths
+  - **Rows**: 5 high-fidelity preference pairs (`chosen` vs `rejected`)
+  - **Domain Coverage**: Anti-Hallucination, OFAC SDN Enforcement & Bit-Exact WASM Arithmetic
+  - **Devnode EvalPool Consensus**: 13 submitters, 264 eligible consensual rows (ACTIVE)
+  - **Key Edge Cases Covered**:
+    - Bit-exact IEEE-754 3-way line-item invoice reconciliation via compiled WebAssembly
+    - US Treasury OFAC Specially Designated Nationals (SDN) trie enforcement vs evasive typosquats
+    - Adversarial prompt injection jailbreak detection and immutable circuit breaker tripping
 
 
 #### Cryptographic EvalPool Evidence
