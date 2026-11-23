@@ -24,5 +24,6 @@ scratch/
 benchmark/benchmark-results.json
 public/recorded_benchmark/
 public/benchmark-recording-shell.html
+examples/minds-spend-guard/test-bundles/
 .vercel
 .env*
