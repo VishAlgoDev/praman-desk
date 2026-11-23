@@ -258,4 +258,7 @@ export function createToolGuard(toolFn, options = {}) {
   };
 }
 
+// Re-export Solana Spend Guard Middleware
+export * from './solana.js';
+
 export default PramanDesk;

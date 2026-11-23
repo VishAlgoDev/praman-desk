@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "act": "act1_problem",
+    "title": "Act 1: The Problem: AI Procurement Bots Hallucinating Math",
+    "target_duration_sec": 18,
+    "text": "In 2026, AI agents hold private keys and autonomous spend caps. But when an LLM procurement bot calculates line-item math or parses warehouse receipts, it hallucinates. If an agent blindly signs an invoice, corporate treasury bleeds capital irreversibly in seconds. Here is Praman Desk — an institutional, pre-payment clearing firewall that stops unauthorized disbursements before signing can ever occur."
+  },
+  {
+    "id": 2,
+    "act": "act2_discovery",
+    "title": "Act 2: The Discovery: PO-ALI-9021 vs Port of LA Cainiao Receipt",
+    "target_duration_sec": 24,
+    "text": "Let's test a real commercial scenario: Alibaba Trade Assurance order PO-ALI-9021. The buyer escrows one hundred thousand dollars for one hundred industrial sensors from Siemens. But at the Port of Los Angeles, the Cainiao warehouse receipt accepts only eighty conforming units — twenty were damaged. When the supplier invoices for the full hundred thousand, our six-hundred-fifty-one byte WebAssembly circuit breaker catches the twenty-thousand dollar shortfall in under three milliseconds. Payment halts instantly. Escrow remains locked."
+  },
+  {
+    "id": 3,
+    "act": "act3_consensus",
+    "title": "Act 3: The Consensus: Takar + Praman 2-of-3 Settlement on Sepolia",
+    "target_duration_sec": 23,
+    "text": "Now watch multi-miner consensus in action. When a reconciled eighty-thousand dollar invoice is submitted, Bangdrop's Takar Second Opinion evaluates the delivery evidence while Praman proves the exact line-item math. Both independent miners agree. On Ethereum Sepolia, the TakarSettle contract disburses eighty thousand dollars to Siemens, immediately refunds the twenty thousand dollar balance to the buyer, and generates a tamper-proof statutory audit certificate."
+  },
+  {
+    "id": 4,
+    "act": "act4_proof",
+    "title": "Act 4: The Commercial Proof: 57 Paid Sepolia Calls, Keyless MCP & Cross-Chain Solana",
+    "target_duration_sec": 20,
+    "text": "This is not mock software. Praman Desk has executed fifty-seven paid on-chain settlements on Sepolia. Any developer can wire our eighteen keyless tools into Claude Code or Cursor in ten seconds with zero wallet hurdles. And with our new Solana middleware, the same spend caps and OFAC screening protect native SOL and SPL USDC transfers. Praman Desk: autonomous financial guardrails for production AI agents."
+  }
+]

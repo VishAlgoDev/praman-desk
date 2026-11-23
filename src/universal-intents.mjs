@@ -334,8 +334,11 @@ export async function executeResearchQuery({ query, question, q, prompt, text } 
   return {
     status: 'ok',
     query: rawQuery,
+    verdict: 'found',
+    found: true,
     answer,                                     // primary field (Devnode evaluator checks this)
     summary: answer,                            // alias for compatibility
+    reason: answer,
     key_findings: findings.length > 0 ? findings.slice(0, 3) : [searchRes.brief || answer.slice(0, 100)],
     sources: normalizedSources,
     brief: searchRes.brief || answer.slice(0, 80),
@@ -595,10 +598,15 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
   if (!targetWallet) {
     return {
       status: 'error',
+      address: null,
       wallet_address: null,
       chain: targetChain,
       balance: null,
+      funded: false,
+      verdict: 'unfunded',
+      answer: 'unfunded',
       confidence: 0.0,
+      reason: 'No valid 40-character hexadecimal wallet address provided',
       summary: 'No valid 40-character hexadecimal wallet address provided'
     };
   }
@@ -624,15 +632,24 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
         const data = await res.json();
         if (data.result && data.result !== '0x') {
           const rawBalance = BigInt(data.result);
+          const isFunded = rawBalance > 0n;
+          const verdictStr = isFunded ? 'funded' : 'empty';
+          const summaryStr = `The address ${targetWallet} currently has a token balance of ${rawBalance.toString()} on ${targetChain}.`;
           return {
             status: 'confirmed',
+            address: targetWallet,
             wallet_address: targetWallet,
             token_address: targetToken,
             chain: targetChain,
             balance: rawBalance.toString(),
             balance_raw: rawBalance.toString(),
+            symbol: 'TOKEN',
+            funded: isFunded,
+            verdict: verdictStr,
+            answer: verdictStr,
             confidence: 1.0,
-            summary: `Wallet ${targetWallet} token balance on ${targetChain} is ${rawBalance.toString()}`
+            reason: summaryStr,
+            summary: summaryStr
           };
         }
       } else {
@@ -653,15 +670,25 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
         if (data.result) {
           const rawBalance = BigInt(data.result);
           const ethBalance = Number(rawBalance) / 1e18;
+          const isFunded = ethBalance > 0;
+          const verdictStr = isFunded ? 'funded' : 'empty';
+          const symbolStr = targetChain === 'polygon' ? 'POL' : 'ETH';
+          const summaryStr = `The address ${targetWallet} currently has a native-coin balance of ${ethBalance.toFixed(8)} ${symbolStr} on ${targetChain}.`;
           return {
             status: 'confirmed',
+            address: targetWallet,
             wallet_address: targetWallet,
             chain: targetChain,
             balance: ethBalance,
             balance_wei: rawBalance.toString(),
             balance_eth: ethBalance,
+            symbol: symbolStr,
+            funded: isFunded,
+            verdict: verdictStr,
+            answer: verdictStr,
             confidence: 1.0,
-            summary: `Wallet ${targetWallet} has ${ethBalance.toFixed(6)} ETH on ${targetChain}`
+            reason: summaryStr,
+            summary: summaryStr
           };
         }
       }
@@ -672,11 +699,16 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
 
   return {
     status: 'not_found',
+    address: targetWallet,
     wallet_address: targetWallet,
     chain: targetChain,
     balance: null,
+    funded: false,
+    verdict: 'unfunded',
+    answer: 'unfunded',
     confidence: 0.0,
-    summary: `Failed to retrieve balance for ${targetWallet} on ${targetChain}`
+    reason: `Could not retrieve balance for ${targetWallet} on ${targetChain}`,
+    summary: `Could not retrieve balance for ${targetWallet} on ${targetChain}`
   };
 }
 

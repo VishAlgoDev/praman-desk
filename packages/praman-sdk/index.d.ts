@@ -79,4 +79,27 @@ export declare function createToolGuard<T = any>(
   options?: PramanDeskOptions
 ): (params: T) => Promise<any>;
 
+export interface SolanaSpendGuardOptions {
+  maxSingleSpend?: { SOL?: number; USDC?: number } | number;
+  maxSessionSpend?: { SOL?: number; USDC?: number } | number;
+  allowedProgramIds?: string[];
+  enforceSupplyChain?: boolean;
+  sdnSnapshotPath?: string;
+}
+
+export declare class SolanaSpendGuard {
+  constructor(options?: SolanaSpendGuardOptions);
+  guardTransaction(tx: any, context?: any): any;
+  wrapTransaction(tx: any, context?: any): any;
+  wrapSigner(signer: any, context?: any): any;
+  getSessionSpent(): { SOL: number; USDC: number };
+  resetSession(): { SOL: number; USDC: number };
+}
+
+export declare function createSolanaSpendMiddleware(options?: SolanaSpendGuardOptions): SolanaSpendGuard;
+export declare function createSolanaToolGuard<T = any>(toolFn: (params: T, clearance?: any) => Promise<any> | any, options?: SolanaSpendGuardOptions): (params: T, context?: any) => Promise<any>;
+export declare function inspectSolanaTransaction(tx: any): any;
+export declare function screenSolanaRecipient(pubkeyOrName: string, options?: any): any;
+export declare function checkSolanaSupplyChain(options?: any): any;
+
 export default PramanDesk;

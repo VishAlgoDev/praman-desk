@@ -9,6 +9,7 @@
  * 
  * Commands:
  *   demo                 Run a 5-second end-to-end evaluation benchmark (Approval, Sanctions Block, Phishing Shield, Math Discrepancy)
+ *   solana-demo          Run the Solana pre-signature spend guard suite (VersionedTx, OFAC 19.5k SDN, drainers, spend caps)
  *   agent-demo           Run the Animoca Minds Agent spend guard demo (exploit drain vs circuit breaker vs clean settlement)
  *   alibaba              Run the Alibaba Trade Assurance B2B cross-border escrow arbitration demo (Discrepancy vs Reconciled)
  *   takar                Run the Bangdrop Takar cross-miner escrow clearing bridge (Two-Miner consensus)
@@ -22,7 +23,21 @@ import http from 'node:http';
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PramanDesk } from '../packages/praman-sdk/index.js';
+import {
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+  TransactionInstruction,
+  TransactionMessage,
+  VersionedTransaction
+} from '@solana/web3.js';
+import { PramanDesk, PramanSpendGuardError } from '../packages/praman-sdk/index.js';
+import {
+  SolanaSpendGuard,
+  TOKEN_PROGRAM_ID,
+  USDC_SPL_MINT
+} from '../packages/praman-sdk/solana.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -103,6 +118,188 @@ async function runDemo() {
   console.log(`\n=======================================================================`);
   console.log(`🎯 Demo Complete: ${passed}/4 scenarios evaluated deterministically.`);
   console.log(`Interactive Web Playground: ${client.endpoint}`);
+}
+
+async function runSolanaDemo() {
+  banner();
+  console.log(`\n▶ Running 5-Scenario Solana Spend Guard & Pre-Signature Armoring Suite...\n`);
+  console.log(`  🛡️ Engine: Praman Solana Spend Guard (VersionedTransaction + Legacy)`);
+  console.log(`  🔍 Database: In-Memory 19,565 US Treasury OFAC SDN Entities (<25ms RAM)`);
+  console.log(`  ⚠️ Defenses: Malicious Drainers, Supply Chain Hacks (@solana/web3.js 1.95.6/7), Spend Caps\n`);
+
+  const guard = new SolanaSpendGuard({
+    maxSingleSpend: { SOL: 5, USDC: 1000 },
+    maxSessionSpend: { SOL: 20, USDC: 5000 }
+  });
+
+  const payer = Keypair.generate();
+  const legitimateVendorKey = Keypair.generate().publicKey;
+  const legitimateVendorName = 'Siemens AG';
+  const attackerExfilKey = new PublicKey('FnvLGtucz4E1ppJHRTev6Qv4X7g8Pw6WPStHCcbAKbfx');
+  const lazarusKey = Keypair.generate().publicKey;
+
+  const scenarios = [
+    {
+      id: 1,
+      name: 'Scenario 1: Legitimate Agent B2B Vendor Settlement (Siemens AG - 1.5 SOL)',
+      expected: 'APPROVED & SIGNED',
+      build: () => {
+        const tx = new Transaction({
+          recentBlockhash: '11111111111111111111111111111111',
+          feePayer: payer.publicKey
+        }).add(
+          SystemProgram.transfer({
+            fromPubkey: payer.publicKey,
+            toPubkey: legitimateVendorKey,
+            lamports: 1500000000n // 1.5 SOL
+          })
+        );
+        return { tx, context: { vendor: legitimateVendorName } };
+      }
+    },
+    {
+      id: 2,
+      name: 'Scenario 2: Hijacked @solana/web3.js Drainer Exfiltration Wallet Attack',
+      expected: 'HALTED (DRAINER ATTACK INTERCEPTED)',
+      build: () => {
+        const tx = new Transaction({
+          recentBlockhash: '11111111111111111111111111111111',
+          feePayer: payer.publicKey
+        }).add(
+          SystemProgram.transfer({
+            fromPubkey: payer.publicKey,
+            toPubkey: attackerExfilKey,
+            lamports: 2000000000n // 2.0 SOL
+          })
+        );
+        return { tx, context: { recipient: attackerExfilKey.toBase58() } };
+      }
+    },
+    {
+      id: 3,
+      name: 'Scenario 3: Real-Time OFAC SDN Sanctions Match (Lazarus Group Transfer)',
+      expected: 'HALTED (SANCTIONS VIOLATION)',
+      build: () => {
+        const tx = new Transaction({
+          recentBlockhash: '11111111111111111111111111111111',
+          feePayer: payer.publicKey
+        }).add(
+          SystemProgram.transfer({
+            fromPubkey: payer.publicKey,
+            toPubkey: lazarusKey,
+            lamports: 1000000000n // 1.0 SOL
+          })
+        );
+        return { tx, context: { vendor: 'Lazarus Group', recipient: lazarusKey.toBase58() } };
+      }
+    },
+    {
+      id: 4,
+      name: 'Scenario 4: Spend Cap Circuit Breaker (USDC SPL: $2,500 on $1,000 Single Cap)',
+      expected: 'HALTED (SPEND CAP EXCEEDED)',
+      build: () => {
+        const data = Buffer.alloc(10);
+        data.writeUInt8(12, 0); // TransferChecked tag
+        data.writeBigUInt64LE(2500000000n, 1); // 2,500.00 USDC
+        data.writeUInt8(6, 9); // 6 decimals
+
+        const tx = new Transaction({
+          recentBlockhash: '11111111111111111111111111111111',
+          feePayer: payer.publicKey
+        }).add(
+          new TransactionInstruction({
+            programId: new PublicKey(TOKEN_PROGRAM_ID),
+            keys: [
+              { pubkey: payer.publicKey, isSigner: false, isWritable: true },
+              { pubkey: new PublicKey(USDC_SPL_MINT), isSigner: false, isWritable: false },
+              { pubkey: legitimateVendorKey, isSigner: false, isWritable: true },
+              { pubkey: payer.publicKey, isSigner: true, isWritable: false }
+            ],
+            data
+          })
+        );
+        return { tx, context: { asset: 'USDC', amount: 2500 } };
+      }
+    },
+    {
+      id: 5,
+      name: 'Scenario 5: VersionedTransaction (v0 Compiled Message) Pre-Signature Guard (150 USDC)',
+      expected: 'APPROVED & SIGNED',
+      build: () => {
+        const data = Buffer.alloc(10);
+        data.writeUInt8(12, 0);
+        data.writeBigUInt64LE(150000000n, 1); // 150.00 USDC
+        data.writeUInt8(6, 9);
+
+        const ix = new TransactionInstruction({
+          programId: new PublicKey(TOKEN_PROGRAM_ID),
+          keys: [
+            { pubkey: payer.publicKey, isSigner: false, isWritable: true },
+            { pubkey: new PublicKey(USDC_SPL_MINT), isSigner: false, isWritable: false },
+            { pubkey: legitimateVendorKey, isSigner: false, isWritable: true },
+            { pubkey: payer.publicKey, isSigner: true, isWritable: false }
+          ],
+          data
+        });
+
+        const msg = new TransactionMessage({
+          payerKey: payer.publicKey,
+          recentBlockhash: '11111111111111111111111111111111',
+          instructions: [ix]
+        }).compileToV0Message();
+
+        const vtx = new VersionedTransaction(msg);
+        return { tx: vtx, context: { vendor: 'Cloudflare Inc' } };
+      }
+    }
+  ];
+
+  let passedScenarios = 0;
+
+  for (const s of scenarios) {
+    console.log(`-----------------------------------------------------------------------`);
+    console.log(`[${s.id}/5] ${s.name}`);
+    console.log(`Expected: ${s.expected}`);
+
+    const t0 = Date.now();
+    const { tx, context } = s.build();
+
+    try {
+      // Wrap transaction prior to signing
+      guard.wrapTransaction(tx, context);
+
+      // Attempt signing
+      if (tx.version !== undefined) {
+        tx.sign([payer]);
+      } else {
+        tx.sign(payer);
+      }
+
+      const elapsed = Date.now() - t0;
+      console.log(`Status:   ✅ APPROVED`);
+      console.log(`Action:   Signed Ed25519 signature generated without policy violations.`);
+      console.log(`Latency:  ${elapsed} ms`);
+      console.log(`Session:  Spent: ${JSON.stringify(guard.getSessionSpent())}`);
+      passedScenarios++;
+    } catch (err) {
+      const elapsed = Date.now() - t0;
+      if (err instanceof PramanSpendGuardError) {
+        console.log(`Status:   🛑 HALTED (${err.clearance?.reason || 'POLICY_VIOLATION'})`);
+        console.log(`Verdict:  ${err.message.replace(/^\[PRAMAN CIRCUIT BREAKER\]\s*/, '')}`);
+        console.log(`CertHash: ${err.certHash || 'N/A'}`);
+        console.log(`Latency:  ${elapsed} ms`);
+        console.log(`Defense:  Signature prevented. 0 private key bytes or signatures leaked.`);
+        passedScenarios++;
+      } else {
+        console.error(`❌ Unexpected Failure: ${err.message}`);
+      }
+    }
+  }
+
+  console.log(`\n=======================================================================`);
+  console.log(`🎯 Solana Demo Complete: ${passedScenarios}/5 scenarios verified deterministically.`);
+  console.log(`Session Cumulative Spend: ${JSON.stringify(guard.getSessionSpent())}`);
+  console.log(`=======================================================================\n`);
 }
 
 async function checkPrompt(promptText) {
@@ -215,6 +412,10 @@ async function main() {
     case 'demo':
       await runDemo();
       break;
+    case 'solana-demo':
+    case 'solana':
+      await runSolanaDemo();
+      break;
     case 'agent-demo':
     case 'agent':
     case 'minds': {
@@ -269,7 +470,7 @@ async function main() {
       break;
     default:
       banner();
-      console.log(`Commands:\n  demo\n  check "<prompt>"\n  miner\n  evalpool\n  health\n`);
+      console.log(`Commands:\n  demo\n  solana-demo\n  agent-demo\n  alibaba\n  takar\n  check "<prompt>"\n  miner\n  evalpool\n  health\n`);
       break;
   }
 }

@@ -13,10 +13,10 @@
   - **SHA-256**: `ff9976d383ccb5dbad1ffeb7672820ff0b8bd83bb852a1fa29af2f166093080c`
   - **Domain Coverage**: Legal & Construction Procurement (Mission 04)
   - **Key Edge Cases Covered**:
-    - MahaRERA Section 18 statutory delay interest vs ordinary force majeure claims
-    - FIDIC Silver Book Sub-Clause 20.1 28-day notice time-bars on EOT claims
-    - MEP turnkey 50/50 retention money bank guarantee validity windows
-    - Multi-jurisdictional tax rounding, cross-currency payment tolerances, and statutory interest overrides
+    - FIDIC Silver Book Sub-Clause 20.1 28-day notice time-bars on Contractor claims
+    - Delay liquidated damages vs statutory interest rate caps and force majeure exceptions
+    - Retention money release preconditions, Defect Liability Period (DLP) milestones, and bank guarantee validity
+    - Cross-border governing law clauses, arbitration rules (ICC / LCIA / SIAC), and payment dispute escalation
 
 
 - **Intent**: `PURCHASE_ORDER_VERIFY_GENERAL` (Bounty #122)
@@ -25,10 +25,10 @@
   - **SHA-256**: `3ad30696e1e21be2a5c54a8717018e29be12a10575259f6c49759ed23596fea0`
   - **Domain Coverage**: Enterprise AP / Procurement (Mission 03 & 04)
   - **Key Edge Cases Covered**:
-    - MahaRERA Section 18 statutory delay interest vs ordinary force majeure claims
-    - FIDIC Silver Book Sub-Clause 20.1 28-day notice time-bars on EOT claims
-    - MEP turnkey 50/50 retention money bank guarantee validity windows
-    - Multi-jurisdictional tax rounding, cross-currency payment tolerances, and statutory interest overrides
+    - Incoterms 2020 delivery obligations (DAP vs CIF vs FOB risk transfer points)
+    - Multi-currency unit price conversions and authorized FX rate fluctuation tolerances (±0.5%)
+    - Blanket PO call-off balance depletion and line-item quantity over-shipment tolerances
+    - Milestone billing matching: advance payment vs milestone delivery against verified Bill of Lading (BL)
 
 
 - **Intent**: `INVOICE_LEDGER_RECONCILE_GENERAL` (Bounty #120)
@@ -37,10 +37,10 @@
   - **SHA-256**: `450a9208f632d54f9fc3e0af0fb4fe981f2887ce0b1db3a48ea8efe30d84bce7`
   - **Domain Coverage**: Treasury & Financial Clearing (Mission 03)
   - **Key Edge Cases Covered**:
-    - MahaRERA Section 18 statutory delay interest vs ordinary force majeure claims
-    - FIDIC Silver Book Sub-Clause 20.1 28-day notice time-bars on EOT claims
-    - MEP turnkey 50/50 retention money bank guarantee validity windows
-    - Multi-jurisdictional tax rounding, cross-currency payment tolerances, and statutory interest overrides
+    - 3-way match reconciliation: Purchase Order vs Vendor Invoice vs Cainiao / Port Receiving Log (shortage detection)
+    - Automated prompt-payment discount application (2/10 Net 30) vs late penalty grace periods
+    - Multi-jurisdictional VAT/GST statutory withholding, reverse charge rules, and tax invoice rounding
+    - Escrow freeze and circuit breaker activation on discrepancies exceeding threshold (> $5,000 variance)
 
 
 - **Intent**: `MINING_INTELLIGENCE_GENERAL` (Bounty #218)
