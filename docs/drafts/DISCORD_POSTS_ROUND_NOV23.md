@@ -1,41 +1,46 @@
-# Discord Post Drafts: Round 1 (Nov 23, 2026)
+# Verified, Zero-Slop Post Drafts: Round 1 (Nov 23, 2026)
 
 Target Guild: **Telegraph Protocol** (`1438396125609463881`)  
-Date: November 23, 2026  
-Status: Ground-truth verified against disk, Sepolia testnet, and production edge.
+Status: Ground-truth verified against disk, Sepolia testnet, and live edge (Devnode #6164: 279 requests).
 
 ---
 
 ## 1. Showcase Thread: Praman Desk Dedicated Thread
 **Location**: `#showcase` ➔ `Praman Desk | Route #5281 / Diamond #6164 (14 Intents) | 2,052+ Ops`  
 **Channel / Thread ID**: `1569379402360553692`  
-**Purpose**: Date 1 Major Progress Update (Mission 14 Route 2 + Epoch 42 Milestone)
+**Purpose**: Date 1 Progress Update (Route 2 Conditional Escrow & SDK Spend Guard)
 
 ```markdown
-🚀 **Progress Update: Route 2 Conditional Escrow & SDK Spend Guard (VishAlgoDev / Praman Desk)**
+**Progress Update: Route 2 Conditional Escrow & Agent Spend Guard (VishAlgoDev / Praman Desk)**
 
-**Live App**: https://praman-desk.vercel.app | **Walkthrough**: https://praman-desk.vercel.app/praman-desk-walkthrough.mp4
-**Repo**: https://github.com/VishAlgoDev/praman-desk | **Miner**: Devnode Route #5281 / Miner #6164 (Epoch 42: 277 paid requests served)
+- Web Playground: https://praman-desk.vercel.app
+- Video Walkthrough: https://praman-desk.vercel.app/praman-desk-walkthrough.mp4
+- Repository: https://github.com/VishAlgoDev/praman-desk
+- Devnode Status: Route #5281 / Miner #6164 (Epoch 42: 279 paid requests served)
 
-### 1. Route 2 Conditional Escrow Clearing Gate Deployed (Mission 14 #202)
-Following the two-sided intelligence directives from @1xahmed, we implemented a Two-Miner Consensus Clearing Gate between Bangdrop's Takar (`0x310275e6D66818E068245326bB9e398822304248` on Sepolia) and Praman Desk (deterministic 651-byte WASM math + OFAC Aho-Corasick trie):
-• **Deal #101 (Siemens AG - $1,250 USDC)**: Both Takar (delivery fulfilled) and Praman (LEI verified, OFAC clear) concurred ➔ Escrow released in 1,451ms.
-• **Deal #102 (CloudServer Corp - $10,000.05 USDC)**: Praman halted payout on unverified counterparty & single-agent ceiling breach despite heuristic delivery score ➔ $10,000 preserved.
-• **Deal #103 (Lazarus Group - $50,000 USDC)**: Praman OFAC trie flagged SDN address `0x098B...2f96` ➔ Transfer blocked in 1,001ms.
+### 1. Route 2 Conditional Escrow: Two-Miner Clearing Gate (Mission 14 #202)
+We deployed a cross-miner consensus clearing gate between Bangdrop's Takar heuristic escrow on Sepolia (`0x310275e6D66818E068245326bB9e398822304248`) and Praman Desk (deterministic 651-byte WASM math comparator + Aho-Corasick OFAC trie). 
 
-### 2. Autonomous Agent Spend Guard Middleware
-Shipped `createAgentSpendMiddleware` and `createToolGuard` in `@vishalgodev/praman-sdk`. Any autonomous agent (Cursor, Claude, or Minds) can now intercept tool disbursements with zero code refactoring:
+Escrow release requires independent concurrence from both miners:
+1. Deal #101 (Siemens AG, $1,250 USDC): Takar verified delivery (score 94%) and Praman verified entity LEI and sanctions clearance. Dual consensus achieved; escrow released in 1,451ms.
+2. Deal #102 (CloudServer Corp, $10,000.05 USDC): Takar gave heuristic delivery approval, but Praman halted the payout on unverified counterparty LEI and budget ceiling breach ($10,000 preserved).
+3. Deal #103 (Lazarus Group, $50,000 USDC): Praman's OFAC trie flagged SDN EVM address `0x098B...2f96`; transaction blocked in 1,001ms.
+
+### 2. Autonomous Agent Spend Guard
+Added `createAgentSpendMiddleware` to the root package. Any autonomous agent can intercept tool disbursements before blockchain broadcast:
+
 ```javascript
-import { createAgentSpendMiddleware } from '@vishalgodev/praman-sdk';
+import { createAgentSpendMiddleware } from 'praman-desk';
+
 const guard = createAgentSpendMiddleware({ maxSingleSpend: 500 });
-// Pre-flight intercepts and halts unauthorized drains before RPC broadcast
+// Pre-flight check halts unauthorized spend or unverified counterparties
 ```
 
-### 3. One-Command Independent Reproduction
+### 3. Independent Reproduction
 ```bash
 git clone https://github.com/VishAlgoDev/praman-desk && cd praman-desk && npm install && npm run gate takar
 ```
-Interactive 4-scenario live testbed is also available directly on the web edge: https://praman-desk.vercel.app
+Interactive scenarios (Siemens, Lazarus, unisvvap phishing, arithmetic inflation) can also be tested directly at https://praman-desk.vercel.app.
 ```
 
 ---
@@ -43,13 +48,13 @@ Interactive 4-scenario live testbed is also available directly on the web edge: 
 ## 2. Main Hackathon Channel Broadcast
 **Location**: `#hackathon`  
 **Channel ID**: `1498654113376899112`  
-**Purpose**: Executive progress ping tagging `@1xahmed` per his Nov 22 broadcast directive
+**Purpose**: Core hackathon progress update
 
 ```markdown
-Hey @1xahmed, quick update on Mission 14 (Route 2: Conditional Escrow): We've deployed a Two-Miner Consensus Clearing Gate connecting Bangdrop's Takar escrow on Sepolia (`0x3102...4248`) with Praman Desk's deterministic WASM math & OFAC trie. In empirical testnet runs, funds release only on independent dual consensus—clearing verified Siemens payouts while halting unverified vendor overbilling drifts ($10k saved) and Lazarus SDN transfers. 
+Deployed Route 2 (Conditional Escrow) for Mission 14: a two-miner consensus gate linking Bangdrop's Takar on Sepolia (`0x3102...4248`) with Praman Desk's deterministic WASM math and OFAC trie. Releases funds only on dual independent concurrence, catching unverified vendor overbilling drifts ($10k preserved) and OFAC SDN matches before RPC broadcast.
 
-Full writeup & walkthrough video in the showcase thread: <#1569379402360553692>
-Reproduction: `git clone https://github.com/VishAlgoDev/praman-desk && cd praman-desk && npm i && npm run gate takar` (Live demo: https://praman-desk.vercel.app)
+Showcase details & video walkthrough: <#1569379402360553692>
+Reproduction: `git clone https://github.com/VishAlgoDev/praman-desk && cd praman-desk && npm i && npm run gate takar` (Live demo: https://praman-desk.vercel.app) @1xahmed
 ```
 
 ---
@@ -57,19 +62,17 @@ Reproduction: `git clone https://github.com/VishAlgoDev/praman-desk && cd praman
 ## 3. Developer Activation in Minds Agents Thread
 **Location**: `#showcase` ➔ `Minds Agents - Development & Collaboration`  
 **Thread ID**: `1573287348689567774`  
-**Purpose**: Developer activation & community adoption for Animoca Minds builders (RitaCryptoTips, Chrysolite494, etc.)
+**Purpose**: Practical integration snippet for Minds agent builders
 
 ```markdown
-Hey everyone working on Animoca Minds agents (@RitaCryptoTips @Chrysolite494)! 
-
-If your agent executes API calls, tool calls, or on-chain payments, we've published a lightweight pre-transaction spend guard you can drop into any agent workflow in 3 lines of code:
+For anyone running autonomous agents that execute payments or tool disbursements (@RitaCryptoTips @Chrysolite494), we open-sourced a lightweight pre-transaction spend guard:
 
 ```bash
 npm install github:VishAlgoDev/praman-desk
 ```
 
 ```javascript
-import { createAgentSpendMiddleware } from 'praman-desk/packages/praman-sdk/index.js';
+import { createAgentSpendMiddleware } from 'praman-desk';
 
 const guard = createAgentSpendMiddleware({ maxSingleSpend: 500 });
 const decision = await guard.interceptPayment({
@@ -83,7 +86,7 @@ if (!decision.cleared) {
 }
 ```
 
-It runs our 651-byte WASM engine and live GLEIF/OFAC checks to catch prompt injections, phantom invoices, and unverified counterparties before any funds leave the wallet. Test harness is runnable via `npm run gate demo`. Happy to help integrate into any Minds skill!
+It runs a 651-byte WASM comparator and live GLEIF/OFAC checks locally before any wallet disbursement to catch prompt injections, phantom invoices, and unverified counterparties. Local test suite: `npm run gate demo`.
 ```
 
 ---
@@ -94,14 +97,14 @@ It runs our 651-byte WASM engine and live GLEIF/OFAC checks to catch prompt inje
 **Purpose**: Technical validation and consensus collaboration with Bangdrop
 
 ```markdown
-@Bangdrop We've completed empirical integration testing between TakarSettle v4 (`0x310275e6D66818E068245326bB9e398822304248` on Sepolia) and Praman Desk (Seat 2 / Resolver 3). 
+@Bangdrop Completed integration testing between TakarSettle v4 (`0x310275e6D66818E068245326bB9e398822304248` on Sepolia) and Praman Desk (Seat 2 / Resolver 3). 
 
-Ran a 3-deal test suite:
-1. Siemens AG ($1,250): Takar delivery score 94% + Praman OFAC/LEI clearance ➔ Full dual consensus reached, escrow released in 1,451ms.
-2. CloudServer Corp ($10,000.05): Takar delivered heuristic pass, but Praman triggered circuit breaker on unverified LEI and hard ceiling breach ➔ Capital secured.
-3. Lazarus Group ($50,000): OFAC SDN flagged ➔ Locked in contract.
+Verified 3 testnet dispute cases:
+1. Siemens AG ($1,250): Takar delivery score 94% + Praman OFAC/LEI clearance ➔ Dual consensus reached, escrow released in 1,451ms.
+2. CloudServer Corp ($10,000.05): Takar heuristic pass, but Praman halted on unverified LEI and single-agent budget ceiling ➔ Funds secured in contract.
+3. Lazarus Group ($50,000): Praman OFAC trie flagged SDN address ➔ Locked in contract.
 
-Runnable in 1 command: `git clone https://github.com/VishAlgoDev/praman-desk && cd praman-desk && npm i && npm run gate takar`. Ready to run live contract dispute resolutions on Sepolia whenever you trigger the next batch!
+Reproduction: `git clone https://github.com/VishAlgoDev/praman-desk && cd praman-desk && npm i && npm run gate takar`. Ready to resolve live Sepolia disputes whenever you trigger the next batch.
 ```
 
 ---
@@ -109,22 +112,20 @@ Runnable in 1 command: `git clone https://github.com/VishAlgoDev/praman-desk && 
 ## 5. X (Twitter) Post Draft (Syndicating with Telegraph `#engage`)
 **Target Platform**: X (Twitter)  
 **Mentions**: `@Telegraphprotoc` `@1xahmed`  
-**Links**: `https://praman-desk.vercel.app` | `https://github.com/VishAlgoDev/praman-desk`  
-**Tags**: `#TelegraphProtocol #AIHackathon #Web3 #AIAgents`
+**Links**: `https://praman-desk.vercel.app` | `https://github.com/VishAlgoDev/praman-desk`
 
 ```text
-Specialist intelligence beats generalist hallucination.
+To support @Telegraphprotoc's two-sided intelligence architecture, @VishAlgoDev deployed Route 2 Conditional Escrow: a two-miner consensus clearing gate combining @Bangdrop's Takar heuristic escrow with Praman Desk's deterministic 651-byte WASM math & OFAC trie.
 
-To realize @Telegraphprotoc's vision of two-sided intelligence markets, @VishAlgoDev deployed Route 2 Conditional Escrow: a Two-Miner Consensus Gate uniting @Bangdrop's Takar heuristic escrow with Praman Desk's deterministic 651-byte WASM math & OFAC trie.
+Sepolia testnet results:
+- Verified vendor payouts clear in 1.4s on dual consensus
+- Unverified counterparty overbilling ($10,000) halted by circuit breaker
+- Sanctioned transfers blocked before RPC broadcast
 
-Results on Sepolia:
-✅ Clean payouts clear in 1.4s
-🛑 Unverified $10k invoice drifts halted
-🛑 Sanctioned transfers blocked before RPC broadcast
-
-Try the 1-command reproduction:
+Reproduction CLI:
 git clone https://github.com/VishAlgoDev/praman-desk && cd praman-desk && npm i && npm run gate takar
 
-Live Edge: https://praman-desk.vercel.app
-Full Walkthrough: https://praman-desk.vercel.app/praman-desk-walkthrough.mp4
+Edge demo: https://praman-desk.vercel.app
+Walkthrough: https://praman-desk.vercel.app/praman-desk-walkthrough.mp4
+#TelegraphProtocol #AIHackathon #Web3
 ```

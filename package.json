@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "description": "Praman Desk — Autonomous Pre-Payment Spend Guard & Counterparty Clearing Desk (MCP Server + WebAssembly Deterministic Comparator + Telegraph Protocol Paid Miner / Evaluator Network).",
   "type": "module",
-  "main": "mcp/server.mjs",
+  "main": "packages/praman-sdk/index.js",
+  "exports": {
+    ".": "./packages/praman-sdk/index.js",
+    "./sdk": "./packages/praman-sdk/index.js",
+    "./mcp": "./mcp/server.mjs"
+  },
+  "types": "packages/praman-sdk/index.d.ts",
   "bin": {
     "praman-gate": "./bin/praman-gate.mjs",
     "praman-spend-guard": "./mcp/server.mjs",

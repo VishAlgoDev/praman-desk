@@ -141,8 +141,9 @@ async function queryPraman(tc) {
   }
 }
 
-const MODEL_A_ID = process.env.FRONTIER_MODEL_A || 'gpt-5';
-const MODEL_B_ID = process.env.FRONTIER_MODEL_B || 'claude-sonnet-4-6';
+const MODEL_A_ID = process.env.FRONTIER_MODEL_A || process.env.OPENAI_MODEL || 'gpt-6.1';
+const MODEL_B_ID = process.env.FRONTIER_MODEL_B || process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
+const MODEL_C_ID = process.env.FRONTIER_MODEL_C || process.env.GEMINI_MODEL || 'gemini-4-neon';
 
 async function queryFrontierA(tc, apiKey) {
   if (!apiKey) return null;
