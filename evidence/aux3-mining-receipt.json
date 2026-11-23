@@ -1,0 +1,61 @@
+{
+  "submitter": "0x8755bAD0d7647ACdbFC0B5718564476F102B9624",
+  "timestamp": "2026-11-22T14:12:02.838Z",
+  "response": {
+    "intent_id": "MINING_INTELLIGENCE_GENERAL",
+    "submitter": "0x8755bad0d7647acdbfc0b5718564476f102b9624",
+    "signed": true,
+    "received": 6,
+    "accepted": 6,
+    "duplicate": 0,
+    "rejected": 0,
+    "curated": 6,
+    "state_counts": {
+      "admitted": 12,
+      "eligible": 6
+    }
+  },
+  "statusData": {
+    "intent_id": "MINING_INTELLIGENCE_GENERAL",
+    "counts": [
+      {
+        "status": "admitted",
+        "count": 12
+      },
+      {
+        "status": "eligible",
+        "count": 6
+      }
+    ],
+    "by_state": {
+      "admitted": 12,
+      "eligible": 6
+    },
+    "submitters": 3,
+    "eligible_submitters": 1,
+    "snapshot": {
+      "corpus_version": "e73c83aeaeb5a47731efc749dfa0ec569441cf4da2f5ddbd834108fbca5571ff",
+      "rows": 6,
+      "submitters": 1,
+      "qualification": 5,
+      "ranking": 1,
+      "ranking_split_bps": 5000,
+      "quality_rules_version": "evalpool-quality-v1",
+      "published_at": "2026-11-20T04:05:41.160015Z",
+      "activation_epoch": 22
+    },
+    "active_snapshot": {
+      "corpus_version": "e73c83aeaeb5a47731efc749dfa0ec569441cf4da2f5ddbd834108fbca5571ff",
+      "rows": 6,
+      "submitters": 1,
+      "qualification": 5,
+      "ranking": 1,
+      "ranking_split_bps": 5000,
+      "quality_rules_version": "evalpool-quality-v1",
+      "published_at": "2026-11-20T04:05:41.160015Z",
+      "activation_epoch": 22
+    },
+    "current_epoch": 38,
+    "min_submitters": 3
+  }
+}

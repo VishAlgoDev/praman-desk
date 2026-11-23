@@ -1,0 +1,862 @@
+[
+  {
+    "timestamp": "2026-11-22T14:29:03.911Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify SAP SE in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xd4596bca73ef27d895e087e44de1c9b671d3315d551e83ff0105f892679536ad",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8015
+  },
+  {
+    "timestamp": "2026-11-22T14:29:15.300Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Siemens AG in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x4abb547344a77edcd161cbf8b0cbfd2b6073007a294d23f0352f9293e5e7bf0b",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9386
+  },
+  {
+    "timestamp": "2026-11-22T14:29:27.934Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Apple Inc in California US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xcb0940a0dc02cd6a4b6f502ced3fdb7500abfc4d4ae9d20ea1e45682dc8bbe52",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11681
+  },
+  {
+    "timestamp": "2026-11-22T14:29:43.779Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Alphabet Inc in Delaware US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x153cddaf7a5823a69a41d94e95b5b6e5ef686d1b88ea559fedb33287f6d5e48d",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8963
+  },
+  {
+    "timestamp": "2026-11-22T14:29:55.634Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Microsoft Corporation in Washington US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xc3554fe1ef4c0b24180164c9eb91cd8bc08273b96f9031e31f4b6f2ea260e1f2",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 7586
+  },
+  {
+    "timestamp": "2026-11-22T14:30:06.361Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ASML Holding N.V. in Netherlands",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x5e934e1b94de0feb6f6a8f8fa5cd0fc21616fb0406957235afecfbe72dd6941b",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8056
+  },
+  {
+    "timestamp": "2026-11-22T14:30:19.000Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Schneider Electric SE in France",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x81fd13824ff9e2fcf38ee085e1110463b0b01189f535741228288b49f36b2ba1",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9879
+  },
+  {
+    "timestamp": "2026-11-22T14:30:32.493Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ABB Ltd in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x78682c0fe916b6a1a7e0475459e15e9db71ddd144df1d7e9f4fa0f8812b99c73",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9230
+  },
+  {
+    "timestamp": "2026-11-22T14:30:44.818Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Tata Steel Limited in India",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x2b8c5f9aaf34dd270b6e9af016a1fa3708d9fd1b45b002f4c852bc6da7c27bb8",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9894
+  },
+  {
+    "timestamp": "2026-11-22T14:30:56.907Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Glencore International AG in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x409a0d586446db9aa419d844483165f539422dd1074468e68bca22941c6e7d95",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10285
+  },
+  {
+    "timestamp": "2026-11-22T15:03:09.714Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify SAP SE in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xc24ccef7dd341f300c445d5972273c3f34b46eb4f2f887355205321e62ed7314",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8280
+  },
+  {
+    "timestamp": "2026-11-22T15:03:21.250Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Siemens AG in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x21e194570c040b44e849926ed8632f833b936de9a6986f12560e4a998b2d129e",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8726
+  },
+  {
+    "timestamp": "2026-11-22T15:03:32.648Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Apple Inc in California US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xe99de5fcc02d067945e472cabd3b12952782ece42caa016d4e660c339f53aba9",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 12036
+  },
+  {
+    "timestamp": "2026-11-22T15:03:48.195Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Alphabet Inc in Delaware US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x30db9348031b7e1c38e95e9167b6bc2aef2dbe1be3ee0bf896fbbbc548c7373e",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10153
+  },
+  {
+    "timestamp": "2026-11-22T15:04:03.127Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Microsoft Corporation in Washington US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xf71bc7dc0dbda7c1e2c91b63fe3097128208b0106318674c09653ad3f64c3cdd",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 7261
+  },
+  {
+    "timestamp": "2026-11-22T15:04:13.141Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ASML Holding N.V. in Netherlands",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xcaefbce151351a3d45ede419b94a3d8ca6fbdfda1e05f17d8c765002f8e4dca0",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8670
+  },
+  {
+    "timestamp": "2026-11-22T15:04:26.732Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Schneider Electric SE in France",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xe12fbeed671d8aacf2e7b4cd2b38adc8a233cafda041bfa3fa177e8b7e4cd921",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11053
+  },
+  {
+    "timestamp": "2026-11-22T15:04:41.681Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ABB Ltd in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xc3d8403e58437d8c132bedd8c7a9418b6a33d8837ad10a71ff0ea8a84aa6aac6",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11410
+  },
+  {
+    "timestamp": "2026-11-22T15:04:56.970Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Tata Steel Limited in India",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x47d6dba781946615cce0d089d48f7f16def87c0663d2b854274fbd1b305a86d3",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11346
+  },
+  {
+    "timestamp": "2026-11-22T15:05:12.336Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Glencore International AG in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xa27b656aea0d03ca15ce5ab3715258db6ccf3f0d5bdf0d7585c90d71ccfc28b0",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8098
+  },
+  {
+    "timestamp": "2026-11-22T15:13:49.275Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify SAP SE in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xc176601c907f06d5037d7d10e80d219cbc33f81438f8d8702b820a58d73c508e",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 13344
+  },
+  {
+    "timestamp": "2026-11-22T15:14:05.428Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Siemens AG in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x265349f94255e4d0d0738078700b242e1d61553d8741ccaa0771f9b85ef4d3db",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 17347
+  },
+  {
+    "timestamp": "2026-11-22T15:14:27.194Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Apple Inc in California US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xf6eab8f44122e31cad516b4b5111de71cedbf60c8eedfbc52d82fb6555c165d5",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 15137
+  },
+  {
+    "timestamp": "2026-11-22T15:14:47.061Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Alphabet Inc in Delaware US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x15e7faf12383e6572fbb2e3f3bf5104945e7d8de5dde1d8c47f86e0a33b070ab",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 19524
+  },
+  {
+    "timestamp": "2026-11-22T15:15:10.602Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Microsoft Corporation in Washington US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xcbf93ddef30adca321e4ab926645cff4618654d8c3240ba2100135f0f2e1ada6",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 13883
+  },
+  {
+    "timestamp": "2026-11-22T15:15:28.050Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ASML Holding N.V. in Netherlands",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xc6d321ce6422171166788b157aa5fa14a653c1d9b55d5d7bc0c617d68b2e0ef4",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 12513
+  },
+  {
+    "timestamp": "2026-11-22T15:15:43.097Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Schneider Electric SE in France",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x483cc43ae60b0210129df95770f37368ef9404d58bc5b21c47ab93eea31312e5",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 12934
+  },
+  {
+    "timestamp": "2026-11-22T15:15:58.723Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ABB Ltd in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xe6a81d25ef111e0d5b7ddcd49c420f3044d3cedf9cc747781c440353e4c9c03c",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10957
+  },
+  {
+    "timestamp": "2026-11-22T15:16:14.422Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Tata Steel Limited in India",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xa9b222fc6619c4e8e0a17a2c4ce5747a09bbc33276b5b4e1f2f77112b12cb028",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 17913
+  },
+  {
+    "timestamp": "2026-11-22T15:16:36.992Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Glencore International AG in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xc8214f79e146fbc09881f5d5a168c660c6806d41fc047962014ac5bce0624424",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 18557
+  },
+  {
+    "timestamp": "2026-11-22T15:20:06.549Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify SAP SE in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xa6cc8b4c2e97170fc6f698b2e4bb02c67d70b29e101ced70510eb97ad4ce3d25",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 7898
+  },
+  {
+    "timestamp": "2026-11-22T15:21:48.067Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify SAP SE in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xe008b7bba6c4f9ebeeaf74d232687d0dc14edecb5a6d8e00f5a9ec05f09476ee",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8424
+  },
+  {
+    "timestamp": "2026-11-22T15:22:00.448Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Siemens AG in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x33962280a9522d0ed6b6e7461283f03b689fd31f476f8d340787bab20c51d262",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 6745
+  },
+  {
+    "timestamp": "2026-11-22T15:22:09.769Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Apple Inc in California US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xdbe9dc629009575c36e0a28166cb120c54024db3c395e2a0778a3206388b35be",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10642
+  },
+  {
+    "timestamp": "2026-11-22T15:22:23.744Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Alphabet Inc in Delaware US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x0e93c6b8dae308bf2aa89378f782ebdd62e7c25a01fb8bea273119cf458cbe84",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11971
+  },
+  {
+    "timestamp": "2026-11-22T15:22:39.009Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Microsoft Corporation in Washington US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x3df56cd05cf08d4d3d7305a7bc3415bb8f21effe78529fa7c6255f5592a81218",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9800
+  },
+  {
+    "timestamp": "2026-11-22T15:22:51.903Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ASML Holding N.V. in Netherlands",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x54252760f4899c6d7d2c943e19b7ec6f9452cd9521abd30bf1e7294601a90168",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10113
+  },
+  {
+    "timestamp": "2026-11-22T15:23:04.458Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Schneider Electric SE in France",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x08425afefea3f12b35dc38e932b06cf2aa54d6e42914296231acdcfc6bdeda40",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9841
+  },
+  {
+    "timestamp": "2026-11-22T15:23:17.380Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ABB Ltd in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xf2e7a2b56d2f16125133efdae97ae39d4884145ff7ccb79b92bec11b90bd625f",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8656
+  },
+  {
+    "timestamp": "2026-11-22T15:23:29.235Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Tata Steel Limited in India",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xe83ba342a7df85dc436cc2c2ab004f36e2eb820aaadf59cdaf690c488d39c925",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9782
+  },
+  {
+    "timestamp": "2026-11-22T15:23:41.187Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Glencore International AG in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x90216fa1961e9b82b07c2160b6379c8fb8de888cc1db0ca1f099d667769de74d",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9663
+  },
+  {
+    "timestamp": "2026-11-22T16:00:53.218Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify SAP SE in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x085991887b664f698a8168ef9a2be3f447c3f720079d7d643674d8b978867aaf",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 12395
+  },
+  {
+    "timestamp": "2026-11-22T16:01:09.435Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Siemens AG in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xac52e2a7db05831d420fb37a63dd581dd96e3d9a16c7cf52d787bf57b5f3f1c9",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9832
+  },
+  {
+    "timestamp": "2026-11-22T16:01:23.016Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Apple Inc in California US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x23e040668be10adb499c94dd772b16a899c3e7c3c1d6a36fcfe5890b024c67de",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10562
+  },
+  {
+    "timestamp": "2026-11-22T16:01:37.969Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Alphabet Inc in Delaware US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xe43d3df72a95b589bb65979ca7f285c6de98b58b6f6c5c4057dbe2b644dcd29c",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 14613
+  },
+  {
+    "timestamp": "2026-11-22T16:01:55.038Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Microsoft Corporation in Washington US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x9d98040c3e1cd0de977eb98ca6bbb3325e8b227a3392dcddbb19f3374ac16f5b",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9193
+  },
+  {
+    "timestamp": "2026-11-22T16:02:08.666Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ASML Holding N.V. in Netherlands",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x3a66312df1de0f1ee993c3d5bc682d381e965916385ab66e24082516c6234740",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10236
+  },
+  {
+    "timestamp": "2026-11-22T16:02:21.863Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Schneider Electric SE in France",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x9926fa70a5d4dec9aec4adba43480a5f8e250602f663ee13585b6c7cfad4037d",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9557
+  },
+  {
+    "timestamp": "2026-11-22T16:02:34.418Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ABB Ltd in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xeb2f1b9a304b8721d79b1a656a6f7fbdde9df5f42f4cdcaf98a27a4b01b2b88d",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10561
+  },
+  {
+    "timestamp": "2026-11-22T16:02:48.728Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Tata Steel Limited in India",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x3eab7d382fd280026a28b143ec561db64c90e63604b7263bd3bec34aa7ff2325",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11494
+  },
+  {
+    "timestamp": "2026-11-22T16:03:03.867Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Glencore International AG in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x89cdcff42d186b1f5f376a6581db36f75f6e88693d5ceb2a8959842bb2bf5068",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 12601
+  },
+  {
+    "timestamp": "2026-11-22T17:44:14.361Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify SAP SE in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x3d6c77421dc9d16478edacec4a8dc9ed827a9eb2303e3b630e7f7ff09a38ed9c",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11854
+  },
+  {
+    "timestamp": "2026-11-22T17:44:29.691Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Siemens AG in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xdb1200f5c7a2d4abfb3986226324f2ba957bdb8d35de7f3cb8899d350d886cc2",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9319
+  },
+  {
+    "timestamp": "2026-11-22T17:44:43.989Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Apple Inc in California US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x870fa670e98b9d41f2240ee93d149e7d7289922e426cd9748a361d29b1fc8528",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11856
+  },
+  {
+    "timestamp": "2026-11-22T17:44:58.195Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Alphabet Inc in Delaware US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x7c5ca9b735c2e4ff8aefdef8658484606b526c4d82bc68d5819501c4badf33e0",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11974
+  },
+  {
+    "timestamp": "2026-11-22T17:45:13.471Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Microsoft Corporation in Washington US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x741b26cbf84f69b99253bcc7538b93d757929710876c5ed6cca469408e8b511a",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 7571
+  },
+  {
+    "timestamp": "2026-11-22T18:20:17.631Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify SAP SE in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xb7485fe0188e5468fd91998b74a7afa7eed16bf0b2d8262a4e621eb25944db03",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9861
+  },
+  {
+    "timestamp": "2026-11-22T18:20:32.486Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Siemens AG in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x081e6b2fc13f2478e04da1b44441da7ec911b6e79ead4776dd69d6e6b912300a",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 7800
+  },
+  {
+    "timestamp": "2026-11-22T18:20:43.918Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Apple Inc in California US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x414b01cef0d805d8aa4c61611dd78e512ccee6053205229af8ebfce99771db18",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10096
+  },
+  {
+    "timestamp": "2026-11-22T18:20:57.750Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Alphabet Inc in Delaware US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xb7fd42dbf577f6d8ec691242f5c0ad058a8d56be9c5bfbab2d48160e5d532326",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 12730
+  },
+  {
+    "timestamp": "2026-11-22T18:21:13.959Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Microsoft Corporation in Washington US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xd078618089be554a401138865504d9b1d87b7c001eaf27d871acffbcb2b36604",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 6659
+  },
+  {
+    "timestamp": "2026-11-22T18:21:25.141Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ASML Holding N.V. in Netherlands",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xed69caf40bceb6664f6a54aaf888268de74c45143cf1a22b8ea6ebd0236d4cf9",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8865
+  },
+  {
+    "timestamp": "2026-11-22T18:21:38.370Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Schneider Electric SE in France",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xfa7b156240d04a326b6f7a65fd6058a45ee279715ebfe840f5341d360453a1f1",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10201
+  },
+  {
+    "timestamp": "2026-11-22T18:21:53.452Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ABB Ltd in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x8824c99e836ebed8a974f2593361777abf8f209fccaed7434d53b9fa331ca83d",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11136
+  },
+  {
+    "timestamp": "2026-11-22T18:22:07.398Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Tata Steel Limited in India",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x29417194d691540db36006322048e2ffb93c0c6972ead484460997cd864bb3f0",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10166
+  },
+  {
+    "timestamp": "2026-11-22T18:22:21.162Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Glencore International AG in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x9475274885a2d83344f0c339028901ca7b25f2703dbe76abac3ad90f62251dd0",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9916
+  },
+  {
+    "timestamp": "2026-11-22T18:30:44.910Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify SAP SE in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x7e391f66106cda097c53353f54193c6b4cb8e281524b1be992dca21917a01bf9",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8263
+  },
+  {
+    "timestamp": "2026-11-22T18:30:55.414Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Siemens AG in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x06e5aa9cc2989e3786d8d7e6af0c82bf54ca03dfebdc79d571a326bda2c3a401",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 7539
+  },
+  {
+    "timestamp": "2026-11-22T18:31:07.252Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Apple Inc in California US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x113da1d3d9e2bcb208e4cbb8e1baabdfb025f00d1ba3107066f5d12ad953656c",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 14197
+  },
+  {
+    "timestamp": "2026-11-22T18:31:25.870Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Alphabet Inc in Delaware US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x79e2182707268fac9658d67c5fb3a5729036626d69200c1b29ddc4b58b7a0f47",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 12349
+  },
+  {
+    "timestamp": "2026-11-22T18:31:42.533Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Microsoft Corporation in Washington US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x227c1bf2bcbbedc09e2843927d1fc8e297a002ab885cc5dc2f523cfa90f4b676",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11299
+  },
+  {
+    "timestamp": "2026-11-22T18:31:56.434Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ASML Holding N.V. in Netherlands",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x4d5510c2000fc31282352495846111135cb93a46bc9205d660b03c85f299439c",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11321
+  },
+  {
+    "timestamp": "2026-11-22T18:32:10.026Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Schneider Electric SE in France",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x6267ea99bb7ea0acc901e3718064c89c2e06f79fc2106bd20a0864fc152b1607",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 9974
+  },
+  {
+    "timestamp": "2026-11-22T18:32:23.849Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ABB Ltd in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xb6867d9f7fd9e908f0c723897f68a94f293823835d408fe3b390cfbacedf401a",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10845
+  },
+  {
+    "timestamp": "2026-11-22T18:32:39.072Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Tata Steel Limited in India",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x6c2406a0e580ae63064db109f1e561473e5ba0792316558737a58c336f92db27",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10451
+  },
+  {
+    "timestamp": "2026-11-22T18:32:54.041Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Glencore International AG in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x9f559ad0036f9b093e548c0ce1c8dcf65a6606a4b10dfc39963896d44766cd46",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10172
+  },
+  {
+    "timestamp": "2026-11-22T18:54:23.458Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify SAP SE in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x20525f5f1e8c255c4fc9c09f34e456f22083e9b53b9a5e91ea3de5940f7adafd",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10011
+  },
+  {
+    "timestamp": "2026-11-22T18:54:36.469Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Siemens AG in Germany",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x60aa879300d521c7dd734b6b38552128831aa7f888693be3aac710c87dfb72ed",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8382
+  },
+  {
+    "timestamp": "2026-11-22T18:54:48.777Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Apple Inc in California US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x652f09c5a9d200bbbbc1b7045fbdac20aded56db6af72f93887a9de4188e991b",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 13054
+  },
+  {
+    "timestamp": "2026-11-22T18:55:05.023Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Alphabet Inc in Delaware US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x863e350072259e59d72891511907e2245963db07ada95ddf4a2dc1184cf382e5",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11066
+  },
+  {
+    "timestamp": "2026-11-22T18:55:20.663Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Microsoft Corporation in Washington US",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x6d699b63f9602555f4f7969254e4872097c98fd0b591891cc82a4946840915c8",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 7430
+  },
+  {
+    "timestamp": "2026-11-22T18:55:31.357Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ASML Holding N.V. in Netherlands",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x50bef86c182dbde2200da63f39f1f966d13774a8d557f3f3ae261267c703f47a",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 8633
+  },
+  {
+    "timestamp": "2026-11-22T18:55:42.711Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Schneider Electric SE in France",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x073ccc7b6bb6db6f4a9b995ce8e5ccf34162faa1b82da26da45350dffd7875bb",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 11354
+  },
+  {
+    "timestamp": "2026-11-22T18:55:58.762Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify ABB Ltd in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x4500aebbb201dbcd26bf91138dec79053d68731288afb677cc80b6e5fd66925d",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10562
+  },
+  {
+    "timestamp": "2026-11-22T18:56:12.117Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Tata Steel Limited in India",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0x63fc1219bf0199edcbc00405597b8223febe69e02cc9d0cf1738e1fe1d5654ed",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 14459
+  },
+  {
+    "timestamp": "2026-11-22T18:56:31.293Z",
+    "query": "[CORPORATE_REGISTRY_LOOKUP_GENERAL] Verify Glencore International AG in Switzerland",
+    "status": 200,
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "signalHash": "0xf1c2cb41aff8f6aa353aebb9a67b0d9f6b9e2d21d29e631ddb4af611298a22b4",
+    "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+    "latencyMs": 10509
+  }
+]
