@@ -37,7 +37,7 @@
   - **Upstream PR #220**: `CORPORATE_REGISTRY_LOOKUP` adapter (Mission 03 / #191, Mission 13 / #201)
   - **Upstream PR #221**: `REGULATORY_FILING_MONITOR` adapter (Mission 04 / #192, Mission 13 / #201)
   - **Upstream PR #222**: `GRID_POWER_PRICE` adapter (Mission 11 / #199, Mission 12 / #200)
-  *(All 6 PRs open, 100% MERGEABLE, passing CI)*  
+  *(Submitted as reference adapters; per upstream PR #229, deterministic intents use the node's shared comparator, making our 68 EvalPool ground-truth rows our primary Track 3 scoring contribution)*  
 - **Benchmark & Policy Evaluation**: "With vs Without Telegraph" ($79,373 Capital Loss Averted across 5 Adversarial Scenarios, 100% Catch Rate vs 0% Ungrounded Baseline)  
 - **Main Competition Deadline**: December 1, 2026, 23:59 UTC  
 - **GitHub Repository**: [https://github.com/VishAlgoDev/praman-desk](https://github.com/VishAlgoDev/praman-desk)  
