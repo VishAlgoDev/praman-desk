@@ -46,7 +46,7 @@ async function executeSentinelCycle() {
   // Step 3: Check Devnode Miner Standing
   let devnodeStanding = null;
   try {
-    const r = await fetch('https://devnode.telegraphprotocol.com/api/miners');
+    const r = await fetch('https://devnode.telegraphprotocol.com/api/miners', { signal: AbortSignal.timeout(10000) });
     if (r.ok) {
       const miners = await r.json();
       const m = miners.find(x => x.id === '6164');
