@@ -269,5 +269,37 @@
     "tx_hash": "0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75",
     "reason": "All 7 claims verified compliant",
     "execution_note": "Confirmed in block 12190408"
+  },
+  {
+    "timestamp": "2026-11-23T04:53:34.212Z",
+    "resolver_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "deal_id": "0x1111111111111111111111111111111111111111111111111111111111111111",
+    "counterparty_name": "Siemens AG",
+    "payer": "0x1000000000000000000000000000000000000001",
+    "payee": "0x2000000000000000000000000000000000000002",
+    "amount_usd": 50000,
+    "verdict": "APPROVE_PAYMENT",
+    "authorized": true,
+    "bundle_sha256": "0xe202392d8f7fc3de4d9046ca429c0fc1b2ab23a1626c85d3c306dfb435dc4500",
+    "seconded": true,
+    "tx_hash": "0xsim_9a4cc88d5236aab7afdf57511ce731c51abac753854a5668b19e81ce",
+    "reason": "All 7 claims verified compliant",
+    "execution_note": "Simulated execution verified (dry-run mode)"
+  },
+  {
+    "timestamp": "2026-11-23T04:53:36.676Z",
+    "resolver_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "deal_id": "0x3333333333333333333333333333333333333333333333333333333333333333",
+    "counterparty_name": "Bank Rossiya",
+    "payer": "0x3000000000000000000000000000000000000003",
+    "payee": "0x4000000000000000000000000000000000000004",
+    "amount_usd": 150000,
+    "verdict": "REJECT_PAYMENT",
+    "authorized": false,
+    "bundle_sha256": "0xf92bde87444a7a2a789909d0d73912a0cc168fa431af8fa31ee052da72ce46f9",
+    "seconded": false,
+    "tx_hash": null,
+    "reason": "OFAC_SDN_SANCTIONS_HARD_BLOCK",
+    "execution_note": "Declined by Resolver 3: OFAC_SDN_SANCTIONS_HARD_BLOCK"
   }
 ]
