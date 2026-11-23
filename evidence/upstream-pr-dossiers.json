@@ -1,0 +1,65 @@
+[
+  {
+    "issue": 219,
+    "intent": "GRID_POWER_PRICE_GENERAL",
+    "branch": "eval/grid-power-price-219",
+    "title": "feat(eval): add 6 verified preference pairs for GRID_POWER_PRICE_GENERAL (#219)",
+    "dataFile": "eval-data/grid_power_price_general.jsonl",
+    "rowCount": 6,
+    "devnodeConsensus": {
+      "submitters": 7,
+      "eligible": 229,
+      "active": true
+    },
+    "docPath": "C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_219_GRID_POWER_PRICE_GENERAL.md",
+    "cliCommands": [
+      "git checkout -b eval/grid-power-price-219",
+      "git add eval-data/grid_power_price_general.jsonl",
+      "git commit -m \"feat(eval): add 6 verified preference pairs for GRID_POWER_PRICE_GENERAL (#219)\"",
+      "git push origin eval/grid-power-price-219",
+      "gh pr create --repo telegraphprotocol/bounties --base main --head eval/grid-power-price-219 --title \"feat(eval): add 6 verified preference pairs for GRID_POWER_PRICE_GENERAL (#219)\" --body-file \"C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_219_GRID_POWER_PRICE_GENERAL.md\""
+    ]
+  },
+  {
+    "issue": 220,
+    "intent": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
+    "branch": "eval/optimal-execution-route-220",
+    "title": "feat(eval): add 6 verified preference pairs for OPTIMAL_EXECUTION_ROUTE_GENERAL (#220)",
+    "dataFile": "eval-data/optimal_execution_route_general.jsonl",
+    "rowCount": 5,
+    "devnodeConsensus": {
+      "submitters": 8,
+      "eligible": 312,
+      "active": true
+    },
+    "docPath": "C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_220_OPTIMAL_EXECUTION_ROUTE_GENERAL.md",
+    "cliCommands": [
+      "git checkout -b eval/optimal-execution-route-220",
+      "git add eval-data/optimal_execution_route_general.jsonl",
+      "git commit -m \"feat(eval): add 6 verified preference pairs for OPTIMAL_EXECUTION_ROUTE_GENERAL (#220)\"",
+      "git push origin eval/optimal-execution-route-220",
+      "gh pr create --repo telegraphprotocol/bounties --base main --head eval/optimal-execution-route-220 --title \"feat(eval): add 6 verified preference pairs for OPTIMAL_EXECUTION_ROUTE_GENERAL (#220)\" --body-file \"C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_220_OPTIMAL_EXECUTION_ROUTE_GENERAL.md\""
+    ]
+  },
+  {
+    "issue": 221,
+    "intent": "TASK_EXECUTION_QUALITY_GENERAL",
+    "branch": "eval/task-execution-quality-221",
+    "title": "feat(eval): add 6 verified preference pairs for TASK_EXECUTION_QUALITY_GENERAL (#221)",
+    "dataFile": "eval-data/task_execution_quality_general.jsonl",
+    "rowCount": 5,
+    "devnodeConsensus": {
+      "submitters": 13,
+      "eligible": 264,
+      "active": true
+    },
+    "docPath": "C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_221_TASK_EXECUTION_QUALITY_GENERAL.md",
+    "cliCommands": [
+      "git checkout -b eval/task-execution-quality-221",
+      "git add eval-data/task_execution_quality_general.jsonl",
+      "git commit -m \"feat(eval): add 6 verified preference pairs for TASK_EXECUTION_QUALITY_GENERAL (#221)\"",
+      "git push origin eval/task-execution-quality-221",
+      "gh pr create --repo telegraphprotocol/bounties --base main --head eval/task-execution-quality-221 --title \"feat(eval): add 6 verified preference pairs for TASK_EXECUTION_QUALITY_GENERAL (#221)\" --body-file \"C:\\Users\\Public\\My Agent\\telegraph-h2\\docs\\upstream-prs\\PR_ISSUE_221_TASK_EXECUTION_QUALITY_GENERAL.md\""
+    ]
+  }
+]

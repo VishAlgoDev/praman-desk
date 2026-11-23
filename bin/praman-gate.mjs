@@ -9,6 +9,8 @@
  * 
  * Commands:
  *   demo                 Run a 5-second end-to-end evaluation benchmark (Approval, Sanctions Block, Phishing Shield, Math Discrepancy)
+ *   agent-demo           Run the Animoca Minds Agent spend guard demo (exploit drain vs circuit breaker vs clean settlement)
+ *   takar                Run the Bangdrop Takar cross-miner escrow clearing bridge (Two-Miner consensus)
  *   check "<prompt>"     Audit any payment prompt or transaction with Two-Mind synthesis & WASM comparator
  *   miner                Check live telemetry on Sepolia Diamond Miner #6169 (Devnode Route #5281)
  *   evalpool             Check live Devnode consensus across all registered EvalPool intents
@@ -16,7 +18,14 @@
  */
 
 import http from 'node:http';
+import { spawn } from 'node:child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { PramanDesk } from '../packages/praman-sdk/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '..');
 
 const client = new PramanDesk({
   endpoint: process.env.PRAMAN_ENDPOINT || 'https://praman-desk.vercel.app'
@@ -205,6 +214,31 @@ async function main() {
     case 'demo':
       await runDemo();
       break;
+    case 'agent-demo':
+    case 'agent':
+    case 'minds': {
+      const child = spawn(process.execPath, [path.join(rootDir, 'examples', 'minds-spend-guard', 'demo-minds-spend-guard.mjs')], {
+        stdio: 'inherit',
+        cwd: rootDir
+      });
+      await new Promise((resolve, reject) => {
+        child.on('close', code => (code === 0 ? resolve() : reject(new Error(`Agent demo exited with code ${code}`))));
+        child.on('error', reject);
+      });
+      break;
+    }
+    case 'takar':
+    case 'bridge': {
+      const child = spawn(process.execPath, [path.join(rootDir, 'examples', 'takar-second-opinion', 'takar-praman-escrow-bridge.mjs')], {
+        stdio: 'inherit',
+        cwd: rootDir
+      });
+      await new Promise((resolve, reject) => {
+        child.on('close', code => (code === 0 ? resolve() : reject(new Error(`Takar bridge exited with code ${code}`))));
+        child.on('error', reject);
+      });
+      break;
+    }
     case 'check':
       await checkPrompt(args.slice(1).join(' '));
       break;

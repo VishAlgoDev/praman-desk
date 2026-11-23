@@ -9,6 +9,34 @@
 [![WASM Comparator](https://img.shields.io/badge/WASM%20Engine-651%20Bytes%20Pure%20Binary-f59e0b?style=for-the-badge)](https://praman-desk.vercel.app/comparator.wasm)
 [![MCP Server](https://img.shields.io/badge/MCP-18%20Tools%20Streamable%20HTTP-6366f1?style=for-the-badge)](https://github.com/VishAlgoDev/praman-desk#10-second-developer-quickstart)
 
+---
+
+## ⚡ Judge & Developer 30-Second Quickstart
+
+Evaluate the entire Praman Desk stack locally with zero external configuration in under 30 seconds:
+
+```bash
+# 1. Clone repository
+git clone https://github.com/VishAlgoDev/praman-desk.git
+cd praman-desk
+
+# 2. Run the 5-second 4-scenario ground-truth evaluation suite
+npm run gate demo
+
+# 3. Run the Animoca Minds autonomous agent loss-prevention demo ($10,000 saved)
+npm run gate agent-demo
+
+# 4. Run the Bangdrop Takar cross-miner escrow clearing bridge (Two-Miner consensus)
+npm run gate takar
+```
+
+- 🌐 **Live Web Playground:** [https://praman-desk.vercel.app](https://praman-desk.vercel.app) *(Click the 4 one-click scenario buttons for live <300ms arbitration)*
+- 🎬 **Official Master Walkthrough Video:** [praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) (5.23 min, complete audio + visual proof)
+- 🔌 **Zero-Install Keyless MCP Server:** Add `https://praman-desk.vercel.app/api/mcp` to Cursor, Claude Code, or Minds ([Setup Guide](CONNECT_YOUR_AGENT.md))
+- 📦 **NPM / GitHub SDK Integration:** `npm install github:VishAlgoDev/praman-desk` or import from `packages/praman-sdk`
+
+---
+
 - **Live Split-Screen Interactive Playground:** <https://praman-desk.vercel.app>
 - **Universal Multi-Miner Contradiction & Truth Matrix:** <https://praman-desk.vercel.app/#matrix>
 - **Zero-Install Keyless MCP Server for Cursor, Claude & Minds:** [CONNECT_YOUR_AGENT.md](CONNECT_YOUR_AGENT.md) (`https://praman-desk.vercel.app/api/mcp`)

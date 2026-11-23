@@ -33,7 +33,7 @@ export class PramanDesk {
    * Universal 1-line Pre-Payment Spend Guard.
    * Runs OFAC SDN check, corporate registry lookup, WASM line-item math, and delegation policy caps.
    */
-  async clearSpend({ vendor = '', amount = 0, invoiceNumber = '', currency = 'USD', poNumber = '', lei = '', jurisdiction = 'US' } = {}) {
+  async clearSpend({ vendor = '', amount = 0, invoiceNumber = '', currency = 'USD', poNumber = '', lei = '', jurisdiction = 'US', supervisorSignature = '' } = {}) {
     const res = await this._request('/api/spend-guard/evaluate', 'POST', {
       vendor,
       amount,
@@ -41,7 +41,8 @@ export class PramanDesk {
       currency,
       poNumber,
       lei,
-      jurisdiction
+      jurisdiction,
+      supervisorSignature
     });
     return {
       ...res,
@@ -187,6 +188,74 @@ export class PramanDesk {
       miners
     });
   }
+}
+
+/**
+ * Standard Circuit Breaker Exception thrown when an autonomous agent spend is halted.
+ */
+export class PramanSpendGuardError extends Error {
+  constructor(message, clearanceData = {}) {
+    super(message);
+    this.name = 'PramanSpendGuardError';
+    this.clearance = clearanceData;
+    this.certHash = clearanceData.certHash || null;
+    this.verdictText = clearanceData.verdictText || null;
+    this.status = clearanceData.status || 'HALTED';
+  }
+}
+
+/**
+ * 2-Line Autonomous Agent Wallet Spend Middleware
+ * Drop into any AI agent framework (Minds, LangChain, ElizaOS, Coinbase AgentKit, Vercel AI SDK).
+ * Intercepts tool calls and transaction dispatches before on-chain execution.
+ */
+export function createAgentSpendMiddleware(options = {}) {
+  const client = new PramanDesk(options);
+
+  return async function guardTransaction(context, next = null) {
+    const payload = typeof context === 'string' ? { prompt: context } : { ...context };
+    const vendor = payload.vendor || payload.recipient || payload.to || payload.counterparty || '';
+    const amount = Number(payload.amount || payload.value || 0);
+    const currency = payload.currency || payload.token || 'USDC';
+    const address = payload.address || payload.recipientAddress || payload.to || '';
+    const prompt = payload.prompt || `Disburse ${amount} ${currency} to ${vendor || address}`;
+
+    const res = await client._request('/api/spend-guard/evaluate', 'POST', {
+      prompt,
+      vendor,
+      amount,
+      currency,
+      address
+    });
+
+    const cleared = res.status === 'APPROVED';
+    const clearance = {
+      ...res,
+      cleared,
+      timestamp: new Date().toISOString()
+    };
+
+    if (!cleared) {
+      const errMessage = `[PRAMAN CIRCUIT BREAKER] Transaction HALTED: ${res.verdictText || 'Policy violation detected'}`;
+      throw new PramanSpendGuardError(errMessage, clearance);
+    }
+
+    if (typeof next === 'function') {
+      return await next(clearance);
+    }
+    return clearance;
+  };
+}
+
+/**
+ * Wraps an agent tool function with pre-payment spend clearance.
+ */
+export function createToolGuard(toolFn, options = {}) {
+  const guard = createAgentSpendMiddleware(options);
+  return async function guardedTool(params) {
+    const clearance = await guard(params);
+    return await toolFn(params, clearance);
+  };
 }
 
 export default PramanDesk;

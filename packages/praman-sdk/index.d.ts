@@ -11,6 +11,7 @@ export interface SpendClearanceInput {
   poNumber?: string;
   lei?: string;
   jurisdiction?: string;
+  supervisorSignature?: string;
 }
 
 export interface SpendClearanceResult {
@@ -58,5 +59,24 @@ export declare class PramanDesk {
   queryMiningIntelligence(input?: { site?: string; entity?: string; jurisdiction?: string }): Promise<any>;
   arbitrateMiningDiscrepancies(input?: { site?: string; entity?: string; miners?: any[] }): Promise<any>;
 }
+
+export declare class PramanSpendGuardError extends Error {
+  name: 'PramanSpendGuardError';
+  clearance: any;
+  certHash: string | null;
+  verdictText: string | null;
+  status: string;
+  constructor(message: string, clearanceData?: any);
+}
+
+export declare function createAgentSpendMiddleware(options?: PramanDeskOptions): (
+  context: string | { vendor?: string; amount?: number; currency?: string; address?: string; prompt?: string; [key: string]: any },
+  next?: ((clearance: any) => Promise<any> | any) | null
+) => Promise<any>;
+
+export declare function createToolGuard<T = any>(
+  toolFn: (params: T, clearance?: any) => Promise<any> | any,
+  options?: PramanDeskOptions
+): (params: T) => Promise<any>;
 
 export default PramanDesk;

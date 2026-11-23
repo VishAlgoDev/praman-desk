@@ -60,7 +60,39 @@ async function run() {
   assert.ok(arbRes.status === 'SYNTHESIS_ARBITRATED' || arbRes.status === 'DISCREPANCY_FLAGGED', 'Arbitration must flag or arbitrate');
   console.log('   PASS ✅ status:', arbRes.status, 'discrepancies:', arbRes.discrepancies_found);
 
-  console.log('=== All JS/TS SDK Tests Passed (9/9) ✅ ===');
+  console.log('10. Testing createAgentSpendMiddleware (Clean spend vs Sanctioned block)...');
+  const { createAgentSpendMiddleware, createToolGuard, PramanSpendGuardError } = await import('./index.js');
+  const guard = createAgentSpendMiddleware({ endpoint: 'https://praman-desk.vercel.app' });
+
+  // 10a: Clean spend approved
+  const approvedSpend = await guard({ vendor: 'Siemens AG', amount: 450, currency: 'USDC' });
+  assert.strictEqual(approvedSpend.cleared, true, 'Clean spend must be approved');
+  console.log('   PASS ✅ Approved clean spend: Siemens AG $450, certHash:', approvedSpend.certHash?.slice(0, 16));
+
+  // 10b: Blocked spend throws PramanSpendGuardError
+  let caughtError = null;
+  try {
+    await guard({ vendor: 'Lazarus Group', amount: 10000, address: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' });
+  } catch (err) {
+    caughtError = err;
+  }
+  assert.ok(caughtError instanceof PramanSpendGuardError, 'Blocked spend must throw PramanSpendGuardError');
+  console.log('   PASS ✅ Caught expected circuit breaker error:', caughtError.message.slice(0, 60));
+
+  console.log('11. Testing createToolGuard (wrapping wallet transfer function)...');
+  let transferExecuted = false;
+  const mockWalletTransfer = async (params) => {
+    transferExecuted = true;
+    return { txHash: '0xmocktxhash123456789' };
+  };
+
+  const safeTransferTool = createToolGuard(mockWalletTransfer, { endpoint: 'https://praman-desk.vercel.app' });
+  const result = await safeTransferTool({ vendor: 'Siemens AG', amount: 200 });
+  assert.strictEqual(transferExecuted, true, 'Clean transfer should execute');
+  assert.strictEqual(result.txHash, '0xmocktxhash123456789');
+  console.log('   PASS ✅ createToolGuard successfully wrapped wallet execution');
+
+  console.log('=== All JS/TS SDK Tests Passed (11/11) ✅ ===');
 }
 
 run().catch((err) => {
