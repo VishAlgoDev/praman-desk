@@ -434,6 +434,42 @@ header {
 }
 @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--brand); } }
 
+/* Traveling Border Beam Input Wrapper */
+.border-beam-input-wrapper {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-surface-elevated);
+  padding: 1px;
+  display: inline-flex;
+  align-items: center;
+  transition: all var(--t-fast);
+}
+.border-beam-input-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -200%;
+  background: conic-gradient(from 0deg, transparent 0deg, transparent 280deg, var(--brand) 320deg, #6B9EFF 360deg);
+  animation: border-rotate 3.5s linear infinite;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+.border-beam-input-wrapper:focus-within::before {
+  opacity: 1;
+  filter: drop-shadow(0 0 10px #6B9EFF);
+}
+.border-beam-input-wrapper input {
+  position: relative;
+  z-index: 1;
+  background: var(--bg-surface-elevated) !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  width: 100%;
+  border-radius: 5px;
+}
+
 /* ==========================================================================
    7. 15-STAGE VERIFICATION PIPELINE STRIP
    ========================================================================== */
@@ -1172,7 +1208,9 @@ footer {
       <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;gap:12px">
         <h3 style="font-family:var(--font-mono);font-size:14px">Confirmed Settlement Ledger</h3>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input class="form-control" id="lg-q" placeholder="Search intent, miner, hash…" style="max-width:240px;min-height:36px" aria-label="Search ledger">
+          <div class="border-beam-input-wrapper" style="max-width:320px;flex:1">
+            <input class="form-control" id="lg-q" placeholder="Search intent, miner, hash…" style="min-height:36px" aria-label="Search ledger">
+          </div>
           <select class="form-control" id="lg-intent" style="max-width:200px;min-height:36px" aria-label="Filter by intent">
             <option value="">ALL INTENTS</option>
           </select>
@@ -2045,6 +2083,57 @@ $('#mr-load').addEventListener('click', async () => {
     out.innerHTML = `<div class="border-beam-card"><div class="border-beam-inner" style="color:var(--halt-crimson)">Dossier unavailable — ${err.message}.</div></div>`;
   }
 });
+
+/* ----------------- Typewriter Animated Placeholders ----------------- */
+function initTypewriterPlaceholder(inputId, phrases, typeSpeed = 35, deleteSpeed = 20, pauseTime = 2200) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  let phraseIdx = 0;
+  let charIdx = 0;
+  let isDeleting = false;
+  let isFocused = false;
+
+  el.addEventListener('focus', () => { isFocused = true; });
+  el.addEventListener('blur', () => {
+    isFocused = false;
+    if (!el.value) setTimeout(type, 300);
+  });
+
+  function type() {
+    if (isFocused || el.value.length > 0) return;
+    const current = phrases[phraseIdx];
+    if (isDeleting) {
+      charIdx--;
+      el.setAttribute('placeholder', current.substring(0, charIdx) + '▊');
+      if (charIdx <= 0) {
+        isDeleting = false;
+        phraseIdx = (phraseIdx + 1) % phrases.length;
+        setTimeout(type, 400);
+        return;
+      }
+      setTimeout(type, deleteSpeed);
+    } else {
+      charIdx++;
+      el.setAttribute('placeholder', current.substring(0, charIdx) + (charIdx < current.length ? '▊' : ''));
+      if (charIdx >= current.length) {
+        isDeleting = true;
+        setTimeout(type, pauseTime);
+        return;
+      }
+      setTimeout(type, typeSpeed);
+    }
+  }
+  type();
+}
+
+// Initialize dynamic typewriter animations with authentic Praman queries
+initTypewriterPlaceholder('lg-q', [
+  'Verify PO-ALI-9021 for Siemens AG ($100k USDC)…',
+  'Screen 0x98021b… against 19,565 OFAC SDN records…',
+  'Audit CAISO NP15 Day-Ahead power price ($41.20/MWh)…',
+  'Reconcile Mount Morgan (GSQ Site 494270) gold records…',
+  'Evaluate Solana VersionedTransaction spend cap…'
+]);
 </script>
 </body>
 </html>

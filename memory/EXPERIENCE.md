@@ -148,3 +148,10 @@ Also: NLP entity extraction bugs exist for sanctions intent when query is phrase
   3. Always place a high-density 4-card KPI strip above financial dashboards (Total Capital, Conformance Rate, Variance Intercepted, Quorum Status).
   4. Render tabular financial comparisons in structured data tables (`<table class="reconcile-table">`) rather than nested generic text boxes.
   5. Include a full-width multi-column footer displaying protocol identity, statutory references, verified contract addresses, and real-time node telemetry.
+
+### [2026-11-24T22:34:08.002886+05:30] Lesson Learned: Standalone React Component Deployment & Local Dev Server Lifecycle
+- **Issue**: Multi-part user prompts that request both creating a standalone React app (`npm run dev`) and composing components into a primary production portal can lead to confusion if the local server address is not presented immediately and foregrounded.
+- **Solution**:
+  1. Always start the standalone React development server (`npx vite --host 127.0.0.1 --port 5173`) via a background daemon task and test connectivity (`http://127.0.0.1:5173/`).
+  2. Build the production bundle of the React app with `base: "./"` and deploy it directly into the primary application's public directory (e.g. `/pencil/`), embedding it in the `#2D3B42` showcase card within the white `rounded-3xl` container.
+  3. Ensure both the standalone link (`/pencil/` and `http://127.0.0.1:5173/`) and the integrated portal link (`http://127.0.0.1:3402/` and `https://praman-desk.vercel.app`) are clearly and directly communicated to the user.
