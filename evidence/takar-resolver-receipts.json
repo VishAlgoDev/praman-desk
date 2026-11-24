@@ -1,0 +1,43 @@
+{
+  "executed_at": "2026-11-24T05:32:21.363Z",
+  "network": "Ethereum Sepolia (Chain ID 11155111)",
+  "resolver_address": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "initial_balance_eth": "0.0449999895171798",
+  "final_balance_eth": "0.044999989511647464",
+  "total_gas_spent_eth": "0.000000000005532336",
+  "disputes_count": 2,
+  "disputes": [
+    {
+      "case_id": "Case 2 (Quantity Dispute)",
+      "contract_name": "TakarSettle5",
+      "contract_address": "0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B",
+      "deal_id": 0,
+      "proposal_hash": "0x5a328eb1b97a5bc02f7df0908ca147c30a8b88ac298f5ba7e209eba719b1c4f2",
+      "tx_hash": "0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de",
+      "block_number": 12200597,
+      "gas_used": "154816",
+      "effective_gas_price_wei": "18",
+      "gas_fee_eth": "0.000000000002786688",
+      "status": "success",
+      "elapsed_ms": 13475,
+      "etherscan_link": "https://sepolia.etherscan.io/tx/0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de",
+      "dispute_summary": "Supplier invoiced 1,000 units @ $12.40 ($12,400.00), GRN accepted 960 units ($11,904.00), variance $496.00 (split: 96% supplier, 4% refund)."
+    },
+    {
+      "case_id": "Case 1 (Ferry Dispute)",
+      "contract_name": "TakarSettle v4",
+      "contract_address": "0x310275e6D66818E068245326bB9e398822304248",
+      "deal_id": 1,
+      "proposal_hash": "0x8f4d39493e214e5e5a5a1f6ae92779895aa9935140e6ed5295c213b40d3efcf2",
+      "tx_hash": "0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13",
+      "block_number": 12200598,
+      "gas_used": "152536",
+      "effective_gas_price_wei": "18",
+      "gas_fee_eth": "0.000000000002745648",
+      "status": "success",
+      "elapsed_ms": 9561,
+      "etherscan_link": "https://sepolia.etherscan.io/tx/0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13",
+      "dispute_summary": "Megastar berthed at Helsinki per AIS telemetry, GRN accepts 1,000 units conforming delivery."
+    }
+  ]
+}

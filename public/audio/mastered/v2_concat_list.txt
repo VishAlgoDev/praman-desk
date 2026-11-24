@@ -1,0 +1,4 @@
+file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/mastered/v2_part1_dev_console_48k_ebur128.wav'
+file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/mastered/v2_part2_wasm_disassembly_48k_ebur128.wav'
+file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/mastered/v2_part3_takar_consensus_48k_ebur128.wav'
+file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/mastered/v2_part4_solana_and_ledger_48k_ebur128.wav'

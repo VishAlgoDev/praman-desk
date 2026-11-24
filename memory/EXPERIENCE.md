@@ -95,3 +95,25 @@ Also: NLP entity extraction bugs exist for sanctions intent when query is phrase
   - Relying on browser `window.alert()` completely breaks institutional enterprise styling. Using native HTML5 `<dialog>` elements with `.showModal()` and `.close()` provides hardware-accelerated backdrop blur (`backdrop-filter: blur(8px)`), native `Esc` key handling, and zero third-party UI dependencies.
 - **Lesson 4: Pre-Hydrated Client-Side Transaction Ledgers**:
   - Embedding verified historical transactions (30 on-chain Sepolia calls) directly into the page script prevents blank table flashes and layout shift during initial load, while asynchronously fetching `/api/ledger` for live updates.
+
+## [2026-11-24T05:33:00.000Z] Takar Dispute On-Chain Resolver Invariants
+- **Lesson 1: Multi-Contract Resolver Panel Verification**:
+  - Different dispute cases may be deployed across iterations of escrow contracts (e.g. TakarSettle v4 0x3102... vs TakarSettle5 0xa6D0...). Always check isResolver(address) and hasBacked(dealId, address) on each contract before initiating second() transactions to prevent unnecessary reverts or double-signing penalties.
+- **Lesson 2: Gas Safety Pre-Check Buffering**:
+  - Estimating contract gas via estimateContractGas() and applying a minimum 1.5x buffer ((gasCostWei * 15n) / 10n) prevents out-of-gas failures and guarantees the resolver's transaction pool nonce sequence does not stall from sudden baseFee spikes on Sepolia.
+
+## [2026-11-24T05:35:00.000Z] Obsidian FinTech Visual Craft, Cursor Spotlight & 28-Route In-Browser Playground
+- **Lesson 1: High-Performance Cursor Spotlight via RAF Loop**:
+  - Attaching inline style mutations directly to DOM elements on every mousemove event causes layout thrashing and drops frame rates from 60fps to ~24fps on low-tier hardware.
+  - Fix: Decouple mouse tracking from DOM mutation by buffering lastMouseEvent and updating --mouse-x/--mouse-y CSS variables on .spotlight-card elements inside a single throttled requestAnimationFrame callback. Filter cards against window.innerHeight to avoid updating off-screen elements.
+- **Lesson 2: Sliding-Pill Tab Indicator Dynamics**:
+  - Setting a moving indicator using CSS absolute positioning requires the container (.desk-nav) to establish a positioning context (position: relative). Calculate horizontal offset left = btnRect.left - navRect.left and apply CSS transform: translateX(...) with spring timing cubic-bezier(0.16, 1, 0.3, 1) for organic, tactile motion.
+- **Lesson 3: In-Browser 28-Route API Playground Architecture**:
+  - Developers evaluating agent protocols require live testability without installing CLI tooling or configuring environment keys. Categorising all 28 API routes with pre-populated JSON payloads and live execution timers allows third-party auditors and hackathon evaluators to test all verification and spend guard endpoints with one click.
+- **Lesson 4: Multi-Column Sorting in In-Memory Ledgers**:
+  - When sorting heterogeneous ledger rows (numeric indices, ISO timestamps, currency strings with $, and alphanumeric transaction hashes), a standard JavaScript sort() fails without custom value extractors. Parsing currency strings to floats and indices to numbers ensures proper numeric sorting rather than lexicographical string comparison.
+
+## [2026-11-24T05:42:00.000Z] Dynamic Line-Item Equation Pattern Matching & Arithmetic Tie-Out
+- **Lesson 1: Dedicated Equation Pattern Matching Before Fallback Numeric Extraction**:
+  - Unstructured natural language prompts containing purchase order calculations (e.g. PO-7781: 1000 units x USD 12.40 = USD 12,400.00) cause naive fallback extractors to collect all numbers ([12.40, 12400.00]) and compare min() vs max(), misidentifying the unit price (.40) as the accepted ledger total and generating a false ,387.60 variance.
+  - Fix: Explicitly check for equation patterns (QTY units x UNIT_PRICE = TOTAL_AMOUNT) before falling back to unstructured number lists. Verify that QTY * UNIT_PRICE == TOTAL_AMOUNT, set the reconciled line total, cross-reference against explicit invoice totals, and return econciled: true, discrepancy: 0 when the multiplication ties out bit-exact.

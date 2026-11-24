@@ -95,6 +95,13 @@ async function run() {
     console.log('invoice-reconcile status:', inv.status, 'reconciled:', inv.json.reconciled);
     if (inv.status !== 200) throw new Error('invoice-reconcile failed');
 
+    // Miner 6164 (INVOICE_LEDGER_RECONCILE_GENERAL): Equation pattern regression check
+    const eqRec = await check('/api/miner/invoice-reconcile?invoice=' + encodeURIComponent('INV-7781: USD 12,400.00') + '&ledger=' + encodeURIComponent('PO-7781: 1000 units x USD 12.40 = USD 12,400.00'));
+    console.log('invoice-reconcile equation check status:', eqRec.status, 'reconciled:', eqRec.json.reconciled, 'discrepancy:', eqRec.json.discrepancy);
+    if (eqRec.status !== 200 || eqRec.json.reconciled !== true || eqRec.json.discrepancy !== 0) {
+      throw new Error(`Miner 6164 invoice equation regression check failed: ${JSON.stringify(eqRec.json)}`);
+    }
+
     const ven = await check('/api/miner/vendor-verify?vendor=SAP%20SE');
     console.log('vendor-verify status:', ven.status, 'valid:', ven.json.valid);
     if (ven.status !== 200) throw new Error('vendor-verify failed');
