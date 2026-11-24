@@ -27,7 +27,7 @@
 ## 2026-11-22 Benchmark Lesson
 When building test cases that call live API endpoints, always first diagnose what fields the API actually returns before writing correct_signal() functions. Assumed fields (found, match, sanctioned) differed from actual fields (matched, match_found, verdict). Always do a diagnostic call first.
 
-Also: NLP entity extraction bugs exist for sanctions intent when query is phrased as 'Check if X is on any list' — the trailing 'is on any sanctions list' gets included in the extracted entity name. Same parser class as GLEIF bug. Future fix: add same trailing-phrase strip to sanctions entity extractor.
+Also: NLP entity extraction bugs exist for sanctions intent when query is phrased as 'Check if X is on any list' ï¿½ the trailing 'is on any sanctions list' gets included in the extracted entity name. Same parser class as GLEIF bug. Future fix: add same trailing-phrase strip to sanctions entity extractor.
 
 ## [2026-11-23T01:44:28.321Z] Engineering Experience: Devnode Routing, Prompt Parameter Passing & Consensus Dynamics
 - **Lesson 1: Devnode Router Strips Undeclared Parameters**:
@@ -83,3 +83,15 @@ Also: NLP entity extraction bugs exist for sanctions intent when query is phrase
 - **Dynamic Dossier Synthesis**: Static dictionaries fail edge cases on third-party audits. Coupling general regex extractors to live peer miner receipts (Takar capsules) and real-time GLEIF/OFAC verification delivers both bit-exact precision and universal generalization across hundreds of mineral deposits.
 - **Documentation Parity with Intent Scope**: Evaluation ground-truth datasets must have crisp, intent-specific documentation. Never allow boilerplate legal clauses to bleed into AP procurement or treasury reconciliation datasets.
 - **Solana Devnet Live Cluster Handshake**: Always measure live cluster latency and confirm slot numbering against official RPC (api.devnet.solana.com) before evaluating pre-signature transactions, ensuring simulation results reflect authentic chain state.
+
+### [2026-11-24T08:55:00+05:30] Institutional Obsidian FinTech Frontend Design System & Environment Invariants
+- **Lesson 1: Windows Subprocess Environment Preservation (`ncrypto::CSPRNG`)**:
+  - When spawning Node.js processes from Python `subprocess.Popen` or `subprocess.run` on Windows, passing an isolated dictionary like `env={'PORT': '3409'}` strips critical Windows OS environment variables (`SystemRoot`, `WINDIR`, `PATH`). This causes OpenSSL / Windows Cryptographic Service Provider initialization to crash with `ncrypto::CSPRNG(nullptr, 0)`.
+  - Fix: Always inherit the host environment on Windows: `env = {**os.environ, 'PORT': '3409'}`.
+- **Lesson 2: Single-Token Hierarchy Eradicates "AI Slop"**:
+  - Frontend visual degradation ("AI slop") occurs when autonomous agents incrementally append blocks of CSS with competing `:root` definitions, clashing hex color codes, and hundreds of inline `style="..."` overrides.
+  - Fix: Enforce a single `:root` block with a cohesive Obsidian FinTech color system (`--bg-base: #080c14`, `--bg-surface: #0e1526`, `--border: #1c2844`, `--text-primary: #f8fafc`, `--text-secondary: #94a3b8`), pure vector SVGs (`stroke-width="1.75"`), strict border radii, and `font-variant-numeric: tabular-nums`.
+- **Lesson 3: Native HTML5 `<dialog>` Modals vs `window.alert()`**:
+  - Relying on browser `window.alert()` completely breaks institutional enterprise styling. Using native HTML5 `<dialog>` elements with `.showModal()` and `.close()` provides hardware-accelerated backdrop blur (`backdrop-filter: blur(8px)`), native `Esc` key handling, and zero third-party UI dependencies.
+- **Lesson 4: Pre-Hydrated Client-Side Transaction Ledgers**:
+  - Embedding verified historical transactions (30 on-chain Sepolia calls) directly into the page script prevents blank table flashes and layout shift during initial load, while asynchronously fetching `/api/ledger` for live updates.
