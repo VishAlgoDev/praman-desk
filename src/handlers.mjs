@@ -6660,11 +6660,15 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, 200, out);
     }
 
-    // 0e. GET / POST /api/mission/autonomous-spend & /api/spend-guard/evaluate (Mission 11 Genuine Workflow)
-    if ((pathname === '/api/mission/autonomous-spend' || pathname === '/api/spend-guard/evaluate' || pathname === '/api/evaluator/spend-guard') && (req.method === 'GET' || req.method === 'POST')) {
+    // 0e. GET / POST /api/mission/autonomous-spend & /api/spend-guard/evaluate & /api/trade-assurance/audit (Mission 11 Genuine Workflow)
+    if ((pathname === '/api/mission/autonomous-spend' || pathname === '/api/spend-guard/evaluate' || pathname === '/api/evaluator/spend-guard' || pathname === '/api/trade-assurance/audit') && (req.method === 'GET' || req.method === 'POST')) {
       const body = req.method === 'POST' ? await readJsonBody(req) : {};
       const q = Object.fromEntries(urlObj.searchParams.entries());
-      const out = await evaluateAutonomousSpendPolicy(sanitizeCurrencyStrings({ ...q, ...body }));
+      const merged = sanitizeCurrencyStrings({ ...q, ...body });
+      if (pathname === '/api/trade-assurance/audit' && !merged.scenario) {
+        merged.scenario = merged.disputeResolutionAuthorized ? 'alibaba_reconciled' : 'alibaba';
+      }
+      const out = await evaluateAutonomousSpendPolicy(merged);
       return sendJson(res, 200, out);
     }
 // 1. GET /api/wallet
