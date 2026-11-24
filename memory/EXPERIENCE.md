@@ -117,3 +117,21 @@ Also: NLP entity extraction bugs exist for sanctions intent when query is phrase
 - **Lesson 1: Dedicated Equation Pattern Matching Before Fallback Numeric Extraction**:
   - Unstructured natural language prompts containing purchase order calculations (e.g. PO-7781: 1000 units x USD 12.40 = USD 12,400.00) cause naive fallback extractors to collect all numbers ([12.40, 12400.00]) and compare min() vs max(), misidentifying the unit price (.40) as the accepted ledger total and generating a false ,387.60 variance.
   - Fix: Explicitly check for equation patterns (QTY units x UNIT_PRICE = TOTAL_AMOUNT) before falling back to unstructured number lists. Verify that QTY * UNIT_PRICE == TOTAL_AMOUNT, set the reconciled line total, cross-reference against explicit invoice totals, and return econciled: true, discrepancy: 0 when the multiplication ties out bit-exact.
+## [2026-11-24T05:45:00.000Z] Multi-Miner Dispute Resolution & Equation Parsing Invariants
+- **Lesson 1: Strict Equation Regex Priority in Reconciliation Engines**:
+  - Unstructured string tokenization can mistakenly treat intermediate multipliers (e.g., unit prices) as total ledger amounts if parsed greedily. Implementing a high-priority regex matching exact algebraic grammar (QTY units x UNIT_PRICE = TOTAL_AMOUNT) and asserting ound(qty * unitPrice * 100) / 100 == totalAmount ensures mathematically rigorous line-item resolution before falling back to generic token comparisons.
+- **Lesson 2: On-Chain Gas Buffers for Automated Resolvers**:
+  - Broadcasting multi-transaction multisig resolution calls (such as second(id, proposalHash)) on testnets can fail if gas estimates fluctuate under network load. Always query live balance and assert alance >= estimatedGas * 1.5 before broadcasting to prevent nonce lockups.
+- **Lesson 3: Hardware-Accelerated Dynamic Glass & Spotlight Performance**:
+  - In deep obsidian themes, attaching mouse event listeners directly to mousemove triggers continuous style recalculations. Buffering cursor coordinates and applying --mouse-x / --mouse-y updates inside equestAnimationFrame maintains a solid 60fps with zero layout thrashing or stutter.
+
+
+## [2026-11-24T12:43:00.000Z] Elimination of AI Slop, Layout-Thrashing Stutter & Strict Pre-Signature Solana Security
+- **Lesson 1: Complete Elimination of Layout Thrashing**:
+  - Even with requestAnimationFrame, querying getBoundingClientRect() across multiple elements on mouse movements causes synchronous DOM layout recalculation (forced reflow). In high-performance institutional UI (Linear / Mercury / Stripe), eliminate mousemove-driven DOM recalculations completely in favor of pure CSS hover states and subtle static inset specular rims. This immediately restores silky-smooth 60fps scrolling and zero input lag.
+- **Lesson 2: In-Loop Cumulative Session Cap Accumulator (SEC-01)**:
+  - If a spend guard only checks the session cap against the starting session total and commits the new total at the end of the transaction loop, a single transaction containing multiple transfers (e.g., [3 SOL, 3 SOL] under a 5 SOL limit) can bypass the cap. Maintaining a running accumulator (runningSessionSpend) inside the transfer loop ensures that sequential transfers within the same transaction fail immediately upon breaching the cap.
+- **Lesson 3: Address Lookup Table (ALT) Safety in Versioned Transactions (SEC-02)**:
+  - In Solana v0 compiled messages, accounts referenced via Address Lookup Tables (ALTs) require offline resolution. If an ALT account index cannot be resolved and is not passed in static keys, treating it as a standard public key causes null addresses or stealth exfiltration. Strict-mode pre-signature guards must halt transactions containing unresolved ALT indices unless explicit offline resolution tables are provided.
+- **Lesson 4: Eliminating Toy Hackathon AI-Slop UI Patterns**:
+  - Professional FinTech applications never use numbered stepper circles or buttons labeled 'Simulate Case A / Case B'. Replace toy simulation cards with institutional split-pane terminals: commercial contracts & inward manifests on the left, and real-time WASM verification telemetry on the right, accompanied by production-grade operational buttons ('Test Overbilling Halt', 'Execute Reconciled Settlement', 'Statutory Legal Certificate').

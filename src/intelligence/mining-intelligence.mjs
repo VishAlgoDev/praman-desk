@@ -549,18 +549,18 @@ export function evaluateMiningIntelligencePrompt(rawText = '') {
     authorityName = 'Natural Resources Canada (NRCan) / Provincial Surveys';
   }
 
-  const generatedSummary = `HISTORICAL MINING INTELLIGENCE: ${detectedName.toUpperCase()} (${jurisdictionCountry}). Dynamic resource intelligence analyzed against authoritative open geological survey registers. Entity cataloged under ${authorityName} with verified mineral tenement history, structural host geology, and extraction records.`;
+  const generatedSummary = `HISTORICAL MINING INTELLIGENCE: ${detectedName.toUpperCase()} (${jurisdictionCountry}). Dynamic resource query screened against authoritative open geological survey registers. Entity not matched to verified ground-truth historical production record in primary registry catalog. Flagged as UNVERIFIED / PROSPECTIVE ONLY.`;
 
   return {
     site: detectedName,
-    goldfield: `${detectedName} Mineral District`,
+    goldfield: `${detectedName} Mineral District (Unverified)`,
     state: jurisdictionState,
     country: jurisdictionCountry,
-    verdict: 'VERIFIED_HISTORICAL_RECORD',
-    status: 'verified_registry_record',
+    verdict: 'UNVERIFIED_PROSPECT',
+    status: 'unverified_mineral_occurrence',
     discovery: {
       entity: detectedName,
-      status: 'Documented in statutory geological survey index'
+      status: 'No confirmed statutory production record in baseline registry'
     },
     geology: {
       deposit_type: /placer|alluvial/i.test(text) ? 'Placer Alluvial' : (/epithermal/i.test(text) ? 'Epithermal Quartz' : 'Orogenic Mesothermal / Hydrothermal'),
@@ -569,11 +569,11 @@ export function evaluateMiningIntelligencePrompt(rawText = '') {
     summary: generatedSummary,
     explanation: generatedSummary,
     provenance: {
-      source_kind: 'registry',
+      source_kind: 'registry_query',
       source_url: authorityUrl,
       authority: authorityName
     },
-    confidence: 0.90
+    confidence: 0.20
   };
 }
 

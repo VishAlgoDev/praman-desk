@@ -377,14 +377,18 @@ export function inspectSolanaTransaction(tx) {
       const progId = staticKeys[ci.programIdIndex] || '';
       programIds.add(progId);
 
-      const keys = (ci.accountKeyIndexes || []).map(idx => ({
-        pubkey: staticKeys[idx]
-      }));
+      let hasUnresolvedAlt = false;
+      const keys = (ci.accountKeyIndexes || []).map(idx => {
+        const pk = staticKeys[idx];
+        if (!pk) hasUnresolvedAlt = true;
+        return { pubkey: pk || null, isAlt: !pk };
+      });
 
       const instruction = {
         programId: progId,
         keys,
-        data: ci.data
+        data: ci.data,
+        hasUnresolvedAlt
       };
 
       normalizedInstructions.push(instruction);
@@ -415,6 +419,8 @@ export function inspectSolanaTransaction(tx) {
     isVersioned,
     version: isVersioned ? (tx.version ?? 0) : 'legacy',
     instructionCount: normalizedInstructions.length,
+    instructions: normalizedInstructions,
+    hasUnresolvedAlt: normalizedInstructions.some(i => Boolean(i.hasUnresolvedAlt)),
     programIds: Array.from(programIds),
     transfers,
     totalSol,
@@ -516,7 +522,21 @@ export class SolanaSpendGuard {
       }
     }
 
+    // Check for un-resolvable Address Lookup Tables (SEC-02)
+    if (inspection.hasUnresolvedAlt) {
+      const certHash = this._generateCertHash('HALTED', { reason: 'UNRESOLVED_ALT_ADDRESS' });
+      throw new PramanSpendGuardError(`[PRAMAN CIRCUIT BREAKER] Transaction HALTED: Transfer instruction references un-resolvable Address Lookup Table (ALT) account index without offline address resolution.`, {
+        status: 'HALTED',
+        reason: 'UNRESOLVED_ALT_ADDRESS',
+        certHash,
+        timestamp
+      });
+    }
+
     // 4. Intercept transfers: OFAC SDN & Drainer address screening + Spend Caps
+    // Maintain a running accumulator during inspection to prevent multi-transfer session cap bypass (SEC-01)
+    const runningSessionSpend = { ...this.sessionSpent };
+
     for (const transfer of inspection.transfers) {
       const recipient = transfer.recipient;
       const asset = transfer.asset;
@@ -570,8 +590,8 @@ export class SolanaSpendGuard {
         });
       }
 
-      // Check Session Spend Cap
-      const currentSession = this.sessionSpent[asset] || 0;
+      // Check Session Spend Cap with running in-tx accumulator (SEC-01)
+      const currentSession = runningSessionSpend[asset] || 0;
       const sessionCap = this.maxSessionSpend[asset];
       if (sessionCap !== undefined && (currentSession + amount) > sessionCap) {
         const certHash = this._generateCertHash('HALTED', { asset, attempted: amount, currentSession, sessionCap });
@@ -587,17 +607,13 @@ export class SolanaSpendGuard {
           timestamp
         });
       }
+
+      // Accumulate for subsequent transfers in the same transaction
+      runningSessionSpend[asset] = currentSession + amount;
     }
 
-    // 5. If all checks pass: update cumulative session spend
-    for (const transfer of inspection.transfers) {
-      const asset = transfer.asset;
-      if (this.sessionSpent[asset] !== undefined) {
-        this.sessionSpent[asset] += transfer.amount;
-      } else {
-        this.sessionSpent[asset] = transfer.amount;
-      }
-    }
+    // 5. If all checks pass: commit running accumulator to session state
+    this.sessionSpent = runningSessionSpend;
 
     const certHash = this._generateCertHash('APPROVED', {
       inspection,
