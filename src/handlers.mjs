@@ -6102,7 +6102,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
 
   const isAlibaba = scenario === 'alibaba_trade' || scenario === 'alibaba_reconciled' || /Alibaba|Cainiao|ALI-9021/i.test(p.prompt || p.question || '');
   if (isAlibaba) {
-    const poCommitmentVal = Number(p.poTotal || p.statedTotal || 100000);
+    const poCommitmentVal = Number(p.poCommitment || p.poTotal || (scenario === 'alibaba_reconciled' ? 100000 : (p.statedTotal || 100000)));
     const actualConformingVal = Number(p.spendAmountUsdc || (scenario === 'alibaba_reconciled' ? 80000 : (spendAmountUsdc || 80000)));
     const shortfallVal = Math.max(0, poCommitmentVal - actualConformingVal);
     const unitPrice = 1000;
