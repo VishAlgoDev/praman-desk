@@ -135,3 +135,16 @@ Also: NLP entity extraction bugs exist for sanctions intent when query is phrase
   - In Solana v0 compiled messages, accounts referenced via Address Lookup Tables (ALTs) require offline resolution. If an ALT account index cannot be resolved and is not passed in static keys, treating it as a standard public key causes null addresses or stealth exfiltration. Strict-mode pre-signature guards must halt transactions containing unresolved ALT indices unless explicit offline resolution tables are provided.
 - **Lesson 4: Eliminating Toy Hackathon AI-Slop UI Patterns**:
   - Professional FinTech applications never use numbered stepper circles or buttons labeled 'Simulate Case A / Case B'. Replace toy simulation cards with institutional split-pane terminals: commercial contracts & inward manifests on the left, and real-time WASM verification telemetry on the right, accompanied by production-grade operational buttons ('Test Overbilling Halt', 'Execute Reconciled Settlement', 'Statutory Legal Certificate').
+
+### [2026-11-24T13:25:00+05:30] FinTech UI/UX Typography & Layout Best Practices (Linear / Mercury / Stripe Radar Standard)
+- **Problem**:
+  1. Defaulting to childish enterprise labels like `ENTERPRISE V3.8` destroys credibility and triggers user disgust. Real institutional platforms use clean brand marks and environment badges (`Sepolia Testnet 11ms`).
+  2. Applying `word-break: break-all;` to general metadata text cells causes awkward hyphenation and breaks normal English words in half (e.g. `Logistics Hu b)`).
+  3. Lacking an executive summary strip forces users to scan dense dashboards without immediate situational awareness.
+  4. Pages ending abruptly without an institutional footer look unfinished and amateurish.
+- **Solution & Invariant**:
+  1. Never use fake version pills. Use subtle, monochrome status pills with pulsing indicators.
+  2. Use `word-break: normal; overflow-wrap: break-word;` for general text containers, reserving `word-break: break-all;` strictly for hashes, addresses, and code blocks (`.font-mono`).
+  3. Always place a high-density 4-card KPI strip above financial dashboards (Total Capital, Conformance Rate, Variance Intercepted, Quorum Status).
+  4. Render tabular financial comparisons in structured data tables (`<table class="reconcile-table">`) rather than nested generic text boxes.
+  5. Include a full-width multi-column footer displaying protocol identity, statutory references, verified contract addresses, and real-time node telemetry.
