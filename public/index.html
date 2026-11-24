@@ -338,11 +338,12 @@ header {
   box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.7);
 }
 .blueprint-card-inner {
-  background: #0A0A0A;
-  border-radius: 28px;
-  padding: 32px 36px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #fafaf8;
+  border-radius: 24px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   position: relative; overflow: hidden;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
 }
 .blueprint-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -832,96 +833,32 @@ footer {
         HOSTING THE PLOTREVEAL BLUEPRINT MORPH ENGINE
      ========================================================================== -->
 <section class="blueprint-card-outer" id="blueprint-showcase">
-  <div class="blueprint-card-inner plot-root" id="blueprint-plot-root">
-    
-    <!-- SVG Pencil Sketch Overlay Layer -->
-    <svg class="plot-sketch-layer" id="plot-sketch-svg" viewBox="0 0 1200 420" preserveAspectRatio="none">
-      <defs>
-        <pattern id="plot-hatch" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
-          <line x1="0" y1="0" x2="0" y2="8" stroke="var(--plot)" stroke-width="1.5" stroke-opacity="0.4" />
-        </pattern>
-      </defs>
-      <!-- Wireframe Paths will be dynamically drawn by JS -->
-      <g id="plot-sketch-paths"></g>
-    </svg>
-
-    <div class="plot-real-content" id="plot-content-wrapper">
-      <div class="blueprint-header">
-        <div class="blueprint-title-group">
-          <h3>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
-            </svg>
-            PRAMAN BLUEPRINT MORPH ENGINE
-          </h3>
-          <p style="font-size:12.5px;color:var(--text-secondary);margin-top:4px">
-            Live wireframe sketch transitioning to verified commercial data and telemetry.
-          </p>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span class="blueprint-tag">BLUEPRINT MORPH B</span>
-          <span class="pill-chip" id="blueprint-status-chip">STATUS: VERIFIED</span>
-        </div>
-      </div>
-
-      <div class="blueprint-grid">
-        <!-- Blueprint Left: Stepped Funnel & Variance Progression -->
-        <div class="blueprint-panel">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <h4 style="font-family:var(--font-mono);font-size:13px;letter-spacing:0.04em;text-transform:uppercase">
-              Trade Assurance Escrow Reconciliation Funnel
-            </h4>
-            <span class="mono" style="font-size:12px;color:var(--accent-emerald)">PO-ALI-9021</span>
-          </div>
-
-          <div style="display:flex;gap:12px;align-items:flex-end;height:180px;padding-top:20px" id="blueprint-funnel-bars">
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
-              <span class="mono tnum" style="font-size:11px;color:var(--text-muted)">$100,000</span>
-              <div class="hatch" style="width:100%;height:140px;background-color:#1E3A8A;border-radius:6px 6px 0 0;border:1px solid #3B82F6"></div>
-              <span class="mono" style="font-size:10.5px">Contract</span>
-            </div>
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
-              <span class="mono tnum" style="font-size:11px;color:var(--text-muted)">100 Units</span>
-              <div class="hatch" style="width:100%;height:140px;background-color:#1D4ED8;border-radius:6px 6px 0 0;border:1px solid #60A5FA"></div>
-              <span class="mono" style="font-size:10.5px">Shipped</span>
-            </div>
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
-              <span class="mono tnum" style="font-size:11px;color:var(--accent-emerald)" id="plot-val-conforming">$80,000</span>
-              <div style="width:100%;height:112px;background:var(--accent-emerald);border-radius:6px 6px 0 0"></div>
-              <span class="mono" style="font-size:10.5px;color:var(--accent-emerald)">Conforming</span>
-            </div>
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
-              <span class="mono tnum" style="font-size:11px;color:var(--halt-crimson)" id="plot-val-shortfall">-$20,000</span>
-              <div style="width:100%;height:28px;background:var(--halt-crimson);border-radius:6px 6px 0 0"></div>
-              <span class="mono" style="font-size:10.5px;color:var(--halt-crimson)">Damaged</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Blueprint Right: Micro Metric Tiles -->
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <div class="blueprint-panel" style="flex:1">
-            <span class="mono" style="font-size:10px;color:var(--text-muted);text-transform:uppercase">Deterministic Execution</span>
-            <div class="mono tnum" style="font-size:24px;font-weight:700;color:var(--brand);margin-top:4px" id="plot-val-latency">
-              &lt; 3.0 ms
-            </div>
-            <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">
-              WASM 651b Bytecode math comparator evaluates 15 verification stages before signature execution.
-            </p>
-          </div>
-
-          <div class="blueprint-panel" style="flex:1">
-            <span class="mono" style="font-size:10px;color:var(--text-muted);text-transform:uppercase">Sanctions Defense Speed</span>
-            <div class="mono tnum" style="font-size:24px;font-weight:700;color:var(--accent-emerald);margin-top:4px" id="plot-val-ofac">
-              18.4 ms (19,565 SDN)
-            </div>
-            <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">
-              In-memory OFAC SDN list screening protects treasury accounts from sanctioned counterparty exposure.
-            </p>
-          </div>
-        </div>
-      </div>
+  <!-- Blueprint Top Control Bar -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:2px 10px;flex-wrap:wrap;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fafaf8;background:rgba(255,255,255,0.12);padding:4px 10px;border-radius:6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        BLUEPRINT B: PLOTREVEAL PENCIL SKETCH ENGINE
+      </span>
+      <span style="font-size:12px;color:rgba(255,255,255,0.7);font-family:var(--font-mono)">
+        Morphing wireframe sketch to verified commercial SaaS telemetry
+      </span>
     </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button onclick="const f=document.getElementById('pencil-iframe'); if(f) f.contentWindow.location.reload();" class="btn-square" style="padding:6px 14px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Replay Morph
+      </button>
+      <a href="/pencil/" target="_blank" class="btn-square" style="background:#52a8ff;color:#000;padding:6px 14px;font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Open Standalone App
+      </a>
+    </div>
+  </div>
+
+  <!-- White Container with rounded-3xl corners -->
+  <div class="blueprint-card-inner" id="blueprint-plot-root">
+    <iframe id="pencil-iframe" src="/pencil/" style="width:100%;height:780px;border:none;display:block;background:#fafaf8;border-radius:24px" title="Praman Pencil Sketch Dashboard"></iframe>
   </div>
 </section>
 

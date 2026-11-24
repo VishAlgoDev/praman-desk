@@ -15,6 +15,12 @@ const server = http.createServer(async (req, res) => {
   }
 
   let filePath = path.join(publicDir, urlObj.pathname === '/' ? 'index.html' : urlObj.pathname);
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+    const dirIndex = path.join(filePath, 'index.html');
+    if (fs.existsSync(dirIndex)) {
+      filePath = dirIndex;
+    }
+  }
   if (!filePath.startsWith(publicDir) || !fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
     filePath = path.join(publicDir, 'index.html');
   }
