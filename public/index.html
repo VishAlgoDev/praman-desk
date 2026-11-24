@@ -1197,7 +1197,7 @@ OFAC SDN Sanctions Screening: CLEARED (0 matches across 19,565 entities)
         <div class="meta-label">Interactive Route Tester</div>
         <div style="display:flex; gap:10px; margin-top:4px;">
           <select id="playground-route-select" class="form-control" style="flex:2;" onchange="onPlaygroundRouteChange()">
-            <option value="/api/evaluator/spend-guard">POST /api/evaluator/spend-guard (Alibaba &amp; Circuit Breaker)</option>
+            <option value="/api/spend-guard/evaluate">POST /api/spend-guard/evaluate (Alibaba &amp; Circuit Breaker)</option>
             <option value="/api/miner/sanctions-screen">POST /api/miner/sanctions-screen (19,565 OFAC SDN RAM Trie)</option>
             <option value="/api/miner/corporate-registry">POST /api/miner/corporate-registry (GLEIF / Statutory LEI)</option>
             <option value="/api/miner/invoice-reconcile">POST /api/miner/invoice-reconcile (Dynamic Line-Item Tie-Out)</option>
@@ -1301,7 +1301,7 @@ OFAC SDN Sanctions Screening: CLEARED (0 matches across 19,565 entities)
       };
 
       try {
-        const res = await fetch('/api/evaluator/spend-guard', {
+        const res = await fetch('/api/spend-guard/evaluate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -1679,7 +1679,7 @@ OFAC SDN Sanctions Screening: CLEARED (0 matches across 19,565 entities)
     }
 
     const PLAYGROUND_PAYLOADS = {
-      '/api/evaluator/spend-guard': {
+      '/api/spend-guard/evaluate': {
         scenario: 'alibaba_trade',
         poNumber: 'PO-ALI-9021',
         vendorName: 'Siemens Aktiengesellschaft',

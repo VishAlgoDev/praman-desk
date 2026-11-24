@@ -6661,7 +6661,7 @@ export async function handleApiRequest(req, res) {
     }
 
     // 0e. GET / POST /api/mission/autonomous-spend & /api/spend-guard/evaluate (Mission 11 Genuine Workflow)
-    if ((pathname === '/api/mission/autonomous-spend' || pathname === '/api/spend-guard/evaluate') && (req.method === 'GET' || req.method === 'POST')) {
+    if ((pathname === '/api/mission/autonomous-spend' || pathname === '/api/spend-guard/evaluate' || pathname === '/api/evaluator/spend-guard') && (req.method === 'GET' || req.method === 'POST')) {
       const body = req.method === 'POST' ? await readJsonBody(req) : {};
       const q = Object.fromEntries(urlObj.searchParams.entries());
       const out = await evaluateAutonomousSpendPolicy(sanitizeCurrencyStrings({ ...q, ...body }));
