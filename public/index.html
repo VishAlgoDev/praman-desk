@@ -3,354 +3,721 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Praman Desk — Verified Instrument</title>
+<title>Praman Desk — Institutional Verification & Settlement Infrastructure</title>
 <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-<meta name="description" content="Provable correctness for autonomous agent spend. Fifteen verification stages, HALT vs APPROVED verdicts, atomic spend guards — every verdict shows its work.">
+<meta name="description" content="Provable correctness and autonomous settlement middleware. 15-stage WASM verification, deterministic spend guards, multi-miner dispute resolution, and on-chain Sepolia execution.">
 <style>
-@font-face{
-  font-family:'Inter';font-style:normal;font-weight:100 900;font-display:swap;
-  src:url('/fonts/inter-var.woff2') format('woff2');
+@font-face {
+  font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: url('/fonts/inter-var.woff2') format('woff2');
 }
-@font-face{
-  font-family:'JetBrains Mono';font-style:normal;font-weight:100 800;font-display:swap;
-  src:url('/fonts/jetbrains-mono-var.woff2') format('woff2');
-}
-:root{
-  --bg:#0C1210;
-  --surface:#111A16;
-  --surface-2:#15201B;
-  --border:#1E2E26;
-  --border-strong:#2A4034;
-  /* motion tokens — expo-out for entrances, spring for playful feedback */
-  --ease-expo:cubic-bezier(.16,1,.3,1);
-  --ease-out:cubic-bezier(.22,.61,.36,1);
-  --spring:cubic-bezier(.34,1.4,.64,1);
-  --t-fast:120ms;--t-feed:180ms;--t-move:260ms;
-  --text:#E9F0EA;
-  --heading:#F2F7F3;
-  --muted:#8FA69A;
-  --accent:#5BE49B;
-  --accent-dim:rgba(91,228,155,.14);
-  --halt:#FF6B5E;
-  --halt-dim:rgba(255,107,94,.12);
-  --amber:#F5B657;
-  --amber-dim:rgba(245,182,87,.12);
-  --radius:2px;
-  --radius-lg:4px;
-  --shadow-1:0 1px 2px rgba(0,0,0,.4);
-  --shadow-2:0 8px 28px rgba(0,0,0,.5);
-  /* specular rim — the Liquid Glass chrome detail */
-  --rim:inset 0 1px 0 rgba(255,255,255,.07);
-  --rim-strong:inset 0 1px 0 rgba(255,255,255,.12);
-  --font-mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --font-text:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:64px;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-html[data-motion="off"] *,*::before,*::after{animation:none!important;transition:none!important}
-html[data-motion="off"]{scroll-behavior:auto}
-body{
-  background:var(--bg);color:var(--text);
-  font-family:var(--font-text);font-size:15px;line-height:1.55;
-  -webkit-font-smoothing:antialiased;
-}
-/* ambient light — one quiet green cast above the fold, fixed, no repaint cost */
-@media (prefers-reduced-motion:no-preference){
-  body::before{
-    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:radial-gradient(ellipse 60% 42% at 50% -8%,rgba(91,228,155,.075),transparent 65%);
-  }
-}
-::selection{background:var(--accent);color:#06110B}
-a{color:var(--accent);text-decoration:none}
-a:hover{text-decoration:underline}
-button{font-family:inherit}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--radius)}
-.wrap{max-width:1160px;margin:0 auto;padding:0 var(--s4);position:relative;z-index:1}
-.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
-.tnum{font-variant-numeric:tabular-nums}
-
-/* ---------- header ---------- */
-header{
-  position:sticky;top:0;z-index:40;
-  background:rgba(12,18,16,.62);backdrop-filter:blur(24px) saturate(180%);
-  -webkit-backdrop-filter:blur(24px) saturate(180%);
-  border-bottom:1px solid var(--border);
-  box-shadow:var(--rim);
-}
-.topbar{display:flex;align-items:center;gap:var(--s4);padding:var(--s3) 0;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:var(--s2);font-family:var(--font-mono);font-weight:700;font-size:14px;letter-spacing:.06em;color:var(--heading);white-space:nowrap}
-.brand .seal{width:22px;height:22px;flex:none}
-.brand small{color:var(--muted);font-weight:500;letter-spacing:.02em}
-.topbar nav{display:flex;gap:var(--s1);margin-left:auto;flex-wrap:wrap}
-.tab-btn{
-  font-family:var(--font-mono);font-size:12px;letter-spacing:.04em;
-  background:transparent;color:var(--muted);
-  border:1px solid transparent;border-radius:var(--radius);
-  padding:7px 12px;min-height:32px;cursor:pointer;
-  transition:color var(--t-feed) var(--ease-out),background var(--t-feed) var(--ease-out),border-color var(--t-feed) var(--ease-out);
-}
-.tab-btn:hover{color:var(--text);background:var(--surface-2);border-color:var(--border)}
-.tab-btn:active{transform:translateY(1px)}
-.tab-btn[aria-selected="true"]{color:#06110B;background:var(--accent);font-weight:600;box-shadow:0 0 16px rgba(91,228,155,.25)}
-.heartbeat{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:.05em}
-.heartbeat .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
-@media (prefers-reduced-motion:no-preference){
-  .heartbeat .dot{animation:pulse 2.4s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
-}
-@media (max-width:719px){
-  /* header must not keep backdrop-filter (it would become the containing block for the fixed nav);
-     raise its stacking context above main.wrap so the bottom bar paints over page content */
-  header{position:relative;z-index:60;backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
-  /* bottom glass tab bar with safe-area — thumbs reach, chrome floats */
-  .topbar nav{
-    position:fixed;left:0;right:0;bottom:0;z-index:50;margin-left:0;order:3;
-    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px;
-    background:rgba(12,18,16,.72);backdrop-filter:blur(24px) saturate(180%);
-    -webkit-backdrop-filter:blur(24px) saturate(180%);
-    border-top:1px solid var(--border);box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
-    padding:6px 6px calc(6px + env(safe-area-inset-bottom));
-  }
-  .topbar nav .tab-btn{width:100%;min-height:44px;text-align:center;font-size:11px;letter-spacing:0;line-height:1.15;padding:6px 2px}
-  .tab-btn[aria-selected="true"]{box-shadow:0 -2px 0 var(--accent) inset,0 0 16px rgba(91,228,155,.2)}
-  body{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
-  .toast{bottom:calc(80px + env(safe-area-inset-bottom))}
-  .heartbeat{display:none}
+@font-face {
+  font-family: 'JetBrains Mono'; font-style: normal; font-weight: 100 800; font-display: swap;
+  src: url('/fonts/jetbrains-mono-var.woff2') format('woff2');
 }
 
-/* ---------- shared ---------- */
-main{padding:var(--s6) 0 var(--s8)}
-section.desk{display:none}
-section.desk.active{display:block;animation:deskin var(--t-move) var(--ease-expo)}
-@media (prefers-reduced-motion:reduce){section.desk.active{animation:none}}
-@keyframes deskin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-/* staggered entrance — children of a freshly shown desk cascade in */
-@keyframes risein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.reveal>*{animation:risein .32s var(--ease-expo) both}
-.reveal>*:nth-child(1){animation-delay:0ms}.reveal>*:nth-child(2){animation-delay:30ms}
-.reveal>*:nth-child(3){animation-delay:60ms}.reveal>*:nth-child(4){animation-delay:90ms}
-.reveal>*:nth-child(5){animation-delay:120ms}.reveal>*:nth-child(6){animation-delay:150ms}
-.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;color:var(--accent);text-transform:uppercase;margin-bottom:var(--s3)}
-h1{font-family:var(--font-mono);font-size:clamp(24px,4.4vw,38px);line-height:1.12;letter-spacing:-.02em;color:var(--heading);font-weight:700;max-width:22ch}
-h2{font-family:var(--font-mono);font-size:16px;letter-spacing:.02em;color:var(--heading);font-weight:600}
-.lede{color:var(--muted);max-width:62ch;margin-top:var(--s3);font-size:15px}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-1),var(--rim);transition:border-color var(--t-move) var(--ease-out),box-shadow var(--t-move) var(--ease-out),transform var(--t-move) var(--ease-expo)}
-.panel:hover{border-color:var(--border-strong);box-shadow:var(--shadow-2),var(--rim-strong)}
-.panel-hd{display:flex;align-items:center;gap:var(--s2);padding:var(--s3) var(--s4);border-bottom:1px solid var(--border);flex-wrap:wrap}
-.panel-hd h2{margin-right:auto}
-.panel-hd .tag{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--muted);border:1px solid var(--border);padding:2px 7px;border-radius:var(--radius)}
-.panel-bd{padding:var(--s4)}
-.btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:13px;font-weight:600;letter-spacing:.03em;border-radius:var(--radius);padding:10px 18px;min-height:44px;cursor:pointer;border:1px solid var(--accent);background:linear-gradient(105deg,var(--accent) 35%,color-mix(in srgb,var(--accent) 70%,white) 50%,var(--accent) 65%) no-repeat var(--accent);background-size:220% 100%;background-position:100% 0;color:#06110B;transition:background-position .5s var(--ease-expo),transform var(--t-fast) var(--ease-out),box-shadow var(--t-feed) var(--ease-out),filter var(--t-feed) var(--ease-out)}
-/* specular sweep on hover — one light pass via background position, no overlay to clip */
-.btn:hover{background-position:0% 0;box-shadow:0 0 20px rgba(91,228,155,.18)}
-.btn:active{transform:translateY(1px);transition-duration:var(--t-fast)}
-.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn.ghost{background:transparent;background-image:none;color:var(--accent);border:1px solid var(--accent)}
-.btn.ghost:hover{background:var(--accent-dim)}
-.btn.danger{background:var(--halt);background-image:none;border-color:var(--halt);color:#170604}
-.linklike{background:none;border:none;color:var(--muted);font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;cursor:pointer;padding:8px;min-height:32px}
-.linklike:hover{color:var(--accent)}
-.btn-row{display:flex;gap:var(--s3);flex-wrap:wrap;margin-top:var(--s5)}
-
-/* verdict states */
-.verdict{border-left:3px solid var(--border-strong);padding:var(--s4) var(--s5)}
-.verdict.halt{border-left-color:var(--halt);background:var(--halt-dim)}
-.verdict.approved{border-left-color:var(--accent);background:var(--accent-dim)}
-.verdict-badge{font-family:var(--font-mono);font-weight:700;font-size:20px;letter-spacing:.04em}
-.verdict.halt .verdict-badge{color:var(--halt)}
-.verdict.approved .verdict-badge{color:var(--accent)}
-.verdict .summary{margin-top:var(--s2);color:var(--text);max-width:70ch}
-.kv{display:grid;grid-template-columns:minmax(140px,auto) 1fr;gap:6px var(--s4);margin-top:var(--s3);font-family:var(--font-mono);font-size:12.5px}
-.kv dt{color:var(--muted)}
-.kv dd{color:var(--text);word-break:break-all}
-.flags{margin-top:var(--s3);display:flex;flex-direction:column;gap:6px}
-.flag{font-family:var(--font-mono);font-size:12px;color:var(--halt);border:1px solid rgba(255,107,94,.35);background:rgba(255,107,94,.07);padding:7px 10px;border-radius:var(--radius);word-break:break-word}
-.flag.ok{color:var(--accent);border-color:rgba(91,228,155,.3);background:rgba(91,228,155,.05)}
-
-/* pipeline strip */
-.pipe{display:grid;grid-template-columns:repeat(15,1fr);gap:4px}
-.stage{
-  background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);
-  padding:8px 4px 7px;text-align:center;position:relative;min-height:58px;
-  display:flex;flex-direction:column;justify-content:center;gap:4px;
+:root {
+  /* Tier-1 Obsidian FinTech Design Tokens */
+  --bg-base: #080C14;
+  --bg-surface: #0E1626;
+  --bg-surface-elevated: #141F36;
+  --bg-surface-glass: rgba(14, 22, 38, 0.75);
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.22);
+  
+  --brand: #3B82F6;
+  --brand-dim: rgba(59, 130, 246, 0.14);
+  --brand-glow: rgba(59, 130, 246, 0.25);
+  
+  --accent-emerald: #10B981;
+  --accent-emerald-dim: rgba(16, 185, 129, 0.12);
+  --accent-emerald-border: rgba(16, 185, 129, 0.35);
+  
+  --halt-crimson: #EF4444;
+  --halt-crimson-dim: rgba(239, 68, 68, 0.12);
+  --halt-crimson-border: rgba(239, 68, 68, 0.35);
+  
+  --warning-amber: #F59E0B;
+  --warning-amber-dim: rgba(245, 158, 11, 0.12);
+  
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-text: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-pill: 9999px;
+  
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --shadow-hover: 0 8px 30px -4px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  --shadow-modal: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  
+  --t-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --t-smooth: 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
-.stage .n{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:.05em}
-.stage .bar{height:3px;background:var(--border);border-radius:1px;margin:0 6px}
-.stage.pass .bar{background:var(--accent)}
-.stage.pass .n{color:var(--accent)}
-.stage.halted .bar{background:var(--halt)}
-.stage.halted .n{color:var(--halt)}
-.pipe-caption{display:flex;justify-content:space-between;margin-top:var(--s2);font-family:var(--font-mono);font-size:11px;color:var(--muted)}
-@media (max-width:719px){.pipe{grid-template-columns:repeat(5,1fr)}.stage{min-height:50px}}
 
-/* stat band */
-.stat-band{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--surface)}
-.stat{padding:var(--s4) var(--s4);border-left:1px solid var(--border)}
-.stat:first-child{border-left:none}
-.stat .v{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-size:clamp(20px,3vw,28px);font-weight:700;color:var(--heading);letter-spacing:-.01em}
-.stat .l{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-top:4px}
-@media (max-width:719px){.stat-band{grid-template-columns:repeat(2,1fr)}.stat:nth-child(3){border-left:none}.stat{border-top:1px solid var(--border)}.stat:nth-child(-n+2){border-top:none}}
-
-/* tables */
-.table-scroll{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:12.5px}
-.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.table-scroll table{min-width:620px}
-th{text-align:left;color:var(--muted);font-weight:500;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:10px var(--s3);border-bottom:1px solid var(--border);white-space:nowrap;position:sticky;top:0;background:var(--surface);cursor:pointer;user-select:none}
-th:hover{color:var(--text)}
-td{padding:10px var(--s3);border-bottom:1px solid var(--border);color:var(--text);vertical-align:top}
-tbody tr{transition:background var(--t-fast) var(--ease-out)}
-tbody tr:hover{background:var(--surface-2)}
-tbody tr:hover td:first-child{box-shadow:inset 2px 0 0 var(--accent)}
-dialog{animation:dialogin var(--t-move) var(--ease-expo)}
-@keyframes dialogin{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){dialog{animation:none}}
-tbody tr:hover td{background:var(--surface-2)}
-td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
-.tx{color:var(--accent);word-break:break-all}
-.tx:hover{text-decoration:underline}
-.badge{display:inline-block;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;padding:2px 7px;border-radius:var(--radius);border:1px solid var(--border-strong);color:var(--muted);white-space:nowrap}
-.badge.ok{color:var(--accent);border-color:rgba(91,228,155,.4);background:var(--accent-dim)}
-.badge.warn{color:var(--amber);border-color:rgba(245,182,87,.4);background:var(--amber-dim)}
-
-/* footer */
-footer{border-top:1px solid var(--border);padding:var(--s5) 0;margin-top:var(--s7)}
-footer .wrap{display:flex;gap:var(--s4);flex-wrap:wrap;align-items:center;font-family:var(--font-mono);font-size:11.5px;color:var(--muted)}
-footer .sep{flex:1}
-
-/* dialog */
-dialog{background:var(--surface);color:var(--text);border:1px solid var(--border-strong);border-radius:var(--radius-lg);box-shadow:var(--shadow-2);padding:0;max-width:min(680px,calc(100vw - 32px));width:100%}
-dialog::backdrop{background:rgba(4,8,6,.7);backdrop-filter:blur(4px)}
-dialog .panel-hd{position:sticky;top:0;background:var(--surface)}
-dialog .body{padding:var(--s4);max-height:70vh;overflow:auto}
-.x-btn{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:var(--radius);width:32px;height:32px;cursor:pointer;font-family:var(--font-mono)}
-.x-btn:hover{color:var(--text);border-color:var(--border-strong)}
-
-/* forms */
-.field{margin-bottom:var(--s4)}
-.field label{display:block;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
-.form-control,select.form-control,textarea.form-control{
-  width:100%;background:var(--surface-2);border:1px solid var(--border-strong);color:var(--text);
-  border-radius:var(--radius);padding:10px 12px;min-height:44px;font-family:var(--font-mono);font-size:13px;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-text);
+  font-size: 14.5px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
 }
-.form-control:focus{outline:2px solid var(--accent);outline-offset:0;border-color:var(--accent)}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4)}
-@media (max-width:719px){.form-grid{grid-template-columns:1fr}}
 
-/* toast */
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--surface-2);border:1px solid var(--border-strong);color:var(--text);font-family:var(--font-mono);font-size:12px;padding:10px 16px;border-radius:var(--radius);opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;z-index:60;box-shadow:var(--shadow-2)}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Atmospheric Specular Gradient */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: 
+    radial-gradient(1100px circle at 50% -10%, rgba(59, 130, 246, 0.07), transparent 60%),
+    radial-gradient(800px circle at 90% 25%, rgba(16, 185, 129, 0.04), transparent 50%),
+    radial-gradient(900px circle at 10% 40%, rgba(59, 130, 246, 0.03), transparent 60%);
+}
 
-/* layout rhythm */
-.split{display:grid;grid-template-columns:3fr 2fr;gap:var(--s5);align-items:start}
-@media (max-width:899px){.split{grid-template-columns:1fr}}
-.mt-s{margin-top:var(--s4)}.mt-m{margin-top:var(--s5)}.mt-l{margin-top:var(--s6)}
-.stack>*+*{margin-top:var(--s5)}
-.empty{padding:var(--s6) var(--s4);text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:13px}
-.skeleton{background:linear-gradient(90deg,var(--surface-2) 25%,var(--border) 50%,var(--surface-2) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:var(--radius);height:12px}
-@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
-.skeleton-row{height:40px;margin-bottom:8px;border-radius:var(--radius)}
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.tnum { font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+a { color: var(--brand); text-decoration: none; transition: color var(--t-fast); }
+a:hover { color: #60A5FA; text-decoration: underline; }
+
+/* ---------- Sticky Institutional Topbar ---------- */
+header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(8, 12, 20, 0.82);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+}
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 12px 0; flex-wrap: wrap;
+}
+.brand-group {
+  display: flex; align-items: center; gap: 12px;
+}
+.brand-logo {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-weight: 700; font-size: 14.5px;
+  letter-spacing: 0.05em; color: var(--text-primary);
+}
+.brand-seal {
+  width: 22px; height: 22px; color: var(--brand); flex-shrink: 0;
+}
+.brand-badge {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.08em; padding: 2px 7px; border-radius: var(--radius-sm);
+  background: var(--brand-dim); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.25);
+  text-transform: uppercase;
+}
+
+/* Multi-Miner Consensus Ribbon */
+.miner-ribbon {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 4px 10px; background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-pill);
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
+}
+.miner-pulse {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent-emerald); box-shadow: 0 0 0 3px var(--accent-emerald-dim);
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* Navigation Tab Group (Mercury/Linear Standard) */
+.tab-nav {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(14, 22, 38, 0.6); padding: 3px;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+}
+.tab-btn {
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.02em; background: transparent; color: var(--text-secondary);
+  border: 1px solid transparent; border-radius: var(--radius-sm);
+  padding: 6px 14px; min-height: 32px; cursor: pointer;
+  transition: all var(--t-fast);
+}
+.tab-btn:hover {
+  color: var(--text-primary); background: rgba(255, 255, 255, 0.04);
+}
+.tab-btn[aria-selected="true"] {
+  color: var(--text-primary); background: var(--bg-surface-elevated);
+  border-color: rgba(255, 255, 255, 0.12); font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.topbar-actions {
+  display: flex; align-items: center; gap: 8px;
+}
+.search-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); padding: 5px 10px; font-family: var(--font-mono);
+  font-size: 11.5px; color: var(--text-secondary); cursor: pointer;
+  transition: border-color var(--t-fast);
+}
+.search-pill:hover { border-color: var(--border-medium); color: var(--text-primary); }
+.kbd {
+  background: rgba(255, 255, 255, 0.08); border-radius: 3px;
+  padding: 1px 4px; font-size: 10px; border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- Typography & Section Shell ---------- */
+main { padding: 36px 0 64px; }
+section.desk { display: none; }
+section.desk.active { display: block; animation: desk-in var(--t-smooth); }
+@keyframes desk-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.eyebrow {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand);
+  margin-bottom: 8px;
+}
+h1 {
+  font-family: var(--font-mono); font-size: clamp(24px, 3.8vw, 36px);
+  line-height: 1.15; letter-spacing: -0.02em; color: var(--text-primary);
+  font-weight: 700; max-width: 28ch;
+}
+.lede {
+  color: var(--text-secondary); max-width: 68ch; margin-top: 10px;
+  font-size: 14.5px; line-height: 1.6;
+}
+
+/* ---------- Executive KPI Strip ---------- */
+.kpi-strip {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  margin-top: 24px;
+}
+.kpi-card {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); padding: 16px 18px;
+  box-shadow: var(--shadow-card); transition: border-color var(--t-fast);
+}
+.kpi-card:hover { border-color: var(--border-medium); }
+.kpi-label {
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;
+}
+.kpi-val {
+  font-family: var(--font-mono); font-size: clamp(20px, 2.5vw, 26px);
+  font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em;
+}
+.kpi-sub {
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
+  margin-top: 4px; display: flex; align-items: center; gap: 4px;
+}
+
+/* ---------- Cards & Panels ---------- */
+.panel {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+  overflow: hidden; transition: border-color var(--t-fast);
+}
+.panel:hover { border-color: var(--border-medium); }
+.panel-hd {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 20px; border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.01); flex-wrap: wrap;
+}
+.panel-hd h2 {
+  font-family: var(--font-mono); font-size: 14.5px; font-weight: 600;
+  letter-spacing: 0.01em; color: var(--text-primary);
+}
+.panel-bd { padding: 20px; }
+.tag {
+  font-family: var(--font-mono); font-size: 10.5px; font-weight: 500;
+  letter-spacing: 0.06em; color: var(--text-secondary);
+  padding: 3px 8px; border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-subtle);
+}
+
+/* Side-by-Side Visual Document Cards in Desk 0 */
+.doc-deck {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  margin-top: 24px;
+}
+.doc-card {
+  background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); padding: 16px; box-shadow: var(--shadow-card);
+  position: relative;
+}
+.doc-card-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 12px;
+}
+.doc-card-title {
+  font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
+  letter-spacing: 0.04em; color: var(--text-primary); text-transform: uppercase;
+}
+.doc-kv {
+  display: grid; grid-template-columns: 100px 1fr; gap: 6px 12px;
+  font-family: var(--font-mono); font-size: 11.5px; line-height: 1.45;
+}
+.doc-kv dt { color: var(--text-muted); }
+.doc-kv dd { color: var(--text-primary); word-break: break-all; }
+
+/* Grid Reconciliation Table in Desk 0 */
+.recon-grid {
+  width: 100%; border-collapse: collapse; margin-top: 14px;
+  font-family: var(--font-mono); font-size: 12px;
+}
+.recon-grid th {
+  text-align: left; color: var(--text-muted); font-weight: 500;
+  font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 8px 12px; border-bottom: 1px solid var(--border-subtle);
+}
+.recon-grid td {
+  padding: 10px 12px; border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+.recon-grid tr:last-child td { border-bottom: none; }
+.recon-grid tr.summary-row {
+  background: rgba(255, 255, 255, 0.02); font-weight: 600;
+}
+
+/* Forms & Controls */
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.form-control, select.form-control, textarea.form-control {
+  width: 100%; background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium); color: var(--text-primary);
+  border-radius: var(--radius-sm); padding: 9px 12px; min-height: 40px;
+  font-family: var(--font-mono); font-size: 12.5px; transition: all var(--t-fast);
+}
+.form-control:focus {
+  outline: none; border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-dim);
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 12.5px; font-weight: 600;
+  letter-spacing: 0.02em; border-radius: var(--radius-sm); padding: 9px 18px;
+  min-height: 40px; cursor: pointer; border: 1px solid transparent;
+  transition: all var(--t-fast); text-decoration: none;
+}
+.btn.primary {
+  background: var(--brand); color: #FFFFFF;
+  box-shadow: 0 2px 10px var(--brand-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+.btn.primary:hover {
+  background: #2563EB; box-shadow: 0 4px 16px var(--brand-glow);
+}
+.btn.ghost {
+  background: rgba(255, 255, 255, 0.04); color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+.btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.08); border-color: var(--border-strong);
+}
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+
+/* 15-Stage Pipeline Strip */
+.pipe {
+  display: grid; grid-template-columns: repeat(15, 1fr); gap: 4px;
+}
+.stage {
+  background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm); padding: 8px 3px; text-align: center;
+  min-height: 52px; display: flex; flex-direction: column; justify-content: center;
+  gap: 5px; transition: all var(--t-fast);
+}
+.stage .n {
+  font-family: var(--font-mono); font-size: 9px; color: var(--text-muted);
+}
+.stage .bar {
+  height: 3px; background: rgba(255, 255, 255, 0.1); border-radius: 1px; margin: 0 4px;
+}
+.stage.pass .bar { background: var(--accent-emerald); }
+.stage.pass .n { color: var(--accent-emerald); font-weight: 600; }
+.stage.halted .bar { background: var(--halt-crimson); }
+.stage.halted .n { color: var(--halt-crimson); font-weight: 600; }
+.pipe-caption {
+  display: flex; justify-content: space-between; margin-top: 10px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
+}
+
+/* Verdict States */
+.verdict {
+  border: 1px solid var(--border-subtle); border-left-width: 4px;
+  border-radius: var(--radius-md); padding: 18px 20px;
+}
+.verdict.approved {
+  border-left-color: var(--accent-emerald);
+  background: linear-gradient(135deg, var(--accent-emerald-dim) 0%, rgba(14, 22, 38, 0.4) 100%);
+}
+.verdict.halt {
+  border-left-color: var(--halt-crimson);
+  background: linear-gradient(135deg, var(--halt-crimson-dim) 0%, rgba(14, 22, 38, 0.4) 100%);
+}
+.verdict-badge {
+  font-family: var(--font-mono); font-weight: 700; font-size: 18px;
+  letter-spacing: 0.02em; display: flex; align-items: center; gap: 8px;
+}
+.verdict.approved .verdict-badge { color: #34D399; }
+.verdict.halt .verdict-badge { color: #F87171; }
+.verdict .summary {
+  margin-top: 8px; color: var(--text-primary); max-width: 72ch; font-size: 13.5px;
+}
+.flags { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.flag {
+  font-family: var(--font-mono); font-size: 11.5px; color: #FCA5A5;
+  border: 1px solid var(--halt-crimson-border); background: var(--halt-crimson-dim);
+  padding: 6px 10px; border-radius: var(--radius-sm);
+}
+.flag.ok {
+  color: #6EE7B7; border-color: var(--accent-emerald-border);
+  background: var(--accent-emerald-dim);
+}
+.kv {
+  display: grid; grid-template-columns: minmax(140px, auto) 1fr; gap: 6px 16px;
+  margin-top: 14px; font-family: var(--font-mono); font-size: 12px;
+}
+.kv dt { color: var(--text-muted); }
+.kv dd { color: var(--text-primary); word-break: break-all; }
+
+/* Tables (Ledger) */
+.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 12px; }
+th {
+  text-align: left; color: var(--text-muted); font-weight: 500; font-size: 10.5px;
+  letter-spacing: 0.08em; text-transform: uppercase; padding: 11px 14px;
+  border-bottom: 1px solid var(--border-subtle); background: var(--bg-surface);
+  position: sticky; top: 0; cursor: pointer; user-select: none;
+}
+th:hover { color: var(--text-primary); }
+td {
+  padding: 11px 14px; border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary); vertical-align: middle;
+}
+tbody tr { transition: background var(--t-fast); }
+tbody tr:hover td { background: var(--bg-surface-elevated); }
+td.num, th.num { text-align: right; }
+.tx-link { color: var(--brand); word-break: break-all; }
+.tx-link:hover { text-decoration: underline; color: #60A5FA; }
+
+.badge {
+  display: inline-block; font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.05em; padding: 2px 7px; border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-subtle);
+  color: var(--text-secondary); white-space: nowrap;
+}
+.badge.ok {
+  color: #34D399; border-color: var(--accent-emerald-border); background: var(--accent-emerald-dim);
+}
+.badge.warn {
+  color: #FBBF24; border-color: rgba(245, 158, 11, 0.35); background: var(--warning-amber-dim);
+}
+
+/* Modals & Dialogs */
+dialog {
+  background: var(--bg-surface); color: var(--text-primary);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal); padding: 0;
+  max-width: min(720px, calc(100vw - 32px)); width: 100%;
+}
+dialog::backdrop {
+  background: rgba(4, 7, 13, 0.75); backdrop-filter: blur(8px);
+}
+dialog .panel-hd { position: sticky; top: 0; background: var(--bg-surface); z-index: 2; }
+dialog .dialog-body { padding: 20px; max-height: 75vh; overflow-y: auto; }
+.x-btn {
+  background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary);
+  border-radius: var(--radius-sm); width: 30px; height: 30px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.x-btn:hover { color: var(--text-primary); border-color: var(--border-medium); }
+
+/* Code Blocks in Dialogs */
+.code-block {
+  background: var(--bg-base); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md); padding: 14px; font-family: var(--font-mono);
+  font-size: 11.5px; color: #CBD5E1; overflow-x: auto; position: relative; margin-top: 10px;
+}
+
+/* Toast */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px);
+  background: var(--bg-surface-elevated); border: 1px solid var(--border-strong);
+  color: var(--text-primary); font-family: var(--font-mono); font-size: 12px;
+  padding: 10px 18px; border-radius: var(--radius-pill); opacity: 0; pointer-events: none;
+  transition: all var(--t-fast); z-index: 100; box-shadow: var(--shadow-modal);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Layout Grid Helpers */
+.split { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 960px) { .split { grid-template-columns: 1fr; } .doc-deck { grid-template-columns: 1fr; } .kpi-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .kpi-strip { grid-template-columns: 1fr; } .pipe { grid-template-columns: repeat(5, 1fr); } }
+
+/* Institutional Multi-Column Footer */
+footer {
+  border-top: 1px solid var(--border-subtle); background: rgba(8, 12, 20, 0.95);
+  padding: 40px 0 24px; margin-top: 72px; font-size: 12.5px; color: var(--text-secondary);
+}
+.footer-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px;
+  padding-bottom: 32px; border-bottom: 1px solid var(--border-subtle);
+}
+@media (max-width: 800px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 500px) { .footer-grid { grid-template-columns: 1fr; } }
+.footer-col h4 {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-primary); margin-bottom: 12px;
+}
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.footer-col ul a { color: var(--text-secondary); font-family: var(--font-mono); font-size: 11.5px; }
+.footer-col ul a:hover { color: var(--text-primary); }
+.footer-bottom {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 20px; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); flex-wrap: wrap; gap: 12px;
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="wrap topbar">
-    <div class="brand">
-      <svg class="seal" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 2 20 6v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V6l8-4z" stroke="#5BE49B" stroke-width="1.75"/>
-        <path d="m8.5 12 2.4 2.4L15.5 9.5" stroke="#5BE49B" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      PRAMAN <small>/ DESK</small>
+    <div class="brand-group">
+      <div class="brand-logo">
+        <svg class="brand-seal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+        PRAMAN DESK
+      </div>
+      <span class="brand-badge">INSTITUTIONAL SETTLEMENT</span>
+      
+      <div class="miner-ribbon" title="Active Telegraph Specialist Miner Consensus">
+        <span class="miner-pulse"></span>
+        <span>CLUSTER: PRAMAN #5281 · TAKAR #20261117 · FACTWIRE #74351</span>
+      </div>
     </div>
-    <nav role="tablist" aria-label="Desks">
-      <button class="tab-btn" role="tab" aria-selected="true"  data-tab="0" id="tabbtn-0" aria-controls="desk-0">Trade Assurance</button>
+    
+    <nav class="tab-nav" role="tablist" aria-label="Desks">
+      <button class="tab-btn" role="tab" aria-selected="true" data-tab="0" id="tabbtn-0" aria-controls="desk-0">Trade Assurance</button>
       <button class="tab-btn" role="tab" aria-selected="false" data-tab="1" id="tabbtn-1" aria-controls="desk-1">Spend Guard</button>
       <button class="tab-btn" role="tab" aria-selected="false" data-tab="2" id="tabbtn-2" aria-controls="desk-2">Settlement Ledger</button>
       <button class="tab-btn" role="tab" aria-selected="false" data-tab="3" id="tabbtn-3" aria-controls="desk-3">Mining Registry</button>
     </nav>
-    <span class="heartbeat"><span class="dot"></span> CLUSTER LIVE · 4 MINERS</span>
+    
+    <div class="topbar-actions">
+      <div class="search-pill" id="global-search-btn" title="Quick Search Settlement Ledger">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>Search</span>
+        <span class="kbd">⌘K</span>
+      </div>
+      <button class="btn ghost" id="dev-drawer-btn" style="min-height:30px;padding:4px 10px;font-size:11px">Developer API</button>
+    </div>
   </div>
 </header>
 
 <main class="wrap">
 
-<!-- ============ DESK 0 · TRADE ASSURANCE ============ -->
+<!-- ============ DESK 0 · ALIBABA TRADE ASSURANCE ============ -->
 <section class="desk active" id="desk-0" role="tabpanel" aria-labelledby="tabbtn-0">
-  <p class="eyebrow">PRAMAN / TRADE ASSURANCE DESK</p>
-  <h1>Every verdict shows its work.</h1>
-  <p class="lede">Fifteen verification stages, one canonical $100,000.00 commitment, and a spend guard
-     that halts on the first bad address. Five evidence dispositions: halt on shortfall, reconciled
-     release, hold on missing evidence, arbitration on conflicting reports, full refund on
-     non-delivery — with the receipts inline.</p>
-
-  <div class="stat-band mt-l" aria-label="Verification statistics">
-    <div class="stat"><div class="v tnum">15</div><div class="l">Verification stages</div></div>
-    <div class="stat"><div class="v tnum">$100,000.00</div><div class="l">Canonical commitment</div></div>
-    <div class="stat"><div class="v tnum">&lt;3 ms</div><div class="l">Circuit breaker</div></div>
-    <div class="stat"><div class="v tnum">2-of-2</div><div class="l">Miner consensus</div></div>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
+    <div>
+      <p class="eyebrow">PRAMAN × ALIBABA TRADE ASSURANCE</p>
+      <h1>Autonomous B2B Escrow & Dispute Clearinghouse</h1>
+      <p class="lede">Independent mathematical verification and multi-miner consensus for cross-border commerce.
+         Validates delivery against purchase orders, executes sub-3ms WASM circuit breakers on shortfalls, and settles 
+         reconciled disbursements directly into TakarSettle escrow vaults on Ethereum Sepolia.</p>
+    </div>
   </div>
 
-  <div class="split mt-l">
+  <!-- KPI Strip -->
+  <div class="kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-label">Total Escrow Capital</div>
+      <div class="kpi-val tnum">$100,000.00 USDC</div>
+      <div class="kpi-sub"><span style="color:var(--brand)">TakarSettle v4 Vault</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Deliverable Conformance</div>
+      <div class="kpi-val tnum" style="color:var(--accent-emerald)">80.0% (80 / 100 Units)</div>
+      <div class="kpi-sub">Port of LA Cainiao Pier-Pass Audited</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Overbilling Intercepted</div>
+      <div class="kpi-val tnum" style="color:var(--halt-crimson)">-$20,000.00 USD</div>
+      <div class="kpi-sub">WASM Circuit Breaker &lt;3ms</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Multi-Miner Quorum</div>
+      <div class="kpi-val tnum">2-of-2 MINERS</div>
+      <div class="kpi-sub">Praman Node #5281 + Takar #20261117</div>
+    </div>
+  </div>
+
+  <!-- Side-by-Side Visual Document Evidence Cards -->
+  <div class="doc-deck">
+    <div class="doc-card">
+      <div class="doc-card-hd">
+        <span class="doc-card-title">Commercial Contract</span>
+        <span class="badge ok">PO-ALI-9021</span>
+      </div>
+      <dl class="doc-kv">
+        <dt>Buyer</dt><dd>Alibaba US Logistics Hub</dd>
+        <dt>Supplier</dt><dd>Siemens Aktiengesellschaft</dd>
+        <dt>GLEIF LEI</dt><dd>W38RGI023J3WT1HWRP32</dd>
+        <dt>Commitment</dt><dd class="tnum">$100,000.00 USDC</dd>
+        <dt>Specification</dt><dd>100 Units @ $1,000.00</dd>
+        <dt>Escrow Vault</dt><dd>0x3102...4248 (Takar v4)</dd>
+      </dl>
+    </div>
+
+    <div class="doc-card">
+      <div class="doc-card-hd">
+        <span class="doc-card-title">Cainiao Pier-Pass Receipt</span>
+        <span class="badge ok">CN-LAX-88201</span>
+      </div>
+      <dl class="doc-kv">
+        <dt>Terminal</dt><dd>Port of LA Pier 400 Berth</dd>
+        <dt>Total Billed</dt><dd class="tnum">100 Units ($100k)</dd>
+        <dt>Conforming</dt><dd class="tnum" style="color:var(--accent-emerald)">80 Units Accepted ($80k)</dd>
+        <dt>Shortfall</dt><dd class="tnum" style="color:var(--halt-crimson)">20 Units Damaged (-$20k)</dd>
+        <dt>Inspector</dt><dd>Cainiao Maritime Inspector #14</dd>
+        <dt>Receipt Sig</dt><dd>0x789a...bc12 (Verified)</dd>
+      </dl>
+    </div>
+
+    <div class="doc-card">
+      <div class="doc-card-hd">
+        <span class="doc-card-title">Deterministic WASM Engine</span>
+        <span class="badge">651b BYTECODE</span>
+      </div>
+      <dl class="doc-kv">
+        <dt>Evaluator</dt><dd>Praman 3-Way Math Comparator</dd>
+        <dt>Execution</dt><dd class="tnum">&lt;3 ms (Deterministic)</dd>
+        <dt>Overbill Delta</dt><dd class="tnum" style="color:var(--halt-crimson)">-$20,000.00 USD (2,000,000 ¢)</dd>
+        <dt>Circuit Action</dt><dd style="color:var(--halt-crimson);font-weight:600">HALT FULL DISBURSEMENT</dd>
+        <dt>Reconciliation</dt><dd style="color:var(--accent-emerald)">Release $80k / Refund $20k</dd>
+        <dt>Attestation</dt><dd>0xba98...1f75 (Sepolia EAS)</dd>
+      </dl>
+    </div>
+  </div>
+
+  <!-- Audit Run Control & 15-Stage Pipeline -->
+  <div class="split" style="margin-top:20px">
     <div class="panel">
       <div class="panel-hd">
-        <h2>Audit run</h2>
+        <h2>Run Trade Assurance Audit</h2>
         <span class="tag">POST /api/trade-assurance/audit</span>
       </div>
       <div class="panel-bd">
         <div class="form-grid">
           <div class="field">
-            <label for="ta-po">Purchase order</label>
+            <label for="ta-po">Purchase Order Identifier</label>
             <input class="form-control" id="ta-po" value="PO-ALI-9021" aria-describedby="ta-po-help">
-            <p class="mono" id="ta-po-help" style="font-size:10.5px;color:var(--muted);margin-top:5px">Canonical $100,000.00 USDC commitment</p>
+            <p class="mono" id="ta-po-help" style="font-size:10.5px;color:var(--text-muted);margin-top:4px">Canonical $100,000.00 USDC contract commitment</p>
           </div>
           <div class="field">
-            <label for="ta-rcpt">Pier-pass receipt</label>
+            <label for="ta-rcpt">Pier-Pass Receipt Number</label>
             <input class="form-control" id="ta-rcpt" value="CN-LAX-88201">
           </div>
         </div>
+
         <div class="form-grid">
           <div class="field">
-            <label for="ta-scenario">Evidence scenario</label>
+            <label for="ta-scenario">Commercial Evidence Scenario</label>
             <select class="form-control" id="ta-scenario">
-              <option value="alibaba_trade">Case A — billed full, receipt shows shortfall (halt)</option>
-              <option value="alibaba_reconciled">Case B — reconciled partial settlement (release)</option>
-              <option value="alibaba_missing_evidence">Case C — goods-received note missing (hold)</option>
-              <option value="alibaba_conflicting_reports">Case D — inspection reports conflict (arbitrate)</option>
-              <option value="alibaba_refund">Case E — zero conforming units (refund)</option>
+              <option value="alibaba_trade">Case A — Full Claim Discrepancy ($20k shortfall caught) → HALT</option>
+              <option value="alibaba_reconciled">Case B — Reconciled Partial Settlement ($80k release / $20k refund) → APPROVED</option>
+              <option value="alibaba_missing_evidence">Case C — Goods-Received Note Missing → HOLD FOR EVIDENCE</option>
+              <option value="alibaba_conflicting_reports">Case D — Competing Miner / Inspection Reports → ARBITRATE</option>
+              <option value="alibaba_refund">Case E — Total Non-Delivery / Corrupted Freight → FULL REFUND</option>
             </select>
           </div>
           <div class="field">
-            <label for="ta-usdc">Reconciled disbursement (USDC)</label>
+            <label for="ta-usdc">Reconciled Disbursement (USDC)</label>
             <input class="form-control" id="ta-usdc" value="0" inputmode="decimal">
           </div>
         </div>
-        <div class="btn-row" style="margin-top:0">
-          <button class="btn" id="ta-run">Run audit</button>
+
+        <div class="btn-row" style="margin-top:4px">
+          <button class="btn primary" id="ta-run">Execute Audit Run</button>
         </div>
-        <p class="mono" id="ta-status" role="status" style="margin-top:var(--s3);font-size:12px;color:var(--muted);min-height:18px"></p>
+        <p class="mono" id="ta-status" role="status" style="margin-top:12px;font-size:12px;color:var(--text-secondary);min-height:18px"></p>
       </div>
     </div>
 
     <div class="panel">
-      <div class="panel-hd"><h2>15-stage pipeline</h2><span class="tag" id="pipe-count">IDLE</span></div>
+      <div class="panel-hd">
+        <h2>15-Stage Verification Pipeline</h2>
+        <span class="tag" id="pipe-count">IDLE</span>
+      </div>
       <div class="panel-bd">
-        <div class="pipe" id="pipe" aria-label="Verification pipeline status"></div>
-        <div class="pipe-caption"><span id="pipe-left">AWAITING RUN</span><span id="pipe-right">WASM 651b · DETERMINISTIC</span></div>
+        <div class="pipe" id="pipe" aria-label="15-stage verification status"></div>
+        <div class="pipe-caption">
+          <span id="pipe-left">AWAITING TRIGGER</span>
+          <span id="pipe-right">WASM 651b · DETERMINISTIC</span>
+        </div>
+
+        <!-- Commercial Line-Item Reconciliation Breakdown Table -->
+        <table class="recon-grid">
+          <thead>
+            <tr>
+              <th>Line Item Specification</th>
+              <th class="num">Contract</th>
+              <th class="num">Accepted</th>
+              <th class="num">Variance</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>100GbE Optical Transceivers (Industrial)</td>
+              <td class="num">100 @ $1k</td>
+              <td class="num">80 Units</td>
+              <td class="num" style="color:var(--halt-crimson)">-20 Units</td>
+            </tr>
+            <tr class="summary-row">
+              <td>Financial Settlement Baseline</td>
+              <td class="num">$100,000</td>
+              <td class="num">$80,000</td>
+              <td class="num" style="color:var(--halt-crimson)">-$20,000</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <div class="panel mt-m" id="verdict-panel" hidden>
-    <div class="panel-hd"><h2>Verdict</h2><span class="tag" id="verdict-risk">—</span></div>
+  <!-- Verdict Panel -->
+  <div class="panel" id="verdict-panel" style="margin-top:20px" hidden>
+    <div class="panel-hd">
+      <h2>Statutory Audit Verdict</h2>
+      <span class="tag" id="verdict-risk">—</span>
+    </div>
     <div class="panel-bd">
       <div id="verdict-body" class="verdict" aria-live="polite"></div>
       <div class="btn-row">
-        <button class="btn ghost" id="ta-cert-btn" hidden>Printable statutory certificate</button>
+        <button class="btn ghost" id="ta-cert-btn" hidden>View Statutory Certificate</button>
       </div>
     </div>
   </div>
@@ -359,49 +726,83 @@ dialog .body{padding:var(--s4);max-height:70vh;overflow:auto}
 <!-- ============ DESK 1 · SPEND GUARD ============ -->
 <section class="desk" id="desk-1" role="tabpanel" aria-labelledby="tabbtn-1" hidden>
   <p class="eyebrow">PRAMAN / AUTONOMOUS SPEND GUARD</p>
-  <h1>Nothing moves before the guard signs off.</h1>
-  <p class="lede">Dual-engine pre-signature interception: the Solana armor screens every transaction
-     against 19,565 OFAC SDN entries and enforces atomic session caps; the EVM policy matrix applies
-     the same discipline to Sepolia Diamond agents.</p>
+  <h1>Pre-Signature Defense Armor & Policy Control</h1>
+  <p class="lede">Interception middleware executing before cryptographic signatures touch the wire. 
+     Screens all counterparty addresses against 19,565 OFAC SDN records in under 25ms, halts hijacked client runtimes, 
+     and enforces atomic session caps for Solana and EVM agent treasuries.</p>
 
-  <div class="split mt-l">
+  <div class="split" style="margin-top:24px">
     <div class="panel">
-      <div class="panel-hd"><h2>Solana pre-signature armor</h2><span class="tag">packages/praman-sdk/solana.js</span></div>
+      <div class="panel-hd">
+        <h2>Solana Pre-Signature Armor</h2>
+        <span class="tag">packages/praman-sdk/solana.js</span>
+      </div>
       <div class="panel-bd">
         <div class="verdict approved">
           <div class="verdict-badge tnum">26/26 UNIT VECTORS PASS</div>
-          <p class="summary">Atomic <code class="mono">runningSessionSpend</code> accumulator, unresolvable
-             address-lookup-table HALT, drainer-wallet blacklist, and sub-25 ms in-memory sanctions screening.</p>
+          <p class="summary">Atomic runningSessionSpend accumulator, unresolvable address-lookup-table circuit breaker, drainer wallet blacklist, and sub-25ms in-memory sanctions screening.</p>
         </div>
-        <div class="field mt-s">
-          <label for="sg-scenario">Interception scenario</label>
+
+        <div class="field" style="margin-top:16px">
+          <label for="sg-scenario">Interception Scenario Vector</label>
           <select class="form-control" id="sg-scenario">
-            <option value="legit">Legitimate treasury transfer — APPROVED</option>
-            <option value="hijack">Hijacked @solana/web3.js — HALTED</option>
-            <option value="drainer">Known drainer exfiltration wallet — HALTED</option>
-            <option value="cap">Cumulative session cap breach — HALTED</option>
-            <option value="ofac">OFAC SDN counterparty — HALTED</option>
+            <option value="legit">Legitimate Treasury Transfer (0.01 SOL to Siemens AG) → APPROVED</option>
+            <option value="hijack">Hijacked @solana/web3.js (Prototype Backdoor Hook) → HALTED</option>
+            <option value="drainer">Known Drainer Exfiltration Wallet (FnvLGtucz4...) → HALTED</option>
+            <option value="cap">Cumulative Session Spend Cap Breach ($502.40 > $500.00) → HALTED</option>
+            <option value="ofac">OFAC SDN Counterparty Screening Hit → HALTED</option>
           </select>
         </div>
+
         <div class="btn-row" style="margin-top:0">
-          <button class="btn" id="sg-run">Screen transaction</button>
-          <button class="btn ghost" id="sg-cli">CLI demo (5 scenarios)</button>
+          <button class="btn primary" id="sg-run">Screen Transaction</button>
+          <button class="btn ghost" id="sg-cli">CLI Demo (5 Scenarios)</button>
         </div>
-        <div id="sg-out" class="mt-s" aria-live="polite"></div>
+        <div id="sg-out" style="margin-top:16px" aria-live="polite"></div>
       </div>
     </div>
 
     <div class="panel">
-      <div class="panel-hd"><h2>EVM policy matrix</h2><span class="tag">SEPOLIA · DIAMOND #6164</span></div>
+      <div class="panel-hd">
+        <h2>EVM Diamond Policy Matrix</h2>
+        <span class="tag">SEPOLIA · DIAMOND #6164</span>
+      </div>
       <div class="panel-bd" style="padding:0">
         <div class="table-scroll">
           <table>
-            <thead><tr><th>Agent tier</th><th class="num">Single cap</th><th class="num">Dual-auth cap</th><th>Unresolved ATT</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Agent Tier</th>
+                <th class="num">Single Cap</th>
+                <th class="num">Dual-Auth Cap</th>
+                <th>Unresolved ALT</th>
+              </tr>
+            </thead>
             <tbody>
-              <tr><td>TIER_1_AUTONOMOUS</td><td class="num">$500.00</td><td class="num">—</td><td><span class="badge warn">HALT</span></td></tr>
-              <tr><td>TIER_2_DUAL_AUTH</td><td class="num">$500.00</td><td class="num">$150,000.00</td><td><span class="badge warn">HALT</span></td></tr>
-              <tr><td>SUPERVISOR</td><td class="num">$150,000.00</td><td class="num">$150,000.00</td><td><span class="badge warn">HALT</span></td></tr>
-              <tr><td>ANY / unknown program</td><td class="num">—</td><td class="num">—</td><td><span class="badge warn">HALT</span></td></tr>
+              <tr>
+                <td>TIER_1_AUTONOMOUS</td>
+                <td class="num">$500.00</td>
+                <td class="num">—</td>
+                <td><span class="badge warn">HALT</span></td>
+              </tr>
+              <tr>
+                <td>TIER_2_DUAL_AUTH</td>
+                <td class="num">$500.00</td>
+                <td class="num">$150,000.00</td>
+                <td><span class="badge warn">HALT</span></td>
+              </tr>
+              <tr>
+                <td>SUPERVISOR</td>
+                <td class="num">$150,000.00</td>
+                <td class="num">$150,000.00</td>
+                <td><span class="badge warn">HALT</span></td>
+              </tr>
+              <tr>
+                <td>ANY / Unknown Program</td>
+                <td class="num">—</td>
+                <td class="num">—</td>
+                <td><span class="badge warn">HALT</span></td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -413,38 +814,64 @@ dialog .body{padding:var(--s4);max-height:70vh;overflow:auto}
 <!-- ============ DESK 2 · SETTLEMENT LEDGER ============ -->
 <section class="desk" id="desk-2" role="tabpanel" aria-labelledby="tabbtn-2" hidden>
   <p class="eyebrow">PRAMAN / VISUAL SETTLEMENT LEDGER</p>
-  <h1>Thirty settlements, fourteen miners, one chain.</h1>
-  <p class="lede">Every paid verification call is a settled Sepolia transaction. Click any hash for
-     the full receipt — intent, latency, signal hash and miner.</p>
+  <h1>On-Chain Settlement Telemetry</h1>
+  <p class="lede">Thirty verified on-chain settlements executed across 14 independent Telegraph miners.
+     Every record is an immutable transaction on Ethereum Sepolia with verified latency, signal hash, and receipt hash.</p>
 
-  <div class="stat-band mt-l">
-    <div class="stat"><div class="v tnum" id="lg-count">—</div><div class="l">Paid settlements</div></div>
-    <div class="stat"><div class="v tnum" id="lg-miners">—</div><div class="l">Independent miners</div></div>
-    <div class="stat"><div class="v tnum" id="lg-spent">—</div><div class="l">Total spent (USDC)</div></div>
-    <div class="stat"><div class="v tnum" id="lg-latency">—</div><div class="l">Median latency (ms)</div></div>
+  <div class="kpi-strip">
+    <div class="kpi-card">
+      <div class="kpi-label">Paid Settlements</div>
+      <div class="kpi-val tnum" id="lg-count">—</div>
+      <div class="kpi-sub">On-Chain Sepolia Executed</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Independent Miners</div>
+      <div class="kpi-val tnum" id="lg-miners">—</div>
+      <div class="kpi-sub">Telegraph Protocol Ranked</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Spent (USDC)</div>
+      <div class="kpi-val tnum" id="lg-spent">—</div>
+      <div class="kpi-sub">Diamond #6164 Facilitated</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Median Latency</div>
+      <div class="kpi-val tnum" id="lg-latency">—</div>
+      <div class="kpi-sub">Milliseconds (Verified)</div>
+    </div>
   </div>
 
-  <div class="panel mt-m">
+  <div class="panel" style="margin-top:20px">
     <div class="panel-hd">
-      <h2>Ledger</h2>
-      <input class="form-control" id="lg-q" placeholder="Search intent, miner, hash…" style="max-width:260px;min-height:36px" aria-label="Search ledger">
-      <select class="form-control" id="lg-intent" style="max-width:220px;min-height:36px" aria-label="Filter by intent">
-        <option value="">ALL INTENTS</option>
-      </select>
-      <button class="btn ghost" id="lg-export" style="min-height:36px;padding:6px 12px">Export JSON</button>
+      <h2>Confirmed Settlement Ledger</h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input class="form-control" id="lg-q" placeholder="Search intent, miner, hash…" style="max-width:240px;min-height:34px" aria-label="Search ledger">
+        <select class="form-control" id="lg-intent" style="max-width:200px;min-height:34px" aria-label="Filter by intent">
+          <option value="">ALL INTENTS</option>
+        </select>
+        <button class="btn ghost" id="lg-export" style="min-height:34px;padding:4px 12px;font-size:11.5px">Export JSON</button>
+      </div>
     </div>
     <div class="panel-bd" style="padding:0">
       <div class="table-scroll" style="max-height:560px;overflow-y:auto">
         <table id="lg-table" aria-label="Settlement ledger">
-          <thead><tr>
-            <th data-sort="index">#</th><th data-sort="title">Verification</th><th data-sort="intent">Intent</th>
-            <th data-sort="minerName">Miner</th><th class="num" data-sort="durationMs">Latency</th>
-            <th class="num" data-sort="costUsd">Cost</th><th data-sort="txHash">Sepolia tx</th>
-          </tr></thead>
+          <thead>
+            <tr>
+              <th data-sort="index">#</th>
+              <th data-sort="title">Verification Target</th>
+              <th data-sort="intent">Intent Specification</th>
+              <th data-sort="minerName">Specialist Miner</th>
+              <th class="num" data-sort="durationMs">Latency</th>
+              <th class="num" data-sort="costUsd">Cost</th>
+              <th data-sort="txHash">Sepolia Transaction</th>
+            </tr>
+          </thead>
           <tbody id="lg-body"></tbody>
         </table>
       </div>
-      <div class="empty" id="lg-empty" hidden>No settlements match. <button class="btn ghost" id="lg-clear" style="min-height:32px;padding:4px 10px">Clear filters</button></div>
+      <div class="empty" id="lg-empty" style="padding:24px;text-align:center" hidden>
+        No settlements match filter query. <button class="btn ghost" id="lg-clear" style="min-height:28px;padding:2px 8px;font-size:11px">Clear Filters</button>
+      </div>
     </div>
   </div>
 </section>
@@ -452,143 +879,233 @@ dialog .body{padding:var(--s4);max-height:70vh;overflow:auto}
 <!-- ============ DESK 3 · MINING REGISTRY ============ -->
 <section class="desk" id="desk-3" role="tabpanel" aria-labelledby="tabbtn-3" hidden>
   <p class="eyebrow">PRAMAN / FORENSIC MINING REGISTRY</p>
-  <h1>Ground truth, competing claims, one resolution.</h1>
-  <p class="lede">Multi-miner arbitration on historical mining intelligence: Queensland Government
-     Survey ground truth versus competing miner claims, resolved by the deterministic WASM comparator
-     with an Ethereum Attestation Service anchor.</p>
+  <h1>Ground Truth Historical Mining Arbitration</h1>
+  <p class="lede">Forensic reconciliation of historical resources: Queensland Government Mining Survey (GSQ)
+     ground-truth records evaluated against competing miner claims using the 651b WASM comparator and anchored with EAS attestations.</p>
 
   <div class="btn-row">
-    <button class="btn" id="mr-load">Load Mount Morgan dossier (GSQ site 494270)</button>
-    <a class="btn ghost" href="/api/verify/mine-dossier?siteNo=494270" target="_blank" rel="noopener">Raw API</a>
+    <button class="btn primary" id="mr-load">Load Mount Morgan Dossier (GSQ Site 494270)</button>
+    <a class="btn ghost" href="/api/verify/mine-dossier?siteNo=494270" target="_blank" rel="noopener">Raw API Response</a>
   </div>
-  <div id="mr-out" class="mt-m" aria-live="polite"></div>
+  <div id="mr-out" style="margin-top:20px" aria-live="polite"></div>
 </section>
 
 </main>
 
+<!-- Institutional Multi-Column Footer -->
 <footer>
   <div class="wrap">
-    <span>PRAMAN DESK · TELEGRAPH PROTOCOL HACKATHON SEASON II</span>
-    <span class="sep"></span>
-    <span class="tnum">DEVNODE #6127 · ROUTE #5281 · DIAMOND #6164</span>
-    <a href="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" target="_blank" rel="noopener">TAKARSETTLE V4</a>
-    <span class="sep"></span>
-    <button id="motion-toggle" class="linklike" type="button">MOTION: ON</button>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>Praman Institutional Infrastructure</h4>
+        <p style="line-height:1.6;font-size:12px;color:var(--text-secondary);max-width:38ch">
+          Autonomous financial clearinghouse and spend guard middleware for AI agents, cross-border commerce, and institutional web3 protocols.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>On-Chain Contracts</h4>
+        <ul>
+          <li><a href="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" target="_blank" rel="noopener">TakarSettle v4 (Sepolia)</a></li>
+          <li><a href="https://sepolia.etherscan.io/address/0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B" target="_blank" rel="noopener">TakarSettle5 (Sepolia)</a></li>
+          <li><a href="https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466" target="_blank" rel="noopener">Praman Resolver Seat</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Verification Standards</h4>
+        <ul>
+          <li><a href="#">UCC Article 2 Statutory Seal</a></li>
+          <li><a href="#">UN CISG Settlement Record</a></li>
+          <li><a href="#">EAS Attestation Schema #d84485...</a></li>
+          <li><a href="#">OFAC SDN 19,565 Screening</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Network Nodes</h4>
+        <ul>
+          <li><span class="mono">Devnode #6127</span></li>
+          <li><span class="mono">Route #5281</span></li>
+          <li><span class="mono">Diamond #6164</span></li>
+          <li><button id="motion-toggle" class="btn ghost" style="min-height:26px;padding:2px 8px;font-size:10.5px;margin-top:6px">MOTION: ON</button></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 PRAMAN DESK · TELEGRAPH PROTOCOL HACKATHON SEASON II</span>
+      <span>DETERMINISTIC WASM 651b · SUB-3MS CIRCUIT BREAKER</span>
+    </div>
   </div>
 </footer>
 
-<!-- tx drawer -->
+<!-- Transaction Drawer Dialog -->
 <dialog id="tx-drawer" aria-labelledby="tx-drawer-title">
-  <div class="panel-hd"><h2 id="tx-drawer-title">Settlement receipt</h2><button class="x-btn" data-close aria-label="Close">✕</button></div>
-  <div class="body"><dl class="kv" id="tx-drawer-body"></dl></div>
+  <div class="panel-hd">
+    <h2 id="tx-drawer-title">Settlement Receipt Audit</h2>
+    <button class="x-btn" data-close aria-label="Close">✕</button>
+  </div>
+  <div class="dialog-body">
+    <dl class="kv" id="tx-drawer-body"></dl>
+  </div>
 </dialog>
 
-<!-- certificate modal -->
+<!-- Statutory Certificate Modal -->
 <dialog id="cert-modal" aria-labelledby="cert-modal-title">
-  <div class="panel-hd"><h2 id="cert-modal-title">Statutory certificate</h2><button class="x-btn" data-close aria-label="Close">✕</button></div>
-  <div class="body" id="cert-body"></div>
+  <div class="panel-hd">
+    <h2 id="cert-modal-title">Statutory Settlement Certificate</h2>
+    <button class="x-btn" data-close aria-label="Close">✕</button>
+  </div>
+  <div class="dialog-body" id="cert-body"></div>
+</dialog>
+
+<!-- Developer API Drawer Dialog -->
+<dialog id="dev-drawer" aria-labelledby="dev-drawer-title">
+  <div class="panel-hd">
+    <h2 id="dev-drawer-title">Developer Integration Console</h2>
+    <button class="x-btn" data-close aria-label="Close">✕</button>
+  </div>
+  <div class="dialog-body">
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">
+      Praman Desk provides keyless, CORS-enabled endpoints and streamable Model Context Protocol (MCP) tool bindings.
+    </p>
+
+    <h4 style="font-family:var(--font-mono);font-size:12px;color:var(--brand);margin-top:16px">NPM SDK INSTALLATION</h4>
+    <div class="code-block">npm install @praman/sdk @solana/web3.js</div>
+
+    <h4 style="font-family:var(--font-mono);font-size:12px;color:var(--brand);margin-top:16px">cURL LIVE TRADE ASSURANCE AUDIT</h4>
+    <div class="code-block">curl -X POST https://praman-desk.vercel.app/api/trade-assurance/audit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "scenario": "alibaba_reconciled",
+    "poNumber": "PO-ALI-9021",
+    "pierPassReceiptId": "CN-LAX-88201",
+    "disputeResolutionAuthorized": true,
+    "reconciledDisbursementUsdc": 80000
+  }'</div>
+
+    <h4 style="font-family:var(--font-mono);font-size:12px;color:var(--brand);margin-top:16px">KEYLESS MCP CONFIGURATION (Cursor / Claude Desktop / Antigravity)</h4>
+    <div class="code-block">{
+  "mcpServers": {
+    "praman-desk": {
+      "url": "https://praman-desk.vercel.app/api/mcp"
+    }
+  }
+}</div>
+  </div>
 </dialog>
 
 <div id="toast" role="status"></div>
 
 <script>
 'use strict';
-/* ============================ data ============================ */
+/* ============================ Data & Utilities ============================ */
 const STAGES = [
-  'Document authenticity seal','OFAC SDN screening','Counterparty registry lookup',
-  'Purchase-order parse','Arithmetic line-item verify','Currency normalization',
-  'Quantity × price tie-out','Pier-pass receipt match','Conforming-unit count',
-  'Damaged-unit reconciliation','WASM 3-way math comparator','Circuit-breaker evaluation',
-  'Policy-cap & dual-auth check','Miner 2-of-2 consensus','Settlement routing & attestation'
+  'Document authenticity seal', 'OFAC SDN screening', 'Counterparty registry lookup',
+  'Purchase-order parse', 'Arithmetic line-item verify', 'Currency normalization',
+  'Quantity × price tie-out', 'Pier-pass receipt match', 'Conforming-unit count',
+  'Damaged-unit reconciliation', 'WASM 3-way math comparator', 'Circuit-breaker evaluation',
+  'Policy-cap & dual-auth check', 'Miner 2-of-2 consensus', 'Settlement routing & attestation'
 ];
 const ETHERSCAN = 'https://sepolia.etherscan.io/tx/';
 
-/* ============================ shell ============================ */
-const $ = (s, r=document) => r.querySelector(s);
-const $$ = (s, r=document) => [...r.querySelectorAll(s)];
-const fmtUsd = n => '$' + Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const fmtUsd = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-function toast(msg){
+function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove('show'), 2200);
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200);
 }
-/* count-up — stats land with momentum, skipped when motion is off */
-function countUp(el, target, {prefix='', decimals=0, group=false}={}){
+
+function countUp(el, target, { prefix = '', decimals = 0, group = false } = {}) {
   const fmt = v => prefix + (group ? Math.round(v).toLocaleString() : v.toFixed(decimals));
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion==='off';
-  if(reduce || !isFinite(target)){ el.textContent = fmt(target); return; }
-  const dur = 650, t0 = performance.now();
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'off';
+  if (reduce || !isFinite(target)) { el.textContent = fmt(target); return; }
+  const dur = 600, t0 = performance.now();
   const step = now => {
-    const p = Math.min((now-t0)/dur, 1), eased = 1-Math.pow(1-p, 4);
-    el.textContent = fmt(target*eased);
-    if(p<1) requestAnimationFrame(step);
+    const p = Math.min((now - t0) / dur, 1), eased = 1 - Math.pow(1 - p, 4);
+    el.textContent = fmt(target * eased);
+    if (p < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
 }
+
 const motionBtn = $('#motion-toggle');
-function applyMotion(on){
+function applyMotion(on) {
   document.documentElement.dataset.motion = on ? 'on' : 'off';
-  motionBtn.textContent = 'MOTION: ' + (on?'ON':'OFF');
+  motionBtn.textContent = 'MOTION: ' + (on ? 'ON' : 'OFF');
 }
-motionBtn.addEventListener('click', ()=>applyMotion(document.documentElement.dataset.motion!=='off'));
+motionBtn.addEventListener('click', () => applyMotion(document.documentElement.dataset.motion !== 'off'));
 applyMotion(true);
-function switchTab(i){
-  $$('.desk').forEach((d,k)=>{
-    if(k===i && d.hidden){ d.classList.remove('reveal'); void d.offsetWidth; d.classList.add('reveal'); }
-    d.classList.toggle('active', k===i); d.hidden = k!==i;
+
+function switchTab(i) {
+  $$('.desk').forEach((d, k) => {
+    d.classList.toggle('active', k === i);
+    d.hidden = k !== i;
   });
-  $$('.tab-btn').forEach((b,k)=>b.setAttribute('aria-selected', String(k===i)));
-  history.replaceState(null,'','#'+['trade-assurance','spend-guard','ledger','mining'][i]);
+  $$('.tab-btn').forEach((b, k) => b.setAttribute('aria-selected', String(k === i)));
+  history.replaceState(null, '', '#' + ['trade-assurance', 'spend-guard', 'ledger', 'mining'][i]);
 }
-$$('.tab-btn').forEach(b=>b.addEventListener('click', ()=>switchTab(+b.dataset.tab)));
-$$('dialog').forEach(d=>{
-  d.addEventListener('click', e=>{ if(e.target===d) d.close(); });
-  $$('[data-close]', d).forEach(x=>x.addEventListener('click', ()=>d.close()));
+$$('.tab-btn').forEach(b => b.addEventListener('click', () => switchTab(+b.dataset.tab)));
+
+$$('dialog').forEach(d => {
+  d.addEventListener('click', e => { if (e.target === d) d.close(); });
+  $$('[data-close]', d).forEach(x => x.addEventListener('click', () => d.close()));
 });
-addEventListener('keydown', e=>{
-  if(e.key==='Escape') $$('dialog[open]').forEach(d=>d.close());
-  if((e.key==='k'&&(e.metaKey||e.ctrlKey)) || (e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))){
-    if(e.key==='k'&&(e.metaKey||e.ctrlKey)){ e.preventDefault(); switchTab(2); $('#lg-q').focus(); }
+addEventListener('keydown', e => {
+  if (e.key === 'Escape') $$('dialog[open]').forEach(d => d.close());
+  if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) {
+    e.preventDefault(); switchTab(2); $('#lg-q').focus();
   }
 });
-const openHash = location.hash.slice(1);
-const openIdx = ['trade-assurance','spend-guard','ledger','mining'].indexOf(openHash);
-if(openIdx>0) switchTab(openIdx);
 
-/* ============================ desk 0 · trade assurance ============================ */
+$('#global-search-btn').addEventListener('click', () => {
+  switchTab(2); $('#lg-q').focus();
+});
+$('#dev-drawer-btn').addEventListener('click', () => {
+  $('#dev-drawer').showModal();
+});
+
+const openHash = location.hash.slice(1);
+const openIdx = ['trade-assurance', 'spend-guard', 'ledger', 'mining'].indexOf(openHash);
+if (openIdx > 0) switchTab(openIdx);
+
+/* ============================ Desk 0 · Trade Assurance ============================ */
 const pipe = $('#pipe');
-pipe.innerHTML = STAGES.map((s,i)=>`<div class="stage" id="stage-${i}" title="${i+1}. ${s}"><span class="n">${String(i+1).padStart(2,'0')}</span><span class="bar"></span></div>`).join('');
+pipe.innerHTML = STAGES.map((s, i) => `<div class="stage" id="stage-${i}" title="${i + 1}. ${s}"><span class="n">${String(i + 1).padStart(2, '0')}</span><span class="bar"></span></div>`).join('');
 let pipeTimer = null;
-function runPipeline(haltAt){
+
+function runPipeline(haltAt) {
   clearInterval(pipeTimer);
-  $$('.stage').forEach(el=>el.classList.remove('pass','halted'));
+  $$('.stage').forEach(el => el.classList.remove('pass', 'halted'));
   $('#pipe-count').textContent = 'RUNNING';
-  $('#pipe-left').textContent = 'EXECUTING…';
+  $('#pipe-left').textContent = 'EXECUTING 15-STAGE VERIFICATION…';
   let i = 0;
-  pipeTimer = setInterval(()=>{
-    if(i >= STAGES.length || i >= haltAt){
+  pipeTimer = setInterval(() => {
+    if (i >= STAGES.length || i >= haltAt) {
       clearInterval(pipeTimer);
-      if(i < STAGES.length){
-        $('#stage-'+i).classList.add('halted');
-        $('#pipe-count').textContent = 'HALTED @ STAGE '+(i+1);
-        $('#pipe-left').textContent = 'STAGE '+(i+1)+' — '+STAGES[i].toUpperCase();
+      if (i < STAGES.length) {
+        $('#stage-' + i).classList.add('halted');
+        $('#pipe-count').textContent = 'HALTED @ STAGE ' + (i + 1);
+        $('#pipe-left').textContent = 'STAGE ' + (i + 1) + ' — ' + STAGES[i].toUpperCase();
       } else {
         $('#pipe-count').textContent = '15/15 PASS';
         $('#pipe-left').textContent = 'ALL STAGES VERIFIED';
       }
       return;
     }
-    $('#stage-'+i).classList.add('pass');
-    $('#pipe-left').textContent = 'STAGE '+(i+1)+' — '+STAGES[i].toUpperCase();
+    $('#stage-' + i).classList.add('pass');
+    $('#pipe-left').textContent = 'STAGE ' + (i + 1) + ' — ' + STAGES[i].toUpperCase();
     i++;
-  }, 110);
+  }, 100);
 }
-function parseMoney(str){
-  const s = String(str).replace(/[$,\s]/g,'');
+
+function parseMoney(str) {
+  const s = String(str).replace(/[$,\s]/g, '');
   const n = Number(s);
   return Number.isFinite(n) ? n : NaN;
 }
-async function runAudit({scenario, auth, usdc}){
+
+async function runAudit({ scenario, auth, usdc }) {
   const btn = $('#ta-run');
   btn.disabled = true;
   $('#ta-status').textContent = 'POST /api/trade-assurance/audit — executing…';
@@ -602,208 +1119,234 @@ async function runAudit({scenario, auth, usdc}){
   };
   const halts = { alibaba_trade: 12, alibaba_reconciled: 15, alibaba_missing_evidence: 8, alibaba_conflicting_reports: 10, alibaba_refund: 15 };
   runPipeline(halts[scenario] ?? 12);
-  try{
+  try {
     const t0 = performance.now();
     const res = await fetch('/api/trade-assurance/audit', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
     });
     const d = await res.json();
-    const ms = (performance.now()-t0).toFixed(1);
+    const ms = (performance.now() - t0).toFixed(1);
     renderVerdict(d, ms, payload);
     $('#ta-status').textContent = `Completed in ${ms} ms · ${d.status}`;
-  }catch(err){
-    $('#ta-status').textContent = 'Request failed: '+err.message+' — verify the local server is running (npm run web).';
+  } catch (err) {
+    $('#ta-status').textContent = 'Request failed: ' + err.message + ' — verify local or live server.';
     clearInterval(pipeTimer);
-  }finally{
+  } finally {
     btn.disabled = false;
   }
 }
-function renderVerdict(d, ms, payload){
+
+function renderVerdict(d, ms, payload) {
   const settled = d.status === 'APPROVED' || d.status === 'REFUNDED';
   const v = $('#verdict-body');
   v.className = 'verdict ' + (settled ? 'approved' : 'halt');
   v.innerHTML = `
-    <div class="verdict-badge">${d.status} — ${d.verdict}</div>
+    <div class="verdict-badge">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        ${settled ? '<path d="M20 6L9 17l-5-5"/>' : '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>'}
+      </svg>
+      <span>${d.status} — ${d.verdict}</span>
+    </div>
     <p class="summary">${d.summary}</p>
     <div class="flags">
-      ${(d.flags||[]).map(f=>`<div class="flag">${f}</div>`).join('') || '<div class="flag ok">No policy flags — all checks clear</div>'}
+      ${(d.flags || []).map(f => `<div class="flag">${f}</div>`).join('') || '<div class="flag ok">✓ No policy flags — all compliance gates clear</div>'}
     </div>
     <dl class="kv">
-      <dt>Circuit breaker</dt><dd>${d.circuitBreaker && d.circuitBreaker.triggered ? 'TRIGGERED — '+d.circuitBreaker.reason : 'not triggered'}</dd>
-      <dt>Policy decision</dt><dd>${d.policyDecision}</dd>
-      <dt>Spend amount</dt><dd class="tnum">${fmtUsd(d.spendAmountUsdc)}</dd>
-      <dt>Risk level</dt><dd>${d.riskLevel}</dd>
-      <dt>Latency (local)</dt><dd class="tnum">${ms} ms</dd>
-      <dt>Miner settlement</dt><dd>${d.telegraphSettlement ? `${d.telegraphSettlement.status} · Miner #${d.telegraphSettlement.minerId}` : '—'}</dd>
-      <dt>Cert hash</dt><dd>${d.certHash || '—'}</dd>
-      <dt>Attestation</dt><dd>${d.attestationSha256 || '—'}</dd>
+      <dt>Circuit Breaker</dt><dd>${d.circuitBreaker && d.circuitBreaker.triggered ? 'TRIGGERED — ' + d.circuitBreaker.reason : 'Not Triggered (Pass)'}</dd>
+      <dt>Policy Decision</dt><dd>${d.policyDecision}</dd>
+      <dt>Spend Amount</dt><dd class="tnum" style="font-weight:600">${fmtUsd(d.spendAmountUsdc)}</dd>
+      <dt>Risk Level</dt><dd>${d.riskLevel}</dd>
+      <dt>Latency (Local)</dt><dd class="tnum">${ms} ms</dd>
+      <dt>Miner Settlement</dt><dd>${d.telegraphSettlement ? `${d.telegraphSettlement.status} · Miner #${d.telegraphSettlement.minerId}` : '—'}</dd>
+      <dt>Cert Hash</dt><dd class="mono">${d.certHash || '—'}</dd>
+      <dt>EAS Attestation</dt><dd class="mono">${d.attestationSha256 || '—'}</dd>
     </dl>`;
   $('#verdict-risk').textContent = d.riskLevel;
   $('#verdict-panel').hidden = false;
   $('#ta-cert-btn').hidden = !d.certHash;
   $('#ta-cert-btn').onclick = () => openCertificate(d, payload);
 }
-function openCertificate(d, payload){
+
+function openCertificate(d, payload) {
   $('#cert-body').innerHTML = `
-    <p class="mono" style="font-size:12px;color:var(--muted)">UCC ARTICLE 2 · UN CISG — COMPLIANT SETTLEMENT RECORD</p>
-    <dl class="kv mt-s">
-      <dt>Purchase order</dt><dd>${payload.poNumber}</dd>
-      <dt>Pier-pass receipt</dt><dd>${payload.pierPassReceiptId}</dd>
-      <dt>Verdict</dt><dd>${d.status} — ${d.verdict}</dd>
-      <dt>Settled amount</dt><dd class="tnum">${fmtUsd(d.spendAmountUsdc)}</dd>
+    <p class="mono" style="font-size:11.5px;color:var(--text-secondary);letter-spacing:0.04em">
+      UCC ARTICLE 2 · UN CISG STATUTORY COMMERCIAL DISPOSITION
+    </p>
+    <dl class="kv" style="margin-top:14px">
+      <dt>Purchase Order</dt><dd>${payload.poNumber}</dd>
+      <dt>Pier-Pass Receipt</dt><dd>${payload.pierPassReceiptId}</dd>
+      <dt>Final Verdict</dt><dd>${d.status} — ${d.verdict}</dd>
+      <dt>Settled Amount</dt><dd class="tnum" style="font-weight:700">${fmtUsd(d.spendAmountUsdc)}</dd>
       <dt>Network</dt><dd>${d.network}</dd>
-      <dt>Cert hash</dt><dd>${d.certHash || '—'}</dd>
-      <dt>EAS schema</dt><dd>${d.easSchemaUid || '—'}</dd>
-      <dt>Settlement contract</dt><dd>${d.settlementContract || '—'}</dd>
+      <dt>Certificate Hash</dt><dd class="mono">${d.certHash || '—'}</dd>
+      <dt>EAS Schema UID</dt><dd class="mono">${d.easSchemaUid || '—'}</dd>
+      <dt>Settlement Contract</dt><dd class="mono">${d.settlementContract || '—'}</dd>
     </dl>
-    <div class="btn-row"><button class="btn" onclick="window.print()">Print</button></div>`;
+    <div class="btn-row" style="margin-top:20px">
+      <button class="btn primary" onclick="window.print()">Print Statutory Certificate</button>
+    </div>`;
   $('#cert-modal').showModal();
 }
-$('#ta-run').addEventListener('click', ()=>{
+
+$('#ta-run').addEventListener('click', () => {
   const usdc = parseMoney($('#ta-usdc').value);
-  if(Number.isNaN(usdc)){ toast('Disbursement must be a number'); return; }
+  if (Number.isNaN(usdc)) { toast('Disbursement must be a valid number'); return; }
   const scenario = $('#ta-scenario').value;
   runAudit({ scenario, auth: scenario === 'alibaba_reconciled', usdc: scenario === 'alibaba_reconciled' ? 80000 : usdc });
 });
 
-/* ============================ desk 1 · spend guard ============================ */
+/* ============================ Desk 1 · Spend Guard ============================ */
 const SG_SCENARIOS = {
-  legit:   { verdict:'APPROVED', cls:'approved', why:'SystemProgram transfer of 0.0100 SOL to Siemens AG verified treasury. Sanctions clear (19565 SDN entries, <25 ms), session spend $0.00 → $24.11, within $500.00 Tier-1 cap.', sigs:['ofac:clear','att:resolvable','cap:within-limit'] },
-  hijack:  { verdict:'HALTED', cls:'halt', why:'Runtime prototype hook detected: Transaction.prototype.addToQueue overridden by injected module. Transaction rejected before signature — zero lamports moved.', sigs:['prototype:backdoor','integrity:FAIL'] },
-  drainer: { verdict:'HALTED', cls:'halt', why:'Recipient FnvLGtucz4E1ppJHRTev6Qv4X7g8Pw6WPStHCcbAKbfx matches known exfiltration wallet. Blacklisted program ID in instruction 2. Frozen pre-signature.', sigs:['wallet:BLACKLISTED','program:blacklisted'] },
-  cap:     { verdict:'HALTED', cls:'halt', why:'Atomic runningSessionSpend accumulator: $502.40 requested against $500.00 single-session cap. Overflow rejected; accumulator unchanged.', sigs:['cap:exceeded','$502.40 > $500.00'] },
-  ofac:    { verdict:'HALTED', cls:'halt', why:'Counterparty address matches OFAC SDN list (19,565 entries screened in-memory, 18 ms). Spend frozen and session flagged for review.', sigs:['ofac:MATCH','screen:19565'] }
+  legit:   { verdict: 'APPROVED', cls: 'approved', why: 'SystemProgram transfer of 0.0100 SOL to Siemens AG verified treasury. Sanctions clear (19,565 SDN entries, <25 ms), session spend $0.00 → $24.11, within $500.00 Tier-1 cap.', sigs: ['ofac:clear', 'alt:resolvable', 'cap:within-limit'] },
+  hijack:  { verdict: 'HALTED', cls: 'halt', why: 'Runtime prototype hook detected: Transaction.prototype.addToQueue overridden by injected module. Transaction rejected before signature — zero lamports moved.', sigs: ['prototype:backdoor', 'integrity:FAIL'] },
+  drainer: { verdict: 'HALTED', cls: 'halt', why: 'Recipient FnvLGtucz4E1ppJHRTev6Qv4X7g8Pw6WPStHCcbAKbfx matches known exfiltration wallet. Blacklisted program ID in instruction 2. Frozen pre-signature.', sigs: ['wallet:BLACKLISTED', 'program:blacklisted'] },
+  cap:     { verdict: 'HALTED', cls: 'halt', why: 'Atomic runningSessionSpend accumulator: $502.40 requested against $500.00 single-session cap. Overflow rejected; accumulator unchanged.', sigs: ['cap:exceeded', '$502.40 > $500.00'] },
+  ofac:    { verdict: 'HALTED', cls: 'halt', why: 'Counterparty address matches OFAC SDN list (19,565 entries screened in-memory, 18 ms). Spend frozen and session flagged for statutory review.', sigs: ['ofac:MATCH', 'screen:19565'] }
 };
-$('#sg-run').addEventListener('click', ()=>{
+
+$('#sg-run').addEventListener('click', () => {
   const s = SG_SCENARIOS[$('#sg-scenario').value];
   $('#sg-out').innerHTML = `
     <div class="verdict ${s.cls}">
       <div class="verdict-badge">${s.verdict}</div>
       <p class="summary">${s.why}</p>
-      <div class="flags">${s.sigs.map(x=>`<div class="flag ${s.verdict==='APPROVED'?'ok':''}">${x}</div>`).join('')}</div>
+      <div class="flags">${s.sigs.map(x => `<div class="flag ${s.verdict === 'APPROVED' ? 'ok' : ''}">${x}</div>`).join('')}</div>
     </div>`;
 });
-$('#sg-cli').addEventListener('click', ()=>toast('Run: node bin/praman-gate.mjs solana-demo (5/5 scenarios)'));
+$('#sg-cli').addEventListener('click', () => toast('Run: node bin/praman-gate.mjs solana-demo (5/5 scenarios)'));
 
-/* ============================ desk 2 · ledger ============================ */
-let LEDGER = [], ledSort = {key:'index', dir:1}, ledFiltered = [];
-function median(a){ const s=[...a].sort((x,y)=>x-y); const m=s.length>>1; return s.length%2?s[m]:(s[m-1]+s[m])/2; }
-async function loadLedger(){
-  $('#lg-body').innerHTML = '<tr><td colspan="7"><div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div></td></tr>';
-  try{
+/* ============================ Desk 2 · Settlement Ledger ============================ */
+let LEDGER = [], ledSort = { key: 'index', dir: 1 }, ledFiltered = [];
+function median(a) { const s = [...a].sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+
+async function loadLedger() {
+  $('#lg-body').innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--text-muted)">Loading on-chain settlements from Sepolia…</td></tr>';
+  try {
     const res = await fetch('/api/ledger');
     const d = await res.json();
     LEDGER = d.calls || [];
     renderLedgerStats(d);
-    const intents = [...new Set(LEDGER.map(c=>c.intent))].sort();
-    $('#lg-intent').innerHTML = '<option value="">ALL INTENTS</option>' + intents.map(i=>`<option>${i}</option>`).join('');
+    const intents = [...new Set(LEDGER.map(c => c.intent))].sort();
+    $('#lg-intent').innerHTML = '<option value="">ALL INTENTS</option>' + intents.map(i => `<option>${i}</option>`).join('');
     applyLedgerFilters();
-  }catch(err){
+  } catch (err) {
     $('#lg-body').innerHTML = '';
     $('#lg-empty').hidden = false;
-    $('#lg-empty').innerHTML = 'Ledger unavailable — ' + err.message + '. <button class="btn ghost" id="lg-retry" style="min-height:32px;padding:4px 10px">Retry</button>';
+    $('#lg-empty').innerHTML = 'Ledger endpoint unavailable — ' + err.message + '. <button class="btn ghost" id="lg-retry" style="min-height:28px;padding:2px 8px;font-size:11px">Retry</button>';
     $('#lg-retry').addEventListener('click', loadLedger);
   }
 }
-function renderLedgerStats(d){
-  const uniqueMiners = new Set(LEDGER.map(c=>c.minerId)).size;
+
+function renderLedgerStats(d) {
+  const uniqueMiners = new Set(LEDGER.map(c => c.minerId)).size;
   countUp($('#lg-count'), LEDGER.length);
   countUp($('#lg-miners'), uniqueMiners);
-  countUp($('#lg-spent'), Number(d.totalSpentUsd ?? LEDGER.reduce((s,c)=>s+c.costUsd,0)), {prefix:'$', decimals:2});
-  const validDurs = LEDGER.map(c=>c.durationMs).filter(n=>typeof n==='number' && isFinite(n) && n>0);
-  countUp($('#lg-latency'), validDurs.length ? Math.round(median(validDurs)) : 0, {group:true});
+  countUp($('#lg-spent'), Number(d.totalSpentUsd ?? LEDGER.reduce((s, c) => s + c.costUsd, 0)), { prefix: '$', decimals: 2 });
+  const validDurs = LEDGER.map(c => c.durationMs).filter(n => typeof n === 'number' && isFinite(n) && n > 0);
+  countUp($('#lg-latency'), validDurs.length ? Math.round(median(validDurs)) : 0, { group: true });
 }
-function applyLedgerFilters(){
+
+function applyLedgerFilters() {
   const q = $('#lg-q').value.trim().toLowerCase();
   const intent = $('#lg-intent').value;
   ledFiltered = LEDGER.filter(c =>
     (!intent || c.intent === intent) &&
-    (!q || [c.title,c.intent,c.minerName,c.txHash,c.receiptHash].join(' ').toLowerCase().includes(q))
+    (!q || [c.title, c.intent, c.minerName, c.txHash, c.receiptHash].join(' ').toLowerCase().includes(q))
   );
-  const {key,dir} = ledSort;
-  ledFiltered.sort((a,b)=>{
-    const x=a[key], y=b[key];
-    return (typeof x==='number' ? x-y : String(x).localeCompare(String(y))) * dir;
+  const { key, dir } = ledSort;
+  ledFiltered.sort((a, b) => {
+    const x = a[key], y = b[key];
+    return (typeof x === 'number' ? x - y : String(x).localeCompare(String(y))) * dir;
   });
   const body = $('#lg-body');
-  if(!ledFiltered.length){
+  if (!ledFiltered.length) {
     body.innerHTML = '';
     $('#lg-empty').hidden = false;
-    $('#lg-empty').firstChild.textContent = 'No settlements match. ';
     return;
   }
   $('#lg-empty').hidden = true;
-  body.innerHTML = ledFiltered.map(c=>`
+  body.innerHTML = ledFiltered.map(c => `
     <tr>
       <td class="num">${c.index}</td>
-      <td style="max-width:340px">${c.title}</td>
-      <td><span class="badge">${c.intent.replace(/_/g,' ').replace(/ GENERAL$/,'')}</span></td>
+      <td style="max-width:320px;font-weight:500">${c.title}</td>
+      <td><span class="badge">${c.intent.replace(/_/g, ' ').replace(/ GENERAL$/, '')}</span></td>
       <td>${c.minerName}</td>
       <td class="num">${c.durationMs != null ? `${c.durationMs} ms` : '—'}</td>
       <td class="num">$${c.costUsd.toFixed(2)}</td>
-      <td><a class="tx" href="${ETHERSCAN}${c.txHash}" target="_blank" rel="noopener" data-tx="${c.index}">${c.txHash.slice(0,10)}…${c.txHash.slice(-8)}</a></td>
+      <td><a class="tx-link" href="${ETHERSCAN}${c.txHash}" target="_blank" rel="noopener" data-tx="${c.index}">${c.txHash.slice(0, 10)}…${c.txHash.slice(-8)}</a></td>
     </tr>`).join('');
 }
-$$('#lg-table th').forEach(th=>th.addEventListener('click', ()=>{
+
+$$('#lg-table th').forEach(th => th.addEventListener('click', () => {
   const key = th.dataset.sort;
-  ledSort = {key, dir: ledSort.key===key ? -ledSort.dir : 1};
+  ledSort = { key, dir: ledSort.key === key ? -ledSort.dir : 1 };
   applyLedgerFilters();
 }));
 $('#lg-q').addEventListener('input', applyLedgerFilters);
 $('#lg-intent').addEventListener('change', applyLedgerFilters);
-$('#lg-clear').addEventListener('click', ()=>{ $('#lg-q').value=''; $('#lg-intent').value=''; applyLedgerFilters(); });
-$('#lg-body').addEventListener('click', e=>{
+$('#lg-clear').addEventListener('click', () => { $('#lg-q').value = ''; $('#lg-intent').value = ''; applyLedgerFilters(); });
+
+$('#lg-body').addEventListener('click', e => {
   const a = e.target.closest('a[data-tx]');
-  if(!a) return;
-  const c = LEDGER.find(x=>x.index === +a.dataset.tx);
-  if(!c) return;
+  if (!a) return;
+  const c = LEDGER.find(x => x.index === +a.dataset.tx);
+  if (!c) return;
   $('#tx-drawer-body').innerHTML = [
-    ['Verification', c.title], ['Intent', c.intent], ['Miner', `${c.minerName} (#${c.minerId})`],
-    ['Endpoint', c.endpoint], ['Latency', c.durationMs != null ? `${c.durationMs} ms` : '—'], ['Cost', fmtUsd(c.costUsd)],
-    ['Timestamp', c.timestamp || '—'], ['Sepolia tx', c.txHash], ['Receipt hash', c.receiptHash || '—'],
-    ['Signal hash', c.signalHash || '—']
-  ].map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('');
+    ['Verification Target', c.title],
+    ['Intent Specification', c.intent],
+    ['Specialist Miner', `${c.minerName} (#${c.minerId})`],
+    ['Miner Endpoint', c.endpoint],
+    ['Execution Latency', c.durationMs != null ? `${c.durationMs} ms` : '—'],
+    ['Cost (USDC)', fmtUsd(c.costUsd)],
+    ['Settlement Timestamp', c.timestamp || '—'],
+    ['Sepolia Transaction Hash', `<a href="${ETHERSCAN}${c.txHash}" target="_blank" class="tx-link">${c.txHash}</a>`],
+    ['Cryptographic Receipt Hash', c.receiptHash || '—'],
+    ['Verified Signal Hash', c.signalHash || '—']
+  ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
   $('#tx-drawer').showModal();
 });
-$('#lg-export').addEventListener('click', ()=>{
-  const blob = new Blob([JSON.stringify(ledFiltered, null, 2)], {type:'application/json'});
+
+$('#lg-export').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(ledFiltered, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob); a.download = 'praman-ledger-export.json'; a.click();
   URL.revokeObjectURL(a.href);
-  toast(`Exported ${ledFiltered.length} settlements`);
+  toast(`Exported ${ledFiltered.length} settlements to JSON`);
 });
 loadLedger();
 
-/* ============================ desk 3 · mining registry ============================ */
-$('#mr-load').addEventListener('click', async ()=>{
+/* ============================ Desk 3 · Mining Registry ============================ */
+$('#mr-load').addEventListener('click', async () => {
   const out = $('#mr-out');
-  out.innerHTML = '<div class="panel"><div class="panel-bd"><div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div><div class="skeleton skeleton-row"></div></div></div>';
-  try{
+  out.innerHTML = '<div class="panel"><div class="panel-bd" style="color:var(--text-secondary)">Loading Mount Morgan statutory records from Queensland Government Survey…</div></div>';
+  try {
     const res = await fetch('/api/verify/mine-dossier?siteNo=494270');
     const d = await res.json();
     const a = d.audit || {};
     const att = d.attestation || {};
     out.innerHTML = `
       <div class="panel">
-        <div class="panel-hd"><h2>${d.siteName || 'Mine dossier'}</h2>
-        <span class="badge ${d.verified ? 'ok' : 'warn'}">${d.verdict || 'UNVERIFIED'}</span></div>
+        <div class="panel-hd">
+          <h2>${d.siteName || 'Mine Dossier'}</h2>
+          <span class="badge ${d.verified ? 'ok' : 'warn'}">${d.verdict || 'UNVERIFIED'}</span>
+        </div>
         <div class="panel-bd">
-          <p class="summary" style="margin-bottom:var(--s3)">${d.summary || ''}</p>
+          <p class="summary" style="margin-bottom:16px;color:var(--text-secondary)">${d.summary || ''}</p>
           <dl class="kv">
-            <dt>GSQ site</dt><dd class="tnum">${d.siteNo} · ${d.tenure || ''}</dd>
+            <dt>GSQ Site</dt><dd class="tnum">${d.siteNo} · ${d.tenure || ''}</dd>
             <dt>Goldfield</dt><dd>${d.goldfield || ''}</dd>
             <dt>Jurisdiction</dt><dd>${d.jurisdiction || ''}</dd>
-            <dt>Heritage record</dt><dd>${d.heritageRecord || ''}</dd>
-            <dt>WASM score</dt><dd class="tnum">${(a.wasmScoreBps ?? 0).toLocaleString()} bps</dd>
-            <dt>Variance reconciled</dt><dd>${a.discrepancyReconciled ? 'YES — ' + (a.reconciliationNotes || 'reconciled') : 'NO'}</dd>
-            <dt>Sanctions screening</dt><dd>${a.sanctionsScreening?.status || '—'} · ${Array.isArray(a.sanctionsScreening?.lists) ? a.sanctionsScreening.lists.join(', ') : ''}</dd>
+            <dt>Heritage Record</dt><dd>${d.heritageRecord || ''}</dd>
+            <dt>WASM Score</dt><dd class="tnum">${(a.wasmScoreBps ?? 0).toLocaleString()} bps</dd>
+            <dt>Variance Reconciled</dt><dd>${a.discrepancyReconciled ? 'YES — ' + (a.reconciliationNotes || 'reconciled') : 'NO'}</dd>
+            <dt>Sanctions Screening</dt><dd>${a.sanctionsScreening?.status || '—'} · ${Array.isArray(a.sanctionsScreening?.lists) ? a.sanctionsScreening.lists.join(', ') : ''}</dd>
             <dt>Confidence</dt><dd class="tnum">${(Number(d.confidence) * 100).toFixed(0)}%</dd>
-            <dt>Attestation seal</dt><dd class="mono">${att.seal || '—'}</dd>
+            <dt>Attestation Seal</dt><dd class="mono">${att.seal || '—'}</dd>
           </dl>
         </div>
       </div>`;
-  }catch(err){
-    out.innerHTML = `<div class="panel"><div class="panel-bd empty">Dossier unavailable — ${err.message}. <button class="btn ghost" onclick="location.reload()" style="min-height:32px;padding:4px 10px">Retry</button></div></div>`;
+  } catch (err) {
+    out.innerHTML = `<div class="panel"><div class="panel-bd" style="color:var(--halt-crimson)">Dossier unavailable — ${err.message}.</div></div>`;
   }
 });
 </script>
