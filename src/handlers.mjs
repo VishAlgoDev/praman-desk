@@ -6131,6 +6131,11 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       sanctionsScreeningClear: !sanctionsAddress?.matched,
       matchedSanctions: sanctionsAddress?.matches || []
     },
+    countersign: (p.countersignReportHash || p.countersignReport || p.countersignSignature) ? {
+      reportHash: p.countersignReportHash || p.countersignReport?.reportHash || null,
+      signature: p.countersignSignature || p.countersignReport?.signature || null,
+      receipts: p.countersignReport?.receipts || []
+    } : undefined,
     telegraphSettlement: liveSettlement,
     timestamp: new Date().toISOString()
   };

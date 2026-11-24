@@ -710,7 +710,8 @@ function renderLedgerStats(d){
   countUp($('#lg-count'), LEDGER.length);
   countUp($('#lg-miners'), uniqueMiners);
   countUp($('#lg-spent'), Number(d.totalSpentUsd ?? LEDGER.reduce((s,c)=>s+c.costUsd,0)), {prefix:'$', decimals:2});
-  countUp($('#lg-latency'), Math.round(median(LEDGER.map(c=>c.durationMs))), {group:true});
+  const validDurs = LEDGER.map(c=>c.durationMs).filter(n=>typeof n==='number' && isFinite(n) && n>0);
+  countUp($('#lg-latency'), validDurs.length ? Math.round(median(validDurs)) : 0, {group:true});
 }
 function applyLedgerFilters(){
   const q = $('#lg-q').value.trim().toLowerCase();
@@ -738,7 +739,7 @@ function applyLedgerFilters(){
       <td style="max-width:340px">${c.title}</td>
       <td><span class="badge">${c.intent.replace(/_/g,' ').replace(/ GENERAL$/,'')}</span></td>
       <td>${c.minerName}</td>
-      <td class="num">${c.durationMs} ms</td>
+      <td class="num">${c.durationMs != null ? `${c.durationMs} ms` : '—'}</td>
       <td class="num">$${c.costUsd.toFixed(2)}</td>
       <td><a class="tx" href="${ETHERSCAN}${c.txHash}" target="_blank" rel="noopener" data-tx="${c.index}">${c.txHash.slice(0,10)}…${c.txHash.slice(-8)}</a></td>
     </tr>`).join('');
@@ -758,9 +759,9 @@ $('#lg-body').addEventListener('click', e=>{
   if(!c) return;
   $('#tx-drawer-body').innerHTML = [
     ['Verification', c.title], ['Intent', c.intent], ['Miner', `${c.minerName} (#${c.minerId})`],
-    ['Endpoint', c.endpoint], ['Latency', `${c.durationMs} ms`], ['Cost', fmtUsd(c.costUsd)],
-    ['Timestamp', c.timestamp], ['Sepolia tx', c.txHash], ['Receipt hash', c.receiptHash],
-    ['Signal hash', c.signalHash]
+    ['Endpoint', c.endpoint], ['Latency', c.durationMs != null ? `${c.durationMs} ms` : '—'], ['Cost', fmtUsd(c.costUsd)],
+    ['Timestamp', c.timestamp || '—'], ['Sepolia tx', c.txHash], ['Receipt hash', c.receiptHash || '—'],
+    ['Signal hash', c.signalHash || '—']
   ].map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('');
   $('#tx-drawer').showModal();
 });
