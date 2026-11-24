@@ -1,7 +1,7 @@
 {
   "name": "praman-desk",
   "version": "1.0.0",
-  "description": "Praman Desk — Autonomous Pre-Payment Spend Guard & Counterparty Clearing Desk (MCP Server + WebAssembly Deterministic Comparator + Telegraph Protocol Paid Miner / Evaluator Network).",
+  "description": "Praman Desk \u2014 Autonomous Pre-Payment Spend Guard & Counterparty Clearing Desk (MCP Server + WebAssembly Deterministic Comparator + Telegraph Protocol Paid Miner / Evaluator Network).",
   "type": "module",
   "main": "packages/praman-sdk/index.js",
   "exports": {
@@ -44,7 +44,8 @@
     "eval:submit": "node scripts/submit-eval.mjs",
     "app:demo": "node compliance-auditor-app/audit-demo.mjs",
     "web": "node web/server.mjs",
-    "bounty:claim-and-submit": "node scripts/bounty-submit-helper.mjs"
+    "bounty:claim-and-submit": "node scripts/bounty-submit-helper.mjs",
+    "start": "node web/server.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",

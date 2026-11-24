@@ -5634,6 +5634,63 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       statedTotal: p.statedTotal ?? 80000.00,
       ...p
     };
+  } else if (scenario === 'alibaba_missing_evidence') {
+    p = {
+      agentId: p.agentId || 'alibaba-trade-assurance-agent',
+      recipientAddress: p.recipientAddress || '0x4D224452801ACEd8B2F0aebE155379bb5D594381',
+      vendorName: p.vendorName || 'Siemens Aktiengesellschaft',
+      vendorJurisdiction: p.vendorJurisdiction || 'DE',
+      spendAmountUsdc: p.spendAmountUsdc ?? 60000.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 150000,
+      supervisorSignature: p.supervisorSignature || '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466d3a948192305bad61042781bcf8291048291823ba78192304891283ba192384fca81',
+      invoiceId: p.invoiceId || 'INV-ALI-9023-MISSING-EVIDENCE',
+      lineItems: p.lineItems || [
+        { desc: 'Industrial Automation Sensors (Supplier claims full delivery: 60 units @ $1,000.00 — no goods-received note on file)', qty: 60, unitPrice: 1000.00, amount: 60000.00 }
+      ],
+      statedSubtotal: p.statedSubtotal ?? 60000.00,
+      statedTax: p.statedTax ?? 0,
+      statedTotal: p.statedTotal ?? 60000.00,
+      ...p
+    };
+  } else if (scenario === 'alibaba_conflicting_reports') {
+    p = {
+      agentId: p.agentId || 'alibaba-trade-assurance-agent',
+      recipientAddress: p.recipientAddress || '0x4D224452801ACEd8B2F0aebE155379bb5D594381',
+      vendorName: p.vendorName || 'Siemens Aktiengesellschaft',
+      vendorJurisdiction: p.vendorJurisdiction || 'DE',
+      spendAmountUsdc: p.spendAmountUsdc ?? 50000.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 150000,
+      supervisorSignature: p.supervisorSignature || '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466d3a948192305bad61042781bcf8291048291823ba78192304891283ba192384fca81',
+      invoiceId: p.invoiceId || 'INV-ALI-9024-CONFLICTING-REPORTS',
+      lineItems: p.lineItems || [
+        { desc: 'Industrial Automation Sensors (Inspector SGS: 50 conforming vs Warehouse tally: 32 conforming / 18 damaged — reports conflict)', qty: 50, unitPrice: 1000.00, amount: 50000.00 }
+      ],
+      statedSubtotal: p.statedSubtotal ?? 50000.00,
+      statedTax: p.statedTax ?? 0,
+      statedTotal: p.statedTotal ?? 50000.00,
+      ...p
+    };
+  } else if (scenario === 'alibaba_refund') {
+    p = {
+      agentId: p.agentId || 'alibaba-trade-assurance-agent',
+      recipientAddress: p.recipientAddress || '0x4D224452801ACEd8B2F0aebE155379bb5D594381',
+      vendorName: p.vendorName || 'Siemens Aktiengesellschaft',
+      vendorJurisdiction: p.vendorJurisdiction || 'DE',
+      spendAmountUsdc: p.spendAmountUsdc ?? 40000.00,
+      singleAgentCap: p.singleAgentCap ?? 500,
+      dualApprovalCap: p.dualApprovalCap ?? 150000,
+      supervisorSignature: p.supervisorSignature || '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466d3a948192305bad61042781bcf8291048291823ba78192304891283ba192384fca81',
+      invoiceId: p.invoiceId || 'INV-ALI-9025-FULL-REFUND',
+      lineItems: p.lineItems || [
+        { desc: 'Industrial Automation Sensors (Cainiao receipt: 0 conforming units — vessel CN-LAX-88299 never discharged, full rejection)', qty: 40, unitPrice: 1000.00, amount: 40000.00 }
+      ],
+      statedSubtotal: p.statedSubtotal ?? 40000.00,
+      statedTax: p.statedTax ?? 0,
+      statedTotal: p.statedTotal ?? 40000.00,
+      ...p
+    };
   }
 
   // Dynamic NLP parameter extraction if a raw prompt is provided
@@ -6100,7 +6157,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   payload.verdictColor = circuitBreakerTriggered ? '#f87171' : '#34d399';
   payload.certHash = attestationDigest;
 
-  const isAlibaba = scenario === 'alibaba_trade' || scenario === 'alibaba_reconciled' || /Alibaba|Cainiao|ALI-9021/i.test(p.prompt || p.question || '');
+  const isAlibaba = scenario === 'alibaba_trade' || scenario === 'alibaba_reconciled' || scenario === 'alibaba_missing_evidence' || scenario === 'alibaba_conflicting_reports' || scenario === 'alibaba_refund' || /Alibaba|Cainiao|ALI-9021/i.test(p.prompt || p.question || '');
   if (isAlibaba) {
     const poCommitmentVal = Number(p.poCommitment || p.poTotal || (scenario === 'alibaba_reconciled' ? 100000 : (p.statedTotal || 100000)));
     const actualConformingVal = Number(p.spendAmountUsdc || (scenario === 'alibaba_reconciled' ? 80000 : (spendAmountUsdc || 80000)));
@@ -6111,7 +6168,58 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     const damagedUnits = Math.max(0, totalUnits - conformingUnits);
     const driftPct = totalUnits > 0 ? Math.round((shortfallVal / poCommitmentVal) * 100) : 20;
 
-    if (scenario === 'alibaba_reconciled' || (spendAmountUsdc === actualConformingVal && wasmMatch && !circuitBreakerTriggered)) {
+    if (scenario === 'alibaba_missing_evidence') {
+      const billedUnits = Math.round(poCommitmentVal / unitPrice) || 60;
+      payload.status = 'ON_HOLD';
+      payload.verdict = 'HOLD_PENDING_EVIDENCE';
+      payload.policyDecision = 'EVIDENCE_INSUFFICIENT_HOLD';
+      payload.verdictHeadline = `ALIBABA TRADE ASSURANCE HOLD — EVIDENCE INSUFFICIENT ($${poCommitmentVal.toLocaleString()} HELD IN ESCROW)`;
+      payload.verdictText = `HOLD — GOODS-RECEIVED NOTE MISSING ($${poCommitmentVal.toLocaleString()} HELD, NOT RELEASED)`;
+      payload.verdictColor = '#facc15';
+      payload.flags = [...(payload.flags || []), 'MISSING_GOODS_RECEIVED_NOTE', 'CANNOT_VERIFY_DELIVERY', 'ESCROW_HOLD_PENDING_EVIDENCE'];
+      payload.summary = `Escrow hold, not a halt: line-item math is bit-exact, but the decisive evidence is absent. Supplier invoices ${billedUnits} units ($${poCommitmentVal.toLocaleString()}.00) yet no goods-received note or Cainiao warehouse receipt exists for contract #ALI-9023. Delivery cannot be verified or refuted, so $${poCommitmentVal.toLocaleString()}.00 USDC stays secured in TakarSettle v4 escrow and an evidence request is issued to the supplier. No release without verified receipt.`;
+      payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_EVIDENCE_COMPLETENESS\n• Platform: Alibaba Trade Assurance Contract #ALI-9023\n• PO Commitment: ${billedUnits} industrial units @ $1,000.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Supplier Claim: Full delivery of ${billedUnits} units, invoice INV-ALI-9023-MISSING-EVIDENCE\n• Delivery & Warehouse Evidence: ABSENT — no goods-received note, no Cainiao receipt, no Port of LA inbound record\n• Arithmetic: Invoice line-item math internally consistent (WASM bit-exact) — consistency is NOT proof of delivery`;
+      payload.reviewerFindings = `• Evidence Completeness Gate: FAIL (0 of 1 required delivery artifacts on file)\n• WASM Fixed-Point Arithmetic: no discrepancy found — case turns on missing evidence, not bad math\n• Required to clear: goods-received note signed by buyer warehouse OR Cainiao delivery receipt with unit-level tally\n• Circuit Breaker: Not triggered (no overbilling detected) — disposition is evidentiary hold`;
+      payload.easSchemaUid = '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04';
+      payload.settlementContract = '0x310275e6D66818E068245326bB9e398822304248';
+      payload.certHash = '0x' + crypto.createHash('sha256').update('ALIBABA-EVIDENCE-HOLD:' + JSON.stringify(payload)).digest('hex');
+    } else if (scenario === 'alibaba_conflicting_reports') {
+      const billedUnits = Math.round(poCommitmentVal / unitPrice) || 50;
+      const inspectorClaimUnits = Number(p.inspectorConformingUnits ?? billedUnits);
+      const warehouseClaimUnits = Number(p.warehouseConformingUnits ?? 32);
+      const conflictUnits = Math.abs(inspectorClaimUnits - warehouseClaimUnits);
+      const conflictVal = conflictUnits * unitPrice;
+      const conflictPct = billedUnits > 0 ? ((conflictUnits / billedUnits) * 100).toFixed(1) : '0.0';
+      payload.status = 'DISPUTED';
+      payload.verdict = 'ARBITRATION_REQUIRED';
+      payload.policyDecision = 'CONFLICTING_EVIDENCE_ARBITRATION';
+      payload.verdictHeadline = `ALIBABA TRADE ASSURANCE DISPUTE — CONFLICTING INSPECTION REPORTS ($${conflictVal.toLocaleString()} IN CONFLICT)`;
+      payload.verdictText = `ARBITRATION REQUIRED — REPORTS CONFLICT ON ${conflictUnits} UNITS ($${conflictVal.toLocaleString()})`;
+      payload.verdictColor = '#facc15';
+      payload.flags = [...(payload.flags || []), 'CONFLICTING_INSPECTION_REPORTS', `UNIT_COUNT_VARIANCE_${conflictUnits}_UNITS`, 'TAKAR_PANEL_ARBITRATION_QUEUED'];
+      payload.summary = `Two independent inspection reports disagree on the same shipment, so neither can settle it. Inspector report (SGS, pre-shipment) certifies ${inspectorClaimUnits} of ${billedUnits} units conforming; the Port of LA warehouse tally (post-arrival) counts ${warehouseClaimUnits} conforming and ${billedUnits - warehouseClaimUnits} damaged — a ${conflictUnits}-unit / ${conflictPct}% variance worth $${conflictVal.toLocaleString()}.00. Payment condition cannot be established from contradictory evidence: the low-confidence figure ($${(warehouseClaimUnits * unitPrice).toLocaleString()}.00 maximum) is held in TakarSettle v4 escrow and the ${conflictUnits}-unit variance is queued for Takar panel arbitration with both reports anchored as EAS attestations.`;
+      payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_CONFLICTING_EVIDENCE_ARBITRATION\n• Platform: Alibaba Trade Assurance Contract #ALI-9024\n• PO Commitment: ${billedUnits} industrial units @ $1,000.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Evidence A (Inspector, pre-shipment): ${inspectorClaimUnits} conforming units certified\n• Evidence B (Warehouse, post-arrival): ${warehouseClaimUnits} conforming, ${billedUnits - warehouseClaimUnits} damaged/rejected\n• Variance: ${conflictUnits} units ($${conflictVal.toLocaleString()}.00 / ${conflictPct}% drift) — contradictory, not additive`;
+      payload.reviewerFindings = `• Conflict Detection: ${conflictUnits}-unit variance between independent verifiers (${conflictPct}% of consignment)\n• WASM 3-Way Math Comparator: invoice math bit-exact vs BOTH claims — arithmetic cannot resolve a factual dispute\n• Disposition Rule: when material evidence conflicts, settle on the buyer-protective figure pending arbitration; never average, never assume\n• Takar Escrow Panel (Sepolia): arbitration docket opened; both reports anchored as attestations for panel review`;
+      payload.easSchemaUid = '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04';
+      payload.settlementContract = '0x310275e6D66818E068245326bB9e398822304248';
+      payload.certHash = '0x' + crypto.createHash('sha256').update('ALIBABA-CONFLICTING-EVIDENCE-ARBITRATION:' + JSON.stringify(payload)).digest('hex');
+    } else if (scenario === 'alibaba_refund') {
+      const billedUnits = Math.round(poCommitmentVal / unitPrice) || 40;
+      const conformingUnitsRefund = Number(p.conformingUnits ?? 0);
+      payload.status = 'REFUNDED';
+      payload.verdict = 'FULL_REFUND_APPROVED';
+      payload.policyDecision = 'FULL_REFUND_TO_BUYER';
+      payload.verdictHeadline = `ALIBABA TRADE ASSURANCE FULL REFUND ($${poCommitmentVal.toLocaleString()} RETURNED TO BUYER)`;
+      payload.verdictText = `FULL REFUND APPROVED — $${poCommitmentVal.toLocaleString()} USDC RETURNED TO BUYER`;
+      payload.verdictColor = '#34d399';
+      payload.flags = [...(payload.flags || []), 'ZERO_CONFORMING_UNITS', 'DELIVERY_CONDITION_UNSATISFIED', 'FULL_REFUND_EXECUTED'];
+      payload.summary = `Verified non-delivery settles as a full refund, not a partial reconciliation. Cainiao receipt CN-LAX-88299 records 0 of ${billedUnits} billed units discharged — the vessel never off-loaded and the buyer's warehouse accepted nothing. The payment condition (${billedUnits} conforming units into US inventory) is wholly unsatisfied, so the full $${poCommitmentVal.toLocaleString()}.00 USDC is refunded to the Buyer from TakarSettle v4 escrow, $0.00 released to Siemens Aktiengesellschaft, and the non-delivery is anchored as an EAS attestation on the settlement record.`;
+      payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_NON_DELIVERY_REFUND\n• Platform: Alibaba Trade Assurance Contract #ALI-9025\n• PO Commitment: ${billedUnits} industrial units @ $1,000.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Delivery & Warehouse Evidence: Cainiao receipt CN-LAX-88299 — 0 units discharged, vessel never completed off-load\n• Supplier Claim: Invoice INV-ALI-9025-FULL-REFUND bills the full ${billedUnits} units`;
+      payload.reviewerFindings = `• Conforming-Unit Count: 0 / ${billedUnits} accepted into Port of LA inventory\n• WASM 3-Way Math Comparator: stated $${poCommitmentVal.toLocaleString()}.00 vs conforming $0.00 — 100% shortfall (WASM_3WAY_MATH_MISMATCH)\n• Payment Condition: 0% satisfied → full refund, no partial release, no supplier credit memo\n• Disbursement: $${poCommitmentVal.toLocaleString()}.00 USDC refunded to Buyer, $0.00 to supplier — settled on TakarSettle v4`;
+      payload.easSchemaUid = '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04';
+      payload.settlementContract = '0x310275e6D66818E068245326bB9e398822304248';
+      payload.certHash = '0x' + crypto.createHash('sha256').update('ALIBABA-FULL-REFUND-NON-DELIVERY:' + JSON.stringify(payload)).digest('hex');
+    } else if (scenario === 'alibaba_reconciled' || (spendAmountUsdc === actualConformingVal && wasmMatch && !circuitBreakerTriggered)) {
       payload.status = 'APPROVED';
       payload.verdict = 'CLEAR_FOR_PAYMENT';
       payload.verdictHeadline = `ALIBABA TRADE ASSURANCE RECONCILED SETTLEMENT APPROVED ($${actualConformingVal.toLocaleString()} DISBURSED)`;

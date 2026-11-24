@@ -580,7 +580,21 @@ async function run() {
       throw new Error(`GET /api/miner/grid-power-price (ERCOT Houston) failed: ${JSON.stringify(ercotCheck)}`);
     }
 
-    console.log('\nALL 28 ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM, MISSION 02, GRID POWER PRICING & GENERALIZED MULTI-MINER AGGREGATION VERIFIED!');
+    // 29. Trade Assurance evidence dispositions (missing evidence hold / conflicting reports arbitration / non-delivery refund)
+    const taMissing = await check('/api/trade-assurance/audit', 'POST', { poNumber: 'PO-ALI-9023', pierPassReceiptId: 'CN-LAX-88201', scenario: 'alibaba_missing_evidence', disputeResolutionAuthorized: false, reconciledDisbursementUsdc: 0 });
+    if (taMissing.status !== 200 || taMissing.json.status !== 'ON_HOLD' || taMissing.json.verdict !== 'HOLD_PENDING_EVIDENCE' || taMissing.json.policyDecision !== 'EVIDENCE_INSUFFICIENT_HOLD' || !taMissing.json.certHash) {
+      throw new Error(`Trade Assurance missing-evidence hold failed: ${JSON.stringify(taMissing.json?.status)}`);
+    }
+    const taConflict = await check('/api/trade-assurance/audit', 'POST', { poNumber: 'PO-ALI-9024', pierPassReceiptId: 'CN-LAX-88201', scenario: 'alibaba_conflicting_reports', disputeResolutionAuthorized: false, reconciledDisbursementUsdc: 0 });
+    if (taConflict.status !== 200 || taConflict.json.status !== 'DISPUTED' || taConflict.json.verdict !== 'ARBITRATION_REQUIRED' || taConflict.json.policyDecision !== 'CONFLICTING_EVIDENCE_ARBITRATION') {
+      throw new Error(`Trade Assurance conflicting-reports arbitration failed: ${JSON.stringify(taConflict.json?.status)}`);
+    }
+    const taRefund = await check('/api/trade-assurance/audit', 'POST', { poNumber: 'PO-ALI-9025', pierPassReceiptId: 'CN-LAX-88299', scenario: 'alibaba_refund', disputeResolutionAuthorized: false, reconciledDisbursementUsdc: 0 });
+    if (taRefund.status !== 200 || taRefund.json.status !== 'REFUNDED' || taRefund.json.verdict !== 'FULL_REFUND_APPROVED' || taRefund.json.policyDecision !== 'FULL_REFUND_TO_BUYER') {
+      throw new Error(`Trade Assurance full-refund disposition failed: ${JSON.stringify(taRefund.json?.status)}`);
+    }
+
+    console.log('\nALL 28 ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM, MISSION 02, GRID POWER PRICING, GENERALIZED MULTI-MINER AGGREGATION & TRADE ASSURANCE EVIDENCE DISPOSITIONS VERIFIED!');
   } finally {
     server.close();
   }
