@@ -785,3 +785,8 @@ ode scratch/test_e2e_endpoints.mjs: ALL E2E ENDPOINTS VERIFIED WITH ZERO ERRORS.
 - Excluded from push: public/praman_showcase_4act.mp4 and public/audio narration (dropped video pipeline).
 - Checks: node scripts/test-endpoints-local.mjs — ALL 28 ENDPOINTS + TRADE ASSURANCE EVIDENCE DISPOSITIONS VERIFIED.
 - Deploy: vercel --prod --yes (production alias praman-desk.vercel.app).
+
+## 2026-11-24T12:25:00Z — Push via gh device-login token (auth blocker resolved)
+- Resolved persistent 403 on git push: Vault fine-grained tokens lacked Contents: write. gh device login (user VishAlgoDev, scopes repo+workflow) succeeded; git credential helper switched via gh auth setup-git.
+- Rebased local commit onto origin/main (remote had docs commits 0e8574b, 4eb9c15) and pushed 57887b1 to origin/main. GitHub->Vercel auto-deploy.
+- Stashed/restored untracked WIP (narration audio, .mlai) — excluded from push per user instruction.
