@@ -644,9 +644,11 @@ ode scripts/build-showcase-4act-pipeline.mjs: 100% PASS (16/16 keywords verified
 - **Root Cause & Fix**:
   - Context: Prompts with line-item multiplication (e.g. PO-7781: 1000 units x USD 12.40 = USD 12,400.00) previously dropped into naive fallback logic extracting numbers [12.40, 12400.00] and assigning min() (.40) to ledger, falsely flagging a ,387.60 variance.
   - Implemented explicit equation regex pattern matching QTY units x UNIT_PRICE = TOTAL_AMOUNT in src/intelligence/dynamic-solver.mjs.
-  - Verified QTY * UNIT_PRICE == TOTAL_AMOUNT, bound illedQty, cceptedQty, and unitPrice, and cross-checked against explicit invoice totals. Returns econciled: true, discrepancy: 0 on exact arithmetic tie-outs.
+  - Verified QTY * UNIT_PRICE == TOTAL_AMOUNT, bound illedQty, cceptedQty, and unitPrice, and cross-checked against explicit invoice totals. Returns 
+econciled: true, discrepancy: 0 on exact arithmetic tie-outs.
 - **Regression Verification**:
-  - In scripts/test-endpoints-local.mjs: Added test call for invoice=INV-7781: USD 12,400.00 & ledger=PO-7781: 1000 units x USD 12.40 = USD 12,400.00, asserting econciled === true && discrepancy === 0.
+  - In scripts/test-endpoints-local.mjs: Added test call for invoice=INV-7781: USD 12,400.00 & ledger=PO-7781: 1000 units x USD 12.40 = USD 12,400.00, asserting 
+econciled === true && discrepancy === 0.
   - Staged counterfactual benchmark diff in docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md.
   - Full suite verification: 
 ode scripts/test-endpoints-local.mjs (all 28 endpoints and regression guards passed 100%) and 
@@ -657,7 +659,8 @@ ode scripts/verify-15-miner-endpoints.mjs (17/17 passed 100%).
 - **Verification Proof & Artifact Checks**:
   1. **Phase 1: Miner 6164 (INVOICE_LEDGER_RECONCILE_GENERAL) Equation Matcher**:
      - Verified equation regex pattern in src/intelligence/dynamic-solver.mjs matching structured PO equation (QTY units x UNIT_PRICE = TOTAL_AMOUNT).
-     - Regression test verified in scripts/test-endpoints-local.mjs: INV-7781: USD 12,400.00 vs PO-7781: 1000 units x USD 12.40 = USD 12,400.00 asserts econciled: true, discrepancy: 0.
+     - Regression test verified in scripts/test-endpoints-local.mjs: INV-7781: USD 12,400.00 vs PO-7781: 1000 units x USD 12.40 = USD 12,400.00 asserts 
+econciled: true, discrepancy: 0.
      - Zero false variance flags.
   2. **Phase 2: Takar On-Chain Dispute Resolution Broadcasts**:
      - Executed via contributor wallet  x98021b20Efdb7ae2C57366010a6E0fDE207b4466.
@@ -667,7 +670,8 @@ ode scripts/verify-15-miner-endpoints.mjs (17/17 passed 100%).
      - Full execution receipts and Etherscan verification links verified in evidence/takar-resolver-receipts.json.
   3. **Phase 3: Tier-1 Obsidian FinTech Portal Overhaul (public/index.html)**:
      - Deep obsidian canvas (#060911) with sapphire/cyan radial mesh gradients and Liquid Glass 2.0 specular rims.
-     - Dynamic cursor spotlight engine via equestAnimationFrame tracking --mouse-x, --mouse-y.
+     - Dynamic cursor spotlight engine via 
+equestAnimationFrame tracking --mouse-x, --mouse-y.
      - Sliding-pill tab transition physics (cubic-bezier(0.16, 1, 0.3, 1)).
      - Header multi-miner consensus ribbon displaying Praman #5281, Takar #20261117, FactWire #74351, Impostor67 #731005 with live /api/health heartbeat ping (● 14ms).
      - In-browser interactive Developer Console Drawer (<dialog id="dev-drawer">) with 28-route playground, live execution, latency timer, and 1-click copyable Keyless MCP Server JSON.
@@ -876,3 +880,116 @@ pm run alibaba:demo: Cases A and B verified.
   - `node scripts/test-endpoints-local.mjs`: ALL 28 ENDPOINTS VERIFIED.
   - `node scripts/verify-15-miner-endpoints.mjs`: 17/17 ENDPOINTS PASSED.
   - `npm run alibaba:demo`: Cases A and B verified.
+
+## 2026-11-25T11:05:00Z — Disposition Board tab added to portal (design direction: disposition-board)
+- New Desk 0 "Disposition Board" in public/index.html: four-lane board (Hold / Release / Partial / Refund) with real case data (PO-ALI-9021 $100k vs $80k computed; PO-7781 reconciled; CN-LAX-88201 partial; PO-DEMO-REF refund), arbitration flag, case drawer (native <dialog>) with escrow/computed/disposition/variance grid, receipt rail fed by live /api/ledger with Etherscan links.
+- Existing desks preserved and renumbered: Trade Assurance (1), Spend Guard (2), Settlement Ledger (3), Mining Registry (4); hash routes, ⌘K search and DESK_NAMES updated; hero CTAs point to #disposition-board / #trade-assurance.
+- Fixed latent crash paths surfaced by renumbering: TDZ-safe LEDGER access, null-safe countUp/blueprint morph/hero replay.
+- Verification: npm test exit 0 (51/51), node scripts/test-endpoints-local.mjs ALL 28 ENDPOINTS VERIFIED, browser 390px and 1280px pass (no page errors, no overflow, drawer + ledger error state asserted).
+- Post-check fixes: header wraps on small screens (topbar/brand-group/topbar-actions), KPI value 17px under 480px, --text-muted brightened #666666→#8a8a8a (labels to ~4.5:1+). Browser 390px & 1280px re-verified: 0 page errors, 0 clipped text, 0 low-contrast; only transient count-up overlap sample on KPI value mid-animation; /api/ledger 404 is the static preview only (real server serves it, verified on :3001).
+
+## 2026-11-25 — Portal hash navigation verification
+- Fixed public/index.html to switch desks on hashchange, including returning to Disposition Board. The Open a live case link previously changed the fragment without displaying Trade Assurance.
+- Before this edit: timeout 90 npm test exited 0. After this edit: inline script parsing and node scripts/test-endpoints-local.mjs exited 0; browser navigation at 390px and 1280px passed with no page/console errors, failed requests, overflow, clipping, overlaps, or low-contrast findings.
+- No push or deployment. Repository-wide git diff --check reports trailing whitespace in the pre-existing modified benchmark report; npm test refreshed its generated timestamp. Unrelated changes retained.
+
+## 2026-11-25T13:05:00Z — Portal Transformation Master Plan checkpoint delivered
+- Wrote `docs/PORTAL_TRANSFORMATION_MASTER_PLAN.md`: preservation audit (original vs newer capabilities, access gaps, destinations), honesty labels plan (LIVE / WORKED EXAMPLE / RECORDED), design decisions, hackathon constraints, build order.
+- Checks run this turn: `npm test` full suite PASS (Python SDK 9/9 shown; 15 stages green); `node scripts/test-endpoints-local.mjs` ALL 28 ENDPOINTS & REGRESSION GUARDS VERIFIED; browser checks at 390px and 1280px PASSED (no page errors, no overflow, no clipping).
+- Known: static preview host returns 404 for `/api/ledger` (no Node backend behind static preview); endpoint check covers it locally and passed.
+- No portal code changed in this step.
+
+## 2026-11-25T13:30:00Z — Master plan execution: honesty labels, Desk 05 Procurement Verify, Evidence table
+- Step 1: LIVE / WORKED EXAMPLE / RECORDED badges added to KPI strip and all desk headers (`.evidence-live/-example/-recorded`, `.evidence-note` in public/index.html).
+- Step 2: New Desk 05 "Procurement Verify" (section#desk-5): five live panels wired to existing APIs — `/api/miner/po-verify`, `invoice-reconcile`, `corporate-registry`, `vendor-verify` + `doc-authenticity`, `sanctions-screen`. Nav tab, `DESK_NAMES`, hash map extended (`#procurement-verify`).
+- Step 3: Evidence table from `docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md` (5 vectors, $79,373 averted, reproduce command included), labelled RECORDED.
+- Fixed during build: sanctions card was accidentally replaced by the evidence card in an Edit; restored. Panels re-styled to `--bg-surface-elevated` + `--border-subtle` (light card style clashed with dark theme).
+- Verification (all run this turn): `node scripts/test-endpoints-local.mjs` ALL 28 ENDPOINTS VERIFIED; `npm test` full suite PASS (Python SDK 9/9); inline JS parses (1 script, vm.Script OK); browser 1280px PASS (0 overflow / 0 clipped / 0 overlap / 0 low-contrast); browser 390px PASS (same, zero layout issues); live curl of `/api/miner/sanctions-screen?name=Banco%20Nacional%20de%20Cuba` on 127.0.0.1:3402 returned 200.
+- Known environment quirk: static preview host (port 3000) has no Node backend — `/api/*` 404 there; APIs verified on 3402. Not a code defect.
+- Not done (needs user go): Step 4 full design polish pass; production deployment (blocked from this shell by repository policy — deploy runs through the product's release flow).
+
+
+## 2026-11-25T13:24:00+00:00 — Disposition Board design applied to portal (saved design set 37e0b4ee)
+- Applied Disposition Board identity tokens in public/index.html: --bg-base #15131C, --bg-surface #1B1824, --brand #FF7A59 (all hardcoded blue tints recolored).
+- Fixed false 'MAINNET READY' hero claim -> 'SEPOLIA LIVE · MAINNET-PATH ARCHITECTURE'; hero CTA now routes to live Procurement Verify (desk-5).
+- Added signature move: case cards physically travel between lanes (FLIP animation) via 'Evidence arrives' + MOVE CARD control on Desk 0.
+- Mobile fixes: tab-nav wrap/scroll, single-column lanes <=480px, HUD overflow hidden, desk scroll-margin; fixed header no longer covers desk content.
+- Verification: inline script syntax OK; node scripts/test-endpoints-local.mjs ALL 28 VERIFIED (exit 0); npm test all suites passed (exit 0); browser 1280px & 390px: 0 overlaps, 0 clipped, 0 low-contrast, no horizontal overflow; live move interaction passed at both widths. Only console error is known static-preview /api/ledger 404.
+
+
+## 2026-11-25T13:26:52+00:00 — Disposition Board design applied to portal (saved design set 37e0b4ee)
+- Applied Disposition Board identity tokens in public/index.html: --bg-base #15131C, --bg-surface #1B1824, --brand #FF7A59 (all hardcoded blue tints recolored).
+- Fixed false 'MAINNET READY' hero claim -> 'SEPOLIA LIVE · MAINNET-PATH ARCHITECTURE'; hero CTA now routes to live Procurement Verify (desk-5).
+- Added signature move: case cards physically travel between lanes (FLIP animation) via 'Evidence arrives' + MOVE CARD control on Desk 0.
+- Mobile fixes: tab-nav wrap/scroll, single-column lanes <=480px, HUD overflow hidden, desk scroll-margin; fixed header no longer covers desk content.
+- Verification: inline script syntax OK; node scripts/test-endpoints-local.mjs ALL 28 VERIFIED (exit 0); npm test all suites passed (exit 0); browser 1280px & 390px: 0 overlaps, 0 clipped, 0 low-contrast, no horizontal overflow; live move interaction passed at both widths. Only console error is known static-preview /api/ledger 404.
+
+
+## 2026-11-25T13:29:45+00:00 — Mobile overlap cleanup (Audit trail to Disposition Board entry)
+- Removed decorative 'Replay Blueprint' floating button and PlotReveal hover-marquee layers in public/index.html (flagged AI slop; overlapped hero text on mobile).
+- Shortened EAS registry sub-label; flowing-sub wraps below title at <=640px.
+- Verification: independent geometry probe at 390px = NO OVERLAPS; official browser check 1280px = 0 overlaps / 0 clipped / 0 low-contrast, no overflow, move interaction passed; 390px = 0 clipped, 0 low-contrast, no overflow, move interaction passed, remaining 10 'overlaps' are parent-child tab-nav containment pairs (false positives; visual screenshot clean). Endpoint suite exit 0.
+
+
+## 2026-11-25T13:30:47+00:00 — Disposition Board design applied to portal (saved design set 37e0b4ee)
+- Applied Disposition Board identity tokens in public/index.html: --bg-base #15131C, --bg-surface #1B1824, --brand #FF7A59 (all hardcoded blue tints recolored).
+- Fixed false 'MAINNET READY' hero claim -> 'SEPOLIA LIVE · MAINNET-PATH ARCHITECTURE'; hero CTA now routes to live Procurement Verify (desk-5).
+- Added signature move: case cards physically travel between lanes (FLIP animation) via 'Evidence arrives' + MOVE CARD control on Desk 0.
+- Mobile fixes: tab-nav wrap/scroll, single-column lanes <=480px, HUD overflow hidden, desk scroll-margin; fixed header no longer covers desk content.
+- Verification: inline script syntax OK; node scripts/test-endpoints-local.mjs ALL 28 VERIFIED (exit 0); npm test all suites passed (exit 0); browser 1280px & 390px: 0 overlaps, 0 clipped, 0 low-contrast, no horizontal overflow; live move interaction passed at both widths. Only console error is known static-preview /api/ledger 404.
+
+## 2026-11-25T14:07:50+00:00 — Continuation verification pass + mobile clipping fix (public/index.html)
+- Inline-script syntax check on current public/index.html: 1 script, 0 failures.
+- node scripts/test-endpoints-local.mjs: ALL 28 ENDPOINTS ... VERIFIED (exit 0).
+- timeout 120 npm test: full suite passed, final stage All Python SDK Tests Passed (9/9).
+- Browser 1280px: 0 overlaps / 0 clipped / 0 low-contrast / no horizontal overflow; Procurement Verify live PO form filled and submitted (static-preview /api 404s expected; APIs verified locally).
+- Browser 390px fix: evidence table forced width:100% clipped mono flag cells; added min-width:640px inside existing overflow-x:auto wrapper. Re-check: 0 clipped / 0 overlaps / 0 low-contrast / no horizontal overflow.
+- No desks, demos, SDKs or datasets removed.
+
+## 2026-11-25T14:19:09+00:00 — Continuation verification of Disposition Board build (no code changes this turn)
+- Confirmed design tokens (#15131C / #1B1824 / #FF7A59) and Disposition Board markup present in public/index.html.
+- `node scripts/test-endpoints-local.mjs`: ALL 28 ENDPOINTS ... VERIFIED! (exit 0).
+- Browser 1280x900: success:true, 0 clippedText, 0 overlaps, 0 lowContrast, no horizontal overflow; MOVE CARD interaction moved PO-ALI-9021 between lanes with correct lane counts (drawer opened, WASM Circuit Breaker text shown).
+- Browser 390x844: success:true, 0 clipped, 0 lowContrast, no overflow; interaction fired ("PO-ALI-9021 moved to RELEASE"). Checker still reports 10 parent-child containment false positives (tab buttons vs nav container), matching the earlier geometry probe.
+- `timeout 150 npm test`: full suite passed, "All Python SDK Tests Passed (9/9)".
+- Note: "REPLAY BLUEPRINT MORPH" hero section still present in markup, contrary to an earlier reply saying it was removed.
+
+## 2026-11-25T14:22:36+00:00 — Receipt-rail error state + MOVE CARD interaction fix (public/index.html)
+- Fixed: receipt rail showed "Loading receipts from /api/ledger…" forever on hosts without the Node backend. Now shows a graceful error state ("Receipts unavailable (ledger HTTP 404). Live on the production deployment.") with a working RETRY button; Desk 2 table already had its own Retry state.
+- Fixed: first browser check caught a real bug — ReferenceError "Cannot access 'LEDGER_FAILED' before initialization" (TDZ: dbRenderReceipts() runs before the let declaration). Declared `var LEDGER_FAILED = null` above dbRenderReceipts; zero pageErrors in both subsequent checks.
+- Verified backend separately: `PORT=3001 node web/server.mjs` serves /api/ledger and / with HTTP 200 (browser tool is restricted to port 3000 static host, so the 404 there is the documented platform limitation; the UI now handles it).
+- Browser 1280x900 success:true: 0 clipped, 0 overlaps, 0 lowContrast, no overflow, 0 pageErrors; drawer open ("WASM Circuit Breaker"), MOVE CARD moved PO-ALI-9021 to Release.
+- Browser 390x844 success:true: same, 0/0/0, no overflow, 0 pageErrors; toast "PO-ALI-9021 moved to RELEASE".
+- Inline-script syntax check: 1 script, 0 failures.
+- `node scripts/test-endpoints-local.mjs`: ALL 28 ENDPOINTS ... VERIFIED! (exit 0), run after the edit.
+
+## 2026-11-25T14:31:00+00:00 — Sketch animation customised for Praman (public/index.html)
+- User asked that the sketch animation and revelation be customised for Praman.
+- Replaced the generic PlotReveal blueprint card (compiled /pencil/ iframe, generic SaaS dashboard, ~1 MB of assets) with an inline SVG sketch-to-revelation engine drawn in Disposition Board theme: a pencil draws the four lanes (HOLD/RELEASE/PARTIAL/REFUND), case PO-ALI-9021, the WASM Circuit Breaker interception, then reveals verified telemetry ($100,000 held / $80,000 computed / -$20,000 intercepted, receipt 0xba98c51a...91f75 · TAKARSETTLE V4, SEPOLIA).
+- Removed dead PlotReveal JS (runBlueprintMorph targeting removed #blueprint-plot-root elements); hero "Replay" button and new in-card "Replay the sketch" button both restart the animation; prefers-reduced-motion shows the finished drawing statically.
+- public/pencil/ app left untouched (standalone demo still available).
+- Fixes from browser checks: receipt hash shortened to 0xba98c51a...91f75 (was clipped), sketch ink darkened #3a3a3a -> #1f1f1c, circuit-breaker label #FF7A59 -> #c14e17 on light paper.
+- Browser 1280x900 success:true: 0 clipped, 0 overlaps, no overflow, 0 pageErrors; sketch + replay verified.
+- Browser 390x844 success:true: 0 clipped, no overflow, 0 pageErrors; 8 overlaps are the known parent-child containment false positives; lowContrast flags sampled mid-fade (settled ink #1f1f1c on #fafaf8 is high contrast).
+- Inline-script syntax: 1 script, 0 failures.
+- `node scripts/test-endpoints-local.mjs`: ALL 28 ENDPOINTS ... VERIFIED! (exit 0).
+- `timeout 150 npm test`: full suite passed, "All Python SDK Tests Passed (9/9)".
+
+## 2026-11-25T14:31:45+00:00 — Final browser evidence on post-sketch source (no code changes this turn)
+- Browser 1280x900 success:true on final source: sketch section renders, REPLAY THE SKETCH click passed, case drawer ("WASM Circuit Breaker: $20,000 overbilling shortfall") passed; 0 clipped, no overflow, 0 pageErrors; 8 overlap samples are all parent-child containment; 1 lowContrast = drawer arbitration note (muted text on dark drawer, readable).
+- Browser 390x844 success:true: sketch replay + MOVE CARD (PO-ALI-9021 Hold -> Release, lane counts updated) passed; 0 clipped, 0 lowContrast, no overflow, 0 pageErrors; 8 parent-child containment false positives.
+- Known platform limitation: /api/ledger 404 on static preview host (browser tool restricted to port 3000); verified 200 via PORT=3001 node web/server.mjs earlier; UI shows graceful retry state.
+
+## 2026-11-25T14:35:45+00:00 — Zero-failed-request static hydration + contrast fix (public/index.html, public/data/ledger-snapshot.json)
+- Eliminated the last failed request: on static-export hosts (*.vercel.run, no Node backend) loadLedger() now hydrates the receipt rail and Settlement Ledger from the bundled snapshot public/data/ledger-snapshot.json (copied from data/, 30 txs, all with txHash); production and the local Node server keep the live /api/ledger. renderLedgerStats already computes totals from the array shape.
+- Drawer arbitration note recolored #e5484d -> #ff9d9d (was the single lowContrast flag on the dark drawer).
+- Browser 1280x900 success:true: 0 clipped, 0 lowContrast, 0 pageErrors, 0 consoleErrors, 0 networkFailures, no overflow; sketch replay, receipt rail hydrated (0x6e3f7744…240295bc), drawer opened. 8 overlaps = parent-child containment false positives.
+- Browser 390x844 success:true: identical clean profile; MOVE CARD moved PO-ALI-9021 Hold->Release (HOLD 0 cases / RELEASE 2 cases).
+- Inline-script syntax: 1 script, 0 failures.
+- `node scripts/test-endpoints-local.mjs`: ALL 28 ENDPOINTS ... VERIFIED! (exit 0).
+- `timeout 150 npm test`: full suite passed, "All Python SDK Tests Passed (9/9)".
+
+## 2026-11-25T14:55:49+00:00 — Hero pencil sketch layer verified after restart (no code changes this turn)
+- Continuation of "PROCEED FOR IT": the hero merge (inverted feathered `/pencil/` iframe in `.hero-sketch` with IntersectionObserver auto-replay, prefers-reduced-motion guard) was already complete in `public/index.html`; verified rather than rebuilt.
+- Verified: inline script syntax check 1/1 clean; browser 1280x900 and 390x844 both success (0 clipped / 0 overlaps / 0 low-contrast, no horizontal overflow, 0 page errors); `node scripts/test-endpoints-local.mjs` ALL 28 ENDPOINTS VERIFIED exit 0; `npm test` full suite passed ending "All Python SDK Tests Passed (9/9)".
+- Console noise is pre-existing: blocked external fonts/supabase in preview and a compiled `/pencil/` bundle path warning; not introduced by this change.

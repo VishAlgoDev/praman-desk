@@ -155,3 +155,6 @@ Also: NLP entity extraction bugs exist for sanctions intent when query is phrase
   1. Always start the standalone React development server (`npx vite --host 127.0.0.1 --port 5173`) via a background daemon task and test connectivity (`http://127.0.0.1:5173/`).
   2. Build the production bundle of the React app with `base: "./"` and deploy it directly into the primary application's public directory (e.g. `/pencil/`), embedding it in the `#2D3B42` showcase card within the white `rounded-3xl` container.
   3. Ensure both the standalone link (`/pencil/` and `http://127.0.0.1:5173/`) and the integrated portal link (`http://127.0.0.1:3402/` and `https://praman-desk.vercel.app`) are clearly and directly communicated to the user.
+
+### 2026-11-25 — Portal fragment navigation
+- Reading location.hash only at startup does not activate desks when an in-page link changes the fragment. Handle hashchange as well, accepting desk index zero. Verify the visible target panel after clicking the actual link, not merely the resulting URL.

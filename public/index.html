@@ -20,19 +20,19 @@
 
 :root {
   /* Dark Tech System Tokens */
-  --bg-base: #000000;
-  --bg-surface: #0A0A0A;
-  --bg-surface-elevated: #111827;
-  --bg-surface-glass: rgba(10, 10, 10, 0.75);
+  --bg-base: #15131C;
+  --bg-surface: #1B1824;
+  --bg-surface-elevated: #232030;
+  --bg-surface-glass: rgba(21, 19, 28, 0.78);
   
   --border-subtle: rgba(255, 255, 255, 0.09);
   --border-ring: rgba(255, 255, 255, 0.145);
   --border-strong: rgba(255, 255, 255, 0.28);
   
   /* Accent Blue & Positive Green & Halt Crimson */
-  --brand: #52A8FF;
-  --brand-dim: rgba(82, 168, 255, 0.14);
-  --brand-glow: rgba(82, 168, 255, 0.35);
+  --brand: #FF7A59;
+  --brand-dim: rgba(255, 122, 89, 0.14);
+  --brand-glow: rgba(255, 122, 89, 0.35);
   
   --accent-emerald: #62C073;
   --accent-emerald-dim: rgba(98, 192, 115, 0.14);
@@ -47,7 +47,7 @@
   
   --text-primary: #FFFFFF;
   --text-secondary: #999999;
-  --text-muted: #666666;
+  --text-muted: #8a8a8a;
   
   /* Pencil Sketch Plot Color */
   --plot: #2E6FFF;
@@ -85,16 +85,16 @@ body::before {
   content: '';
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background: 
-    radial-gradient(1100px circle at 50% -10%, rgba(82, 168, 255, 0.08), transparent 60%),
+    radial-gradient(1100px circle at 50% -10%, rgba(255, 122, 89, 0.08), transparent 60%),
     radial-gradient(800px circle at 90% 25%, rgba(98, 192, 115, 0.05), transparent 50%),
-    radial-gradient(900px circle at 10% 40%, rgba(82, 168, 255, 0.04), transparent 60%);
+    radial-gradient(900px circle at 10% 40%, rgba(255, 122, 89, 0.04), transparent 60%);
 }
 
 .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .tnum { font-variant-numeric: tabular-nums; }
 .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
 a { color: var(--brand); text-decoration: none; transition: color var(--t-fast); }
-a:hover { color: #93C5FD; text-decoration: underline; }
+a:hover { color: #FFB39D; text-decoration: underline; }
 
 /* ==========================================================================
    1. FIXED 60PX RIGHT EDGE HUD SIDEBAR
@@ -154,6 +154,8 @@ a:hover { color: #93C5FD; text-decoration: underline; }
     border-bottom: 1px solid var(--border-subtle); padding: 0; flex-direction: row;
   }
   .hud-ticks-track, .hud-label-42, .hud-label-58 { display: none; }
+  .hud-progress-rail, #hud-progress-bar { display: none; }
+  #hud-sidebar { overflow: hidden; height: 3px; }
   .hud-progress-rail { width: 100%; height: 3px; right: 0; }
   #hud-progress-bar { height: 100%; width: 0%; transition: width 60ms linear; }
 }
@@ -173,7 +175,7 @@ header {
   display: flex; align-items: center; justify-content: space-between;
   gap: 16px; padding: 14px 0; flex-wrap: wrap;
 }
-.brand-group { display: flex; align-items: center; gap: 12px; }
+.brand-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .brand-logo {
   display: flex; align-items: center; gap: 8px;
   font-family: var(--font-mono); font-weight: 700; font-size: 14.5px;
@@ -184,7 +186,7 @@ header {
 .brand-badge {
   font-family: var(--font-mono); font-size: 10px; font-weight: 600;
   letter-spacing: 0.08em; padding: 2px 7px; border-radius: 4px;
-  background: var(--brand-dim); color: #93C5FD; border: 1px solid rgba(82, 168, 255, 0.28);
+  background: var(--brand-dim); color: #FFB39D; border: 1px solid rgba(255, 122, 89, 0.28);
   text-transform: uppercase;
 }
 
@@ -207,6 +209,8 @@ header {
   display: flex; align-items: center; gap: 4px;
   background: rgba(14, 22, 38, 0.6); padding: 3px;
   border: 1px solid var(--border-subtle); border-radius: 6px;
+  max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
 .tab-btn {
   font-family: var(--font-mono); font-size: 12px; font-weight: 500;
@@ -215,6 +219,13 @@ header {
   padding: 6px 14px; min-height: 32px; cursor: pointer;
   transition: all var(--t-fast);
 }
+@media (max-width: 900px) {
+  .topbar { flex-direction: column; align-items: stretch; }
+  .brand-group .miner-ribbon { display: none; }
+  .tab-nav { width: 100%; flex: 1 1 auto; flex-wrap: wrap; overflow-x: auto; }
+  .tab-btn { white-space: nowrap; }
+  .topbar-actions { width: 100%; justify-content: flex-start; }
+}
 .tab-btn:hover { color: var(--text-primary); background: rgba(255, 255, 255, 0.04); }
 .tab-btn[aria-selected="true"] {
   color: var(--text-primary); background: var(--bg-surface-elevated);
@@ -222,7 +233,15 @@ header {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.desk { scroll-margin-top: 150px; padding-top: 8px; }
+@media (max-width: 900px) {
+  .desk { scroll-margin-top: 230px; }
+  #db-lanes { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (max-width: 480px) {
+  #db-lanes { grid-template-columns: minmax(0, 1fr) !important; }
+}
 .search-pill {
   display: inline-flex; align-items: center; gap: 6px;
   background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle);
@@ -246,6 +265,29 @@ header {
 #hero-canvas {
   position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
 }
+/* Pencil sketch hero layer — light paper inverted to chalk-on-slate, feathered into the hero */
+.hero-sketch {
+  position: absolute; top: 50%; right: -6%; transform: translateY(-50%);
+  width: 56%; height: 94%; z-index: 1; pointer-events: none; overflow: hidden;
+  -webkit-mask-image: radial-gradient(ellipse 82% 78% at 50% 50%, #000 75%, transparent 100%);
+  mask-image: radial-gradient(ellipse 82% 78% at 50% 50%, #000 75%, transparent 100%);
+}
+.hero-sketch iframe {
+  width: 112%; height: 130%; border: none; display: block; background: transparent;
+  position: relative; top: -64px; left: -6%;
+  filter: invert(1) hue-rotate(180deg) brightness(2.4) contrast(1.35);
+}
+@media (max-width: 1024px) {
+  .hero-sketch {
+    right: auto; left: 50%; transform: translate(-50%, -50%);
+    width: 130%; height: 80%; opacity: 0.4;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-sketch iframe { filter: invert(1) hue-rotate(180deg) brightness(1.55) contrast(1.1); }
+}
+.hero-sketch { transition: opacity 1.2s ease; }
+.hero-sketch--settled { opacity: 0; }
 .hero-scrim {
   position: absolute; inset: 0; z-index: 1; pointer-events: none;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0.92) 100%);
@@ -314,11 +356,14 @@ header {
 .kpi-card:hover { border-color: rgba(255, 255, 255, 0.28); }
 .kpi-label {
   font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;
+  text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px;
 }
 .kpi-val {
   font-family: var(--font-mono); font-size: clamp(20px, 2.5vw, 26px);
   font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em;
+}
+@media (max-width: 480px) {
+  .kpi-val { font-size: 17px; }
 }
 .kpi-sub {
   font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
@@ -326,11 +371,10 @@ header {
 }
 
 /* ==========================================================================
-   5. FEATURED BLUEPRINT CARD (#2D3B42 BG + 40PX RADIUS)
-      WITH PLOTREVEAL PENCIL SKETCH MORPH ENGINE
+   5. PRAMAN BLUEPRINT CARD — SKETCH-TO-REVELATION ENGINE
    ========================================================================== */
 .blueprint-card-outer {
-  background: #2D3B42;
+  background: #1B1824;
   border-radius: 40px;
   padding: 18px;
   margin: 40px 0 56px;
@@ -363,7 +407,7 @@ header {
 
 /* Diagonal Stripes Hatch for Funnel & Bars */
 .hatch {
-  background-image: repeating-linear-gradient(135deg, rgba(82, 168, 255, 0.28) 0 1.5px, transparent 1.5px 6px);
+  background-image: repeating-linear-gradient(135deg, rgba(255, 122, 89, 0.28) 0 1.5px, transparent 1.5px 6px);
 }
 
 /* Blueprint Morph Active State */
@@ -531,7 +575,9 @@ header {
   text-align: left; color: var(--text-muted); font-weight: 500;
   font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
   padding: 8px 12px; border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
 }
+.recon-grid td { overflow-wrap: anywhere; }
 .recon-grid td {
   padding: 10px 12px; border-bottom: 1px solid var(--border-subtle);
   color: var(--text-primary);
@@ -579,11 +625,19 @@ header {
   display: grid; grid-template-columns: minmax(140px, auto) 1fr; gap: 6px 16px;
   margin-top: 14px; font-family: var(--font-mono); font-size: 12px;
 }
-.kv dt { color: var(--text-muted); }
-.kv dd { color: var(--text-primary); word-break: break-all; }
+.kv dt { color: var(--text-secondary); }
+.kv dd { color: var(--text-primary); min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 640px) {
+  .kv { grid-template-columns: minmax(0, 1fr); }
+  .kv dd { margin: 0 0 10px; }
+  .flowing-item { height: auto; min-height: 88px; flex-wrap: wrap; gap: 8px; padding: 16px; }
+  .flowing-sub { flex-basis: 100%; }
+}
+.flowing-item.hovered .flowing-title, .flowing-item.hovered .flowing-sub { visibility: hidden; }
 
 /* Table & Ledger Styles */
 .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+#lg-body td { overflow-wrap: anywhere; }
 table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 12px; }
 th {
   text-align: left; color: var(--text-muted); font-weight: 500; font-size: 10.5px;
@@ -600,7 +654,7 @@ tbody tr { transition: background var(--t-fast); }
 tbody tr:hover td { background: var(--bg-surface-elevated); }
 td.num, th.num { text-align: right; }
 .tx-link { color: var(--brand); word-break: break-all; }
-.tx-link:hover { text-decoration: underline; color: #93C5FD; }
+.tx-link:hover { text-decoration: underline; color: #FFB39D; }
 
 .badge {
   display: inline-block; font-family: var(--font-mono); font-size: 10px;
@@ -613,6 +667,14 @@ td.num, th.num { text-align: right; }
 }
 .badge.warn {
   color: #FBBF24; border-color: rgba(245, 158, 11, 0.35); background: var(--warning-amber-dim);
+}
+.badge.evidence-live { color: #4ADE80; border-color: var(--accent-emerald-border); background: var(--accent-emerald-dim); }
+.badge.evidence-example { color: #FBBF24; border-color: rgba(245, 158, 11, 0.35); background: var(--warning-amber-dim); }
+.badge.evidence-recorded { color: #FFB39D; border-color: rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.12); }
+.evidence-note {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.04em;
+  color: var(--text-muted); margin-top: 10px;
 }
 
 /* Modals & Dialogs */
@@ -656,7 +718,7 @@ dialog .dialog-body { padding: 22px; max-height: 75vh; overflow-y: auto; }
   padding: 0 24px; cursor: pointer; transition: background var(--t-fast);
 }
 .flowing-item:last-child { border-bottom: none; }
-.flowing-item:hover { background: rgba(82, 168, 255, 0.04); }
+.flowing-item:hover { background: rgba(255, 122, 89, 0.04); }
 .flowing-title {
   font-family: var(--font-mono); font-size: 16px; font-weight: 600;
   letter-spacing: 0.02em; color: var(--text-primary); text-transform: uppercase;
@@ -679,23 +741,6 @@ dialog .dialog-body { padding: 22px; max-height: 75vh; overflow-y: auto; }
   text-transform: uppercase; letter-spacing: 0.05em;
 }
 @keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-/* Floating Replay Blueprint Button */
-#replay-plot-btn {
-  position: fixed; right: 80px; bottom: 24px; z-index: 80;
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--bg-surface-elevated); color: #FFFFFF;
-  border: 1px solid var(--brand); border-radius: 100px;
-  padding: 9px 18px; font-family: var(--font-mono); font-size: 12px; font-weight: 600;
-  cursor: pointer; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px var(--brand-glow);
-  transition: all var(--t-fast);
-}
-#replay-plot-btn:hover {
-  background: var(--brand); color: #000000; transform: translateY(-2px);
-}
-@media (max-width: 1024px) {
-  #replay-plot-btn { right: 20px; bottom: 20px; }
-}
 
 /* Toast */
 #toast {
@@ -779,10 +824,12 @@ footer {
     </div>
     
     <nav class="tab-nav" role="tablist" aria-label="Desks">
-      <button class="tab-btn" role="tab" aria-selected="true" data-tab="0" id="tabbtn-0" aria-controls="desk-0">Trade Assurance</button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="1" id="tabbtn-1" aria-controls="desk-1">Spend Guard</button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="2" id="tabbtn-2" aria-controls="desk-2">Settlement Ledger</button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="3" id="tabbtn-3" aria-controls="desk-3">Mining Registry</button>
+      <button class="tab-btn" role="tab" aria-selected="true" data-tab="0" id="tabbtn-0" aria-controls="desk-0">Disposition Board</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="1" id="tabbtn-1" aria-controls="desk-1">Trade Assurance</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="2" id="tabbtn-2" aria-controls="desk-2">Spend Guard</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="3" id="tabbtn-3" aria-controls="desk-3">Settlement Ledger</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="4" id="tabbtn-4" aria-controls="desk-4">Mining Registry</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="5" id="tabbtn-5" aria-controls="desk-5">Procurement Verify</button>
     </nav>
     
     <div class="topbar-actions">
@@ -809,7 +856,7 @@ footer {
     <div class="hero-eyebrow">
       <span class="pill-chip">
         <span style="width:6px;height:6px;border-radius:50%;background:var(--accent-emerald);"></span>
-        MAINNET READY · 15-STAGE DETERMINISTIC CLEARING
+        SEPOLIA LIVE · MAINNET-PATH ARCHITECTURE · 15-STAGE DETERMINISTIC CLEARING
       </span>
       <span class="pill-chip" style="color:var(--brand)">WASM 651b BYTECODE</span>
     </div>
@@ -825,18 +872,20 @@ footer {
     </p>
     
     <div class="hero-cta-row">
-      <a href="#desk-0" class="btn-square" id="hero-cta-audit">
-        <span>Execute PO Audit</span>
+      <a href="#desk-5" class="btn-square" id="hero-cta-audit">
+        <span>Run a Live Verification</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </a>
-      <a href="#desk-1" class="btn-square ghost-square" id="hero-cta-spend">
+      <a href="#trade-assurance" class="btn-square ghost-square" id="hero-cta-spend">
         <span>Screen Spend Guard</span>
       </a>
-      <button class="btn-square ghost-square" id="hero-replay-trigger">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-        <span>Replay Blueprint Morph</span>
-      </button>
     </div>
+  </div>
+
+  <!-- Pencil sketch layer: hand-drawn Praman Disposition Board case, auto-plays on load
+       and replays via IntersectionObserver when the hero scrolls back into view -->
+  <div class="hero-sketch" id="hero-sketch-layer" aria-hidden="true">
+    <iframe id="pencil-iframe" src="/pencil/" title="Praman Pencil Sketch Dashboard"></iframe>
   </div>
 
   <!-- Executive Protocol KPI Strip -->
@@ -845,65 +894,87 @@ footer {
       <div class="kpi-label">Total Escrow Capital</div>
       <div class="kpi-val tnum">$100,000.00 USDC</div>
       <div class="kpi-sub"><span style="color:var(--brand)">TakarSettle v4 Vault</span></div>
+      <p class="evidence-note"><span class="badge evidence-example" style="font-size:9px;padding:1px 6px">WORKED EXAMPLE</span> Canonical Desk 0 contract</p>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Deliverable Conformance</div>
       <div class="kpi-val tnum" style="color:var(--accent-emerald)">80.0% (80 / 100 Units)</div>
       <div class="kpi-sub">Port of LA Cainiao Pier-Pass Audited</div>
+      <p class="evidence-note"><span class="badge evidence-example" style="font-size:9px;padding:1px 6px">WORKED EXAMPLE</span> Fixed demo dataset</p>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Overbilling Intercepted</div>
       <div class="kpi-val tnum" style="color:var(--halt-crimson)">-$20,000.00 USD</div>
       <div class="kpi-sub">WASM Circuit Breaker &lt;3ms</div>
+      <p class="evidence-note"><span class="badge evidence-example" style="font-size:9px;padding:1px 6px">WORKED EXAMPLE</span> Derived from Case A</p>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Multi-Miner Quorum</div>
       <div class="kpi-val tnum">2-of-2 MINERS</div>
       <div class="kpi-sub">Praman Node #5281 + Takar #20261117</div>
+      <p class="evidence-note"><span class="badge evidence-live" style="font-size:9px;padding:1px 6px">LIVE</span> Registered miner consensus</p>
     </div>
   </div>
 </section>
 
 <!-- ==========================================================================
-     4. FEATURED BLUEPRINT CARD (#2D3B42 BG + 40PX RADIUS)
-        HOSTING THE PLOTREVEAL BLUEPRINT MORPH ENGINE
+     4. (Pencil sketch now lives in the hero as an inverted, feathered layer.)
      ========================================================================== -->
-<section class="blueprint-card-outer" id="blueprint-showcase">
-  <!-- Blueprint Top Control Bar -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding:2px 10px;flex-wrap:wrap;gap:10px">
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#fafaf8;background:rgba(255,255,255,0.12);padding:4px 10px;border-radius:6px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        BLUEPRINT B: PLOTREVEAL PENCIL SKETCH ENGINE
-      </span>
-      <span style="font-size:12px;color:rgba(255,255,255,0.7);font-family:var(--font-mono)">
-        Morphing wireframe sketch to verified commercial SaaS telemetry
-      </span>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <button onclick="const f=document.getElementById('pencil-iframe'); if(f) f.contentWindow.location.reload();" class="btn-square" style="padding:6px 14px;font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Replay Morph
-      </button>
-      <a href="/pencil/" target="_blank" class="btn-square" style="background:#52a8ff;color:#000;padding:6px 14px;font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:6px">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        Open Standalone App
-      </a>
-    </div>
-  </div>
-
-  <!-- White Container with rounded-3xl corners -->
-  <div class="blueprint-card-inner" id="blueprint-plot-root">
-    <iframe id="pencil-iframe" src="/pencil/" style="width:100%;height:780px;border:none;display:block;background:#fafaf8;border-radius:24px" title="Praman Pencil Sketch Dashboard"></iframe>
-  </div>
-</section>
 
 <!-- ==========================================================================
      5. FINGERTIP BENTO DESKS: CORE FUNCTIONALITY KEPT ACCESSIBLE
      ========================================================================== -->
 
 <!-- ============ DESK 0 · ALIBABA TRADE ASSURANCE ============ -->
+<!-- ============ DESK 0 · DISPOSITION BOARD ============ -->
 <section class="desk active" id="desk-0" role="tabpanel" aria-labelledby="tabbtn-0">
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
+    <div>
+      <p class="eyebrow" style="font-size:11px;letter-spacing:0.14em;color:var(--text-secondary);margin:0 0 6px">PRAMAN TRADE ASSURANCE</p>
+      <h2 style="font-size:26px;font-weight:700;color:var(--text-primary);margin:0">$100k held. Evidence decides where it goes.</h2>
+      <p style="font-size:14px;color:var(--text-secondary);margin:6px 0 0;max-width:640px">Each case sits in one of four lanes until the evidence moves it. Open a card to see the figure Praman computed independently, the rule that fired, and the settlement receipt behind the outcome.</p>
+    </div>
+    <a href="#trade-assurance" class="btn-square" style="text-decoration:none">Open a live case</a>
+  </div>
+
+  <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <label for="db-move-select" style="font-size:12px;color:var(--text-secondary)">Evidence arrives:</label>
+    <select id="db-move-select" class="form-control" style="min-height:32px;max-width:340px" aria-label="Case to move">
+      <option value="PO-ALI-9021">PO-ALI-9021 — Cainiao conforming count confirmed</option>
+      <option value="PO-7781">PO-7781 — ledger equation ties out</option>
+      <option value="CN-LAX-88201">CN-LAX-88201 — 20 damaged units documented</option>
+      <option value="PO-DEMO-REF">PO-DEMO-REF — delivery evidence missing</option>
+    </select>
+    <select id="db-move-lane" class="form-control" style="min-height:32px;max-width:160px" aria-label="New disposition lane">
+      <option value="hold">Hold</option>
+      <option value="release" selected>Release</option>
+      <option value="partial">Partial</option>
+      <option value="refund">Refund</option>
+    </select>
+    <button id="db-move-btn" class="btn-square ghost-square" style="padding:5px 14px;font-size:12px">Move card</button>
+  </div>
+
+  <div id="db-lanes" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:22px"></div>
+
+  <div style="margin-top:26px">
+    <h3 style="font-size:15px;font-weight:600;color:var(--text-primary);margin:0 0 4px">Receipt rail</h3>
+    <p style="font-size:13px;color:var(--text-secondary);margin:0 0 10px">TakarSettle v4 receipts and Sepolia transaction hashes from the live settlement ledger.</p>
+    <div id="db-receipt-rail" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <dialog id="db-case-drawer" aria-labelledby="db-drawer-title" style="border:1px solid var(--border-subtle);border-radius:14px;background:var(--bg-surface-elevated);color:var(--text-primary);max-width:560px;width:min(92vw,560px);padding:0">
+    <div style="padding:20px 22px">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
+        <h3 id="db-drawer-title" style="font-size:17px;font-weight:700;margin:0">Case</h3>
+        <button data-close aria-label="Close" style="background:none;border:1px solid var(--border-subtle);border-radius:8px;color:var(--text-secondary);width:30px;height:30px;cursor:pointer">✕</button>
+      </div>
+      <div id="db-drawer-body" style="margin-top:14px;font-size:13.5px;line-height:1.6;color:var(--text-secondary)"></div>
+    </div>
+  </dialog>
+</section>
+
+<!-- ============ DESK 1 · TRADE ASSURANCE (100% PRESERVED) ============ -->
+<section class="desk" id="desk-1" role="tabpanel" aria-labelledby="tabbtn-1" hidden>
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
     <div>
       <span class="pill-chip" style="margin-bottom:8px">DESK 01 · B2B COMMERCE ESCROW</span>
@@ -915,6 +986,7 @@ footer {
         Validates delivery against purchase orders, executes sub-3ms WASM circuit breakers on shortfalls, 
         and settles reconciled disbursements directly into TakarSettle escrow vaults on Ethereum Sepolia.
       </p>
+      <p class="evidence-note"><span class="badge evidence-example" style="font-size:9px;padding:1px 6px">WORKED EXAMPLE</span> Canonical PO-ALI-9021 / CN-LAX-88201 dataset · on-chain anchor is real (Sepolia, receipt-backed)</p>
     </div>
   </div>
 
@@ -1069,7 +1141,7 @@ footer {
 </section>
 
 <!-- ============ DESK 1 · SPEND GUARD ============ -->
-<section class="desk" id="desk-1" role="tabpanel" aria-labelledby="tabbtn-1" hidden>
+<section class="desk" id="desk-2" role="tabpanel" aria-labelledby="tabbtn-2" hidden>
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
     <div>
       <span class="pill-chip" style="margin-bottom:8px">DESK 02 · PRE-SIGNATURE DEFENSE</span>
@@ -1081,6 +1153,7 @@ footer {
         Screens all counterparty addresses against 19,565 OFAC SDN records in under 25ms, halts hijacked client runtimes, 
         and enforces atomic session caps for Solana and EVM agent treasuries.
       </p>
+      <p class="evidence-note"><span class="badge evidence-live" style="font-size:9px;padding:1px 6px">LIVE</span> Scenario runs execute the real SDK policy engine via <span class="mono">/api/audit/*</span></p>
     </div>
   </div>
 
@@ -1166,7 +1239,7 @@ footer {
 </section>
 
 <!-- ============ DESK 2 · SETTLEMENT LEDGER ============ -->
-<section class="desk" id="desk-2" role="tabpanel" aria-labelledby="tabbtn-2" hidden>
+<section class="desk" id="desk-3" role="tabpanel" aria-labelledby="tabbtn-3" hidden>
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
     <div>
       <span class="pill-chip" style="margin-bottom:8px">DESK 03 · IMMUTABLE EXECUTION</span>
@@ -1177,6 +1250,7 @@ footer {
         Thirty verified on-chain settlements executed across 14 independent Telegraph miners. 
         Every record is an immutable transaction on Ethereum Sepolia with verified latency, signal hash, and receipt hash.
       </p>
+      <p class="evidence-note"><span class="badge evidence-recorded" style="font-size:9px;padding:1px 6px">RECORDED</span> Receipt-backed on-chain transactions · <span class="mono">/api/ledger</span></p>
     </div>
   </div>
 
@@ -1242,7 +1316,7 @@ footer {
 </section>
 
 <!-- ============ DESK 3 · MINING REGISTRY ============ -->
-<section class="desk" id="desk-3" role="tabpanel" aria-labelledby="tabbtn-3" hidden>
+<section class="desk" id="desk-4" role="tabpanel" aria-labelledby="tabbtn-4" hidden>
   <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
     <div>
       <span class="pill-chip" style="margin-bottom:8px">DESK 04 · HISTORICAL ARBITRATION</span>
@@ -1253,6 +1327,7 @@ footer {
         Forensic reconciliation of historical resources: Queensland Government Mining Survey (GSQ)
         ground-truth records evaluated against competing miner claims using the 651b WASM comparator and anchored with EAS attestations.
       </p>
+      <p class="evidence-note"><span class="badge evidence-recorded" style="font-size:9px;padding:1px 6px">RECORDED</span> GSQ ground truth + EAS attestation · <span class="mono">/api/verify/mine-dossier</span></p>
     </div>
   </div>
 
@@ -1263,64 +1338,124 @@ footer {
   <div id="mr-out" style="margin-top:20px" aria-live="polite"></div>
 </section>
 
+<!-- ============ DESK 5 · PROCUREMENT VERIFY (original product surface, live APIs) ============ -->
+<section class="desk" id="desk-5" role="tabpanel" aria-labelledby="tabbtn-5" hidden>
+  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
+    <div>
+      <span class="pill-chip" style="margin-bottom:8px">DESK 05 · ORIGINAL PRODUCT SURFACE</span>
+      <h2 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.02em;margin-top:4px">
+        Procurement Verify
+      </h2>
+      <p style="color:var(--text-secondary);max-width:72ch;margin-top:8px">
+        The capabilities Praman was built for, on real inputs: purchase-order arithmetic verification,
+        invoice-to-ledger reconciliation, corporate registry lookups, vendor validation, document authenticity,
+        and OFAC SDN sanctions screening. Every run below executes a live API call on your text — nothing here is pre-scripted.
+      </p>
+      <p class="evidence-note"><span class="badge evidence-live" style="font-size:9px;padding:1px 6px">LIVE</span> Real generalized NLP + arithmetic solving · <span class="mono">/api/miner/*</span></p>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;margin-top:24px">
+    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
+      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Purchase Order Verify</h3>
+      <input class="form-control" id="pv-po" placeholder="PO-2026-7741" aria-label="PO number">
+      <input class="form-control" id="pv-po-q" placeholder='Optional claim, e.g. "10 units at $250 = $2500"' style="margin-top:8px" aria-label="PO claim">
+      <button class="btn-square" id="pv-po-btn" style="margin-top:10px;width:100%">Verify PO</button>
+      <pre id="pv-po-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
+    </div>
+
+    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
+      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Invoice ↔ Ledger Reconcile</h3>
+      <input class="form-control" id="pv-inv" placeholder="INV-101" aria-label="Invoice">
+      <input class="form-control" id="pv-led" placeholder="LEDGER-101 or 'PO-7781: 1000 units x USD 12.40 = USD 12,400.00'" style="margin-top:8px" aria-label="Ledger">
+      <button class="btn-square" id="pv-inv-btn" style="margin-top:10px;width:100%">Reconcile</button>
+      <pre id="pv-inv-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
+    </div>
+
+    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
+      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Corporate Registry</h3>
+      <input class="form-control" id="pv-co" placeholder="SAP SE" aria-label="Company">
+      <input class="form-control" id="pv-jur" placeholder="Jurisdiction, e.g. DE (optional)" style="margin-top:8px" aria-label="Jurisdiction">
+      <button class="btn-square" id="pv-co-btn" style="margin-top:10px;width:100%">Look up</button>
+      <pre id="pv-co-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
+    </div>
+
+    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
+      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Vendor &amp; Document Authenticity</h3>
+      <input class="form-control" id="pv-ven" placeholder="Vendor name, e.g. SAP SE" aria-label="Vendor">
+      <button class="btn-square" id="pv-ven-btn" style="margin-top:10px;width:100%">Verify vendor + doc</button>
+      <pre id="pv-ven-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
+    </div>
+
+    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
+      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Sanctions Screening (OFAC SDN)</h3>
+      <input class="form-control" id="pv-sdn" placeholder="Counterparty name, e.g. Banco Nacional de Cuba" aria-label="Name to screen">
+      <button class="btn-square" id="pv-sdn-btn" style="margin-top:10px;width:100%">Screen</button>
+      <pre id="pv-sdn-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
+    </div>
+  </div>
+
+  <!-- Evidence: counterfactual benchmark (source: docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md) -->
+  <div class="blueprint-card-inner" style="padding:18px;margin-top:20px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <h3 style="font-size:14px;font-weight:600;margin:0;color:var(--text-primary)">Evidence — With vs Without Telegraph (5 adversarial vectors)</h3>
+      <span class="badge evidence-recorded">RECORDED</span>
+    </div>
+    <p style="color:var(--text-secondary);font-size:13px;margin:8px 0 14px">
+      Counterfactual policy evaluation, 2026-11-25: ungrounded agent pass-through vs Praman Two-Mind Spend Guard.
+      Catch rate 0/5 vs 5/5; $79,373 of direct capital loss averted. Source: <span class="mono">docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md</span> ·
+      Reproduce: <span class="mono">node benchmark/with-vs-without-telegraph.mjs</span>
+    </p>
+    <div style="overflow-x:auto">
+      <table style="width:100%;min-width:640px;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="text-align:left;color:var(--text-muted);font-size:11px;letter-spacing:0.06em">
+            <th style="padding:8px 10px">Vector</th>
+            <th style="padding:8px 10px" class="num">Exposure</th>
+            <th style="padding:8px 10px">Blocking Flag</th>
+            <th style="padding:8px 10px">Digest</th>
+          </tr>
+        </thead>
+        <tbody class="mono" style="font-variant-numeric:tabular-nums">
+          <tr><td style="padding:8px 10px">Inverted FX rate overcharge</td><td class="num">$1,373</td><td style="padding:8px 10px">INVERTED_FX_OVERCHARGE_PREVENTED</td><td style="padding:8px 10px">0xc2f2890d65e4cdaf…</td></tr>
+          <tr><td style="padding:8px 10px">Lapsed LEI / unregistered entity</td><td class="num">$24,500</td><td style="padding:8px 10px">LAPSED_CORPORATE_LEI_STATUS</td><td style="padding:8px 10px">0x5829d26b01dd1ca1…</td></tr>
+          <tr><td style="padding:8px 10px">Typosquat phishing domain</td><td class="num">$15,000</td><td style="padding:8px 10px">PHISHING_DOMAIN_HARD_BLOCK</td><td style="padding:8px 10px">0x25e8d1fedf9e7dfa…</td></tr>
+          <tr><td style="padding:8px 10px">Sub-cent line-item inflation</td><td class="num">$500</td><td style="padding:8px 10px">WASM_ARITHMETIC_DRIFT_DETECTED</td><td style="padding:8px 10px">0xac5f5f2873a345a1…</td></tr>
+          <tr><td style="padding:8px 10px">OFAC SDN transliteration collision</td><td class="num">$38,000</td><td style="padding:8px 10px">OFAC_SDN_SANCTIONS_BLOCK</td><td style="padding:8px 10px">0x5f438c1557c704db…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
 <!-- ==========================================================================
-     6. FLOWINGMENU DIRECTIONAL HOVER MARQUEE SECTION
+     6. PROTOCOL ECOSYSTEM LINK ROWS (marquee hover layer removed as decorative)
      ========================================================================== -->
 <section class="flowing-menu-container" id="flowing-menu-section" aria-label="Protocol Ecosystem Marquee">
   
   <div class="flowing-item" data-link="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" data-external="true">
     <span class="flowing-title">01 · TAKARSETTLE V4 VAULT</span>
     <span class="flowing-sub">0x3102...4248 · SEPOLIA ETHEREUM</span>
-    <div class="flowing-marquee-layer">
-      <div class="flowing-marquee-inner">
-        <span>TAKARSETTLE V4 ESCROW VAULT · IMMUTABLE DEPLOYMENT · 15-STAGE RESOLVER SEAT · 2-OF-2 CONSENSUS · BLOCK 12200598 CONFIRMED ·</span>
-        <span>TAKARSETTLE V4 ESCROW VAULT · IMMUTABLE DEPLOYMENT · 15-STAGE RESOLVER SEAT · 2-OF-2 CONSENSUS · BLOCK 12200598 CONFIRMED ·</span>
-      </div>
-    </div>
   </div>
 
   <div class="flowing-item" data-action="ledger">
     <span class="flowing-title">02 · VISUAL SETTLEMENT LEDGER</span>
     <span class="flowing-sub">30 CONFIRMED PAID TRANSACTIONS</span>
-    <div class="flowing-marquee-layer">
-      <div class="flowing-marquee-inner">
-        <span>30 ON-CHAIN PAID SETTLEMENTS · 14 INDEPENDENT TELEGRAPH MINERS · DIAMOND #6164 · 100% CONFIRMED · CLICK TO EXPLORE ·</span>
-        <span>30 ON-CHAIN PAID SETTLEMENTS · 14 INDEPENDENT TELEGRAPH MINERS · DIAMOND #6164 · 100% CONFIRMED · CLICK TO EXPLORE ·</span>
-      </div>
-    </div>
   </div>
 
   <div class="flowing-item" data-action="certificate">
     <span class="flowing-title">03 · STATUTORY EAS ATTESTATION REGISTRY</span>
-    <span class="flowing-sub">SCHEMA #d84485... · UCC ART. 2 DISPOSITIONS</span>
-    <div class="flowing-marquee-layer">
-      <div class="flowing-marquee-inner">
-        <span>STATUTORY SETTLEMENT ATTESTATIONS · EAS SCHEMA UID 0xba98c... · UN CISG COMPLIANT · CRYPTOGRAPHIC AUDIT DISPOSITION ·</span>
-        <span>STATUTORY SETTLEMENT ATTESTATIONS · EAS SCHEMA UID 0xba98c... · UN CISG COMPLIANT · CRYPTOGRAPHIC AUDIT DISPOSITION ·</span>
-      </div>
-    </div>
+    <span class="flowing-sub">SCHEMA #d84485... · UCC ART. 2</span>
   </div>
 
   <div class="flowing-item" data-action="developer">
     <span class="flowing-title">04 · DEVELOPER MCP SERVER & API</span>
     <span class="flowing-sub">KEYLESS CORS ENDPOINTS · STREAMABLE TOOLS</span>
-    <div class="flowing-marquee-layer">
-      <div class="flowing-marquee-inner">
-        <span>KEYLESS MCP SERVER · 28 LIVE REST ENDPOINTS · MODEL CONTEXT PROTOCOL · CURSOR / ANTHROPIC COMPATIBLE ·</span>
-        <span>KEYLESS MCP SERVER · 28 LIVE REST ENDPOINTS · MODEL CONTEXT PROTOCOL · CURSOR / ANTHROPIC COMPATIBLE ·</span>
-      </div>
-    </div>
   </div>
 
 </section>
 
 </main>
-
-<!-- Floating Replay Blueprint Morph Button -->
-<button type="button" id="replay-plot-btn" title="Replay Blueprint Loading Morph">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-  <span>Replay Blueprint</span>
-</button>
 
 <!-- ==========================================================================
      7. INSTITUTIONAL MULTI-COLUMN FOOTER
@@ -1453,6 +1588,7 @@ function toast(msg) {
 }
 
 function countUp(el, target, { prefix = '', decimals = 0, group = false, duration = 600 } = {}) {
+  if (!el) return;
   const fmt = v => prefix + (group ? Math.round(v).toLocaleString() : v.toFixed(decimals));
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'off';
   if (reduce || !isFinite(target)) { el.textContent = fmt(target); return; }
@@ -1475,17 +1611,72 @@ motionBtn.addEventListener('click', () => applyMotion(document.documentElement.d
 applyMotion(true);
 
 /* ----------------- Tab Navigation ----------------- */
-const DESK_NAMES = ['Trade Assurance', 'Spend Guard', 'Settlement Ledger', 'Mining Registry'];
+const DESK_NAMES = ['Disposition Board', 'Trade Assurance', 'Spend Guard', 'Settlement Ledger', 'Mining Registry', 'Procurement Verify'];
 function switchTab(i) {
   $$('.desk').forEach((d, k) => {
     d.classList.toggle('active', k === i);
     d.hidden = k !== i;
   });
   $$('.tab-btn').forEach((b, k) => b.setAttribute('aria-selected', String(k === i)));
-  history.replaceState(null, '', '#' + ['trade-assurance', 'spend-guard', 'ledger', 'mining'][i]);
+  history.replaceState(null, '', '#' + ['disposition-board', 'trade-assurance', 'spend-guard', 'ledger', 'mining', 'procurement-verify'][i]);
   $('#hud-section-label').textContent = DESK_NAMES[i].toUpperCase();
 }
 $$('.tab-btn').forEach(b => b.addEventListener('click', () => switchTab(+b.dataset.tab)));
+
+/* ----------------- Desk 5 · Procurement Verify (live API calls) ----------------- */
+async function pvCall(btn, out, path) {
+  btn.disabled = true;
+  out.textContent = 'Running…';
+  try {
+    const res = await fetch(path);
+    const json = await res.json();
+    out.textContent = JSON.stringify(json, null, 2);
+  } catch (err) {
+    out.textContent = 'Request failed: ' + err.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+const q = s => encodeURIComponent(s.trim());
+$('#pv-po-btn')?.addEventListener('click', e => {
+  const n = $('#pv-po').value.trim();
+  if (!n) { toast('Enter a PO number'); return; }
+  const claim = $('#pv-po-q').value.trim();
+  pvCall(e.currentTarget, $('#pv-po-out'), `/api/miner/po-verify?po_number=${q(n)}${claim ? `&question=${q(claim)}` : ''}`);
+});
+$('#pv-inv-btn')?.addEventListener('click', () => {
+  const inv = $('#pv-inv').value.trim(), led = $('#pv-led').value.trim();
+  if (!inv || !led) { toast('Enter invoice and ledger text'); return; }
+  pvCall($('#pv-inv-btn'), $('#pv-inv-out'), `/api/miner/invoice-reconcile?invoice=${q(inv)}&ledger=${q(led)}`);
+});
+$('#pv-co-btn')?.addEventListener('click', () => {
+  const co = $('#pv-co').value.trim();
+  if (!co) { toast('Enter a company name'); return; }
+  const jur = $('#pv-jur').value.trim();
+  pvCall($('#pv-co-btn'), $('#pv-co-out'), `/api/miner/corporate-registry?company=${q(co)}${jur ? `&jurisdiction=${q(jur)}` : ''}`);
+});
+$('#pv-ven-btn')?.addEventListener('click', async () => {
+  const v = $('#pv-ven').value.trim();
+  if (!v) { toast('Enter a vendor name'); return; }
+  const out = $('#pv-ven-out'), btn = $('#pv-ven-btn');
+  btn.disabled = true; out.textContent = 'Running…';
+  try {
+    const [ven, doc] = await Promise.all([
+      fetch(`/api/miner/vendor-verify?vendor=${q(v)}`).then(r => r.json()),
+      fetch('/api/miner/doc-authenticity').then(r => r.json()),
+    ]);
+    out.textContent = JSON.stringify({ vendor: ven, document: doc }, null, 2);
+  } catch (err) {
+    out.textContent = 'Request failed: ' + err.message;
+  } finally {
+    btn.disabled = false;
+  }
+});
+$('#pv-sdn-btn')?.addEventListener('click', () => {
+  const n = $('#pv-sdn').value.trim();
+  if (!n) { toast('Enter a counterparty name'); return; }
+  pvCall($('#pv-sdn-btn'), $('#pv-sdn-out'), `/api/miner/sanctions-screen?name=${q(n)}`);
+});
 
 /* ----------------- Global Modals & Keyboard ----------------- */
 $$('dialog').forEach(d => {
@@ -1495,15 +1686,18 @@ $$('dialog').forEach(d => {
 addEventListener('keydown', e => {
   if (e.key === 'Escape') $$('dialog[open]').forEach(d => d.close());
   if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) {
-    e.preventDefault(); switchTab(2); $('#lg-q').focus();
+    e.preventDefault(); switchTab(3); $('#lg-q').focus();
   }
 });
-$('#global-search-btn').addEventListener('click', () => { switchTab(2); $('#lg-q').focus(); });
+$('#global-search-btn').addEventListener('click', () => { switchTab(3); $('#lg-q').focus(); });
 $('#dev-drawer-btn').addEventListener('click', () => { $('#dev-drawer').showModal(); });
 
-const openHash = location.hash.slice(1);
-const openIdx = ['trade-assurance', 'spend-guard', 'ledger', 'mining'].indexOf(openHash);
-if (openIdx > 0) switchTab(openIdx);
+function openHashTab() {
+  const openIdx = ['disposition-board', 'trade-assurance', 'spend-guard', 'ledger', 'mining', 'procurement-verify'].indexOf(location.hash.slice(1));
+  if (openIdx >= 0) switchTab(openIdx);
+}
+addEventListener('hashchange', openHashTab);
+openHashTab();
 
 /* ==========================================================================
    A. FIXED 60PX RIGHT HUD SIDEBAR CONTROLLER
@@ -1644,7 +1838,7 @@ function initForceFieldCanvas() {
           ctx.beginPath();
           ctx.moveTo(p.x, p.y);
           ctx.lineTo(p2.x, p2.y);
-          ctx.strokeStyle = `rgba(82, 168, 255, ${0.2 * (1 - ndist / 36)})`;
+          ctx.strokeStyle = `rgba(255, 122, 89, ${0.2 * (1 - ndist / 36)})`;
           ctx.lineWidth = 0.75;
           ctx.stroke();
         }
@@ -1663,53 +1857,48 @@ initForceFieldCanvas();
 /* ==========================================================================
    C. PLOTREVEAL BLUEPRINT MORPH ENGINE
    ========================================================================== */
-function runBlueprintMorph() {
-  const root = $('#blueprint-plot-root');
-  const chip = $('#blueprint-status-chip');
-  const svgGroup = $('#plot-sketch-paths');
-  if (!root || !svgGroup) return;
-
-  root.classList.add('sketching');
-  chip.textContent = 'STATUS: MORPHING';
-  chip.style.borderColor = 'var(--brand)';
-
-  // Build simulated pencil wireframe paths
-  svgGroup.innerHTML = `
-    <rect x="20" y="20" width="1160" height="380" rx="16" fill="none" stroke="var(--plot)" stroke-width="1.5" stroke-dasharray="3000" stroke-dashoffset="3000">
-      <animate attributeName="stroke-dashoffset" from="3000" to="0" dur="1.2s" fill="freeze" ease="ease-out"/>
-    </rect>
-    <line x1="20" y1="90" x2="1180" y2="90" stroke="var(--plot)" stroke-width="1" stroke-dasharray="1200" stroke-dashoffset="1200">
-      <animate attributeName="stroke-dashoffset" from="1200" to="0" dur="0.8s" fill="freeze"/>
-    </line>
-    <rect x="50" y="120" width="600" height="250" rx="8" fill="url(#plot-hatch)" stroke="var(--plot)" stroke-width="1.2" stroke-dasharray="1800" stroke-dashoffset="1800">
-      <animate attributeName="stroke-dashoffset" from="1800" to="0" dur="1s" fill="freeze"/>
-    </rect>
-    <rect x="680" y="120" width="470" height="115" rx="8" fill="none" stroke="var(--plot)" stroke-width="1.2" stroke-dasharray="1200" stroke-dashoffset="1200">
-      <animate attributeName="stroke-dashoffset" from="1200" to="0" dur="0.9s" fill="freeze"/>
-    </rect>
-    <rect x="680" y="255" width="470" height="115" rx="8" fill="none" stroke="var(--plot)" stroke-width="1.2" stroke-dasharray="1200" stroke-dashoffset="1200">
-      <animate attributeName="stroke-dashoffset" from="1200" to="0" dur="0.9s" fill="freeze"/>
-    </rect>
-  `;
-
-  // Dynamic count-up
-  countUp($('#plot-val-conforming'), 80000, { prefix: '$', group: true, duration: 1200 });
-  countUp($('#plot-val-shortfall'), -20000, { prefix: '-$', group: true, duration: 1200 });
-
-  setTimeout(() => {
-    root.classList.remove('sketching');
-    chip.textContent = 'STATUS: VERIFIED';
-    chip.style.borderColor = 'var(--accent-emerald)';
-    svgGroup.innerHTML = '';
-  }, 1400);
-}
-
-$('#replay-plot-btn').addEventListener('click', runBlueprintMorph);
-$('#hero-replay-trigger').addEventListener('click', () => {
-  $('html').scrollTo({ top: $('#blueprint-showcase').offsetTop - 80, behavior: 'smooth' });
-  setTimeout(runBlueprintMorph, 300);
-});
-setTimeout(runBlueprintMorph, 500);
+(function initHeroSketchReplay() {
+  const hero = document.getElementById('hero-section');
+  const frame = document.getElementById('pencil-iframe');
+  const layer = frame ? frame.closest('.hero-sketch') : null;
+  if (!hero || !frame || !layer) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) return; // sketch stays as loaded
+  let lastReplay = Date.now(); // plays on first load; guard stops rapid scroll flicker from restarting it
+  let settleTimer = null;
+  const replay = () => {
+    lastReplay = Date.now();
+    layer.classList.remove('hero-sketch--settled');
+    try { frame.contentWindow.location.reload(); } catch (_) { frame.src = '/pencil/'; }
+    armSettle();
+  };
+  function armSettle() {
+    clearTimeout(settleTimer);
+    settleTimer = setTimeout(checkSettled, 500);
+  }
+  // The pencil app ends its sketch on its rendered dashboard UI, which would bleed into the
+  // hero as inverted chrome. Poll for the sketch's "done" state and fade the layer out;
+  // scrolling back to the hero replays it (IntersectionObserver below).
+  function checkSettled() {
+    try {
+      const plot = frame.contentDocument && frame.contentDocument.querySelector('[data-plot-state]');
+      if (plot && plot.getAttribute('data-plot-state') === 'done') {
+        layer.classList.add('hero-sketch--settled');
+        return; // stay faded until a scroll-back replay
+      }
+    } catch (_) { /* frame not ready */ }
+    settleTimer = setTimeout(checkSettled, 500);
+  }
+  const observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.5 && Date.now() - lastReplay > 4000) {
+        replay();
+      }
+    }
+  }, { threshold: [0.5] });
+  observer.observe(hero);
+  armSettle();
+})();
 
 /* ==========================================================================
    D. TYPEWRITER PLACEHOLDER ANIMATION
@@ -1777,8 +1966,8 @@ function initFlowingMenu() {
       if (item.dataset.external) {
         window.open(item.dataset.link, '_blank');
       } else if (item.dataset.action === 'ledger') {
-        switchTab(2);
-        $('html').scrollTo({ top: $('#desk-2').offsetTop - 80, behavior: 'smooth' });
+        switchTab(3);
+        $('html').scrollTo({ top: $('#desk-3').offsetTop - 80, behavior: 'smooth' });
       } else if (item.dataset.action === 'certificate') {
         openCertificate({
           status: 'APPROVED', verdict: 'RECONCILED PARTIAL DISBURSEMENT APPROVED',
@@ -1946,22 +2135,143 @@ $('#sg-run').addEventListener('click', () => {
 $('#sg-cli').addEventListener('click', () => toast('Run: node bin/praman-gate.mjs solana-demo (5/5 scenarios)'));
 
 /* ==========================================================================
-   H. DESK 2 · SETTLEMENT LEDGER (100% PRESERVED & ZERO REGRESSION)
+   Z. DESK 0 · DISPOSITION BOARD
+   ========================================================================== */
+const DB_LANES = [
+  { id: 'hold',    label: 'Hold',    tone: 'var(--accent-rose, #ff7a8a)' },
+  { id: 'release', label: 'Release', tone: 'var(--accent-emerald)' },
+  { id: 'partial', label: 'Partial', tone: '#d4a017' },
+  { id: 'refund',  label: 'Refund',  tone: '#4c8dff' }
+];
+const DB_CASES = [
+  { id: 'PO-ALI-9021', lane: 'hold', buyer: 'Alibaba buyer', supplier: 'Cainiao consignee', escrow: 100000, computed: 80000, rule: 'WASM Circuit Breaker: $20,000 overbilling shortfall (80/100 units conforming)', flag: 'ARBITRATION' },
+  { id: 'PO-7781', lane: 'release', buyer: 'Siemens AG', supplier: 'Telegraph miner cluster', escrow: 12400, computed: 12400, rule: 'Equation matcher: 1000 units x USD 12.40 reconciled with zero discrepancy', flag: null },
+  { id: 'CN-LAX-88201', lane: 'partial', buyer: 'Alibaba buyer', supplier: 'Port of LA Cainiao PierPass', escrow: 100000, computed: 80000, rule: 'PierPass manifest audit: 80 conforming / 20 damaged units accepted', flag: null },
+  { id: 'PO-DEMO-REF', lane: 'refund', buyer: 'Buyer of record', supplier: 'Undelivered PO', escrow: 25000, computed: 0, rule: 'Evidence completeness gate FAIL: 0 of 1 required delivery artifacts on file', flag: null }
+];
+function dbRender() {
+  const wrap = document.getElementById('db-lanes');
+  if (!wrap) return;
+  wrap.innerHTML = DB_LANES.map(l => {
+    const cards = DB_CASES.filter(c => c.lane === l.id);
+    return `<div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:12px;padding:12px;min-height:180px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;color:${l.tone}">${l.label.toUpperCase()}</span>
+        <span style="font-size:11px;color:var(--text-secondary)">${cards.length} case${cards.length === 1 ? '' : 's'}</span>
+      </div>
+      ${cards.map(c => `<button data-db-case="${c.id}" style="display:block;width:100%;text-align:left;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;color:var(--text-primary)">
+        <span style="font-size:13px;font-weight:600">${c.id}</span>
+        <span style="display:block;font-size:12px;color:var(--text-secondary);margin-top:2px">$${c.escrow.toLocaleString('en-US','en-US')} escrow</span>
+        ${c.flag ? `<span style="display:inline-block;margin-top:6px;font-size:10px;letter-spacing:0.1em;color:${l.tone};border:1px solid ${l.tone};border-radius:999px;padding:1px 8px">${c.flag}</span>` : ''}
+      </button>`).join('') || '<p style="font-size:12px;color:var(--text-secondary);margin:0">No cases in this lane.</p>'}
+    </div>`;
+  }).join('');
+  wrap.querySelectorAll('[data-db-case]').forEach(b => b.addEventListener('click', () => dbOpen(b.dataset.dbCase)));
+}
+function dbOpen(id) {
+  const c = DB_CASES.find(x => x.id === id);
+  if (!c) return;
+  const dlg = document.getElementById('db-case-drawer');
+  document.getElementById('db-drawer-title').textContent = c.id;
+  const d = c.escrow - c.computed;
+  document.getElementById('db-drawer-body').innerHTML = `
+    <p style="margin:0 0 10px">${c.rule}</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace;font-size:13px">
+      <div style="background:var(--bg-surface);border-radius:8px;padding:8px">Escrow held<div style="color:var(--text-primary);font-weight:600">$${c.escrow.toLocaleString('en-US')}</div></div>
+      <div style="background:var(--bg-surface);border-radius:8px;padding:8px">Praman computed<div style="color:var(--text-primary);font-weight:600">$${c.computed.toLocaleString('en-US')}</div></div>
+      <div style="background:var(--bg-surface);border-radius:8px;padding:8px">Disposition<div style="color:var(--text-primary);font-weight:600;text-transform:capitalize">${c.lane}</div></div>
+      <div style="background:var(--bg-surface);border-radius:8px;padding:8px">Variance<div style="color:var(--text-primary);font-weight:600">${d === 0 ? '$0' : '-$' + d.toLocaleString('en-US')}</div></div>
+    </div>
+    ${c.flag ? `<p style="margin:12px 0 0;font-size:12px;color:#ff9d9d">Flagged for multi-miner arbitration: 2-of-2 quorum required before release.</p>` : ''}`;
+  dlg.showModal();
+}
+var LEDGER_FAILED = null;
+function dbRenderReceipts() {
+  const rail = document.getElementById('db-receipt-rail');
+  if (!rail) return;
+  let rows = [];
+  try { rows = (typeof LEDGER !== 'undefined' && LEDGER.length ? LEDGER : []).slice(0, 6); } catch (_) { rows = []; }
+  if (!rows.length) {
+    rail.innerHTML = LEDGER_FAILED
+      ? `<p style="font-size:12.5px;color:var(--text-secondary)">Receipts unavailable (${LEDGER_FAILED}). Live on the production deployment. <button class="btn-square ghost-square" id="db-led-retry" style="padding:3px 10px;font-size:11px">Retry</button></p>`
+      : '<p style="font-size:12.5px;color:var(--text-secondary)">Loading receipts from /api/ledger…</p>';
+    if (LEDGER_FAILED) { const b = document.getElementById('db-led-retry'); if (b) b.addEventListener('click', loadLedger); }
+    return;
+  }
+  rail.innerHTML = rows.map(t => {
+    const h = t.txHash || t.tx || '';
+    return `<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:10px;padding:10px 12px;font-size:12.5px">
+      <span style="color:var(--text-primary);font-weight:600">${t.miner || t.id || 'Settlement'}</span>
+      ${h ? `<a href="https://sepolia.etherscan.io/tx/${h}" target="_blank" rel="noopener" style="color:var(--accent-emerald);font-family:'JetBrains Mono',monospace">${h.slice(0, 10)}…${h.slice(-8)}</a>` : '<span>—</span>'}
+    </div>`;
+  }).join('');
+}
+dbRender();
+dbRenderReceipts();
+const dbDlg = document.getElementById('db-case-drawer');
+if (dbDlg) dbDlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => dbDlg.close()));
+try { document.addEventListener('ledger-loaded', dbRenderReceipts); } catch (_) {}
+setTimeout(dbRenderReceipts, 1500);
+
+/* Signature move: a case card physically travels between lanes as evidence arrives. */
+function dbMove(id, lane) {
+  const c = DB_CASES.find(x => x.id === id);
+  if (!c || c.lane === lane) return;
+  const wrap = document.getElementById('db-lanes');
+  const card = wrap && wrap.querySelector(`[data-db-case="${id}"]`);
+  if (card) {
+    const from = card.getBoundingClientRect();
+    c.lane = lane;
+    dbRender();
+    const moved = wrap.querySelector(`[data-db-case="${id}"]`);
+    if (moved) {
+      const to = moved.getBoundingClientRect();
+      const dx = from.left - to.left, dy = from.top - to.top;
+      if (dx || dy) {
+        moved.animate(
+          [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }],
+          { duration: 550, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
+        );
+        moved.style.boxShadow = '0 0 0 2px var(--brand-glow)';
+        setTimeout(() => { moved.style.boxShadow = ''; }, 900);
+      }
+    }
+  } else {
+    c.lane = lane;
+    dbRender();
+  }
+  toast(`${id} moved to ${lane.toUpperCase()}`);
+}
+const dbMoveBtn = document.getElementById('db-move-btn');
+if (dbMoveBtn) dbMoveBtn.addEventListener('click', () => {
+  dbMove(document.getElementById('db-move-select').value, document.getElementById('db-move-lane').value);
+});
+
+/* ==========================================================================
+   H. DESK 3 · SETTLEMENT LEDGER (100% PRESERVED & ZERO REGRESSION)
    ========================================================================== */
 let LEDGER = [], ledSort = { key: 'index', dir: 1 }, ledFiltered = [];
 function median(a) { const s = [...a].sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
 
 async function loadLedger() {
   $('#lg-body').innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--text-muted)">Loading on-chain settlements from Sepolia…</td></tr>';
+  // Static-export hosts (no Node backend) hydrate from the bundled snapshot;
+  // production and the local Node server use the live /api/ledger endpoint.
+  const staticExport = location.hostname.endsWith('.vercel.run');
+  const url = staticExport ? '/data/ledger-snapshot.json' : '/api/ledger';
   try {
-    const res = await fetch('/api/ledger');
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('ledger HTTP ' + res.status);
     const d = await res.json();
-    LEDGER = d.calls || [];
+    LEDGER = Array.isArray(d) ? d : (d.calls || []);
+    LEDGER_FAILED = null;
+    dbRenderReceipts();
     renderLedgerStats(d);
     const intents = [...new Set(LEDGER.map(c => c.intent))].sort();
     $('#lg-intent').innerHTML = '<option value="">ALL INTENTS</option>' + intents.map(i => `<option>${i}</option>`).join('');
     applyLedgerFilters();
   } catch (err) {
+    LEDGER_FAILED = err.message;
     $('#lg-body').innerHTML = '';
     $('#lg-empty').hidden = false;
     $('#lg-empty').innerHTML = 'Ledger endpoint unavailable — ' + err.message + '. <button class="btn-square ghost-square" id="lg-retry" style="padding:3px 10px;font-size:11px">Retry</button>';
