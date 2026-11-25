@@ -34,13 +34,63 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..', '..');
 const anjomanScript = path.join(rootDir, '.agents', 'skills', 'anjoman', 'scripts', 'anjoman.mjs');
 
-// Standard reference rates for deterministic cross-currency FX validation (EUR/USD, GBP/USD, etc.)
-const REFERENCE_FX_RATES = {
+// Fallback reference rates ONLY used when live ECB/Frankfurter feed is unreachable
+const FALLBACK_REFERENCE_FX_RATES = {
   'EUR_USD': 1.0850,
   'USD_EUR': 0.9216,
   'GBP_USD': 1.2850,
   'USD_GBP': 0.7782
 };
+
+async function fetchLiveFxRate(fromCcy, toCcy) {
+  const from = String(fromCcy || '').toUpperCase();
+  const to = String(toCcy || '').toUpperCase();
+  const pairKey = `${from}_${to}`;
+  try {
+    const res = await fetch(`https://api.frankfurter.dev/v1/latest?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`, {
+      signal: AbortSignal.timeout(4500)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const rate = Number(data?.rates?.[to]);
+      if (Number.isFinite(rate) && rate > 0) {
+        return {
+          rate,
+          live: true,
+          simulated: false,
+          date: data.date || null,
+          provider: `Live ECB / Frankfurter FX Feed (${data.date || 'latest'})`
+        };
+      }
+    }
+  } catch (_) {}
+  try {
+    const res2 = await fetch(`https://open.er-api.com/v6/latest/${encodeURIComponent(from)}`, {
+      signal: AbortSignal.timeout(4500)
+    });
+    if (res2.ok) {
+      const data2 = await res2.json();
+      const rate2 = Number(data2?.rates?.[to]);
+      if (Number.isFinite(rate2) && rate2 > 0) {
+        return {
+          rate: rate2,
+          live: true,
+          simulated: false,
+          date: data2.time_last_update_utc || null,
+          provider: 'Live Open Exchange Rate API'
+        };
+      }
+    }
+  } catch (_) {}
+  const fallback = FALLBACK_REFERENCE_FX_RATES[pairKey] || 1.0;
+  return {
+    rate: fallback,
+    live: false,
+    simulated: true,
+    date: null,
+    provider: 'Offline Reference Fallback (Live FX Unreachable)'
+  };
+}
 
 /**
  * Queries Anjoman via the official skill CLI if an API key is provisioned,
@@ -230,11 +280,11 @@ export async function investigateProcurement(request) {
   let fxData = null;
   if (request.currency && request.settlementCurrency && request.currency !== request.settlementCurrency) {
     const pairKey = `${request.currency.toUpperCase()}_${request.settlementCurrency.toUpperCase()}`;
-    const inverseKey = `${request.settlementCurrency.toUpperCase()}_${request.currency.toUpperCase()}`;
-    const referenceRate = REFERENCE_FX_RATES[pairKey] || 1.0;
+    const fxLookup = await fetchLiveFxRate(request.currency, request.settlementCurrency);
+    const referenceRate = fxLookup.rate;
     const claimedRate = Number(request.claimedFxRate) || referenceRate;
 
-    // Detect inverted FX rates (e.g., passing EUR/USD 0.92 instead of 1.085, or vice-versa)
+    // Detect inverted FX rates (e.g., passing EUR/USD 0.92 instead of ~1.08, or vice-versa)
     const isInverted = Math.abs(claimedRate - (1 / referenceRate)) < 0.05 && Math.abs(claimedRate - referenceRate) > 0.08;
     const rateDeviationPct = Math.abs((claimedRate - referenceRate) / referenceRate) * 100;
 
@@ -244,7 +294,10 @@ export async function investigateProcurement(request) {
       referenceRate,
       isInverted,
       rateDeviationPct: Math.round(rateDeviationPct * 100) / 100,
-      provider: 'Telegraph FX Specialist / European Central Bank Feed'
+      live: fxLookup.live,
+      simulated: fxLookup.simulated,
+      date: fxLookup.date,
+      provider: fxLookup.provider
     };
 
     if (isInverted || rateDeviationPct > 5.0) {
