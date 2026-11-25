@@ -15,8 +15,7 @@ import { generateRugReceiptProof } from './bridges/rugreceipt-bridge.mjs';
 import { evaluatePaysheetConsensus } from './bridges/paysheet-bridge.mjs';
 import { GoldRushAggregator } from '../examples/gold-rush-aggregator/gold-rush-aggregator.mjs';
 import { executeWebSearch, lookupOnchainTx, verifyTokenTotalSupply, checkWalletBalance, executeResearchQuery, arbitrateMultiMiner, verifyLiquidityDepth } from './universal-intents.mjs';
-import { SolanaSpendGuard, screenSolanaRecipient, loadInMemorySdnDatabase, MALICIOUS_DRAINER_ADDRESSES } from '../packages/praman-sdk/solana.js';
-import { Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
+import { SolanaSpendGuard, screenSolanaRecipient, loadInMemorySdnDatabase, MALICIOUS_DRAINER_ADDRESSES, SYSTEM_PROGRAM_ID } from '../packages/praman-sdk/solana.js';
 
 const goldRushAggregator = new GoldRushAggregator();
 
@@ -6285,7 +6284,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   return payload;
 }
 
-export function evaluateSolanaSpendGuardRequest(params = {}) {
+export async function evaluateSolanaSpendGuardRequest(params = {}) {
   const scenario = String(params.scenario || 'legit').trim().toLowerCase();
   const sdnDb = loadInMemorySdnDatabase();
   const sdnCount = sdnDb?.count || 0;
@@ -6299,8 +6298,7 @@ export function evaluateSolanaSpendGuardRequest(params = {}) {
     maxSessionSpend: { SOL: maxSessionSol, USDC: maxSessionUsdc }
   });
 
-  const senderKp = Keypair.generate();
-  const recentBlockhash = '11111111111111111111111111111111';
+  const senderPubkey = '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin';
   const context = {
     vendor: String(params.entity || params.vendor || '').trim(),
     mockBackdoor: Boolean(params.mockBackdoor),
@@ -6313,21 +6311,34 @@ export function evaluateSolanaSpendGuardRequest(params = {}) {
 
   if (typeof rawTxB64 === 'string' && rawTxB64.trim().length > 16) {
     const rawBuf = Buffer.from(rawTxB64.trim(), 'base64');
-    tx = Transaction.from(rawBuf);
+    try {
+      const web3 = await import('@solana/web3.js');
+      tx = web3.Transaction.from(rawBuf);
+    } catch (e) {
+      return {
+        ok: false,
+        chain: 'solana',
+        scenario: 'custom_serialized_tx',
+        verdict: 'HALTED',
+        status: 'HALTED',
+        cleared: false,
+        reason: 'TX_DESERIALIZE_UNAVAILABLE',
+        summary: `Unable to deserialize raw Solana transaction in serverless runtime: ${e.message}`,
+        flags: ['reason:TX_DESERIALIZE_UNAVAILABLE'],
+        sdnEntriesScreened: sdnCount,
+        as_of: new Date().toISOString()
+      };
+    }
     scenarioLabel = 'custom_serialized_tx';
   } else {
-    let destPubkey = new PublicKey('11111111111111111111111111111111');
-    try {
-      destPubkey = Keypair.generate().publicKey;
-    } catch {}
+    let destPubkey = '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU';
     let lamports = Math.round(0.01 * 1e9);
 
     if (scenario === 'hijack') {
       context.mockBackdoor = true;
       context.vendor = context.vendor || 'Siemens Aktiengesellschaft';
     } else if (scenario === 'drainer') {
-      const drainerAddr = Array.from(MALICIOUS_DRAINER_ADDRESSES)[0] || 'FnvLGtucz4E1ppJHRTev6Qv4X7g8Pw6WPStHCcbAKbfx';
-      destPubkey = new PublicKey(drainerAddr);
+      destPubkey = Array.from(MALICIOUS_DRAINER_ADDRESSES)[0] || 'FnvLGtucz4E1ppJHRTev6Qv4X7g8Pw6WPStHCcbAKbfx';
       lamports = Math.round(2.5 * 1e9);
       context.vendor = context.vendor || 'Unknown Unverified Drain Router';
     } else if (scenario === 'cap') {
@@ -6344,21 +6355,25 @@ export function evaluateSolanaSpendGuardRequest(params = {}) {
     }
 
     if (params.recipientPubkey) {
-      try {
-        destPubkey = new PublicKey(String(params.recipientPubkey).trim());
-      } catch {}
+      destPubkey = String(params.recipientPubkey).trim();
     }
 
-    tx = new Transaction({
-      feePayer: senderKp.publicKey,
-      recentBlockhash
-    }).add(
-      SystemProgram.transfer({
-        fromPubkey: senderKp.publicKey,
-        toPubkey: destPubkey,
-        lamports
-      })
-    );
+    const ixData = Buffer.alloc(12);
+    ixData.writeUInt32LE(2, 0);
+    ixData.writeBigUInt64LE(BigInt(Math.max(0, lamports)), 4);
+
+    tx = {
+      instructions: [
+        {
+          programId: SYSTEM_PROGRAM_ID,
+          keys: [
+            { pubkey: senderPubkey, isSigner: true, isWritable: true },
+            { pubkey: destPubkey, isSigner: false, isWritable: true }
+          ],
+          data: ixData
+        }
+      ]
+    };
   }
 
   const t0 = process.hrtime.bigint();
@@ -6934,7 +6949,7 @@ export async function handleApiRequest(req, res) {
       const q = Object.fromEntries(urlObj.searchParams.entries());
       const merged = sanitizeCurrencyStrings({ ...q, ...body });
       if (pathname === '/api/audit/solana-spend-guard' || String(merged.chain || '').toLowerCase() === 'solana') {
-        const out = evaluateSolanaSpendGuardRequest(merged);
+        const out = await evaluateSolanaSpendGuardRequest(merged);
         return sendJson(res, 200, out);
       }
       if (pathname === '/api/trade-assurance/audit' && !merged.scenario) {
