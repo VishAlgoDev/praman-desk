@@ -28,7 +28,7 @@ import {
   evaluateStablecoinGate,
   evaluateContractObligationPrompt,
   evaluateMiningIntelligencePrompt,
-  getGridPowerPrice,
+  getLiveGridPowerPrice,
 } from '../src/handlers.mjs';
 import { generateComplianceCertificate } from '../src/certificate.mjs';
 import { evaluateCounterpartyShield, checkFakeWatchDomain } from '../src/bridges/fakewatch-bridge.mjs';
@@ -994,7 +994,7 @@ export async function executeMcpTool(name, inputArgs = {}) {
           break;
 
         case 'query_grid_power_price':
-          result = getGridPowerPrice(args);
+          result = await getLiveGridPowerPrice(args);
           break;
 
         default:

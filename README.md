@@ -3,81 +3,70 @@
 **The Autonomous Pre-Payment Spend Firewall for AI Agents, DAOs & Treasuries**
 
 [![Live Hosted App](https://img.shields.io/badge/Live%20Firewall-praman--desk.vercel.app-0284c7?style=for-the-badge&logo=vercel)](https://praman-desk.vercel.app)
-[![Active Sepolia Diamond](https://img.shields.io/badge/Sepolia%20Diamond-Reg%20%236164%20(Miner%20%236127)-10b981?style=for-the-badge&logo=ethereum)](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
+[![Active Sepolia Diamond](https://img.shields.io/badge/Sepolia%20Diamond-Reg%20%236169%20(Route%20%235281)-10b981?style=for-the-badge&logo=ethereum)](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
 [![Sepolia EAS Attested](https://img.shields.io/badge/Sepolia%20EAS-UID%200x33d85bed...-8b5cf6?style=for-the-badge&logo=ethereum)](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115)
-[![Multi-Miner Truth Matrix](https://img.shields.io/badge/Truth%20Matrix-Live%20Arbitrator-ec4899?style=for-the-badge)](https://praman-desk.vercel.app/#matrix)
 [![WASM Comparator](https://img.shields.io/badge/WASM%20Engine-651%20Bytes%20Pure%20Binary-f59e0b?style=for-the-badge)](https://praman-desk.vercel.app/comparator.wasm)
 [![MCP Server](https://img.shields.io/badge/MCP-18%20Tools%20Streamable%20HTTP-6366f1?style=for-the-badge)](https://github.com/VishAlgoDev/praman-desk#10-second-developer-quickstart)
 
 ---
 
-## ⚡ Judge & Developer 30-Second Quickstart
+## Judge & Developer 30-Second Quickstart
 
-Evaluate the entire Praman Desk stack locally with zero external configuration in under 30 seconds:
+Evaluate Praman Desk locally with zero external keys in under 30 seconds:
 
 ```bash
 # 1. Clone repository
 git clone https://github.com/VishAlgoDev/praman-desk.git
 cd praman-desk
+npm install
 
-# 2. Run the 5-second 4-scenario ground-truth evaluation suite
+# 2. Run the core compliance gate demo & Alibaba Trade Assurance arbitration
 npm run gate demo
+npm run alibaba:demo
 
-# 3. Run the Animoca Minds autonomous agent loss-prevention demo ($10,000 saved)
-npm run gate agent-demo
+# 3. Run Solana Pre-Signature Spend Guard unit & Devnet suite (26 unit + 5 Devnet tests)
+npm run solana:test
 
-# 4. Run the Bangdrop Takar cross-miner escrow clearing bridge (Two-Miner consensus)
-npm run gate takar
+# 4. Run the Animoca Minds two-agent loss-prevention & WASM comparator suites
+npm run minds:test
+npm run comparator:test
 ```
 
-- 🌐 **Live Web Playground:** [https://praman-desk.vercel.app](https://praman-desk.vercel.app) *(Click the 4 one-click scenario buttons for live <300ms arbitration)*
-- 🎬 **Official Master Walkthrough Video:** [praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) (5.23 min, complete audio + visual proof)
-- 🔌 **Zero-Install Keyless MCP Server:** Add `https://praman-desk.vercel.app/api/mcp` to Cursor, Claude Code, or Minds ([Setup Guide](CONNECT_YOUR_AGENT.md))
-- 📦 **NPM / GitHub SDK Integration:** `npm install github:VishAlgoDev/praman-desk` or import from `packages/praman-sdk`
-
----
-
-- **Live Split-Screen Interactive Playground:** <https://praman-desk.vercel.app>
-- **Universal Multi-Miner Contradiction & Truth Matrix:** <https://praman-desk.vercel.app/#matrix>
-- **Zero-Install Keyless MCP Server for Cursor, Claude & Minds:** [CONNECT_YOUR_AGENT.md](CONNECT_YOUR_AGENT.md) (`https://praman-desk.vercel.app/api/mcp`)
-- **Official Master Walkthrough (Full Deep Dive):** [praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) (5.23 min, Screen Studio + Founder narration).
-- **Fast-Track Executive Demo (47s Video):** [praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) (47s Two-Mind Threat Interception demo).
+- **Live Web Console:** [https://praman-desk.vercel.app](https://praman-desk.vercel.app) *(Alibaba Trade Assurance Desk, Disposition Board, Live Solana Pre-Signature Spend Guard, Procurement Verifier, Multi-Miner Settlement Ledger)*
+- **Zero-Install Keyless MCP Server:** Add `https://praman-desk.vercel.app/api/mcp` to Cursor, Claude Code, or Minds ([Setup Guide](CONNECT_YOUR_AGENT.md))
+- **NPM / GitHub SDK Integration:** `npm install github:VishAlgoDev/praman-desk` or import from `packages/praman-sdk` (`index.js`, `solana.js`, `praman.py`)
 - **Two-Mind Spend Guard Architecture:** [Reference Implementation of the Animoca Brands Minds Specification](examples/minds-spend-guard/) (Diligence Investigator + Escrow Reviewer Minds)
-- **Empirical Benchmark Report:** [With vs Without Telegraph ($79,373 Averted)](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md)
-- **Active Telegraph Miner:** Devnode Miner `#6164` (Route `5281` / Sepolia Diamond registration `#6164`, **15 capabilities**) on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
-- **Devnode Global Leaderboard Standing (Live Epoch 38 & 39):**
-  - 🥈 **Rank #2 Globally:** `INVOICE_LEDGER_RECONCILE_GENERAL` (Score: `0.9979` in Epoch 39)
-  - 🏆 **Rank #1 Globally:** `CONTRACT_OBLIGATION_AUDIT_GENERAL` (Score: `0.500`)
-  - 🏆 **Rank #1 Globally:** `PURCHASE_ORDER_VERIFY_GENERAL` (Score: `0.000`, top seed)
-  - 🏆 **Rank #1 Globally:** `CORPORATE_REGISTRY_LOOKUP_GENERAL` (Score: `0.998`, 200+ jurisdictions GLEIF)
-  - 🥈 **Rank #2 Globally:** `SANCTIONS_SCREENING_MATCH_GENERAL` (Score: `1.000`, 19,599 OFAC records + 127 EVM digital currency addresses)
-  - 🏆 **Rank #1 Globally:** `GRID_POWER_PRICE_GENERAL` (CAISO / ERCOT Locational Marginal Pricing)
-  - 🏆 **Rank #1 Globally:** `REGULATORY_FILING_MONITOR_GENERAL` (SEC EDGAR / Federal Register)
-- **Total Requests Served on Devnode:** **275+** live paid network requests served via native EIP-191 escrow signatures (100% HTTP 200)
-- **Live Multi-Operator Consensus on Sepolia:** Verified Seat 3 Resolver on TakarSettle v4 (`0x310275e6D66818E068245326bB9e398822304248`). Evaluated Deal 0 (Siemens AG) and broadcasted decisive on-chain `second()` transaction:
-  - **Tx**: [`0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75`](https://sepolia.etherscan.io/tx/0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75) (Block `12190408`)
-  - **Result**: 3/3 approvals reached, Deal 0 finalized on Ethereum Sepolia.
+- **Counterfactual Policy Benchmark:** [With vs Without Telegraph ($79,373 Averted in Deterministic Counterfactual Simulation)](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md)
+- **Active Telegraph Miner Coordinates:** Sepolia Diamond Registration `#6169` / Devnode Route `#5281` on [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
+- **Verified Live Specialist Signals:**
+  - `INVOICE_LEDGER_RECONCILE_GENERAL`, `CONTRACT_OBLIGATION_AUDIT_GENERAL`, `PURCHASE_ORDER_VERIFY_GENERAL`, `VENDOR_VERIFY_GENERAL`, `DOCUMENT_AUTHENTICITY_GENERAL` (651-byte pure WebAssembly fixed-point arithmetic + SHA-256)
+  - `CORPORATE_REGISTRY_LOOKUP_GENERAL` (Live GLEIF Global LEI Index across 200+ jurisdictions)
+  - `SANCTIONS_SCREENING_MATCH_GENERAL` (19,565 OFAC SDN entities + digital currency/EVM addresses screened in-memory in <25ms)
+  - `REGULATORY_FILING_MONITOR_GENERAL` (Live SEC EDGAR & US Federal Register)
+  - `GRID_POWER_PRICE_GENERAL` (Live CAISO OASIS `PRC_LMP` / `PRC_INTVL_LMP` SingleZip feed; fails closed to `live_feed_unavailable` when an ISO blocks unauthenticated access)
+  - `LIQUIDITY_DEPTH_VERIFY_GENERAL`, `TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL`, `ONCHAIN_TX_LOOKUP_GENERAL`, `WALLET_TOKEN_BALANCE_GENERAL` (Live Ethereum & Sepolia JSON-RPC, including Uniswap v3 `slot0` / `liquidity` depth math)
+- **Verified On-Chain Takar Escrow Settlements (Ethereum Sepolia):**
+  - `TakarSettle v4` (`0x310275e6D66818E068245326bB9e398822304248`) Deal 0: [`0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75`](https://sepolia.etherscan.io/tx/0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75) (Block `12190408`) & Case 1: [`0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13`](https://sepolia.etherscan.io/tx/0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13) (Block `12200598`)
+  - `TakarSettle5` (`0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B`) Case 2: [`0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de`](https://sepolia.etherscan.io/tx/0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de) (Block `12200597`)
 - **Telegraph Hackathon Season II Tracks Covered:**
-  - **Track 01 (Apps & Agents):** Praman Desk Collaborative Two-Mind Spend Guard + Zero-Install MCP Spend Gate
-  - **Track 02 (Miners/Providers):** Miner `#6164` holding Rank 1/Rank 2 standings across active commercial intents
-  - **Track 03 (Evaluators/Truth Sources):** 68 eligible rows across 9 intents in Devnode EvalPool satisfying `min_submitters >= 3` consensus + Upstream Ground-Truth PRs #217-#222
-- **Anjoman App Submission IDs:** `9ae7025e-65be-490b-8e59-2aa598f16992` (Category: Agents, Status: In review) & `c7c1adbb-304d-42ec-91df-5811f5e7f49e` (Category: Security, Status: In review)
+  - **Track 01 (Apps & Agents):** Praman Desk Collaborative Two-Mind Spend Guard, Alibaba & Cainiao Trade Assurance Clearing Desk, Solana Pre-Signature Spend Guard SDK (`packages/praman-sdk/solana.js`), & Zero-Install MCP Spend Gate (`/api/mcp`)
+  - **Track 02 (Miners/Providers):** Sepolia Diamond RegID `#6169` / Devnode Route `#5281`
+  - **Track 03 (Evaluators/Truth Sources):** Deterministic 651-byte WASM Comparator + private live-tested `truth_source` suites
+- **Anjoman App Listing (`praman-desk-2`):** `9ae7025e-65be-490b-8e59-2aa598f16992`
 - **Contributor / Payer Wallet:** [`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`](https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466)
 
 ---
 
 ## For Judges: Official Season II Rubric Mapping
 
-This table maps directly to the Hackathon Judging Criteria from Section 6 of the official rules:
-
 | Judging Criterion (100 pts) | Implementation & Verifiable Proof | Key Links |
 |---|---|---|
-| **1. Technical Quality & Mainnet Readiness** | 15 production specialist endpoints on Vercel with <600ms latency. Standalone 651-byte compiled WebAssembly arithmetic engine (`comparator.wasm`) guaranteeing bit-exact IEEE-754 3-way invoice reconciliation. Decisive Seat 3 Resolver on Sepolia TakarSettle v4 escrow contract. | [WASM Binary](https://praman-desk.vercel.app/comparator.wasm) • [Sepolia Settle Tx](https://sepolia.etherscan.io/tx/0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75) • [Offline Verifier](scripts/verify-bundle-offline.mjs) |
-| **2. Commercial Viability & Real Utility** | Solves the critical security vulnerability of autonomous agent wallets: prompt-injected payments to sanctioned addresses and fraudulent invoices. Directly serves CFOs, DAOs, and autonomous agent runtimes. $79,373 capital loss averted in empirical testing. | [Commercial Dossier](#anjoman-season-ii-hackathon-rubric-dossier-the-5-mandatory-questions) • [Benchmark Report](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md) |
-| **3. Genuine Independent Adoption & Retention** | Public, zero-install, keyless MCP endpoint (`/api/mcp`) running in any Cursor, Claude Code, Windsurf, or Minds agent in 30 seconds. Co-opetition partnership with Bangdrop's Takar: Takar uses Praman Desk as Seat 3 Resolver. | [CONNECT_YOUR_AGENT.md](CONNECT_YOUR_AGENT.md) • [Live MCP](https://praman-desk.vercel.app/api/mcp) • [Minds Specification](examples/minds-spend-guard/) |
-| **4. Telegraph Network Integration & Quality** | Devnode Miner #6164 (Route 5281) has served **275+ live verified network requests** (100% HTTP 200). Holds Rank 1 across 5 commercial intents (Ep 38) and Rank 2 on `INVOICE_LEDGER_RECONCILE` (0.9979 score in Ep 39). 68 eligible EvalPool rows. | [Sepolia Diamond #6164](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) • [Leaderboard](https://devnode.telegraphprotocol.com) |
-| **5. Reproducibility, Demo & Verifiable Proof** | Live interactive split-screen web app. 5.23m full master walkthrough video + 47s executive threat demo. Complete offline test suite (`npm run offline:test`, 29 test vectors). Confirmed on-chain EAS attestation and Etherscan transaction receipts. | [Live App](https://praman-desk.vercel.app) • [Demo Video (5.23m)](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) • [EAS Attestation](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115) |
-| **6. Organic Growth, Education & Dev Activation** | Published 30-second developer onboarding guide for Cursor, Claude Code, and Minds. Public updates and verified on-chain proofs shared in Discord `#hackathon`, `#showcase`, and on X tagging `@Telegraphprotoc`. | [Developer Guide](CONNECT_YOUR_AGENT.md) • [X Broadcast](https://x.com/vishal_karad) • [Discord Showcase](https://discord.com/channels/1438396125609463881) |
+| **1. Technical Quality & Mainnet Readiness** | Standalone 651-byte compiled WebAssembly arithmetic engine (`comparator.wasm`, 1,043/1,043 bit-exact test cases). Solana `SolanaSpendGuard` middleware (`legacy` + `v0` VersionedTransaction, supply-chain `web3.js` 1.95.6/1.95.7 detection, drainer wallet interception, ALT fail-closed guard). On-chain Resolver on Sepolia `TakarSettle v4` & `TakarSettle5`. | [WASM Binary](https://praman-desk.vercel.app/comparator.wasm) • [Sepolia Settle Tx](https://sepolia.etherscan.io/tx/0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75) • [Solana SDK](packages/praman-sdk/solana.js) |
+| **2. Commercial Viability & Real Utility** | Prevents autonomous treasury loss from overbilling (`PO-ALI-9021` 80 vs 100 units), OFAC SDN sanctions exposure, phishing domains (`FakeWatch`), exploit contracts (`RugReceipt`), and hijacked Solana `web3.js` signing hooks before capital leaves escrow or wallet keys touch bytes. | [Commercial Dossier](#anjoman-season-ii-hackathon-rubric-dossier-the-5-mandatory-questions) • [Benchmark Report](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md) |
+| **3. Genuine Independent Adoption & Retention** | Keyless Streamable HTTP MCP (`/api/mcp`, 18 tools) + JS/TS/Python SDKs (`packages/praman-sdk`) + cross-project integrations with Takar (`Bangdrop`), FakeWatch (`#42420`), RugReceipt (`#208`), and Paysheet (`#214`). | [CONNECT_YOUR_AGENT.md](CONNECT_YOUR_AGENT.md) • [Live MCP](https://praman-desk.vercel.app/api/mcp) • [Minds Specification](examples/minds-spend-guard/) |
+| **4. Telegraph Network Integration & Quality** | Devnode Route `#5281` / Sepolia Diamond RegID `#6169` serving real live upstream data (GLEIF, SEC EDGAR, OFAC SDN, CAISO OASIS, Ethereum/Sepolia JSON-RPC) with `30` verified paid Sepolia ledger receipts (`0.30 test-USDC`) and fail-closed transparency (`confidence: 0` when an upstream feed is unreachable). | [Sepolia Diamond #6169](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) • [Live Ledger](https://praman-desk.vercel.app/#desk-3) |
+| **5. Reproducibility, Demo & Verifiable Proof** | Interactive browser portal (`Trade Assurance`, `Disposition Board`, `Solana Spend Guard` wired to `/api/audit/solana-spend-guard`, `Procurement Verify`, `Settlement Ledger`), full unit + integration + Devnet test suites, and Sepolia Etherscan + EAS receipts. | [Live App](https://praman-desk.vercel.app) • [EAS Attestation](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115) |
+| **6. Organic Growth, Education & Dev Activation** | Zero-install developer guide (`CONNECT_YOUR_AGENT.md`), CLI runner (`npm run gate solana-demo` / `npm run alibaba:demo`), and interactive SDK playground. | [Developer Guide](CONNECT_YOUR_AGENT.md) • [Discord Showcase](https://discord.com/channels/1438396125609463881) |
 
 ---
 
@@ -85,17 +74,17 @@ This table maps directly to the Hackathon Judging Criteria from Section 6 of the
 
 ### Q1: Who is it for?
 - **Target Users & Buyers**:
-  - **Treasury Operations Managers & CFOs**: Web3 DAOs, protocol foundations, and tech enterprises executing automated multi-currency or crypto payroll, vendor payouts, and grants.
-  - **Autonomous AI Agents & Coding Harnesses** (Antigravity, OpenCode, Eliza, CrewAI): Agentic runtimes granted wallet private keys and automated spend caps for hiring compute, paying API vendors, and settling invoices.
-  - **Procurement & Accounts Payable Desks**: Enterprise desks processing high-volume recurring vendor invoices subject to statutory reporting and OFAC compliance.
+  - **Treasury Operations Managers & CFOs**: Web3 DAOs, protocol foundations, and tech enterprises executing automated multi-currency or crypto payroll, vendor payouts, and trade escrow.
+  - **Autonomous AI Agents & Coding Harnesses** (Antigravity, OpenCode, Eliza, CrewAI): Agentic runtimes granted wallet signing capabilities or Solana/EVM spend caps.
+  - **Procurement & Accounts Payable Desks**: Cross-border supply chain and B2B desks (e.g., Alibaba & Cainiao Trade Assurance) reconciling POs against warehouse receipts before releasing escrow.
 - **Problem Frequency**:
-  - **Continuous & Real-Time**: Autonomous agents disburse transactions 24/7 without human intervention. In Web3, transactions are mathematically final and irreversible. A single unverified payment to a sanctioned address or a fraudulent invoice results in permanent capital loss and severe regulatory liability.
+  - **Continuous & Real-Time**: Autonomous agents disburse transactions 24/7 without human intervention. In Web3, transactions are mathematically final and irreversible. A single unverified payment to a sanctioned address or an overbilled invoice results in permanent capital loss and regulatory liability.
 
 ### Q2: What does it improve?
 - **Measurable Improvement Over Current Alternatives**:
-  - **Replaces Blind LLM Hallucinations with Deterministic Cryptography**: Standard LLMs hallucinate arithmetic and cannot verify whether an address belongs to an OFAC-sanctioned entity. Praman Desk provides a zero-slop pre-payment barrier backed by 19,599 OFAC SDN records, 127 EVM digital currency addresses, 200+ jurisdictions GLEIF official registry, and a 651-byte WASM arithmetic comparator.
-  - **56% to 72% Query Spend Reduction (Golden Challenge)**: Rather than blasting monolithic, expensive multi-miner queries, Praman Desk deconstructs invoice claims into a dependency graph and dynamically queries only the cheapest missing corroboration on Telegraph, saving 56%–72% in protocol fees.
-  - **$79,373 in Capital Loss Averted**: In empirical benchmarks, Praman Desk intercepted fraudulent invoices, phantom overcharges, and sanctioned transfers before `signer.sendTransaction()` was ever broadcast.
+  - **Replaces Blind LLM Hallucinations with Deterministic Cryptography**: Standard LLMs hallucinate arithmetic and cannot verify whether an address belongs to an OFAC-sanctioned entity. Praman Desk provides a fail-closed pre-payment barrier backed by `19,565` OFAC SDN records, GLEIF Global LEI verification across 200+ jurisdictions, Solana pre-signature transaction inspection, and a `651`-byte WASM arithmetic comparator.
+  - **56% to 72% Query Spend Reduction (Golden Challenge)**: Rather than blasting monolithic multi-miner queries, Praman Desk deconstructs invoice claims into a dependency graph and queries only the cheapest missing corroboration.
+  - **$79,373 Capital Exposure Averted in Counterfactual Simulation**: Against an ungrounded parameter pass-through baseline, Praman Desk intercepted inverted FX overcharges, lapsed LEIs, phishing domains, sub-cent arithmetic drift, and OFAC collisions before signing.
 
 ### Q3: What does it do today?
 - **Live Concrete Capabilities in Production**:
@@ -197,19 +186,19 @@ node examples/minds-spend-guard/test-two-minds.mjs
 
 ---
 
-## Empirical Benchmark: With vs Without Telegraph ($79,373 Averted)
+## Counterfactual Benchmark: With vs Without Telegraph ($79,373 Averted)
 
-We benchmarked identical adversarial scenarios across two agent architectures:
-1. **Without Telegraph (Raw LLM / Generic Agent)**: Unassisted model relying on prompt weights and loose floating-point math.
-2. **With Telegraph (Praman Desk Two-Mind Architecture)**: Powered by Devnode Miner #6127, FakeWatch Miner #42420, and 651-byte WASM engine.
+We evaluated five adversarial scenarios under a deterministic counterfactual baseline:
+1. **Without Telegraph (Ungrounded Parameter Pass-Through Baseline)**: Simulated unassisted pass-through with no live oracle verification or deterministic math checks.
+2. **With Telegraph (Praman Desk Two-Mind Architecture)**: Powered by Devnode Route `#5281`, FakeWatch Miner `#42420`, and the 651-byte WASM engine.
 
-| Benchmark Metric | Without Telegraph (Raw LLM) | With Telegraph (Praman Desk) | Advantage |
+| Benchmark Metric | Without Telegraph (Counterfactual Baseline) | With Telegraph (Praman Desk) | Advantage |
 |---|:---:|:---:|:---:|
 | **Adversarial Error Catch Rate** | **0.0%** (0 / 5) | **100.0%** (5 / 5) | **+100.0% Protection** |
-| **Direct Capital Loss** | **-$79,373.00 USD** | **$0.00 USD** | **$79,373 Averted (100%)** |
-| **Arithmetic Precision** | Loose / Approximate | **Deterministic 651-byte WASM** | **0 Drift down to sub-cent** |
+| **Direct Capital Exposure** | **-$79,373.00 USD** | **$0.00 USD** | **$79,373 Averted (100%)** |
+| **Arithmetic Precision** | Loose / Unchecked | **Deterministic 651-byte WASM** | **0 Drift down to sub-cent** |
 | **Auditability & Receipts** | None (Opaque Text) | **EIP-191 & Sepolia Diamond** | **100% Cryptographic Proof** |
-| **Average Decision Latency** | 1,250 ms | 775 ms | **Enterprise Real-Time (<2.5s)** |
+| **Average Decision Latency** | N/A (No Live Verification) | ~600 ms | **Real-Time Verification** |
 
 Detailed findings, reproduction steps, and full report: [`docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md`](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md).
 
@@ -388,11 +377,11 @@ node examples/rugreceipt-screen/test-rugreceipt-screen.mjs
 
 Praman Desk bridges Track 01, Track 02, and Track 03 into a self-reinforcing flywheel:
 
-1. **Active Miner (Track 02):** Bonded on active Sepolia Diamond [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) (Diamond registration `#6164`, Devnode miner `#6127`, Route `5281`). **14** intents on-chain; mining intelligence live on HTTP/MCP pending Diamond bond support.
-2. **Evaluator Pool (Track 03):** 62 attested bounties scoring external miners against primary registers (SEC EDGAR, GLEIF, OFAC).
-3. **Praman Spend Guard (Track 01):** The user-facing application that consumes high-reputation network miners to verify counterparty parameters before on-chain payment.
+1. **Active Miner (Track 02):** Bonded on active Sepolia Diamond [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) (Diamond registration `#6169`, Devnode Route `#5281`) backed by live GLEIF, SEC EDGAR, OFAC SDN (`19,565` entries), CAISO OASIS, and Ethereum/Sepolia JSON-RPC.
+2. **Evaluators & Truth Sources (Track 03):** Private curated ground-truth pools kept outside the public repo so test vectors remain uncontaminated.
+3. **Praman Spend Guard (Track 01):** Pre-payment application, Alibaba Trade Assurance escrow arbiter (`TakarSettle v4` & `TakarSettle5`), and Solana Pre-Signature Spend Guard (`packages/praman-sdk/solana.js`).
 4. **WASM Math Engine:** 651-byte zero-import binary compiled from AssemblyScript with 1,043/1,043 test vectors passing with zero discrepancies.
-5. **18 Streamable MCP Tools:** Fully compliant with MCP specification 2025-03-26 via SSE/JSON-RPC 2.0 at `/api/mcp`.
+5. **18 Streamable MCP Tools:** Compliant with MCP specification 2025-03-26 via SSE/JSON-RPC 2.0 at `/api/mcp`.
 
 ---
 

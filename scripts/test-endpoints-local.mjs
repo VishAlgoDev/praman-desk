@@ -576,8 +576,11 @@ async function run() {
     }
 
     const ercotCheck = await check('/api/miner/grid-power-price?hub=Houston&iso=ERCOT');
-    if (ercotCheck.status !== 200 || ercotCheck.json.verdict !== 'SETTLEMENT_PRICE_VERIFIED' || ercotCheck.json.iso !== 'ERCOT' || typeof ercotCheck.json.price_mwh !== 'number') {
-      throw new Error(`GET /api/miner/grid-power-price (ERCOT Houston) failed: ${JSON.stringify(ercotCheck)}`);
+    if (ercotCheck.status !== 200 || (ercotCheck.json.verdict !== 'LIVE_FEED_UNAVAILABLE' && ercotCheck.json.verdict !== 'SETTLEMENT_PRICE_VERIFIED')) {
+      throw new Error(`GET /api/miner/grid-power-price (ERCOT Houston) failed honest live/unavailable check: ${JSON.stringify(ercotCheck)}`);
+    }
+    if (ercotCheck.json.verdict === 'LIVE_FEED_UNAVAILABLE' && ercotCheck.json.confidence !== 0) {
+      throw new Error(`ERCOT unavailable response must report confidence=0: ${JSON.stringify(ercotCheck)}`);
     }
 
     // 29. Trade Assurance evidence dispositions (missing evidence hold / conflicting reports arbitration / non-delivery refund)
@@ -592,6 +595,62 @@ async function run() {
     const taRefund = await check('/api/trade-assurance/audit', 'POST', { poNumber: 'PO-ALI-9025', pierPassReceiptId: 'CN-LAX-88299', scenario: 'alibaba_refund', disputeResolutionAuthorized: false, reconciledDisbursementUsdc: 0 });
     if (taRefund.status !== 200 || taRefund.json.status !== 'REFUNDED' || taRefund.json.verdict !== 'FULL_REFUND_APPROVED' || taRefund.json.policyDecision !== 'FULL_REFUND_TO_BUYER') {
       throw new Error(`Trade Assurance full-refund disposition failed: ${JSON.stringify(taRefund.json?.status)}`);
+    }
+
+    // 30. Anthony (Countersign) PO-ALI-9021 exact math + dryRun copy regression checks (liveSettle: false)
+    const taCaseA = await check('/api/spend-guard/evaluate', 'POST', {
+      scenario: 'alibaba_trade',
+      vendorName: 'Siemens Aktiengesellschaft',
+      spendAmountUsdc: 100000,
+      poCommitment: 100000,
+      statedTotal: 100000,
+      statedSubtotal: 100000,
+      singleAgentCap: 500,
+      dualApprovalCap: 150000,
+      supervisorSignature: '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466d3a948192305bad61042781bcf8291048291823ba78192304891283ba192384fca81',
+      lineItems: [{ desc: 'Industrial Automation Sensors', qty: 80, unitPrice: 1000, amount: 80000 }],
+      liveSettle: false
+    });
+    if (taCaseA.status !== 200 || taCaseA.json.status !== 'HALTED' || taCaseA.json.conformingUnits !== 80 || taCaseA.json.shortfallUsd !== 20000 || !/80 conforming units/.test(taCaseA.json.summary) || !/20,000 SHORTFALL BLOCKED/.test(taCaseA.json.verdictHeadline)) {
+      throw new Error(`Anthony PO-ALI-9021 Case A math/copy regression failed: ${JSON.stringify(taCaseA.json)}`);
+    }
+    const taCaseB = await check('/api/spend-guard/evaluate', 'POST', {
+      scenario: 'alibaba_reconciled',
+      vendorName: 'Siemens Aktiengesellschaft',
+      spendAmountUsdc: 80000,
+      poCommitment: 100000,
+      statedTotal: 80000,
+      statedSubtotal: 80000,
+      singleAgentCap: 500,
+      dualApprovalCap: 150000,
+      supervisorSignature: '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466d3a948192305bad61042781bcf8291048291823ba78192304891283ba192384fca81',
+      lineItems: [{ desc: 'Industrial Automation Sensors', qty: 80, unitPrice: 1000, amount: 80000 }],
+      liveSettle: false
+    });
+    if (taCaseB.status !== 200 || taCaseB.json.status !== 'APPROVED' || taCaseB.json.dryRun !== true || taCaseB.json.liveSettleExecuted !== false || !/Dry-run pre-flight/i.test(taCaseB.json.summary) || /Settled on TakarSettle v4\.$/.test(taCaseB.json.summary)) {
+      throw new Error(`Anthony PO-ALI-9021 Case B dryRun copy regression failed: ${JSON.stringify(taCaseB.json)}`);
+    }
+
+    // 31. Solana Pre-Signature Spend Guard live endpoint & /api/mission/contract-audit + /api/miner/vendor-verify NL fix
+    for (const sc of ['legit', 'hijack', 'drainer', 'cap', 'ofac']) {
+      const sg = await check('/api/audit/solana-spend-guard', 'POST', { scenario: sc });
+      const expectedVerdict = sc === 'legit' ? 'APPROVED' : 'HALTED';
+      if (sg.status !== 200 || sg.json.verdict !== expectedVerdict || sg.json.sdnEntriesScreened < 19000) {
+        throw new Error(`Solana Spend Guard scenario ${sc} failed: ${JSON.stringify(sg.json)}`);
+      }
+    }
+    const missionContract = await check('/api/mission/contract-audit', 'POST', {
+      contractText: 'Late payment interest accrues at 18% p.a.',
+      principal: 50000,
+      rate_pct: 18,
+      days_overdue: 30
+    });
+    if (missionContract.status !== 200 || missionContract.json.verdict !== 'Non-compliant' || missionContract.json.penalty_amount <= 0) {
+      throw new Error(`POST /api/mission/contract-audit failed: ${JSON.stringify(missionContract.json)}`);
+    }
+    const vendorCorp = await check('/api/miner/vendor-verify?prompt=Verify%20corporate%20status%20of%20Siemens%20AG');
+    if (vendorCorp.status !== 200 || vendorCorp.json.valid !== true || vendorCorp.json.lei !== 'W38RGI023J3WT1HWRP32') {
+      throw new Error(`Vendor NL corporate status check failed: ${JSON.stringify(vendorCorp.json)}`);
     }
 
     console.log('\nALL 28 ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM, MISSION 02, GRID POWER PRICING, GENERALIZED MULTI-MINER AGGREGATION & TRADE ASSURANCE EVIDENCE DISPOSITIONS VERIFIED!');

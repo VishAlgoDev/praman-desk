@@ -243,7 +243,7 @@ export async function runBenchmark() {
       totalLossIncurredUsd: totalLossWithoutTelegraph,
       lossAversionRatePct: 0.0,
       cryptographicVerifiability: 'NONE (Unverifiable string output)',
-      avgLatencyMs: 1250
+      avgLatencyLabel: 'N/A (Deterministic Counterfactual Baseline — No Live Check)',
     },
     withTelegraph: {
       catchRatePct: catchRateWithTelegraph,
@@ -253,6 +253,7 @@ export async function runBenchmark() {
       cryptographicVerifiability: '100% (EIP-191 Signatures + Sepolia Diamond Escrow)',
       avgLatencyMs: Math.round(results.reduce((acc, r) => acc + r.withTelegraph.latencyMs, 0) / totalScenarios)
     },
+    methodologyNote: 'Simulated counterfactual baseline (ungrounded parameter pass-through) vs live Praman Desk verification.',
     detailedResults: results
   };
 
@@ -296,7 +297,7 @@ Following public instructions from Telegraph Protocol Co-Founder **Ahmed Ali (\`
 | **Direct Capital Loss** | **\$${summary.withoutTelegraph.totalLossIncurredUsd.toLocaleString()} USD** | **\$0.00 USD** | **\$${summary.withTelegraph.totalLossAvertedUsd.toLocaleString()} Averted (100%)** |
 | **Arithmetic Precision** | Approximate / Loose | **Deterministic 651-byte WASM** | **0 Drift down to sub-cent** |
 | **Auditability & Receipts** | None (Opaque Text) | **EIP-191 & Sepolia Diamond** | **100% Cryptographic Proof** |
-| **Average Decision Latency** | 1,250 ms | ${summary.withTelegraph.avgLatencyMs} ms | **Enterprise Real-Time (<2.5s)** |
+| **Average Decision Latency** | ${summary.withoutTelegraph.avgLatencyLabel} | ${summary.withTelegraph.avgLatencyMs} ms | **Real-Time Verification** |
 
 ---
 

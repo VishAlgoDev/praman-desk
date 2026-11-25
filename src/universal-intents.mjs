@@ -193,10 +193,57 @@ export async function executeWebSearch({ query, question, q, prompt, text } = {}
     }
   }
 
+  // 2b. Authoritative technical / corporate registry resolution before Wikipedia
+  const cleanSearch = rawQuery
+    .replace(/^(?:search|look\s*up|find|query|research)\s+(?:the\s+web\s+for\s+|for\s+)?/i, '')
+    .replace(/\s+documentation$/i, '')
+    .trim();
+
+  if (!answer && /\b(?:gleif|lei)\b/i.test(rawQuery)) {
+    const corpQuery = cleanSearch.replace(/\b(?:gleif|lei|lookup|registry)\b/gi, '').trim();
+    if (corpQuery.length >= 2) {
+      try {
+        const gRes = await fetch(`https://api.gleif.org/api/v1/lei-records?filter%5Bentity.legalName%5D=${encodeURIComponent(corpQuery)}&page%5Bsize%5D=3`, {
+          headers: { Accept: 'application/vnd.api+json' },
+          signal: AbortSignal.timeout(4000)
+        });
+        if (gRes.ok) {
+          const gJson = await gRes.json();
+          const rec = gJson?.data?.[0];
+          if (rec?.attributes?.entity?.legalName?.name) {
+            const legalName = rec.attributes.entity.legalName.name;
+            const lei = rec.id;
+            const status = rec.attributes.entity.status;
+            const jur = rec.attributes.entity.jurisdiction || '';
+            answer = `GLEIF Global LEI record for "${corpQuery}": ${legalName} (LEI: ${lei}, status: ${status}${jur ? `, jurisdiction: ${jur}` : ''}).`;
+            brief = `${legalName} (LEI ${lei}) - ${status}`.slice(0, 80);
+            sources.push(`https://api.gleif.org/api/v1/lei-records/${lei}`);
+          }
+        }
+      } catch {}
+    }
+  }
+
+  if (!answer && /\btelegraph\s+protocol\b/i.test(rawQuery)) {
+    try {
+      const ghRes = await fetch('https://api.github.com/repos/telegraphprotocol/bounties', {
+        headers: { 'User-Agent': 'PramanDesk-Intelligence/2.0', Accept: 'application/vnd.github+json' },
+        signal: AbortSignal.timeout(4000)
+      });
+      if (ghRes.ok) {
+        const gh = await ghRes.json();
+        answer = `Telegraph Protocol (${gh.full_name}): ${gh.description || 'Decentralized AI intelligence network'}. Official documentation and Season II mission specs are hosted at https://anjoman.ai/docs and https://github.com/telegraphprotocol/bounties.`;
+        brief = `Telegraph Protocol official repo & Anjoman docs`.slice(0, 80);
+        sources.push('https://github.com/telegraphprotocol/bounties', 'https://anjoman.ai/docs');
+      }
+    } catch {}
+  }
+
   // 3. Wikipedia search with direct snippet synthesis (answers direct factual questions e.g. "capital of Australia")
   if (!answer) {
     try {
-      const wikiSearchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(rawQuery)}&utf8=&format=json`;
+      const wikiQuery = cleanSearch || rawQuery;
+      const wikiSearchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(wikiQuery)}&utf8=&format=json`;
       const wRes = await fetch(wikiSearchUrl, {
         headers: { 'User-Agent': 'PramanDesk-Intelligence/2.0' },
         signal: AbortSignal.timeout(4000)
@@ -478,10 +525,40 @@ export async function lookupOnchainTx({ tx_hash, hash, chain, question, query, p
  * Verify ERC-20 Token Total Supply deterministically via JSON-RPC
  * Conforms bit-exact to Devnode TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL spec
  */
+const KNOWN_TOKEN_ADDRESSES = {
+  ethereum: {
+    USDC: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
+    USDT: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+    WETH: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    WBTC: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
+    DAI: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
+    LINK: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
+    UNI: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
+    AAVE: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9',
+    USDY: '0x96F6eF951840721AdBF46Ac996b59E0235CB985C'
+  },
+  sepolia: {
+    USDC: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
+    TESTUSDC: '0xcc194e1a843B658526D0D5C431f670028582Ae17',
+    WETH: '0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9'
+  },
+  base: {
+    USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+    WETH: '0x4200000000000000000000000000000000000006'
+  },
+  arbitrum: {
+    USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+    USDT: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
+    WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+  }
+};
+
 export async function verifyTokenTotalSupply({ token_address, address, token, chain, question, query, prompt, text } = {}) {
   const rawQuery = (question || query || prompt || text || '').trim();
-  const match = (token_address || address || token || rawQuery).match(/0x[a-fA-F0-9]{40}/i);
-  const targetAddress = match ? match[0] : null;
+  const explicitTokenText = (token_address || address || token || '').trim();
+  const combinedText = `${explicitTokenText} ${rawQuery}`.trim();
+  const match = combinedText.match(/0x[a-fA-F0-9]{40}/i);
+  let targetAddress = match ? match[0] : null;
 
   let targetChain = (chain || '').toLowerCase();
   if (!RPC_ENDPOINTS[targetChain]) {
@@ -494,6 +571,14 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
   }
 
   if (!targetAddress) {
+    const symMatch = combinedText.match(/\b(TESTUSDC|USDC|USDT|WETH|WBTC|DAI|LINK|UNI|AAVE|USDY)\b/i);
+    if (symMatch) {
+      const sym = symMatch[1].toUpperCase();
+      targetAddress = KNOWN_TOKEN_ADDRESSES[targetChain]?.[sym] || KNOWN_TOKEN_ADDRESSES.ethereum[sym] || null;
+    }
+  }
+
+  if (!targetAddress) {
     return {
       status: 'error',
       token_address: null,
@@ -501,7 +586,7 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
       total_supply: null,
       total_supply_formatted: null,
       confidence: 0.0,
-      summary: 'No valid 40-character hexadecimal contract address provided'
+      summary: 'No valid 40-character hexadecimal contract address or recognized token symbol provided'
     };
   }
 
@@ -791,21 +876,14 @@ export async function arbitrateMultiMiner({ query, question, task, intent, miner
       // Devnode lookup fallback
     }
 
-    // If no live peer responded, provide deterministic consensus mirror
-    if (collectedResponses.length < 2) {
-      collectedResponses.push({
-        miner_id: 'consensus-mirror',
-        provider: 'Ecosystem Ground-Truth Mirror',
-        claim: prompt,
-        verified: true,
-        timestamp: new Date().toISOString()
-      });
-    }
+    // Never invent a synthetic peer vote when <2 real peers responded
   }
+
+  const quorumMet = collectedResponses.length >= 2;
 
   // 3. Run discrepancy arbitration logic
   const discrepancies = [];
-  let consensus = true;
+  let consensus = quorumMet;
 
   // Compare key fields across collected providers
   for (let i = 0; i < collectedResponses.length - 1; i++) {
@@ -847,18 +925,23 @@ export async function arbitrateMultiMiner({ query, question, task, intent, miner
 
   const sha256Receipt = crypto
     .createHash('sha256')
-    .update(JSON.stringify({ prompt, targetIntent, collectedResponses, discrepancies }))
+    .update(JSON.stringify({ prompt, targetIntent, collectedResponses, discrepancies, quorumMet }))
     .digest('hex');
 
   return {
     ok: true,
     task: prompt || 'Multi-miner consensus verification',
     intent: targetIntent,
+    quorum_met: quorumMet,
     consensus,
     discrepancy_detected: discrepancies.length > 0,
     discrepancy_count: discrepancies.length,
     discrepancies,
-    arbitrated_verdict: consensus ? 'CONSENSUS_VERIFIED' : 'DISCREPANCY_FLAGGED_FOR_MANUAL_REVIEW',
+    arbitrated_verdict: !quorumMet
+      ? 'INSUFFICIENT_QUORUM_SINGLE_SOURCE'
+      : consensus
+      ? 'CONSENSUS_VERIFIED'
+      : 'DISCREPANCY_FLAGGED_FOR_MANUAL_REVIEW',
     providers_checked: collectedResponses.map(r => ({ miner_id: r.miner_id, provider: r.provider })),
     sha256_receipt: `0x${sha256Receipt}`,
     timestamp: new Date().toISOString()
@@ -866,16 +949,45 @@ export async function arbitrateMultiMiner({ query, question, task, intent, miner
 }
 
 /**
- * 7. LIQUIDITY_DEPTH_VERIFY_GENERAL (Treasury & DEX Liquidity Depth Verification)
- * Solves Chrysolite494's reported Anjoman issues:
- * - Robust dual-mode parsing (Structured JSON + Natural Language Queries)
- * - Exact non-truncated floating point math (prevents integer truncation bugs)
- * - Dual depth metric support: reports both bid/ask depth and aggregated liquidity_usd
+ * 7. LIQUIDITY_DEPTH_VERIFY_GENERAL (Live On-Chain DEX Liquidity Depth Verification)
+ * Queries real Uniswap v3 pool contracts via JSON-RPC (`slot0()`, `liquidity()`, `balanceOf()`, `eth_blockNumber`).
+ * Fails transparently with `status: 'rpc_unavailable'` / `confidence: 0` if live RPC data cannot be fetched.
  */
+const LIVE_UNIV3_POOLS = {
+  'ETH/USDC': {
+    ethereum: {
+      address: '0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640',
+      dex: 'Uniswap v3 (0.05%)',
+      token0: { sym: 'USDC', addr: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', dec: 6, isUsdStable: true },
+      token1: { sym: 'WETH', addr: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', dec: 18, isUsdStable: false }
+    },
+    base: {
+      address: '0xd0b53D9277642d899DF5C87A3966A349A798F224',
+      dex: 'Uniswap v3 Base (0.05%)',
+      token0: { sym: 'WETH', addr: '0x4200000000000000000000000000000000000006', dec: 18, isUsdStable: false },
+      token1: { sym: 'USDC', addr: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', dec: 6, isUsdStable: true }
+    },
+    arbitrum: {
+      address: '0xC6962004f452bE9203591991D15f6b388e09E8D0',
+      dex: 'Uniswap v3 Arbitrum (0.05%)',
+      token0: { sym: 'WETH', addr: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1', dec: 18, isUsdStable: false },
+      token1: { sym: 'USDC', addr: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', dec: 6, isUsdStable: true }
+    }
+  },
+  'USDC/WETH': null, // Alias handled below
+  'USDC/USDT': {
+    ethereum: {
+      address: '0x3416cF6C708Da44DB2624503abc801490ed47154',
+      dex: 'Uniswap v3 (0.01%)',
+      token0: { sym: 'USDC', addr: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', dec: 6, isUsdStable: true },
+      token1: { sym: 'USDT', addr: '0xdAC17F958D2ee523a2206206994597C13D831ec7', dec: 6, isUsdStable: true }
+    }
+  }
+};
+
 export async function verifyLiquidityDepth(params = {}) {
   const queryText = `${params.query || ''} ${params.question || ''} ${params.prompt || ''} ${params.task || ''}`.trim();
 
-  // 1. Extract Pair (e.g. ETH/USDC, WBTC/USDT)
   let pair = params.pair || params.symbol || params.market;
   if (!pair && queryText) {
     const pairMatch = queryText.match(/([A-Za-z0-9]+)[/-]([A-Za-z0-9]+)/);
@@ -883,87 +995,139 @@ export async function verifyLiquidityDepth(params = {}) {
   }
   if (!pair) pair = 'ETH/USDC';
   pair = pair.toUpperCase().replace('-', '/');
+  if (pair === 'USDC/ETH' || pair === 'USDC/WETH' || pair === 'WETH/USDC') pair = 'ETH/USDC';
 
-  // 2. Extract Chain
   let chain = (params.chain || params.network || 'ethereum').toLowerCase();
-  if (queryText.includes('base')) chain = 'base';
-  else if (queryText.includes('arbitrum')) chain = 'arbitrum';
-  else if (queryText.includes('optimism')) chain = 'optimism';
-  else if (queryText.includes('polygon')) chain = 'polygon';
+  if (/\bbase\b/i.test(queryText)) chain = 'base';
+  else if (/\barbitrum\b/i.test(queryText)) chain = 'arbitrum';
 
-  // 3. Known DEX Pool Mappings & Real-Time Liquidity Anchors
-  const KNOWN_POOLS = {
-    'ETH/USDC': {
-      ethereum: { address: '0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640', dex: 'Uniswap v3', feeTierBps: 5, basePrice: 3150.00, tvlUsd: 142500000.00, depth2Pct: 18500000.00 },
-      base: { address: '0xd0b53D9277642d899DF5C87A3966A349A798F224', dex: 'Aerodrome', feeTierBps: 30, basePrice: 3150.00, tvlUsd: 48200000.00, depth2Pct: 6200000.00 },
-      arbitrum: { address: '0xC6962004f452bE9203591991D15f6b388e09E8D0', dex: 'Uniswap v3', feeTierBps: 5, basePrice: 3150.00, tvlUsd: 64100000.00, depth2Pct: 8100000.00 }
-    },
-    'WBTC/USDC': {
-      ethereum: { address: '0x99ac8cA7087fA4A2A1FB6357269965A2014ABc35', dex: 'Uniswap v3', feeTierBps: 30, basePrice: 91500.00, tvlUsd: 88400000.00, depth2Pct: 12400000.00 }
-    },
-    'USDC/USDT': {
-      ethereum: { address: '0x3416cF6C708Da44DB2624503abc801490ed47154', dex: 'Uniswap v3', feeTierBps: 1, basePrice: 1.0001, tvlUsd: 195000000.00, depth2Pct: 45000000.00 }
-    }
-  };
-
-  const poolConfig = KNOWN_POOLS[pair]?.[chain] || {
-    address: params.pool_address || params.pool || '0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640',
-    dex: params.dex || 'Uniswap v3',
-    feeTierBps: Number(params.fee_tier) || 5,
-    basePrice: Number(params.price) || (pair.startsWith('ETH') ? 3150.00 : pair.startsWith('WBTC') ? 91500.00 : 1.00),
-    tvlUsd: Number(params.tvl) || 25000000.00,
-    depth2Pct: Number(params.depth) || 3500000.00
-  };
-
-  // 4. Exact Floating-Point Depth Normalization (prevents truncation bugs)
   let depthPct = parseFloat(params.depth_pct ?? params.depth ?? params.range_pct ?? 2.0);
   if (isNaN(depthPct) || depthPct <= 0) depthPct = 2.0;
 
   let notionalUsd = parseFloat(params.notional_usd ?? params.amount_usd ?? params.notional ?? 100000.0);
   if (isNaN(notionalUsd) || notionalUsd <= 0) notionalUsd = 100000.0;
 
-  // Scale depth proportionally to requested depth range
-  const depthFactor = depthPct / 2.0;
-  const bidDepthUsd = Math.round((poolConfig.depth2Pct * 0.495 * depthFactor) * 100) / 100;
-  const askDepthUsd = Math.round((poolConfig.depth2Pct * 0.505 * depthFactor) * 100) / 100;
-  const totalDepthUsd = Math.round((bidDepthUsd + askDepthUsd) * 100) / 100;
+  const poolCfg = LIVE_UNIV3_POOLS[pair]?.[chain];
+  const rpcs = RPC_ENDPOINTS[chain] || RPC_ENDPOINTS.ethereum;
 
-  // Slippage Model: slippage_pct = (notional / (depth * 2)) * 100
-  const slippagePct = Math.min(10.0, Math.round(((notionalUsd / (totalDepthUsd * 2)) * 100) * 1000) / 1000);
-  const depthSufficient = totalDepthUsd >= (notionalUsd * 2.0);
+  if (poolCfg && rpcs.length > 0) {
+    const paddedPool = poolCfg.address.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+    const batch = [
+      { jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: poolCfg.address, data: '0x3850c7bd' }, 'latest'] },
+      { jsonrpc: '2.0', id: 2, method: 'eth_call', params: [{ to: poolCfg.address, data: '0x1a686502' }, 'latest'] },
+      { jsonrpc: '2.0', id: 3, method: 'eth_call', params: [{ to: poolCfg.token0.addr, data: `0x70a08231${paddedPool}` }, 'latest'] },
+      { jsonrpc: '2.0', id: 4, method: 'eth_call', params: [{ to: poolCfg.token1.addr, data: `0x70a08231${paddedPool}` }, 'latest'] },
+      { jsonrpc: '2.0', id: 5, method: 'eth_blockNumber', params: [] }
+    ];
 
-  const summaryText = `LIQUIDITY DEPTH: ${pair} on ${chain} (${poolConfig.dex}) total depth $${totalDepthUsd.toLocaleString()} (slippage ${slippagePct}%) - ${depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING'}`;
+    for (const rpc of rpcs) {
+      try {
+        const res = await fetch(rpc, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(batch),
+          signal: AbortSignal.timeout(4500)
+        });
+        if (!res.ok) continue;
+        const arr = await res.json();
+        const byId = Object.fromEntries((Array.isArray(arr) ? arr : []).map(x => [x.id, x.result]));
+        const slot0Hex = byId[1];
+        const liqHex = byId[2];
+        if (!slot0Hex || slot0Hex.length < 66 || !liqHex || liqHex === '0x') continue;
 
-  const resultPayload = {
-    ok: true,
+        const sqrtPriceX96 = BigInt('0x' + slot0Hex.slice(2, 66));
+        const L = Number(BigInt(liqHex));
+        const sqrtP = Number(sqrtPriceX96) / (2 ** 96);
+        const rawRatio1Per0 = sqrtP * sqrtP;
+        const human1Per0 = rawRatio1Per0 * (10 ** (poolCfg.token0.dec - poolCfg.token1.dec));
+
+        let usdPerToken0 = 1.0;
+        let usdPerToken1 = 1.0;
+        if (poolCfg.token0.isUsdStable && !poolCfg.token1.isUsdStable) {
+          usdPerToken0 = 1.0;
+          usdPerToken1 = human1Per0 > 0 ? 1 / human1Per0 : 0;
+        } else if (!poolCfg.token0.isUsdStable && poolCfg.token1.isUsdStable) {
+          usdPerToken1 = 1.0;
+          usdPerToken0 = human1Per0;
+        }
+
+        const f = Math.sqrt(1 + depthPct / 100);
+        const dxRaw = L * (1 / sqrtP - 1 / (sqrtP * f));
+        const dyRaw = L * (sqrtP - sqrtP / f);
+        const usdDepth0 = (dxRaw / (10 ** poolCfg.token0.dec)) * usdPerToken0;
+        const usdDepth1 = (dyRaw / (10 ** poolCfg.token1.dec)) * usdPerToken1;
+
+        const bidDepthUsd = Math.round(usdDepth0 * 100) / 100;
+        const askDepthUsd = Math.round(usdDepth1 * 100) / 100;
+        const totalDepthUsd = Math.round((bidDepthUsd + askDepthUsd) * 100) / 100;
+
+        const bal0 = byId[3] && byId[3] !== '0x' ? Number(BigInt(byId[3])) / (10 ** poolCfg.token0.dec) : 0;
+        const bal1 = byId[4] && byId[4] !== '0x' ? Number(BigInt(byId[4])) / (10 ** poolCfg.token1.dec) : 0;
+        const tvlUsd = Math.round((bal0 * usdPerToken0 + bal1 * usdPerToken1) * 100) / 100;
+        const blockNumber = byId[5] ? parseInt(byId[5], 16) : null;
+        const spotPriceUsd = !poolCfg.token0.isUsdStable ? usdPerToken0 : (!poolCfg.token1.isUsdStable ? usdPerToken1 : human1Per0);
+
+        const slippagePct = totalDepthUsd > 0 ? Math.min(100.0, Math.round(((notionalUsd / (totalDepthUsd * 2)) * 100) * 1000) / 1000) : 100.0;
+        const depthSufficient = totalDepthUsd >= notionalUsd * 2.0;
+        const formattedDepth = totalDepthUsd.toLocaleString('en-US', { maximumFractionDigits: 2 });
+        const summaryText = `LIVE ON-CHAIN LIQUIDITY DEPTH: ${pair} on ${chain} (${poolCfg.dex}, block ${blockNumber ?? 'latest'}) active ±${depthPct}% depth $${formattedDepth} (TVL $${tvlUsd.toLocaleString('en-US', { maximumFractionDigits: 2 })}, est. slippage ${slippagePct}%) - ${depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING'}`;
+
+        const resultPayload = {
+          ok: true,
+          status: 'confirmed',
+          intent: 'LIQUIDITY_DEPTH_VERIFY_GENERAL',
+          pair,
+          chain,
+          block_number: blockNumber,
+          pool_address: poolCfg.address,
+          dex: poolCfg.dex,
+          current_price_usd: Math.round(spotPriceUsd * 100) / 100,
+          depth_range_pct: depthPct,
+          notional_tested_usd: notionalUsd,
+          bid_depth_usd: bidDepthUsd,
+          ask_depth_usd: askDepthUsd,
+          total_depth_usd: totalDepthUsd,
+          liquidity_usd: totalDepthUsd,
+          tvl_usd: tvlUsd,
+          estimated_slippage_pct: slippagePct,
+          depth_sufficient: depthSufficient,
+          verdict: depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING',
+          summary: summaryText,
+          explanation: summaryText,
+          reason: summaryText,
+          answer: summaryText,
+          results: [summaryText],
+          confidence: 1.0,
+          verification_method: 'LIVE_UNISWAP_V3_JSON_RPC',
+          timestamp: new Date().toISOString()
+        };
+        const digest = crypto.createHash('sha256').update(JSON.stringify(resultPayload, Object.keys(resultPayload).sort())).digest('hex');
+        resultPayload.canonical_sha256 = `0x${digest}`;
+        return resultPayload;
+      } catch {}
+    }
+  }
+
+  const summaryText = `LIQUIDITY DEPTH UNAVAILABLE: Unable to query live on-chain DEX state for ${pair} on ${chain}. No synthetic fallback emitted.`;
+  return {
+    ok: false,
+    status: 'rpc_unavailable',
     intent: 'LIQUIDITY_DEPTH_VERIFY_GENERAL',
     pair,
     chain,
-    pool_address: poolConfig.address,
-    dex: poolConfig.dex,
-    current_price_usd: poolConfig.basePrice,
-    depth_range_pct: depthPct,
-    notional_tested_usd: notionalUsd,
-    bid_depth_usd: bidDepthUsd,
-    ask_depth_usd: askDepthUsd,
-    total_depth_usd: totalDepthUsd,
-    liquidity_usd: totalDepthUsd, // Dual-support for specs querying liquidity_usd
-    tvl_usd: poolConfig.tvlUsd,
-    estimated_slippage_pct: slippagePct,
-    depth_sufficient: depthSufficient,
-    verdict: depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING',
+    pool_address: poolCfg?.address || null,
+    total_depth_usd: null,
+    liquidity_usd: null,
+    tvl_usd: null,
+    depth_sufficient: false,
+    verdict: 'RPC_UNAVAILABLE',
     summary: summaryText,
     explanation: summaryText,
     reason: summaryText,
     answer: summaryText,
     results: [summaryText],
-    confidence: 1.0,
-    verification_method: 'ONCHAIN_DEX_TICK_MODEL',
+    confidence: 0.0,
+    verification_method: 'LIVE_UNISWAP_V3_JSON_RPC',
     timestamp: new Date().toISOString()
   };
-
-  const digest = crypto.createHash('sha256').update(JSON.stringify(resultPayload, Object.keys(resultPayload).sort())).digest('hex');
-  resultPayload.canonical_sha256 = `0x${digest}`;
-
-  return resultPayload;
 }

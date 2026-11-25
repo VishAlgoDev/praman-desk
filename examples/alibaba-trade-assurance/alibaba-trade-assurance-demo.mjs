@@ -44,12 +44,15 @@ async function runAlibabaScenario() {
   console.log(`========================================================================`);
 
   // Query Praman evaluate directly for exact Alibaba Trade Assurance payload
-  const resA = await fetch('https://praman-desk.vercel.app/api/spend-guard/evaluate', {
+  const endpoint = process.env.PRAMAN_ENDPOINT || 'https://praman-desk.vercel.app';
+  const resA = await fetch(`${endpoint}/api/spend-guard/evaluate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      scenario: 'alibaba_trade',
       vendorName: 'Siemens Aktiengesellschaft',
       spendAmountUsdc: 100000.00,
+      poCommitment: 100000.00,
       statedTotal: 100000.00,
       statedSubtotal: 100000.00,
       singleAgentCap: 500,
@@ -85,12 +88,14 @@ async function runAlibabaScenario() {
   console.log(`▶ CASE B: Reconciled Invoice for Conforming Units ($80,000.00 Released)`);
   console.log(`========================================================================`);
 
-  const resB = await fetch('https://praman-desk.vercel.app/api/spend-guard/evaluate', {
+  const resB = await fetch(`${endpoint}/api/spend-guard/evaluate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
+      scenario: 'alibaba_reconciled',
       vendorName: 'Siemens Aktiengesellschaft',
       spendAmountUsdc: 80000.00,
+      poCommitment: 100000.00,
       statedTotal: 80000.00,
       statedSubtotal: 80000.00,
       singleAgentCap: 500,
@@ -109,14 +114,15 @@ async function runAlibabaScenario() {
     deliveryEvidence: 'Inspection Certificate #IC-80: 80 conforming units verified and accepted into inventory.'
   });
 
-  console.log(`[Miner 1: Takar]   Opinion: ${takarOpinionB.opinion} | Confidence: ${(takarOpinionB.heuristicScore * 100).toFixed(1)}%`);
-  console.log(`[Miner 2: Praman]  Status: ${resB.status} | Policy: ${resB.policyDecision}`);
+  console.log(`[Miner 1: Takar]   Opinion: ${takarOpinionB.opinion} | Confidence: ${(takarOpinionB.heuristicScore * 100).toFixed(1)}%${takarOpinionB.simulated ? ' (simulated)' : ''}`);
+  console.log(`[Miner 2: Praman]  Status: ${resB.status} | Policy: ${resB.policyDecision} | DryRun: ${Boolean(resB.dryRun)}`);
   console.log(`   Flags: ${resB.flags.length === 0 ? 'NONE (ALL CHECKS PASSED)' : resB.flags.join(' | ')}`);
 
-  console.log(`\n➔ DUAL-MINER CONSENSUS VERDICT: [RELEASE_ESCROW_APPROVED]`);
-  console.log(`   Escrow Released:     ✅ YES (FUNDS DISBURSED ON-CHAIN)`);
-  console.log(`   Disbursement:        $80,000.00 USDC released to Supplier | $20,000.00 refunded to Buyer`);
-  console.log(`   EAS Attestation:     ${resB.receipt?.easAttestationUid || '0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75'}`);
+  console.log(`\n➔ DUAL-MINER CONSENSUS VERDICT: [PREFLIGHT_CLEARED_FOR_SETTLEMENT]`);
+  console.log(`   Mode:                ${resB.liveSettleExecuted ? 'LIVE ON-CHAIN SETTLED' : 'DRY-RUN PRE-FLIGHT (liveSettle: false, zero funds moved in this call)'}`);
+  console.log(`   Authorized Split:    $80,000.00 USDC to Supplier | $20,000.00 refunded to Buyer`);
+  console.log(`   EAS Schema UID:      ${resB.easSchemaUid || '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04'}`);
+  console.log(`   Reference Sepolia Tx: 0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75`);
   console.log(`   Settlement Contract: TakarSettle v4 (${TAKAR_SETTLE_V4_ADDRESS})\n`);
 
   console.log(`========================================================================`);

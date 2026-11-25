@@ -6,7 +6,7 @@ import { PramanDesk } from './index.js';
 
 async function run() {
   console.log('=== Testing Praman Desk JS/TS SDK ===');
-  const client = new PramanDesk({ endpoint: 'https://praman-desk.vercel.app', timeout: 10000 });
+  const client = new PramanDesk({ endpoint: process.env.PRAMAN_ENDPOINT || 'https://praman-desk.vercel.app', timeout: 10000 });
 
   console.log('1. Testing screenSanctions (Lazarus Group EVM)...');
   const sdnRes = await client.screenSanctions({ address: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' });
@@ -36,17 +36,19 @@ async function run() {
   console.log('6. Testing auditContractObligation (Mission 04)...');
   const contractRes = await client.auditContractObligation({
     contractText: 'Late payment interest accrues at 18% per annum compounded monthly if unpaid after 30 days.',
-    invoiceAmount: 50000,
-    invoiceDate: '2026-08-01',
-    paymentDueDate: '2026-08-31',
-    interestRatePct: 18.0
+    principal: 50000,
+    rate_pct: 18.0,
+    days_overdue: 30
   });
-  assert.ok(contractRes.intent === 'CONTRACT_OBLIGATION_AUDIT_GENERAL' || contractRes.status, 'Contract obligation must respond');
-  console.log('   PASS ✅ status:', contractRes.status, 'accrued:', contractRes.accruedLiability || contractRes.accrued_liability);
+  assert.strictEqual(contractRes.intent, 'CONTRACT_OBLIGATION_AUDIT_GENERAL', 'Contract obligation must return CONTRACT_OBLIGATION_AUDIT_GENERAL');
+  assert.strictEqual(contractRes.verdict, 'Non-compliant', 'Overdue contract must be Non-compliant');
+  assert.ok(contractRes.penalty_amount > 0, 'Accrued delay penalty must be positive');
+  console.log('   PASS ✅ status:', contractRes.status, 'penalty:', contractRes.penalty_amount);
 
   console.log('7. Testing getGridPowerPrice (CAISO NP15)...');
   const powerRes = await client.getGridPowerPrice({ hub: 'NP15' });
   assert.strictEqual(powerRes.intent, 'GRID_POWER_PRICE_GENERAL', 'Power price must return GRID_POWER_PRICE_GENERAL');
+  assert.strictEqual(powerRes.ok, true, 'Live CAISO NP15 price query must succeed');
   assert.ok(powerRes.price_mwh > 0, 'Price per MWh must be positive');
   console.log('   PASS ✅ hub:', powerRes.hub, 'price_mwh:', powerRes.price_mwh);
 
@@ -62,7 +64,7 @@ async function run() {
 
   console.log('10. Testing createAgentSpendMiddleware (Clean spend vs Sanctioned block)...');
   const { createAgentSpendMiddleware, createToolGuard, PramanSpendGuardError } = await import('./index.js');
-  const guard = createAgentSpendMiddleware({ endpoint: 'https://praman-desk.vercel.app' });
+  const guard = createAgentSpendMiddleware({ endpoint: process.env.PRAMAN_ENDPOINT || 'https://praman-desk.vercel.app' });
 
   // 10a: Clean spend approved
   const approvedSpend = await guard({ vendor: 'Siemens AG', amount: 450, currency: 'USDC' });
@@ -86,7 +88,7 @@ async function run() {
     return { txHash: '0xmocktxhash123456789' };
   };
 
-  const safeTransferTool = createToolGuard(mockWalletTransfer, { endpoint: 'https://praman-desk.vercel.app' });
+  const safeTransferTool = createToolGuard(mockWalletTransfer, { endpoint: process.env.PRAMAN_ENDPOINT || 'https://praman-desk.vercel.app' });
   const result = await safeTransferTool({ vendor: 'Siemens AG', amount: 200 });
   assert.strictEqual(transferExecuted, true, 'Clean transfer should execute');
   assert.strictEqual(result.txHash, '0xmocktxhash123456789');

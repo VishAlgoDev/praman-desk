@@ -105,6 +105,10 @@ class PramanDesk:
     def audit_contract_obligation(
         self,
         contract_text: str = "",
+        principal: Optional[float] = None,
+        rate_pct: Optional[float] = None,
+        days_overdue: Optional[int] = None,
+        months_overdue: Optional[int] = None,
         invoice_amount: float = 0.0,
         invoice_date: str = "",
         payment_due_date: str = "",
@@ -113,6 +117,10 @@ class PramanDesk:
         """Mission 04 & CONTRACT_OBLIGATION_AUDIT_GENERAL: Audit contractual obligations."""
         return self._request("/api/miner/contract-obligation", method="POST", payload={
             "contractText": contract_text,
+            "principal": principal if principal is not None else invoice_amount,
+            "rate_pct": rate_pct if rate_pct is not None else interest_rate_pct,
+            "days_overdue": days_overdue,
+            "months_overdue": months_overdue,
             "invoiceAmount": invoice_amount,
             "invoiceDate": invoice_date,
             "paymentDueDate": payment_due_date,

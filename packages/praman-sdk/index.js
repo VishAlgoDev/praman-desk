@@ -125,9 +125,13 @@ export class PramanDesk {
   /**
    * Mission 04 & CONTRACT_OBLIGATION_AUDIT_GENERAL: Audit contractual payment obligations.
    */
-  async auditContractObligation({ contractText = '', invoiceAmount = 0, invoiceDate = '', paymentDueDate = '', interestRatePct = 0 } = {}) {
+  async auditContractObligation({ contractText = '', principal = undefined, rate_pct = undefined, days_overdue = undefined, months_overdue = undefined, invoiceAmount = 0, invoiceDate = '', paymentDueDate = '', interestRatePct = 0 } = {}) {
     return this._request('/api/miner/contract-obligation', 'POST', {
       contractText,
+      principal: principal ?? invoiceAmount,
+      rate_pct: rate_pct ?? interestRatePct,
+      days_overdue,
+      months_overdue,
       invoiceAmount,
       invoiceDate,
       paymentDueDate,

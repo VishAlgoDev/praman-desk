@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..', '..');
-const groundTruthPath = path.join(rootDir, 'eval-data', 'gold_rush_queensland_mines.jsonl');
+const groundTruthPath = path.join(rootDir, 'data', 'gold_rush_queensland_mines.jsonl');
 
 export class GoldRushEvaluatorAdapter {
   constructor() {

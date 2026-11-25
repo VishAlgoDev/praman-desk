@@ -9,7 +9,7 @@ import json
 import re
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-EVAL_DATA_PATH = os.path.join(ROOT_DIR, "eval-data", "gold_rush_queensland_mines.jsonl")
+EVAL_DATA_PATH = os.path.join(ROOT_DIR, "data", "gold_rush_queensland_mines.jsonl")
 
 def test_dataset_integrity():
     assert os.path.exists(EVAL_DATA_PATH), f"Dataset missing: {EVAL_DATA_PATH}"

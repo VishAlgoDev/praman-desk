@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/index.mjs": {
-      "includeFiles": "{data/**,evidence/**,comparator/**,mcp/**}",
+      "includeFiles": "{data/**,evidence/**,comparator/**,mcp/**,packages/**}",
       "maxDuration": 30
     }
   },

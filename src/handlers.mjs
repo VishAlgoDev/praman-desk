@@ -15,6 +15,8 @@ import { generateRugReceiptProof } from './bridges/rugreceipt-bridge.mjs';
 import { evaluatePaysheetConsensus } from './bridges/paysheet-bridge.mjs';
 import { GoldRushAggregator } from '../examples/gold-rush-aggregator/gold-rush-aggregator.mjs';
 import { executeWebSearch, lookupOnchainTx, verifyTokenTotalSupply, checkWalletBalance, executeResearchQuery, arbitrateMultiMiner, verifyLiquidityDepth } from './universal-intents.mjs';
+import { SolanaSpendGuard, screenSolanaRecipient, loadInMemorySdnDatabase, MALICIOUS_DRAINER_ADDRESSES } from '../packages/praman-sdk/solana.js';
+import { Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 
 const goldRushAggregator = new GoldRushAggregator();
 
@@ -1038,13 +1040,14 @@ function parseVendorVerifyQuery(rawVendor = '', rawJurisdiction = '') {
       text = trailingInCountry[1].trim();
     }
   }
-  const qMatch = cleaned.match(/^(?:verify|check|validate|is|lookup|find)\s+(?:the\s+)?(?:vendor\s+|supplier\s+|counterparty\s+|company\s+)?(.+?)(?:\s+(?:with\s+(?:vat|tax\s*id|gstin)|a\s+valid|registered)\b.*)?$/i);
+  const qMatch = cleaned.match(/^(?:verify|check|validate|is|lookup|find)\s+(?:the\s+)?(?:(?:corporate|legal|registration|entity|onboarding|kyb|vendor|supplier|counterparty|company)\s+)?(?:(?:status|registration|validity|standing)\s+(?:of|for)\s+)?(.+?)(?:\s+(?:with\s+(?:vat|tax\s*id|gstin)|a\s+valid|registered)\b.*)?$/i);
   if (qMatch && (/\b(?:is|verify|check|validate|lookup|find)\b/i.test(cleaned) || extractedVat)) {
     text = qMatch[1].replace(/\s+with\s+(?:vat|tax\s*id|gstin).*$/i, '').trim();
   }
   let s = text
     .replace(/^\[?[A-Z_]+_GENERAL\]?\s+/i, '')
-    .replace(/^(?:is|are|look\s*up|verify|check|find|what\s+is|does|search\s+for)\s+(?:the\s+)?(?:official\s+)?(?:vendor\s+|supplier\s+|counterparty\s+|company\s+)?(?:status\s+(?:of|for)\s+)?/i, '')
+    .replace(/^(?:is|are|look\s*up|verify|check|find|what\s+is|does|search\s+for)\s+(?:the\s+)?(?:official\s+)?(?:(?:corporate|legal|registration|entity|onboarding|kyb|vendor|supplier|counterparty|company)\s+)*(?:(?:status|registration|validity|standing)\s+(?:of|for)\s+)?/i, '')
+    .replace(/^(?:(?:corporate|legal|registration|entity|onboarding|kyb|vendor|supplier|counterparty|company)\s+)*(?:status|registration|validity|standing)\s+(?:of|for)\s+/i, '')
     .replace(/\s+(?:with\s+(?:vat|tax\s*id|gstin)|a\s+valid|registered\s+vendor|valid\s+vendor|approved\s+vendor)\b.*$/i, '')
     .replace(/\s+(?:is\s+)?(?:currently\s+)?(?:an?\s+)?(?:active|registered|valid|approved|onboarded|compliant)(?:\s+(?:vendor|supplier|counterparty|company|entity|firm))?$/i, '')
     .replace(/\s+(?:in|under|jurisdiction)\s+[a-zA-Z\s]+$/i, '')
@@ -1055,11 +1058,11 @@ function parseVendorVerifyQuery(rawVendor = '', rawJurisdiction = '') {
 }
 
 export async function verifyVendorPrimary({
-  vendor = '', vendor_name = '', name = '', company = '', query = '', question = '',
+  vendor = '', vendor_name = '', name = '', company = '', query = '', question = '', prompt = '', text = '',
   vat_number = '', vatNumber = '', vat_id = '', vatId = '', vat = '', tax_id = '', taxId = '',
   lei = '', country = '', jurisdiction = ''
 } = {}) {
-  const rawVendorInput = vendor || vendor_name || name || company || query || question || '';
+  const rawVendorInput = vendor || vendor_name || name || company || query || question || prompt || text || '';
   const rawVatInput = vat_number || vatNumber || vat_id || vatId || vat || tax_id || taxId || '';
   let countryCode = resolveJurisdictionCountryCode(country || jurisdiction || '');
 
@@ -2867,8 +2870,8 @@ export function evaluateRegulatoryFilingPrompt(rawText = '') {
 // Decoupled Mining and Wholesale Power Intelligence Modules
 import { evaluateMiningIntelligencePrompt } from './intelligence/mining-intelligence.mjs';
 import { parseDynamicInvoiceReconciliation, parseDynamicContractObligation } from './intelligence/dynamic-solver.mjs';
-import { getGridPowerPrice } from './intelligence/grid-power-intelligence.mjs';
-export { evaluateMiningIntelligencePrompt, getGridPowerPrice, parseDynamicInvoiceReconciliation, parseDynamicContractObligation };
+import { getGridPowerPrice, getLiveGridPowerPrice } from './intelligence/grid-power-intelligence.mjs';
+export { evaluateMiningIntelligencePrompt, getGridPowerPrice, getLiveGridPowerPrice, parseDynamicInvoiceReconciliation, parseDynamicContractObligation };
 
 export function verifyDocumentAuthenticityPrimary({
   documentRef = 'Cryptographic e-Invoice / Spend Receipt',
@@ -6164,14 +6167,28 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
 
   const isAlibaba = scenario === 'alibaba_trade' || scenario === 'alibaba_reconciled' || scenario === 'alibaba_missing_evidence' || scenario === 'alibaba_conflicting_reports' || scenario === 'alibaba_refund' || /Alibaba|Cainiao|ALI-9021/i.test(p.prompt || p.question || '');
   if (isAlibaba) {
-    const poCommitmentVal = Number(p.poCommitment || p.poTotal || (scenario === 'alibaba_reconciled' ? 100000 : (p.statedTotal || 100000)));
-    const actualConformingVal = Number(p.spendAmountUsdc || (scenario === 'alibaba_reconciled' ? 80000 : (spendAmountUsdc || 80000)));
+    const poCommitmentVal = Number(p.poCommitment || p.poTotal || p.statedTotal || 100000);
+    const hasExplicitLineItems = Array.isArray(p.lineItems) && p.lineItems.length > 0;
+    const actualConformingVal = hasExplicitLineItems
+      ? computedTotal
+      : Number(scenario === 'alibaba_reconciled' ? 80000 : (p.actualConformingVal ?? 80000));
     const shortfallVal = Math.max(0, poCommitmentVal - actualConformingVal);
-    const unitPrice = 1000;
-    const conformingUnits = Math.round(actualConformingVal / unitPrice) || 80;
-    const totalUnits = Math.round(poCommitmentVal / unitPrice) || 100;
+    const firstUnitPrice = Array.isArray(lineItems) && Number(lineItems[0]?.unitPrice) > 0 ? Number(lineItems[0].unitPrice) : 1000;
+    const unitPrice = firstUnitPrice;
+    const conformingUnits = unitPrice > 0 ? Math.round(actualConformingVal / unitPrice) : 80;
+    const totalUnits = unitPrice > 0 ? Math.round(poCommitmentVal / unitPrice) : 100;
     const damagedUnits = Math.max(0, totalUnits - conformingUnits);
-    const driftPct = totalUnits > 0 ? Math.round((shortfallVal / poCommitmentVal) * 100) : 20;
+    const driftPct = poCommitmentVal > 0 ? Math.round((shortfallVal / poCommitmentVal) * 100) : 20;
+    const isLiveExecuted = Boolean(liveSettle && liveSettlement?.settled);
+    payload.dryRun = !liveSettle;
+    payload.liveSettleRequested = liveSettle;
+    payload.liveSettleExecuted = isLiveExecuted;
+    payload.poCommitmentUsd = poCommitmentVal;
+    payload.conformingAmountUsd = actualConformingVal;
+    payload.shortfallUsd = shortfallVal;
+    payload.conformingUnits = conformingUnits;
+    payload.totalUnits = totalUnits;
+    payload.damagedUnits = damagedUnits;
 
     if (scenario === 'alibaba_missing_evidence') {
       const billedUnits = Math.round(poCommitmentVal / unitPrice) || 60;
@@ -6214,25 +6231,38 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       payload.status = 'REFUNDED';
       payload.verdict = 'FULL_REFUND_APPROVED';
       payload.policyDecision = 'FULL_REFUND_TO_BUYER';
-      payload.verdictHeadline = `ALIBABA TRADE ASSURANCE FULL REFUND ($${poCommitmentVal.toLocaleString()} RETURNED TO BUYER)`;
-      payload.verdictText = `FULL REFUND APPROVED — $${poCommitmentVal.toLocaleString()} USDC RETURNED TO BUYER`;
+      payload.verdictHeadline = !liveSettle
+        ? `ALIBABA TRADE ASSURANCE FULL REFUND CLEARED ($${poCommitmentVal.toLocaleString()} AUTHORIZED — DRY RUN, NO FUNDS MOVED)`
+        : `ALIBABA TRADE ASSURANCE FULL REFUND ($${poCommitmentVal.toLocaleString()} RETURNED TO BUYER)`;
+      payload.verdictText = !liveSettle
+        ? `FULL REFUND AUTHORIZED (DRY RUN) — $${poCommitmentVal.toLocaleString()} USDC REFUND TO BUYER PENDING EXECUTION`
+        : `FULL REFUND APPROVED — $${poCommitmentVal.toLocaleString()} USDC RETURNED TO BUYER`;
       payload.verdictColor = '#34d399';
-      payload.flags = [...(payload.flags || []), 'ZERO_CONFORMING_UNITS', 'DELIVERY_CONDITION_UNSATISFIED', 'FULL_REFUND_EXECUTED'];
-      payload.summary = `Verified non-delivery settles as a full refund, not a partial reconciliation. Cainiao receipt CN-LAX-88299 records 0 of ${billedUnits} billed units discharged — the vessel never off-loaded and the buyer's warehouse accepted nothing. The payment condition (${billedUnits} conforming units into US inventory) is wholly unsatisfied, so the full $${poCommitmentVal.toLocaleString()}.00 USDC is refunded to the Buyer from TakarSettle v4 escrow, $0.00 released to Siemens Aktiengesellschaft, and the non-delivery is anchored as an EAS attestation on the settlement record.`;
+      payload.flags = [...(payload.flags || []), 'ZERO_CONFORMING_UNITS', 'DELIVERY_CONDITION_UNSATISFIED', ...(liveSettle ? ['FULL_REFUND_EXECUTED'] : ['PRE_FLIGHT_DRY_RUN_NO_FUNDS_MOVED'])];
+      payload.summary = `${!liveSettle ? 'Pre-flight audit (liveSettle=false; zero funds moved in this call): ' : ''}Verified non-delivery settles as a full refund, not a partial reconciliation. Cainiao receipt CN-LAX-88299 records ${conformingUnitsRefund} of ${billedUnits} billed units discharged — the vessel never off-loaded and the buyer's warehouse accepted nothing. The payment condition (${billedUnits} conforming units into US inventory) is wholly unsatisfied, so the full $${poCommitmentVal.toLocaleString()}.00 USDC ${isLiveExecuted ? 'is refunded' : 'refund is authorized'} to the Buyer on TakarSettle v4 escrow, $0.00 released to Siemens Aktiengesellschaft.`;
       payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_NON_DELIVERY_REFUND\n• Platform: Alibaba Trade Assurance Contract #ALI-9025\n• PO Commitment: ${billedUnits} industrial units @ $1,000.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Delivery & Warehouse Evidence: Cainiao receipt CN-LAX-88299 — 0 units discharged, vessel never completed off-load\n• Supplier Claim: Invoice INV-ALI-9025-FULL-REFUND bills the full ${billedUnits} units`;
-      payload.reviewerFindings = `• Conforming-Unit Count: 0 / ${billedUnits} accepted into Port of LA inventory\n• WASM 3-Way Math Comparator: stated $${poCommitmentVal.toLocaleString()}.00 vs conforming $0.00 — 100% shortfall (WASM_3WAY_MATH_MISMATCH)\n• Payment Condition: 0% satisfied → full refund, no partial release, no supplier credit memo\n• Disbursement: $${poCommitmentVal.toLocaleString()}.00 USDC refunded to Buyer, $0.00 to supplier — settled on TakarSettle v4`;
+      payload.reviewerFindings = `• Conforming-Unit Count: 0 / ${billedUnits} accepted into Port of LA inventory\n• WASM 3-Way Math Comparator: stated $${poCommitmentVal.toLocaleString()}.00 vs conforming $0.00 — 100% shortfall (WASM_3WAY_MATH_MISMATCH)\n• Payment Condition: 0% satisfied → full refund, no partial release, no supplier credit memo\n• Settlement Execution: ${isLiveExecuted ? `$${poCommitmentVal.toLocaleString()}.00 USDC refunded to Buyer, $0.00 to supplier — settled on TakarSettle v4` : `DRY RUN ONLY (liveSettle=false; zero funds moved) — $${poCommitmentVal.toLocaleString()}.00 USDC refund authorized for Buyer, $0.00 to supplier`}`;
       payload.easSchemaUid = '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04';
       payload.settlementContract = '0x310275e6D66818E068245326bB9e398822304248';
       payload.certHash = '0x' + crypto.createHash('sha256').update('ALIBABA-FULL-REFUND-NON-DELIVERY:' + JSON.stringify(payload)).digest('hex');
     } else if (scenario === 'alibaba_reconciled' || (spendAmountUsdc === actualConformingVal && wasmMatch && !circuitBreakerTriggered)) {
       payload.status = 'APPROVED';
       payload.verdict = 'CLEAR_FOR_PAYMENT';
-      payload.verdictHeadline = `ALIBABA TRADE ASSURANCE RECONCILED SETTLEMENT APPROVED ($${actualConformingVal.toLocaleString()} DISBURSED)`;
-      payload.verdictText = `RECONCILED SETTLEMENT APPROVED ($${actualConformingVal.toLocaleString()} DISBURSED / $${shortfallVal.toLocaleString()} REFUNDED)`;
+      payload.verdictHeadline = isLiveExecuted
+        ? `ALIBABA TRADE ASSURANCE RECONCILED SETTLEMENT APPROVED ($${actualConformingVal.toLocaleString()} DISBURSED)`
+        : `ALIBABA TRADE ASSURANCE RECONCILED PRE-FLIGHT APPROVED ($${actualConformingVal.toLocaleString()} CLEARED — DRY RUN, NO FUNDS MOVED)`;
+      payload.verdictText = isLiveExecuted
+        ? `RECONCILED SETTLEMENT APPROVED ($${actualConformingVal.toLocaleString()} DISBURSED / $${shortfallVal.toLocaleString()} REFUNDED)`
+        : `RECONCILED PRE-FLIGHT APPROVED ($${actualConformingVal.toLocaleString()} PAYOUT CLEARED / $${shortfallVal.toLocaleString()} REFUND — DRY RUN)`;
       payload.verdictColor = '#34d399';
-      payload.summary = `Conforming delivery verified (${conformingUnits} units accepted into Port of LA inventory @ $1,000.00 = $${actualConformingVal.toLocaleString()}.00). $${actualConformingVal.toLocaleString()}.00 USDC released to Siemens Aktiengesellschaft; $${shortfallVal.toLocaleString()}.00 USDC refunded to Buyer. Settled on TakarSettle v4.`;
-      payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_DELIVERY_ARBITRATION\n• Platform: Alibaba Trade Assurance Contract #ALI-9021\n• PO Commitment: ${totalUnits} industrial units @ $1,000.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Delivery & Warehouse Evidence: Inspection Certificate confirms ${conformingUnits} conforming units accepted into US inventory\n• Reconciled Invoice: Adjusted to ${conformingUnits} conforming units ($${actualConformingVal.toLocaleString()}.00 USD)`;
-      payload.reviewerFindings = `• Variance Reconciliation: ${conformingUnits} units @ $1,000.00 = $${actualConformingVal.toLocaleString()}.00 bit-exact integer match (0 bps drift)\n• Takar (Bangdrop) Miner Opinion: DELIVERY_FULFILLED (Confidence: 94.0%)\n• Quorum Consensus: Both independent verifiers approve settlement\n• Disbursement: $${actualConformingVal.toLocaleString()}.00 USDC released to supplier, $${shortfallVal.toLocaleString()}.00 USDC refunded to buyer`;
+      if (!liveSettle) {
+        payload.flags = [...(payload.flags || []), 'PRE_FLIGHT_DRY_RUN_NO_FUNDS_MOVED'];
+      }
+      payload.summary = isLiveExecuted
+        ? `Conforming delivery verified (${conformingUnits} units accepted into Port of LA inventory @ $${unitPrice.toLocaleString()}.00 = $${actualConformingVal.toLocaleString()}.00). $${actualConformingVal.toLocaleString()}.00 USDC released to Siemens Aktiengesellschaft; $${shortfallVal.toLocaleString()}.00 USDC refunded to Buyer. Settled on TakarSettle v4.`
+        : `Dry-run pre-flight verification (liveSettle=false; no on-chain funds moved in this call): Conforming delivery verified (${conformingUnits} units accepted into Port of LA inventory @ $${unitPrice.toLocaleString()}.00 = $${actualConformingVal.toLocaleString()}.00). Authorized settlement split is $${actualConformingVal.toLocaleString()}.00 USDC to Siemens Aktiengesellschaft and $${shortfallVal.toLocaleString()}.00 USDC refund to Buyer via TakarSettle v4 when liveSettle=true is executed.`;
+      payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_DELIVERY_ARBITRATION\n• Platform: Alibaba Trade Assurance Contract #ALI-9021\n• PO Commitment: ${totalUnits} industrial units @ $${unitPrice.toLocaleString()}.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Delivery & Warehouse Evidence: Inspection Certificate confirms ${conformingUnits} conforming units accepted into US inventory\n• Reconciled Invoice: Adjusted to ${conformingUnits} conforming units ($${actualConformingVal.toLocaleString()}.00 USD)`;
+      payload.reviewerFindings = `• Variance Reconciliation: ${conformingUnits} units @ $${unitPrice.toLocaleString()}.00 = $${actualConformingVal.toLocaleString()}.00 bit-exact integer match (0 bps drift)\n• Takar Verification: Pre-flight escrow condition satisfied against warehouse tally\n• Quorum Consensus: Policy & arithmetic gates cleared (${liveSettle ? (isLiveExecuted ? 'live settlement executed' : `live settlement attempted: ${liveSettlement?.status || 'skipped'}`) : 'dry-run mode'})\n• Disbursement: ${isLiveExecuted ? `$${actualConformingVal.toLocaleString()}.00 USDC released to supplier, $${shortfallVal.toLocaleString()}.00 USDC refunded to buyer` : `DRY RUN (liveSettle=false; zero funds moved in this call) — authorized payout $${actualConformingVal.toLocaleString()}.00 USDC to supplier, $${shortfallVal.toLocaleString()}.00 USDC refund to buyer on TakarSettle v4`}`;
       payload.easSchemaUid = '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04';
       payload.settlementContract = '0x310275e6D66818E068245326bB9e398822304248';
       payload.certHash = '0x' + crypto.createHash('sha256').update('ALIBABA-APPROVED-DISBURSEMENT:' + JSON.stringify(payload)).digest('hex');
@@ -6243,9 +6273,9 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       payload.verdictHeadline = `ALIBABA TRADE ASSURANCE HALT ($${shortfallVal.toLocaleString()} SHORTFALL BLOCKED)`;
       payload.verdictText = `ALIBABA TRADE ASSURANCE HALT ($${shortfallVal.toLocaleString()} SHORTFALL BLOCKED BEFORE RELEASE)`;
       payload.verdictColor = '#f87171';
-      payload.summary = `Alibaba Trade Assurance Escrow Protected: Full $${poCommitmentVal.toLocaleString()} release blocked by WASM line-item math. Port of LA Cainiao receipt confirms ${conformingUnits} conforming units ($${actualConformingVal.toLocaleString()}) vs ${totalUnits} billed ($${poCommitmentVal.toLocaleString()}). Funds secured in TakarSettle v4 escrow.`;
-      payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_DELIVERY_ARBITRATION\n• Platform: Alibaba Trade Assurance Contract #ALI-9021\n• PO Commitment: ${totalUnits} industrial units @ $1,000.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Delivery & Warehouse Evidence: Port of LA Cainiao receipt confirms ${conformingUnits} units accepted, ${damagedUnits} rejected/damaged\n• Supplier Claim: Invoiced full ${totalUnits} units ($${poCommitmentVal.toLocaleString()}.00 USD)`;
-      payload.reviewerFindings = `• Variance Detection: ${damagedUnits}-unit shortfall (-$${shortfallVal.toLocaleString()}.00 variance / -${driftPct}% drift)\n• WASM Arbitration: Full $${(poCommitmentVal/1000).toFixed(0)}k payment condition UNSATISFIED (WASM_3WAY_MATH_MISMATCH: Stated $${poCommitmentVal.toLocaleString()}.00 differs from conforming $${actualConformingVal.toLocaleString()}.00)\n• Takar Escrow Panel (Sepolia 3-of-3): Consensus reached across 2 independent verifiers\n• Circuit Breaker: Blocked unauthorized $${(poCommitmentVal/1000).toFixed(0)}k release; Reconciled partial settlement ($${(actualConformingVal/1000).toFixed(0)}k) queued pending buyer signoff`;
+      payload.summary = `Alibaba Trade Assurance Escrow Protected: Full $${poCommitmentVal.toLocaleString()} release blocked by WASM line-item math (${!liveSettle ? 'dry-run pre-flight; zero funds moved' : 'escrow locked'}). Port of LA Cainiao receipt confirms ${conformingUnits} conforming units ($${actualConformingVal.toLocaleString()}) vs ${totalUnits} billed ($${poCommitmentVal.toLocaleString()}). Funds remain secured in TakarSettle v4 escrow.`;
+      payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_DELIVERY_ARBITRATION\n• Platform: Alibaba Trade Assurance Contract #ALI-9021\n• PO Commitment: ${totalUnits} industrial units @ $${unitPrice.toLocaleString()}.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Delivery & Warehouse Evidence: Port of LA Cainiao receipt confirms ${conformingUnits} units accepted, ${damagedUnits} rejected/damaged\n• Supplier Claim: Invoiced full ${totalUnits} units ($${poCommitmentVal.toLocaleString()}.00 USD)`;
+      payload.reviewerFindings = `• Variance Detection: ${damagedUnits}-unit shortfall (-$${shortfallVal.toLocaleString()}.00 variance / -${driftPct}% drift)\n• WASM Arbitration: Full $${(poCommitmentVal/1000).toFixed(0)}k payment condition UNSATISFIED (WASM_3WAY_MATH_MISMATCH: Stated $${poCommitmentVal.toLocaleString()}.00 differs from conforming $${actualConformingVal.toLocaleString()}.00)\n• Takar Escrow Panel: Claim fails deterministic 3-way warehouse tally gate\n• Circuit Breaker: Blocked unauthorized $${(poCommitmentVal/1000).toFixed(0)}k release; Reconciled partial settlement ($${(actualConformingVal/1000).toFixed(0)}k) queued pending buyer signoff`;
       payload.easSchemaUid = '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04';
       payload.settlementContract = '0x310275e6D66818E068245326bB9e398822304248';
       payload.certHash = '0x' + crypto.createHash('sha256').update('ALIBABA-ESCROW-FREEZE-SHORTFALL:' + JSON.stringify(payload)).digest('hex');
@@ -6253,6 +6283,131 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   }
 
   return payload;
+}
+
+export function evaluateSolanaSpendGuardRequest(params = {}) {
+  const scenario = String(params.scenario || 'legit').trim().toLowerCase();
+  const sdnDb = loadInMemorySdnDatabase();
+  const sdnCount = sdnDb?.count || 0;
+  const maxSingleSol = Number.isFinite(Number(params.maxSingleSol)) ? Number(params.maxSingleSol) : 5;
+  const maxSessionSol = Number.isFinite(Number(params.maxSessionSol)) ? Number(params.maxSessionSol) : 10;
+  const maxSingleUsdc = Number.isFinite(Number(params.maxSingleUsdc)) ? Number(params.maxSingleUsdc) : 500;
+  const maxSessionUsdc = Number.isFinite(Number(params.maxSessionUsdc)) ? Number(params.maxSessionUsdc) : 500;
+
+  const guard = new SolanaSpendGuard({
+    maxSingleSpend: { SOL: maxSingleSol, USDC: maxSingleUsdc },
+    maxSessionSpend: { SOL: maxSessionSol, USDC: maxSessionUsdc }
+  });
+
+  const senderKp = Keypair.generate();
+  const recentBlockhash = '11111111111111111111111111111111';
+  const context = {
+    vendor: String(params.entity || params.vendor || '').trim(),
+    mockBackdoor: Boolean(params.mockBackdoor),
+    mockWeb3Version: params.mockWeb3Version || undefined
+  };
+
+  let tx = null;
+  let scenarioLabel = scenario;
+  const rawTxB64 = params.txBase64 || params.serializedTx || params.transaction;
+
+  if (typeof rawTxB64 === 'string' && rawTxB64.trim().length > 16) {
+    const rawBuf = Buffer.from(rawTxB64.trim(), 'base64');
+    tx = Transaction.from(rawBuf);
+    scenarioLabel = 'custom_serialized_tx';
+  } else {
+    let destPubkey = new PublicKey('11111111111111111111111111111111');
+    try {
+      destPubkey = Keypair.generate().publicKey;
+    } catch {}
+    let lamports = Math.round(0.01 * 1e9);
+
+    if (scenario === 'hijack') {
+      context.mockBackdoor = true;
+      context.vendor = context.vendor || 'Siemens Aktiengesellschaft';
+    } else if (scenario === 'drainer') {
+      const drainerAddr = Array.from(MALICIOUS_DRAINER_ADDRESSES)[0] || 'FnvLGtucz4E1ppJHRTev6Qv4X7g8Pw6WPStHCcbAKbfx';
+      destPubkey = new PublicKey(drainerAddr);
+      lamports = Math.round(2.5 * 1e9);
+      context.vendor = context.vendor || 'Unknown Unverified Drain Router';
+    } else if (scenario === 'cap') {
+      const requestedSol = Number.isFinite(Number(params.amountSol)) ? Number(params.amountSol) : 12.5;
+      lamports = Math.round(requestedSol * 1e9);
+      context.vendor = context.vendor || 'Siemens Aktiengesellschaft';
+    } else if (scenario === 'ofac') {
+      context.vendor = context.vendor || 'Lazarus Group';
+      lamports = Math.round(0.5 * 1e9);
+    } else {
+      const requestedSol = Number.isFinite(Number(params.amountSol)) ? Number(params.amountSol) : 0.01;
+      lamports = Math.round(requestedSol * 1e9);
+      context.vendor = context.vendor || 'Siemens Aktiengesellschaft';
+    }
+
+    if (params.recipientPubkey) {
+      try {
+        destPubkey = new PublicKey(String(params.recipientPubkey).trim());
+      } catch {}
+    }
+
+    tx = new Transaction({
+      feePayer: senderKp.publicKey,
+      recentBlockhash
+    }).add(
+      SystemProgram.transfer({
+        fromPubkey: senderKp.publicKey,
+        toPubkey: destPubkey,
+        lamports
+      })
+    );
+  }
+
+  const t0 = process.hrtime.bigint();
+  try {
+    const clearance = guard.guardTransaction(tx, context);
+    const latencyMs = Number(process.hrtime.bigint() - t0) / 1e6;
+    return {
+      ok: true,
+      chain: 'solana',
+      scenario: scenarioLabel,
+      verdict: 'APPROVED',
+      status: 'APPROVED',
+      cleared: true,
+      reason: 'POLICY_CLEAR',
+      certHash: clearance.certHash,
+      summary: `Solana Pre-Signature Spend Guard CLEARED ${clearance.transfersCount} transfer(s) (${clearance.totalSol.toFixed(4)} SOL). Supply chain clean, drainer filter clear, ${sdnCount.toLocaleString('en-US')} OFAC SDN records screened in ${latencyMs.toFixed(2)} ms.`,
+      flags: [`ofac:clear (${sdnCount.toLocaleString('en-US')})`, 'supply-chain:verified', 'cap:within-limit'],
+      latencyMs: Number(latencyMs.toFixed(2)),
+      sdnEntriesScreened: sdnCount,
+      totalSol: clearance.totalSol,
+      totalUsdc: clearance.totalUsdc,
+      transfers: clearance.transfers,
+      sessionSpent: clearance.sessionSpent,
+      as_of: new Date().toISOString()
+    };
+  } catch (err) {
+    const latencyMs = Number(process.hrtime.bigint() - t0) / 1e6;
+    const d = err?.details || {};
+    const reason = d.reason || 'POLICY_VIOLATION';
+    return {
+      ok: false,
+      chain: 'solana',
+      scenario: scenarioLabel,
+      verdict: 'HALTED',
+      status: 'HALTED',
+      cleared: false,
+      reason,
+      certHash: d.certHash || null,
+      summary: err?.message || 'Solana Spend Guard halted transaction before signing.',
+      flags: [`reason:${reason}`, `ofac-index:${sdnCount.toLocaleString('en-US')}`, 'signature:BLOCKED'],
+      latencyMs: Number(latencyMs.toFixed(2)),
+      sdnEntriesScreened: sdnCount,
+      recipient: d.recipient || null,
+      entity: d.entity || context.vendor || null,
+      amount: d.amount ?? null,
+      cap: d.cap ?? null,
+      as_of: new Date().toISOString()
+    };
+  }
 }
 
 /**
@@ -6773,11 +6928,15 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, 200, out);
     }
 
-    // 0e. GET / POST /api/mission/autonomous-spend & /api/spend-guard/evaluate & /api/trade-assurance/audit (Mission 11 Genuine Workflow)
-    if ((pathname === '/api/mission/autonomous-spend' || pathname === '/api/spend-guard/evaluate' || pathname === '/api/evaluator/spend-guard' || pathname === '/api/trade-assurance/audit') && (req.method === 'GET' || req.method === 'POST')) {
+    // 0e. GET / POST /api/mission/autonomous-spend & /api/spend-guard/evaluate & /api/trade-assurance/audit & /api/audit/solana-spend-guard
+    if ((pathname === '/api/audit/solana-spend-guard' || pathname === '/api/mission/autonomous-spend' || pathname === '/api/spend-guard/evaluate' || pathname === '/api/evaluator/spend-guard' || pathname === '/api/trade-assurance/audit') && (req.method === 'GET' || req.method === 'POST')) {
       const body = req.method === 'POST' ? await readJsonBody(req) : {};
       const q = Object.fromEntries(urlObj.searchParams.entries());
       const merged = sanitizeCurrencyStrings({ ...q, ...body });
+      if (pathname === '/api/audit/solana-spend-guard' || String(merged.chain || '').toLowerCase() === 'solana') {
+        const out = evaluateSolanaSpendGuardRequest(merged);
+        return sendJson(res, 200, out);
+      }
       if (pathname === '/api/trade-assurance/audit' && !merged.scenario) {
         merged.scenario = merged.disputeResolutionAuthorized ? 'alibaba_reconciled' : 'alibaba';
       }
@@ -7430,8 +7589,8 @@ export async function handleApiRequest(req, res) {
       }
       const params = sanitizeCurrencyStrings({ ...q, ...body });
       const report = await evaluatePaysheetConsensus({
-        target: params.target || params.recipientAddress || params.recipient || params.payee || params.vendorName || params.vendor || params.name || params.address,
-        amountUsdc: params.amountUsdc || params.amount || '0.00',
+        target: params.target || params.payeeAddress || params.recipientAddress || params.recipient || params.payee || params.vendorName || params.vendor || params.name || params.address,
+        amountUsdc: params.grossAmount || params.amountUsdc || params.amount || '0.00',
         payrollId: params.payrollId || params.payroll_id || 'PAYROLL-DEFAULT'
       });
       return sendJson(res, 200, report);
@@ -7463,8 +7622,8 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, 200, dossierAudit);
     }
 
-    // 6. Replacement Compliance Miner & Gold Rush Endpoints (/api/miner/*, /api/gold-rush/*)
-    if (pathname.startsWith('/api/miner/') || pathname.startsWith('/api/gold-rush/')) {
+    // 6. Replacement Compliance Miner & Gold Rush Endpoints (/api/miner/*, /api/gold-rush/*, /api/mission/contract-audit, /api/mission/grid-power, /api/mission/gold-rush)
+    if (pathname.startsWith('/api/miner/') || pathname.startsWith('/api/gold-rush/') || pathname === '/api/mission/contract-audit' || pathname === '/api/mission/grid-power' || pathname === '/api/mission/gold-rush') {
       let body = {};
       if (req.method === 'POST') {
         try {
@@ -7564,10 +7723,14 @@ export async function handleApiRequest(req, res) {
 
         const invAmounts = extractAmountList(invoiceStr);
         const ledAmounts = extractAmountList(ledgerStr);
+        const structuredInv = parseStrictNumber(merged.invoice_amount ?? merged.invoiceAmount ?? merged.billed_amount ?? merged.billedAmount);
+        const structuredLed = parseStrictNumber(merged.po_amount ?? merged.poAmount ?? merged.ledger_amount ?? merged.ledgerAmount ?? merged.receipt_amount ?? merged.receiptAmount);
+        const resolvedInvTotal = invAmounts.length ? invAmounts[invAmounts.length - 1] : (Number.isFinite(structuredInv) ? structuredInv : NaN);
+        const resolvedLedTotal = ledAmounts.length ? ledAmounts[ledAmounts.length - 1] : (Number.isFinite(structuredLed) ? structuredLed : NaN);
 
-        if (invAmounts.length && ledAmounts.length) {
-          const invTotal = invAmounts[invAmounts.length - 1];
-          const ledTotal = ledAmounts[ledAmounts.length - 1];
+        if (Number.isFinite(resolvedInvTotal) && Number.isFinite(resolvedLedTotal)) {
+          const invTotal = resolvedInvTotal;
+          const ledTotal = resolvedLedTotal;
           const diff = Math.round((invTotal - ledTotal) * 100) / 100;
           const isRec = Math.abs(diff) < 0.01;
           const expl = isRec
@@ -7932,6 +8095,7 @@ export async function handleApiRequest(req, res) {
         const summary = out.summary || out.reason || (out.found ? `Corporate record found for ${rawQuery}` : `No corporate record found for ${rawQuery}`);
         return sendJson(res, 200, {
           ...out,
+          lei: out.lei || out.registration_id || null,
           summary,
           explanation: out.explanation || summary,
           reason: out.reason || summary,
@@ -8044,6 +8208,8 @@ export async function handleApiRequest(req, res) {
           merged.question ||
           merged.query ||
           merged.prompt ||
+          merged.contractText ||
+          merged.contract_text ||
           merged.text ||
           merged.contract ||
           merged.clause ||
@@ -8095,18 +8261,64 @@ export async function handleApiRequest(req, res) {
           });
         }
 
+        // Deterministic structured interest / penalty calculation if numeric contract parameters supplied
+        const principalNum = parseStrictNumber(merged.principal ?? merged.principal_amount ?? merged.contract_value ?? merged.invoiceAmount ?? merged.invoice_amount ?? merged.amount);
+        const ratePctNum = parseStrictNumber(merged.rate_pct ?? merged.interest_rate ?? merged.interestRatePct ?? merged.penalty_rate_pct ?? merged.rate);
+        let daysOverdue = parseStrictNumber(merged.days_overdue ?? merged.daysOverdue ?? merged.delay_days ?? merged.days);
+        const monthsOverdue = parseStrictNumber(merged.months_overdue ?? merged.monthsOverdue ?? merged.delay_months ?? merged.months);
+        if (!Number.isFinite(daysOverdue) && !Number.isFinite(monthsOverdue) && merged.paymentDueDate) {
+          const dueMs = Date.parse(String(merged.paymentDueDate));
+          const asOfMs = merged.asOfDate ? Date.parse(String(merged.asOfDate)) : Date.now();
+          if (Number.isFinite(dueMs) && Number.isFinite(asOfMs)) {
+            daysOverdue = Math.max(0, Math.floor((asOfMs - dueMs) / 86400000));
+          }
+        }
+        if (Number.isFinite(principalNum) && principalNum > 0 && Number.isFinite(ratePctNum) && ratePctNum >= 0 && (Number.isFinite(daysOverdue) || Number.isFinite(monthsOverdue))) {
+          const penaltyAmt = Number.isFinite(daysOverdue)
+            ? Math.round(principalNum * (ratePctNum / 100) * (Math.max(0, daysOverdue) / 365) * 100) / 100
+            : Math.round(principalNum * (ratePctNum / 100) * (Math.max(0, monthsOverdue) / 12) * 100) / 100;
+          const periodLabel = Number.isFinite(daysOverdue) ? `${Math.max(0, daysOverdue)} days (/365)` : `${Math.max(0, monthsOverdue)} months (/12)`;
+          const isDelinquent = penaltyAmt > 0;
+          const summary = isDelinquent
+            ? `CONTRACT OBLIGATION AUDIT: Delay penalty triggered. Principal ${principalNum.toFixed(2)} x ${ratePctNum}% p.a. over ${periodLabel} = accrued liability ${penaltyAmt.toFixed(2)}.`
+            : `CONTRACT OBLIGATION AUDIT: Zero delay liability accrued (${periodLabel} overdue at ${ratePctNum}% p.a.).`;
+          return sendJson(res, 200, {
+            verified: !isDelinquent,
+            compliant: !isDelinquent,
+            verdict: isDelinquent ? 'Non-compliant' : 'Compliant',
+            audit_verdict: isDelinquent ? 'DELAY_LIABILITY_TRIGGERED' : 'COMPLIANT_NO_DELAY',
+            obligations: ['Contractual Delay Interest & Payment Schedule'],
+            clauses: [merged.clause || 'Interest & Payment Clause'],
+            status: isDelinquent ? 'delay_liability_triggered' : 'compliant',
+            principal: principalNum,
+            interest_rate_pct: ratePctNum,
+            penalty_amount: penaltyAmt,
+            total_payable: Math.round((principalNum + penaltyAmt) * 100) / 100,
+            citations: ['Contractual Delay Interest Clause'],
+            summary,
+            explanation: summary,
+            reason: summary,
+            answer: summary,
+            results: [summary],
+            confidence: 1.0,
+            intent: 'CONTRACT_OBLIGATION_AUDIT_GENERAL',
+            schema_version: 2,
+            as_of: new Date().toISOString()
+          });
+        }
+
         const summary = rawText
-          ? `CONTRACT OBLIGATION AUDIT: Under review. Contract clause analyzed for statutory and contractual binding terms.`
-          : 'Insufficient parameters: supply contract text, clause, or audit prompt (?question=...).';
+          ? `CONTRACT OBLIGATION AUDIT: Supplied text did not match an indexed statutory template and lacks structured numeric parameters (principal, rate_pct, days_overdue) for deterministic calculation.`
+          : 'Insufficient parameters: supply contract text, clause, or structured penalty terms (?question=... or principal/rate_pct/days_overdue).';
 
         return sendJson(res, 200, {
           verified: false,
           compliant: false,
           verdict: 'Unclear',
-          audit_verdict: rawText ? 'UNDER_REVIEW' : 'INSUFFICIENT_EVIDENCE',
+          audit_verdict: rawText ? 'UNVERIFIED_UNSTRUCTURED_CLAUSE' : 'INSUFFICIENT_EVIDENCE',
           obligations: ['Statutory Contract Standards'],
           clauses: ['General Contract Terms'],
-          status: rawText ? 'review_pending' : 'insufficient_evidence',
+          status: rawText ? 'unclear_unstructured' : 'insufficient_evidence',
           penalty_amount: 0.0,
           citations: ['Statutory Contract Standards'],
           summary,
@@ -8114,7 +8326,7 @@ export async function handleApiRequest(req, res) {
           reason: summary,
           answer: summary,
           results: [summary],
-          confidence: 1.0,
+          confidence: rawText ? 0.25 : 0.0,
           intent: 'CONTRACT_OBLIGATION_AUDIT_GENERAL',
           schema_version: 2,
           as_of: new Date().toISOString()
@@ -8122,7 +8334,7 @@ export async function handleApiRequest(req, res) {
       }
 
       if (pathname === '/api/miner/grid-power-price' || pathname === '/api/miner/grid-power' || pathname === '/api/mission/grid-power') {
-        const out = getGridPowerPrice(merged);
+        const out = await getLiveGridPowerPrice(merged);
         return sendJson(res, 200, out);
       }
 

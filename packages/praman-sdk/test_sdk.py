@@ -9,7 +9,7 @@ from praman import PramanDesk
 
 def main():
     print("=== Testing Praman Desk Python SDK ===")
-    client = PramanDesk(endpoint="https://praman-desk.vercel.app", timeout=12.0)
+    client = PramanDesk(endpoint=os.environ.get("PRAMAN_ENDPOINT", "https://praman-desk.vercel.app"), timeout=12.0)
 
     print("1. Testing screen_sanctions (Lazarus Group EVM)...")
     sdn = client.screen_sanctions(address="0x098B716B8Aaf21512996dC57EB0615e2383E2f96")
@@ -39,18 +39,19 @@ def main():
     print("6. Testing audit_contract_obligation (Mission 04)...")
     contract = client.audit_contract_obligation(
         contract_text="Late payment interest accrues at 18% per annum compounded monthly if unpaid after 30 days.",
-        invoice_amount=50000.0,
-        invoice_date="2026-08-01",
-        payment_due_date="2026-08-31",
-        interest_rate_pct=18.0
+        principal=50000.0,
+        rate_pct=18.0,
+        days_overdue=30
     )
-    assert contract.get("intent") == "CONTRACT_OBLIGATION_AUDIT_GENERAL" or "status" in contract, "Contract audit response required"
-    print(f"   PASS ✅ status: {contract.get('status')} accrued: {contract.get('accruedLiability') or contract.get('accrued_liability')}")
+    assert contract.get("intent") == "CONTRACT_OBLIGATION_AUDIT_GENERAL", "Contract audit response required"
+    assert contract.get("verdict") == "Non-compliant", "Overdue contract must be Non-compliant"
+    assert contract.get("penalty_amount", 0) > 0, "Accrued penalty must be positive"
+    print(f"   PASS ✅ status: {contract.get('status')} penalty: {contract.get('penalty_amount')}")
 
     print("7. Testing get_grid_power_price (CAISO NP15)...")
     power = client.get_grid_power_price(hub="NP15")
     assert power.get("intent") == "GRID_POWER_PRICE_GENERAL", "Power price must return GRID_POWER_PRICE_GENERAL"
-    assert power.get("price_mwh", 0) > 0, "Price per MWh must be positive"
+    assert power.get("ok") is True and power.get("price_mwh", 0) > 0, "Live CAISO NP15 price per MWh must be positive"
     print(f"   PASS ✅ hub: {power.get('hub')} price_mwh: {power.get('price_mwh')}")
 
     print("8. Testing query_mining_intelligence (Mount Morgan)...")

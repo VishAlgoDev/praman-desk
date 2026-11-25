@@ -2115,22 +2115,37 @@ $('#ta-run').addEventListener('click', () => {
 /* ==========================================================================
    G. DESK 1 · SPEND GUARD (100% PRESERVED & ZERO REGRESSION)
    ========================================================================== */
-const SG_SCENARIOS = {
-  legit:   { verdict: 'APPROVED', cls: 'approved', why: 'SystemProgram transfer of 0.0100 SOL to Siemens AG verified treasury. Sanctions clear (19,565 SDN entries, <25 ms), session spend $0.00 → $24.11, within $500.00 Tier-1 cap.', sigs: ['ofac:clear', 'alt:resolvable', 'cap:within-limit'] },
-  hijack:  { verdict: 'HALTED', cls: 'halt', why: 'Runtime prototype hook detected: Transaction.prototype.addToQueue overridden by injected module. Transaction rejected before signature — zero lamports moved.', sigs: ['prototype:backdoor', 'integrity:FAIL'] },
-  drainer: { verdict: 'HALTED', cls: 'halt', why: 'Recipient FnvLGtucz4E1ppJHRTev6Qv4X7g8Pw6WPStHCcbAKbfx matches known exfiltration wallet. Blacklisted program ID in instruction 2. Frozen pre-signature.', sigs: ['wallet:BLACKLISTED', 'program:blacklisted'] },
-  cap:     { verdict: 'HALTED', cls: 'halt', why: 'Atomic runningSessionSpend accumulator: $502.40 requested against $500.00 single-session cap. Overflow rejected; accumulator unchanged.', sigs: ['cap:exceeded', '$502.40 > $500.00'] },
-  ofac:    { verdict: 'HALTED', cls: 'halt', why: 'Counterparty address matches OFAC SDN list (19,565 entries screened in-memory, 18 ms). Spend frozen and session flagged for statutory review.', sigs: ['ofac:MATCH', 'screen:19565'] }
-};
+const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-$('#sg-run').addEventListener('click', () => {
-  const s = SG_SCENARIOS[$('#sg-scenario').value];
-  $('#sg-out').innerHTML = `
-    <div class="verdict ${s.cls}">
-      <div class="verdict-badge">${s.verdict}</div>
-      <p class="summary">${s.why}</p>
-      <div class="flags">${s.sigs.map(x => `<div class="flag ${s.verdict === 'APPROVED' ? 'ok' : ''}">${x}</div>`).join('')}</div>
-    </div>`;
+$('#sg-run').addEventListener('click', async () => {
+  const scenario = $('#sg-scenario').value;
+  const out = $('#sg-out');
+  const btn = $('#sg-run');
+  btn.disabled = true;
+  out.innerHTML = `<div class="verdict"><div class="verdict-badge">EVALUATING</div><p class="summary">Running live SolanaSpendGuard middleware &amp; 19,565 OFAC SDN check...</p></div>`;
+  try {
+    const r = await fetch('/api/audit/solana-spend-guard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scenario })
+    });
+    const d = await r.json();
+    const isApproved = d.verdict === 'APPROVED';
+    const cls = isApproved ? 'approved' : 'halt';
+    const flags = Array.isArray(d.flags) ? [...d.flags] : [];
+    if (d.latencyMs !== undefined) flags.push(`${d.latencyMs} ms`);
+    if (d.certHash) flags.push(`cert:${String(d.certHash).slice(0, 12)}…`);
+    out.innerHTML = `
+      <div class="verdict ${cls}">
+        <div class="verdict-badge">${escapeHtml(d.verdict || (isApproved ? 'APPROVED' : 'HALTED'))}</div>
+        <p class="summary">${escapeHtml(d.summary || '')}</p>
+        <div class="flags">${flags.map(x => `<div class="flag ${isApproved ? 'ok' : ''}">${escapeHtml(x)}</div>`).join('')}</div>
+      </div>`;
+  } catch (e) {
+    out.innerHTML = `<div class="verdict halt"><div class="verdict-badge">ERROR</div><p class="summary">${escapeHtml(e.message || 'Solana Spend Guard request failed')}</p></div>`;
+  } finally {
+    btn.disabled = false;
+  }
 });
 $('#sg-cli').addEventListener('click', () => toast('Run: node bin/praman-gate.mjs solana-demo (5/5 scenarios)'));
 

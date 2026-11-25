@@ -29,19 +29,37 @@ export class TakarPramanEscrowBridge {
   }
 
   /**
-   * Simulates/Queries Takar Second Opinion heuristic delivery verification
+   * Queries Takar Second Opinion (or explicit deterministic offline simulation if TAKAR_ENDPOINT is unset)
    */
   async queryTakarSecondOpinion({ dealId, vendor, terms, deliveryEvidence }) {
     const startTime = Date.now();
-    // Simulate Takar's heuristic evaluation based on delivery evidence & contract terms
-    const isDeliveryAttested = typeof deliveryEvidence === 'string' && deliveryEvidence.length > 10;
-    const isSuspiciousPrompt = /bypass|unauthorized|fake|phish/i.test(deliveryEvidence || '');
+    const takarEndpoint = process.env.TAKAR_ENDPOINT;
+    if (takarEndpoint) {
+      try {
+        const res = await fetch(takarEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dealId, vendor, terms, deliveryEvidence }),
+          signal: AbortSignal.timeout(6000)
+        });
+        if (res.ok) {
+          const data = await res.json();
+          return { ...data, simulated: false, latencyMs: Date.now() - startTime };
+        }
+      } catch {
+        // Fall through to explicitly flagged simulation below
+      }
+    }
+
+    const isDeliveryAttested = typeof deliveryEvidence === 'string' && deliveryEvidence.length > 10 && !/shortfall|damaged|rejected|missing/i.test(deliveryEvidence);
+    const isSuspiciousPrompt = /bypass|unauthorized|fake|phish|shortfall|damaged/i.test(deliveryEvidence || '');
 
     const confidence = isSuspiciousPrompt ? 0.32 : (isDeliveryAttested ? 0.94 : 0.65);
     const approved = confidence >= 0.85;
 
     return {
-      miner: 'Takar Second Opinion (Bangdrop)',
+      miner: 'Takar Second Opinion (Simulated Local Heuristic — set TAKAR_ENDPOINT for live peer)',
+      simulated: true,
       contract: this.takarContract,
       dealId,
       heuristicScore: confidence,
