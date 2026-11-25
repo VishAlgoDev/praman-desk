@@ -1,16 +1,16 @@
 # Praman Desk vs Frontier Foundation Models: Empirical Hallucination Benchmark
 
-> **Run Date**: 2026-11-22T16:33:28.450Z
+> **Run Date**: 2026-11-25T17:14:55.920Z
 > **Standard**: Ground truth verified against GLEIF, OFAC SDN, Sepolia Etherscan, and live exchange tickers
 > **Praman Desk Environment**: Live production deployment on [praman-desk.vercel.app](https://praman-desk.vercel.app) (Devnode Miner ID: 6164)
 
 ## Summary Scores
 
-| System | Architecture | Correct / 10 | Hallucinations | Accuracy |
+| System | Classification | Correct / 10 | Hallucinations | Accuracy |
 |---|---|---|---|---|
-| **Praman Desk** | **Cryptographically Grounded Verification (Telegraph Season II)** | **10/10** | **0** | **100%** |
-| Frontier Reasoning LLM | Weights-Only Foundation Model (Non-Grounded) | — | — | — |
-| Frontier Generalist LLM | Weights-Only Foundation Model (Non-Grounded) | — | — | — |
+| **Praman Desk** | **Cryptographically Grounded Agent (Telegraph Protocol Season II)** | **10/10** | **0** | **100%** |
+| Frontier Reasoning LLM (gpt-6.1) | Foundation Model (Weights-Only / Non-Grounded) | — | — | — |
+| Frontier Multi-Modal LLM (claude-opus-5-5) | Foundation Model (Weights-Only / Non-Grounded) | — | — | — |
 
 > 🚨 = Hallucination (confident wrong assertion) | ✅ = Correct (verified ground truth) | ❌ = Wrong / Incomplete | — = Offline / unconfigured
 

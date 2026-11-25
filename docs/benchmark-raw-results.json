@@ -101,7 +101,7 @@
     "intent": "WEB_SEARCH_GENERAL",
     "praman_correct": true,
     "praman_hallucinated": false,
-    "praman_note": "{\"answer\":\"Current spot price of BITCOIN: $61,183.27 (via Coinbase live exchange spot).\",\"sources\":[\"https://api.coinbase.com\"],\"brief\":\"BITCOIN Price",
+    "praman_note": "{\"answer\":\"Current spot price of BITCOIN: $59,179.03 (via Coinbase live exchange spot).\",\"sources\":[\"https://api.coinbase.com\"],\"brief\":\"BITCOIN Price",
     "gpt_correct": null,
     "gpt_hallucinated": null,
     "claude_correct": null,
