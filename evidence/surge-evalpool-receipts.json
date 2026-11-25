@@ -1,0 +1,287 @@
+[
+  {
+    "intentId": "WALLET_BALANCE_CHECK_GENERAL",
+    "file": "surge_wallet_balance_check_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "d609f18e7975ed5690802517ef44f2c7acad15a44a012ca25888f0b53c0d4386",
+    "nonce": "79b5ea9fc1626dbf08c61c16bd8ac468",
+    "status": 200,
+    "response": {
+      "intent_id": "WALLET_BALANCE_CHECK_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 341
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:47.094Z"
+  },
+  {
+    "intentId": "LIQUIDITY_DEPTH_VERIFY_GENERAL",
+    "file": "surge_liquidity_depth_verify_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "ade3db145622f0e532bf604948d1f4e39e8bf5bb08d99e2516b3e126e757578e",
+    "nonce": "18f13fcf88c82529dc50055637e31d09",
+    "status": 200,
+    "response": {
+      "intent_id": "LIQUIDITY_DEPTH_VERIFY_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 527,
+        "rejected": 58
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:48.118Z"
+  },
+  {
+    "intentId": "RESEARCH_QUERY_GENERAL",
+    "file": "surge_research_query_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "288540a26842c0a73531608c27ef6d107cf6994ab8b34ffc6711410132e7f652",
+    "nonce": "1ee8398b5af2be820eea4f82a714ca2a",
+    "status": 200,
+    "response": {
+      "intent_id": "RESEARCH_QUERY_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 480,
+        "quarantine": 60
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:49.176Z"
+  },
+  {
+    "intentId": "WEB_SEARCH_GENERAL",
+    "file": "surge_web_search_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "25b4546bca046ae88c2b2a6a4d9b48590aed8eb8ad33a3a312d9aaa1f29f0988",
+    "nonce": "e38f2038c8b9d1af952cce6b99c3b6c2",
+    "status": 200,
+    "response": {
+      "intent_id": "WEB_SEARCH_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 466,
+        "rejected": 3
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:50.169Z"
+  },
+  {
+    "intentId": "SMART_CONTRACT_AUDIT_GENERAL",
+    "file": "surge_smart_contract_audit_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "0f5d7f9705a66564457f18ed09bf2583d887b499d3ad6c10d2989802e8c12036",
+    "nonce": "1b759484f734597d897ff38dd38e4272",
+    "status": 200,
+    "response": {
+      "intent_id": "SMART_CONTRACT_AUDIT_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 393,
+        "quarantine": 71,
+        "rejected": 2
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:51.201Z"
+  },
+  {
+    "intentId": "WASH_TRADING_DETECTION_GENERAL",
+    "file": "surge_wash_trading_detection_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "5bf1e6b2c6af8ae7d005dad6e5de965e69a5d6e5f45f36bb66ff1f86a2d21fff",
+    "nonce": "f4635a477654b94b044c9e38248ed872",
+    "status": 200,
+    "response": {
+      "intent_id": "WASH_TRADING_DETECTION_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 825,
+        "rejected": 9
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:52.257Z"
+  },
+  {
+    "intentId": "MACRO_ECONOMIC_INDICATOR_GENERAL",
+    "file": "surge_macro_economic_indicator_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "b747b2fe76c0eea5fe8caa37cb48cb00c8edd3c38444d5fdd2ab5006fa67ac71",
+    "nonce": "5710b07f05cfe0509a9114af29aac41e",
+    "status": 200,
+    "response": {
+      "intent_id": "MACRO_ECONOMIC_INDICATOR_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 531,
+        "rejected": 6
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:53.136Z"
+  },
+  {
+    "intentId": "GAS_PRICE_GENERAL",
+    "file": "surge_gas_price_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "56cd004e791ffb8ed50267e331cf9c4df8cdd17833fc052055722a64614b4022",
+    "nonce": "9a6e68f6f0aecdd9428264e3b4784fdf",
+    "status": 200,
+    "response": {
+      "intent_id": "GAS_PRICE_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 160,
+        "rejected": 1
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:54.110Z"
+  },
+  {
+    "intentId": "CODE_REVIEW_GENERAL",
+    "file": "surge_code_review_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "914aaf43a16811dec646e6414d0d1224a004de36edc3faa5fe5a4f5ea7378664",
+    "nonce": "b8b06d02831032c869f06ce1e8a534ca",
+    "status": 200,
+    "response": {
+      "intent_id": "CODE_REVIEW_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 904
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:55.189Z"
+  },
+  {
+    "intentId": "EVENT_OUTCOME_RESOLUTION_GENERAL",
+    "file": "surge_event_outcome_resolution_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "334b141c115880df24a81bd4b4aff29230fb81650d01cde77ec010e7641c13cf",
+    "nonce": "873ef918ef78d62ae0e2a22026bd568d",
+    "status": 200,
+    "response": {
+      "intent_id": "EVENT_OUTCOME_RESOLUTION_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 1048,
+        "rejected": 33
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:56.232Z"
+  },
+  {
+    "intentId": "LIVE_PORT_CONGESTION_GENERAL",
+    "file": "surge_live_port_congestion_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "3a8c099b959d85974bc58bec2ca752b0330d7f517da64236fbb8508e3aa161cc",
+    "nonce": "8cd45be67d7d5c13d3843a29cc92c600",
+    "status": 200,
+    "response": {
+      "intent_id": "LIVE_PORT_CONGESTION_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 60
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:57.201Z"
+  },
+  {
+    "intentId": "VESSEL_TELEMETRY_VERIFY_GENERAL",
+    "file": "surge_vessel_telemetry_verify_general.jsonl",
+    "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "bodySha256": "f2611b99e88ee2903ee624f85957287b0719b02c69900794ab49e8a1a963026c",
+    "nonce": "7c12285c93a1c06df9afed566178efde",
+    "status": 200,
+    "response": {
+      "intent_id": "VESSEL_TELEMETRY_VERIFY_GENERAL",
+      "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+      "signed": true,
+      "received": 15,
+      "accepted": 15,
+      "duplicate": 0,
+      "rejected": 0,
+      "curated": 15,
+      "state_counts": {
+        "admitted": 15,
+        "eligible": 61
+      }
+    },
+    "submittedAt": "2026-11-25T12:26:58.151Z"
+  }
+]

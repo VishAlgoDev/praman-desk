@@ -1,29 +1,28 @@
 {
-  "timestamp": "2026-11-23T01:33:40.583Z",
+  "timestamp": "2026-11-25T12:15:43.559Z",
   "totalSubmissions": 6,
   "receipts": [
     {
-      "timestamp": "2026-11-23T01:33:37.331Z",
+      "timestamp": "2026-11-25T12:15:40.450Z",
       "intentId": "GRID_POWER_PRICE_GENERAL",
       "bountyIssue": 219,
       "file": "grid_power_price_general.jsonl",
       "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
       "bodySha256": "160329c0a2325b62b15b98b9ad477abb30ad21de2ddfc53c9843059bf2db3f4c",
-      "nonce": "4c4c42864fbc30cfbd3af9b5b21128f8",
-      "signature": "0x1ec57ff3351d2baaa03267731b9d3a55ac1997963f0066b2f47fc0a755a8ab840d3f394fd2818d3defb1ba77ed3033764acfd727f51023c68e8bfd80f37724cc1c",
+      "nonce": "fa92d674069543cccdb7531acbb2d944",
+      "signature": "0xcfdea5a144e68ce208a87d5b817b068e878ed176b2560219115594e170bc494951f54293508c6447082bd5132a7524e34f4d334c1ea70aeff0b96eeb3f60b8481c",
       "httpStatus": 200,
       "response": {
         "intent_id": "GRID_POWER_PRICE_GENERAL",
         "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
         "signed": true,
         "received": 6,
-        "accepted": 6,
-        "duplicate": 0,
+        "accepted": 0,
+        "duplicate": 6,
         "rejected": 0,
-        "curated": 6,
+        "curated": 0,
         "state_counts": {
-          "admitted": 6,
-          "eligible": 229,
+          "eligible": 235,
           "rejected": 1
         }
       },
@@ -31,12 +30,8 @@
         "intent_id": "GRID_POWER_PRICE_GENERAL",
         "counts": [
           {
-            "status": "admitted",
-            "count": 6
-          },
-          {
             "status": "eligible",
-            "count": 229
+            "count": 235
           },
           {
             "status": "rejected",
@@ -45,136 +40,128 @@
           }
         ],
         "by_state": {
-          "admitted": 6,
-          "eligible": 229,
+          "eligible": 235,
           "rejected": 1
         },
         "submitters": 7,
-        "eligible_submitters": 6,
+        "eligible_submitters": 7,
         "snapshot": {
-          "corpus_version": "694d1a87c7d5c4bbbde655a827391fd2fa7a8cf9988e5ac7c71146a862d35bcf",
-          "rows": 229,
-          "submitters": 6,
-          "qualification": 107,
-          "ranking": 122,
+          "corpus_version": "6cd62d5b35bef18968deceb73b4a83a3f25a215a7393fd793f8e4a79eae8ac41",
+          "rows": 235,
+          "submitters": 7,
+          "qualification": 110,
+          "ranking": 125,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T05:35:38.707278Z",
-          "activation_epoch": 8
+          "published_at": "2026-11-23T05:39:04.525838Z",
+          "activation_epoch": 42
         },
         "active_snapshot": {
-          "corpus_version": "694d1a87c7d5c4bbbde655a827391fd2fa7a8cf9988e5ac7c71146a862d35bcf",
-          "rows": 229,
-          "submitters": 6,
-          "qualification": 107,
-          "ranking": 122,
+          "corpus_version": "6cd62d5b35bef18968deceb73b4a83a3f25a215a7393fd793f8e4a79eae8ac41",
+          "rows": 235,
+          "submitters": 7,
+          "qualification": 110,
+          "ranking": 125,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T05:35:38.707278Z",
-          "activation_epoch": 8
+          "published_at": "2026-11-23T05:39:04.525838Z",
+          "activation_epoch": 42
         },
-        "current_epoch": 41,
+        "current_epoch": 54,
         "min_submitters": 3
       }
     },
     {
-      "timestamp": "2026-11-23T01:33:37.951Z",
+      "timestamp": "2026-11-25T12:15:41.121Z",
       "intentId": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
       "bountyIssue": 220,
       "file": "optimal_execution_route_general.jsonl",
       "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
       "bodySha256": "d414a7a99935b5a250a209840c19118f7304f4c3cce45196738f816547abd8f2",
-      "nonce": "b5ae6ce024c618416dba8a2151e53d02",
-      "signature": "0x9e86b2d392540ee8da46fcd9dae80ac4bb673309f764aa834ef5568f644f06e20e0cf068351ccd1123feb21fa6d25a47e2c92a4b63092eb81023e1fd4fa9a9231c",
+      "nonce": "4a4b3e94fa8a6b74cc188bbe3eb0da3e",
+      "signature": "0x7791159b31e427a209d0f07205c2ca51c6f82da78a9cda7af3f2945a04952b7a2563a9e059d51738401943f201ce4aa4bd0949b877208a836af3b62cb5c523091c",
       "httpStatus": 200,
       "response": {
         "intent_id": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
         "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
         "signed": true,
         "received": 5,
-        "accepted": 5,
-        "duplicate": 0,
+        "accepted": 0,
+        "duplicate": 5,
         "rejected": 0,
-        "curated": 5,
+        "curated": 0,
         "state_counts": {
-          "admitted": 5,
-          "eligible": 312,
-          "quarantine": 197
+          "eligible": 322,
+          "quarantine": 192
         }
       },
       "poolStatusAfter": {
         "intent_id": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
         "counts": [
           {
-            "status": "admitted",
-            "count": 5
-          },
-          {
             "status": "eligible",
-            "count": 312
+            "count": 322
           },
           {
             "status": "quarantine",
             "reason": "rate_limited",
-            "count": 197
+            "count": 192
           }
         ],
         "by_state": {
-          "admitted": 5,
-          "eligible": 312,
-          "quarantine": 197
+          "eligible": 322,
+          "quarantine": 192
         },
         "submitters": 8,
-        "eligible_submitters": 7,
+        "eligible_submitters": 8,
         "snapshot": {
-          "corpus_version": "4ca05ddc2d37aa1484adb9b40053a7b029f4f78d01272b811a9acd3d599ecd92",
-          "rows": 312,
-          "submitters": 7,
-          "qualification": 164,
-          "ranking": 148,
+          "corpus_version": "097c748f3a217fedf65e7c3f6e359dca2b4dcfc81d09817e297828a6534fcd59",
+          "rows": 322,
+          "submitters": 8,
+          "qualification": 169,
+          "ranking": 153,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T15:49:30.921885Z",
-          "activation_epoch": 11
+          "published_at": "2026-11-23T05:39:05.034294Z",
+          "activation_epoch": 42
         },
         "active_snapshot": {
-          "corpus_version": "4ca05ddc2d37aa1484adb9b40053a7b029f4f78d01272b811a9acd3d599ecd92",
-          "rows": 312,
-          "submitters": 7,
-          "qualification": 164,
-          "ranking": 148,
+          "corpus_version": "097c748f3a217fedf65e7c3f6e359dca2b4dcfc81d09817e297828a6534fcd59",
+          "rows": 322,
+          "submitters": 8,
+          "qualification": 169,
+          "ranking": 153,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T15:49:30.921885Z",
-          "activation_epoch": 11
+          "published_at": "2026-11-23T05:39:05.034294Z",
+          "activation_epoch": 42
         },
-        "current_epoch": 41,
+        "current_epoch": 54,
         "min_submitters": 3
       }
     },
     {
-      "timestamp": "2026-11-23T01:33:38.991Z",
+      "timestamp": "2026-11-25T12:15:41.672Z",
       "intentId": "TASK_EXECUTION_QUALITY_GENERAL",
       "bountyIssue": 221,
       "file": "task_execution_quality_general.jsonl",
       "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
       "bodySha256": "44d26eab73b4a83ee55b9cd0e8274f6f1b93c6f25657c1105a865c5ea6cf44c0",
-      "nonce": "7f7f7b3c38d3af99cff66f56a9d80eb4",
-      "signature": "0xc81cdaa91fbd2fba6a4977e23be3a63f6f0cc09195baa1158053b60b444d56b14e5604f4adb079858db7bdfca22c44fd0d5676fb3636e2b827a6f31c3b5bb16f1c",
+      "nonce": "c9b4c8e2a771815ec760c128e561901a",
+      "signature": "0xb2e09356b09d57313dfbb338dfa401fe7706a0ace5e7a1e01d7427e4ac24ccbd60c8c7b7907c29adc5b998e843627f8b6ab49aa22a1df084df40a8e7681b72eb1c",
       "httpStatus": 200,
       "response": {
         "intent_id": "TASK_EXECUTION_QUALITY_GENERAL",
         "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
         "signed": true,
         "received": 5,
-        "accepted": 5,
-        "duplicate": 0,
+        "accepted": 0,
+        "duplicate": 5,
         "rejected": 0,
-        "curated": 5,
+        "curated": 0,
         "state_counts": {
-          "admitted": 5,
-          "eligible": 264,
-          "quarantine": 18,
+          "eligible": 274,
+          "quarantine": 13,
           "rejected": 48
         }
       },
@@ -182,17 +169,13 @@
         "intent_id": "TASK_EXECUTION_QUALITY_GENERAL",
         "counts": [
           {
-            "status": "admitted",
-            "count": 5
-          },
-          {
             "status": "eligible",
-            "count": 264
+            "count": 274
           },
           {
             "status": "quarantine",
             "reason": "rate_limited",
-            "count": 18
+            "count": 13
           },
           {
             "status": "rejected",
@@ -201,48 +184,47 @@
           }
         ],
         "by_state": {
-          "admitted": 5,
-          "eligible": 264,
-          "quarantine": 18,
+          "eligible": 274,
+          "quarantine": 13,
           "rejected": 48
         },
         "submitters": 13,
-        "eligible_submitters": 8,
+        "eligible_submitters": 9,
         "snapshot": {
-          "corpus_version": "0b7d07d461e21b6e4ac69b4f1cd340b85079273b96e77d7dded737e227415fb3",
-          "rows": 264,
-          "submitters": 8,
-          "qualification": 132,
-          "ranking": 132,
+          "corpus_version": "376c53521f15633092b4cbc0bf3b5215cce091c5824b26baf629ed6ff5ecabb0",
+          "rows": 274,
+          "submitters": 9,
+          "qualification": 138,
+          "ranking": 136,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T15:49:32.506058Z",
-          "activation_epoch": 11
+          "published_at": "2026-11-23T05:39:06.348935Z",
+          "activation_epoch": 42
         },
         "active_snapshot": {
-          "corpus_version": "0b7d07d461e21b6e4ac69b4f1cd340b85079273b96e77d7dded737e227415fb3",
-          "rows": 264,
-          "submitters": 8,
-          "qualification": 132,
-          "ranking": 132,
+          "corpus_version": "376c53521f15633092b4cbc0bf3b5215cce091c5824b26baf629ed6ff5ecabb0",
+          "rows": 274,
+          "submitters": 9,
+          "qualification": 138,
+          "ranking": 136,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T15:49:32.506058Z",
-          "activation_epoch": 11
+          "published_at": "2026-11-23T05:39:06.348935Z",
+          "activation_epoch": 42
         },
-        "current_epoch": 41,
+        "current_epoch": 54,
         "min_submitters": 3
       }
     },
     {
-      "timestamp": "2026-11-23T01:33:39.522Z",
+      "timestamp": "2026-11-25T12:15:42.347Z",
       "intentId": "GRID_POWER_PRICE_GENERAL",
       "bountyIssue": 219,
       "file": "grid_power_price_general.jsonl",
       "submitter": "0x497FF1bE8cc0C95A7a14165A4999768C47fc0109",
       "bodySha256": "160329c0a2325b62b15b98b9ad477abb30ad21de2ddfc53c9843059bf2db3f4c",
-      "nonce": "6dba3c513ded07ee9a534c417ad8740b",
-      "signature": "0x6df0ffccffd0bb3583e8181269a720336248f9ea1a92c982302d97d52d4adc537f433519537e88b728ac3d5d472029651775eff82cfafbe328e8c71bc6e192211c",
+      "nonce": "d4038176810f7cdb79d397137e511ce4",
+      "signature": "0xc2b2c2a9d80aec974e46f3d995881e658aa7cd02c2673d6a2961e3a34b732dff1d0af7c5cbea338c0a8098388e724676c154f434709e3f99f130ca744b39337d1b",
       "httpStatus": 200,
       "response": {
         "intent_id": "GRID_POWER_PRICE_GENERAL",
@@ -254,8 +236,7 @@
         "rejected": 0,
         "curated": 0,
         "state_counts": {
-          "admitted": 6,
-          "eligible": 229,
+          "eligible": 235,
           "rejected": 1
         }
       },
@@ -263,12 +244,8 @@
         "intent_id": "GRID_POWER_PRICE_GENERAL",
         "counts": [
           {
-            "status": "admitted",
-            "count": 6
-          },
-          {
             "status": "eligible",
-            "count": 229
+            "count": 235
           },
           {
             "status": "rejected",
@@ -277,47 +254,46 @@
           }
         ],
         "by_state": {
-          "admitted": 6,
-          "eligible": 229,
+          "eligible": 235,
           "rejected": 1
         },
         "submitters": 7,
-        "eligible_submitters": 6,
+        "eligible_submitters": 7,
         "snapshot": {
-          "corpus_version": "694d1a87c7d5c4bbbde655a827391fd2fa7a8cf9988e5ac7c71146a862d35bcf",
-          "rows": 229,
-          "submitters": 6,
-          "qualification": 107,
-          "ranking": 122,
+          "corpus_version": "6cd62d5b35bef18968deceb73b4a83a3f25a215a7393fd793f8e4a79eae8ac41",
+          "rows": 235,
+          "submitters": 7,
+          "qualification": 110,
+          "ranking": 125,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T05:35:38.707278Z",
-          "activation_epoch": 8
+          "published_at": "2026-11-23T05:39:04.525838Z",
+          "activation_epoch": 42
         },
         "active_snapshot": {
-          "corpus_version": "694d1a87c7d5c4bbbde655a827391fd2fa7a8cf9988e5ac7c71146a862d35bcf",
-          "rows": 229,
-          "submitters": 6,
-          "qualification": 107,
-          "ranking": 122,
+          "corpus_version": "6cd62d5b35bef18968deceb73b4a83a3f25a215a7393fd793f8e4a79eae8ac41",
+          "rows": 235,
+          "submitters": 7,
+          "qualification": 110,
+          "ranking": 125,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T05:35:38.707278Z",
-          "activation_epoch": 8
+          "published_at": "2026-11-23T05:39:04.525838Z",
+          "activation_epoch": 42
         },
-        "current_epoch": 41,
+        "current_epoch": 54,
         "min_submitters": 3
       }
     },
     {
-      "timestamp": "2026-11-23T01:33:40.048Z",
+      "timestamp": "2026-11-25T12:15:42.902Z",
       "intentId": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
       "bountyIssue": 220,
       "file": "optimal_execution_route_general.jsonl",
       "submitter": "0x497FF1bE8cc0C95A7a14165A4999768C47fc0109",
       "bodySha256": "d414a7a99935b5a250a209840c19118f7304f4c3cce45196738f816547abd8f2",
-      "nonce": "5706eeb8643d8fcc6fd202071cf3070c",
-      "signature": "0xe212c34f40f8bd7870e10a44d3f01b13832caed99a2dd28a23adeb03b42b4bb062f92a0eb169859f2713dc5e4e0757d28bcb6a42f53d69e19d77ee01fed8c1441c",
+      "nonce": "f3691d615240914ae66d0ea7fe8ecf41",
+      "signature": "0x8fae75b4fceb4170a98f8c68cf751c93a4a43c265fad414ab71d5242764d3bbf72ef5a8bb5482e639e720d335956d8732e41c8113c90a899698c88c94849bd471c",
       "httpStatus": 200,
       "response": {
         "intent_id": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
@@ -329,70 +305,64 @@
         "rejected": 0,
         "curated": 0,
         "state_counts": {
-          "admitted": 5,
-          "eligible": 312,
-          "quarantine": 197
+          "eligible": 322,
+          "quarantine": 192
         }
       },
       "poolStatusAfter": {
         "intent_id": "OPTIMAL_EXECUTION_ROUTE_GENERAL",
         "counts": [
           {
-            "status": "admitted",
-            "count": 5
-          },
-          {
             "status": "eligible",
-            "count": 312
+            "count": 322
           },
           {
             "status": "quarantine",
             "reason": "rate_limited",
-            "count": 197
+            "count": 192
           }
         ],
         "by_state": {
-          "admitted": 5,
-          "eligible": 312,
-          "quarantine": 197
+          "eligible": 322,
+          "quarantine": 192
         },
         "submitters": 8,
-        "eligible_submitters": 7,
+        "eligible_submitters": 8,
         "snapshot": {
-          "corpus_version": "4ca05ddc2d37aa1484adb9b40053a7b029f4f78d01272b811a9acd3d599ecd92",
-          "rows": 312,
-          "submitters": 7,
-          "qualification": 164,
-          "ranking": 148,
+          "corpus_version": "097c748f3a217fedf65e7c3f6e359dca2b4dcfc81d09817e297828a6534fcd59",
+          "rows": 322,
+          "submitters": 8,
+          "qualification": 169,
+          "ranking": 153,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T15:49:30.921885Z",
-          "activation_epoch": 11
+          "published_at": "2026-11-23T05:39:05.034294Z",
+          "activation_epoch": 42
         },
         "active_snapshot": {
-          "corpus_version": "4ca05ddc2d37aa1484adb9b40053a7b029f4f78d01272b811a9acd3d599ecd92",
-          "rows": 312,
-          "submitters": 7,
-          "qualification": 164,
-          "ranking": 148,
+          "corpus_version": "097c748f3a217fedf65e7c3f6e359dca2b4dcfc81d09817e297828a6534fcd59",
+          "rows": 322,
+          "submitters": 8,
+          "qualification": 169,
+          "ranking": 153,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T15:49:30.921885Z",
-          "activation_epoch": 11
+          "published_at": "2026-11-23T05:39:05.034294Z",
+          "activation_epoch": 42
         },
-        "current_epoch": 41,
+        "current_epoch": 54,
         "min_submitters": 3
       }
     },
     {
-      "timestamp": "2026-11-23T01:33:40.583Z",
+      "timestamp": "2026-11-25T12:15:43.559Z",
       "intentId": "TASK_EXECUTION_QUALITY_GENERAL",
       "bountyIssue": 221,
       "file": "task_execution_quality_general.jsonl",
       "submitter": "0x497FF1bE8cc0C95A7a14165A4999768C47fc0109",
       "bodySha256": "44d26eab73b4a83ee55b9cd0e8274f6f1b93c6f25657c1105a865c5ea6cf44c0",
-      "nonce": "7c857399bf25473aec0a919e83b79528",
-      "signature": "0x514f5582ba47643125433ef76101215129f91e646a85e1c843592d690ae647f44b07e098ab6737294d329324bdee6ba30bc357c5e9cf5a4498fa75f9fa819c171b",
+      "nonce": "06cb5243be47e0ea8a4d664700642f57",
+      "signature": "0x2a19371f878bd7222d8674aad0dbabcec556700df5025c70fcee3de34a8e379524aa8a9c0858e4e41f76a1f7e545073d9d0be3a38502833a7d3b149bf63f072f1b",
       "httpStatus": 200,
       "response": {
         "intent_id": "TASK_EXECUTION_QUALITY_GENERAL",
@@ -404,9 +374,8 @@
         "rejected": 0,
         "curated": 0,
         "state_counts": {
-          "admitted": 5,
-          "eligible": 264,
-          "quarantine": 18,
+          "eligible": 274,
+          "quarantine": 13,
           "rejected": 48
         }
       },
@@ -414,17 +383,13 @@
         "intent_id": "TASK_EXECUTION_QUALITY_GENERAL",
         "counts": [
           {
-            "status": "admitted",
-            "count": 5
-          },
-          {
             "status": "eligible",
-            "count": 264
+            "count": 274
           },
           {
             "status": "quarantine",
             "reason": "rate_limited",
-            "count": 18
+            "count": 13
           },
           {
             "status": "rejected",
@@ -433,36 +398,35 @@
           }
         ],
         "by_state": {
-          "admitted": 5,
-          "eligible": 264,
-          "quarantine": 18,
+          "eligible": 274,
+          "quarantine": 13,
           "rejected": 48
         },
         "submitters": 13,
-        "eligible_submitters": 8,
+        "eligible_submitters": 9,
         "snapshot": {
-          "corpus_version": "0b7d07d461e21b6e4ac69b4f1cd340b85079273b96e77d7dded737e227415fb3",
-          "rows": 264,
-          "submitters": 8,
-          "qualification": 132,
-          "ranking": 132,
+          "corpus_version": "376c53521f15633092b4cbc0bf3b5215cce091c5824b26baf629ed6ff5ecabb0",
+          "rows": 274,
+          "submitters": 9,
+          "qualification": 138,
+          "ranking": 136,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T15:49:32.506058Z",
-          "activation_epoch": 11
+          "published_at": "2026-11-23T05:39:06.348935Z",
+          "activation_epoch": 42
         },
         "active_snapshot": {
-          "corpus_version": "0b7d07d461e21b6e4ac69b4f1cd340b85079273b96e77d7dded737e227415fb3",
-          "rows": 264,
-          "submitters": 8,
-          "qualification": 132,
-          "ranking": 132,
+          "corpus_version": "376c53521f15633092b4cbc0bf3b5215cce091c5824b26baf629ed6ff5ecabb0",
+          "rows": 274,
+          "submitters": 9,
+          "qualification": 138,
+          "ranking": 136,
           "ranking_split_bps": 5000,
           "quality_rules_version": "evalpool-quality-v1",
-          "published_at": "2026-11-18T15:49:32.506058Z",
-          "activation_epoch": 11
+          "published_at": "2026-11-23T05:39:06.348935Z",
+          "activation_epoch": 42
         },
-        "current_epoch": 41,
+        "current_epoch": 54,
         "min_submitters": 3
       }
     }
