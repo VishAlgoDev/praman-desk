@@ -244,28 +244,12 @@
       font-size: 0.89rem;
       color: var(--ink-secondary);
     }
-    .diagram-frame-shell {
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      background: var(--surface);
-      box-shadow: var(--shadow-card);
-    }
-    .diagram-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      padding: 0.7rem 1rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface-subtle);
-      flex-wrap: wrap;
-    }
     .diagram-iframe {
       display: block;
       width: 100%;
-      height: 540px;
+      height: 530px;
       border: 0;
+      background: transparent;
     }
     .telemetry-embed-frame {
       display: block;
@@ -668,21 +652,14 @@
           </p>
         </div>
 
-        <div class="diagram-frame-shell">
-          <div class="diagram-toolbar">
-            <span class="mono" style="font-size:0.78rem;color:var(--ink-secondary)">Interactive Showcase Diagram: clearing-workflow.html (Archify Verified)</span>
-            <a class="btn" href="/diagrams/clearing-workflow.html" target="_blank" rel="noopener">Open Fullscreen Diagram</a>
-          </div>
-          <iframe
-            id="archify-workflow-frame"
-            class="diagram-iframe"
-            data-theme-sync
-            data-reload-on-theme="true"
-            src="/diagrams/clearing-workflow.html?embed=1&theme=light"
-            title="Praman Autonomous Clearing and Halt Workflow Diagram"
-            loading="lazy"
-          ></iframe>
-        </div>
+        <iframe
+          id="archify-workflow-frame"
+          class="diagram-iframe"
+          data-theme-sync
+          src="/diagrams/clearing-workflow.html?embed=1&theme=light"
+          title="Praman Autonomous Clearing and Halt Workflow Diagram"
+          loading="lazy"
+        ></iframe>
       </div>
     </section>
 
