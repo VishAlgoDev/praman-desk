@@ -7,24 +7,24 @@ Posting Policy: Nothing has been posted externally without user approval. Every 
 
 ## 0. Completed Pre-Publish Gates & Remaining Manual Actions
 
-### Completed (`Checkpoint B`)
+### Completed (`Checkpoint B` + GitHub Mission Refresh)
 1. **Solana Devnet Funded Settlement (`evidence/solana-devnet-settlement.json`, `evidence/solana-devnet-wallet.json`)**:
    - Treasury `3r428Z8YSgQFJpsyPcQyxmt1faQQBuNRpqz92m9ucbuL` funded (`4.99799 SOL` pre-tx) and executed a guarded `0.001 SOL` settlement on Devnet (`certHash: 0xe3fccaf88769bb2c31d97d0982f0c283ec00aa0c6cc2e35152319a20b402cb3d`).
    - Solscan Devnet tx: `https://solscan.io/tx/E3qVPMwcssFhxQuZyCgJ47yzZAk7UAUUgtxRwUAYtyD8pFZjnRrHcC91MLwMWxLixhb3YRMjWB8ifkk4cJjNEQq?cluster=devnet`
 2. **Minds (`hellominds.ai`) Mind & Bazaar Skill Live**:
    - Mind: `Praman.Spend.Guard` (`47b85842-f36b-1410-8467-00039ce7df11`, `https://hellominds.ai/profile/minds/47b85842-f36b-1410-8467-00039ce7df11`)
    - Published Bazaar Skill: `Praman_Spend_Guard` (`skillId: 5BD48D42-F36B-1410-8467-00039CE7DF11`, `artifactId: 58D48D42-F36B-1410-8467-00039CE7DF11`, read-only `HTTP_Execute` wired to `https://praman-desk.vercel.app/api/mcp` and `/api/miner/*`)
+3. **GitHub Mission `/submit` Comments Refreshed Live (`2026-11-26T09:37Z`):**
+   - Patched all 9 active `telegraphprotocol/bounties` comments (`#189, #190, #191, #192, #196, #199, #200, #201, #202`, IDs `7168309193..7168315358`) via `gh api`: removed `#6169/#5281`, duration tags, and em dashes; updated to `Diamond #6201 / Route #6164`, `Minds Praman_Spend_Guard`, `30/30` Solana + Solscan Devnet tx `E3qVPMwc...`, `/api/agent/verify-output`, `/api/evaluator/sanctions-batch`, and exact `/api/ledger` counts.
 
 ### Critical Reminders & Pending Actions Before Submission (`Dec 1, 2026 23:59 UTC`)
-1. **Urgent Today-Live Discord Follow-Ups (Captured `14:12-14:22 IST`):**
-   - **`@Chrysolite494` (`Supplier Buyer Check`, `Alibaba` thread `12:39 PM`):** Replied *"I'll run your trade-assurance/audit and sanctions-screen endpoints this afternoon and post what I see, good or bad. Could you send me one example request for the audit one?"* -> Send Section 2J right away and run her two flows (`Siemens AG` + `"Invoice pays someone else"`) on `https://supplier-buyer-check.vercel.app/` (external mutual tester points!).
-   - **`@Ahmed Ali` DM (`12:20 PM`) + `Solana` Thread (`Truvian` updated `1:49 PM`):** Ahmed explicitly asked: *"great, can you add in the solana thread?"* -> Post Section 2C inside `Solana Institutional AI & Commercial Applications` (`1574380609839833139`) and reply in Section 2I DM!
-   - **`@Anthony` (`anthony_rix`, Countersign) DM (`12:18 PM`):** Confirmed he ALREADY re-ran both `liveSettle: false` cases and saved them for the joint evidence pack -> Send Section 2F follow-up acknowledging his re-run (no duplicate re-test request).
-   - **Epoch 59/60 Verification (`after ~15:00 IST`):** Anjoman Explorer (`14:21 IST`) showed Epoch 59 ongoing (`next epoch in 37m 50s`), while `#6164` was last scored in **Epoch 58 (`11/26/2026, 11:48:19 AM IST`)** before our `ND-30..39` / `#6201` fixes (`0.500` avg, `#2` best rank, `390` requests). Check `#6164` again after `15:00 IST`.
-2. **App ID Mapping Verified Live**:
+1. **Urgent Today-Live Discord Follow-Ups (Verify User Posts + Run Chrysolite Tests):**
+   - **`@Chrysolite494` (`Supplier Buyer Check`):** Verify Section 2J was posted in `Alibaba` and run her two flows (`Siemens AG` + `"Invoice pays someone else"`) on `https://supplier-buyer-check.vercel.app/`.
+   - **`@Ahmed Ali` DM + `Solana` Thread + `Minds` + `#showcase`:** Verify today's Discord posts landed cleanly and confirm `Epoch 59+` score on `#6164 / #6201`.
+2. **App ID Mapping Verified Live (Pending Browser Update on `anjoman.ai`):**
    - `praman-desk` (`AGENTS` track, approved & live on `anjoman.ai/dashboard/apps/praman-desk`): **`9ae7025e-65be-490b-8e59-2aa598f16992`** (currently displays stale Nov 10 / Miner `#5165` copy -> replace with Section 1A).
    - `praman-desk-2` (`SECURITY` track, currently `In review` / HTTP `404` on public API): **`c7c1adbb-304d-42ec-91df-5811f5e7f49e`** (update with Section 1B and ask Ahmed Ali to approve or advise on consolidating).
-3. **Replace/Supersede Stale Nov 25 GitHub Comments (`#189, #190, #191, #192, #196, #199, #200, #201, #202`)**: Existing Nov 25 `/submit` comments (`7168309193..7168315358`) still contain `RegID #6169 / Route #5281`, duration text on the walkthrough video link, and em dashes (`#192, #196, #202`). Edit them or post the refreshed Section 4 update.
+3. **GitHub `<72h` Cadence (`Nov 27-28` Follow-Up):** All 9 `/submit` comments (`7168309193..7168315358`) were refreshed on `Nov 26`; post Section 4's `/progress` sync on `Nov 27-28` to maintain `<72h` bot cadence.
 4. **Replace Broken X Post (`2125698555092553987`) & Spread Across 3 Dates (`Nov 26`, `Nov 27-28`, `Nov 29-30`)**: Delete/replace `2125698555092553987` (had `@TelegraphProto` typo, em dash, duration tag, `#6169/#5281`) and post Updates 1, 2, 3 on 3 distinct calendar dates with explicit Season II hackathon disclosure and `@Telegraphprotoc` tag (Section 06 requirement).
 5. **Disclose Related Wallet on Official H2 Form (`Section 10`)**: Disclose primary contributor wallet `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466` (`309` Devnode EvalPool rows: `307 eligible / 2 superseded`; `301 attested / 8 earlier unverified`) AND secondary wallet `0x497FF1bE8cc0C95A7a14165A4999768C47fc0109` (`22` `eligible`, `attested` rows) if the H2 form asks for related addresses.
 6. **Wait for / Submit Official H2 Form (`~5d 15h` left)**: Final official hackathon entries must be submitted on `anjoman.ai` when the Season II closing form opens (Tracks 01, 02, 03), and watch Discord `#announcements` for the Final-Week Anjoman Session.
@@ -197,9 +197,9 @@ https://github.com/VishAlgoDev/praman-desk
 
 ---
 
-## 4. GitHub Mission Refreshes (`telegraphprotocol/bounties` Issues `#189, #190, #191, #192, #196, #199, #200, #201, #202`)
+## 4. GitHub Mission `/progress` Update Template (`telegraphprotocol/bounties` Issues `#189, #190, #191, #192, #196, #199, #200, #201, #202`)
 
-Action note: Your Nov 25 `/submit` comments (`7168309193..7168315358`) currently still display `RegID #6169 / Route #5281`, a duration tag on the walkthrough video link, and em dashes (`#192, #196, #202`). Edit those comments in-place OR post the refreshed `/progress` update below so judges see updated `#6201 / #6164` facts:
+Status (`2026-11-26T09:37Z`): All 9 `/submit` comments (`7168309193..7168315358`) were patched cleanly in-place (`Diamond #6201 / Route #6164`, zero duration tags, zero em dashes). Use the `/progress` template below on `Nov 27-28` to maintain `<72h` cadence:
 
 ```markdown
 /progress Update (Season II Verification Sync, Nov 26):
