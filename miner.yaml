@@ -433,15 +433,15 @@ endpoints:
     intents:
       - ONCHAIN_TX_LOOKUP_GENERAL
     description: >-
-      Source-attributed EVM transaction verification directly via public archive JSON-RPC nodes.
-      Resolves execution status (confirmed, reverted, pending, not_found), block number, from, to, and value in ETH.
+      Source-attributed EVM and Solana transaction verification directly via archive/mainnet JSON-RPC nodes.
+      Resolves execution status (confirmed, reverted, pending, not_found), block/slot number, from, to, gas used, and native value.
     params:
       query:
         optional:
           - name: tx_hash
             type: string
             intents: ["*"]
-            description: "64-character transaction hash"
+            description: "64-character EVM tx hash or Solana Base58 signature"
           - name: hash
             type: string
             intents: ["*"]
@@ -449,11 +449,11 @@ endpoints:
           - name: chain
             type: string
             intents: ["*"]
-            description: "Target EVM chain (ethereum, sepolia, base, arbitrum, optimism, polygon)"
+            description: "Target chain (ethereum, sepolia, base, arbitrum, optimism, polygon, solana, solana-devnet)"
           - name: question
             type: string
             intents: ["*"]
-            description: "Query containing transaction hash"
+            description: "Query containing transaction hash or signature"
           - name: prompt
             type: string
             intents: ["*"]
@@ -465,30 +465,30 @@ endpoints:
     intents:
       - TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL
     description: >-
-      Deterministic ERC-20 token total supply and decimals verification directly via multi-chain JSON-RPC.
+      Deterministic ERC-20 and Solana SPL token total supply and decimals verification directly via multi-chain JSON-RPC.
     params:
       query:
         optional:
           - name: token_address
             type: string
             intents: ["*"]
-            description: "ERC-20 token contract address"
+            description: "ERC-20 contract address or Solana SPL mint address"
           - name: token
             type: string
             intents: ["*"]
-            description: "Target ERC-20 token contract address or symbol"
+            description: "Target token contract/mint address or symbol with chain"
           - name: address
             type: string
             intents: ["*"]
-            description: "Contract address alias"
+            description: "Contract or mint address alias"
           - name: chain
             type: string
             intents: ["*"]
-            description: "Target EVM chain"
+            description: "Target chain (ethereum, sepolia, base, arbitrum, optimism, polygon, solana)"
           - name: question
             type: string
             intents: ["*"]
-            description: "Natural language query containing token address"
+            description: "Natural language query containing token address or mint"
           - name: prompt
             type: string
             intents: ["*"]
@@ -500,26 +500,30 @@ endpoints:
     intents:
       - WALLET_BALANCE_CHECK_GENERAL
     description: >-
-      Deterministic native and ERC-20 token wallet balance verification directly via multi-chain JSON-RPC.
+      Deterministic native and token wallet balance verification across EVM chains and Solana (native SOL + SPL tokens) via JSON-RPC.
     params:
       query:
         optional:
           - name: wallet_address
             type: string
             intents: ["*"]
-            description: "Target EVM wallet address"
+            description: "Target EVM 0x address or Solana Base58 wallet pubkey"
           - name: address
             type: string
             intents: ["*"]
-            description: "Target EVM account or wallet address"
+            description: "Target EVM or Solana account address"
+          - name: token
+            type: string
+            intents: ["*"]
+            description: "Optional token symbol (e.g. USDC) or ERC-20 / SPL mint address"
           - name: token_address
             type: string
             intents: ["*"]
-            description: "Optional ERC-20 token contract address for token balance"
+            description: "Optional ERC-20 contract or SPL mint address for token balance"
           - name: chain
             type: string
             intents: ["*"]
-            description: "Target EVM chain"
+            description: "Target chain (ethereum, sepolia, base, arbitrum, optimism, polygon, solana, solana-devnet)"
           - name: question
             type: string
             intents: ["*"]
@@ -641,6 +645,10 @@ endpoints:
     params:
       query:
         optional:
+          - name: subject
+            type: string
+            intents: ["*"]
+            description: "Entity, payment, email, IP, or account context to assess"
           - name: ip
             type: string
             intents: ["*"]

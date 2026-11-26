@@ -16,8 +16,8 @@ Following architectural guidance from Telegraph Protocol Co-Founder **Ahmed Ali 
                ▼
    ┌───────────────────────┐
    │        MIND 1         │ ──(Anjoman Skill / telegraph-mcp)──► Telegraph Network Specialists
-   │ Diligence Investigator│                                       • GLEIF Registry (Miner #6127)
-   └───────────────────────┘                                       • OFAC SDN Screening (Miner #6127)
+   │ Diligence Investigator│                                       • GLEIF Registry (Miner #6164)
+   └───────────────────────┘                                       • OFAC SDN Screening (Miner #6164)
                │                                                   • FakeWatch Domain Safety (#42420)
        (Signed Case File)                                          • Cross-Currency Parity (FX_NOW)
                │
@@ -137,8 +137,8 @@ if (verdict.approved) {
 
 ## Live Telegraph Network Coordinates
 
-- **Devnode Miner ID**: `#6127` (Route `#5281`)
-- **Sepolia Diamond Registration**: `#6142`
+- **Devnode Miner ID**: `#6164` (`praman-compliance-miner`, 18 capabilities)
+- **Sepolia Diamond Registration**: `#6200`
 - **Diamond Escrow Port**: `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`
 - **Rank Standings**:
   - `CONTRACT_OBLIGATION_AUDIT_GENERAL`: **Rank #1**

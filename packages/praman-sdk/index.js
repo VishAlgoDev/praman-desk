@@ -6,7 +6,7 @@
 export class PramanDesk {
   constructor(options = {}) {
     this.endpoint = (options.endpoint || 'https://praman-desk.vercel.app').replace(/\/+$/, '');
-    this.timeout = options.timeout || 8000;
+    this.timeout = options.timeout || 15000;
   }
 
   async _request(path, method = 'GET', body = null) {

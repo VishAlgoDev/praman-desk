@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Praman Desk — Autonomous B2B Escrow & Cryptographic Spend Guard</title>
+<title>Praman Desk - Autonomous B2B Escrow & Cryptographic Spend Guard</title>
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
@@ -266,7 +266,7 @@ header {
 #hero-canvas {
   position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
 }
-/* Pencil sketch hero layer — light paper inverted to chalk-on-slate, feathered into the hero */
+/* Pencil sketch hero layer (light paper inverted to chalk-on-slate, feathered into the hero) */
 .hero-sketch {
   position: absolute; top: 50%; right: -6%; transform: translateY(-50%);
   width: 56%; height: 94%; z-index: 1; pointer-events: none; overflow: hidden;
@@ -372,7 +372,7 @@ header {
 }
 
 /* ==========================================================================
-   5. PRAMAN BLUEPRINT CARD — SKETCH-TO-REVELATION ENGINE
+   5. PRAMAN BLUEPRINT CARD : SKETCH-TO-REVELATION ENGINE
    ========================================================================== */
 .blueprint-card-outer {
   background: #1B1824;
@@ -941,10 +941,10 @@ footer {
   <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
     <label for="db-eval-select" style="font-size:12px;color:var(--text-secondary)">Live Policy Evaluation:</label>
     <select id="db-eval-select" class="form-control" style="min-height:32px;max-width:440px" aria-label="Case to evaluate via backend policy">
-      <option value="PO-ALI-9021">PO-ALI-9021 — Reconcile 80 conforming units ($80k / $100k)</option>
-      <option value="PO-7781">PO-7781 — Equation ties out (1,000 units x $12.40)</option>
-      <option value="CN-LAX-88201">CN-LAX-88201 — Audit 20 damaged units shortfall ($20k overbill)</option>
-      <option value="PO-DEMO-REF">PO-DEMO-REF — Audit missing delivery receipt (hold vs refund)</option>
+      <option value="PO-ALI-9021">PO-ALI-9021: Reconcile 80 conforming units ($80k / $100k)</option>
+      <option value="PO-7781">PO-7781: Equation ties out (1,000 units x $12.40)</option>
+      <option value="CN-LAX-88201">CN-LAX-88201: Audit 20 damaged units shortfall ($20k overbill)</option>
+      <option value="PO-DEMO-REF">PO-DEMO-REF: Audit missing delivery receipt (hold vs refund)</option>
     </select>
     <button id="db-eval-btn" class="btn-square ghost-square" style="padding:5px 14px;font-size:12px">Evaluate via Policy API</button>
   </div>
@@ -1058,11 +1058,11 @@ footer {
           <div class="field">
             <label for="ta-scenario">Commercial Evidence Scenario</label>
             <select class="form-control" id="ta-scenario">
-              <option value="alibaba_trade">Case A — Full Claim Discrepancy ($20k shortfall caught) → HALT</option>
-              <option value="alibaba_reconciled">Case B — Reconciled Partial Settlement ($80k release / $20k refund) → APPROVED</option>
-              <option value="alibaba_missing_evidence">Case C — Goods-Received Note Missing → HOLD FOR EVIDENCE</option>
-              <option value="alibaba_conflicting_reports">Case D — Competing Miner / Inspection Reports → ARBITRATE</option>
-              <option value="alibaba_refund">Case E — Total Non-Delivery / Corrupted Freight → FULL REFUND</option>
+              <option value="alibaba_trade">Case A: Full Claim Discrepancy ($20k shortfall caught) → HALT</option>
+              <option value="alibaba_reconciled">Case B: Reconciled Partial Settlement ($80k release / $20k refund) → APPROVED</option>
+              <option value="alibaba_missing_evidence">Case C: Goods-Received Note Missing → HOLD FOR EVIDENCE</option>
+              <option value="alibaba_conflicting_reports">Case D: Competing Miner / Inspection Reports → ARBITRATE</option>
+              <option value="alibaba_refund">Case E: Total Non-Delivery / Corrupted Freight → FULL REFUND</option>
             </select>
           </div>
           <div class="field">
@@ -1125,7 +1125,7 @@ footer {
     <div class="border-beam-inner">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
         <h3 style="font-family:var(--font-mono);font-size:14px">Statutory Audit Verdict</h3>
-        <span class="pill-chip" id="verdict-risk">—</span>
+        <span class="pill-chip" id="verdict-risk">-</span>
       </div>
       <div id="verdict-body" class="verdict" aria-live="polite"></div>
       <div style="margin-top:16px">
@@ -1207,7 +1207,7 @@ footer {
               <tr>
                 <td>TIER_1_AUTONOMOUS</td>
                 <td class="num">$500.00</td>
-                <td class="num">—</td>
+                <td class="num">-</td>
                 <td><span class="badge warn">HALT</span></td>
               </tr>
               <tr>
@@ -1224,8 +1224,8 @@ footer {
               </tr>
               <tr>
                 <td>ANY / Unknown Program</td>
-                <td class="num">—</td>
-                <td class="num">—</td>
+                <td class="num">-</td>
+                <td class="num">-</td>
                 <td><span class="badge warn">HALT</span></td>
               </tr>
             </tbody>
@@ -1245,8 +1245,8 @@ footer {
         On-Chain Settlement Telemetry Ledger
       </h2>
       <p style="color:var(--text-secondary);max-width:72ch;margin-top:8px">
-        Thirty verified on-chain settlements executed across 14 independent Telegraph miners. 
-        Every record is an immutable transaction on Ethereum Sepolia with verified latency, signal hash, and receipt hash.
+        <span id="lg-hero-count">32</span> verified on-chain settlements executed across independent Telegraph miners, alongside paid Devnode escrow signals.
+        Every record carries immutable Sepolia transaction proof or verified cryptographic escrow signal/receipt hashes.
       </p>
       <p class="evidence-note"><span class="badge evidence-recorded" style="font-size:9px;padding:1px 6px">RECORDED</span> Receipt-backed on-chain transactions · <span class="mono">/api/ledger</span></p>
     </div>
@@ -1255,22 +1255,22 @@ footer {
   <div class="kpi-strip" style="margin-top:20px">
     <div class="kpi-card">
       <div class="kpi-label">Paid Settlements</div>
-      <div class="kpi-val tnum" id="lg-count">—</div>
+      <div class="kpi-val tnum" id="lg-count">-</div>
       <div class="kpi-sub">On-Chain Sepolia Executed</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Independent Miners</div>
-      <div class="kpi-val tnum" id="lg-miners">—</div>
+      <div class="kpi-val tnum" id="lg-miners">-</div>
       <div class="kpi-sub">Telegraph Protocol Ranked</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Total Spent (USDC)</div>
-      <div class="kpi-val tnum" id="lg-spent">—</div>
+      <div class="kpi-val tnum" id="lg-spent">-</div>
       <div class="kpi-sub">Sepolia Diamond Facilitated</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Median Latency</div>
-      <div class="kpi-val tnum" id="lg-latency">—</div>
+      <div class="kpi-val tnum" id="lg-latency">-</div>
       <div class="kpi-sub">Milliseconds (Verified)</div>
     </div>
   </div>
@@ -1311,6 +1311,7 @@ footer {
       </div>
     </div>
   </div>
+  <div id="lg-escrow-wrap" style="margin-top:24px" hidden></div>
 </section>
 
 <!-- ============ DESK 3 · MINING REGISTRY ============ -->
@@ -1347,7 +1348,7 @@ footer {
       <p style="color:var(--text-secondary);max-width:72ch;margin-top:8px">
         The capabilities Praman was built for, on real inputs: purchase-order arithmetic verification,
         invoice-to-ledger reconciliation, corporate registry lookups, vendor validation, document authenticity,
-        and OFAC SDN sanctions screening. Every run below executes a live API call on your text — nothing here is pre-scripted.
+        and OFAC SDN sanctions screening. Every run below executes a live API call on your text. Nothing here is pre-scripted.
       </p>
       <p class="evidence-note"><span class="badge evidence-live" style="font-size:9px;padding:1px 6px">LIVE</span> Real generalized NLP + arithmetic solving · <span class="mono">/api/miner/*</span></p>
     </div>
@@ -1391,12 +1392,19 @@ footer {
       <button class="btn-square" id="pv-sdn-btn" style="margin-top:10px;width:100%">Screen</button>
       <pre id="pv-sdn-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
     </div>
+    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
+      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Agent Output Claim Verifier (Tencent #01 / #03)</h3>
+      <input class="form-control" id="pv-agent-vendor" placeholder="Vendor domain/entity, e.g. cloudflare.com" aria-label="Vendor or counterparty">
+      <textarea class="form-control" id="pv-agent-output" rows="2" placeholder="Agent claim, e.g. Invoice USD 10,000 (EUR 9,200) -> IBAN DE89370400440532013000" aria-label="Agent claim to verify" style="margin-top:8px"></textarea>
+      <button class="btn-square" id="pv-agent-btn" style="margin-top:10px;width:100%">Verify Output Claims</button>
+      <pre id="pv-agent-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
+    </div>
   </div>
 
   <!-- Evidence: counterfactual benchmark (source: docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md) -->
   <div class="blueprint-card-inner" style="padding:18px;margin-top:20px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-      <h3 style="font-size:14px;font-weight:600;margin:0;color:var(--text-primary)">Evidence — With vs Without Telegraph (5 adversarial vectors)</h3>
+      <h3 style="font-size:14px;font-weight:600;margin:0;color:var(--text-primary)">Evidence: With vs Without Telegraph (5 adversarial vectors)</h3>
       <span class="badge evidence-recorded">RECORDED</span>
     </div>
     <p style="color:var(--text-secondary);font-size:13px;margin:8px 0 14px">
@@ -1438,7 +1446,7 @@ footer {
 
   <div class="flowing-item" data-action="ledger">
     <span class="flowing-title">02 · VISUAL SETTLEMENT LEDGER</span>
-    <span class="flowing-sub">30 CONFIRMED PAID TRANSACTIONS</span>
+    <span class="flowing-sub" id="flowing-ledger-count">32 ON-CHAIN + ESCROW SIGNALS</span>
   </div>
 
   <div class="flowing-item" data-action="certificate">
@@ -1676,6 +1684,28 @@ $('#pv-sdn-btn')?.addEventListener('click', () => {
   const n = $('#pv-sdn').value.trim();
   if (!n) { toast('Enter a counterparty name'); return; }
   pvCall($('#pv-sdn-btn'), $('#pv-sdn-out'), `/api/miner/sanctions-screen?name=${q(n)}`);
+});
+$('#pv-agent-btn')?.addEventListener('click', async () => {
+  const btn = $('#pv-agent-btn');
+  const out = $('#pv-agent-out');
+  const vendor = ($('#pv-agent-vendor')?.value || '').trim();
+  const output = ($('#pv-agent-output')?.value || '').trim();
+  if (!output) { toast('Paste an AI agent claim or output to verify'); return; }
+  btn.disabled = true;
+  out.textContent = 'Verifying output claims...';
+  try {
+    const res = await fetch('/api/agent/verify-output', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ output, vendor: vendor || undefined })
+    });
+    const json = await res.json();
+    out.textContent = JSON.stringify(json, null, 2);
+  } catch (err) {
+    out.textContent = 'Error: ' + err.message;
+  } finally {
+    btn.disabled = false;
+  }
 });
 
 /* ----------------- Global Modals & Keyboard ----------------- */
@@ -2003,7 +2033,7 @@ function runPipeline(haltAt) {
       if (i < STAGES.length) {
         $('#stage-' + i).classList.add('halted');
         $('#pipe-count').textContent = 'HALTED @ STAGE ' + (i + 1);
-        $('#pipe-left').textContent = 'STAGE ' + (i + 1) + ' — ' + STAGES[i].toUpperCase();
+        $('#pipe-left').textContent = 'STAGE ' + (i + 1) + ': ' + STAGES[i].toUpperCase();
       } else {
         $('#pipe-count').textContent = '15/15 PASS';
         $('#pipe-left').textContent = 'ALL STAGES VERIFIED';
@@ -2011,7 +2041,7 @@ function runPipeline(haltAt) {
       return;
     }
     $('#stage-' + i).classList.add('pass');
-    $('#pipe-left').textContent = 'STAGE ' + (i + 1) + ' — ' + STAGES[i].toUpperCase();
+    $('#pipe-left').textContent = 'STAGE ' + (i + 1) + ': ' + STAGES[i].toUpperCase();
     i++;
   }, 90);
 }
@@ -2025,7 +2055,7 @@ function parseMoney(str) {
 async function runAudit({ scenario, auth, usdc }) {
   const btn = $('#ta-run');
   btn.disabled = true;
-  $('#ta-status').textContent = 'POST /api/trade-assurance/audit — executing…';
+  $('#ta-status').textContent = 'POST /api/trade-assurance/audit: executing...';
   $('#verdict-panel').hidden = true;
   const payload = {
     poNumber: $('#ta-po').value.trim() || 'PO-ALI-9021',
@@ -2046,7 +2076,7 @@ async function runAudit({ scenario, auth, usdc }) {
     renderVerdict(d, ms, payload);
     $('#ta-status').textContent = `Completed in ${ms} ms · ${d.status}`;
   } catch (err) {
-    $('#ta-status').textContent = 'Request failed: ' + err.message + ' — verify local or live server.';
+    $('#ta-status').textContent = 'Request failed: ' + err.message + '. Verify local or live server.';
     clearInterval(pipeTimer);
   } finally {
     btn.disabled = false;
@@ -2062,21 +2092,21 @@ function renderVerdict(d, ms, payload) {
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         ${settled ? '<path d="M20 6L9 17l-5-5"/>' : '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>'}
       </svg>
-      <span>${d.status} — ${d.verdict}</span>
+      <span>${d.status}: ${d.verdict}</span>
     </div>
     <p class="summary">${d.summary}</p>
     <div class="flags">
-      ${(d.flags || []).map(f => `<div class="flag">${f}</div>`).join('') || '<div class="flag ok">✓ No policy flags — all compliance gates clear</div>'}
+      ${(d.flags || []).map(f => `<div class="flag">${f}</div>`).join('') || '<div class="flag ok">✓ No policy flags: all compliance gates clear</div>'}
     </div>
     <dl class="kv">
-      <dt>Circuit Breaker</dt><dd>${d.circuitBreaker && d.circuitBreaker.triggered ? 'TRIGGERED — ' + d.circuitBreaker.reason : 'Not Triggered (Pass)'}</dd>
+      <dt>Circuit Breaker</dt><dd>${d.circuitBreaker && d.circuitBreaker.triggered ? 'TRIGGERED: ' + d.circuitBreaker.reason : 'Not Triggered (Pass)'}</dd>
       <dt>Policy Decision</dt><dd>${d.policyDecision}</dd>
       <dt>Spend Amount</dt><dd class="tnum" style="font-weight:600">${fmtUsd(d.spendAmountUsdc)}</dd>
       <dt>Risk Level</dt><dd>${d.riskLevel}</dd>
       <dt>Latency (Local)</dt><dd class="tnum">${ms} ms</dd>
-      <dt>Miner Settlement</dt><dd>${d.telegraphSettlement ? `${d.telegraphSettlement.status} · Miner #${d.telegraphSettlement.minerId}` : '—'}</dd>
-      <dt>Cert Hash</dt><dd class="mono">${d.certHash || '—'}</dd>
-      <dt>EAS Attestation</dt><dd class="mono">${d.attestationSha256 || '—'}</dd>
+      <dt>Miner Settlement</dt><dd>${d.telegraphSettlement ? `${d.telegraphSettlement.status} · Miner #${d.telegraphSettlement.minerId}` : '-'}</dd>
+      <dt>Cert Hash</dt><dd class="mono">${d.certHash || '-'}</dd>
+      <dt>EAS Attestation</dt><dd class="mono">${d.attestationSha256 || '-'}</dd>
     </dl>`;
   $('#verdict-risk').textContent = d.riskLevel;
   $('#verdict-panel').hidden = false;
@@ -2092,12 +2122,12 @@ function openCertificate(d, payload) {
     <dl class="kv" style="margin-top:14px">
       <dt>Purchase Order</dt><dd>${payload.poNumber}</dd>
       <dt>Pier-Pass Receipt</dt><dd>${payload.pierPassReceiptId}</dd>
-      <dt>Final Verdict</dt><dd>${d.status} — ${d.verdict}</dd>
+      <dt>Final Verdict</dt><dd>${d.status}: ${d.verdict}</dd>
       <dt>Settled Amount</dt><dd class="tnum" style="font-weight:700">${fmtUsd(d.spendAmountUsdc)}</dd>
       <dt>Network</dt><dd>${d.network}</dd>
-      <dt>Certificate Hash</dt><dd class="mono">${d.certHash || '—'}</dd>
-      <dt>EAS Schema UID</dt><dd class="mono">${d.easSchemaUid || '—'}</dd>
-      <dt>Settlement Contract</dt><dd class="mono">${d.settlementContract || '—'}</dd>
+      <dt>Certificate Hash</dt><dd class="mono">${d.certHash || '-'}</dd>
+      <dt>EAS Schema UID</dt><dd class="mono">${d.easSchemaUid || '-'}</dd>
+      <dt>Settlement Contract</dt><dd class="mono">${d.settlementContract || '-'}</dd>
     </dl>
     <div style="margin-top:20px">
       <button class="btn-square" onclick="window.print()">Print Statutory Certificate</button>
@@ -2217,7 +2247,7 @@ function dbRenderReceipts() {
     const h = t.txHash || t.tx || '';
     return `<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:10px;padding:10px 12px;font-size:12.5px">
       <span style="color:var(--text-primary);font-weight:600">${t.miner || t.id || 'Settlement'}</span>
-      ${h ? `<a href="https://sepolia.etherscan.io/tx/${h}" target="_blank" rel="noopener" style="color:var(--accent-emerald);font-family:'JetBrains Mono',monospace">${h.slice(0, 10)}…${h.slice(-8)}</a>` : '<span>—</span>'}
+      ${h ? `<a href="https://sepolia.etherscan.io/tx/${h}" target="_blank" rel="noopener" style="color:var(--accent-emerald);font-family:'JetBrains Mono',monospace">${h.slice(0, 10)}…${h.slice(-8)}</a>` : '<span>-</span>'}
     </div>`;
   }).join('');
 }
@@ -2329,16 +2359,58 @@ async function loadLedger() {
     LEDGER_FAILED = null;
     dbRenderReceipts();
     renderLedgerStats(d);
+    renderEscrowSignals(d);
+    if ($('#lg-hero-count')) $('#lg-hero-count').textContent = String(d.totalPaidCalls ?? LEDGER.length);
+    if ($('#flowing-ledger-count')) {
+      const esc = Array.isArray(d.escrowPurchases) ? d.escrowPurchases.length : 0;
+      $('#flowing-ledger-count').textContent = `${d.totalPaidCalls ?? LEDGER.length} ON-CHAIN + ${esc} ESCROW SIGNALS`;
+    }
     const intents = [...new Set(LEDGER.map(c => c.intent))].sort();
     $('#lg-intent').innerHTML = '<option value="">ALL INTENTS</option>' + intents.map(i => `<option>${i}</option>`).join('');
     applyLedgerFilters();
   } catch (err) {
     LEDGER_FAILED = err.message;
+    dbRenderReceipts();
     $('#lg-body').innerHTML = '';
     $('#lg-empty').hidden = false;
-    $('#lg-empty').innerHTML = 'Ledger endpoint unavailable — ' + err.message + '. <button class="btn-square ghost-square" id="lg-retry" style="padding:3px 10px;font-size:11px">Retry</button>';
+    $('#lg-empty').innerHTML = 'Ledger endpoint unavailable: ' + err.message + '. <button class="btn-square ghost-square" id="lg-retry" style="padding:3px 10px;font-size:11px">Retry</button>';
     $('#lg-retry').addEventListener('click', loadLedger);
   }
+}
+
+function renderEscrowSignals(d) {
+  const wrap = $('#lg-escrow-wrap');
+  if (!wrap) return;
+  const escrow = Array.isArray(d.escrowPurchases) ? d.escrowPurchases : [];
+  const takar = Array.isArray(d.takarResolvers) ? d.takarResolvers : [];
+  if (!escrow.length && !takar.length) { wrap.hidden = true; return; }
+  wrap.hidden = false;
+  const rows = [
+    ...takar.map(r => `<tr>
+      <td class="mono">TAKAR #${r.minerId || '20261117'}</td>
+      <td>${r.caseName || 'Takar Dispute Resolution'}</td>
+      <td class="mono">${r.contractName || r.contract || '-'}</td>
+      <td class="num">Block ${r.blockNumber ?? '-'}</td>
+      <td class="mono"><a href="${ETHERSCAN}${r.txHash}" target="_blank" rel="noopener" style="color:var(--accent-emerald)">${String(r.txHash || '').slice(0, 12)}...</a></td>
+    </tr>`),
+    ...escrow.map(e => `<tr>
+      <td class="mono">${e.source || 'DEVNODE_ESCROW'} · #${e.minerId || '6164'}</td>
+      <td>${e.intent || '-'}</td>
+      <td class="mono" style="font-size:11px">${e.receiptHash ? e.receiptHash.slice(0, 14) + '...' : '-'}</td>
+      <td class="num">${e.amountUsdc != null ? '$' + Number(e.amountUsdc).toFixed(4) : '-'}</td>
+      <td class="mono" style="font-size:11px">${e.signalHash ? e.signalHash.slice(0, 14) + '...' : (e.txHash ? `<a href="${ETHERSCAN}${e.txHash}" target="_blank" rel="noopener" style="color:var(--accent-emerald)">${e.txHash.slice(0, 12)}...</a>` : 'ESCROW_SIGNAL')}</td>
+    </tr>`)
+  ].join('');
+  wrap.innerHTML = `<div class="border-beam-card"><div class="border-beam-inner" style="padding:0">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;gap:8px">
+      <h3 style="font-size:14px;font-weight:600;margin:0;color:var(--text-primary)">Devnode Escrow Signals & Takar Dispute Resolutions</h3>
+      <span class="pill-chip">${takar.length} Takar On-Chain · ${escrow.length} Devnode Escrow Signals</span>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Source / Miner</th><th>Intent / Case</th><th>Receipt / Contract</th><th class="num">Amount / Block</th><th>Signal / Tx Proof</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  </div></div>`;
 }
 
 function renderLedgerStats(d) {
@@ -2375,7 +2447,7 @@ function applyLedgerFilters() {
       <td style="max-width:320px;font-weight:500">${c.title}</td>
       <td><span class="badge">${c.intent.replace(/_/g, ' ').replace(/ GENERAL$/, '')}</span></td>
       <td>${c.minerName}</td>
-      <td class="num">${c.durationMs != null ? `${c.durationMs} ms` : '—'}</td>
+      <td class="num">${c.durationMs != null ? `${c.durationMs} ms` : '-'}</td>
       <td class="num">$${c.costUsd.toFixed(2)}</td>
       <td><a class="tx-link" href="${ETHERSCAN}${c.txHash}" target="_blank" rel="noopener" data-tx="${c.index}">${c.txHash.slice(0, 10)}…${c.txHash.slice(-8)}</a></td>
     </tr>`).join('');
@@ -2400,12 +2472,12 @@ $('#lg-body').addEventListener('click', e => {
     ['Intent Specification', c.intent],
     ['Specialist Miner', `${c.minerName} (#${c.minerId})`],
     ['Miner Endpoint', c.endpoint],
-    ['Execution Latency', c.durationMs != null ? `${c.durationMs} ms` : '—'],
+    ['Execution Latency', c.durationMs != null ? `${c.durationMs} ms` : '-'],
     ['Cost (USDC)', fmtUsd(c.costUsd)],
-    ['Settlement Timestamp', c.timestamp || '—'],
+    ['Settlement Timestamp', c.timestamp || '-'],
     ['Sepolia Transaction Hash', `<a href="${ETHERSCAN}${c.txHash}" target="_blank" class="tx-link">${c.txHash}</a>`],
-    ['Cryptographic Receipt Hash', c.receiptHash || '—'],
-    ['Verified Signal Hash', c.signalHash || '—']
+    ['Cryptographic Receipt Hash', c.receiptHash || '-'],
+    ['Verified Signal Hash', c.signalHash || '-']
   ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
   $('#tx-drawer').showModal();
 });
@@ -2444,15 +2516,15 @@ $('#mr-load').addEventListener('click', async () => {
             <dt>Jurisdiction</dt><dd>${d.jurisdiction || ''}</dd>
             <dt>Heritage Record</dt><dd>${d.heritageRecord || ''}</dd>
             <dt>WASM Score</dt><dd class="tnum">${(a.wasmScoreBps ?? 0).toLocaleString()} bps</dd>
-            <dt>Variance Reconciled</dt><dd>${a.discrepancyReconciled ? 'YES — ' + (a.reconciliationNotes || 'reconciled') : 'NO'}</dd>
-            <dt>Sanctions Screening</dt><dd>${a.sanctionsScreening?.status || '—'} · ${Array.isArray(a.sanctionsScreening?.lists) ? a.sanctionsScreening.lists.join(', ') : ''}</dd>
+            <dt>Variance Reconciled</dt><dd>${a.discrepancyReconciled ? 'YES: ' + (a.reconciliationNotes || 'reconciled') : 'NO'}</dd>
+            <dt>Sanctions Screening</dt><dd>${a.sanctionsScreening?.status || '-'} · ${Array.isArray(a.sanctionsScreening?.lists) ? a.sanctionsScreening.lists.join(', ') : ''}</dd>
             <dt>Confidence</dt><dd class="tnum">${(Number(d.confidence) * 100).toFixed(0)}%</dd>
-            <dt>Attestation Seal</dt><dd class="mono">${att.seal || '—'}</dd>
+            <dt>Attestation Seal</dt><dd class="mono">${att.seal || '-'}</dd>
           </dl>
         </div>
       </div>`;
   } catch (err) {
-    out.innerHTML = `<div class="border-beam-card"><div class="border-beam-inner" style="color:var(--halt-crimson)">Dossier unavailable — ${err.message}.</div></div>`;
+    out.innerHTML = `<div class="border-beam-card"><div class="border-beam-inner" style="color:var(--halt-crimson)">Dossier unavailable: ${err.message}.</div></div>`;
   }
 });
 

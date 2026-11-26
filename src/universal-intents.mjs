@@ -13,23 +13,23 @@
 import crypto from 'node:crypto';
 import { formatUnits } from 'viem';
 
-// Public verified JSON-RPC endpoints for EVM chains (non-pruned archive-capable nodes first)
+// Public verified JSON-RPC endpoints for EVM chains (healthy low-latency archive-capable nodes first)
 const RPC_ENDPOINTS = {
   ethereum: [
-    'https://eth.llamarpc.com',
-    'https://1rpc.io/eth',
     'https://ethereum-rpc.publicnode.com',
+    'https://1rpc.io/eth',
     'https://mainnet.gateway.tenderly.co',
     'https://rpc.mevblocker.io'
   ],
   sepolia: [
-    'https://1rpc.io/sepolia',
-    'https://rpc.sepolia.org',
     'https://ethereum-sepolia-rpc.publicnode.com',
-    'https://gateway.tenderly.co/public/sepolia'
+    'https://1rpc.io/sepolia',
+    'https://gateway.tenderly.co/public/sepolia',
+    'https://rpc.sepolia.org'
   ],
   base: [
     'https://mainnet.base.org',
+    'https://base-rpc.publicnode.com',
     'https://1rpc.io/base'
   ],
   'base-sepolia': [
@@ -37,24 +37,120 @@ const RPC_ENDPOINTS = {
   ],
   arbitrum: [
     'https://arb1.arbitrum.io/rpc',
+    'https://arbitrum-one-rpc.publicnode.com',
     'https://1rpc.io/arb'
   ],
   optimism: [
     'https://mainnet.optimism.io',
+    'https://optimism-rpc.publicnode.com',
     'https://1rpc.io/op'
   ],
   polygon: [
+    'https://polygon-bor-rpc.publicnode.com',
     'https://polygon-rpc.com',
     'https://1rpc.io/matic'
   ],
   bsc: [
-    'https://bsc-dataseed.binance.org',
-    'https://bsc-dataseed1.defibit.io'
+    'https://bsc-rpc.publicnode.com',
+    'https://bsc-dataseed.binance.org'
   ],
   avalanche: [
+    'https://avalanche-c-chain-rpc.publicnode.com',
     'https://api.avax.network/ext/bc/C/rpc'
   ]
 };
+
+const SOLANA_RPC_ENDPOINTS = {
+  mainnet: ['https://api.mainnet-beta.solana.com', 'https://solana-rpc.publicnode.com'],
+  devnet: ['https://api.devnet.solana.com']
+};
+
+const KNOWN_SOLANA_MINTS = {
+  USDC: { mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', decimals: 6 },
+  USDT: { mint: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', decimals: 6 },
+  WSOL: { mint: 'So11111111111111111111111111111111111111112', decimals: 9 },
+  JUP: { mint: 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN', decimals: 6 },
+  BONK: { mint: 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263', decimals: 5 },
+  PYTH: { mint: 'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3', decimals: 6 },
+  WIF: { mint: 'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm', decimals: 6 }
+};
+
+function normalizeChainName(rawChain = '', fallbackQuery = '') {
+  const c = String(rawChain || '').toLowerCase().trim();
+  const aliasMap = {
+    eth: 'ethereum', ethereum: 'ethereum', mainnet: 'ethereum', 'ethereum-mainnet': 'ethereum', l1: 'ethereum',
+    sepolia: 'sepolia', 'eth-sepolia': 'sepolia',
+    base: 'base', 'base-mainnet': 'base',
+    'base-sepolia': 'base-sepolia',
+    arb: 'arbitrum', arbitrum: 'arbitrum', 'arbitrum-one': 'arbitrum', arb1: 'arbitrum',
+    op: 'optimism', optimism: 'optimism', 'op-mainnet': 'optimism',
+    matic: 'polygon', poly: 'polygon', polygon: 'polygon', pol: 'polygon',
+    bsc: 'bsc', bnb: 'bsc', 'bnb-chain': 'bsc',
+    avax: 'avalanche', avalanche: 'avalanche',
+    sol: 'solana', solana: 'solana', 'solana-mainnet': 'solana', 'mainnet-beta': 'solana',
+    'solana-devnet': 'solana-devnet', 'sol-devnet': 'solana-devnet', devnet: 'solana-devnet'
+  };
+  if (aliasMap[c]) return aliasMap[c];
+  const q = String(fallbackQuery || '');
+  if (/\bsolana\s*devnet\b|\bdevnet\b.*\bsol/i.test(q)) return 'solana-devnet';
+  if (/\bsolana\b|\bspl\b|\braydium\b|\borca\b/i.test(q)) return 'solana';
+  if (/base\s*sepolia/i.test(q)) return 'base-sepolia';
+  if (/sepolia/i.test(q)) return 'sepolia';
+  if (/\bbase\b/i.test(q)) return 'base';
+  if (/arbitrum|\barb\b/i.test(q)) return 'arbitrum';
+  if (/optimism|\bop\b/i.test(q)) return 'optimism';
+  if (/polygon|\bmatic\b/i.test(q)) return 'polygon';
+  if (/\bbsc\b|\bbnb\b/i.test(q)) return 'bsc';
+  if (/avalanche|\bavax\b/i.test(q)) return 'avalanche';
+  return '';
+}
+
+async function solanaRpcCall(method, params, isDevnet = false) {
+  const urls = isDevnet ? SOLANA_RPC_ENDPOINTS.devnet : SOLANA_RPC_ENDPOINTS.mainnet;
+  for (const rpc of urls) {
+    try {
+      const res = await fetch(rpc, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+        signal: AbortSignal.timeout(4500)
+      });
+      if (!res.ok) continue;
+      const json = await res.json();
+      if (json && !json.error && json.result !== undefined) {
+        return { result: json.result, rpc };
+      }
+    } catch {}
+  }
+  return null;
+}
+
+async function findEvmTxAcrossRpcs(chain, txHash) {
+  const rpcs = RPC_ENDPOINTS[chain] || [];
+  if (!rpcs.length) return null;
+  const tasks = rpcs.map(async (rpc) => {
+    const res = await fetch(rpc, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'eth_getTransactionByHash',
+        params: [txHash]
+      }),
+      signal: AbortSignal.timeout(3500)
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (data?.result?.hash) return { tx: data.result, rpc };
+    throw new Error('tx not found on rpc');
+  });
+  try {
+    return await Promise.any(tasks);
+  } catch {
+    return null;
+  }
+}
 
 // Cached Devnode Miners Registry
 let cachedMiners = null;
@@ -443,126 +539,187 @@ export async function executeResearchQuery({ query, question, q, prompt, text } 
  * Lookup and verify onchain EVM transactions across major public networks
  * Conforms bit-exact to Devnode ONCHAIN_TX_LOOKUP_GENERAL spec v4
  */
-export async function lookupOnchainTx({ tx_hash, hash, chain, question, query, prompt, text } = {}) {
+export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, question, query, prompt, text } = {}) {
   const rawQuery = (question || query || prompt || text || '').trim();
-  let targetHash = (tx_hash || hash || '').trim();
+  let targetHash = (tx_hash || tx || hash || signature || '').trim();
 
-  // Extract 64-hex-character hash from query string if passed inside question
+  // Extract 64-hex EVM hash or Solana Base58 signature from query text
   if (!targetHash && rawQuery) {
-    const match = rawQuery.match(/0x[a-fA-F0-9]{64}/);
-    if (match) targetHash = match[0];
+    const evmMatch = rawQuery.match(/0x[a-fA-F0-9]{64}/);
+    if (evmMatch) {
+      targetHash = evmMatch[0];
+    } else {
+      const solSigMatch = rawQuery.match(/\b([1-9A-HJ-NP-Za-km-z]{64,90})\b/);
+      if (solSigMatch) targetHash = solSigMatch[1];
+    }
   }
 
-  // Determine target chain
-  let targetChain = (chain || '').toLowerCase();
-  if (!RPC_ENDPOINTS[targetChain]) {
-    if (/base\s*sepolia/i.test(rawQuery)) targetChain = 'base-sepolia';
-    else if (/sepolia/i.test(rawQuery)) targetChain = 'sepolia';
-    else if (/base/i.test(rawQuery)) targetChain = 'base';
-    else if (/arbitrum|arb/i.test(rawQuery)) targetChain = 'arbitrum';
-    else if (/optimism|op\b/i.test(rawQuery)) targetChain = 'optimism';
-    else if (/polygon|matic/i.test(rawQuery)) targetChain = 'polygon';
-    else if (/\bbsc\b|\bbnb\b/i.test(rawQuery)) targetChain = 'bsc';
-    else if (/avalanche|avax/i.test(rawQuery)) targetChain = 'avalanche';
-    else targetChain = 'ethereum';
+  let targetChain = normalizeChainName(chain, rawQuery);
+  const isEvmHash = /^0x[a-fA-F0-9]{64}$/.test(targetHash);
+  const isSolanaSig = !isEvmHash && /^[1-9A-HJ-NP-Za-km-z]{64,90}$/.test(targetHash);
+  if (!targetChain) {
+    targetChain = isSolanaSig ? (/devnet/i.test(rawQuery) ? 'solana-devnet' : 'solana') : 'ethereum';
   }
 
-  if (!targetHash || !/^0x[a-fA-F0-9]{64}$/.test(targetHash)) {
+  if (!targetHash || (!isEvmHash && !isSolanaSig)) {
     return {
       tx_hash: targetHash || null,
       status: 'error',
       from: null,
       to: null,
       block_number: null,
+      gas_used: null,
       value_eth: 0,
       chain: targetChain,
       confidence: 0.0,
-      summary: 'Invalid or missing 64-character hexadecimal transaction hash'
+      summary: 'Invalid or missing 64-character EVM tx hash or Solana Base58 transaction signature'
     };
   }
 
-  // Iterate through available RPCs for the target chain and fallback chains
+  // Branch A: Solana Base58 Transaction Lookup via getTransaction
+  if (isSolanaSig || targetChain === 'solana' || targetChain === 'solana-devnet') {
+    const checkNets = targetChain === 'solana-devnet'
+      ? [{ name: 'solana-devnet', devnet: true }]
+      : [{ name: 'solana', devnet: false }, { name: 'solana-devnet', devnet: true }];
+
+    for (const net of checkNets) {
+      const solRes = await solanaRpcCall(
+        'getTransaction',
+        [targetHash, { encoding: 'jsonParsed', maxSupportedTransactionVersion: 1, commitment: 'confirmed' }],
+        net.devnet
+      );
+      const tx = solRes?.result;
+      if (tx && typeof tx.slot === 'number') {
+        const meta = tx.meta || {};
+        const status = meta.err ? 'reverted' : 'confirmed';
+        const accountKeys = (tx.transaction?.message?.accountKeys || []).map(k => (typeof k === 'string' ? k : k?.pubkey)).filter(Boolean);
+        const fromAddr = accountKeys[0] || null;
+        let toAddr = accountKeys[1] || null;
+        let transferredSol = 0;
+
+        // Parse systemProgram transfer amount when available; otherwise derive net SOL delta excluding fee
+        const topIxs = tx.transaction?.message?.instructions || [];
+        for (const ix of topIxs) {
+          const parsedInfo = ix?.parsed?.info;
+          if (ix?.parsed?.type === 'transfer' && parsedInfo?.lamports !== undefined) {
+            transferredSol += Number(parsedInfo.lamports) / 1e9;
+            if (parsedInfo.destination) toAddr = parsedInfo.destination;
+          }
+        }
+        if (transferredSol === 0 && Array.isArray(meta.preBalances) && Array.isArray(meta.postBalances) && meta.preBalances.length > 0) {
+          const fee = Number(meta.fee || 0);
+          const sentLamports = Math.max(0, Number(meta.preBalances[0]) - Number(meta.postBalances[0]) - fee);
+          transferredSol = Math.round((sentLamports / 1e9) * 1e6) / 1e6;
+        }
+        const feeSol = meta.fee ? Number(meta.fee) / 1e9 : 0;
+        const summary = `Solana transaction ${targetHash} is ${status} in slot ${tx.slot} on ${net.name} (from: ${fromAddr || 'unknown'}, to: ${toAddr || 'program'}, value: ${transferredSol} SOL, fee: ${feeSol.toFixed(6)} SOL).`;
+        return {
+          tx_hash: targetHash,
+          status,
+          from: fromAddr,
+          to: toAddr,
+          block_number: tx.slot,
+          slot: tx.slot,
+          gas_used: meta.computeUnitsConsumed ?? null,
+          fee_lamports: meta.fee ?? null,
+          value_eth: Math.round(transferredSol * 1e6) / 1e6,
+          value_sol: Math.round(transferredSol * 1e6) / 1e6,
+          chain: net.name,
+          confidence: 1.0,
+          summary,
+          explanation: summary,
+          reason: summary,
+          answer: summary
+        };
+      }
+    }
+
+    return {
+      tx_hash: targetHash,
+      status: 'not_found',
+      from: null,
+      to: null,
+      block_number: null,
+      gas_used: null,
+      value_eth: 0,
+      chain: targetChain,
+      confidence: 0.0,
+      summary: `Solana transaction ${targetHash} not found on mainnet-beta or devnet`
+    };
+  }
+
+  // Branch B: Parallel EVM Race Lookup on targetChain first, then secondary chains
   const candidateChains = [targetChain, ...Object.keys(RPC_ENDPOINTS).filter(c => c !== targetChain)];
   for (const c of candidateChains) {
-    const rpcs = RPC_ENDPOINTS[c] || [];
-    for (const rpc of rpcs) {
+    const found = await findEvmTxAcrossRpcs(c, targetHash);
+    if (found && found.tx) {
+      const { tx, rpc } = found;
+      let status = 'confirmed';
+      let blockNumber = tx.blockNumber ? parseInt(tx.blockNumber, 16) : null;
+      let gasUsed = null;
+      let txFeeEth = null;
+
       try {
-        const txRes = await fetch(rpc, {
+        const receiptRes = await fetch(rpc, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             jsonrpc: '2.0',
-            id: 1,
-            method: 'eth_getTransactionByHash',
+            id: 2,
+            method: 'eth_getTransactionReceipt',
             params: [targetHash]
           }),
-          signal: AbortSignal.timeout(3000)
+          signal: AbortSignal.timeout(3500)
         });
-
-        if (!txRes.ok) continue;
-        const txData = await txRes.json();
-        const tx = txData.result;
-
-        if (tx && tx.hash) {
-          let status = 'confirmed';
-          let blockNumber = tx.blockNumber ? parseInt(tx.blockNumber, 16) : null;
-
-          try {
-            const receiptRes = await fetch(rpc, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                jsonrpc: '2.0',
-                id: 2,
-                method: 'eth_getTransactionReceipt',
-                params: [targetHash]
-              }),
-              signal: AbortSignal.timeout(3000)
-            });
-
-            if (receiptRes.ok) {
-              const receiptData = await receiptRes.json();
-              const receipt = receiptData.result;
-              if (receipt) {
-                status = receipt.status === '0x1' ? 'confirmed' : 'reverted';
-                if (receipt.blockNumber) {
-                  blockNumber = parseInt(receipt.blockNumber, 16);
-                }
-              } else if (!blockNumber) {
-                status = 'pending';
+        if (receiptRes.ok) {
+          const receiptData = await receiptRes.json();
+          const receipt = receiptData.result;
+          if (receipt) {
+            status = receipt.status === '0x1' ? 'confirmed' : 'reverted';
+            if (receipt.blockNumber) blockNumber = parseInt(receipt.blockNumber, 16);
+            if (receipt.gasUsed) {
+              const gBig = BigInt(receipt.gasUsed);
+              gasUsed = Number(gBig);
+              const effPrice = receipt.effectiveGasPrice ? BigInt(receipt.effectiveGasPrice) : (tx.gasPrice ? BigInt(tx.gasPrice) : 0n);
+              if (effPrice > 0n) {
+                txFeeEth = Number(formatUnits(gBig * effPrice, 18));
               }
             }
-          } catch (re) {}
-
-          const valueEth = tx.value ? Number(BigInt(tx.value) / 100000000000000n) / 10000 : 0;
-
-          return {
-            tx_hash: tx.hash,
-            status,
-            from: tx.from,
-            to: tx.to,
-            block_number: blockNumber,
-            value_eth: valueEth,
-            chain: c,
-            confidence: 1.0,
-            summary: `Transaction ${tx.hash} is ${status} in block ${blockNumber || 'pending'} on ${c} (value: ${valueEth} ETH)`
-          };
+          } else if (!blockNumber) {
+            status = 'pending';
+          }
         }
-      } catch (e) {
-        // Continue to next RPC
-      }
+      } catch {}
+
+      const valueEth = tx.value ? Math.round(Number(formatUnits(BigInt(tx.value), 18)) * 1e6) / 1e6 : 0;
+      const summary = `Transaction ${tx.hash} is ${status} in block ${blockNumber || 'pending'} on ${c} (from: ${tx.from}, to: ${tx.to || 'contract_creation'}, value: ${valueEth} ETH${gasUsed !== null ? `, gas used: ${gasUsed}` : ''}).`;
+
+      return {
+        tx_hash: tx.hash,
+        status,
+        from: tx.from,
+        to: tx.to,
+        block_number: blockNumber,
+        gas_used: gasUsed,
+        tx_fee_eth: txFeeEth,
+        value_eth: valueEth,
+        chain: c,
+        confidence: 1.0,
+        summary,
+        explanation: summary,
+        reason: summary,
+        answer: summary
+      };
     }
   }
 
-  // Not found on any checked RPC
-  // FIX (2026-11-22): confidence MUST be 0.0 on not_found — asserting 1.0 on a missing tx
-  // was penalizing our Devnode ONCHAIN_TX_LOOKUP_GENERAL score (was 0.1847, Rank 16).
   return {
     tx_hash: targetHash,
     status: 'not_found',
     from: null,
     to: null,
     block_number: null,
+    gas_used: null,
     value_eth: 0,
     chain: targetChain,
     confidence: 0.0,
@@ -571,7 +728,7 @@ export async function lookupOnchainTx({ tx_hash, hash, chain, question, query, p
 }
 
 /**
- * Verify ERC-20 Token Total Supply deterministically via JSON-RPC
+ * Verify ERC-20 and Solana SPL Token Total Supply deterministically via JSON-RPC
  * Conforms bit-exact to Devnode TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL spec
  */
 const KNOWN_TOKEN_ADDRESSES = {
@@ -606,19 +763,100 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
   const rawQuery = (question || query || prompt || text || '').trim();
   const explicitTokenText = (token_address || address || token || '').trim();
   const combinedText = `${explicitTokenText} ${rawQuery}`.trim();
-  const match = combinedText.match(/0x[a-fA-F0-9]{40}/i);
-  let targetAddress = match ? match[0] : null;
-
-  let targetChain = (chain || '').toLowerCase();
-  if (!RPC_ENDPOINTS[targetChain]) {
-    if (/sepolia/i.test(rawQuery)) targetChain = 'sepolia';
-    else if (/base/i.test(rawQuery)) targetChain = 'base';
-    else if (/arbitrum|arb/i.test(rawQuery)) targetChain = 'arbitrum';
-    else if (/optimism|op/i.test(rawQuery)) targetChain = 'optimism';
-    else if (/polygon|matic/i.test(rawQuery)) targetChain = 'polygon';
-    else targetChain = 'ethereum';
+  const evmMatch = combinedText.match(/0x[a-fA-F0-9]{40}/i);
+  const solMintMatch = !evmMatch ? combinedText.match(/\b([1-9A-HJ-NP-Za-km-z]{32,44})\b/) : null;
+  let targetChain = normalizeChainName(chain, combinedText);
+  if (!targetChain) {
+    targetChain = (solMintMatch && /\bsolana\b|\bspl\b|\bmint\b/i.test(combinedText)) || /\b(?:sol|solana|spl)\b/i.test(combinedText)
+      ? 'solana'
+      : 'ethereum';
   }
 
+  // Branch A: Solana SPL Mint or Native SOL Total Supply
+  if (!evmMatch && (targetChain === 'solana' || targetChain === 'solana-devnet')) {
+    const isDevnet = targetChain === 'solana-devnet';
+    const symMatch = combinedText.match(/\b(SOL|USDC|USDT|WSOL|JUP|BONK|PYTH|WIF)\b/i);
+    const solSym = symMatch ? symMatch[1].toUpperCase() : '';
+
+    if (solSym === 'SOL' && !solMintMatch) {
+      const supRes = await solanaRpcCall('getSupply', [{ excludeNonCirculatingAccountsList: true }], isDevnet);
+      const val = supRes?.result?.value;
+      if (val && val.total !== undefined) {
+        const exactDecimalStr = formatUnits(BigInt(val.total), 9);
+        const [intPart, fracPart] = exactDecimalStr.split('.');
+        const groupedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        const trimmedFrac = fracPart ? fracPart.slice(0, 4).replace(/0+$/, '') : '';
+        const formattedSupplyStr = trimmedFrac ? `${groupedInt}.${trimmedFrac}` : groupedInt;
+        const summary = `Native SOL total supply on ${targetChain} is ${formattedSupplyStr} SOL (decimals: 9).`;
+        return {
+          status: 'confirmed',
+          token_address: 'native-SOL',
+          chain: targetChain,
+          decimals: 9,
+          total_supply_raw: String(val.total),
+          total_supply_exact: exactDecimalStr,
+          total_supply: Number(exactDecimalStr),
+          total_supply_formatted: formattedSupplyStr,
+          confidence: 1.0,
+          summary,
+          explanation: summary,
+          answer: summary
+        };
+      }
+    }
+
+    let splMint = solMintMatch?.[1] || KNOWN_SOLANA_MINTS[solSym]?.mint || null;
+    if (!splMint && combinedText) {
+      const tokenTickerMatch = combinedText.match(/\b(?:for|of|token)\s+([A-Za-z0-9]{2,15})\b/i) || combinedText.match(/\b([A-Z]{2,12})\b/);
+      const ticker = (explicitTokenText || tokenTickerMatch?.[1] || '').trim();
+      if (ticker) {
+        try {
+          const dsRes = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(ticker)}`, { signal: AbortSignal.timeout(4000) });
+          if (dsRes.ok) {
+            const dsJson = await dsRes.json();
+            const matches = (dsJson?.pairs || []).filter(p =>
+              p.chainId === 'solana' &&
+              /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(p.baseToken?.address || '') &&
+              String(p.baseToken?.symbol || '').toLowerCase() === ticker.toLowerCase()
+            );
+            matches.sort((a, b) => Number(b.liquidity?.usd || 0) - Number(a.liquidity?.usd || 0));
+            if (matches[0]) splMint = matches[0].baseToken.address;
+          }
+        } catch {}
+      }
+    }
+
+    if (splMint) {
+      const supRes = await solanaRpcCall('getTokenSupply', [splMint], isDevnet);
+      const val = supRes?.result?.value;
+      if (val && val.amount !== undefined) {
+        const decimals = Number(val.decimals ?? 0);
+        const exactDecimalStr = formatUnits(BigInt(val.amount), decimals);
+        const [intPart, fracPart] = exactDecimalStr.split('.');
+        const groupedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        const trimmedFrac = fracPart ? fracPart.slice(0, 4).replace(/0+$/, '') : '';
+        const formattedSupplyStr = trimmedFrac ? `${groupedInt}.${trimmedFrac}` : groupedInt;
+        const numericSupply = Number(exactDecimalStr);
+        const summary = `SPL token ${splMint} on ${targetChain} total supply is ${formattedSupplyStr} (decimals: ${decimals}).`;
+        return {
+          status: 'confirmed',
+          token_address: splMint,
+          chain: targetChain,
+          decimals,
+          total_supply_raw: String(val.amount),
+          total_supply_exact: exactDecimalStr,
+          total_supply: Number.isFinite(numericSupply) ? numericSupply : exactDecimalStr,
+          total_supply_formatted: formattedSupplyStr,
+          confidence: 1.0,
+          summary,
+          explanation: summary,
+          answer: summary
+        };
+      }
+    }
+  }
+
+  let targetAddress = evmMatch ? evmMatch[0] : null;
   if (!targetAddress) {
     const symMatch = combinedText.match(/\b(TESTUSDC|USDC|USDT|WETH|WBTC|DAI|LINK|UNI|AAVE|USDY|PEPE|SHIB|ARB|OP|MKR|LDO|CRV|COMP|ENS|RPL|cbETH)\b/i);
     if (symMatch) {
@@ -627,9 +865,9 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
     }
   }
 
-  // Fallback: dynamically resolve unmapped ERC-20 token addresses via DexScreener search
+  // Fallback: dynamically resolve unmapped ERC-20 / SPL token addresses via DexScreener search
   if (!targetAddress && combinedText) {
-    const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon' };
+    const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon', solana: 'solana' };
     const tokenTokenMatch = combinedText.match(/\b(?:for|of|token)\s+([A-Za-z0-9]{2,15})\b/i) || combinedText.match(/\b([A-Z]{2,12})\b/);
     const searchTicker = (explicitTokenText || tokenTokenMatch?.[1] || '').trim();
     if (searchTicker) {
@@ -662,7 +900,7 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
       total_supply: null,
       total_supply_formatted: null,
       confidence: 0.0,
-      summary: 'No valid 40-character hexadecimal contract address or recognized token symbol provided'
+      summary: 'No valid ERC-20 contract address, Solana SPL mint, or recognized token symbol provided'
     };
   }
 
@@ -684,7 +922,7 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
       const data = await res.json();
       if (data.result && data.result !== '0x') {
         const rawSupplyBigInt = BigInt(data.result);
-        
+
         let decimals = 18;
         try {
           const decRes = await fetch(rpc, {
@@ -726,9 +964,7 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
           summary: `Token ${targetAddress} on ${targetChain} total supply is ${formattedSupplyStr} (decimals: ${decimals})`
         };
       }
-    } catch (e) {
-      // Continue to next RPC
-    }
+    } catch {}
   }
 
   return {
@@ -737,35 +973,24 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
     chain: targetChain,
     total_supply: null,
     total_supply_formatted: null,
-    confidence: 1.0,
+    confidence: 0.0,
     summary: `Contract ${targetAddress} not found or does not implement ERC-20 totalSupply on ${targetChain}`
   };
 }
 
 /**
- * Check and verify wallet balances (native or ERC-20) deterministically
- * Conforms bit-exact to Devnode WALLET_BALANCE_CHECK_GENERAL spec
+ * Check and verify wallet balances (native, ERC-20, Solana SOL, or SPL tokens) deterministically
+ * Conforms bit-exact to Devnode WALLET_BALANCE_CHECK_GENERAL spec v5
  */
-export async function checkWalletBalance({ wallet_address, address, account, token_address, chain, question, query, prompt, text } = {}) {
+export async function checkWalletBalance({ wallet_address, address, account, token, token_address, chain, question, query, prompt, text } = {}) {
   const rawQuery = (question || query || prompt || text || '').trim();
-  const combinedText = `${wallet_address || address || account || ''} ${rawQuery}`.trim();
-  const addresses = combinedText.match(/0x[a-fA-F0-9]{40}/gi) || [];
-  let targetWallet = addresses[0] || null;
-  let targetToken = token_address || (addresses.length > 1 ? addresses[1] : null);
+  const explicitToken = String(token || token_address || '').trim();
+  const combinedText = `${wallet_address || address || account || ''} ${explicitToken} ${rawQuery}`.trim();
+  const evmAddresses = combinedText.match(/0x[a-fA-F0-9]{40}/gi) || [];
+  let targetWallet = evmAddresses[0] || null;
+  let targetToken = explicitToken || (evmAddresses.length > 1 ? evmAddresses[1] : '');
 
-  let targetChain = (chain || '').toLowerCase();
-  if (!RPC_ENDPOINTS[targetChain] && targetChain !== 'solana') {
-    if (/\bsolana\b/i.test(rawQuery)) targetChain = 'solana';
-    else if (/base\s*sepolia/i.test(rawQuery)) targetChain = 'base-sepolia';
-    else if (/sepolia/i.test(rawQuery)) targetChain = 'sepolia';
-    else if (/\bbase\b/i.test(rawQuery)) targetChain = 'base';
-    else if (/arbitrum|\barb\b/i.test(rawQuery)) targetChain = 'arbitrum';
-    else if (/optimism|\bop\b/i.test(rawQuery)) targetChain = 'optimism';
-    else if (/polygon|matic/i.test(rawQuery)) targetChain = 'polygon';
-    else if (/\bbsc\b|\bbnb\b/i.test(rawQuery)) targetChain = 'bsc';
-    else if (/avalanche|avax/i.test(rawQuery)) targetChain = 'avalanche';
-    else targetChain = 'ethereum';
-  }
+  let targetChain = normalizeChainName(chain, combinedText) || 'ethereum';
 
   // Resolve .eth ENS names via public ENS resolver when no 0x address is given
   if (!targetWallet) {
@@ -786,50 +1011,124 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
     }
   }
 
-  // Support Solana Base58 wallet addresses
+  // Support Solana Base58 wallet addresses (native SOL AND SPL tokens via getTokenAccountsByOwner)
   if (!targetWallet) {
-    const solMatch = combinedText.match(/\b([1-9A-HJ-NP-Za-km-z]{32,44})\b/);
-    if (solMatch && (targetChain === 'solana' || /\b(?:sol|solana|devnet|mainnet)\b/i.test(combinedText))) {
-      const solAddr = solMatch[1];
-      const solRpc = /devnet/i.test(combinedText) ? 'https://api.devnet.solana.com' : 'https://api.mainnet-beta.solana.com';
-      try {
-        const sRes = await fetch(solRpc, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getBalance', params: [solAddr] }),
-          signal: AbortSignal.timeout(4000)
-        });
-        if (sRes.ok) {
-          const sData = await sRes.json();
-          if (typeof sData?.result?.value === 'number') {
-            const lamports = BigInt(sData.result.value);
-            const solBal = Number(lamports) / 1e9;
-            const isFunded = solBal > 0;
-            const verdictStr = isFunded ? 'funded' : 'empty';
-            const summaryStr = `The Solana address ${solAddr} currently has a native balance of ${solBal.toFixed(6)} SOL.`;
-            return {
-              status: 'confirmed',
-              address: solAddr,
-              wallet_address: solAddr,
-              chain: /devnet/i.test(combinedText) ? 'solana-devnet' : 'solana',
-              balance: solBal,
-              balance_lamports: lamports.toString(),
-              symbol: 'SOL',
-              funded: isFunded,
-              verdict: verdictStr,
-              answer: verdictStr,
-              confidence: 1.0,
-              reason: summaryStr,
-              summary: summaryStr
-            };
+    const solInputText = `${wallet_address || address || account || ''} ${rawQuery}`.trim();
+    const solMatches = [...solInputText.matchAll(/\b([1-9A-HJ-NP-Za-km-z]{32,44})\b/g)].map(m => m[1]);
+    const solAddr = solMatches[0] || null;
+    if (solAddr && (targetChain === 'solana' || targetChain === 'solana-devnet' || /\b(?:sol|solana|spl|devnet|mainnet)\b/i.test(combinedText))) {
+      const isDevnet = targetChain === 'solana-devnet' || /\bdevnet\b/i.test(combinedText);
+      const chainOut = isDevnet ? 'solana-devnet' : 'solana';
+
+      // Check if an SPL token symbol or explicit SPL mint address was requested
+      let splMint = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(explicitToken) && explicitToken !== solAddr ? explicitToken : null;
+      let splSym = null;
+      if (!splMint) {
+        const explicitSym = explicitToken.toUpperCase();
+        if (explicitSym && explicitSym !== 'SOL' && KNOWN_SOLANA_MINTS[explicitSym]) {
+          splMint = KNOWN_SOLANA_MINTS[explicitSym].mint;
+          splSym = explicitSym;
+        } else {
+          const symMatch = combinedText.match(/\b(USDC|USDT|WSOL|JUP|BONK|PYTH|WIF)\b/i);
+          if (symMatch) {
+            splSym = symMatch[1].toUpperCase();
+            splMint = KNOWN_SOLANA_MINTS[splSym]?.mint || null;
+          } else if (solMatches.length > 1 && solMatches[1] !== solAddr) {
+            splMint = solMatches[1];
           }
         }
-      } catch {}
+      }
+
+      if (splMint) {
+        const splRes = await solanaRpcCall(
+          'getTokenAccountsByOwner',
+          [solAddr, { mint: splMint }, { encoding: 'jsonParsed' }],
+          isDevnet
+        );
+        if (splRes && splRes.result && Array.isArray(splRes.result.value)) {
+          const accounts = splRes.result.value;
+          let rawSum = 0n;
+          let decimals = KNOWN_SOLANA_MINTS[splSym]?.decimals ?? 6;
+          for (const acc of accounts) {
+            const ta = acc?.account?.data?.parsed?.info?.tokenAmount;
+            if (ta?.amount !== undefined) {
+              rawSum += BigInt(ta.amount);
+              if (typeof ta.decimals === 'number') decimals = ta.decimals;
+            }
+          }
+          const humanStr = formatUnits(rawSum, decimals);
+          const humanBal = Number(humanStr);
+          const isFunded = rawSum > 0n;
+          const verdictStr = isFunded ? 'funded' : 'empty';
+          const symLabel = splSym || 'SPL';
+          const summaryStr = `The Solana address ${solAddr} holds ${humanBal.toLocaleString('en-US', { maximumFractionDigits: 6 })} ${symLabel} (${rawSum.toString()} raw units, mint ${splMint}) on ${chainOut}.`;
+          return {
+            status: 'confirmed',
+            address: solAddr,
+            wallet_address: solAddr,
+            token_address: splMint,
+            chain: chainOut,
+            decimals,
+            balance: humanBal,
+            balance_raw: rawSum.toString(),
+            symbol: symLabel,
+            token_symbol: symLabel,
+            funded: isFunded,
+            verdict: verdictStr,
+            answer: summaryStr,
+            confidence: 1.0,
+            reason: summaryStr,
+            summary: summaryStr,
+            as_of: new Date().toISOString()
+          };
+        }
+      }
+
+      const sRes = await solanaRpcCall('getBalance', [solAddr], isDevnet);
+      if (sRes && typeof sRes.result?.value === 'number') {
+        const lamports = BigInt(sRes.result.value);
+        const solBal = Number(lamports) / 1e9;
+        const isFunded = solBal > 0;
+        const verdictStr = isFunded ? 'funded' : 'empty';
+        const summaryStr = `The Solana address ${solAddr} currently has a native balance of ${solBal.toFixed(6)} SOL on ${chainOut}.`;
+        return {
+          status: 'confirmed',
+          address: solAddr,
+          wallet_address: solAddr,
+          chain: chainOut,
+          balance: solBal,
+          balance_lamports: lamports.toString(),
+          symbol: 'SOL',
+          token_symbol: 'SOL',
+          funded: isFunded,
+          verdict: verdictStr,
+          answer: summaryStr,
+          confidence: 1.0,
+          reason: summaryStr,
+          summary: summaryStr,
+          as_of: new Date().toISOString()
+        };
+      }
     }
   }
 
-  // Detect ERC-20 token symbol mention (USDC, USDT, WETH, WBTC, DAI) when explicit token address omitted
+  // Detect ERC-20 token symbol mention (USDC, USDT, WETH, WBTC, DAI) when explicit token contract address omitted
   let requestedSymbol = null;
+  if (targetToken && !/^0x[a-fA-F0-9]{40}$/i.test(targetToken)) {
+    const cleanTokSym = targetToken.toUpperCase();
+    if (cleanTokSym === 'ETH' || cleanTokSym === 'POL' || cleanTokSym === 'BNB' || cleanTokSym === 'AVAX' || cleanTokSym === 'NATIVE') {
+      targetToken = null;
+    } else {
+      const mappedExplicit = KNOWN_TOKEN_ADDRESSES[targetChain]?.[cleanTokSym] || KNOWN_TOKEN_ADDRESSES.ethereum?.[cleanTokSym] || null;
+      if (mappedExplicit && targetWallet && mappedExplicit.toLowerCase() !== targetWallet.toLowerCase()) {
+        targetToken = mappedExplicit;
+        requestedSymbol = cleanTokSym;
+      } else {
+        targetToken = null;
+      }
+    }
+  }
+
   if (targetWallet && !targetToken) {
     const symMatch = combinedText.match(/\b(TESTUSDC|USDC|USDT|WETH|WBTC|DAI)\b/i);
     if (symMatch) {
@@ -849,6 +1148,7 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
       wallet_address: null,
       chain: targetChain,
       balance: null,
+      token_symbol: null,
       funded: false,
       verdict: 'unfunded',
       answer: 'unfunded',
@@ -862,7 +1162,6 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
   for (const rpc of rpcs) {
     try {
       if (targetToken) {
-        // ERC-20 balanceOf(address): 0x70a08231 + padded address
         const paddedAddr = targetWallet.toLowerCase().replace(/^0x/, '').padStart(64, '0');
         const res = await fetch(rpc, {
           method: 'POST',
@@ -905,16 +1204,17 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
             balance: humanBalance,
             balance_raw: rawBalance.toString(),
             symbol: symLabel,
+            token_symbol: symLabel,
             funded: isFunded,
             verdict: verdictStr,
             answer: summaryStr,
             confidence: 1.0,
             reason: summaryStr,
-            summary: summaryStr
+            summary: summaryStr,
+            as_of: new Date().toISOString()
           };
         }
       } else {
-        // Native eth_getBalance
         const res = await fetch(rpc, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -933,7 +1233,7 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
           const ethBalance = Number(rawBalance) / 1e18;
           const isFunded = ethBalance > 0;
           const verdictStr = isFunded ? 'funded' : 'empty';
-          const symbolStr = targetChain === 'polygon' ? 'POL' : 'ETH';
+          const symbolStr = targetChain === 'polygon' ? 'POL' : targetChain === 'bsc' ? 'BNB' : targetChain === 'avalanche' ? 'AVAX' : 'ETH';
           const summaryStr = `The address ${targetWallet} currently has a native-coin balance of ${ethBalance.toFixed(8)} ${symbolStr} on ${targetChain}.`;
           return {
             status: 'confirmed',
@@ -944,18 +1244,18 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
             balance_wei: rawBalance.toString(),
             balance_eth: ethBalance,
             symbol: symbolStr,
+            token_symbol: symbolStr,
             funded: isFunded,
             verdict: verdictStr,
             answer: summaryStr,
             confidence: 1.0,
             reason: summaryStr,
-            summary: summaryStr
+            summary: summaryStr,
+            as_of: new Date().toISOString()
           };
         }
       }
-    } catch (e) {
-      // Continue to next RPC
-    }
+    } catch {}
   }
 
   return {
@@ -964,6 +1264,7 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
     wallet_address: targetWallet,
     chain: targetChain,
     balance: null,
+    token_symbol: requestedSymbol || null,
     funded: false,
     verdict: 'unfunded',
     answer: 'unfunded',
@@ -1013,12 +1314,14 @@ export async function arbitrateMultiMiner({ query, question, task, intent, miner
 
     try {
       const devnodeMiners = await getDevnodeMiners();
-      const peers = devnodeMiners.filter(m => 
-        m.id !== '6137' && 
-        m.id !== '6142' && 
-        m.id !== '6162' && 
-        m.id !== '6163' && 
-        m.id !== '6164' && 
+      const peers = devnodeMiners.filter(m =>
+        m.id !== '6137' &&
+        m.id !== '6142' &&
+        m.id !== '6162' &&
+        m.id !== '6163' &&
+        m.id !== '6164' &&
+        m.id !== '6200' &&
+        m.id !== '6201' &&
         m.slug !== 'praman-compliance-miner' &&
         m.supported_intents?.includes(targetIntent) &&
         m.base_url &&
@@ -1162,9 +1465,10 @@ const LIVE_UNIV3_POOLS = {
 };
 
 export async function verifyLiquidityDepth(params = {}) {
-  const queryText = `${params.query || ''} ${params.question || ''} ${params.prompt || ''} ${params.task || ''}`.trim();
-  const explicitPoolMatch = `${params.pool || params.pool_address || ''} ${queryText}`.match(/0x[a-fA-F0-9]{40}/);
-  const explicitPoolAddress = explicitPoolMatch ? explicitPoolMatch[0] : null;
+  const queryText = `${params.pool || ''} ${params.query || ''} ${params.question || ''} ${params.prompt || ''} ${params.task || ''}`.trim();
+  const explicitEvmPoolMatch = `${params.pool || params.pool_address || ''} ${queryText}`.match(/0x[a-fA-F0-9]{40}/);
+  const explicitSolPoolMatch = !explicitEvmPoolMatch ? `${params.pool || params.pool_address || ''} ${queryText}`.match(/\b([1-9A-HJ-NP-Za-km-z]{32,44})\b/) : null;
+  const explicitPoolAddress = explicitEvmPoolMatch ? explicitEvmPoolMatch[0] : (explicitSolPoolMatch && /\bsol|\bsolana|\braydium|\borca|\bmeteora|\bpool/i.test(`${params.chain || ''} ${queryText}`) ? explicitSolPoolMatch[1] : null);
 
   let pair = params.pair || params.symbol || params.market;
   if (!pair && queryText) {
@@ -1177,31 +1481,39 @@ export async function verifyLiquidityDepth(params = {}) {
       if (validDash) pair = `${validDash[1].toUpperCase()}/${validDash[2].toUpperCase()}`;
     }
   }
-  if (!pair) pair = 'ETH/USDC';
+  const explicitChainProvided = Boolean(params.chain || params.network);
+  let chain = normalizeChainName(params.chain || params.network || '', `${pair || ''} ${queryText}`) || 'ethereum';
+  if (explicitSolPoolMatch && explicitPoolAddress && chain === 'ethereum') chain = 'solana';
+  if (!explicitChainProvided && pair && /\b(SOL|WSOL|JUP|BONK|WIF|RAY|PYTH|JTO|ORCA)\b/i.test(pair)) chain = 'solana';
+  if (!pair) pair = chain === 'solana' ? 'SOL/USDC' : 'ETH/USDC';
   pair = pair.toUpperCase().replace('-', '/');
   if (pair === 'USDC/ETH' || pair === 'USDC/WETH' || pair === 'WETH/USDC') pair = 'ETH/USDC';
-
-  let chain = (params.chain || params.network || 'ethereum').toLowerCase();
-  if (/\bbase\b/i.test(queryText)) chain = 'base';
-  else if (/\barbitrum\b/i.test(queryText)) chain = 'arbitrum';
-  else if (/\bpolygon\b|\bmatic\b/i.test(queryText)) chain = 'polygon';
-  else if (/\boptimism\b|\bop\b/i.test(queryText)) chain = 'optimism';
-  else if (/\bbsc\b|\bbnb\b/i.test(queryText)) chain = 'bsc';
+  if (pair === 'USDC/SOL') pair = 'SOL/USDC';
 
   let depthPct = parseFloat(params.depth_pct ?? params.depth ?? params.range_pct ?? 2.0);
   if (isNaN(depthPct) || depthPct <= 0) depthPct = 2.0;
 
   let notionalUsd = parseFloat(params.notional_usd ?? params.amount_usd ?? params.notional ?? NaN);
   const explicitEthSell = queryText.match(/(\d+(?:\.\d+)?)\s*(?:w?eth)\b/i);
+  const explicitSolSell = queryText.match(/(\d+(?:\.\d+)?)\s*sol\b/i);
+  const explicitUsdCompact = queryText.match(/\$\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*([km])?\b/i);
+  const explicitTokenUnits = explicitEthSell ? { sym: 'ETH', qty: parseFloat(explicitEthSell[1]) } : (explicitSolSell ? { sym: 'SOL', qty: parseFloat(explicitSolSell[1]) } : null);
+  if (isNaN(notionalUsd) && explicitUsdCompact) {
+    const rawN = parseFloat(explicitUsdCompact[1].replace(/,/g, ''));
+    const mult = explicitUsdCompact[2]?.toLowerCase() === 'm' ? 1e6 : (explicitUsdCompact[2]?.toLowerCase() === 'k' ? 1e3 : 1);
+    notionalUsd = rawN * mult;
+  }
   if (isNaN(notionalUsd) && explicitEthSell) {
     notionalUsd = parseFloat(explicitEthSell[1]) * 3000;
+  } else if (isNaN(notionalUsd) && explicitSolSell) {
+    notionalUsd = parseFloat(explicitSolSell[1]) * 180;
   }
   if (isNaN(notionalUsd) || notionalUsd <= 0) notionalUsd = 100000.0;
 
-  // 1. Live multi-chain lookup for arbitrary explicit 0x pool addresses (DexScreener + GeckoTerminal)
+  // 1. Live multi-chain lookup for explicit 0x or Solana Base58 pool addresses (DexScreener + GeckoTerminal)
   if (explicitPoolAddress) {
-    const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon', bsc: 'bsc' };
-    const gtNetMap = { ethereum: 'eth', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon_pos', bsc: 'bsc' };
+    const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon', bsc: 'bsc', solana: 'solana' };
+    const gtNetMap = { ethereum: 'eth', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon_pos', bsc: 'bsc', solana: 'solana' };
     const dexChain = dexChainMap[chain] || 'ethereum';
     const gtNet = gtNetMap[chain] || 'eth';
 
@@ -1245,6 +1557,9 @@ export async function verifyLiquidityDepth(params = {}) {
         : (gtPool?.name || pair);
       const liqUsd = Math.round(Number(dexPair?.liquidity?.usd ?? gtPool?.reserve_in_usd ?? 0) * 100) / 100;
       const priceUsd = Number(dexPair?.priceUsd ?? gtPool?.base_token_price_usd ?? 0);
+      if (explicitTokenUnits && priceUsd > 0 && isNaN(parseFloat(params.notional_usd ?? NaN))) {
+        notionalUsd = Math.round(explicitTokenUnits.qty * priceUsd * 100) / 100;
+      }
       const vol24h = Number(dexPair?.volume?.h24 ?? gtPool?.volume_usd?.h24 ?? 0);
       const dexLabel = dexPair?.dexId || 'DEX Pool';
       const resolvedChain = dexPair?.chainId || chain;
@@ -1285,7 +1600,7 @@ export async function verifyLiquidityDepth(params = {}) {
   }
 
   const poolCfg = LIVE_UNIV3_POOLS[pair]?.[chain];
-  const rpcs = RPC_ENDPOINTS[chain] || RPC_ENDPOINTS.ethereum;
+  const rpcs = RPC_ENDPOINTS[chain] || [];
 
   if (poolCfg && rpcs.length > 0) {
     const paddedPool = poolCfg.address.toLowerCase().replace(/^0x/, '').padStart(64, '0');
@@ -1343,11 +1658,15 @@ export async function verifyLiquidityDepth(params = {}) {
         const tvlUsd = Math.round((bal0 * usdPerToken0 + bal1 * usdPerToken1) * 100) / 100;
         const blockNumber = byId[5] ? parseInt(byId[5], 16) : null;
         const spotPriceUsd = !poolCfg.token0.isUsdStable ? usdPerToken0 : (!poolCfg.token1.isUsdStable ? usdPerToken1 : human1Per0);
+        if (explicitTokenUnits && spotPriceUsd > 0 && isNaN(parseFloat(params.notional_usd ?? NaN))) {
+          notionalUsd = Math.round(explicitTokenUnits.qty * spotPriceUsd * 100) / 100;
+        }
 
         const slippagePct = totalDepthUsd > 0 ? Math.min(100.0, Math.round(((notionalUsd / (totalDepthUsd * 2)) * 100) * 1000) / 1000) : 100.0;
         const depthSufficient = totalDepthUsd >= notionalUsd * 2.0;
+        const formattedTvl = tvlUsd.toLocaleString('en-US', { maximumFractionDigits: 2 });
         const formattedDepth = totalDepthUsd.toLocaleString('en-US', { maximumFractionDigits: 2 });
-        const summaryText = `LIVE ON-CHAIN LIQUIDITY DEPTH: ${pair} on ${chain} (${poolCfg.dex}, block ${blockNumber ?? 'latest'}) active ±${depthPct}% depth $${formattedDepth} (TVL $${tvlUsd.toLocaleString('en-US', { maximumFractionDigits: 2 })}, est. slippage ${slippagePct}%) - ${depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING'}`;
+        const summaryText = `LIVE ON-CHAIN LIQUIDITY DEPTH: ${pair} on ${chain} (${poolCfg.dex}, block ${blockNumber ?? 'latest'}) pool liquidity $${formattedTvl} USD (±${depthPct}% active depth $${formattedDepth}, est. slippage ${slippagePct}%) - ${depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING'}`;
 
         const resultPayload = {
           ok: true,
@@ -1363,8 +1682,9 @@ export async function verifyLiquidityDepth(params = {}) {
           notional_tested_usd: notionalUsd,
           bid_depth_usd: bidDepthUsd,
           ask_depth_usd: askDepthUsd,
+          active_depth_2pct_usd: totalDepthUsd,
           total_depth_usd: totalDepthUsd,
-          liquidity_usd: totalDepthUsd,
+          liquidity_usd: tvlUsd,
           tvl_usd: tvlUsd,
           estimated_slippage_pct: slippagePct,
           depth_sufficient: depthSufficient,
@@ -1385,13 +1705,17 @@ export async function verifyLiquidityDepth(params = {}) {
     }
   }
 
-  // 3. Fallback: dynamic pair lookup on DexScreener (/tokens/:address when known, then /search) when pool is absent from LIVE_UNIV3_POOLS
+  // 3. Fallback: dynamic pair lookup on DexScreener across EVM and Solana pools
   try {
-    const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon', bsc: 'bsc' };
+    const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon', bsc: 'bsc', solana: 'solana' };
     const wantChain = dexChainMap[chain] || 'ethereum';
     const pairTokens = pair.split('/').map(s => s.trim().toUpperCase()).filter(Boolean);
-    const knownBaseAddr = KNOWN_TOKEN_ADDRESSES[chain]?.[pairTokens[0]] || KNOWN_TOKEN_ADDRESSES.ethereum?.[pairTokens[0]] || null;
-    const knownQuoteAddr = KNOWN_TOKEN_ADDRESSES[chain]?.[pairTokens[1]] || KNOWN_TOKEN_ADDRESSES.ethereum?.[pairTokens[1]] || null;
+    const knownBaseAddr = wantChain === 'solana'
+      ? (KNOWN_SOLANA_MINTS[pairTokens[0]]?.mint || null)
+      : (KNOWN_TOKEN_ADDRESSES[chain]?.[pairTokens[0]] || KNOWN_TOKEN_ADDRESSES.ethereum?.[pairTokens[0]] || null);
+    const knownQuoteAddr = wantChain === 'solana'
+      ? (KNOWN_SOLANA_MINTS[pairTokens[1]]?.mint || null)
+      : (KNOWN_TOKEN_ADDRESSES[chain]?.[pairTokens[1]] || KNOWN_TOKEN_ADDRESSES.ethereum?.[pairTokens[1]] || null);
 
     let rawPairs = [];
     for (const tokAddr of [knownBaseAddr, knownQuoteAddr].filter(Boolean)) {
@@ -1411,7 +1735,7 @@ export async function verifyLiquidityDepth(params = {}) {
       }
     }
 
-    const candidates = rawPairs.filter(p => {
+    let candidates = rawPairs.filter(p => {
       if (p.chainId !== wantChain || !p.liquidity?.usd) return false;
       const b = String(p.baseToken?.symbol || '').toUpperCase();
       const qt = String(p.quoteToken?.symbol || '').toUpperCase();
@@ -1421,12 +1745,23 @@ export async function verifyLiquidityDepth(params = {}) {
       );
       return matchesExact || pairTokens.length < 2;
     });
+    if (candidates.length === 0 && !explicitChainProvided && pairTokens.length === 2) {
+      candidates = rawPairs.filter(p => {
+        if (!p.liquidity?.usd) return false;
+        const b = String(p.baseToken?.symbol || '').toUpperCase();
+        const qt = String(p.quoteToken?.symbol || '').toUpperCase();
+        return (b === pairTokens[0] && qt === pairTokens[1]) || (b === pairTokens[1] && qt === pairTokens[0]);
+      });
+    }
     candidates.sort((a, b) => Number(b.liquidity?.usd || 0) - Number(a.liquidity?.usd || 0));
     const best = candidates[0];
     if (best) {
       const liqUsd = Math.round(Number(best.liquidity?.usd || 0) * 100) / 100;
       const vol24h = Number(best.volume?.h24 || 0);
       const priceUsd = Number(best.priceUsd || 0);
+      if (explicitTokenUnits && priceUsd > 0 && isNaN(parseFloat(params.notional_usd ?? NaN))) {
+        notionalUsd = Math.round(explicitTokenUnits.qty * priceUsd * 100) / 100;
+      }
       const slippagePct = liqUsd > 0 ? Math.min(100.0, Math.round(((notionalUsd / (liqUsd * 2)) * 100) * 1000) / 1000) : 100.0;
       const depthSufficient = liqUsd >= notionalUsd * 2.0;
       const formattedLiq = liqUsd.toLocaleString('en-US', { maximumFractionDigits: 2 });

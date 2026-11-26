@@ -1,6 +1,6 @@
 # RugReceipt x Praman Desk Smart Contract & Deployer Shield
 
-Reciprocal smart contract safety screening integrating **RugReceipt (Issue #208)** with **Praman Desk compliance verification (Diamond #6142 / Route #5281 / Devnode miner #6127)**.
+Reciprocal smart contract safety screening integrating **RugReceipt (Issue #208)** with **Praman Desk compliance verification (Devnode #6164 / Diamond #6200)**.
 
 ---
 

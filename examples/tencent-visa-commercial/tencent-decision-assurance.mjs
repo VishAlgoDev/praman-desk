@@ -9,12 +9,17 @@ import { reviewAndGateSpend } from '../minds-spend-guard/reviewer-mind.mjs';
 import { screenSanctions, reconcileInvoicePrimary } from '../../src/handlers.mjs';
 import { generateComplianceCertificate } from '../../src/certificate.mjs';
 import { getWasmInstance } from '../../comparator/wasm-buffer.mjs';
+import { verifyEnterpriseAgentOutput } from '../../src/intelligence/agent-output-verifier.mjs';
+import { purchaseTelegraphSignal, isLiveTelegraphMode } from '../lib/telegraph-live-buyer.mjs';
+
+export { verifyEnterpriseAgentOutput };
 
 export async function runTencentDecisionAssurance(request, options = {}) {
   const auditTrail = [];
+  const wantLive = isLiveTelegraphMode(options.live);
 
   // Stage #01: Pre-Spend Diligence & Escrow Clearance (Mind 1 + Mind 2)
-  const caseFile = await investigateProcurement({ ...request, live: Boolean(options.live) });
+  const caseFile = await investigateProcurement({ ...request, live: wantLive });
   const preSpendVerdict = await reviewAndGateSpend(caseFile);
   auditTrail.push({
     stage: '01_PRE_SPEND_GATE',
@@ -59,7 +64,7 @@ export async function runTencentDecisionAssurance(request, options = {}) {
     };
   }
 
-  // Stage #03: Post-Task Independent Verification (651-byte WASM Math + Statutory Certificate)
+  // Stage #03: Post-Task Independent Verification (651-byte WASM Math + Agent Output Claim Decomposition + Optional Live Telegraph Receipt)
   const wasm = await getWasmInstance();
   const deliveredTotal = Number(options.deliveredAmount ?? request.totalAmount);
   const expectedTotal = Number(request.totalAmount);
@@ -75,24 +80,60 @@ export async function runTencentDecisionAssurance(request, options = {}) {
   );
   const exactMatch = wasmScore === 10000;
 
-  const postTaskPassed = exactMatch;
+  let claimAudit = null;
+  if (request.agentOutput || options.agentOutput || request.iban || request.routingNumber || request.bin) {
+    claimAudit = await verifyEnterpriseAgentOutput({
+      model: request.model || 'tencent-hunyuan-enterprise-agent',
+      vendor: request.vendor,
+      domain: request.domain,
+      recipientAddress: request.recipientAddress,
+      country: request.country,
+      claimedTotal: deliveredTotal,
+      expectedTotal,
+      currency: request.currency,
+      settlementCurrency: request.settlementCurrency,
+      claimedFxRate: request.claimedFxRate,
+      iban: request.iban,
+      routingNumber: request.routingNumber,
+      bin: request.bin,
+      agentOutput: options.agentOutput || request.agentOutput || ''
+    }, { liveModel: Boolean(options.liveModel) });
+  }
+
+  let stage03Purchase = null;
+  if (wantLive) {
+    stage03Purchase = await purchaseTelegraphSignal({
+      intent: 'INVOICE_LEDGER_RECONCILE_GENERAL',
+      query: `[INVOICE_LEDGER_RECONCILE_GENERAL] Verify invoice ${request.invoiceNumber || 'INV'} total ${deliveredTotal} against PO ${expectedTotal}`,
+      live: true
+    });
+  }
+
+  const claimsPassed = claimAudit ? claimAudit.verdict === 'GO' : true;
+  const postTaskPassed = exactMatch && claimsPassed;
   auditTrail.push({
     stage: '03_POST_TASK_VERIFICATION',
     expectedTotal,
     deliveredTotal,
     wasmScore,
     exactMatch,
+    claimVerdict: claimAudit?.verdict || 'STRUCTURED_ONLY',
+    claimMatrix: claimAudit?.claimMatrix || [],
+    telegraphPurchase: stage03Purchase,
     reconcileVerdict: mathCheck.verdict || mathCheck.status,
     passed: postTaskPassed
   });
 
   if (!postTaskPassed) {
-    const varianceHash = '0x' + crypto.createHash('sha256').update(JSON.stringify({ stage: '03', expectedTotal, deliveredTotal })).digest('hex');
+    const varianceHash = '0x' + crypto.createHash('sha256').update(JSON.stringify({ stage: '03', expectedTotal, deliveredTotal, claimVerdict: claimAudit?.verdict })).digest('hex');
     return {
       approved: false,
       haltedAtStage: '03_POST_TASK_VERIFICATION',
-      verdict: 'POST_TASK_VARIANCE_HALT',
-      reason: `Post-task independent check caught amount mismatch (${deliveredTotal} delivered vs ${expectedTotal} authorized).`,
+      verdict: !exactMatch ? 'POST_TASK_VARIANCE_HALT' : `POST_TASK_CLAIM_${claimAudit?.verdict || 'HALT'}`,
+      reason: !exactMatch
+        ? `Post-task independent check caught amount mismatch (${deliveredTotal} delivered vs ${expectedTotal} authorized).`
+        : claimAudit?.summary || 'Post-task output verification flagged claim contradiction or missing evidence.',
+      claimAudit,
       certHash: varianceHash,
       auditTrail,
       receipt: null

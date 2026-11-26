@@ -57,7 +57,7 @@ export async function reviewAndGateSpend(caseFile, options = {}) {
 
   const participatingProviders = [
     {
-      providerId: 'praman-miner-6127',
+      providerId: 'praman-miner-6164',
       role: 'OFAC SDN Sanctions & GLEIF Registry Engine',
       status: sanctions.matched ? 'SANCTIONS_ALERT' : (corporate.found ? 'VERIFIED' : 'UNVERIFIED')
     },

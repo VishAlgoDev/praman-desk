@@ -5,7 +5,7 @@
  * 
  * Cooperative Clearing Protocol between:
  * 1. Bangdrop's Takar (Second Opinion Heuristic Protocol, Sepolia Contract: 0x310275e6D66818E068245326bB9e398822304248)
- * 2. Praman Desk (Deterministic WebAssembly Comparator & OFAC Trie, Devnode Route: #5281 / Miner ID: 6164)
+ * 2. Praman Desk (Deterministic WebAssembly Comparator & OFAC Trie, Devnode Miner #6164 / Sepolia Diamond)
  * 
  * Implements Ahmed Ali's multi-miner consensus standard:
  * - Heuristic LLM opinions alone can fail on subtle math fraud or sanctions.
@@ -19,7 +19,7 @@ import { PramanDesk } from '../../packages/praman-sdk/index.js';
 
 export const TAKAR_SETTLE_V4_ADDRESS = '0x310275e6D66818E068245326bB9e398822304248';
 export const PRAMAN_MINER_ID = '6164';
-export const PRAMAN_DEVNODE_ROUTE = 5281;
+export const PRAMAN_DEVNODE_ROUTE = 6164;
 
 export class TakarPramanEscrowBridge {
   constructor(options = {}) {

@@ -14,7 +14,7 @@
  *   alibaba              Run the Alibaba Trade Assurance B2B cross-border escrow arbitration demo (Discrepancy vs Reconciled)
  *   takar                Run the Bangdrop Takar cross-miner escrow clearing bridge (Two-Miner consensus)
  *   check "<prompt>"     Audit any payment prompt or transaction with Two-Mind synthesis & WASM comparator
- *   miner                Check live telemetry on Sepolia Diamond Miner #6169 (Devnode Route #5281)
+ *   miner                Check live telemetry on Devnode Miner #6164 & active Sepolia Diamond registration
  *   evalpool             Check live Devnode consensus across all registered EvalPool intents
  *   health               Check live production node health, SDN index count & WASM engine status
  */
@@ -52,8 +52,8 @@ const NODE_URL = process.env.TELEGRAPH_NODE_URL || 'https://devnode.telegraphpro
 function banner() {
   console.log(`
 ╔═══════════════════════════════════════════════════════════════════════╗
-║   ⚖️  PRAMAN DESK — PRE-PAYMENT SPEND GUARD & CLEARING GATEWAY        ║
-║   Telegraph Protocol Season II • Diamond Miner #6169 • Route #5281    ║
+║   PRAMAN DESK - PRE-PAYMENT SPEND GUARD & CLEARING GATEWAY            ║
+║   Telegraph Protocol Season II | Devnode Miner #6164 | Sepolia Diamond ║
 ╚═══════════════════════════════════════════════════════════════════════╝`);
 }
 
@@ -340,7 +340,7 @@ async function checkPrompt(promptText) {
 
 async function checkMinerStatus() {
   banner();
-  console.log(`\nQuerying Live Miner #6169 Telemetry on Devnode (${NODE_URL})...\n`);
+  console.log(`\nQuerying Live Miner #6164 Telemetry on Devnode (${NODE_URL})...\n`);
 
   try {
     const healthRes = await fetch(`${client.endpoint}/api/health`);
@@ -350,17 +350,16 @@ async function checkMinerStatus() {
     console.log(`  Service:             ${health.service}`);
     console.log(`  Status:              ${health.ok ? 'HEALTHY (200 OK)' : 'DEGRADED'}`);
     console.log(`  Diamond Registration: #${health.diamondRegistration}`);
-    console.log(`  Devnode Route:       #${health.minerId}`);
+    console.log(`  Devnode Miner ID:    #${health.minerId}`);
     console.log(`  OFAC SDN Indexed:    ${health.sdnEntriesLoaded?.toLocaleString()} records`);
     console.log(`  WASM Engine:         ${health.wasmLoaded ? 'ACTIVE (651 bytes)' : 'INACTIVE'}`);
 
-    // Query on-chain Diamond route status
-    const devnodeRes = await fetch(`${NODE_URL}/engine/v1/signal?route=5281`).catch(() => null);
+    const devnodeRes = await fetch(`${NODE_URL}/api/miners/${health.minerId || 6164}`).catch(() => null);
     if (devnodeRes && devnodeRes.ok) {
       const devnodeData = await devnodeRes.json();
-      console.log(`\nDevnode Signal Gateway: Active (Route 5281)`);
+      console.log(`\nDevnode Registry: ${devnodeData.activation_status || 'active'} (Miner #${devnodeData.id || 6164}, ${devnodeData.supported_intents?.length || 18} intents, warnings: ${devnodeData.warnings?.length ?? 0})`);
     } else {
-      console.log(`\nDevnode Route 5281: Listening on Sepolia Diamond #6169`);
+      console.log(`\nDevnode Miner #${health.minerId || 6164}: Registered on Sepolia Diamond #${health.diamondRegistration}`);
     }
   } catch (err) {
     console.error(`Telemetry lookup failed: ${err.message}`);

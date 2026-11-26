@@ -59,8 +59,14 @@ If you run an agent on [hellominds.ai](https://hellominds.ai), add a simple HTTP
   - `GET /corporate-registry?name=<COMPANY_NAME>`
   - `GET /regulatory-filing?name=<COMPANY_NAME>`
   - `GET /b2b-identity?domain=<DOMAIN>`
-  - `GET /fraud-risk?prompt=<ACTOR_CONTEXT>`
+  - `GET /fraud-risk?subject=<ACTOR_CONTEXT>`
   - `GET /payment-method-verify?bin=<BIN>&routing_number=<ABA>`
+  - `GET /wallet-balance?address=<EVM_OR_SOLANA_ADDR>&chain=<ethereum|solana>`
+  - `GET /token-supply?token=<SYMBOL_OR_MINT>&chain=<ethereum|solana>`
+  - `GET /onchain-tx?tx=<EVM_HASH_OR_SOLANA_SIG>&chain=<ethereum|solana>`
+  - `GET /liquidity-depth?pair=<PAIR>` (e.g. `ETH/USDC`, `SOL/USDC`, or pool address)
+  - `POST /api/agent/verify-output` (Tencent #01/#03 agent claim decomposition & GO/NO_GO gate)
+  - `POST /api/evaluator/sanctions-batch` (Track 3 deterministic batch OFAC SDN evaluator)
 
 No API keys, no bearer tokens, no credit card required.
 

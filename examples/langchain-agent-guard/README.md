@@ -55,7 +55,7 @@ except SpendGuardException as e:
 | **Legal Entity Identifier (LEI)** | Global LEI Foundation (GLEIF) Global LEI Index | **`HALT & FREEZE`** (Unregistered vendor) |
 | **Arithmetic Reconciliation** | 651-byte zero-import AssemblyScript WASM | **`HALT & FREEZE`** (Overcharge blocked) |
 | **Delegation Caps** | Single-agent limit ($500) & Dual-approval limit ($5,000) | **`HALT & FREEZE`** (Signature required) |
-| **Settlement Rail** | Telegraph Protocol (Sepolia Diamond `0x3624EB01...` Miner `#5281`) | Verified x402 payment challenge |
+| **Settlement Rail** | Telegraph Protocol (Sepolia Diamond `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`, Devnode `#6164`) | Verified x402 payment challenge |
 
 ---
 

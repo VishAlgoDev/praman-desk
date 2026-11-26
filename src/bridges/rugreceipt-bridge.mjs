@@ -1,6 +1,6 @@
 /**
  * Praman Desk x RugReceipt Reciprocal Integration Bridge
- * Connects RugReceipt (Issue #208 / Gajanand) with Praman Desk Compliance (Devnode #5281 / Diamond #5311)
+ * Connects RugReceipt (Issue #208 / Gajanand) with Praman Desk Compliance (Devnode #6164 / Sepolia Diamond)
  *
  * Implements:
  * 1. Deep EVM smart contract & deployer address screening against OFAC SDN digital currency list
@@ -96,8 +96,8 @@ export async function generateRugReceiptProof({
     safetyScore,
     receiptVerdict,
     flags,
-    minerId: 5281,
-    diamondRegistration: 5311,
+    minerId: 6164,
+    diamondRegistration: 6200,
     timestamp: new Date().toISOString().slice(0, 10)
   });
   const attestationHash = '0x' + crypto.createHash('sha256').update(canonicalData).digest('hex');
@@ -127,13 +127,13 @@ export async function generateRugReceiptProof({
     attestation: {
       sha256Seal: attestationHash,
       onChainDiamond: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
-      settlementMinerId: 5281,
-      diamondRegistration: 6142,
+      settlementMinerId: 6164,
+      diamondRegistration: 6200,
       explorerUrl: 'https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b'
     },
     reciprocalAttribution: {
       collaborator: 'RugReceipt (Issue #208 / Gajanand)',
-      provider: 'Praman Desk Autonomous Compliance Engine (Devnode #5281 / Diamond #5311)',
+      provider: 'Praman Desk Autonomous Compliance Engine (Devnode #6164 / Diamond #6200)',
       protocol: 'Telegraph Protocol Season II'
     },
     latency_ms: totalLatencyMs,

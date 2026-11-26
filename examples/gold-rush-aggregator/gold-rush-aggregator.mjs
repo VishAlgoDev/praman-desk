@@ -25,7 +25,7 @@ if (process.argv[1] && process.argv[1].endsWith('gold-rush-aggregator.mjs')) {
   console.log('▶ Test 1: Arbitrating Mount Morgan Mine (Queensland)...');
   const mmCandidates = [
     {
-      minerId: 'miner-6127-praman',
+      minerId: 'miner-6164-praman',
       content: 'Mount Morgan Mine discovered in 1882 by Morgan Brothers. Produced 262 tonnes (8.4 million oz) gold and 387,000 tonnes copper from a Devonian VHMS replacement deposit in Trondhjemite.'
     },
     {

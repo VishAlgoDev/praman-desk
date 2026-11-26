@@ -5,12 +5,12 @@
 ## Overview
 Paysheet is an automated payroll streaming and payout tool built for Telegraph Protocol Season II. In production payroll execution, relying on a single oracle or miner creates a single point of failure and exposure to upstream facilitator latency spikes.
 
-Praman Desk provides a sub-25ms in-memory sanctions screening and statutory compliance miner (`praman-compliance-miner`) bonded on Sepolia Diamond (`#6142`) and routed on Devnode (`5281`).
+Praman Desk provides a sub-25ms in-memory sanctions screening and statutory compliance miner (`praman-compliance-miner`) bonded on Sepolia Diamond (`#6200`) and routed on Devnode (`#6164`).
 
 This consensus adapter allows Paysheet to evaluate payout recipients across a 3-way quorum of independent Telegraph miners:
 1. **Miner #731002 / #710637**: Counterproof / ZK Sanctions
 2. **Miner #64175**: Sanctions Name Evidence
-3. **Route #5281 / Diamond #6142**: Praman Desk Compliance Miner (in-memory OFAC SDN + EVM address screening)
+3. **Devnode #6164 / Diamond #6200**: Praman Desk Compliance Miner (in-memory OFAC SDN + EVM address screening)
 
 ---
 
@@ -39,5 +39,5 @@ if (!verdict.cleared) {
 
 ## Benchmark & Performance Guarantee
 - **Praman Desk Latency**: <25ms (19,565 OFAC SDN entities + 127 EVM addresses loaded in RAM).
-- **On-Chain Diamond Registration**: ID `#6142` on contract `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`.
+- **On-Chain Diamond Registration**: ID `#6200` on contract `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`.
 - **Testnet Fallback Rail**: Pure JSON-RPC over HTTPS without requiring local private key for reading state.

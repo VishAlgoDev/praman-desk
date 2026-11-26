@@ -22,7 +22,16 @@ const TEST_QUERIES = [
   { intent: 'LIQUIDITY_DEPTH_VERIFY_GENERAL', path: '/api/miner/liquidity-depth?prompt=Verify%20liquidity%20depth%20for%20USDC-WETH', check: j => j.ok === true && Number(j.liquidity_usd) > 0 && j.confidence >= 0.9 },
   { intent: 'B2B_IDENTITY_ENRICHMENT_GENERAL', path: '/api/miner/b2b-identity?prompt=Enrich%20siemens.com%20legal%20entity%20name%20and%20LEI', check: j => j.ok === true && j.found === true && Boolean(j.lei) },
   { intent: 'FRAUD_RISK_GENERAL', path: '/api/miner/fraud-risk?prompt=Score%20fraud%20risk%20of%20signup%20IP%2045.83.x.x%20headless%20browser%20disposable%20email', check: j => j.ok === true && Number(j.fraud_probability) >= 0.7 },
-  { intent: 'PAYMENT_METHOD_VERIFY_GENERAL', path: '/api/miner/payment-method-verify?prompt=Is%20BIN%20411111%20a%20valid%20Visa%20and%20routing%20021000021%20active', check: j => j.ok === true && j.valid === true }
+  { intent: 'PAYMENT_METHOD_VERIFY_GENERAL', path: '/api/miner/payment-method-verify?prompt=Is%20BIN%20411111%20a%20valid%20Visa%20and%20routing%20021000021%20active', check: j => j.ok === true && j.valid === true },
+  { intent: 'CONTRACT_OBLIGATION_CLAUSE_EXTRACT', path: '/api/miner/contract-obligation?prompt=Delivery%20within%2014%20days%20of%20PO%2C%20Net%2030%20payment%20terms%2C%20governed%20by%20the%20laws%20of%20Singapore%2C%20liability%20capped%20at%20100%25%20of%20fees%2C%20notice%2030%20days.', check: j => j.status === 'obligations_extracted' && /Net\s*30/i.test(String(j.summary || '')) && /Singapore/i.test(String(j.summary || '')) },
+  { intent: 'PURCHASE_ORDER_VERIFY_CAP_FIX', path: '/api/miner/po-verify?po_number=PO-2231&amount=%2442%2C000&prompt=Verify%20PO-2231%20for%20%2442%2C000%2C%20status%3A%20approved%2C%20Q3%20budget%20cap%3A%20%2450%2C000', check: j => j.verified === true && Number(j.amount) === 42000 && Number(j.approval_cap) === 50000 },
+  { intent: 'FRAUD_RISK_SUBJECT_PARAM', path: '/api/miner/fraud-risk?subject=alice%40mailinator.com%20IP%2045.83.12.9%20headless%20browser', check: j => j.ok === true && Number(j.risk_score) >= 0.65 && Number(j.fraud_probability) >= 0.65 },
+  { intent: 'GRID_POWER_EXPLICIT_INTERVAL', path: '/api/miner/grid-power-price?node=NP15&market=DAM&interval_start=2026-11-24T18%3A00%3A00Z', check: j => j.ok === true && Number(j.lmp_usd_per_mwh) > 0 && /^2026-11-24T18:00/i.test(String(j.interval_start || '')) },
+  { intent: 'LIQUIDITY_DEPTH_ETH_USDC_TVL', path: '/api/miner/liquidity-depth?pair=ETH%2FUSDC', check: j => j.ok === true && Number(j.liquidity_usd) > 20000000 },
+  { intent: 'LIQUIDITY_DEPTH_SOL_USDC', path: '/api/miner/liquidity-depth?pair=SOL%2FUSDC', check: j => j.ok === true && Number(j.liquidity_usd) > 100000 },
+  { intent: 'WALLET_BALANCE_SOLANA_SPL', path: '/api/miner/wallet-balance?address=3r428Z8YSgQFJpsyPcQyxmt1faQQBuNRpqz92m9ucbuL&chain=solana', check: j => j.status !== 'error' && j.chain === 'solana' && /SOL/i.test(String(j.answer || '')) },
+  { intent: 'TOKEN_TOTAL_SUPPLY_SOLANA', path: '/api/miner/token-supply?token=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&chain=solana', check: j => j.status !== 'error' && Number(j.total_supply) > 1000000 },
+  { intent: 'ONCHAIN_TX_SOLANA', path: '/api/miner/onchain-tx?tx=mGGrojDg7cBeNpcWz9Vb9p3qkEpJm6iETVwR4AxtE56WkdMVjEkUbFHQDX4XR3SpSo4wRcKzvrP2TcMNSfMepNa&chain=solana', check: j => j.status === 'confirmed' && Number(j.slot) > 0 }
 ];
 
 async function main() {

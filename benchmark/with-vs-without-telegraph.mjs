@@ -7,7 +7,7 @@
  * 1. Without Telegraph: Ungrounded Agent Baseline (an autonomous agent lacking real-time truth oracles,
  *    relying on user-provided parameter pass-through, internal model knowledge, and loose floating-point math).
  * 2. With Telegraph: Praman Desk Collaborative Two-Mind architecture powered by Telegraph Protocol
- *    (Miner #6127, FakeWatch #42420, Anjoman intelligence layer, and 651-byte WASM comparator).
+ *    (Devnode Miner #6164, FakeWatch #42420, Anjoman intelligence layer, and 651-byte WASM comparator).
  *
  * Quantifies:
  * - Adversarial & Anomaly Catch Rate (%)
@@ -243,7 +243,7 @@ export async function runBenchmark() {
       totalLossIncurredUsd: totalLossWithoutTelegraph,
       lossAversionRatePct: 0.0,
       cryptographicVerifiability: 'NONE (Unverifiable string output)',
-      avgLatencyLabel: 'N/A (Deterministic Counterfactual Baseline — No Live Check)',
+      avgLatencyLabel: 'N/A (Deterministic Counterfactual Baseline - No Live Check)',
     },
     withTelegraph: {
       catchRatePct: catchRateWithTelegraph,
@@ -283,7 +283,7 @@ function generateMarkdownReport(summary) {
 > **Timestamp**: ${summary.generatedAt}  
 > **Test Ground**: 5 High-Stakes Procurement, Legal & Web3 Adversarial Vectors  
 > **Methodology**: Compares ungrounded agent parameter pass-through (without live truth oracles or deterministic WASM) against the Praman Two-Mind Spend Guard.  
-> **Network Coordinates**: Devnode Miner #6127 | FakeWatch Miner #42420 | Sepolia Diamond Port \`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b\`
+> **Network Coordinates**: Devnode Miner #6164 | FakeWatch Miner #42420 | Sepolia Diamond Port \`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b\`
 
 ---
 
@@ -324,7 +324,7 @@ ${summary.detailedResults.map(r => `
 
 1. **Parameter Pass-Through Blindness**: Raw LLMs treat inputs (such as claimed FX rates or corporate numbers) as ground-truth facts. When a counterparty supplies an inverted FX rate (e.g. 0.92 USD/EUR instead of 1.085), the LLM executes the math with the inverted parameter, approving an invoice that incurs massive financial loss.
 2. **Subword Tokenization Blind Spots**: Typo-squatted domains (such as \`unisvvap.org\`) are split into subword tokens that the model associates with the clean concept \`uniswap\`. Only a specialized domain reputation miner like **FakeWatch Miner #42420** detects the clone.
-3. **Absence of Real-Time Regulatory Registries**: Corporate statuses change dynamically. An entity with an LEI issued in 2022 may be **LAPSED** today. Training weights cannot know this; only real-time queries to **GLEIF** via **Praman Desk Miner #6127** expose the lapse.
+3. **Absence of Real-Time Regulatory Registries**: Corporate statuses change dynamically. An entity with an LEI issued in 2022 may be **LAPSED** today. Training weights cannot know this; only real-time queries to **GLEIF** via **Praman Desk Miner #6164** expose the lapse.
 4. **Fuzzy Floating-Point Math**: When verifying invoices with hundreds of line items, LLMs approximate totals. The **651-byte compiled WebAssembly comparator** executes integer arithmetic that flags even a single cent of inflation.
 
 ---

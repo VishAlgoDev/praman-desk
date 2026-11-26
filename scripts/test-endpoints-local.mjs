@@ -735,6 +735,80 @@ async function run() {
       throw new Error(`3-intent expansion check failed: ${JSON.stringify({ b2b: b2b.json.found, fraud: fraudRisk.json.fraud_probability, pay: payVerify.json.valid })}`);
     }
 
+    // 36. Season II closing sprint fixes: clauses, PO-2231, fraud-risk subject, grid interval, liquidity TVL/spot, Solana live RPC, Tencent #01/#03, Option A batch evaluator & ledger
+    const contractClause = await check('/api/miner/contract-obligation?prompt=' + encodeURIComponent('Delivery within 14 days of PO, Net 30 payment terms, governed by the laws of Singapore, liability capped at 100% of fees, notice 30 days.'));
+    if (contractClause.status !== 200 || contractClause.json.status !== 'obligations_extracted' || !/Net\s*30/i.test(String(contractClause.json.summary || ''))) {
+      throw new Error(`Contract obligation extraction failed: ${JSON.stringify(contractClause.json)}`);
+    }
+    const po2231Open = await check('/api/miner/po-verify?po_number=PO-2231&amount=%2442%2C000&prompt=' + encodeURIComponent('Verify PO-2231 for $42,000'));
+    if (po2231Open.json.verified !== false || po2231Open.json.status !== 'insufficient_evidence' || po2231Open.json.approval_cap !== null || /three-way match/i.test(String(po2231Open.json.summary || ''))) {
+      throw new Error(`PO-2231 open question invariant failed: ${JSON.stringify(po2231Open.json)}`);
+    }
+    const po2231Cap = await check('/api/miner/po-verify?po_number=PO-2231&amount=%2442%2C000&prompt=' + encodeURIComponent('Verify PO-2231 for $42,000, status: approved, Q3 budget cap: $50,000'));
+    if (po2231Cap.json.verified !== true || Number(po2231Cap.json.amount) !== 42000 || Number(po2231Cap.json.approval_cap) !== 50000) {
+      throw new Error(`PO-2231 budget cap verification failed: ${JSON.stringify(po2231Cap.json)}`);
+    }
+    const fraudSubject = await check('/api/miner/fraud-risk?subject=' + encodeURIComponent('alice@mailinator.com IP 45.83.12.9 headless browser'));
+    if (fraudSubject.json.ok !== true || !(Number(fraudSubject.json.risk_score) >= 0.65) || fraudSubject.json.risk_level !== 'HIGH') {
+      throw new Error(`Fraud risk subject/risk_score failed: ${JSON.stringify(fraudSubject.json)}`);
+    }
+    const gridExplicit = await check('/api/miner/grid-power-price?node=NP15&market=DAM&interval_start=2026-11-24T18:00:00Z');
+    if (gridExplicit.json.ok !== true || !(Number(gridExplicit.json.lmp_usd_per_mwh) > 0) || !/^2026-11-24T18:00/i.test(String(gridExplicit.json.interval_start || ''))) {
+      throw new Error(`Grid power explicit interval failed: ${JSON.stringify(gridExplicit.json)}`);
+    }
+    const liqEthTvl = await check('/api/miner/liquidity-depth?pair=ETH/USDC');
+    const liqSol = await check('/api/miner/liquidity-depth?pair=SOL/USDC');
+    const liqSpot = await check('/api/miner/liquidity-depth?prompt=' + encodeURIComponent('Estimate USD liquidity impact of 50 ETH sell on ETH/USDC'));
+    if (!(Number(liqEthTvl.json.liquidity_usd) > 20000000) || !(Number(liqSol.json.liquidity_usd) > 100000) || !(Number(liqSpot.json.notional_tested_usd) > 50000)) {
+      throw new Error(`Liquidity depth TVL/SOL/spot failed: ${JSON.stringify({ eth: liqEthTvl.json.liquidity_usd, sol: liqSol.json.liquidity_usd, spot: liqSpot.json.notional_tested_usd })}`);
+    }
+    const solBal = await check('/api/miner/wallet-balance?address=3r428Z8YSgQFJpsyPcQyxmt1faQQBuNRpqz92m9ucbuL&chain=solana');
+    const solSupply = await check('/api/miner/token-supply?token=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&chain=solana');
+    const solTx = await check('/api/miner/onchain-tx?tx=mGGrojDg7cBeNpcWz9Vb9p3qkEpJm6iETVwR4AxtE56WkdMVjEkUbFHQDX4XR3SpSo4wRcKzvrP2TcMNSfMepNa&chain=solana');
+    if (solBal.json.chain !== 'solana' || !(Number(solSupply.json.total_supply) > 1000000) || solTx.json.status !== 'confirmed' || !(Number(solTx.json.slot) > 0)) {
+      throw new Error(`Solana live RPC checks failed: ${JSON.stringify({ solBal: solBal.json, solSupply: solSupply.json, solTx: solTx.json })}`);
+    }
+    const agentGo = await check('/api/agent/verify-output', 'POST', {
+      vendor: 'Stripe, Inc.',
+      domain: 'stripe.com',
+      output: 'Counterparty Stripe, Inc. (stripe.com) | Invoice: 100 units x $50.00 = $5,000.00 | ABA Routing 021000021'
+    });
+    const agentNoGo = await check('/api/agent/verify-output', 'POST', {
+      vendor: 'Lazarus Group',
+      recipientAddress: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96',
+      output: 'All checks passed! Ready to settle USD 43,100.00 (100 units x $400.00 = $43,100.00) via ABA 021000029'
+    });
+    if (agentGo.json.verdict !== 'GO' || agentGo.json.approved !== true || agentNoGo.json.verdict !== 'NO_GO' || !(agentNoGo.json.financialExposurePreventedUsd > 0)) {
+      throw new Error(`Agent verify-output GO/NO_GO failed: ${JSON.stringify({ agentGo: agentGo.json, agentNoGo: agentNoGo.json })}`);
+    }
+    const tencentAssurance = await check('/api/mission/tencent-assurance', 'POST', {
+      vendor: 'Stripe, Inc.',
+      domain: 'stripe.com',
+      poCommitment: '5000.00',
+      statedTotal: '5000.00',
+      spendAmountUsdc: '5000.00',
+      output: 'Stripe, Inc. (stripe.com) | 100 units x $50.00 = $5,000.00 | ABA 021000021'
+    });
+    if (tencentAssurance.status !== 200 || tencentAssurance.json.ok !== true || tencentAssurance.json.mission !== 'TENCENT_DECISION_ASSURANCE_01_03') {
+      throw new Error(`Tencent assurance endpoint failed: ${JSON.stringify(tencentAssurance.json)}`);
+    }
+    const batchBad = await check('/api/evaluator/sanctions-batch', 'POST', {});
+    const batchGood = await check('/api/evaluator/sanctions-batch', 'POST', {
+      items: [
+        { id: 'pos-1', name: 'Banco Nacional de Cuba', expected_matched: true },
+        { id: 'pos-2', name: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96', expected_matched: true },
+        { id: 'neg-1', name: 'Siemens AG', expected_matched: false },
+        { id: 'neg-2', name: 'Anthropic PBC', expected_matched: false }
+      ]
+    });
+    if (batchBad.status !== 400 || batchGood.status !== 200 || batchGood.json.metrics?.f1 !== 1 || batchGood.json.results?.length !== 4) {
+      throw new Error(`Evaluator sanctions-batch failed: ${JSON.stringify({ badStatus: batchBad.status, good: batchGood.json })}`);
+    }
+    const ledgerCheck = await check('/api/ledger');
+    if (!(ledgerCheck.json.totalPaidCalls >= 32) || !Array.isArray(ledgerCheck.json.escrowPurchases) || ledgerCheck.json.escrowPurchases.length < 4 || !Array.isArray(ledgerCheck.json.takarResolvers) || ledgerCheck.json.takarResolvers.length < 2) {
+      throw new Error(`Ledger escrow/Takar arrays failed: ${JSON.stringify({ total: ledgerCheck.json.totalPaidCalls, escrow: ledgerCheck.json.escrowPurchases?.length, takar: ledgerCheck.json.takarResolvers?.length })}`);
+    }
+
     console.log('\nALL SEASON II ADVERSARIAL REGRESSION GUARDS, TOKEN-2022 HTTP SCENARIOS, EIP-191 COUNTERSIGN, 3 NEW TRACK 2 INTENTS & LIVE VERIFICATION TESTS PASSED!');
   } finally {
     server.close();

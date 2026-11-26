@@ -44,7 +44,7 @@ function extractAmountList(text) {
   }
 
   str = str
-    .replace(/\b(?:INV|PO|REF|REFERENCE|ID|DOC|TX|NO|ORDER|LEDGER|ACCOUNT|ACCT|ENTRY|BATCH|SERIAL|LOT)[-#:\s]*[A-Z0-9-]*\d+[A-Z0-9-]*\b/gi, ' ')
+    .replace(/\b(?:INV|PO|REF|REFERENCE|ID|DOC|TX|NO|ORDER|LEDGER|ACCOUNT|ACCT|ENTRY|BATCH|SERIAL|LOT|ABA|ROUTING|BIN|SWIFT|BIC|CIK|GSTIN)[-#:\s]*[A-Z0-9-]*\d+[A-Z0-9-]*\b/gi, ' ')
     .replace(/#[0-9A-Za-z-]+/g, ' ')
     .replace(/\b(?:19\d\d|20\d\d)[-/.](?:0[1-9]|1[0-2])[-/.](?:0[1-9]|[12]\d|3[01])\b/g, ' ')
     .replace(/\b(?:0[1-9]|[12]\d|3[01])[-/.](?:0[1-9]|1[0-2])[-/.](?:19\d\d|20\d\d)\b/g, ' ')
@@ -104,10 +104,10 @@ export function parseDynamicInvoiceReconciliation(text) {
   const lineItemAcceptedMatch = text.match(/(?:accepted|net\s*accepted|receiving|received|receipt|approved|confirms?|grn)[\s\S]*?(?:confirming|accepting|verified|received)?\s*\b([0-9,.]+(?:[0-9]+)?)\s*(?:[a-zA-Z]{1,12})\s*(?:@|at)\s*[\$€£₹A-Z\s]*([0-9,.]+(?:[0-9]+)?)/i)
     || text.match(/(?:accepted|net\s*accepted|receiving|received|receipt|approved|confirms?|grn)[\s\S]*?\b([0-9,.]+(?:[0-9]+)?)\s*(?:[a-zA-Z]{1,12})?(?:\s+[^@a]+?)?\s*(?:@|at)\s*[\$€£₹A-Z\s]*([0-9,.]+(?:[0-9]+)?)/i);
 
-  // Extract explicit totals
-  const billedTotalMatch = text.match(/(?:billed\s*(?:total|amount)?|invoice\s*(?:total|bills|amount)|total\s*invoiced?)\s*[:=]?\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9,.]+(?:[0-9]+)?)/i)
-    || text.match(/\b(?:INV|Invoice|Bill|RA)[-#:\s]*([A-Za-z0-9-]+)?\s*[:=]\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9,.]+(?:[0-9]+)?)/i);
-  const ledgerTotalMatch = text.match(/(?:accepted\s*(?:total|amount)?|ledger\s*(?:total|amount|paid)?|approved\s*(?:total|payable|amount)?|po\s*total)\s*[:=]?\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9,.]+(?:[0-9]+)?)/i);
+  // Extract explicit totals (do not backtrack inside digits or mistake line-item quantities like "Invoice: 100 units x $50.00" for invoice dollar total)
+  const billedTotalMatch = text.match(/(?:billed\s*(?:total|amount)?|invoice\s*(?:total|bills|amount)|total\s*invoiced?)\s*[:=]?\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9]+(?:[,.][0-9]+)*)(?![0-9,.]|\s*(?:units?\b|pcs?\b|items?\b|hours?\b|hrs?\b|barrels?\b|cartons?\b|boxes?\b|lots?\b|mt\b|kg\b|x\b|\*|@|\s+at\b))/i)
+    || text.match(/\b(?:INV|Invoice|Bill|RA)[-#:\s]*([A-Za-z0-9-]+)?\s*[:=]\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9]+(?:[,.][0-9]+)*)(?![0-9,.]|\s*(?:units?\b|pcs?\b|items?\b|hours?\b|hrs?\b|barrels?\b|cartons?\b|boxes?\b|lots?\b|mt\b|kg\b|x\b|\*|@|\s+at\b))/i);
+  const ledgerTotalMatch = text.match(/(?:accepted\s*(?:total|amount)?|ledger\s*(?:total|amount|paid)?|approved\s*(?:total|payable|amount)?|po\s*total)\s*[:=]?\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9]+(?:[,.][0-9]+)*)(?![0-9,.]|\s*(?:units?\b|pcs?\b|items?\b|hours?\b|hrs?\b|barrels?\b|cartons?\b|boxes?\b|lots?\b|mt\b|kg\b|x\b|\*|@|\s+at\b))/i);
 
   // Extract explicit equation: QTY units x UNIT_PRICE = TOTAL_AMOUNT
   const equationMatch = text.match(/\b([0-9,.]+(?:[0-9]+)?)\s*(?:[a-zA-Z]{1,12})?\s*(?:x|\*|@|at)\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9,.]+(?:[0-9]+)?)(?:\s*(?:each|\/unit|\/[a-zA-Z]{1,12}))?\s*(?:=|equals?|->|total[:\s]*)\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9,.]+(?:[0-9]+)?)/i);
@@ -258,7 +258,7 @@ export function parseDynamicInvoiceReconciliation(text) {
 export function parseDynamicContractObligation(text) {
   if (!text || text.length < 20) return null;
 
-  const isLegal = /(?:contract|obligation|clause|sub-clause|liquidated damages|delay|penalty|eot|extension of time|retention|breach|liability|time-barred|notice window)/i.test(text);
+  const isLegal = /(?:contract|obligation|clause|sub-clause|liquidated damages|delay|penalty|eot|extension of time|retention|breach|liability|time-barred|notice window|(?:supplier|vendor|seller|buyer|contractor)\s+must\b|governing\s+law|termination\s+notice|\bnet\s+\d{1,3}\b)/i.test(text);
   if (!isLegal) return null;
 
   const currMatch = text.match(/\b(INR|USD|EUR|GBP|AED|AUD|CAD)\b/i) || text.match(/([\$€£₹])/);
@@ -329,11 +329,50 @@ export function parseDynamicContractObligation(text) {
       if (!citations.includes(c)) citations.push(c);
     }
   }
-  if (!citations.length) citations.push('Standard Contract Terms');
+
+  // Deterministic clause & obligation extraction for general contract prompts
+  const obligations = [];
+  const citedClauses = [...citations];
+  const pushObs = (val) => {
+    const v = String(val || '').replace(/\s+/g, ' ').replace(/[;,]+$/, '').trim();
+    if (v && !obligations.includes(v)) obligations.push(v);
+  };
+  const pushClause = (val) => {
+    const v = String(val || '').replace(/\s+/g, ' ').replace(/[;,]+$/, '').trim();
+    if (v && !citedClauses.includes(v)) citedClauses.push(v);
+  };
+
+  for (const m of text.matchAll(/\b(?:(?:supplier|vendor|seller|contractor|provider)\s+(?:must|shall|agrees?\s+to)\s+[^.;\n?!]{4,120}|deliver(?:y)?[^.;\n?!]{0,60}\bwithin\s+\d+\s*(?:business\s+)?(?:days?|weeks?|months?)(?:\s+of\s+[^.;\n?!]{2,40})?)/gi)) {
+    pushObs(m[0]);
+    pushClause(m[0]);
+  }
+  for (const m of text.matchAll(/\b(?:payment\s+(?:is|terms?\s*(?:are|:)|due|shall\s+be)\s*[^.;\n?!]{2,80}|net\s+\d{1,3}(?:\s+days?)?|upon\s+(?:delivery|acceptance|milestone)|advance\s+payment\s+of\s+\d+%|\d+%\s+(?:late|overdue)\s+interest)\b[^.;\n?!]*/gi)) {
+    pushObs(`Payment term: ${m[0].replace(/^payment\s+(?:is|terms?\s*(?:are|:)|shall\s+be)\s*/i, '')}`);
+    pushClause(m[0]);
+  }
+  for (const m of text.matchAll(/\b(?:\d+[-\s]day(?:s)?\s+(?:written\s+)?(?:termination|notice|cure)|(?:termination|notice|cure)\s+(?:window|period)\s*(?:of|:)?\s*\d+\s*days?)\b[^.;\n?!]*/gi)) {
+    pushObs(`Notice / termination: ${m[0]}`);
+    pushClause(m[0]);
+  }
+  for (const m of text.matchAll(/\b(?:governed\s+by\s+[A-Za-z\s]{2,35}\blaw|\b(?:Singapore|English|Delaware|New\s+York|California|Indian|German|Swiss|French|UAE)\s+law|\b(?:SIAC|ICC|LCIA|AAA|UNCITRAL)\s+arbitration)\b/gi)) {
+    pushObs(`Governing law / forum: ${m[0]}`);
+    pushClause(m[0]);
+  }
+  for (const m of text.matchAll(/\b(?:liability\s+(?:cap(?:ped)?|limited)\s+(?:to|at)\s+[^.;\n?!]{2,60}|unlimited\s+liability|warranty\s+(?:period\s+of\s+)?\d+\s*(?:months?|years?|days?)|liquidated\s+damages\s+of\s+[^.;\n?!]{2,60}|indemnif[a-z]+\s+[^.;\n?!]{4,60})/gi)) {
+    pushObs(m[0]);
+    pushClause(m[0]);
+  }
+
+  const hasExplicitBreach = /\b(?:failed\s+to\s+deliver|non[-\s]?payment|in\s+default|breach(?:ed)?\s+(?:clause|contract|obligation|warranty)|short[-\s]?shipped|missed\s+deadline)\b/i.test(text);
+  const hasConditionalRisk = /\b(?:unlimited\s+liability|unilateral\s+(?:variation|change|termination\s+without\s+cause)|waive(?:s|d)?\s+statutory|no\s+liability\s+cap|ambiguous|uncapped)\b/i.test(text);
+
+  if (!citedClauses.length) citedClauses.push('Standard Contract Terms');
 
   let verdict = '';
   let explanation = '';
   let compliant = false;
+  let partiallyCompliant = false;
+  let unclear = false;
 
   if (isTimeBarred) {
     verdict = `AUDIT VERDICT: CLAIM TIME-BARRED UNDER NOTICE CLAUSE; LIQUIDATED DAMAGES PAYABLE (${currency} ${penaltyAmount.toLocaleString()}).`;
@@ -343,27 +382,50 @@ export function parseDynamicContractObligation(text) {
     verdict = `AUDIT VERDICT: CONTRACTUAL DELAY LIQUIDATED DAMAGES PAYABLE (${currency} ${penaltyAmount.toLocaleString()}).`;
     explanation = `AUDIT VERDICT: CONTRACT BREACH / DELAY. Contractual obligations delayed by ${delayUnits} ${delayUnitType}. Statutory and agreed liquidated damages assessed: ${calculationDetails}. Payable to counterparty without prejudice.`;
     compliant = false;
-  } else {
-    verdict = 'AUDIT VERDICT: CONTRACT OBLIGATIONS COMPLIANT AND FULFILLED.';
-    explanation = 'AUDIT VERDICT: COMPLIANT. Review of contract terms, delivery milestones, and covenants indicates all obligations are currently met within statutory grace periods and contractual specifications.';
+  } else if (hasExplicitBreach) {
+    verdict = 'AUDIT VERDICT: NON-COMPLIANT BREACH INDICATOR IDENTIFIED.';
+    explanation = `Contract breach or non-performance indicator identified (${obligations.slice(0, 3).join('; ') || 'supplied contract record'}). Review remedies and notice cure windows (${citedClauses.slice(0, 3).join(', ')}).`;
+    compliant = false;
+  } else if (hasConditionalRisk) {
+    verdict = 'AUDIT VERDICT: PARTIALLY COMPLIANT (HIGH-RISK CLAUSE DETECTED).';
+    explanation = `Contract creates defined obligations (${obligations.slice(0, 3).join('; ')}) but contains an elevated commercial/risk exposure clause requiring bilateral redline or cap.`;
+    partiallyCompliant = true;
+    compliant = false;
+  } else if (obligations.length > 0) {
+    verdict = 'AUDIT VERDICT: CONTRACT OBLIGATIONS EXTRACTED AND COMPLIANT.';
+    explanation = `Extracted obligations: ${obligations.join('; ')}. Cited terms reflect consistent commercial performance, payment, notice, and governing-law structure with no breach or delay penalty indicated.`;
     compliant = true;
+  } else {
+    return null;
   }
 
   return {
     compliant,
+    partially_compliant: partiallyCompliant,
+    unclear,
     verified: compliant,
     verdict,
-    status: compliant ? 'compliant_obligations_fulfilled' : (isTimeBarred ? 'claim_time_barred_ld_payable' : 'liquidated_damages_payable'),
+    status: isTimeBarred
+      ? 'claim_time_barred_ld_payable'
+      : penaltyAmount > 0
+      ? 'liquidated_damages_payable'
+      : hasExplicitBreach
+      ? 'contract_breach_detected'
+      : hasConditionalRisk
+      ? 'partially_compliant_risk_flagged'
+      : 'obligations_extracted',
     penalty_amount: penaltyAmount,
-    citations,
-    summary: verdict + ' ' + explanation,
+    obligations: obligations.length ? obligations : citedClauses,
+    clauses: citedClauses,
+    citations: citedClauses,
+    summary: explanation,
     explanation,
     reason: explanation,
     answer: explanation,
-    results: [verdict, explanation],
-    confidence: 1.0,
+    results: [explanation],
+    confidence: obligations.length > 0 || penaltyAmount > 0 ? 0.96 : 0.85,
     intent: 'CONTRACT_OBLIGATION_AUDIT_GENERAL',
-    schema_version: 2,
+    schema_version: 3,
     as_of: new Date().toISOString()
   };
 }

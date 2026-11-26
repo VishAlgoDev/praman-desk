@@ -241,22 +241,40 @@ export async function enrichB2BIdentity(params = {}, { lookupCorporateRegistry }
 
 export async function scoreFraudRisk(params = {}, { screenSanctions, checkFakeWatchDomain } = {}) {
   const promptText = cleanStr(params.question || params.query || params.prompt || params.text);
+  let subjectText = cleanStr(params.subject);
+  let subjectObj = {};
+  if (subjectText.startsWith('{') && subjectText.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(subjectText);
+      if (parsed && typeof parsed === 'object') subjectObj = parsed;
+    } catch {}
+  }
+
+  const ipVal = cleanStr(params.ip || subjectObj.ip);
+  const emailVal = cleanStr(params.email || subjectObj.email);
+  const uaVal = cleanStr(params.user_agent || params.userAgent || subjectObj.user_agent || subjectObj.userAgent);
+  const fpVal = cleanStr(params.fingerprint || subjectObj.fingerprint);
+  const domVal = cleanStr(params.domain || params.url || subjectObj.domain || subjectObj.url);
+  const entityVal = cleanStr(params.entity || params.name || subjectObj.entity || subjectObj.name);
+
   const combined = [
+    subjectText,
     promptText,
-    cleanStr(params.ip),
-    cleanStr(params.email),
-    cleanStr(params.user_agent || params.userAgent),
-    cleanStr(params.fingerprint),
-    cleanStr(params.domain || params.url),
-    cleanStr(params.session)
+    ipVal,
+    emailVal,
+    uaVal,
+    fpVal,
+    domVal,
+    cleanStr(params.session || subjectObj.session)
   ].filter(Boolean).join(' | ');
 
   if (!combined) {
-    const summary = 'Insufficient actor context: supply signup/session attributes (IP, email, domain, user agent, or fingerprint) to compute fraud risk.';
+    const summary = 'Insufficient actor context: supply signup/session attributes (subject, IP, email, domain, user agent, or fingerprint) to compute fraud risk.';
     return {
       ok: false,
       intent: 'FRAUD_RISK_GENERAL',
       risk_level: 'INSUFFICIENT_CONTEXT',
+      risk_score: null,
       fraud_probability: null,
       signals: [],
       summary,
@@ -272,7 +290,7 @@ export async function scoreFraudRisk(params = {}, { screenSanctions, checkFakeWa
   let score = 0.05;
   const signals = [];
 
-  const emailMatch = (cleanStr(params.email) || promptText).match(/\b[A-Za-z0-9._%+-]+@([A-Za-z0-9.-]+\.[A-Za-z]{2,24})\b/);
+  const emailMatch = (emailVal || combined).match(/\b[A-Za-z0-9._%+-]+@([A-Za-z0-9.-]+\.[A-Za-z]{2,24})\b/);
   const emailDomain = emailMatch?.[1]?.toLowerCase() || null;
   if ((emailDomain && DISPOSABLE_EMAIL_DOMAINS.has(emailDomain)) || /\bdisposable\s+email(?:\s+domain)?\b/i.test(combined)) {
     score += 0.32;
@@ -289,7 +307,7 @@ export async function scoreFraudRisk(params = {}, { screenSanctions, checkFakeWa
     signals.push({ signal: 'FINGERPRINT_ENTROPY_ANOMALY', weight: 0.16, detail: 'Browser/locale consistency mismatch' });
   }
 
-  const fullIpMatch = (cleanStr(params.ip) || promptText).match(/\b((?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?:\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)){3})\b/);
+  const fullIpMatch = (ipVal || combined).match(/\b((?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?:\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)){3})\b/);
   let asnOrg = null;
   if (fullIpMatch) {
     const ip = fullIpMatch[1];
@@ -315,7 +333,7 @@ export async function scoreFraudRisk(params = {}, { screenSanctions, checkFakeWa
   }
 
   let domainSafety = null;
-  const domainOrUrl = cleanStr(params.url || params.domain) || promptText.match(/https?:\/\/[^\s"'<>]+/)?.[0] || null;
+  const domainOrUrl = domVal || combined.match(/https?:\/\/[^\s"'<>]+/)?.[0] || null;
   if (domainOrUrl && typeof checkFakeWatchDomain === 'function') {
     try {
       domainSafety = await checkFakeWatchDomain(domainOrUrl);
@@ -326,9 +344,10 @@ export async function scoreFraudRisk(params = {}, { screenSanctions, checkFakeWa
     } catch {}
   }
 
-  if (cleanStr(params.entity || params.name) && typeof screenSanctions === 'function') {
+  const sdnTarget = entityVal || (/^[A-Za-z0-9\s.,'&-]{3,80}$/.test(subjectText) && !/@/.test(subjectText) ? subjectText : '');
+  if (sdnTarget && typeof screenSanctions === 'function') {
     try {
-      const sdn = await screenSanctions({ name: cleanStr(params.entity || params.name) });
+      const sdn = await screenSanctions({ name: sdnTarget });
       if (sdn?.matched) {
         score += 0.45;
         signals.push({ signal: 'OFAC_SDN_MATCH', weight: 0.45, detail: sdn.matches?.[0]?.matched_name || 'SDN entity match' });
@@ -347,6 +366,7 @@ export async function scoreFraudRisk(params = {}, { screenSanctions, checkFakeWa
   return {
     ok: true,
     intent: 'FRAUD_RISK_GENERAL',
+    risk_score: probability,
     fraud_probability: probability,
     risk_score_pct: riskScorePct,
     risk_level: riskLevel,

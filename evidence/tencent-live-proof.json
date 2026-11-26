@@ -1,0 +1,242 @@
+{
+  "recordedAt": "2026-11-26T05:09:41.267Z",
+  "verdict": "SETTLED_AND_ATTESTED",
+  "certHash": "0x6f61d31d82bc7ce9f5cc222c130873ed03c37e5786068cfa28fa5002bb324367",
+  "purchasesCount": 1,
+  "purchases": [
+    {
+      "stage": "01_PRE_SPEND_GATE",
+      "ok": true,
+      "settled": true,
+      "mode": "LIVE_TELEGRAPH_PAID",
+      "simulated_offline": false,
+      "rail": "escrow",
+      "status": 200,
+      "buyer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+      "minerId": "9002",
+      "minerName": "TxLens",
+      "intent": "CHAT_COMPLETION_GENERAL",
+      "costUsdc": 0.01,
+      "signalHash": "0x8d81b53e5c39be8df37d6982e26ac277c51957bc7ae1ba33d9e8f8488355d8ab",
+      "receiptHash": "0x4dc29b2b788e3feef9aacf95668931e8305d01cd3a8c27289af06d2b95324937",
+      "txHash": null,
+      "durationMs": 14250,
+      "response": {
+        "miner_id": "9002",
+        "miner_name": "TxLens",
+        "endpoint": "/chat-complete",
+        "result": {
+          "reply": "Siemens Aktiengesellschaft is officially registered as a public stock corporation (Aktiengesellschaft) under German law, headquartered in Munich and listed on the Frankfurt Stock Exchange.",
+          "verdict": null,
+          "brief": "Siemens Aktiengesellschaft is officially registered as a public stock corporation (Aktiengesellschaft) under German law, headquartered in Munich and listed on the Frankfurt Stock Exchange."
+        },
+        "result_shape": "intent",
+        "format_version": 3,
+        "field_status": {
+          "reply": "ok",
+          "verdict": "rejected",
+          "brief": "ok"
+        },
+        "input": {
+          "message": "What is the official corporate registration status of Siemens Aktiengesellschaft?"
+        },
+        "input_schema_version": 3,
+        "cost_usd": 0.01,
+        "duration_ms": 963,
+        "timestamp": "2026-11-26T05:08:09.647543146Z",
+        "reasoning": "Intent: The user is asking for the official corporate registration status of a specific company, Siemens Aktiengesellschaft. This directly maps to the CORPORATE_REGISTRY_LOOKUP_GENERAL intent, which is designed to retrieve official register records for companies. As a fallback, CHAT_COMPLETION_GENERAL can provide general information if the specific lookup fails. (runner-up: the top intent's required input is not in the request)\nMiner: The user is asking a question that falls under the CHAT_COMPLETION_GENERAL intent. The TxLens miner has an endpoint `/chat-complete` that serves this intent. The endpoint requires a `query` parameter, which should be populated with the user's verbatim question.",
+        "intent": "CHAT_COMPLETION_GENERAL",
+        "intent_version": 1,
+        "signal_hash": "0x8d81b53e5c39be8df37d6982e26ac277c51957bc7ae1ba33d9e8f8488355d8ab",
+        "warnings": [
+          "The response does not include: What is the official corporate registration status of Siemens Aktiengesellschaft?"
+        ],
+        "cost_usd_total": 0.01,
+        "delivery": "specialist",
+        "served_rank": 1,
+        "sources": [
+          {
+            "miner": "txlens",
+            "intent": "CHAT_COMPLETION_GENERAL"
+          }
+        ],
+        "findings": {
+          "items": [
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "Siemens Aktiengesellschaft is officially registered as a public stock corporation (Aktiengesellschaft) under German law, headquartered in Munich and listed on the Frankfurt Stock Exchange.",
+              "name": "answer",
+              "path": "$.answer",
+              "type": "string",
+              "value": "Siemens Aktiengesellschaft is officially registered as a public stock corporation (Aktiengesellschaft) under German law, headquartered in Munich and listed on the Frankfurt Stock Exchange."
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "chat-completion:What is the official corporate registration status of Siemens Aktiengesellschaft",
+              "name": "canonical",
+              "path": "$.canonical",
+              "type": "string",
+              "value": "chat-completion:What is the official corporate registration status of Siemens Aktiengesellschaft"
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "stop",
+              "name": "finish_reason",
+              "path": "$.choices[0].finish_reason",
+              "type": "string",
+              "value": "stop"
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "0",
+              "name": "index",
+              "path": "$.choices[0].index",
+              "type": "integer",
+              "value": 0
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "Siemens Aktiengesellschaft is officially registered as a public stock corporation (Aktiengesellschaft) under German law, headquartered in Munich and listed on the Frankfurt Stock Exchange.",
+              "name": "content",
+              "path": "$.choices[0].message.content",
+              "type": "string",
+              "value": "Siemens Aktiengesellschaft is officially registered as a public stock corporation (Aktiengesellschaft) under German law, headquartered in Munich and listed on the Frankfurt Stock Exchange."
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "assistant",
+              "name": "role",
+              "path": "$.choices[0].message.role",
+              "type": "string",
+              "value": "assistant"
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "0.9",
+              "name": "confidence",
+              "path": "$.confidence",
+              "type": "number",
+              "value": 0.9
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "0",
+              "name": "cost_usd",
+              "path": "$.cost_usd",
+              "type": "integer",
+              "value": 0
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "1.795669689e+09",
+              "name": "created",
+              "path": "$.created",
+              "type": "integer",
+              "value": 1795669689
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "chatcmpl-d324be96-d57e-4def-8558-a9a531ad9301",
+              "name": "id",
+              "path": "$.id",
+              "type": "string",
+              "value": "chatcmpl-d324be96-d57e-4def-8558-a9a531ad9301"
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "What is the official corporate registration status of Siemens Aktiengesellschaft?",
+              "name": "message",
+              "path": "$.message",
+              "type": "string",
+              "value": "What is the official corporate registration status of Siemens Aktiengesellschaft?"
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "perplexity/sonar",
+              "name": "model",
+              "path": "$.model",
+              "type": "string",
+              "value": "perplexity/sonar"
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "chat.completion",
+              "name": "object",
+              "path": "$.object",
+              "type": "string",
+              "value": "chat.completion"
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "Siemens Aktiengesellschaft is officially registered as a public stock corporation (Aktiengesellschaft) under German law, headquartered in Munich and listed on the Frankfurt Stock Exchange.",
+              "name": "output",
+              "path": "$.output",
+              "type": "string",
+              "value": "Siemens Aktiengesellschaft is officially registered as a public stock corporation (Aktiengesellschaft) under German law, headquartered in Munich and listed on the Frankfurt Stock Exchange."
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "ok",
+              "name": "status",
+              "path": "$.status",
+              "type": "string",
+              "value": "ok"
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "Siemens Aktiengesellschaft is officially registered as a public stock corporation (Aktiengesellschaft) under German law, headquartered in Munich and listed on the Frankfurt Stock Exchange.",
+              "name": "summary",
+              "path": "$.summary",
+              "type": "string",
+              "value": "Siemens Aktiengesellschaft is officially registered as a public stock corporation (Aktiengesellschaft) under German law, headquartered in Munich and listed on the Frankfurt Stock Exchange."
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "47",
+              "name": "completion_tokens",
+              "path": "$.usage.completion_tokens",
+              "type": "integer",
+              "value": 47
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "21",
+              "name": "prompt_tokens",
+              "path": "$.usage.prompt_tokens",
+              "type": "integer",
+              "value": 21
+            },
+            {
+              "basis": "provider_reported",
+              "delivery": "specialist",
+              "evidence": "68",
+              "name": "total_tokens",
+              "path": "$.usage.total_tokens",
+              "type": "integer",
+              "value": 68
+            }
+          ],
+          "raw_sha256": "e153b6d82d84565447bfff12369275ec52b72f7c45bcebef2af9633c3eaef035"
+        }
+      }
+    }
+  ]
+}

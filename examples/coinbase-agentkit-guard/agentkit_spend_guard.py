@@ -25,7 +25,7 @@ Architecture:
   Freezes Agent Outbound TX   Executes On-Chain Settlement
 
 Live Endpoint: https://praman-desk.vercel.app/api/spend-guard/evaluate
-Telegraph Devnode Ask Route: 5281 (Diamond #5311)
+Telegraph Devnode Miner: #6164 (Sepolia Diamond: 0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
 """
 
 import json

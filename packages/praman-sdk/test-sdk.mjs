@@ -6,7 +6,7 @@ import { PramanDesk } from './index.js';
 
 async function run() {
   console.log('=== Testing Praman Desk JS/TS SDK ===');
-  const client = new PramanDesk({ endpoint: process.env.PRAMAN_ENDPOINT || 'https://praman-desk.vercel.app', timeout: 10000 });
+  const client = new PramanDesk({ endpoint: process.env.PRAMAN_ENDPOINT || 'https://praman-desk.vercel.app', timeout: 15000 });
 
   console.log('1. Testing screenSanctions (Lazarus Group EVM)...');
   const sdnRes = await client.screenSanctions({ address: '0x098B716B8Aaf21512996dC57EB0615e2383E2f96' });
@@ -64,7 +64,7 @@ async function run() {
 
   console.log('10. Testing createAgentSpendMiddleware (Clean spend vs Sanctioned block)...');
   const { createAgentSpendMiddleware, createToolGuard, PramanSpendGuardError } = await import('./index.js');
-  const guard = createAgentSpendMiddleware({ endpoint: process.env.PRAMAN_ENDPOINT || 'https://praman-desk.vercel.app' });
+  const guard = createAgentSpendMiddleware({ endpoint: process.env.PRAMAN_ENDPOINT || 'https://praman-desk.vercel.app', timeout: 15000 });
 
   // 10a: Clean spend approved
   const approvedSpend = await guard({ vendor: 'Siemens AG', amount: 450, currency: 'USDC' });

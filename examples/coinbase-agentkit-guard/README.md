@@ -84,7 +84,7 @@ result = guarded_wallet.guarded_transfer(
 
 ---
 
-## ⛓️ Network Verification
+## Network Verification
 - **Live Endpoint**: `https://praman-desk.vercel.app/api/spend-guard/evaluate`
-- **Telegraph Protocol Devnode Ask Route**: `5281` (`praman-compliance-miner`)
-- **Ethereum Sepolia Diamond**: [`0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b`](https://sepolia.etherscan.io/address/0x3624EB012B5E998BB57B6bE6C9Cfc9c4bc5eb99b) (Registration `#5311`)
+- **Telegraph Protocol Devnode Miner**: `#6164` (`praman-compliance-miner`)
+- **Ethereum Sepolia Diamond**: [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) (Registration `#6200`)
