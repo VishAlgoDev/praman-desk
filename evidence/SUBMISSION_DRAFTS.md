@@ -1,3 +1,6 @@
+> [!WARNING]
+> **SUPERSEDED ARCHIVE (Nov 20 Snapshot Only):** Do NOT post from this file (`#5289` / `62 EvalPool rows` are obsolete). Use [SUBMISSION_DRAFTS_SEASON2.md](./SUBMISSION_DRAFTS_SEASON2.md) for current Season II copy (`Diamond #6201 / Route #6164`, `Minds Bazaar Skill`, `Solana Devnet`).
+
 # Praman Desk — Ready-to-Post Submission & Community Drafts
 
 > [!IMPORTANT]
