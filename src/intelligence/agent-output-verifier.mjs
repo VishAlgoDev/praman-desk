@@ -101,8 +101,10 @@ export async function verifyEnterpriseAgentOutput(payload = {}, options = {}) {
   }
 
   const extracted = extractAgentClaimsFromText(generatedOutput);
-  const targetVendor = String(payload.vendor || payload.vendorName || payload.company || '').trim();
-  const targetDomain = String(payload.domain || payload.paymentUrl || extracted.urlOrDomains[0] || '').trim();
+  const rawVendorInput = String(payload.vendor || payload.vendorName || payload.company || '').trim();
+  const vendorIsDomain = !/\s/.test(rawVendorInput) && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(rawVendorInput);
+  const targetVendor = vendorIsDomain ? '' : rawVendorInput;
+  const targetDomain = String(payload.domain || payload.paymentUrl || (vendorIsDomain ? rawVendorInput : '') || extracted.urlOrDomains[0] || '').trim();
   const targetRecipient = String(payload.recipientAddress || payload.walletAddress || extracted.evmMatches[0] || '').trim();
   const claimedTotal = Number(payload.claimedTotal ?? payload.invoiceAmount ?? payload.spendAmountUsdc ?? extracted.primaryMoneyAmount ?? 0);
   const expectedTotal = Number(payload.expectedTotal ?? payload.poAmount ?? claimedTotal);
@@ -169,6 +171,20 @@ export async function verifyEnterpriseAgentOutput(payload = {}, options = {}) {
     if (targetDomain) {
       domSafety = await checkFakeWatchDomain(targetDomain).catch(() => null);
     }
+    let b2bFromDomain = null;
+    if ((!corp || !corp.found) && targetDomain && (!domSafety || (domSafety.verdict !== 'PHISHING' && domSafety.verdict !== 'MALICIOUS'))) {
+      b2bFromDomain = await enrichB2BIdentity({ domain: targetDomain, company: targetVendor || undefined }).catch(() => null);
+      if (b2bFromDomain && b2bFromDomain.found) {
+        corp = {
+          found: true,
+          active: true,
+          legal_name: b2bFromDomain.legal_name || b2bFromDomain.entity || targetDomain,
+          registration_id: b2bFromDomain.lei || b2bFromDomain.domain || targetDomain,
+          jurisdiction: b2bFromDomain.jurisdiction || 'GLOBAL',
+          source: 'RDAP + GLEIF B2B Enrichment'
+        };
+      }
+    }
 
     if (domSafety && (domSafety.verdict === 'PHISHING' || domSafety.verdict === 'MALICIOUS')) {
       const riskAmt = exposureBasis > 0 ? exposureBasis : 15000;
@@ -187,31 +203,31 @@ export async function verifyEnterpriseAgentOutput(payload = {}, options = {}) {
       claimMatrix.push({
         domain: 'CORPORATE_REGISTRY_LOOKUP_GENERAL',
         claim: extracted.assertsEntityActive
-          ? `Agent asserted "${targetVendor}" is an active corporate counterparty`
-          : `Corporate standing for "${targetVendor}"`,
+          ? `Agent asserted "${targetVendor || targetDomain}" is an active corporate counterparty`
+          : `Corporate standing for "${targetVendor || targetDomain}"`,
         groundTruth: `LAPSED / INACTIVE ENTITY (${corp.registration_id || 'Registry record'}, status: ${corp.registration_status || corp.entity_status})`,
         status: 'CONTRADICTED',
         evidenceSource: corp.source || 'GLEIF Global LEI Index',
         varianceUsd: riskAmt
       });
     } else if (corp && corp.found && corp.active === true) {
-      let b2bExtra = null;
-      if (targetDomain && !domSafety?.verdict?.includes('PHISHING')) {
-        b2bExtra = await enrichB2BIdentity({ domain: targetDomain, company: targetVendor }).catch(() => null);
-      }
+      const b2bExtra = b2bFromDomain || (targetDomain && !domSafety?.verdict?.includes('PHISHING')
+        ? await enrichB2BIdentity({ domain: targetDomain, company: targetVendor || undefined }).catch(() => null)
+        : null);
       claimMatrix.push({
         domain: 'CORPORATE_REGISTRY_LOOKUP_GENERAL',
-        claim: `Verify active legal entity standing for "${targetVendor}"`,
+        claim: `Verify active legal entity standing for "${targetVendor || targetDomain}"`,
         groundTruth: `ACTIVE: ${corp.legal_name} (ID: ${corp.registration_id}, Jurisdiction: ${corp.jurisdiction})${b2bExtra?.domain_valid ? `, domain ${targetDomain} valid` : ''}`,
         status: 'VERIFIED',
         evidenceSource: corp.source || 'GLEIF Global LEI Index',
         varianceUsd: 0
       });
-    } else if (targetVendor || extracted.assertsEntityActive) {
-      omittedOrUnverifiedClaims.push(`Corporate entity "${targetVendor || 'unspecified'}" could not be confirmed in GLEIF, UK Companies House, or SEC EDGAR.`);
+    } else if (targetVendor || targetDomain || extracted.assertsEntityActive) {
+      const ident = targetVendor || targetDomain || 'unspecified';
+      omittedOrUnverifiedClaims.push(`Corporate entity "${ident}" could not be confirmed in GLEIF, UK Companies House, or SEC EDGAR.`);
       claimMatrix.push({
         domain: 'CORPORATE_REGISTRY_LOOKUP_GENERAL',
-        claim: `Corporate entity standing for "${targetVendor || 'unspecified'}"`,
+        claim: `Corporate entity standing for "${ident}"`,
         groundTruth: 'Unverified in GLEIF / UK Companies House / SEC EDGAR public registries',
         status: 'MISSING_EVIDENCE',
         evidenceSource: 'GLEIF / SEC EDGAR / UK Companies House',

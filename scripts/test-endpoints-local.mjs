@@ -769,9 +769,8 @@ async function run() {
       throw new Error(`Solana live RPC checks failed: ${JSON.stringify({ solBal: solBal.json, solSupply: solSupply.json, solTx: solTx.json })}`);
     }
     const agentGo = await check('/api/agent/verify-output', 'POST', {
-      vendor: 'Stripe, Inc.',
-      domain: 'stripe.com',
-      output: 'Counterparty Stripe, Inc. (stripe.com) | Invoice: 100 units x $50.00 = $5,000.00 | ABA Routing 021000021'
+      vendor: 'stripe.com',
+      output: 'Counterparty Stripe (stripe.com) | Invoice: 100 units x $50.00 = $5,000.00 | ABA Routing 021000021'
     });
     const agentNoGo = await check('/api/agent/verify-output', 'POST', {
       vendor: 'Lazarus Group',
