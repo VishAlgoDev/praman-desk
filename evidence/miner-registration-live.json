@@ -1,12 +1,12 @@
 {
-  "previousRegistrationId": "6164",
-  "registrationId": "6169",
-  "txHash": "0x524f24c37819fe77c5ba0f6cd125dca6a63e3f0fb193df87beddd363da0a4800",
-  "blockNumber": 12189046,
+  "previousRegistrationId": "6169",
+  "registrationId": "6199",
+  "txHash": "0xecebdf67226764a279c5c2c82ccb6491214f048a247e809c26ff881f70c87d47",
+  "blockNumber": 12213528,
   "diamond": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
   "miner": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
-  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/43278de/miner.yaml",
-  "yamlHash": "0xf6aa150ec3828f610867c00e39a73f824dfa288867d29a55c3cf999f4f321426",
+  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/69bbdc8842623b4e21ba30801f626f77cd9c3d67/miner.yaml",
+  "yamlHash": "0xc610588a1d0ca116fea7d57adb31100250ba6ec27b1fd606ab28b9cf7009d669",
   "supportedIntents": [
     "PURCHASE_ORDER_VERIFY_GENERAL",
     "INVOICE_LEDGER_RECONCILE_GENERAL",
@@ -24,5 +24,5 @@
     "RESEARCH_QUERY_GENERAL",
     "LIQUIDITY_DEPTH_VERIFY_GENERAL"
   ],
-  "updatedAt": "2026-11-22T13:29:00.562Z"
+  "updatedAt": "2026-11-26T02:15:47.008Z"
 }
