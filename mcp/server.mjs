@@ -97,6 +97,8 @@ export async function clearSpendComposite({
   billed_qty,
   accepted_qty,
   unit_price,
+  invoice_amount,
+  po_amount,
   tax_rate_pct = 0,
   approval_cap,
   sha256_digest = '',
@@ -141,14 +143,26 @@ export async function clearSpendComposite({
     flags.push('COUNTERPARTY_UNREGISTERED_IN_GLEIF: No active ISO 17442 LEI found');
   }
 
+  const resolvedInvoiceId = invoice_id || 'INVOICE-UNSPECIFIED';
+  const resolvedPoNumber = po_number || 'PO-UNSPECIFIED';
+  const useSummaryAmounts =
+    billed_qty === undefined &&
+    accepted_qty === undefined &&
+    unit_price === undefined &&
+    (invoice_amount !== undefined || po_amount !== undefined);
+  const effectiveBilledQty = useSummaryAmounts ? Number(invoice_amount ?? po_amount) : billed_qty;
+  const effectiveAcceptedQty = useSummaryAmounts ? Number(po_amount ?? invoice_amount) : accepted_qty;
+  const effectiveUnitPrice = useSummaryAmounts ? 1 : unit_price;
+  const effectiveTaxPct = useSummaryAmounts ? 0 : tax_rate_pct;
+
   // 2. 3-Way Reconciliation
   const reconResult = reconcileInvoicePrimary({
-    invoiceId: invoice_id,
-    poNumber: po_number,
-    billedQty: billed_qty,
-    acceptedQty: accepted_qty,
-    unitPrice: unit_price,
-    taxRatePct: tax_rate_pct,
+    invoiceId: resolvedInvoiceId,
+    poNumber: resolvedPoNumber,
+    billedQty: effectiveBilledQty,
+    acceptedQty: effectiveAcceptedQty,
+    unitPrice: effectiveUnitPrice,
+    taxRatePct: effectiveTaxPct,
     currency,
   });
 
@@ -156,19 +170,38 @@ export async function clearSpendComposite({
     flags.push(`INVOICE_DISCREPANCY: ${reconResult.discrepancy}`);
   }
 
-  // 3. Purchase Order Spend Authority
-  const poResult = verifyPurchaseOrderPrimary({
-    poNumber: po_number,
-    vendor,
-    poAmount: reconResult.details.invoice_total,
-    approvalCap: approval_cap,
-    currency,
-    dualSignoffPresent: dual_signoff_present,
-  });
+  // 3. Purchase Order Spend Authority (fail closed when approval_cap is omitted instead of inventing a $50k ceiling)
+  const hasExplicitCap =
+    approval_cap !== undefined &&
+    approval_cap !== null &&
+    Number.isFinite(Number(approval_cap)) &&
+    Number(approval_cap) > 0;
+  const poResult = hasExplicitCap
+    ? verifyPurchaseOrderPrimary({
+        poNumber: resolvedPoNumber,
+        vendor,
+        poAmount: reconResult.details.invoice_total,
+        approvalCap: Number(approval_cap),
+        currency,
+        dualSignoffPresent: dual_signoff_present,
+      })
+    : {
+        po_number: resolvedPoNumber,
+        verified: false,
+        status: 'unverified_approval_cap',
+        amount: reconResult.details.invoice_total,
+        vendor,
+        currency,
+        approval_cap: null,
+        dual_signoff_present: Boolean(dual_signoff_present),
+        explanation: 'Delegation cap (approval_cap) was not supplied by caller; spend authority could not be verified.'
+      };
 
   if (!poResult.verified) {
     if (poResult.status === 'approval_cap_exceeded') {
-      flags.push(`APPROVAL_CAP_EXCEEDED: Invoice total exceeds delegation cap of ${currency} ${approval_cap}`);
+      flags.push(`APPROVAL_CAP_EXCEEDED: Invoice total exceeds delegation cap of ${currency} ${poResult.approval_cap}`);
+    } else if (poResult.status === 'unverified_approval_cap') {
+      flags.push('UNVERIFIED_APPROVAL_CAP: No approval_cap supplied; delegation ceiling unverified');
     } else {
       flags.push(`SPEND_AUTHORIZATION_FAILED: Status ${poResult.status}`);
     }
@@ -178,7 +211,7 @@ export async function clearSpendComposite({
   let docResult = null;
   if (sha256_digest) {
     docResult = verifyDocumentAuthenticityPrimary({
-      documentRef: `Invoice ${invoice_id}`,
+      documentRef: `Invoice ${resolvedInvoiceId}`,
       irnOrSha256: sha256_digest,
       signedQrAmount: reconResult.details.invoice_total,
       pdfFaceAmount: reconResult.details.invoice_total,
@@ -198,6 +231,7 @@ export async function clearSpendComposite({
   );
   const hasCriticalFailure = !reconResult.reconciled || (docResult && !docResult.authentic);
   const requiresDualSignoff = poResult.status === 'approval_cap_exceeded' && !dual_signoff_present;
+  const hasUnverifiedCap = poResult.status === 'unverified_approval_cap' && !dual_signoff_present;
 
   let cleared = false;
   let risk_level = 'LOW';
@@ -219,7 +253,7 @@ export async function clearSpendComposite({
     cleared = false;
     risk_level = 'MEDIUM';
     action = 'REQUEST_EXECUTIVE_APPROVAL';
-  } else if (isUnknownUrl) {
+  } else if (isUnknownUrl || hasUnverifiedCap) {
     cleared = false;
     risk_level = 'MEDIUM';
     action = 'HELD_FOR_MANUAL_REVIEW';

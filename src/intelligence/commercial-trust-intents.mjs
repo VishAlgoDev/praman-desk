@@ -194,6 +194,19 @@ export async function enrichB2BIdentity(params = {}, { lookupCorporateRegistry }
       if (secondary?.found) finalGleif = secondary;
     } catch {}
   }
+  const hasCorpLegalSuffix = (name = '') => /\b(?:ag|aktiengesellschaft|se|gmbh|inc|incorporated|corp|corporation|llc|ltd|limited|plc|nv|bv|sa|pbc)\b/i.test(String(name || ''));
+  if (!explicitCompany && domain && finalGleif?.found && !hasCorpLegalSuffix(finalGleif.legal_name) && typeof lookupCorporateRegistry === 'function') {
+    try {
+      const candidates = [`${companyQuery} Aktiengesellschaft`, `${companyQuery} Inc.`, `${companyQuery} SE`, `${companyQuery} PLC`, `${companyQuery} Corp`];
+      const expanded = await Promise.allSettled(
+        candidates.map(cand => lookupCorporateRegistry({ company: cand }))
+      );
+      const preferred = expanded
+        .map(r => (r.status === 'fulfilled' ? r.value : null))
+        .find(r => r?.found && r?.active && hasCorpLegalSuffix(r?.legal_name));
+      if (preferred) finalGleif = preferred;
+    } catch {}
+  }
 
   const domainValid = Boolean(rdap || mxRecords.length > 0);
   const gleifFound = Boolean(finalGleif?.found);

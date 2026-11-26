@@ -235,6 +235,15 @@ async function main() {
         timestamp: settled.timestamp
       };
       fs.writeFileSync(path.join(evidenceDir, 'solana-devnet-settlement.json'), JSON.stringify(receipt, null, 2));
+      fs.writeFileSync(path.join(evidenceDir, 'solana-devnet-wallet.json'), JSON.stringify({
+        network: 'solana-devnet',
+        treasuryAddress: pubkeyStr,
+        balanceSol,
+        fundingRequired: false,
+        lastSignature: settled.signature,
+        solscanUrl: settled.solscanUrl,
+        timestamp: settled.timestamp
+      }, null, 2));
       console.log(`  [PASS] Real Solana Devnet tx confirmed: ${settled.solscanUrl}`);
     } else {
       const pendingInfo = {

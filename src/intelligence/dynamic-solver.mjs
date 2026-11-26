@@ -14,8 +14,8 @@ export function parseLocalizedNumber(numStr) {
   if (/^[0-9]{1,3}(?:\.[0-9]{3})+,[0-9]{1,4}$/.test(s)) {
     s = s.replace(/\./g, '').replace(',', '.');
   } 
-  // If simple comma decimal: 12,40 or 100,50 (comma followed by 1-4 digits without prior dots)
-  else if (/^[0-9]+,[0-9]{1,4}$/.test(s)) {
+  // If simple comma decimal: 12,40 or 99,95 (comma followed by 1-2 fractional digits; 3 digits like 1,200 are thousands)
+  else if (/^[0-9]+,[0-9]{1,2}$/.test(s)) {
     s = s.replace(',', '.');
   } 
   // Standard format with commas as thousands: 1,234.56
@@ -106,11 +106,13 @@ export function parseDynamicInvoiceReconciliation(text) {
 
   // Extract explicit totals (do not backtrack inside digits or mistake line-item quantities like "Invoice: 100 units x $50.00" for invoice dollar total)
   const billedTotalMatch = text.match(/(?:billed\s*(?:total|amount)?|invoice\s*(?:total|bills|amount)|total\s*invoiced?)\s*[:=]?\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9]+(?:[,.][0-9]+)*)(?![0-9,.]|\s*(?:units?\b|pcs?\b|items?\b|hours?\b|hrs?\b|barrels?\b|cartons?\b|boxes?\b|lots?\b|mt\b|kg\b|x\b|\*|@|\s+at\b))/i)
-    || text.match(/\b(?:INV|Invoice|Bill|RA)[-#:\s]*([A-Za-z0-9-]+)?\s*[:=]\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9]+(?:[,.][0-9]+)*)(?![0-9,.]|\s*(?:units?\b|pcs?\b|items?\b|hours?\b|hrs?\b|barrels?\b|cartons?\b|boxes?\b|lots?\b|mt\b|kg\b|x\b|\*|@|\s+at\b))/i);
+    || text.match(/\b(?:INV|Invoice|Bill|RA)[-#:\s]*([A-Za-z0-9-]+)?\s*[:=]\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9]+(?:[,.][0-9]+)*)(?![0-9,.]|\s*(?:units?\b|pcs?\b|items?\b|hours?\b|hrs?\b|barrels?\b|cartons?\b|boxes?\b|lots?\b|mt\b|kg\b|x\b|\*|@|\s+at\b))/i)
+    || text.match(/(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])\s*([0-9]+(?:[,.][0-9]+)*)\s+total\b/i);
   const ledgerTotalMatch = text.match(/(?:accepted\s*(?:total|amount)?|ledger\s*(?:total|amount|paid)?|approved\s*(?:total|payable|amount)?|po\s*total)\s*[:=]?\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9]+(?:[,.][0-9]+)*)(?![0-9,.]|\s*(?:units?\b|pcs?\b|items?\b|hours?\b|hrs?\b|barrels?\b|cartons?\b|boxes?\b|lots?\b|mt\b|kg\b|x\b|\*|@|\s+at\b))/i);
 
-  // Extract explicit equation: QTY units x UNIT_PRICE = TOTAL_AMOUNT
-  const equationMatch = text.match(/\b([0-9,.]+(?:[0-9]+)?)\s*(?:[a-zA-Z]{1,12})?\s*(?:x|\*|@|at)\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9,.]+(?:[0-9]+)?)(?:\s*(?:each|\/unit|\/[a-zA-Z]{1,12}))?\s*(?:=|equals?|->|total[:\s]*)\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9,.]+(?:[0-9]+)?)/i);
+  // Extract explicit equation: QTY units x UNIT_PRICE [= or with TAX% tax, TOTAL total]
+  const equationMatch = text.match(/\b([0-9,.]+(?:[0-9]+)?)\s*(?:[a-zA-Z]{1,12})?\s*(?:x|\*|@|at)\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9,.]+(?:[0-9]+)?)(?:\s*(?:each|\/unit|\/[a-zA-Z]{1,12}))?\s*(?:(?:,|with|plus|\+)\s*[0-9]+(?:\.[0-9]+)?\s*%\s*(?:GST|VAT|tax|CGST|SGST|IGST|sales\s*tax)\b)?\s*(?:=|equals?|->|total[:\s]*|,\s*)\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])\s*([0-9,.]+(?:[0-9]+)?)/i)
+    || text.match(/\b([0-9,.]+(?:[0-9]+)?)\s*(?:[a-zA-Z]{1,12})?\s*(?:x|\*|@|at)\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9,.]+(?:[0-9]+)?)(?:\s*(?:each|\/unit|\/[a-zA-Z]{1,12}))?\s*(?:=|equals?|->|total[:\s]*)\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*([0-9,.]+(?:[0-9]+)?)/i);
 
   // Extract tax rate
   const taxMatch = text.match(/([0-9]+(?:\.[0-9]+)?)\s*%\s*(?:GST|VAT|tax|CGST|SGST|sales\s*tax)/i);
@@ -185,11 +187,12 @@ export function parseDynamicInvoiceReconciliation(text) {
         explanation = `RECONCILIATION STATUS: DISCREPANCY DETECTED (${currency} ${discrepancy.toFixed(2)} VARIANCE). Invoice ${invoiceId} claims ${currency} ${billedTotal.toFixed(2)} whereas authorized PO ${poNumber} line-item equation (${eqQty} units x ${currency} ${eqUnitPrice.toFixed(2)}) verifies ${currency} ${ledgerTotal.toFixed(2)}. Disallow excess of ${currency} ${discrepancy.toFixed(2)}.`;
       }
     } else {
+      const expectedEqTotal = taxRate > 0 ? computedTotal : computedBase;
       billedTotal = eqTotal;
-      ledgerTotal = computedBase;
-      discrepancy = Math.round(Math.abs(eqTotal - computedBase) * 100) / 100;
+      ledgerTotal = expectedEqTotal;
+      discrepancy = Math.round(Math.abs(eqTotal - expectedEqTotal) * 100) / 100;
       status = 'arithmetic_mismatch';
-      explanation = `RECONCILIATION STATUS: ARITHMETIC MISMATCH. Stated equation total (${currency} ${eqTotal.toFixed(2)}) contradicts arithmetic line-item multiplication (${eqQty} units x ${currency} ${eqUnitPrice.toFixed(2)} = ${currency} ${computedBase.toFixed(2)}). Variance of ${currency} ${discrepancy.toFixed(2)}.`;
+      explanation = `RECONCILIATION STATUS: ARITHMETIC MISMATCH. Stated equation total (${currency} ${eqTotal.toFixed(2)}) contradicts arithmetic line-item multiplication (${eqQty} units x ${currency} ${eqUnitPrice.toFixed(2)}${taxRate ? ` + ${taxRate}% tax` : ''} = ${currency} ${expectedEqTotal.toFixed(2)}). Variance of ${currency} ${discrepancy.toFixed(2)}.`;
     }
   } else if (billedTotalMatch && ledgerTotalMatch) {
     billedTotal = parseLocalizedNumber(billedTotalMatch[1]);

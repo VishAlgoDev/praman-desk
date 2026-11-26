@@ -1,8 +1,9 @@
 {
   "network": "solana-devnet",
   "treasuryAddress": "3r428Z8YSgQFJpsyPcQyxmt1faQQBuNRpqz92m9ucbuL",
-  "balanceSol": 0,
-  "fundingRequired": true,
-  "faucetUrl": "https://faucet.solana.com",
-  "note": "Fund treasuryAddress at https://faucet.solana.com then re-run test-solana-devnet.mjs to broadcast a real Solscan-verified Devnet settlement."
+  "balanceSol": 4.99799,
+  "fundingRequired": false,
+  "lastSignature": "E3qVPMwcssFhxQuZyCgJ47yzZAk7UAUUgtxRwUAYtyD8pFZjnRrHcC91MLwMWxLixhb3YRMjWB8ifkk4cJjNEQq",
+  "solscanUrl": "https://solscan.io/tx/E3qVPMwcssFhxQuZyCgJ47yzZAk7UAUUgtxRwUAYtyD8pFZjnRrHcC91MLwMWxLixhb3YRMjWB8ifkk4cJjNEQq?cluster=devnet",
+  "timestamp": "2026-11-26T07:07:56.125Z"
 }

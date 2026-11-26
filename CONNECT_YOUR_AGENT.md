@@ -48,9 +48,9 @@ Add to your `mcpServers` configuration (`claude_code_config.json` or `~/.cursor/
 
 ---
 
-## 3. Quick Setup for Minds (`hellominds.ai`) via HTTP Tool
+## 3. Quick Setup for Minds (`hellominds.ai`) via Bazaar Skill or HTTP Tool
 
-If you run an agent on [hellominds.ai](https://hellominds.ai), add a simple HTTP Tool call:
+If you run an agent on [hellominds.ai](https://hellominds.ai), either equip the published Minds Bazaar Skill **`Praman_Spend_Guard`** (Skill ID `5BD48D42-F36B-1410-8467-00039CE7DF11`, built and verified on [Praman.Spend.Guard](https://hellominds.ai/profile/minds/47b85842-f36b-1410-8467-00039ce7df11)) or wire a read-only HTTP Tool call:
 - **Base URL**: `https://praman-desk.vercel.app/api/miner/`
 - **Available Endpoints**:
   - `GET /sanctions-screen?name=<NAME_OR_ADDRESS>`

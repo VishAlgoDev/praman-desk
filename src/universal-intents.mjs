@@ -572,6 +572,7 @@ export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, que
       value_eth: 0,
       chain: targetChain,
       confidence: 0.0,
+      as_of: new Date().toISOString(),
       summary: 'Invalid or missing 64-character EVM tx hash or Solana Base58 transaction signature'
     };
   }
@@ -622,10 +623,13 @@ export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, que
           slot: tx.slot,
           gas_used: meta.computeUnitsConsumed ?? null,
           fee_lamports: meta.fee ?? null,
-          value_eth: Math.round(transferredSol * 1e6) / 1e6,
+          native_symbol: 'SOL',
+          native_amount: Math.round(transferredSol * 1e6) / 1e6,
+          value_eth: null,
           value_sol: Math.round(transferredSol * 1e6) / 1e6,
           chain: net.name,
           confidence: 1.0,
+          as_of: new Date().toISOString(),
           summary,
           explanation: summary,
           reason: summary,
@@ -644,6 +648,7 @@ export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, que
       value_eth: 0,
       chain: targetChain,
       confidence: 0.0,
+      as_of: new Date().toISOString(),
       summary: `Solana transaction ${targetHash} not found on mainnet-beta or devnet`
     };
   }
@@ -705,6 +710,7 @@ export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, que
         value_eth: valueEth,
         chain: c,
         confidence: 1.0,
+        as_of: new Date().toISOString(),
         summary,
         explanation: summary,
         reason: summary,
@@ -723,6 +729,7 @@ export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, que
     value_eth: 0,
     chain: targetChain,
     confidence: 0.0,
+    as_of: new Date().toISOString(),
     summary: `Transaction ${targetHash} not found on any checked chain (${targetChain})`
   };
 }

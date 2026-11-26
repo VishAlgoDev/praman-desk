@@ -50,10 +50,22 @@ export async function verifyOpenClawHermesSkill() {
     vendor: 'Siemens Aktiengesellschaft',
     lei: 'W38RGI023J3WT1HWRP32',
     invoice_id: 'INV-OC-101',
+    po_number: 'PO-OC-101',
+    invoice_amount: 450,
+    po_amount: 450,
+    approval_cap: 5000
+  });
+  assert.equal(approved.gate_decision?.cleared, true);
+
+  const unverifiedCap = await clearSpendComposite({
+    vendor: 'Siemens Aktiengesellschaft',
+    lei: 'W38RGI023J3WT1HWRP32',
+    invoice_id: 'INV-OC-102',
     invoice_amount: 450,
     po_amount: 450
   });
-  assert.equal(approved.gate_decision?.cleared, true);
+  assert.equal(unverifiedCap.gate_decision?.cleared, false);
+  assert.equal(unverifiedCap.gate_decision?.action, 'HELD_FOR_MANUAL_REVIEW');
 
   const halted = await clearSpendComposite({
     vendor: 'Lazarus Group',

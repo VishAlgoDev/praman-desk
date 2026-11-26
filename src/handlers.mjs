@@ -1620,12 +1620,12 @@ export function evaluateInvoiceReconcilePrompt(rawText = '') {
 }
 
 export function reconcileInvoicePrimary({
-  invoiceId = 'INV-2026-081',
-  poNumber = 'PO-2026-104',
+  invoiceId = 'INVOICE-UNSPECIFIED',
+  poNumber = 'PO-UNSPECIFIED',
   billedQty = 100,
   acceptedQty = 100,
   unitPrice = 250,
-  taxRatePct = 8.25,
+  taxRatePct = 0,
   currency = 'USD',
   rawInvoice = '',
   rawLedger = '',
@@ -2349,7 +2349,7 @@ async function lookupChicagoPublicPo(poNumber = '', requestedVendor = '') {
 }
 
 export function verifyPurchaseOrderPrimary({
-  poNumber = 'PO-2026-7741',
+  poNumber = 'PO-UNSPECIFIED',
   vendor = 'Enterprise Cloud Infrastructure',
   poAmount = 25000,
   approvalCap = 50000,
@@ -3494,11 +3494,11 @@ export async function screenSanctions({ name = '', threshold = 0.70 }) {
     return {
       screened: false,
       name: '',
-      matched: false,
+      matched: null,
       matches: [],
       lists: ['US Treasury OFAC SDN'],
       match_score: 0,
-      match_found: false,
+      match_found: null,
       error: 'name parameter required'
     };
   }
@@ -6597,7 +6597,11 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
 }
 
 export async function evaluateSolanaSpendGuardRequest(params = {}) {
-  const scenario = String(params.scenario || 'legit').trim().toLowerCase();
+  const scenarioRaw = params.scenario !== undefined ? String(params.scenario).trim() : '';
+  const customRecipient = String(params.recipientPubkey || params.recipient || params.destination || params.to || params.toPubkey || '').trim();
+  const customSender = String(params.senderPubkey || params.sender || params.from || params.fromPubkey || '').trim();
+  const base58PubkeyRe = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+  const scenario = (scenarioRaw || (customRecipient ? 'custom' : 'legit')).toLowerCase();
   const sdnDb = loadInMemorySdnDatabase();
   const sdnCount = sdnDb?.count || 0;
   const maxSingleSol = Number.isFinite(Number(params.maxSingleSol)) ? Number(params.maxSingleSol) : 5;
@@ -6605,12 +6609,47 @@ export async function evaluateSolanaSpendGuardRequest(params = {}) {
   const maxSingleUsdc = Number.isFinite(Number(params.maxSingleUsdc)) ? Number(params.maxSingleUsdc) : 500;
   const maxSessionUsdc = Number.isFinite(Number(params.maxSessionUsdc)) ? Number(params.maxSessionUsdc) : 500;
 
+  if (customRecipient && !base58PubkeyRe.test(customRecipient)) {
+    return {
+      ok: false,
+      chain: 'solana',
+      scenario: 'custom_recipient_policy_gate',
+      mode: 'parameter_transfer_policy_gate',
+      verdict: 'HALTED',
+      status: 'HALTED',
+      cleared: false,
+      reason: 'INVALID_SOLANA_PUBKEY',
+      recipient: customRecipient,
+      summary: `Invalid Solana Base58 recipient public key: "${customRecipient}". Transaction halted fail-closed before signing.`,
+      flags: ['reason:INVALID_SOLANA_PUBKEY', 'signature:BLOCKED'],
+      sdnEntriesScreened: sdnCount,
+      as_of: new Date().toISOString()
+    };
+  }
+  if (customSender && !base58PubkeyRe.test(customSender)) {
+    return {
+      ok: false,
+      chain: 'solana',
+      scenario: 'custom_recipient_policy_gate',
+      mode: 'parameter_transfer_policy_gate',
+      verdict: 'HALTED',
+      status: 'HALTED',
+      cleared: false,
+      reason: 'INVALID_SOLANA_PUBKEY',
+      sender: customSender,
+      summary: `Invalid Solana Base58 sender public key: "${customSender}". Transaction halted fail-closed before signing.`,
+      flags: ['reason:INVALID_SOLANA_PUBKEY', 'signature:BLOCKED'],
+      sdnEntriesScreened: sdnCount,
+      as_of: new Date().toISOString()
+    };
+  }
+
   const guard = new SolanaSpendGuard({
     maxSingleSpend: { SOL: maxSingleSol, USDC: maxSingleUsdc },
     maxSessionSpend: { SOL: maxSessionSol, USDC: maxSessionUsdc }
   });
 
-  const senderPubkey = '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin';
+  const senderPubkey = customSender || '9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin';
   const context = {
     vendor: String(params.entity || params.vendor || '').trim(),
     mockBackdoor: Boolean(params.mockBackdoor),
@@ -6650,6 +6689,7 @@ export async function evaluateSolanaSpendGuardRequest(params = {}) {
     context.mint = String(params.mint || 'Token2022Mint111111111111111111111111111111');
   }
 
+  let destPubkey = customRecipient || '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU';
   if (typeof rawTxB64 === 'string' && rawTxB64.trim().length > 16) {
     const rawBuf = Buffer.from(rawTxB64.trim(), 'base64');
     try {
@@ -6676,7 +6716,6 @@ export async function evaluateSolanaSpendGuardRequest(params = {}) {
     }
     scenarioLabel = 'custom_serialized_tx';
   } else {
-    let destPubkey = '4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU';
     let lamports = Math.round(0.01 * 1e9);
 
     if (scenario === 'hijack') {
@@ -6723,11 +6762,15 @@ export async function evaluateSolanaSpendGuardRequest(params = {}) {
     } else {
       const requestedSol = Number.isFinite(Number(params.amountSol)) ? Number(params.amountSol) : 0.01;
       lamports = Math.round(requestedSol * 1e9);
-      context.vendor = context.vendor || 'Siemens Aktiengesellschaft';
+      if (!customRecipient) {
+        context.vendor = context.vendor || 'Siemens Aktiengesellschaft';
+      } else {
+        scenarioLabel = scenarioRaw ? scenario : 'custom_recipient_policy_gate';
+      }
     }
 
-    if (params.recipientPubkey) {
-      destPubkey = String(params.recipientPubkey).trim();
+    if (customRecipient) {
+      destPubkey = customRecipient;
     }
 
     const ixData = Buffer.alloc(12);
@@ -6756,10 +6799,16 @@ export async function evaluateSolanaSpendGuardRequest(params = {}) {
       ok: true,
       chain: 'solana',
       scenario: scenarioLabel,
+      mode: rawTxB64 ? 'serialized_tx_inspection' : (customRecipient ? 'parameter_transfer_policy_gate' : 'preset_scenario_policy_check'),
       verdict: 'APPROVED',
       status: 'APPROVED',
       cleared: true,
       reason: 'POLICY_CLEAR',
+      recipient: clearance.transfers?.[0]?.recipient || destPubkey,
+      sender: senderPubkey,
+      recipientSpecifiedByCaller: Boolean(customRecipient),
+      senderSpecifiedByCaller: Boolean(customSender),
+      syntheticTransferConstructed: !rawTxB64,
       certHash: clearance.certHash,
       summary: `Solana Pre-Signature Spend Guard CLEARED ${clearance.transfersCount} transfer(s) (${clearance.totalSol.toFixed(4)} SOL). Supply chain clean, drainer filter clear, ${sdnCount.toLocaleString('en-US')} OFAC SDN records screened in ${latencyMs.toFixed(2)} ms.`,
       flags: [`ofac:clear (${sdnCount.toLocaleString('en-US')})`, 'supply-chain:verified', 'cap:within-limit'],
@@ -6773,22 +6822,24 @@ export async function evaluateSolanaSpendGuardRequest(params = {}) {
     };
   } catch (err) {
     const latencyMs = Number(process.hrtime.bigint() - t0) / 1e6;
-    const d = err?.details || {};
-    const reason = d.reason || 'POLICY_VIOLATION';
+    const d = err?.clearance || err?.details || {};
+    const reason = d.reason || err?.reason || 'POLICY_VIOLATION';
     return {
       ok: false,
       chain: 'solana',
       scenario: scenarioLabel,
+      mode: rawTxB64 ? 'serialized_tx_inspection' : (customRecipient ? 'parameter_transfer_policy_gate' : 'preset_scenario_policy_check'),
       verdict: 'HALTED',
       status: 'HALTED',
       cleared: false,
       reason,
-      certHash: d.certHash || null,
+      certHash: d.certHash || err?.certHash || null,
       summary: err?.message || 'Solana Spend Guard halted transaction before signing.',
       flags: [`reason:${reason}`, `ofac-index:${sdnCount.toLocaleString('en-US')}`, 'signature:BLOCKED'],
       latencyMs: Number(latencyMs.toFixed(2)),
       sdnEntriesScreened: sdnCount,
-      recipient: d.recipient || null,
+      recipient: d.recipient || customRecipient || null,
+      sender: senderPubkey,
       entity: d.entity || context.vendor || null,
       amount: d.amount ?? null,
       cap: d.cap ?? null,
@@ -8293,9 +8344,10 @@ export async function handleApiRequest(req, res) {
           const bq = parseStrictNumber(merged.billedQty);
           const aq = parseStrictNumber(merged.acceptedQty);
           const up = parseStrictNumber(merged.unitPrice);
-          const tr = merged.taxRatePct !== undefined && String(merged.taxRatePct).trim() !== ''
+          const taxExplicit = merged.taxRatePct !== undefined && String(merged.taxRatePct).trim() !== '';
+          const tr = taxExplicit
             ? parseStrictNumber(merged.taxRatePct)
-            : 8.25;
+            : 0;
           const allNumsPresent =
             merged.billedQty !== undefined && merged.acceptedQty !== undefined && merged.unitPrice !== undefined &&
             Number.isFinite(bq) && Number.isFinite(aq) && Number.isFinite(up) && Number.isFinite(tr);
@@ -8318,7 +8370,11 @@ export async function handleApiRequest(req, res) {
               as_of: new Date().toISOString()
             });
           }
-          const out = reconcileInvoicePrimary(merged);
+          const out = reconcileInvoicePrimary({
+            ...merged,
+            invoiceId: merged.invoiceId || merged.invoice_id || 'INVOICE-UNSPECIFIED',
+            poNumber: merged.poNumber || merged.po_number || 'PO-UNSPECIFIED'
+          });
           const expl = out.explanation || (out.reconciled ? 'Reconciled' : 'Discrepancy detected');
           return sendJson(res, 200, {
             reconciled: out.reconciled,
@@ -8339,8 +8395,8 @@ export async function handleApiRequest(req, res) {
 
         const invAmounts = extractAmountList(invoiceStr);
         const ledAmounts = extractAmountList(ledgerStr);
-        const structuredInv = parseStrictNumber(merged.invoice_amount ?? merged.invoiceAmount ?? merged.billed_amount ?? merged.billedAmount);
-        const structuredLed = parseStrictNumber(merged.po_amount ?? merged.poAmount ?? merged.ledger_amount ?? merged.ledgerAmount ?? merged.receipt_amount ?? merged.receiptAmount);
+        const structuredInv = parseStrictNumber(merged.invoice_amount ?? merged.invoiceAmount ?? merged.invoice_total ?? merged.invoiceTotal ?? merged.billed_amount ?? merged.billedAmount);
+        const structuredLed = parseStrictNumber(merged.po_amount ?? merged.poAmount ?? merged.po_total ?? merged.poTotal ?? merged.ledger_amount ?? merged.ledgerAmount ?? merged.ledger_total ?? merged.ledgerTotal ?? merged.receipt_amount ?? merged.receiptAmount);
         const resolvedInvTotal = invAmounts.length ? invAmounts[invAmounts.length - 1] : (Number.isFinite(structuredInv) ? structuredInv : NaN);
         const resolvedLedTotal = ledAmounts.length ? ledAmounts[ledAmounts.length - 1] : (Number.isFinite(structuredLed) ? structuredLed : NaN);
 
@@ -8801,8 +8857,8 @@ export async function handleApiRequest(req, res) {
             verdict: 'insufficient_evidence',
             confidence: 0.3,
             name: null,
-            matched: false,
-            match_found: false,
+            matched: null,
+            match_found: null,
             match_count: 0,
             matches: [],
             lists: ['US Treasury OFAC SDN'],

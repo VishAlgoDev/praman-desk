@@ -161,6 +161,31 @@ async function runTests() {
   }
   console.log('   PASS: clear_spend correctly routed Unknown URL to HELD_FOR_MANUAL_REVIEW.\n');
 
+  // Test 6c: clear_spend with omitted invoice_id / po_number / approval_cap (ND-34 & ND-35)
+  console.log('7c. Testing tool: clear_spend with omitted approval_cap / doc IDs (ND-34/ND-35)...');
+  const resMissingCap = await client.callTool({
+    name: 'clear_spend',
+    arguments: {
+      vendor: 'Siemens AG',
+      billed_qty: 10,
+      accepted_qty: 10,
+      unit_price: 6000,
+      currency: 'USD',
+    },
+  });
+  const missingCapParsed = JSON.parse(resMissingCap.content[0].text);
+  if (
+    missingCapParsed.gate_decision.cleared !== false ||
+    missingCapParsed.gate_decision.action !== 'HELD_FOR_MANUAL_REVIEW' ||
+    !missingCapParsed.gate_decision.flags.some(f => f.startsWith('UNVERIFIED_APPROVAL_CAP')) ||
+    JSON.stringify(missingCapParsed).includes('undefined') ||
+    JSON.stringify(missingCapParsed).includes('INV-2026-081') ||
+    JSON.stringify(missingCapParsed).includes('PO-2026-7741')
+  ) {
+    throw new Error(`ND-34/ND-35 failed in clear_spend: ${JSON.stringify(missingCapParsed)}`);
+  }
+  console.log('   PASS: clear_spend held unverified approval_cap cleanly without synthetic IDs or undefined.\n');
+
   // Test 7: compare_evaluator_scoring (WASM deterministic scoring)
   console.log('8. Testing tool: compare_evaluator_scoring (WASM deterministic)...');
   const resWasm = await client.callTool({

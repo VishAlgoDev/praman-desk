@@ -815,6 +815,63 @@ async function run() {
     if (!(ledgerCheck.json.totalPaidCalls >= 32) || !Array.isArray(ledgerCheck.json.escrowPurchases) || ledgerCheck.json.escrowPurchases.length < 4 || !Array.isArray(ledgerCheck.json.takarResolvers) || ledgerCheck.json.takarResolvers.length < 2) {
       throw new Error(`Ledger escrow/Takar arrays failed: ${JSON.stringify({ total: ledgerCheck.json.totalPaidCalls, escrow: ledgerCheck.json.escrowPurchases?.length, takar: ledgerCheck.json.takarResolvers?.length })}`);
     }
+    const invTotalAlias = await check('/api/miner/invoice-reconcile?po_total=1000&invoice_total=1000.01');
+    if (invTotalAlias.status !== 200 || invTotalAlias.json.reconciled !== false || invTotalAlias.json.discrepancy !== 0.01) {
+      throw new Error(`ND-30 invoice_total/po_total alias failed: ${JSON.stringify(invTotalAlias.json)}`);
+    }
+    const solCustomRecipient = await check('/api/audit/solana-spend-guard?chain=solana', 'POST', {
+      recipient: '3r428Z8YSgQFJpsyPcQyxmt1faQQBuNRpqz92m9ucbuL',
+      amountSol: 0.25,
+      chain: 'solana'
+    });
+    const solDrainerRecipient = await check('/api/audit/solana-spend-guard?chain=solana', 'POST', {
+      recipient: 'FnvLGtucz4E1ppJHRTev6Qv4X7g8Pw6WPStHCcbAKbfx',
+      amountSol: 0.25,
+      chain: 'solana'
+    });
+    if (
+      solCustomRecipient.status !== 200 ||
+      solCustomRecipient.json.recipient !== '3r428Z8YSgQFJpsyPcQyxmt1faQQBuNRpqz92m9ucbuL' ||
+      solCustomRecipient.json.cleared !== true ||
+      solDrainerRecipient.json.cleared !== false ||
+      solDrainerRecipient.json.reason !== 'MALICIOUS_DRAINER_ADDRESS' ||
+      solDrainerRecipient.json.recipient !== 'FnvLGtucz4E1ppJHRTev6Qv4X7g8Pw6WPStHCcbAKbfx'
+    ) {
+      throw new Error(`ND-31 custom recipient guard failed: ${JSON.stringify({ ok: solCustomRecipient.json, drainer: solDrainerRecipient.json })}`);
+    }
+    const proseTaxClaim = await check('/api/agent/verify-output', 'POST', {
+      vendor: 'Siemens AG',
+      output: 'Siemens AG is an active company with sanctions clear: 100 units at $10 with 20% tax, $1,200 total'
+    });
+    const emptySanctions = await check('/api/miner/sanctions-screen');
+    if (
+      proseTaxClaim.status !== 200 ||
+      proseTaxClaim.json.verdict !== 'GO' ||
+      proseTaxClaim.json.approved !== true ||
+      emptySanctions.status !== 200 ||
+      emptySanctions.json.screened !== false ||
+      emptySanctions.json.matched !== null
+    ) {
+      throw new Error(`ND-32/ND-33 failed: ${JSON.stringify({ proseTax: proseTaxClaim.json, emptySanctions: emptySanctions.json })}`);
+    }
+    const recNoIds = await check('/api/miner/invoice-reconcile?billedQty=10&acceptedQty=10&unitPrice=50');
+    const b2bSiemens = await check('/api/miner/b2b-identity?domain=siemens.com');
+    const txWithAsOf = await check('/api/miner/onchain-tx?tx=E3qVPMwcssFhxQuZyCgJ47yzZAk7UAUUgtxRwUAYtyD8pFZjnRrHcC91MLwMWxLixhb3YRMjWB8ifkk4cJjNEQq&chain=solana');
+    const recNoTax = await check('/api/miner/invoice-reconcile?billedQty=100&acceptedQty=80&unitPrice=1000');
+    if (
+      recNoIds.json.details?.invoice_id !== 'INVOICE-UNSPECIFIED' ||
+      recNoIds.json.details?.po_number !== 'PO-UNSPECIFIED' ||
+      b2bSiemens.json.lei !== 'W38RGI023J3WT1HWRP32' ||
+      !txWithAsOf.json.as_of ||
+      txWithAsOf.json.value_eth !== null ||
+      txWithAsOf.json.value_sol !== 0.001 ||
+      recNoTax.json.details?.tax_rate_pct !== 0 ||
+      recNoTax.json.details?.invoice_total !== 100000 ||
+      recNoTax.json.details?.ledger_total !== 80000 ||
+      recNoTax.json.discrepancy !== 20000
+    ) {
+      throw new Error(`ND-34/ND-36/ND-37/ND-38 failed: ${JSON.stringify({ rec: recNoIds.json.details, b2b: b2bSiemens.json, txAsOf: txWithAsOf.json, recNoTax: recNoTax.json })}`);
+    }
 
     console.log('\nALL SEASON II ADVERSARIAL REGRESSION GUARDS, TOKEN-2022 HTTP SCENARIOS, EIP-191 COUNTERSIGN, 3 NEW TRACK 2 INTENTS & LIVE VERIFICATION TESTS PASSED!');
   } finally {
