@@ -1,0 +1,112 @@
+{
+  "checkedAt": "2026-11-26T17:54:34.690Z",
+  "endpoint": "https://supplier-buyer-check.vercel.app/api/check",
+  "cases": [
+    {
+      "label": "siemens_ag_de",
+      "status": 200,
+      "verdict": "VERIFY FIRST",
+      "why": "Some details disagree or could not be checked.",
+      "findings": [
+        {
+          "area": "Company profile",
+          "status": "check",
+          "text": "Business profile from the Telegraph identity provider: headquarters Berlin, about 320,000 employees. This is a profile, not a register record, so it does not by itself confirm the legal entity.",
+          "source": "Telegraph identity provider (Counterproof B2B Identity Enrichment)"
+        },
+        {
+          "area": "Headquarters vs listing",
+          "status": "check",
+          "text": "The listing says Munich; the provider gives headquarters Berlin. Large companies often have several sites, but ask which entity you are buying from.",
+          "source": "Telegraph profile vs listing"
+        },
+        {
+          "area": "Registered identity",
+          "status": "ok",
+          "text": "Registry record: Siemens Aktiengesellschaft, registration HRB 6684, DE, active: true. Name agreement with the listing: 100%.",
+          "source": "Telegraph CORPORATE_REGISTRY_LOOKUP_GENERAL (VulnRank - Security, Compliance and Verified Lookups)"
+        },
+        {
+          "area": "Legal Entity Identifier",
+          "status": "ok",
+          "text": "Siemens Aktiengesellschaft, LEI W38RGI023J3WT1HWRP32, ACTIVE, München DE, registered as HRB 6684.",
+          "source": "GLEIF public API"
+        },
+        {
+          "area": "Sanctions",
+          "status": "ok",
+          "text": "No match reported on US OFAC SDN and non-SDN Consolidated lists (published 2026-11-09), UN Security Council Consolidated List (published 2026-11-12), EU Consolidated Financial Sanctions List (published 2026-10-23), UK Sanctions List (published 2026-11-10). One provider only.",
+          "source": "Telegraph SANCTIONS_SCREENING_MATCH_GENERAL (Counterproof Sanctions Screener)"
+        },
+        {
+          "area": "Website safety",
+          "status": "unverified",
+          "text": "siemens.com: Unknown. The provider could not rate this site, so it is not treated as safe.",
+          "source": "Telegraph URL_SAFE_GENERAL (Telegraph Verity Intelligence)"
+        },
+        {
+          "area": "Can they fulfil the order",
+          "status": "unverified",
+          "text": "The order is 100 units of Industrial Automation Sensors, but the listing gives no production capacity. Ask for it in writing.",
+          "source": "Order vs listing"
+        },
+        {
+          "area": "Disputes and adverse news",
+          "status": "ok",
+          "text": "No news coverage of fraud, disputes, lawsuits or recalls naming this supplier. One news source; absence is not proof.",
+          "source": "Telegraph NEWS_SEARCH_GENERAL (Spaceflight Article Search)"
+        }
+      ]
+    },
+    {
+      "label": "viktor_but_risk",
+      "status": 200,
+      "verdict": "VERIFY FIRST",
+      "why": "The company behind the listing could not be confirmed from an independent register. Ask for the business licence and check it before paying, and use the marketplace's payment protection.",
+      "findings": [
+        {
+          "area": "Company profile",
+          "status": "check",
+          "text": "Business profile from the Telegraph identity provider: industry arms dealer. This is a profile, not a register record, so it does not by itself confirm the legal entity.",
+          "source": "Telegraph identity provider (openai)"
+        },
+        {
+          "area": "Registered identity",
+          "status": "not_found",
+          "text": "The Telegraph registry provider did not return a record for \"Viktor But\". Not found is not the same as clean.",
+          "source": "Telegraph CORPORATE_REGISTRY_LOOKUP_GENERAL"
+        },
+        {
+          "area": "Legal Entity Identifier",
+          "status": "not_found",
+          "text": "No LEI record closely matching \"Viktor But\". Many small manufacturers have no LEI, so this alone is not a warning.",
+          "source": "GLEIF public API"
+        },
+        {
+          "area": "Sanctions",
+          "status": "ok",
+          "text": "No match reported on US OFAC SDN and non-SDN Consolidated lists (published 2026-11-09), UN Security Council Consolidated List (published 2026-11-12), EU Consolidated Financial Sanctions List (published 2026-10-23), UK Sanctions List (published 2026-11-10). One provider only.",
+          "source": "Telegraph SANCTIONS_SCREENING_MATCH_GENERAL (Counterproof Sanctions Screener)"
+        },
+        {
+          "area": "Company website",
+          "status": "not_found",
+          "text": "The listing gives no company website, only the marketplace storefront.",
+          "source": "Listing"
+        },
+        {
+          "area": "Can they fulfil the order",
+          "status": "unverified",
+          "text": "The order is 50 units of Industrial Cargo Lot, but the listing gives no production capacity. Ask for it in writing.",
+          "source": "Order vs listing"
+        },
+        {
+          "area": "Disputes and adverse news",
+          "status": "ok",
+          "text": "No news coverage of fraud, disputes, lawsuits or recalls naming this supplier. One news source; absence is not proof.",
+          "source": "Telegraph NEWS_SEARCH_GENERAL (Spaceflight Article Search)"
+        }
+      ]
+    }
+  ]
+}

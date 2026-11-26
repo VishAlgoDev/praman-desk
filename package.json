@@ -19,6 +19,7 @@
   "scripts": {
     "gate": "node bin/praman-gate.mjs",
     "alibaba:demo": "node examples/alibaba-trade-assurance/alibaba-trade-assurance-demo.mjs",
+    "bytedance:demo": "node examples/bytedance-creative-qa/bytedance-qa-demo.mjs",
     "agent:demo": "node examples/minds-spend-guard/demo-minds-spend-guard.mjs",
     "takar:demo": "node examples/takar-second-opinion/takar-praman-escrow-bridge.mjs",
     "mcp:start": "node mcp/server.mjs",
@@ -34,6 +35,9 @@
     "video:record-benchmark": "node scripts/excerpt-walkthrough-benchmark.mjs",
     "video:publish": "node scripts/splice-walkthrough-act4.mjs && node scripts/excerpt-walkthrough-benchmark.mjs",
     "track3:submit": "node scripts/submit-track3-evaluator-dataset.mjs",
+    "track3:pr229": "node scripts/submit-track3-pr229-evalpool.mjs",
+    "acp:test": "node examples/virtuals-acp-commerce/test-acp-evaluator.mjs",
+    "hermes:trace": "node examples/openclaw-hermes-trace/run-hermes-audit-trace.mjs",
     "solana:demo": "node bin/praman-gate.mjs solana-demo",
     "solana:test": "node packages/praman-sdk/test-solana.mjs && node packages/praman-sdk/test-solana-devnet.mjs",
     "sdk:test": "node packages/praman-sdk/test-sdk.mjs && node packages/praman-sdk/test-solana.mjs && node packages/praman-sdk/test-solana-devnet.mjs && python packages/praman-sdk/test_sdk.py",
@@ -52,6 +56,7 @@
     "@lucasmarkes/hairline": "^0.5.1",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "@solana/web3.js": "^1.95.8",
+    "@virtuals-protocol/acp-node-v2": "^0.1.15",
     "@x402/evm": "^2.30.0",
     "@x402/fetch": "^2.30.0",
     "viem": "^2.57.17"

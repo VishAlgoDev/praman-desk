@@ -459,7 +459,7 @@ async function run() {
 
     // 18. Keyless Streamable HTTP & JSON-RPC 2.0 MCP endpoint (/api/mcp)
     const mcpMeta = await check('/api/mcp');
-    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || (mcpMeta.json.toolsCount !== 17 && mcpMeta.json.toolsCount !== 18)) {
+    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 19) {
       throw new Error(`GET /api/mcp metadata failed: ${JSON.stringify(mcpMeta)}`);
     }
     const mcpInit = await check('/api/mcp', 'POST', {
@@ -483,7 +483,7 @@ async function run() {
       id: 2,
       method: 'tools/list'
     });
-    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || (mcpList.json.result.tools.length !== 17 && mcpList.json.result.tools.length !== 18)) {
+    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 19) {
       throw new Error(`POST /api/mcp tools/list failed: ${JSON.stringify(mcpList)}`);
     }
     const mcpCall = await check('/api/mcp', 'POST', {
@@ -910,6 +910,103 @@ async function run() {
     const pilotBad = await check('/api/pilot-inquiry', 'POST', { organization: 'Bad', email: 'not-an-email' });
     if (pilotOk.status !== 200 || !pilotOk.json.inquiryId || pilotBad.status !== 400) {
       throw new Error(`Pilot inquiry endpoint check failed: ${JSON.stringify({ ok: pilotOk.json, bad: pilotBad.status })}`);
+    }
+
+    // 15. Season II Day 1 Sprint Fixes: Chrysolite 2 bugs + Ep61 zero/half-score intent recoveries
+    console.log('\n--- Checking Chrysolite Edge Cases & Ep61 Intents ---');
+    const sgSiemensParent = await check('/api/spend-guard/evaluate', 'POST', {
+      vendorName: 'Siemens Aktiengesellschaft',
+      spendAmountUsdc: 1000,
+      liveSettle: false
+    });
+    if (
+      sgSiemensParent.status !== 200 ||
+      sgSiemensParent.json.vendorVerification?.lei !== 'W38RGI023J3WT1HWRP32' ||
+      sgSiemensParent.json.vendorVerification?.vendorJurisdiction !== 'DE'
+    ) {
+      throw new Error(`Spend guard Siemens AG parent LEI fix failed: ${JSON.stringify(sgSiemensParent.json.vendorVerification)}`);
+    }
+
+    const viktorBut = await check('/api/miner/sanctions-screen?name=' + encodeURIComponent('Viktor But'));
+    if (
+      viktorBut.status !== 200 ||
+      viktorBut.json.matched !== false ||
+      viktorBut.json.near_miss !== true ||
+      viktorBut.json.review_required !== true ||
+      viktorBut.json.verdict !== 'NEAR_MISS_REVIEW' ||
+      !(viktorBut.json.potential_matches?.length >= 1)
+    ) {
+      throw new Error(`Viktor But phonetic near-miss check failed: ${JSON.stringify(viktorBut.json)}`);
+    }
+    const sgViktorBut = await check('/api/spend-guard/evaluate', 'POST', {
+      vendorName: 'Viktor But',
+      spendAmountUsdc: 250,
+      liveSettle: false
+    });
+    if (
+      sgViktorBut.status !== 200 ||
+      sgViktorBut.json.status !== 'HALTED' ||
+      sgViktorBut.json.vendorVerification?.sanctionsNearMissReview !== true
+    ) {
+      throw new Error(`Spend guard Viktor But near-miss hold failed: ${JSON.stringify(sgViktorBut.json)}`);
+    }
+
+    const liqArb = await check('/api/miner/liquidity-depth?pair=ARB/USDC&chain=arbitrum');
+    if (liqArb.status !== 200 || liqArb.json.status !== 'confirmed' || !(Number(liqArb.json.liquidity_usd) > 100000)) {
+      throw new Error(`Arbitrum ARB/USDC liquidity depth fallback failed: ${JSON.stringify(liqArb.json)}`);
+    }
+
+    const resEcb = await check('/api/miner/research?question=' + encodeURIComponent('What is the current monetary policy rate of the European Central Bank?'));
+    if (resEcb.status !== 200 || resEcb.json.status !== 'ok' || !/%/.test(String(resEcb.json.answer || ''))) {
+      throw new Error(`Research ECB policy rate synthesis failed: ${JSON.stringify(resEcb.json)}`);
+    }
+
+    const supBonk = await check('/api/miner/token-supply?question=' + encodeURIComponent('What is the total supply of BONK on Solana?'));
+    if (supBonk.status !== 200 || supBonk.json.status !== 'confirmed' || !(Number(supBonk.json.total_supply) > 1000000)) {
+      throw new Error(`Solana BONK token-supply lookup failed: ${JSON.stringify(supBonk.json)}`);
+    }
+
+    // 16. ByteDance #5 Creative QA & Live /api/business telemetry
+    console.log('\n--- Checking ByteDance #5 Creative QA & /api/business ---');
+    const bizRes = await check('/api/business');
+    if (
+      bizRes.status !== 200 ||
+      bizRes.json.ok !== true ||
+      bizRes.json.minerId !== 6164 ||
+      !(bizRes.json.liveMetrics?.sepoliaPaidSignals >= 30) ||
+      !bizRes.json.honestRailNotice
+    ) {
+      throw new Error(`GET /api/business check failed: ${JSON.stringify(bizRes.json)}`);
+    }
+    const cqaHold = await check('/api/creative-qa/audit', 'POST', {
+      campaignId: 'BD-TEST-HOLD',
+      advertiserName: 'Viktor But',
+      creativeCopy: 'Guaranteed profit risk-free yield 100% cure!',
+      landingUrl: 'https://unisvvap.org',
+      spendAmountUsdc: 2500
+    });
+    const cqaOk = await check('/api/creative-qa/audit', 'POST', {
+      campaignId: 'BD-TEST-PASS',
+      advertiserName: 'Siemens Aktiengesellschaft',
+      creativeTitle: 'Factory Automation',
+      creativeCopy: '#ad Paid partnership with Siemens. AI-generated visual.',
+      landingUrl: 'https://www.siemens.com',
+      impressions: 50000,
+      cpmUsd: 20,
+      statedTotalUsd: 1000,
+      spendAmountUsdc: 1000,
+      aiGenerated: true
+    });
+    if (
+      cqaHold.status !== 200 ||
+      cqaHold.json.approved !== false ||
+      cqaHold.json.verdict !== 'REJECTED_BRAND_SAFETY_HOLD' ||
+      cqaOk.status !== 200 ||
+      cqaOk.json.approved !== true ||
+      cqaOk.json.verdict !== 'APPROVED_FOR_AD_RELEASE' ||
+      cqaOk.json.advertiser?.lei !== 'W38RGI023J3WT1HWRP32'
+    ) {
+      throw new Error(`ByteDance Creative QA endpoint failed: ${JSON.stringify({ hold: cqaHold.json, ok: cqaOk.json })}`);
     }
 
     console.log('\nALL SEASON II ADVERSARIAL REGRESSION GUARDS, SIGNED MEMO VERIFIER, PILOT INTAKE & LIVE VERIFICATION TESTS PASSED!');

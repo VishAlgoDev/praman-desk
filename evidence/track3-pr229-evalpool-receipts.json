@@ -1,0 +1,139 @@
+{
+  "timestamp": "2026-11-26T18:12:28.529Z",
+  "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "nodeUrl": "https://devnode.telegraphprotocol.com",
+  "pr229Compliant": true,
+  "results": [
+    {
+      "intentId": "PURCHASE_ORDER_VERIFY_GENERAL",
+      "status": 200,
+      "rowCount": 4,
+      "bodySha256": "26a3b91b205d3201bdf2f33e14e05849c09dd776f1ee765d1912c939aa63916a",
+      "nonce": "77534b22fe44ac1a44cd4b42d1a55eed",
+      "response": {
+        "intent_id": "PURCHASE_ORDER_VERIFY_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 4,
+        "accepted": 4,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 4,
+        "state_counts": {
+          "admitted": 4,
+          "eligible": 207,
+          "quarantine": 179
+        }
+      }
+    },
+    {
+      "intentId": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+      "status": 200,
+      "rowCount": 3,
+      "bodySha256": "76fbe8f6a85a9b43b1adf671982a6097887040e410c5797701a286a7d35af7b6",
+      "nonce": "6a6cafd13abcc7abd3d1586cfc221331",
+      "response": {
+        "intent_id": "CONTRACT_OBLIGATION_AUDIT_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 3,
+        "accepted": 3,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 3,
+        "state_counts": {
+          "admitted": 3,
+          "eligible": 338,
+          "rejected": 48
+        }
+      }
+    },
+    {
+      "intentId": "INVOICE_LEDGER_RECONCILE_GENERAL",
+      "status": 200,
+      "rowCount": 3,
+      "bodySha256": "c4a4edec0b02459f0c454ea8a6a2117855b0170b4b5a10588642c5c14ceae8db",
+      "nonce": "fa7aba7309c4fa0821f1209ac4beaae1",
+      "response": {
+        "intent_id": "INVOICE_LEDGER_RECONCILE_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 3,
+        "accepted": 3,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 3,
+        "state_counts": {
+          "admitted": 3,
+          "eligible": 130
+        }
+      }
+    },
+    {
+      "intentId": "DOCUMENT_AUTHENTICITY_GENERAL",
+      "status": 200,
+      "rowCount": 2,
+      "bodySha256": "3efa42ac9d8952fa3c7e3d80b337497a7a17e77b5c68f7c0637d2741eea8c822",
+      "nonce": "a5d9d264fef5c16c417d23101d75fc0f",
+      "response": {
+        "intent_id": "DOCUMENT_AUTHENTICITY_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 2,
+        "accepted": 2,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 2,
+        "state_counts": {
+          "admitted": 2,
+          "eligible": 199,
+          "quarantine": 541
+        }
+      }
+    },
+    {
+      "intentId": "LIQUIDITY_DEPTH_VERIFY_GENERAL",
+      "status": 200,
+      "rowCount": 2,
+      "bodySha256": "f6fad20b26c208e588854ee3c7639d18db7ad115453485e13f4e811b170b1127",
+      "nonce": "95d219c18ecbe4086c3a0994bde01722",
+      "response": {
+        "intent_id": "LIQUIDITY_DEPTH_VERIFY_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 2,
+        "accepted": 2,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 2,
+        "state_counts": {
+          "admitted": 2,
+          "eligible": 542,
+          "rejected": 58
+        }
+      }
+    },
+    {
+      "intentId": "RESEARCH_QUERY_GENERAL",
+      "status": 200,
+      "rowCount": 1,
+      "bodySha256": "e7b8e14691e15112bbc9922202e42c55b9b18adcf8223566a896bddf1a05fe2c",
+      "nonce": "067e020505a46c58065b69c7a3c4dd45",
+      "response": {
+        "intent_id": "RESEARCH_QUERY_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 1,
+        "accepted": 1,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 1,
+        "state_counts": {
+          "admitted": 1,
+          "eligible": 510,
+          "quarantine": 45
+        }
+      }
+    }
+  ]
+}

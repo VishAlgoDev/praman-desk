@@ -36,10 +36,10 @@ async function runTests() {
   for (const t of toolsResult.tools) {
     console.log(`   - ${t.name}: ${t.description.slice(0, 65)}...`);
   }
-  if (toolsResult.tools.length !== 18) {
-    throw new Error(`Expected 18 tools, found ${toolsResult.tools.length}`);
+  if (toolsResult.tools.length !== 19) {
+    throw new Error(`Expected 19 tools, found ${toolsResult.tools.length}`);
   }
-  console.log('   PASS: All 18 tools registered.\n');
+  console.log('   PASS: All 19 tools registered.\n');
 
   // Test 2: verify_counterparty (STRIPE, LLC)
   console.log('3. Testing tool: verify_counterparty (STRIPE, LLC)...');
@@ -453,8 +453,46 @@ async function runTests() {
   console.log(`   Result: Verified LMP | Hub: ${powerParsed.hub} | Price: $${powerParsed.price_mwh}/MWh | Node: ${powerParsed.node_id}`);
   console.log('   PASS: query_grid_power_price succeeded.\n');
 
+  // Test 24: audit_creative_qa (ByteDance #5 Creative QA)
+  console.log('24. Testing tool: audit_creative_qa (ByteDance #5 Creative Quality Assurance)...');
+  const resQaPass = await client.callTool({
+    name: 'audit_creative_qa',
+    arguments: {
+      campaignId: 'BD-QA-2026-01',
+      advertiserName: 'Siemens Aktiengesellschaft',
+      creativeTitle: 'Industrial Edge Automation',
+      creativeCopy: '#ad Paid partnership with Siemens. AI-generated visualization of smart factory telemetry.',
+      landingUrl: 'https://www.siemens.com',
+      impressions: 100000,
+      cpmUsd: 25,
+      statedTotalUsd: 2500,
+      spendAmountUsdc: 2500,
+      aiGenerated: true
+    },
+  });
+  const qaPassParsed = JSON.parse(resQaPass.content[0].text);
+  if (!qaPassParsed.approved || qaPassParsed.verdict !== 'APPROVED_FOR_AD_RELEASE') {
+    throw new Error(`Expected audit_creative_qa approval, got ${JSON.stringify(qaPassParsed)}`);
+  }
+  const resQaHold = await client.callTool({
+    name: 'audit_creative_qa',
+    arguments: {
+      campaignId: 'BD-QA-2026-02',
+      advertiserName: 'Viktor But',
+      creativeCopy: 'Guaranteed profit risk-free yield 100% cure campaign',
+      landingUrl: 'https://unisvvap.org/claim',
+      spendAmountUsdc: 12000
+    },
+  });
+  const qaHoldParsed = JSON.parse(resQaHold.content[0].text);
+  if (qaHoldParsed.approved || qaHoldParsed.verdict !== 'REJECTED_BRAND_SAFETY_HOLD' || qaHoldParsed.flags.length < 3) {
+    throw new Error(`Expected audit_creative_qa hold on risky campaign, got ${JSON.stringify(qaHoldParsed)}`);
+  }
+  console.log(`   Result: Pass=${qaPassParsed.verdict} (${qaPassParsed.advertiser?.lei}) | Hold=${qaHoldParsed.verdict} (${qaHoldParsed.flags.length} flags caught)`);
+  console.log('   PASS: audit_creative_qa succeeded.\n');
+
   await client.close();
-  console.log('=== All 23 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 24 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {

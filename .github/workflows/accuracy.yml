@@ -1,0 +1,58 @@
+name: Praman Daily Accuracy & Live Endpoint Verification
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  verify-praman-accuracy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run 651B WASM Comparator Verification (1043 cases)
+        run: npm run comparator:test
+
+      - name: Run MCP 18-Tool Protocol Suite
+        run: npm run mcp:test
+
+      - name: Run SDK & Solana Spend Guard Suite (JS + Devnet + Python)
+        run: npm run sdk:test
+
+      - name: Run Adversarial Endpoint & Chrysolite Regression Suite
+        run: node scripts/test-endpoints-local.mjs
+
+      - name: Probe Live Production Endpoints (https://praman-desk.vercel.app)
+        run: |
+          set -e
+          curl -fsS https://praman-desk.vercel.app/api/health | grep -q '"ok":true'
+          curl -fsS -X POST https://praman-desk.vercel.app/api/spend-guard/evaluate \
+            -H 'Content-Type: application/json' \
+            -d '{"vendorName":"Siemens Aktiengesellschaft","spendAmountUsdc":1000,"liveSettle":false}' \
+            | grep -q 'W38RGI023J3WT1HWRP32'
+          curl -fsS "https://praman-desk.vercel.app/api/miner/sanctions-screen?name=Viktor%20But" \
+            | grep -q 'NEAR_MISS_REVIEW'
+          curl -fsS "https://praman-desk.vercel.app/api/miner/liquidity-depth?pair=ARB/USDC&chain=arbitrum" \
+            | grep -q '"status":"confirmed"'
+          echo "All live production verification checks passed!"

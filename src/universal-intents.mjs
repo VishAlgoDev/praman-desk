@@ -371,12 +371,54 @@ export async function executeWebSearch({ query, question, q, prompt, text } = {}
 
   const wantsLiveNewsFirst = /\b(?:latest|today|current|recent|news|2025|2026|decision|rate\s+(?:cut|hike|decision)|announced|update|breaking)\b/i.test(rawQuery);
 
+  // Live official macroeconomic policy rates (ECB & Federal Reserve) before general news headlines
+  if (!answer && /\b(?:ecb|european\s+central\s+bank)\b/i.test(rawQuery) && /\b(?:rate|policy|deposit|refinanc|interest)/i.test(rawQuery)) {
+    try {
+      const ecbRes = await fetch(
+        'https://data-api.ecb.europa.eu/service/data/FM/D.U2.EUR.4F.KR.DFR.LEV?lastNObservations=1&format=jsondata',
+        { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(7000) }
+      );
+      if (ecbRes.ok) {
+        const ej = await ecbRes.json();
+        const seriesObj = ej?.dataSets?.[0]?.series || {};
+        const firstSeries = Object.values(seriesObj)[0];
+        const obsObj = firstSeries?.observations || {};
+        const obsVals = Object.values(obsObj);
+        const rateVal = obsVals?.[obsVals.length - 1]?.[0];
+        const timeDim = ej?.structure?.dimensions?.observation?.[0]?.values || [];
+        const obsDate = timeDim?.[timeDim.length - 1]?.id || 'latest';
+        if (rateVal !== undefined && rateVal !== null) {
+          answer = `European Central Bank (ECB) Deposit Facility policy rate is ${Number(rateVal).toFixed(2)}% as of ${obsDate} (ECB Statistical Data Warehouse).`;
+          brief = `ECB Deposit Facility Rate: ${Number(rateVal).toFixed(2)}% (${obsDate})`.slice(0, 80);
+          sources.push('https://data-api.ecb.europa.eu/service/data/FM/D.U2.EUR.4F.KR.DFR.LEV?lastNObservations=1');
+        }
+      }
+    } catch {}
+  }
+
+  if (!answer && /\b(?:fed|federal\s+reserve|fomc)\b/i.test(rawQuery) && /\b(?:rate|policy|funds|target|interest)/i.test(rawQuery)) {
+    try {
+      const fredRes = await fetch('https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARU', {
+        signal: AbortSignal.timeout(5000)
+      });
+      if (fredRes.ok) {
+        const csv = (await fredRes.text()).trim().split('\n').filter(Boolean);
+        const last = csv[csv.length - 1]?.split(',');
+        if (last && last.length >= 2 && Number.isFinite(Number(last[1]))) {
+          answer = `Federal Reserve FOMC Federal Funds Target Rate upper bound is ${Number(last[1]).toFixed(2)}% as of ${last[0]} (St. Louis Fed FRED DFEDTARU).`;
+          brief = `Fed Funds Upper Target: ${Number(last[1]).toFixed(2)}% (${last[0]})`.slice(0, 80);
+          sources.push('https://fred.stlouisfed.org/series/DFEDTARU');
+        }
+      }
+    } catch {}
+  }
+
   const tryGoogleNews = async () => {
     try {
       const newsUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(rawQuery)}&hl=en-US&gl=US&ceid=US:en`;
       const nRes = await fetch(newsUrl, {
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-        signal: AbortSignal.timeout(3500)
+        signal: AbortSignal.timeout(4500)
       });
       if (nRes.ok) {
         const text = await nRes.text();
@@ -386,12 +428,28 @@ export async function executeWebSearch({ query, question, q, prompt, text } = {}
           for (let i = 0; i < Math.min(items.length, 4); i++) {
             const item = items[i];
             const titleMatch = item.match(/<title>([\s\S]*?)<\/title>/);
+            const descMatch = item.match(/<description>([\s\S]*?)<\/description>/);
             const linkMatch = item.match(/<link>([\s\S]*?)<\/link>/);
             const pubMatch = item.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
             if (titleMatch && titleMatch[1]) {
               const cleanTitle = titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+              const unescapedDesc = descMatch?.[1]
+                ? descMatch[1]
+                    .replace(/<!\[CDATA\[|\]\]>/g, '')
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&amp;/g, '&')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&nbsp;/g, ' ')
+                    .replace(/<[^>]+>/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                : '';
+              const snippetPart = unescapedDesc && unescapedDesc.length > 15 && !cleanTitle.toLowerCase().includes(unescapedDesc.slice(0, 20).toLowerCase())
+                ? ` — ${unescapedDesc.slice(0, 120)}`
+                : '';
               const pubStr = pubMatch && pubMatch[1] ? ` (${pubMatch[1].trim().slice(0, 16)})` : '';
-              newsHeadlines.push(`${cleanTitle}${pubStr}`);
+              newsHeadlines.push(`${cleanTitle}${pubStr}${snippetPart}`);
             }
             if (linkMatch && linkMatch[1]) {
               sources.push(linkMatch[1].trim());
@@ -408,6 +466,25 @@ export async function executeWebSearch({ query, question, q, prompt, text } = {}
 
   if (!answer && wantsLiveNewsFirst) {
     await tryGoogleNews();
+  }
+
+  // Zero-key DuckDuckGo Instant Answer factual lookup before generic Wikipedia search
+  if (!answer) {
+    try {
+      const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(cleanSearch || rawQuery)}&format=json&no_html=1&skip_disambig=1`, {
+        headers: { 'User-Agent': 'PramanDesk-Intelligence/2.0' },
+        signal: AbortSignal.timeout(3500)
+      });
+      if (ddgRes.ok) {
+        const ddg = await ddgRes.json();
+        const ddgText = String(ddg.Answer || ddg.AbstractText || ddg.Definition || '').trim();
+        if (ddgText && ddgText.length >= 20) {
+          answer = ddgText;
+          brief = ddgText.slice(0, 80);
+          if (ddg.AbstractURL) sources.push(ddg.AbstractURL);
+        }
+      }
+    } catch {}
   }
 
   // 3. Wikipedia search with direct snippet synthesis (answers direct factual questions e.g. "capital of Australia")
@@ -511,9 +588,9 @@ export async function executeResearchQuery({ query, question, q, prompt, text } 
     }
   }
 
-  // Build a concise answer capped at 280 chars (Devnode evaluator limit)
+  // Build a crisp, evidence-dense answer (allow up to 750 chars so multi-clause facts & sources are preserved)
   const rawAnswer = searchRes.answer || `Research summary for: ${rawQuery}`;
-  const answer = rawAnswer.length > 280 ? rawAnswer.slice(0, 277) + '...' : rawAnswer;
+  const answer = rawAnswer.length > 750 ? rawAnswer.slice(0, 747) + '...' : rawAnswer;
 
   // Normalize sources to array of URL strings (Devnode expects string array)
   const normalizedSources = Array.isArray(searchRes.sources)
@@ -757,14 +834,43 @@ const KNOWN_TOKEN_ADDRESSES = {
   },
   base: {
     USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-    WETH: '0x4200000000000000000000000000000000000006'
+    WETH: '0x4200000000000000000000000000000000000006',
+    AERO: '0x940181a94A35A4569E4529A3CDfB74e38FD98631',
+    VIRTUAL: '0x0b3e328455c4059EEb9e3f84b5543F74E24e7E1b'
   },
   arbitrum: {
     USDC: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
     USDT: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',
-    WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1'
+    WETH: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+    ARB: '0x912CE59144191C1204E64559FE8253a0e49E6548',
+    GMX: '0xfc5A1A6EB076a2C7aD06eD22C90d7E710E35ad0a',
+    PENDLE: '0x0c880f6761F1af8d9Aa9C466984b80DAb9a8c9e8'
+  },
+  optimism: {
+    USDC: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
+    WETH: '0x4200000000000000000000000000000000000006',
+    OP: '0x4200000000000000000000000000000000000042'
   }
 };
+
+const SYMBOL_STOPWORDS = new Set([
+  'WHAT', 'IS', 'ARE', 'THE', 'TOTAL', 'CIRCULATING', 'MAX', 'SUPPLY', 'OF', 'ON', 'FOR', 'TOKEN',
+  'COIN', 'CHECK', 'VERIFY', 'ERC20', 'SPL', 'CHAIN', 'NETWORK', 'MAINNET', 'CURRENT', 'MINT', 'ADDRESS'
+]);
+
+function extractTokenSymbolCandidate(explicitText, combinedText) {
+  if (explicitText && !/0x[a-fA-F0-9]{40}/i.test(explicitText) && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(explicitText)) {
+    return explicitText.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  }
+  const phraseMatch = combinedText.match(/\b(?:for|of|token)\s+([A-Za-z0-9]{2,15})\b/i);
+  if (phraseMatch && !SYMBOL_STOPWORDS.has(phraseMatch[1].toUpperCase())) {
+    return phraseMatch[1].toUpperCase();
+  }
+  const allCaps = [...combinedText.matchAll(/\b([A-Za-z0-9]{2,12})\b/g)]
+    .map(m => m[1])
+    .filter(w => !SYMBOL_STOPWORDS.has(w.toUpperCase()) && (w === w.toUpperCase() || /^(?:sol|usdc|usdt|weth|wbtc|dai|link|uni|aave|arb|op|bonk|jup|wif|pyth|ray|aero|virtual)$/i.test(w)));
+  return allCaps[0] ? allCaps[0].toUpperCase() : '';
+}
 
 export async function verifyTokenTotalSupply({ token_address, address, token, chain, question, query, prompt, text } = {}) {
   const rawQuery = (question || query || prompt || text || '').trim();
@@ -814,8 +920,7 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
 
     let splMint = solMintMatch?.[1] || KNOWN_SOLANA_MINTS[solSym]?.mint || null;
     if (!splMint && combinedText) {
-      const tokenTickerMatch = combinedText.match(/\b(?:for|of|token)\s+([A-Za-z0-9]{2,15})\b/i) || combinedText.match(/\b([A-Z]{2,12})\b/);
-      const ticker = (explicitTokenText || tokenTickerMatch?.[1] || '').trim();
+      const ticker = extractTokenSymbolCandidate(explicitTokenText, combinedText);
       if (ticker) {
         try {
           const dsRes = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(ticker)}`, { signal: AbortSignal.timeout(4000) });
@@ -875,8 +980,7 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
   // Fallback: dynamically resolve unmapped ERC-20 / SPL token addresses via DexScreener search
   if (!targetAddress && combinedText) {
     const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon', solana: 'solana' };
-    const tokenTokenMatch = combinedText.match(/\b(?:for|of|token)\s+([A-Za-z0-9]{2,15})\b/i) || combinedText.match(/\b([A-Z]{2,12})\b/);
-    const searchTicker = (explicitTokenText || tokenTokenMatch?.[1] || '').trim();
+    const searchTicker = extractTokenSymbolCandidate(explicitTokenText, combinedText);
     if (searchTicker) {
       try {
         const dsRes = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(searchTicker)}`, {
@@ -1712,17 +1816,19 @@ export async function verifyLiquidityDepth(params = {}) {
     }
   }
 
-  // 3. Fallback: dynamic pair lookup on DexScreener across EVM and Solana pools
+  // 3. Fallback: dynamic pair lookup on DexScreener + GeckoTerminal across EVM and Solana pools
   try {
     const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon', bsc: 'bsc', solana: 'solana' };
+    const gtNetMap = { ethereum: 'eth', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon_pos', bsc: 'bsc', solana: 'solana' };
     const wantChain = dexChainMap[chain] || 'ethereum';
+    const gtNet = gtNetMap[chain] || 'eth';
     const pairTokens = pair.split('/').map(s => s.trim().toUpperCase()).filter(Boolean);
     const knownBaseAddr = wantChain === 'solana'
       ? (KNOWN_SOLANA_MINTS[pairTokens[0]]?.mint || null)
-      : (KNOWN_TOKEN_ADDRESSES[chain]?.[pairTokens[0]] || KNOWN_TOKEN_ADDRESSES.ethereum?.[pairTokens[0]] || null);
+      : (KNOWN_TOKEN_ADDRESSES[chain]?.[pairTokens[0]] || null);
     const knownQuoteAddr = wantChain === 'solana'
       ? (KNOWN_SOLANA_MINTS[pairTokens[1]]?.mint || null)
-      : (KNOWN_TOKEN_ADDRESSES[chain]?.[pairTokens[1]] || KNOWN_TOKEN_ADDRESSES.ethereum?.[pairTokens[1]] || null);
+      : (KNOWN_TOKEN_ADDRESSES[chain]?.[pairTokens[1]] || null);
 
     let rawPairs = [];
     for (const tokAddr of [knownBaseAddr, knownQuoteAddr].filter(Boolean)) {
@@ -1732,33 +1838,60 @@ export async function verifyLiquidityDepth(params = {}) {
         if (Array.isArray(tj?.pairs)) rawPairs.push(...tj.pairs);
       }
     }
-    if (rawPairs.length === 0) {
+
+    const filterCandidates = (list, requireChain) => list.filter(p => {
+      if ((requireChain && p.chainId !== wantChain) || !p.liquidity?.usd) return false;
+      const b = String(p.baseToken?.symbol || '').toUpperCase();
+      const qt = String(p.quoteToken?.symbol || '').toUpperCase();
+      const bMatches = b === pairTokens[0] || (pairTokens[0] === 'ETH' && b === 'WETH') || (pairTokens[0] === 'WETH' && b === 'ETH');
+      const qMatches = qt === pairTokens[1] || (pairTokens[1] === 'ETH' && qt === 'WETH') || (pairTokens[1] === 'WETH' && qt === 'ETH');
+      const revB = b === pairTokens[1] || (pairTokens[1] === 'ETH' && b === 'WETH');
+      const revQ = qt === pairTokens[0] || (pairTokens[0] === 'ETH' && qt === 'WETH');
+      return pairTokens.length === 2 ? ((bMatches && qMatches) || (revB && revQ)) : true;
+    });
+
+    let candidates = filterCandidates(rawPairs, true);
+    if (candidates.length === 0) {
       const dsSearch = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(pairTokens.join(' '))}`, {
         signal: AbortSignal.timeout(4500)
       });
       if (dsSearch.ok) {
         const dsJson = await dsSearch.json();
         if (Array.isArray(dsJson?.pairs)) rawPairs.push(...dsJson.pairs);
+        candidates = filterCandidates(rawPairs, true);
       }
     }
-
-    let candidates = rawPairs.filter(p => {
-      if (p.chainId !== wantChain || !p.liquidity?.usd) return false;
-      const b = String(p.baseToken?.symbol || '').toUpperCase();
-      const qt = String(p.quoteToken?.symbol || '').toUpperCase();
-      const matchesExact = pairTokens.length === 2 && (
-        (b === pairTokens[0] && qt === pairTokens[1]) ||
-        (b === pairTokens[1] && qt === pairTokens[0])
-      );
-      return matchesExact || pairTokens.length < 2;
-    });
     if (candidates.length === 0 && !explicitChainProvided && pairTokens.length === 2) {
-      candidates = rawPairs.filter(p => {
-        if (!p.liquidity?.usd) return false;
-        const b = String(p.baseToken?.symbol || '').toUpperCase();
-        const qt = String(p.quoteToken?.symbol || '').toUpperCase();
-        return (b === pairTokens[0] && qt === pairTokens[1]) || (b === pairTokens[1] && qt === pairTokens[0]);
-      });
+      candidates = filterCandidates(rawPairs, false);
+    }
+
+    // Secondary GeckoTerminal pool search fallback if DexScreener search returns zero matching pools
+    if (candidates.length === 0) {
+      try {
+        const gtSearch = await fetch(`https://api.geckoterminal.com/api/v2/search/pools?query=${encodeURIComponent(pairTokens.join(' '))}&network=${gtNet}`, {
+          headers: { Accept: 'application/json' },
+          signal: AbortSignal.timeout(4500)
+        });
+        if (gtSearch.ok) {
+          const gtJson = await gtSearch.json();
+          const gtList = Array.isArray(gtJson?.data) ? gtJson.data : [];
+          const bestGt = gtList
+            .filter(item => Number(item?.attributes?.reserve_in_usd || 0) > 0)
+            .sort((a, b) => Number(b.attributes.reserve_in_usd) - Number(a.attributes.reserve_in_usd))[0];
+          if (bestGt?.attributes) {
+            candidates = [{
+              chainId: wantChain,
+              dexId: bestGt.relationships?.dex?.data?.id || 'geckoterminal',
+              pairAddress: bestGt.attributes.address,
+              baseToken: { symbol: pairTokens[0] },
+              quoteToken: { symbol: pairTokens[1] || 'USDC' },
+              priceUsd: bestGt.attributes.base_token_price_usd,
+              liquidity: { usd: Number(bestGt.attributes.reserve_in_usd) },
+              volume: { h24: Number(bestGt.attributes.volume_usd?.h24 || 0) }
+            }];
+          }
+        }
+      } catch {}
     }
     candidates.sort((a, b) => Number(b.liquidity?.usd || 0) - Number(a.liquidity?.usd || 0));
     const best = candidates[0];

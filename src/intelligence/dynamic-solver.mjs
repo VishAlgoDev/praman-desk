@@ -366,8 +366,8 @@ export function parseDynamicContractObligation(text) {
     pushClause(m[0]);
   }
 
-  const hasExplicitBreach = /\b(?:failed\s+to\s+deliver|non[-\s]?payment|in\s+default|breach(?:ed)?\s+(?:clause|contract|obligation|warranty)|short[-\s]?shipped|missed\s+deadline)\b/i.test(text);
-  const hasConditionalRisk = /\b(?:unlimited\s+liability|unilateral\s+(?:variation|change|termination\s+without\s+cause)|waive(?:s|d)?\s+statutory|no\s+liability\s+cap|ambiguous|uncapped)\b/i.test(text);
+  const hasExplicitBreach = /\b(?:failed\s+to\s+deliver|non[-\s]?payment|in\s+default|breach(?:ed)?\s+(?:clause|contract|obligation|warranty)|short[-\s]?shipped|missed\s+deadline|waive(?:s|d)?\s+statutory|prohibited\s+by\s+law|statutorily\s+void)\b/i.test(text);
+  const hasConditionalRisk = /\b(?:unlimited\s+liability|unilateral\s+(?:variation|change|termination(?:\s+without\s+cause)?)|no\s+liability\s+cap|ambiguous|uncapped|sole\s+discretion|without\s+prior\s+notice|auto(?:matically)?\s+renew(?:s|al)?\s+unless|waives?\s+all\s+claims|no\s+refund)\b/i.test(text);
 
   if (!citedClauses.length) citedClauses.push('Standard Contract Terms');
 

@@ -34,6 +34,7 @@ import { generateComplianceCertificate } from '../src/certificate.mjs';
 import { evaluateCounterpartyShield, checkFakeWatchDomain } from '../src/bridges/fakewatch-bridge.mjs';
 import { generateRugReceiptProof } from '../src/bridges/rugreceipt-bridge.mjs';
 import { evaluatePaysheetConsensus } from '../src/bridges/paysheet-bridge.mjs';
+import { evaluateCreativeQa } from '../src/creative-qa.mjs';
 import { getWasmInstance } from '../comparator/wasm-buffer.mjs';
 import { GoldRushAggregator } from '../examples/gold-rush-aggregator/gold-rush-aggregator.mjs';
 
@@ -823,6 +824,30 @@ export const TOOLS = [
       },
     },
   },
+  {
+    name: 'audit_creative_qa',
+    description:
+      'ByteDance Use Case #5 — Independent Creative Quality Assurance: Screen ad sponsor KYB (GLEIF + OFAC SDN), CTA phishing URL safety, #ad / AI-generated disclosures, prohibited claims, and 651B WASM insertion-order budget math before escrow release.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        campaignId: { type: 'string', description: 'Campaign identifier' },
+        advertiserName: { type: 'string', description: 'Sponsor / advertiser legal entity name' },
+        creativeTitle: { type: 'string', description: 'Campaign headline or creative title' },
+        creativeCopy: { type: 'string', description: 'Full creative script, caption, or ad copy' },
+        landingUrl: { type: 'string', description: 'CTA destination landing page URL' },
+        payoutAddress: { type: 'string', description: 'Creator / publisher payout EVM or Solana wallet address' },
+        spendAmountUsdc: { type: 'number', description: 'Campaign payout / escrow amount in USDC' },
+        impressions: { type: 'number', description: 'Billable impression count (optional)' },
+        cpmUsd: { type: 'number', description: 'Agreed CPM rate in USD (optional)' },
+        statedTotalUsd: { type: 'number', description: 'Invoiced insertion-order total in USD' },
+        aiGenerated: { type: 'boolean', description: 'Whether creative contains synthetic / AI media' },
+        aiDisclosurePresent: { type: 'boolean', description: 'Explicit AI disclosure flag (optional)' },
+        sponsoredDisclosurePresent: { type: 'boolean', description: 'Explicit #ad / Paid Partnership flag (optional)' },
+      },
+      required: ['advertiserName', 'creativeCopy', 'spendAmountUsdc'],
+    },
+  },
 ];
 
 // Execute an MCP tool deterministically (shared by stdio and Streamable HTTP /api/mcp)
@@ -1029,6 +1054,14 @@ export async function executeMcpTool(name, inputArgs = {}) {
 
         case 'query_grid_power_price':
           result = await getLiveGridPowerPrice(args);
+          break;
+
+        case 'audit_creative_qa':
+          result = await evaluateCreativeQa(args, {
+            screenSanctions,
+            lookupCorporateRegistry,
+            checkFakeWatchDomain,
+          });
           break;
 
         default:
