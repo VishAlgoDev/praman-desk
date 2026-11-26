@@ -205,6 +205,7 @@ export class PramanSpendGuardError extends Error {
     this.certHash = clearanceData.certHash || null;
     this.verdictText = clearanceData.verdictText || null;
     this.status = clearanceData.status || 'HALTED';
+    this.reason = clearanceData.reason || null;
   }
 }
 

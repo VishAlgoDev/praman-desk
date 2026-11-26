@@ -27,11 +27,13 @@ import {
   SolanaSpendGuard,
   createSolanaSpendMiddleware,
   inspectSolanaTransaction,
+  parseSolanaMintAccountData,
   screenSolanaRecipient,
   checkSolanaSupplyChain,
   loadInMemorySdnDatabase,
   SYSTEM_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
+  TOKEN_2022_PROGRAM_ID,
   USDC_SPL_MINT,
   MALICIOUS_DRAINER_ADDRESSES,
   MALICIOUS_DRAINER_PROGRAM_IDS
@@ -632,6 +634,137 @@ await itAsync('wrapSigner guards transaction before wallet executes signature', 
   }, PramanSpendGuardError);
 
   assert.ok(!badTx.signatures || badTx.signatures.length === 0 || !badTx.signatures[0]?.signature, 'Malicious tx left unsigned');
+});
+
+// -------------------------------------------------------------------------
+// SECTION 8: TOKEN-2022 TLV EXTENSION & FREEZE AUTHORITY INSPECTION
+// -------------------------------------------------------------------------
+console.log(`\n▶ SECTION 8: SPL Token-2022 Mint TLV & Freeze Authority Checks`);
+
+function buildMockMintBuffer({ freezeAuthority = false, tlvExtensions = [] } = {}) {
+  const baseLen = tlvExtensions.length > 0 ? 166 : 82;
+  const extLen = tlvExtensions.reduce((acc, e) => acc + 4 + (e.len || 32), 0);
+  const buf = Buffer.alloc(baseLen + extLen);
+  buf.writeUInt32LE(1, 0); // mintAuthority present
+  buf.writeUInt8(6, 44); // 6 decimals
+  buf.writeUInt8(1, 45); // isInitialized = true
+  buf.writeUInt32LE(freezeAuthority ? 1 : 0, 46); // freezeAuthorityOption
+  if (tlvExtensions.length > 0) {
+    buf.writeUInt8(1, 165); // AccountType::Mint
+    let offset = 166;
+    for (const ext of tlvExtensions) {
+      const len = ext.len || 32;
+      buf.writeUInt16LE(ext.type, offset);
+      buf.writeUInt16LE(len, offset + 2);
+      offset += 4 + len;
+    }
+  }
+  return buf;
+}
+
+it('Approves clean SPL Mint without freezeAuthority or dangerous TLV extensions', () => {
+  const cleanInfo = {
+    owner: TOKEN_PROGRAM_ID,
+    data: buildMockMintBuffer({ freezeAuthority: false })
+  };
+  const parsed = parseSolanaMintAccountData(cleanInfo, USDC_SPL_MINT);
+  assert.equal(parsed.exists, true);
+  assert.equal(parsed.isToken2022, false);
+  assert.equal(parsed.hasFreezeAuthority, false);
+  assert.equal(parsed.riskLevel, 'LOW');
+  assert.equal(parsed.flags.length, 0);
+});
+
+it('Flags FreezeAuthority on SPL Mint and halts unapproved transfer', () => {
+  const frozenInfo = {
+    owner: TOKEN_PROGRAM_ID,
+    data: buildMockMintBuffer({ freezeAuthority: true })
+  };
+  const parsed = parseSolanaMintAccountData(frozenInfo, 'FreezeMint111111111111111111111111111111111');
+  assert.equal(parsed.hasFreezeAuthority, true);
+  assert.equal(parsed.riskLevel, 'HIGH');
+  assert(parsed.flags.includes('FREEZE_AUTHORITY_ENABLED'));
+
+  const guard = new SolanaSpendGuard({ maxSingleSpend: { SOL: 5 } });
+  const tx = new Transaction().add(
+    SystemProgram.transfer({
+      fromPubkey: Keypair.generate().publicKey,
+      toPubkey: Keypair.generate().publicKey,
+      lamports: 100_000_000n
+    })
+  );
+  assert.throws(() => {
+    guard.guardTransaction(tx, { token2022AccountData: frozenInfo, mint: parsed.mint });
+  }, (err) => err instanceof PramanSpendGuardError && err.reason === 'FREEZE_AUTHORITY_ENABLED');
+});
+
+it('Detects and halts Token-2022 PermanentDelegate (TLV 12) and TransferHook (TLV 14)', () => {
+  const permDelegateInfo = {
+    owner: TOKEN_2022_PROGRAM_ID,
+    data: buildMockMintBuffer({ tlvExtensions: [{ type: 12, len: 32 }] })
+  };
+  const parsedPerm = parseSolanaMintAccountData(permDelegateInfo, 'PermMint1111111111111111111111111111111111');
+  assert.equal(parsedPerm.isToken2022, true);
+  assert.equal(parsedPerm.riskLevel, 'CRITICAL');
+  assert(parsedPerm.flags.includes('TOKEN_2022_PERMANENT_DELEGATE'));
+
+  const hookInfo = {
+    owner: TOKEN_2022_PROGRAM_ID,
+    data: buildMockMintBuffer({ tlvExtensions: [{ type: 14, len: 36 }] })
+  };
+  const parsedHook = parseSolanaMintAccountData(hookInfo, 'HookMint1111111111111111111111111111111111');
+  assert.equal(parsedHook.riskLevel, 'CRITICAL');
+  assert(parsedHook.flags.includes('TOKEN_2022_TRANSFER_HOOK'));
+
+  const guard = new SolanaSpendGuard({ maxSingleSpend: { SOL: 5 } });
+  const tx = new Transaction().add(
+    SystemProgram.transfer({
+      fromPubkey: Keypair.generate().publicKey,
+      toPubkey: Keypair.generate().publicKey,
+      lamports: 100_000_000n
+    })
+  );
+  assert.throws(() => {
+    guard.guardTransaction(tx, { token2022AccountData: hookInfo, mint: parsedHook.mint });
+  }, (err) => err instanceof PramanSpendGuardError && err.reason === 'TOKEN_2022_TRANSFER_HOOK');
+  assert.equal(guard.getSessionSpent().SOL, 0, 'Halted Token-2022 tx must not mutate sessionSpent');
+});
+
+await itAsync('guardTransactionAsync fetches RPC mint metadata and blocks Token-2022 PermanentDelegate before signing', async () => {
+  const guard = new SolanaSpendGuard({ maxSingleSpend: { SOL: 5, USDC: 1000 } });
+  const sender = Keypair.generate();
+  const tx = new Transaction({
+    recentBlockhash: '11111111111111111111111111111111',
+    feePayer: sender.publicKey
+  }).add(
+    SystemProgram.transfer({
+      fromPubkey: sender.publicKey,
+      toPubkey: Keypair.generate().publicKey,
+      lamports: 100_000_000n
+    })
+  );
+
+  let sendCalled = false;
+  const mockConnection = {
+    async getAccountInfo() {
+      return {
+        owner: TOKEN_2022_PROGRAM_ID,
+        data: buildMockMintBuffer({ tlvExtensions: [{ type: 12, len: 32 }] })
+      };
+    },
+    async sendRawTransaction() {
+      sendCalled = true;
+      return 'should_never_happen';
+    },
+    async confirmTransaction() {
+      return { value: { err: null } };
+    }
+  };
+
+  await assert.rejects(async () => {
+    await guard.guardAndSendDevnetTransaction(mockConnection, tx, [sender], { mint: USDC_SPL_MINT });
+  }, (err) => err instanceof PramanSpendGuardError && err.reason === 'TOKEN_2022_PERMANENT_DELEGATE');
+  assert.equal(sendCalled, false, 'Transaction must NEVER be broadcast if Token-2022 check halts');
 });
 
 console.log(`\n=======================================================================`);

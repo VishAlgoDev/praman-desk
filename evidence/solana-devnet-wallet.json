@@ -1,0 +1,8 @@
+{
+  "network": "solana-devnet",
+  "treasuryAddress": "3r428Z8YSgQFJpsyPcQyxmt1faQQBuNRpqz92m9ucbuL",
+  "balanceSol": 0,
+  "fundingRequired": true,
+  "faucetUrl": "https://faucet.solana.com",
+  "note": "Fund treasuryAddress at https://faucet.solana.com then re-run test-solana-devnet.mjs to broadcast a real Solscan-verified Devnet settlement."
+}

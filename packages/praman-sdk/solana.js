@@ -35,6 +35,89 @@ export const MEMO_V1_PROGRAM_ID = 'Memo1UhkJRfHyvLMcVucJwxXeuD728EqVDDwQDxFMNo';
 // Official USDC SPL Mint on Solana Mainnet (6 decimals)
 export const USDC_SPL_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
+// SPL Token-2022 Extension TLV Type IDs (spl-token-2022 standard)
+export const TOKEN_2022_EXTENSION_TYPES = Object.freeze({
+  1: 'TransferFeeConfig',
+  6: 'MintCloseAuthority',
+  9: 'DefaultAccountState',
+  12: 'PermanentDelegate',
+  14: 'TransferHook'
+});
+
+/**
+ * Decodes raw SPL Token or Token-2022 Mint account data (zero-trust binary parser).
+ * Detects freezeAuthority and dangerous Token-2022 TLV extensions (PermanentDelegate, TransferHook, TransferFeeConfig).
+ */
+export function parseSolanaMintAccountData(accountInfo, mintAddress = '') {
+  if (!accountInfo || !accountInfo.data) {
+    return { exists: false, mint: String(mintAddress || ''), riskLevel: 'UNKNOWN', flags: ['MINT_ACCOUNT_NOT_FOUND'], extensions: [] };
+  }
+  const owner = toPubkeyString(accountInfo.owner);
+  const buf = Buffer.isBuffer(accountInfo.data) ? accountInfo.data : Buffer.from(accountInfo.data);
+  if (buf.length < 82) {
+    return { exists: true, owner, mint: String(mintAddress || ''), riskLevel: 'UNKNOWN', flags: ['INVALID_MINT_DATA_LENGTH'], extensions: [] };
+  }
+
+  const mintAuthorityOption = buf.readUInt32LE(0);
+  const decimals = buf.readUInt8(44);
+  const isInitialized = buf.readUInt8(45) === 1;
+  const freezeAuthorityOption = buf.readUInt32LE(46);
+  const hasFreezeAuthority = freezeAuthorityOption === 1;
+  const isToken2022 = owner === TOKEN_2022_PROGRAM_ID;
+
+  const extensions = [];
+  const flags = [];
+
+  if (hasFreezeAuthority) {
+    flags.push('FREEZE_AUTHORITY_ENABLED');
+  }
+
+  // SPL Token-2022 TLV section starts at byte 166 (82 base + 83 padding + 1 AccountType byte)
+  if (isToken2022 && buf.length > 166) {
+    let offset = 166;
+    while (offset + 4 <= buf.length) {
+      const extType = buf.readUInt16LE(offset);
+      const extLen = buf.readUInt16LE(offset + 2);
+      if (extType === 0 && extLen === 0) break;
+      const extName = TOKEN_2022_EXTENSION_TYPES[extType] || `Extension_${extType}`;
+      extensions.push({ type: extType, name: extName, byteLength: extLen });
+      if (extType === 12) flags.push('TOKEN_2022_PERMANENT_DELEGATE');
+      else if (extType === 14) flags.push('TOKEN_2022_TRANSFER_HOOK');
+      else if (extType === 1) flags.push('TOKEN_2022_TRANSFER_FEE');
+      else if (extType === 6) flags.push('TOKEN_2022_MINT_CLOSE_AUTHORITY');
+      else if (extType === 9) flags.push('TOKEN_2022_DEFAULT_ACCOUNT_STATE');
+      offset += 4 + extLen;
+    }
+  }
+
+  const hasCritical = flags.includes('TOKEN_2022_PERMANENT_DELEGATE') || flags.includes('TOKEN_2022_TRANSFER_HOOK');
+  const riskLevel = hasCritical ? 'CRITICAL' : (flags.length > 0 ? 'HIGH' : 'LOW');
+
+  return {
+    exists: true,
+    mint: String(mintAddress || ''),
+    owner,
+    isToken2022,
+    isInitialized,
+    decimals,
+    hasMintAuthority: mintAuthorityOption === 1,
+    hasFreezeAuthority,
+    extensions,
+    flags,
+    riskLevel
+  };
+}
+
+/**
+ * Fetches and inspects a Solana Mint account live on RPC for Token-2022 extension risks.
+ */
+export async function inspectSolanaToken2022Mint(connection, mintAddress) {
+  const { PublicKey } = await import('@solana/web3.js');
+  const pk = new PublicKey(mintAddress);
+  const info = await connection.getAccountInfo(pk, 'confirmed');
+  return parseSolanaMintAccountData(info, pk.toBase58());
+}
+
 // Compromised @solana/web3.js supply chain versions (December 2024 backdoor incident)
 export const MALICIOUS_WEB3_VERSIONS = Object.freeze(['1.95.6', '1.95.7']);
 
@@ -612,12 +695,60 @@ export class SolanaSpendGuard {
       runningSessionSpend[asset] = currentSession + amount;
     }
 
+    // 4b. Inspect Token-2022 Mint Extensions & Freeze Authority if provided synchronously or via guardTransactionAsync
+    const mintRisks = [];
+    if (context.mintRisk) mintRisks.push(context.mintRisk);
+    if (Array.isArray(context.mintRisks)) mintRisks.push(...context.mintRisks);
+    if (context.token2022AccountData) {
+      mintRisks.push(parseSolanaMintAccountData(context.token2022AccountData, context.mint || ''));
+    }
+    for (const mr of mintRisks) {
+      if (!mr || !mr.exists) continue;
+      if (mr.flags.includes('TOKEN_2022_PERMANENT_DELEGATE') && !context.allowPermanentDelegate) {
+        const certHash = this._generateCertHash('HALTED', { reason: 'TOKEN_2022_PERMANENT_DELEGATE', mint: mr.mint });
+        throw new PramanSpendGuardError(`[PRAMAN CIRCUIT BREAKER] Transaction HALTED: SPL Token-2022 mint ${mr.mint || 'unknown'} enables PermanentDelegate (unilateral seize/burn risk).`, {
+          status: 'HALTED',
+          reason: 'TOKEN_2022_PERMANENT_DELEGATE',
+          mint: mr.mint,
+          flags: mr.flags,
+          riskLevel: mr.riskLevel,
+          certHash,
+          timestamp
+        });
+      }
+      if (mr.flags.includes('TOKEN_2022_TRANSFER_HOOK') && !context.allowTransferHook) {
+        const certHash = this._generateCertHash('HALTED', { reason: 'TOKEN_2022_TRANSFER_HOOK', mint: mr.mint });
+        throw new PramanSpendGuardError(`[PRAMAN CIRCUIT BREAKER] Transaction HALTED: SPL Token-2022 mint ${mr.mint || 'unknown'} enforces unapproved TransferHook program execution.`, {
+          status: 'HALTED',
+          reason: 'TOKEN_2022_TRANSFER_HOOK',
+          mint: mr.mint,
+          flags: mr.flags,
+          riskLevel: mr.riskLevel,
+          certHash,
+          timestamp
+        });
+      }
+      if (mr.flags.includes('FREEZE_AUTHORITY_ENABLED') && !context.allowFreezeAuthority) {
+        const certHash = this._generateCertHash('HALTED', { reason: 'FREEZE_AUTHORITY_ENABLED', mint: mr.mint });
+        throw new PramanSpendGuardError(`[PRAMAN CIRCUIT BREAKER] Transaction HALTED: SPL mint ${mr.mint || 'unknown'} retains active freezeAuthority.`, {
+          status: 'HALTED',
+          reason: 'FREEZE_AUTHORITY_ENABLED',
+          mint: mr.mint,
+          flags: mr.flags,
+          riskLevel: mr.riskLevel,
+          certHash,
+          timestamp
+        });
+      }
+    }
+
     // 5. If all checks pass: commit running accumulator to session state
     this.sessionSpent = runningSessionSpend;
 
     const certHash = this._generateCertHash('APPROVED', {
       inspection,
       sessionSpent: this.sessionSpent,
+      mintInspections: mintRisks,
       timestamp
     });
 
@@ -632,8 +763,9 @@ export class SolanaSpendGuard {
       totalSol: inspection.totalSol,
       totalUsdc: inspection.totalUsdc,
       transfers: inspection.transfers,
+      mintInspections: mintRisks,
       sessionSpent: { ...this.sessionSpent },
-      summary: `Cleared ${inspection.transfers.length} transfer(s). Verified against 19,565 OFAC SDN records & drainer protections. Zero policy violations.`
+      summary: `Cleared ${inspection.transfers.length} transfer(s). Verified against 19,565 OFAC SDN records, drainer protections & Token-2022 TLV checks. Zero policy violations.`
     };
 
     this.executionLog.push(clearance);
@@ -694,10 +826,85 @@ export class SolanaSpendGuard {
   }
 
   /**
+   * Async pre-signature guard: fetches live SPL/Token-2022 mint TLV extensions via RPC
+   * for any token transfer mints (plus context.mint), then enforces all deterministic circuit breakers.
+   */
+  async guardTransactionAsync(connection, tx, context = {}) {
+    const inspection = inspectSolanaTransaction(tx);
+    const mintsToInspect = new Set();
+    for (const transfer of inspection.transfers) {
+      if (transfer.mint) mintsToInspect.add(transfer.mint);
+    }
+    if (context.mint) {
+      mintsToInspect.add(String(context.mint));
+    }
+
+    const fetchedMintRisks = [];
+    if (connection && mintsToInspect.size > 0) {
+      for (const mintAddr of mintsToInspect) {
+        try {
+          const mr = await inspectSolanaToken2022Mint(connection, mintAddr);
+          fetchedMintRisks.push(mr);
+        } catch (err) {
+          if (context.strictMintCheck) {
+            throw new PramanSpendGuardError(`[PRAMAN CIRCUIT BREAKER] Transaction HALTED: Unable to fetch Token-2022 mint metadata for ${mintAddr}: ${err.message}`, {
+              status: 'HALTED',
+              reason: 'TOKEN_2022_RPC_FETCH_FAILED',
+              mint: mintAddr,
+              timestamp: new Date().toISOString()
+            });
+          }
+        }
+      }
+    }
+
+    return this.guardTransaction(tx, {
+      ...context,
+      mintRisks: [...(Array.isArray(context.mintRisks) ? context.mintRisks : []), ...fetchedMintRisks]
+    });
+  }
+
+  /**
+   * Pre-signature guard + sign + real Devnet/cluster broadcast with confirmation.
+   * Only signs and broadcasts AFTER all synchronous and async Token-2022 checks pass.
+   */
+  async guardAndSendDevnetTransaction(connection, tx, signers = [], context = {}) {
+    const clearance = await this.guardTransactionAsync(connection, tx, context);
+    if (!clearance.approved) {
+      return clearance;
+    }
+
+    const signerList = Array.isArray(signers) ? signers : [signers];
+    if (signerList.length > 0) {
+      if (typeof tx.version !== 'undefined') {
+        tx.sign(signerList);
+      } else {
+        tx.sign(...signerList);
+      }
+    }
+
+    const rawTx = tx.serialize();
+    const signature = await connection.sendRawTransaction(rawTx, {
+      skipPreflight: false,
+      preflightCommitment: 'confirmed'
+    });
+    const confirmation = await connection.confirmTransaction(signature, 'confirmed');
+
+    return {
+      ...clearance,
+      broadcast: true,
+      signature,
+      confirmation,
+      solscanUrl: `https://solscan.io/tx/${signature}?cluster=devnet`,
+      explorerUrl: `https://explorer.solana.com/tx/${signature}?cluster=devnet`
+    };
+  }
+
+  /**
    * Pre-signature guard and simulated execution against live Solana Devnet RPC.
    */
   async guardAndSimulateTransaction(connection, tx, options = {}) {
-    const clearance = this.guardTransaction(tx, options);
+    const clearance = await this.guardTransactionAsync(connection, tx, options);
     if (!clearance.approved) {
       return clearance;
     }

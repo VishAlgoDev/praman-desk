@@ -12,28 +12,46 @@
 
 import crypto from 'node:crypto';
 
-// Public verified JSON-RPC endpoints for EVM chains
+// Public verified JSON-RPC endpoints for EVM chains (non-pruned archive-capable nodes first)
 const RPC_ENDPOINTS = {
   ethereum: [
-    'https://mainnet.gateway.tenderly.co',
+    'https://eth.llamarpc.com',
+    'https://1rpc.io/eth',
     'https://ethereum-rpc.publicnode.com',
+    'https://mainnet.gateway.tenderly.co',
     'https://rpc.mevblocker.io'
   ],
   sepolia: [
-    'https://gateway.tenderly.co/public/sepolia',
-    'https://ethereum-sepolia-rpc.publicnode.com'
+    'https://1rpc.io/sepolia',
+    'https://rpc.sepolia.org',
+    'https://ethereum-sepolia-rpc.publicnode.com',
+    'https://gateway.tenderly.co/public/sepolia'
   ],
   base: [
-    'https://mainnet.base.org'
+    'https://mainnet.base.org',
+    'https://1rpc.io/base'
+  ],
+  'base-sepolia': [
+    'https://sepolia.base.org'
   ],
   arbitrum: [
-    'https://arb1.arbitrum.io/rpc'
+    'https://arb1.arbitrum.io/rpc',
+    'https://1rpc.io/arb'
   ],
   optimism: [
-    'https://mainnet.optimism.io'
+    'https://mainnet.optimism.io',
+    'https://1rpc.io/op'
   ],
   polygon: [
-    'https://polygon-rpc.com'
+    'https://polygon-rpc.com',
+    'https://1rpc.io/matic'
+  ],
+  bsc: [
+    'https://bsc-dataseed.binance.org',
+    'https://bsc-dataseed1.defibit.io'
+  ],
+  avalanche: [
+    'https://api.avax.network/ext/bc/C/rpc'
   ]
 };
 
@@ -203,13 +221,28 @@ export async function executeWebSearch({ query, question, q, prompt, text } = {}
     const corpQuery = cleanSearch.replace(/\b(?:gleif|lei|lookup|registry)\b/gi, '').trim();
     if (corpQuery.length >= 2) {
       try {
-        const gRes = await fetch(`https://api.gleif.org/api/v1/lei-records?filter%5Bentity.legalName%5D=${encodeURIComponent(corpQuery)}&page%5Bsize%5D=3`, {
+        const gleifFilterName = corpQuery.replace(/\bag\s*$/i, 'Aktiengesellschaft').trim();
+        const gRes = await fetch(`https://api.gleif.org/api/v1/lei-records?filter%5Bentity.legalName%5D=${encodeURIComponent(gleifFilterName)}&page%5Bsize%5D=10`, {
           headers: { Accept: 'application/vnd.api+json' },
           signal: AbortSignal.timeout(4000)
         });
         if (gRes.ok) {
           const gJson = await gRes.json();
-          const rec = gJson?.data?.[0];
+          const recs = Array.isArray(gJson?.data) ? gJson.data : [];
+          const qNorm = gleifFilterName.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+          const scored = recs.map(r => {
+            const ln = String(r?.attributes?.entity?.legalName?.name || '');
+            const lnNorm = ln.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+            const st = r?.attributes?.entity?.status || '';
+            const cat = r?.attributes?.entity?.entityCategory || '';
+            let s = st === 'ACTIVE' ? 10 : 0;
+            if (lnNorm === qNorm) s += 100;
+            else if (lnNorm.startsWith(qNorm)) s += 50;
+            if (cat === 'GENERAL') s += 5;
+            if (!/\b(?:energy|healthineers|finance|bank)\b/i.test(lnNorm) || /\b(?:energy|healthineers|finance|bank)\b/i.test(qNorm)) s += 20;
+            return { r, s };
+          }).sort((a, b) => b.s - a.s);
+          const rec = scored[0]?.r;
           if (rec?.attributes?.entity?.legalName?.name) {
             const legalName = rec.attributes.entity.legalName.name;
             const lei = rec.id;
@@ -237,6 +270,47 @@ export async function executeWebSearch({ query, question, q, prompt, text } = {}
         sources.push('https://github.com/telegraphprotocol/bounties', 'https://anjoman.ai/docs');
       }
     } catch {}
+  }
+
+  const wantsLiveNewsFirst = /\b(?:latest|today|current|recent|news|2025|2026|decision|rate\s+(?:cut|hike|decision)|announced|update|breaking)\b/i.test(rawQuery);
+
+  const tryGoogleNews = async () => {
+    try {
+      const newsUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(rawQuery)}&hl=en-US&gl=US&ceid=US:en`;
+      const nRes = await fetch(newsUrl, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
+        signal: AbortSignal.timeout(3500)
+      });
+      if (nRes.ok) {
+        const text = await nRes.text();
+        const items = text.match(/<item>[\s\S]*?<\/item>/g) || [];
+        if (items.length > 0) {
+          const newsHeadlines = [];
+          for (let i = 0; i < Math.min(items.length, 4); i++) {
+            const item = items[i];
+            const titleMatch = item.match(/<title>([\s\S]*?)<\/title>/);
+            const linkMatch = item.match(/<link>([\s\S]*?)<\/link>/);
+            const pubMatch = item.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
+            if (titleMatch && titleMatch[1]) {
+              const cleanTitle = titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+              const pubStr = pubMatch && pubMatch[1] ? ` (${pubMatch[1].trim().slice(0, 16)})` : '';
+              newsHeadlines.push(`${cleanTitle}${pubStr}`);
+            }
+            if (linkMatch && linkMatch[1]) {
+              sources.push(linkMatch[1].trim());
+            }
+          }
+          if (newsHeadlines.length > 0) {
+            answer = `Latest reporting for "${rawQuery}":\n` + newsHeadlines.map((h, idx) => `[${idx + 1}] ${h}`).join('\n');
+            brief = newsHeadlines[0].slice(0, 80);
+          }
+        }
+      }
+    } catch (e) {}
+  };
+
+  if (!answer && wantsLiveNewsFirst) {
+    await tryGoogleNews();
   }
 
   // 3. Wikipedia search with direct snippet synthesis (answers direct factual questions e.g. "capital of Australia")
@@ -291,36 +365,7 @@ export async function executeWebSearch({ query, question, q, prompt, text } = {}
 
   // 4. Google News RSS fallback for news/current events
   if (!answer || answer.length < 50) {
-    try {
-      const newsUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(rawQuery)}&hl=en-US&gl=US&ceid=US:en`;
-      const nRes = await fetch(newsUrl, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' },
-        signal: AbortSignal.timeout(3000)
-      });
-      if (nRes.ok) {
-        const text = await nRes.text();
-        const items = text.match(/<item>[\s\S]*?<\/item>/g) || [];
-        if (items.length > 0) {
-          const newsHeadlines = [];
-          for (let i = 0; i < Math.min(items.length, 3); i++) {
-            const item = items[i];
-            const titleMatch = item.match(/<title>([\s\S]*?)<\/title>/);
-            const linkMatch = item.match(/<link>([\s\S]*?)<\/link>/);
-            if (titleMatch && titleMatch[1]) {
-              const cleanTitle = titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim();
-              newsHeadlines.push(cleanTitle);
-            }
-            if (linkMatch && linkMatch[1]) {
-              sources.push(linkMatch[1].trim());
-            }
-          }
-          if (newsHeadlines.length > 0) {
-            answer = `Latest reporting for "${rawQuery}":\n` + newsHeadlines.map((h, idx) => `[${idx + 1}] ${h}`).join('\n');
-            brief = newsHeadlines[0].slice(0, 80);
-          }
-        }
-      }
-    } catch (e) {}
+    await tryGoogleNews();
   }
 
   // 5. Default fallback
@@ -410,11 +455,14 @@ export async function lookupOnchainTx({ tx_hash, hash, chain, question, query, p
   // Determine target chain
   let targetChain = (chain || '').toLowerCase();
   if (!RPC_ENDPOINTS[targetChain]) {
-    if (/sepolia/i.test(rawQuery)) targetChain = 'sepolia';
+    if (/base\s*sepolia/i.test(rawQuery)) targetChain = 'base-sepolia';
+    else if (/sepolia/i.test(rawQuery)) targetChain = 'sepolia';
     else if (/base/i.test(rawQuery)) targetChain = 'base';
     else if (/arbitrum|arb/i.test(rawQuery)) targetChain = 'arbitrum';
-    else if (/optimism|op/i.test(rawQuery)) targetChain = 'optimism';
+    else if (/optimism|op\b/i.test(rawQuery)) targetChain = 'optimism';
     else if (/polygon|matic/i.test(rawQuery)) targetChain = 'polygon';
+    else if (/\bbsc\b|\bbnb\b/i.test(rawQuery)) targetChain = 'bsc';
+    else if (/avalanche|avax/i.test(rawQuery)) targetChain = 'avalanche';
     else targetChain = 'ethereum';
   }
 
@@ -666,18 +714,98 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
  */
 export async function checkWalletBalance({ wallet_address, address, account, token_address, chain, question, query, prompt, text } = {}) {
   const rawQuery = (question || query || prompt || text || '').trim();
-  const addresses = ((wallet_address || address || account || '') + ' ' + rawQuery).match(/0x[a-fA-F0-9]{40}/gi) || [];
-  const targetWallet = addresses[0] || null;
-  const targetToken = token_address || (addresses.length > 1 ? addresses[1] : null);
+  const combinedText = `${wallet_address || address || account || ''} ${rawQuery}`.trim();
+  const addresses = combinedText.match(/0x[a-fA-F0-9]{40}/gi) || [];
+  let targetWallet = addresses[0] || null;
+  let targetToken = token_address || (addresses.length > 1 ? addresses[1] : null);
 
   let targetChain = (chain || '').toLowerCase();
-  if (!RPC_ENDPOINTS[targetChain]) {
-    if (/sepolia/i.test(rawQuery)) targetChain = 'sepolia';
-    else if (/base/i.test(rawQuery)) targetChain = 'base';
-    else if (/arbitrum|arb/i.test(rawQuery)) targetChain = 'arbitrum';
-    else if (/optimism|op/i.test(rawQuery)) targetChain = 'optimism';
+  if (!RPC_ENDPOINTS[targetChain] && targetChain !== 'solana') {
+    if (/\bsolana\b/i.test(rawQuery)) targetChain = 'solana';
+    else if (/base\s*sepolia/i.test(rawQuery)) targetChain = 'base-sepolia';
+    else if (/sepolia/i.test(rawQuery)) targetChain = 'sepolia';
+    else if (/\bbase\b/i.test(rawQuery)) targetChain = 'base';
+    else if (/arbitrum|\barb\b/i.test(rawQuery)) targetChain = 'arbitrum';
+    else if (/optimism|\bop\b/i.test(rawQuery)) targetChain = 'optimism';
     else if (/polygon|matic/i.test(rawQuery)) targetChain = 'polygon';
+    else if (/\bbsc\b|\bbnb\b/i.test(rawQuery)) targetChain = 'bsc';
+    else if (/avalanche|avax/i.test(rawQuery)) targetChain = 'avalanche';
     else targetChain = 'ethereum';
+  }
+
+  // Resolve .eth ENS names via public ENS resolver when no 0x address is given
+  if (!targetWallet) {
+    const ensMatch = combinedText.match(/\b([a-zA-Z0-9-]+\.eth)\b/i);
+    if (ensMatch) {
+      const ensName = ensMatch[1].toLowerCase();
+      try {
+        const ensRes = await fetch(`https://api.ensideas.com/ens/resolve/${encodeURIComponent(ensName)}`, {
+          signal: AbortSignal.timeout(4000)
+        });
+        if (ensRes.ok) {
+          const ensData = await ensRes.json();
+          if (ensData?.address && /^0x[a-fA-F0-9]{40}$/.test(ensData.address)) {
+            targetWallet = ensData.address;
+          }
+        }
+      } catch {}
+    }
+  }
+
+  // Support Solana Base58 wallet addresses
+  if (!targetWallet) {
+    const solMatch = combinedText.match(/\b([1-9A-HJ-NP-Za-km-z]{32,44})\b/);
+    if (solMatch && (targetChain === 'solana' || /\b(?:sol|solana|devnet|mainnet)\b/i.test(combinedText))) {
+      const solAddr = solMatch[1];
+      const solRpc = /devnet/i.test(combinedText) ? 'https://api.devnet.solana.com' : 'https://api.mainnet-beta.solana.com';
+      try {
+        const sRes = await fetch(solRpc, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getBalance', params: [solAddr] }),
+          signal: AbortSignal.timeout(4000)
+        });
+        if (sRes.ok) {
+          const sData = await sRes.json();
+          if (typeof sData?.result?.value === 'number') {
+            const lamports = BigInt(sData.result.value);
+            const solBal = Number(lamports) / 1e9;
+            const isFunded = solBal > 0;
+            const verdictStr = isFunded ? 'funded' : 'empty';
+            const summaryStr = `The Solana address ${solAddr} currently has a native balance of ${solBal.toFixed(6)} SOL.`;
+            return {
+              status: 'confirmed',
+              address: solAddr,
+              wallet_address: solAddr,
+              chain: /devnet/i.test(combinedText) ? 'solana-devnet' : 'solana',
+              balance: solBal,
+              balance_lamports: lamports.toString(),
+              symbol: 'SOL',
+              funded: isFunded,
+              verdict: verdictStr,
+              answer: verdictStr,
+              confidence: 1.0,
+              reason: summaryStr,
+              summary: summaryStr
+            };
+          }
+        }
+      } catch {}
+    }
+  }
+
+  // Detect ERC-20 token symbol mention (USDC, USDT, WETH, WBTC, DAI) when explicit token address omitted
+  let requestedSymbol = null;
+  if (targetWallet && !targetToken) {
+    const symMatch = combinedText.match(/\b(TESTUSDC|USDC|USDT|WETH|WBTC|DAI)\b/i);
+    if (symMatch) {
+      const sym = symMatch[1].toUpperCase();
+      const mapped = KNOWN_TOKEN_ADDRESSES[targetChain]?.[sym] || KNOWN_TOKEN_ADDRESSES.ethereum?.[sym] || null;
+      if (mapped && mapped.toLowerCase() !== targetWallet.toLowerCase()) {
+        targetToken = mapped;
+        requestedSymbol = sym;
+      }
+    }
   }
 
   if (!targetWallet) {
@@ -691,8 +819,8 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
       verdict: 'unfunded',
       answer: 'unfunded',
       confidence: 0.0,
-      reason: 'No valid 40-character hexadecimal wallet address provided',
-      summary: 'No valid 40-character hexadecimal wallet address provided'
+      reason: 'No valid 40-character hexadecimal wallet address, ENS name, or Solana pubkey provided',
+      summary: 'No valid 40-character hexadecimal wallet address, ENS name, or Solana pubkey provided'
     };
   }
 
@@ -705,33 +833,47 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
         const res = await fetch(rpc, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'eth_call',
-            params: [{ to: targetToken, data: `0x70a08231${paddedAddr}` }, 'latest']
-          }),
+          body: JSON.stringify([
+            {
+              jsonrpc: '2.0',
+              id: 1,
+              method: 'eth_call',
+              params: [{ to: targetToken, data: `0x70a08231${paddedAddr}` }, 'latest']
+            },
+            {
+              jsonrpc: '2.0',
+              id: 2,
+              method: 'eth_call',
+              params: [{ to: targetToken, data: '0x313ce567' }, 'latest']
+            }
+          ]),
           signal: AbortSignal.timeout(4000)
         });
         if (!res.ok) continue;
-        const data = await res.json();
-        if (data.result && data.result !== '0x') {
-          const rawBalance = BigInt(data.result);
+        const arr = await res.json();
+        const balRes = Array.isArray(arr) ? arr.find(x => x.id === 1) : arr;
+        const decRes = Array.isArray(arr) ? arr.find(x => x.id === 2) : null;
+        if (balRes?.result && balRes.result !== '0x') {
+          const rawBalance = BigInt(balRes.result);
+          const decimals = (decRes?.result && decRes.result !== '0x') ? Number(BigInt(decRes.result)) : (requestedSymbol === 'USDC' || requestedSymbol === 'USDT' ? 6 : 18);
+          const humanBalance = Number(rawBalance) / (10 ** decimals);
           const isFunded = rawBalance > 0n;
           const verdictStr = isFunded ? 'funded' : 'empty';
-          const summaryStr = `The address ${targetWallet} currently has a token balance of ${rawBalance.toString()} on ${targetChain}.`;
+          const symLabel = requestedSymbol || 'TOKEN';
+          const summaryStr = `The address ${targetWallet} currently has a ${symLabel} token balance of ${humanBalance.toLocaleString('en-US', { maximumFractionDigits: 6 })} ${symLabel} (${rawBalance.toString()} raw units) on ${targetChain}.`;
           return {
             status: 'confirmed',
             address: targetWallet,
             wallet_address: targetWallet,
             token_address: targetToken,
             chain: targetChain,
-            balance: rawBalance.toString(),
+            decimals,
+            balance: humanBalance,
             balance_raw: rawBalance.toString(),
-            symbol: 'TOKEN',
+            symbol: symLabel,
             funded: isFunded,
             verdict: verdictStr,
-            answer: verdictStr,
+            answer: summaryStr,
             confidence: 1.0,
             reason: summaryStr,
             summary: summaryStr
@@ -987,11 +1129,19 @@ const LIVE_UNIV3_POOLS = {
 
 export async function verifyLiquidityDepth(params = {}) {
   const queryText = `${params.query || ''} ${params.question || ''} ${params.prompt || ''} ${params.task || ''}`.trim();
+  const explicitPoolMatch = `${params.pool || params.pool_address || ''} ${queryText}`.match(/0x[a-fA-F0-9]{40}/);
+  const explicitPoolAddress = explicitPoolMatch ? explicitPoolMatch[0] : null;
 
   let pair = params.pair || params.symbol || params.market;
   if (!pair && queryText) {
-    const pairMatch = queryText.match(/([A-Za-z0-9]+)[/-]([A-Za-z0-9]+)/);
-    if (pairMatch) pair = `${pairMatch[1].toUpperCase()}/${pairMatch[2].toUpperCase()}`;
+    const slashMatch = queryText.match(/\b([A-Za-z0-9]{2,10})\/([A-Za-z0-9]{2,10})\b/);
+    if (slashMatch) {
+      pair = `${slashMatch[1].toUpperCase()}/${slashMatch[2].toUpperCase()}`;
+    } else {
+      const dashMatches = [...queryText.matchAll(/\b([A-Za-z0-9]{2,10})-([A-Za-z0-9]{2,10})\b/g)];
+      const validDash = dashMatches.find(m => !/^(?:bid|ask|pre|post|on|off|re|sub|non|anti)$/i.test(m[1]));
+      if (validDash) pair = `${validDash[1].toUpperCase()}/${validDash[2].toUpperCase()}`;
+    }
   }
   if (!pair) pair = 'ETH/USDC';
   pair = pair.toUpperCase().replace('-', '/');
@@ -1000,12 +1150,105 @@ export async function verifyLiquidityDepth(params = {}) {
   let chain = (params.chain || params.network || 'ethereum').toLowerCase();
   if (/\bbase\b/i.test(queryText)) chain = 'base';
   else if (/\barbitrum\b/i.test(queryText)) chain = 'arbitrum';
+  else if (/\bpolygon\b|\bmatic\b/i.test(queryText)) chain = 'polygon';
+  else if (/\boptimism\b|\bop\b/i.test(queryText)) chain = 'optimism';
+  else if (/\bbsc\b|\bbnb\b/i.test(queryText)) chain = 'bsc';
 
   let depthPct = parseFloat(params.depth_pct ?? params.depth ?? params.range_pct ?? 2.0);
   if (isNaN(depthPct) || depthPct <= 0) depthPct = 2.0;
 
-  let notionalUsd = parseFloat(params.notional_usd ?? params.amount_usd ?? params.notional ?? 100000.0);
+  let notionalUsd = parseFloat(params.notional_usd ?? params.amount_usd ?? params.notional ?? NaN);
+  const explicitEthSell = queryText.match(/(\d+(?:\.\d+)?)\s*(?:w?eth)\b/i);
+  if (isNaN(notionalUsd) && explicitEthSell) {
+    notionalUsd = parseFloat(explicitEthSell[1]) * 3000;
+  }
   if (isNaN(notionalUsd) || notionalUsd <= 0) notionalUsd = 100000.0;
+
+  // 1. Live multi-chain lookup for arbitrary explicit 0x pool addresses (DexScreener + GeckoTerminal)
+  if (explicitPoolAddress) {
+    const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon', bsc: 'bsc' };
+    const gtNetMap = { ethereum: 'eth', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon_pos', bsc: 'bsc' };
+    const dexChain = dexChainMap[chain] || 'ethereum';
+    const gtNet = gtNetMap[chain] || 'eth';
+
+    let dexPair = null;
+    try {
+      const dsRes = await fetch(`https://api.dexscreener.com/latest/dex/pairs/${dexChain}/${explicitPoolAddress}`, {
+        signal: AbortSignal.timeout(4000)
+      });
+      if (dsRes.ok) {
+        const dsData = await dsRes.json();
+        dexPair = dsData?.pair || dsData?.pairs?.[0] || null;
+      }
+      if (!dexPair) {
+        const dsSearch = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${explicitPoolAddress}`, {
+          signal: AbortSignal.timeout(4000)
+        });
+        if (dsSearch.ok) {
+          const dsS = await dsSearch.json();
+          dexPair = dsS?.pairs?.find(p => String(p.pairAddress || '').toLowerCase() === explicitPoolAddress.toLowerCase()) || dsS?.pairs?.[0] || null;
+        }
+      }
+    } catch {}
+
+    let gtPool = null;
+    if (!dexPair) {
+      try {
+        const gtRes = await fetch(`https://api.geckoterminal.com/api/v2/networks/${gtNet}/pools/${explicitPoolAddress}`, {
+          headers: { Accept: 'application/json' },
+          signal: AbortSignal.timeout(4000)
+        });
+        if (gtRes.ok) {
+          const gtJson = await gtRes.json();
+          gtPool = gtJson?.data?.attributes || null;
+        }
+      } catch {}
+    }
+
+    if (dexPair || gtPool) {
+      const resolvedPair = dexPair
+        ? `${dexPair.baseToken?.symbol || 'TOKEN0'}/${dexPair.quoteToken?.symbol || 'TOKEN1'}`
+        : (gtPool?.name || pair);
+      const liqUsd = Math.round(Number(dexPair?.liquidity?.usd ?? gtPool?.reserve_in_usd ?? 0) * 100) / 100;
+      const priceUsd = Number(dexPair?.priceUsd ?? gtPool?.base_token_price_usd ?? 0);
+      const vol24h = Number(dexPair?.volume?.h24 ?? gtPool?.volume_usd?.h24 ?? 0);
+      const dexLabel = dexPair?.dexId || 'DEX Pool';
+      const resolvedChain = dexPair?.chainId || chain;
+      const slippagePct = liqUsd > 0 ? Math.min(100.0, Math.round(((notionalUsd / (liqUsd * 2)) * 100) * 1000) / 1000) : 100.0;
+      const depthSufficient = liqUsd >= notionalUsd * 2.0;
+      const formattedLiq = liqUsd.toLocaleString('en-US', { maximumFractionDigits: 2 });
+      const summaryText = `LIVE DEX LIQUIDITY: ${resolvedPair} on ${resolvedChain} (${dexLabel}, pool ${explicitPoolAddress}) liquidity $${formattedLiq} USD (24h vol $${Math.round(vol24h).toLocaleString('en-US')}, est. slippage ${slippagePct}%) - ${depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING'}`;
+      const payload = {
+        ok: true,
+        status: 'confirmed',
+        intent: 'LIQUIDITY_DEPTH_VERIFY_GENERAL',
+        pair: resolvedPair,
+        chain: resolvedChain,
+        pool_address: explicitPoolAddress,
+        dex: dexLabel,
+        current_price_usd: priceUsd || null,
+        depth_range_pct: depthPct,
+        notional_tested_usd: notionalUsd,
+        total_depth_usd: liqUsd,
+        liquidity_usd: liqUsd,
+        tvl_usd: liqUsd,
+        volume_24h_usd: vol24h || null,
+        estimated_slippage_pct: slippagePct,
+        depth_sufficient: depthSufficient,
+        verdict: depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING',
+        summary: summaryText,
+        explanation: summaryText,
+        reason: summaryText,
+        answer: summaryText,
+        results: [summaryText],
+        confidence: 1.0,
+        verification_method: dexPair ? 'LIVE_DEXSCREENER_POOL_STATE' : 'LIVE_GECKOTERMINAL_POOL_STATE',
+        timestamp: new Date().toISOString()
+      };
+      payload.canonical_sha256 = `0x${crypto.createHash('sha256').update(JSON.stringify(payload, Object.keys(payload).sort())).digest('hex')}`;
+      return payload;
+    }
+  }
 
   const poolCfg = LIVE_UNIV3_POOLS[pair]?.[chain];
   const rpcs = RPC_ENDPOINTS[chain] || RPC_ENDPOINTS.ethereum;

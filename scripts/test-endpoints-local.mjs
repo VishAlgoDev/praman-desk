@@ -653,6 +653,12 @@ async function run() {
       throw new Error(`Vendor NL corporate status check failed: ${JSON.stringify(vendorCorp.json)}`);
     }
 
+    // 32. Shareable Case Permalink Route (/api/audit/case)
+    const caseRes = await check('/api/audit/case?case=po-ali-9021');
+    if (caseRes.status !== 200 || caseRes.json.caseId !== 'po-ali-9021' || caseRes.json.releasedAmountUsdc !== 80000 || !caseRes.json.permalink?.includes('/api/audit/case?case=po-ali-9021')) {
+      throw new Error(`GET /api/audit/case?case=po-ali-9021 failed: ${JSON.stringify(caseRes.json)}`);
+    }
+
     console.log('\nALL 28 ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM, MISSION 02, GRID POWER PRICING, GENERALIZED MULTI-MINER AGGREGATION & TRADE ASSURANCE EVIDENCE DISPOSITIONS VERIFIED!');
   } finally {
     server.close();

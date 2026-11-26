@@ -10,6 +10,18 @@
 
 ---
 
+## Judges Start Here: 5-Step Independent Verification
+
+| Step | Action | Exact Command or Live URL | Expected Result |
+|---|---|---|---|
+| **1. Run it** | Run the full core, Alibaba Trade Assurance, Solana Token-2022 + Devnet, Two-Mind, Tencent/Visa/OpenClaw, and WASM suites | `npm run sdk:test && npm run tencent-visa:test && npm run alibaba:demo && npm run comparator:test` | Zero failures across JS, Python, Solana, Token-2022, Tencent, Visa, OpenClaw/Hermes, and 1,043 WASM vectors |
+| **2. Check it** | Hit live production API or shareable signed audit case permalink | [PO-ALI-9021 Case Permalink](https://praman-desk.vercel.app/api/audit/case?case=po-ali-9021) | Returns JSON verdict (`RECONCILED_PARTIAL_SETTLEMENT`, `$80,000` released, `$20,000` refunded, Sepolia tx + EAS links) |
+| **3. Inspect receipt** | Verify on-chain Sepolia TakarSettle resolutions and Diamond #6169 | [TakarSettle v4 Deal 0](https://sepolia.etherscan.io/tx/0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75) • [Deal 1](https://sepolia.etherscan.io/tx/0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13) • [Deal 2](https://sepolia.etherscan.io/tx/0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de) | Confirmed Ethereum Sepolia transactions & EAS attestation `0x33d85bed...` |
+| **4. Break it** | Trigger deterministic pre-payment & Token-2022 circuit breakers | `npm run solana:demo` | Halts hijacked `@solana/web3.js` 1.95.6/1.95.7, drainer `FnvLGtucz4...`, Token-2022 `PermanentDelegate`/`TransferHook`, and OFAC entities with zero key exposure |
+| **5. Reproduce it** | Connect headless via zero-install MCP (18 tools) or read the walkthrough | [Live MCP](https://praman-desk.vercel.app/api/mcp) • [OpenClaw/Hermes Skill](examples/tencent-visa-commercial/openclaw-hermes-skill/SKILL.md) • [Walkthrough Video](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) | Direct headless tool calls & complete end-to-end visual walkthrough |
+
+---
+
 ## Judge & Developer 30-Second Quickstart
 
 Evaluate Praman Desk locally with zero external keys in under 30 seconds:
@@ -33,7 +45,7 @@ npm run comparator:test
 ```
 
 - **Live Web Console:** [https://praman-desk.vercel.app](https://praman-desk.vercel.app) *(Alibaba Trade Assurance Desk, Disposition Board, Live Solana Pre-Signature Spend Guard, Procurement Verifier, Multi-Miner Settlement Ledger)*
-- **Verified Live Walkthrough Video (1m 48s):** [praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) *(Live UI + narrated 4-act proof covering PO-ALI-9021, Disposition Board, Live Solana Spend Guard, Settlement Ledger, and MCP/SDK integration)*
+- **Verified Live Walkthrough Video:** [praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) *(Live UI + narrated 4-act proof covering PO-ALI-9021, Disposition Board, Live Solana Spend Guard, Settlement Ledger, and MCP/SDK integration)*
 - **Zero-Install Keyless MCP Server:** Add `https://praman-desk.vercel.app/api/mcp` to Cursor, Claude Code, or Minds ([Setup Guide](CONNECT_YOUR_AGENT.md))
 - **NPM / GitHub SDK Integration:** `npm install github:VishAlgoDev/praman-desk` or import from `packages/praman-sdk` (`index.js`, `solana.js`, `praman.py`)
 - **Two-Mind Spend Guard Architecture:** [Reference Implementation of the Animoca Brands Minds Specification](examples/minds-spend-guard/) (Diligence Investigator + Escrow Reviewer Minds)
@@ -66,7 +78,7 @@ npm run comparator:test
 | **2. Commercial Viability & Real Utility** | Prevents autonomous treasury loss from overbilling (`PO-ALI-9021` 80 vs 100 units), OFAC SDN sanctions exposure, phishing domains (`FakeWatch`), exploit contracts (`RugReceipt`), and hijacked Solana `web3.js` signing hooks before capital leaves escrow or wallet keys touch bytes. | [Commercial Dossier](#anjoman-season-ii-hackathon-rubric-dossier-the-5-mandatory-questions) • [Benchmark Report](docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md) |
 | **3. Genuine Independent Adoption & Retention** | Keyless Streamable HTTP MCP (`/api/mcp`, 18 tools) + JS/TS/Python SDKs (`packages/praman-sdk`) + cross-project integrations with Takar (`Bangdrop`), FakeWatch (`#42420`), RugReceipt (`#208`), and Paysheet (`#214`). | [CONNECT_YOUR_AGENT.md](CONNECT_YOUR_AGENT.md) • [Live MCP](https://praman-desk.vercel.app/api/mcp) • [Minds Specification](examples/minds-spend-guard/) |
 | **4. Telegraph Network Integration & Quality** | Devnode Route `#5281` / Sepolia Diamond RegID `#6169` serving real live upstream data (GLEIF, SEC EDGAR, OFAC SDN, CAISO OASIS, Ethereum/Sepolia JSON-RPC) with `30` verified paid Sepolia ledger receipts (`0.30 test-USDC`) and fail-closed transparency (`confidence: 0` when an upstream feed is unreachable). | [Sepolia Diamond #6169](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b) • [Live Ledger](https://praman-desk.vercel.app/#desk-3) |
-| **5. Reproducibility, Demo & Verifiable Proof** | Interactive browser portal (`Trade Assurance`, `Disposition Board`, `Solana Spend Guard` wired to `/api/audit/solana-spend-guard`, `Procurement Verify`, `Settlement Ledger`), full unit + integration + Devnet test suites, verified 1m 48s walkthrough video, and Sepolia Etherscan + EAS receipts. | [Live App](https://praman-desk.vercel.app) • [Walkthrough Video (1m 48s)](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) • [EAS Attestation](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115) |
+| **5. Reproducibility, Demo & Verifiable Proof** | Interactive browser portal (`Trade Assurance`, `Disposition Board`, `Solana Spend Guard` wired to `/api/audit/solana-spend-guard`, `Procurement Verify`, `Settlement Ledger`), full unit + integration + Devnet test suites, verified walkthrough video, and Sepolia Etherscan + EAS receipts. | [Live App](https://praman-desk.vercel.app) • [Walkthrough Video](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) • [EAS Attestation](https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115) |
 | **6. Organic Growth, Education & Dev Activation** | Zero-install developer guide (`CONNECT_YOUR_AGENT.md`), CLI runner (`npm run gate solana-demo` / `npm run alibaba:demo`), and interactive SDK playground. | [Developer Guide](CONNECT_YOUR_AGENT.md) • [Discord Showcase](https://discord.com/channels/1438396125609463881) |
 
 ---
