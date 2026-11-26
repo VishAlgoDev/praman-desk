@@ -820,7 +820,7 @@ footer {
       
       <div class="miner-ribbon" title="Active Telegraph Specialist Miner Consensus">
         <span class="miner-pulse"></span>
-        <span>CLUSTER: PRAMAN #5281 · TAKAR #20261117 · FACTWIRE #74351</span>
+        <span>CLUSTER: PRAMAN #6164 (DIAMOND #6199) · TAKAR #20261117 · FACTWIRE #74351</span>
       </div>
     </div>
     
@@ -873,11 +873,11 @@ footer {
     </p>
     
     <div class="hero-cta-row">
-      <a href="#desk-5" class="btn-square" id="hero-cta-audit">
+      <a href="#procurement-verify" class="btn-square" id="hero-cta-audit">
         <span>Run a Live Verification</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </a>
-      <a href="#trade-assurance" class="btn-square ghost-square" id="hero-cta-spend">
+      <a href="#spend-guard" class="btn-square ghost-square" id="hero-cta-spend">
         <span>Screen Spend Guard</span>
       </a>
     </div>
@@ -912,7 +912,7 @@ footer {
     <div class="kpi-card">
       <div class="kpi-label">Multi-Miner Quorum</div>
       <div class="kpi-val tnum">2-of-2 MINERS</div>
-      <div class="kpi-sub">Praman Node #5281 + Takar #20261117</div>
+      <div class="kpi-sub">Praman Devnode #6164 + Takar #20261117</div>
       <p class="evidence-note"><span class="badge evidence-live" style="font-size:9px;padding:1px 6px">LIVE</span> Registered miner consensus</p>
     </div>
   </div>
@@ -939,20 +939,14 @@ footer {
   </div>
 
   <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <label for="db-move-select" style="font-size:12px;color:var(--text-secondary)">Evidence arrives:</label>
-    <select id="db-move-select" class="form-control" style="min-height:32px;max-width:340px" aria-label="Case to move">
-      <option value="PO-ALI-9021">PO-ALI-9021 — Cainiao conforming count confirmed</option>
-      <option value="PO-7781">PO-7781 — ledger equation ties out</option>
-      <option value="CN-LAX-88201">CN-LAX-88201 — 20 damaged units documented</option>
-      <option value="PO-DEMO-REF">PO-DEMO-REF — delivery evidence missing</option>
+    <label for="db-eval-select" style="font-size:12px;color:var(--text-secondary)">Live Policy Evaluation:</label>
+    <select id="db-eval-select" class="form-control" style="min-height:32px;max-width:440px" aria-label="Case to evaluate via backend policy">
+      <option value="PO-ALI-9021">PO-ALI-9021 — Reconcile 80 conforming units ($80k / $100k)</option>
+      <option value="PO-7781">PO-7781 — Equation ties out (1,000 units x $12.40)</option>
+      <option value="CN-LAX-88201">CN-LAX-88201 — Audit 20 damaged units shortfall ($20k overbill)</option>
+      <option value="PO-DEMO-REF">PO-DEMO-REF — Audit missing delivery receipt (hold vs refund)</option>
     </select>
-    <select id="db-move-lane" class="form-control" style="min-height:32px;max-width:160px" aria-label="New disposition lane">
-      <option value="hold">Hold</option>
-      <option value="release" selected>Release</option>
-      <option value="partial">Partial</option>
-      <option value="refund">Refund</option>
-    </select>
-    <button id="db-move-btn" class="btn-square ghost-square" style="padding:5px 14px;font-size:12px">Move card</button>
+    <button id="db-eval-btn" class="btn-square ghost-square" style="padding:5px 14px;font-size:12px">Evaluate via Policy API</button>
   </div>
 
   <div id="db-lanes" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:22px"></div>
@@ -1167,18 +1161,21 @@ footer {
         </div>
 
         <div class="verdict approved">
-          <div class="verdict-badge tnum">26/26 UNIT VECTORS PASS</div>
-          <p class="summary">Atomic runningSessionSpend accumulator, unresolvable address-lookup-table circuit breaker, drainer wallet blacklist, and sub-25ms in-memory sanctions screening.</p>
+          <div class="verdict-badge tnum">30/30 UNIT + TOKEN-2022 VECTORS PASS</div>
+          <p class="summary">Atomic runningSessionSpend accumulator, unresolvable address-lookup-table circuit breaker, Token-2022 TLV inspection, drainer blacklist, and sub-25ms OFAC SDN screening.</p>
         </div>
 
         <div class="field" style="margin-top:18px">
           <label for="sg-scenario">Interception Scenario Vector</label>
           <select class="form-control" id="sg-scenario">
-            <option value="legit">Legitimate Treasury Transfer (0.01 SOL to Siemens AG) → APPROVED</option>
-            <option value="hijack">Hijacked @solana/web3.js (Prototype Backdoor Hook) → HALTED</option>
-            <option value="drainer">Known Drainer Exfiltration Wallet (FnvLGtucz4...) → HALTED</option>
-            <option value="cap">Cumulative Session Spend Cap Breach ($502.40 > $500.00) → HALTED</option>
-            <option value="ofac">OFAC SDN Counterparty Screening Hit → HALTED</option>
+            <option value="legit">Legitimate Treasury Transfer (0.01 SOL to Siemens AG) -> APPROVED</option>
+            <option value="hijack">Hijacked @solana/web3.js (Prototype Backdoor Hook) -> HALTED</option>
+            <option value="drainer">Known Drainer Exfiltration Wallet (FnvLGtucz4...) -> HALTED</option>
+            <option value="token2022_permanent_delegate">Token-2022 PermanentDelegate (TLV 12 Seize Trap) -> HALTED</option>
+            <option value="token2022_transfer_hook">Token-2022 TransferHook (TLV 14 Arbitary Program) -> HALTED</option>
+            <option value="token2022_freeze_authority">Token-2022 Active FreezeAuthority Trap -> HALTED</option>
+            <option value="cap">Cumulative Session Spend Cap Breach ($502.40 > $500.00) -> HALTED</option>
+            <option value="ofac">OFAC SDN Counterparty Screening Hit -> HALTED</option>
           </select>
         </div>
 
@@ -1194,7 +1191,7 @@ footer {
       <div class="border-beam-inner" style="padding:0">
         <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border-subtle)">
           <h3 style="font-family:var(--font-mono);font-size:14px">EVM Diamond Policy Matrix</h3>
-          <span class="pill-chip" style="font-size:10px">SEPOLIA · DIAMOND #6164</span>
+          <span class="pill-chip" style="font-size:10px">SEPOLIA · DIAMOND #6199 / DEVNODE #6164</span>
         </div>
         <div class="table-scroll">
           <table>
@@ -1269,7 +1266,7 @@ footer {
     <div class="kpi-card">
       <div class="kpi-label">Total Spent (USDC)</div>
       <div class="kpi-val tnum" id="lg-spent">—</div>
-      <div class="kpi-sub">Diamond #6164 Facilitated</div>
+      <div class="kpi-sub">Sepolia Diamond Facilitated</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Median Latency</div>
@@ -1481,18 +1478,18 @@ footer {
       <div class="footer-col">
         <h4>Verification Standards</h4>
         <ul>
-          <li><a href="#">UCC Article 2 Statutory Seal</a></li>
-          <li><a href="#">UN CISG Settlement Record</a></li>
-          <li><a href="#">EAS Attestation Schema #d84485...</a></li>
-          <li><a href="#">OFAC SDN 19,565 Screening</a></li>
+          <li><a href="/api/audit/case?case=po-ali-9021&format=html" target="_blank" rel="noopener">UCC Art. 2 / UN CISG Statutory Seal</a></li>
+          <li><a href="https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115" target="_blank" rel="noopener">EAS Attestation Record #33d85bed</a></li>
+          <li><a href="/api/mcp" target="_blank" rel="noopener">Keyless Streamable MCP Endpoint</a></li>
+          <li><a href="https://github.com/VishAlgoDev/praman-desk" target="_blank" rel="noopener">Open-Source Audit Repository</a></li>
         </ul>
       </div>
       <div class="footer-col">
         <h4>Network Nodes</h4>
         <ul>
-          <li><span class="mono">Devnode #6127</span></li>
-          <li><span class="mono">Route #5281</span></li>
-          <li><span class="mono">Diamond #6164</span></li>
+          <li><span class="mono">Devnode #6164</span></li>
+          <li><span class="mono">Diamond #6199</span></li>
+          <li><span class="mono">18 Bonded Intents</span></li>
           <li><button id="motion-toggle" class="btn-square ghost-square" style="padding:3px 10px;font-size:10.5px;margin-top:6px">MOTION: ON</button></li>
         </ul>
       </div>
@@ -1500,7 +1497,7 @@ footer {
 
     <div class="footer-bottom">
       <span>© 2026 PRAMAN DESK · TELEGRAPH PROTOCOL HACKATHON SEASON II</span>
-      <span>DETERMINISTIC WASM 651b · SUB-3MS CIRCUIT BREAKER · ZERO AI SLOP</span>
+      <span>DETERMINISTIC WASM 651b · SUB-3MS CIRCUIT BREAKER · 19,565 OFAC SDN RAM</span>
     </div>
   </div>
 </footer>
@@ -1536,8 +1533,10 @@ footer {
       Praman Desk provides keyless, CORS-enabled endpoints and streamable Model Context Protocol (MCP) tool bindings.
     </p>
 
-    <h4 style="font-family:var(--font-mono);font-size:11.5px;color:var(--brand);margin-top:16px;text-transform:uppercase">NPM SDK Installation</h4>
-    <div class="code-block">npm install @praman/sdk @solana/web3.js</div>
+    <h4 style="font-family:var(--font-mono);font-size:11.5px;color:var(--brand);margin-top:16px;text-transform:uppercase">SDK Installation (JS / TS &amp; Python)</h4>
+    <div class="code-block">npm install github:VishAlgoDev/praman-desk @solana/web3.js</div>
+    <div class="code-block" style="margin-top:8px">git clone https://github.com/VishAlgoDev/praman-desk.git
+# Python zero-dependency client: packages/praman-sdk/praman.py</div>
 
     <h4 style="font-family:var(--font-mono);font-size:11.5px;color:var(--brand);margin-top:16px;text-transform:uppercase">cURL Live Trade Assurance Audit</h4>
     <div class="code-block">curl -X POST https://praman-desk.vercel.app/api/trade-assurance/audit \
@@ -1664,7 +1663,7 @@ $('#pv-ven-btn')?.addEventListener('click', async () => {
   try {
     const [ven, doc] = await Promise.all([
       fetch(`/api/miner/vendor-verify?vendor=${q(v)}`).then(r => r.json()),
-      fetch('/api/miner/doc-authenticity').then(r => r.json()),
+      fetch(`/api/miner/doc-authenticity?prompt=${q('Verify commercial invoice and statutory certificate authenticity for ' + v)}`).then(r => r.json()),
     ]);
     out.textContent = JSON.stringify({ vendor: ven, document: doc }, null, 2);
   } catch (err) {
@@ -1974,7 +1973,7 @@ function initFlowingMenu() {
           status: 'APPROVED', verdict: 'RECONCILED PARTIAL DISBURSEMENT APPROVED',
           spendAmountUsdc: 80000, network: 'Sepolia Ethereum',
           certHash: '0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75',
-          easSchemaUid: '0xd844853034fbabde58231ec690b23023e10fa140081bfec21b4a36f1c4df8217',
+          easSchemaUid: '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04',
           settlementContract: '0x310275e6D66818E068245326bB9e398822304248'
         }, { poNumber: 'PO-ALI-9021', pierPassReceiptId: 'CN-LAX-88201' });
       } else if (item.dataset.action === 'developer') {
@@ -2177,7 +2176,7 @@ function dbRender() {
       </div>
       ${cards.map(c => `<button data-db-case="${c.id}" style="display:block;width:100%;text-align:left;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;color:var(--text-primary)">
         <span style="font-size:13px;font-weight:600">${c.id}</span>
-        <span style="display:block;font-size:12px;color:var(--text-secondary);margin-top:2px">$${c.escrow.toLocaleString('en-US','en-US')} escrow</span>
+        <span style="display:block;font-size:12px;color:var(--text-secondary);margin-top:2px">$${c.escrow.toLocaleString('en-US')} escrow</span>
         ${c.flag ? `<span style="display:inline-block;margin-top:6px;font-size:10px;letter-spacing:0.1em;color:${l.tone};border:1px solid ${l.tone};border-radius:999px;padding:1px 8px">${c.flag}</span>` : ''}
       </button>`).join('') || '<p style="font-size:12px;color:var(--text-secondary);margin:0">No cases in this lane.</p>'}
     </div>`;
@@ -2229,15 +2228,15 @@ if (dbDlg) dbDlg.querySelectorAll('[data-close]').forEach(b => b.addEventListene
 try { document.addEventListener('ledger-loaded', dbRenderReceipts); } catch (_) {}
 setTimeout(dbRenderReceipts, 1500);
 
-/* Signature move: a case card physically travels between lanes as evidence arrives. */
-function dbMove(id, lane) {
+/* Moves a case strictly based on live backend policy evaluation (/api/trade-assurance/audit). */
+function animateDbMove(id, newLane) {
   const c = DB_CASES.find(x => x.id === id);
-  if (!c || c.lane === lane) return;
+  if (!c) return;
   const wrap = document.getElementById('db-lanes');
   const card = wrap && wrap.querySelector(`[data-db-case="${id}"]`);
-  if (card) {
+  if (card && c.lane !== newLane) {
     const from = card.getBoundingClientRect();
-    c.lane = lane;
+    c.lane = newLane;
     dbRender();
     const moved = wrap.querySelector(`[data-db-case="${id}"]`);
     if (moved) {
@@ -2253,14 +2252,61 @@ function dbMove(id, lane) {
       }
     }
   } else {
-    c.lane = lane;
+    c.lane = newLane;
     dbRender();
   }
-  toast(`${id} moved to ${lane.toUpperCase()}`);
 }
-const dbMoveBtn = document.getElementById('db-move-btn');
-if (dbMoveBtn) dbMoveBtn.addEventListener('click', () => {
-  dbMove(document.getElementById('db-move-select').value, document.getElementById('db-move-lane').value);
+
+const DB_POLICY_PAYLOADS = {
+  'PO-ALI-9021': { scenario: 'alibaba_reconciled', poCommitment: 100000, spendAmountUsdc: 80000, statedTotal: 80000 },
+  'PO-7781': {
+    vendorName: 'Siemens Aktiengesellschaft',
+    vendorJurisdiction: 'DE',
+    spendAmountUsdc: 12400,
+    singleAgentCap: 500,
+    dualApprovalCap: 50000,
+    supervisorSignature: '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466d3a948192305bad61042781bcf8291048291823ba78192304891283ba192384fca81',
+    lineItems: [{ desc: 'PO-7781 Conforming Units (1000 x $12.40)', qty: 1000, unitPrice: 12.40, amount: 12400 }],
+    statedSubtotal: 12400,
+    statedTax: 0,
+    statedTotal: 12400
+  },
+  'CN-LAX-88201': { scenario: 'alibaba_trade', poCommitment: 100000, spendAmountUsdc: 100000, statedTotal: 100000 },
+  'PO-DEMO-REF': { scenario: 'alibaba_refund', poCommitment: 25000, conformingUnits: 0, unitPrice: 1000, statedTotal: 25000, lineItems: [{ desc: 'Undelivered PO-DEMO-REF', qty: 25, unitPrice: 1000, amount: 25000 }] }
+};
+
+const dbEvalBtn = document.getElementById('db-eval-btn');
+if (dbEvalBtn) dbEvalBtn.addEventListener('click', async () => {
+  const id = document.getElementById('db-eval-select').value;
+  const c = DB_CASES.find(x => x.id === id);
+  const body = DB_POLICY_PAYLOADS[id];
+  if (!c || !body) return;
+  dbEvalBtn.disabled = true;
+  dbEvalBtn.textContent = 'Evaluating...';
+  try {
+    const res = await fetch('/api/trade-assurance/audit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const out = await res.json();
+    let targetLane = 'hold';
+    if (out.status === 'REFUNDED' || out.verdict === 'FULL_REFUND_APPROVED') targetLane = 'refund';
+    else if (out.status === 'APPROVED' && Number(out.shortfallUsd || 0) > 0) targetLane = 'partial';
+    else if (out.status === 'APPROVED' || out.verdict === 'APPROVED_FOR_PAYMENT' || out.verdict === 'CLEAR_FOR_PAYMENT') targetLane = 'release';
+    else targetLane = 'hold';
+
+    c.computed = Number(out.conformingAmountUsd ?? (out.status === 'REFUNDED' ? 0 : (out.spendAmountUsdc ?? c.computed)));
+    c.rule = out.summary || c.rule;
+    c.flag = (out.flags && out.flags[0]) ? out.flags[0].slice(0, 24) : null;
+    animateDbMove(id, targetLane);
+    toast(`${id} policy verdict -> ${targetLane.toUpperCase()} (${out.verdict || out.status})`);
+  } catch (err) {
+    toast('Policy API error: ' + err.message);
+  } finally {
+    dbEvalBtn.disabled = false;
+    dbEvalBtn.textContent = 'Evaluate via Policy API';
+  }
 });
 
 /* ==========================================================================

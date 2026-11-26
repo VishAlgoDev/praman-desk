@@ -692,7 +692,7 @@ export const TOOLS = [
   {
     name: 'paysheet_consensus_screen',
     description:
-      '3-Way Consensus Payroll Shield with Paysheet (Issue #214 / PR #1). Evaluates payout recipient across 3 independent Telegraph Season II miners (#731002, #64175, Praman Desk #5281) with sub-25ms in-memory OFAC SDN & EVM screening.',
+      '3-Way Consensus Payroll Shield with Paysheet (Issue #214 / PR #1). Evaluates payout recipient across 3 independent Telegraph Season II miners (#731002, #64175, Praman Desk #6164) with sub-25ms in-memory OFAC SDN & EVM screening.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -982,7 +982,7 @@ export async function executeMcpTool(name, inputArgs = {}) {
           const primaryInfo = evaluateMiningIntelligencePrompt(targetSite);
           const candidates = Array.isArray(args.candidates) && args.candidates.length > 0 ? args.candidates : [
             {
-              minerId: 'miner-6127-praman',
+              minerId: 'miner-6164-praman',
               content: primaryInfo ? primaryInfo.summary : `Resource deposit ${targetSite}`
             },
             {

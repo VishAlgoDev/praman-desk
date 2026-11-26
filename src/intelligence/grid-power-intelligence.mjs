@@ -134,8 +134,16 @@ export async function getLiveGridPowerPrice({
   }
 
   try {
-    const resp = await fetch(oasisUrl, { signal: AbortSignal.timeout(7000) });
-    if (resp.ok) {
+    let resp = null;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        resp = await fetch(oasisUrl, { signal: AbortSignal.timeout(9500) });
+        if (resp.ok) break;
+      } catch (retryErr) {
+        if (attempt === 1) throw retryErr;
+      }
+    }
+    if (resp && resp.ok) {
       const buf = Buffer.from(await resp.arrayBuffer());
       const csv = await inflateZipSingleCsv(buf);
       const parsed = parseCaisoCsvLmp(csv);

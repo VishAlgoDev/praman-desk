@@ -188,7 +188,7 @@ async function run() {
     // 1. /api/health & /api/status
     const health = await check('/api/health');
     const appStatus = await check('/api/status');
-    if (health.status !== 200 || !health.json.ok || (health.json.sdnEntriesLoaded || 0) < 19000 || health.json.minerId !== 5281) {
+    if (health.status !== 200 || !health.json.ok || (health.json.sdnEntriesLoaded || 0) < 19000 || health.json.minerId !== 6164) {
       throw new Error(`Health check failed: ${JSON.stringify(health.json)}`);
     }
     if (appStatus.status !== 200 || !appStatus.json.ok || (appStatus.json.sdnEntriesLoaded || 0) < 19000) {
@@ -653,13 +653,89 @@ async function run() {
       throw new Error(`Vendor NL corporate status check failed: ${JSON.stringify(vendorCorp.json)}`);
     }
 
-    // 32. Shareable Case Permalink Route (/api/audit/case)
+    // 32. Shareable Case Permalink Route (/api/audit/case) JSON + HTML Verdict Parity
     const caseRes = await check('/api/audit/case?case=po-ali-9021');
-    if (caseRes.status !== 200 || caseRes.json.caseId !== 'po-ali-9021' || caseRes.json.releasedAmountUsdc !== 80000 || !caseRes.json.permalink?.includes('/api/audit/case?case=po-ali-9021')) {
+    if (caseRes.status !== 200 || caseRes.json.caseId !== 'po-ali-9021' || caseRes.json.releasedAmountUsdc !== 80000 || !caseRes.json.permalink?.includes('/api/audit/case?case=po-ali-9021') || caseRes.json.clearanceVerdict !== 'RECONCILED_PARTIAL_SETTLEMENT') {
       throw new Error(`GET /api/audit/case?case=po-ali-9021 failed: ${JSON.stringify(caseRes.json)}`);
     }
+    const htmlRes = await fetch('http://127.0.0.1:3499/api/audit/case?case=po-ali-9021&format=html');
+    const htmlBody = await htmlRes.text();
+    if (htmlRes.status !== 200 || !/RECONCILED PARTIAL SETTLEMENT/.test(htmlBody) || /DISCREPANCY DETECTED/.test(htmlBody)) {
+      throw new Error(`GET /api/audit/case?case=po-ali-9021&format=html showed stale DISCREPANCY banner`);
+    }
 
-    console.log('\nALL 28 ENDPOINTS, P0/P1/POST-AUDIT REGRESSION GUARDS, GO OPTIONAL MAP, STREAMABLE /API/MCP, ISSUE #1, SSRF, DILIGENCE PACK, OFAC EVM, MISSION 02, GRID POWER PRICING, GENERALIZED MULTI-MINER AGGREGATION & TRADE ASSURANCE EVIDENCE DISPOSITIONS VERIFIED!');
+    // 33. Corporate Registry Epoch 58 multi-word NL fix + Doc Authenticity negation-safe fix
+    const nvidiaCorp = await check('/api/miner/corporate-registry?query=' + encodeURIComponent('What is the corporate registration status of Nvidia Corporation?'));
+    if (nvidiaCorp.status !== 200 || nvidiaCorp.json.found !== true || !nvidiaCorp.json.registration_id) {
+      throw new Error(`Corporate registry Nvidia multi-word NL check failed: ${JSON.stringify(nvidiaCorp.json)}`);
+    }
+    const docNotExpired = await check('/api/miner/doc-authenticity?prompt=' + encodeURIComponent('Document certificate not expired, signature is valid, OCSP good, digest matches'));
+    if (docNotExpired.status !== 200 || docNotExpired.json.authentic !== true) {
+      throw new Error(`Doc authenticity negation-safe check failed: ${JSON.stringify(docNotExpired.json)}`);
+    }
+    const docExpired = await check('/api/miner/doc-authenticity?prompt=' + encodeURIComponent('Document not valid, certificate expired'));
+    if (docExpired.status !== 200 || docExpired.json.authentic === true) {
+      throw new Error(`Doc authenticity invalid/expired check falsely passed: ${JSON.stringify(docExpired.json)}`);
+    }
+
+    // 34. Spend Guard HTTP 400 NaN guard + EIP-191 Countersign verification + Alibaba default poCommitment=100k
+    const badNum = await check('/api/spend-guard/evaluate', 'POST', { vendorName: 'Siemens AG', spendAmountUsdc: 'not-a-number' });
+    if (badNum.status !== 400 || badNum.json.code !== 'INVALID_NUMERIC_INPUT') {
+      throw new Error(`Expected clean HTTP 400 INVALID_NUMERIC_INPUT on NaN spendAmountUsdc, got ${badNum.status}: ${JSON.stringify(badNum.json)}`);
+    }
+    const forgedCs = await check('/api/spend-guard/evaluate', 'POST', {
+      vendorName: 'Siemens Aktiengesellschaft',
+      vendorJurisdiction: 'DE',
+      spendAmountUsdc: 200,
+      statedSubtotal: 200,
+      statedTotal: 200,
+      countersignReportHash: '0x1111111111111111111111111111111111111111111111111111111111111111',
+      countersignSignature: '0xdeadbeef'
+    });
+    if (forgedCs.status !== 200 || forgedCs.json.countersign?.verified !== false || !forgedCs.json.flags?.some(f => f.includes('COUNTERSIGN_SIGNATURE_INVALID'))) {
+      throw new Error(`Forged countersign signature must be rejected cleanly: ${JSON.stringify(forgedCs.json)}`);
+    }
+    const { privateKeyToAccount } = await import('viem/accounts');
+    const testSigner = privateKeyToAccount('0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d');
+    const csReportHash = '0x2222222222222222222222222222222222222222222222222222222222222222';
+    const validSig = await testSigner.signMessage({ message: csReportHash });
+    const validCs = await check('/api/spend-guard/evaluate', 'POST', {
+      vendorName: 'Siemens Aktiengesellschaft',
+      vendorJurisdiction: 'DE',
+      spendAmountUsdc: 200,
+      statedSubtotal: 200,
+      statedTotal: 200,
+      countersignReportHash: csReportHash,
+      countersignSignature: validSig,
+      expectedCountersignSigner: testSigner.address
+    });
+    if (validCs.status !== 200 || validCs.json.countersign?.verified !== true || validCs.json.countersign?.recoveredSigner?.toLowerCase() !== testSigner.address.toLowerCase()) {
+      throw new Error(`Valid EIP-191 countersign failed: ${JSON.stringify(validCs.json)}`);
+    }
+    const aliDefaultB = await check('/api/spend-guard/evaluate', 'POST', { scenario: 'alibaba_reconciled', liveSettle: false });
+    if (aliDefaultB.status !== 200 || aliDefaultB.json.poCommitmentUsd !== 100000 || aliDefaultB.json.shortfallUsd !== 20000) {
+      throw new Error(`Default alibaba_reconciled shortfall check failed: ${JSON.stringify({ poCommitmentUsd: aliDefaultB.json.poCommitmentUsd, shortfallUsd: aliDefaultB.json.shortfallUsd })}`);
+    }
+
+    // 35. Solana Token-2022 scenarios + mining-intelligence word boundary + Track 2 3-intent expansion
+    for (const sc22 of ['token2022_permanent_delegate', 'token2022_transfer_hook', 'token2022_freeze_authority']) {
+      const sg22 = await check('/api/audit/solana-spend-guard', 'POST', { scenario: sc22 });
+      if (sg22.status !== 200 || sg22.json.verdict !== 'HALTED' || sg22.json.cleared !== false) {
+        throw new Error(`Solana Token-2022 HTTP scenario ${sc22} failed: ${JSON.stringify(sg22.json)}`);
+      }
+    }
+    const mineBoundary = await check('/api/miner/mining-intelligence?prompt=' + encodeURIComponent('Evaluate Devnode miner scores'));
+    if (mineBoundary.status !== 200 || /\br\s+scores\b/i.test(String(mineBoundary.json.summary || ''))) {
+      throw new Error(`Mining intelligence stripped 'miner' word: ${JSON.stringify(mineBoundary.json)}`);
+    }
+    const b2b = await check('/api/miner/b2b-identity?prompt=' + encodeURIComponent('Enrich siemens.com legal entity name and LEI'));
+    const fraudRisk = await check('/api/miner/fraud-risk?prompt=' + encodeURIComponent('Score signup fraud risk: IP 45.83.x.x, headless browser fingerprint, disposable email domain'));
+    const payVerify = await check('/api/miner/payment-method-verify?prompt=' + encodeURIComponent('Is BIN 411111 a valid Visa and is routing number 021000021 active?'));
+    if (!b2b.json.found || !b2b.json.domain_valid || !(fraudRisk.json.fraud_probability >= 0.7) || payVerify.json.valid !== true) {
+      throw new Error(`3-intent expansion check failed: ${JSON.stringify({ b2b: b2b.json.found, fraud: fraudRisk.json.fraud_probability, pay: payVerify.json.valid })}`);
+    }
+
+    console.log('\nALL SEASON II ADVERSARIAL REGRESSION GUARDS, TOKEN-2022 HTTP SCENARIOS, EIP-191 COUNTERSIGN, 3 NEW TRACK 2 INTENTS & LIVE VERIFICATION TESTS PASSED!');
   } finally {
     server.close();
   }

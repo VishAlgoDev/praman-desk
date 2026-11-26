@@ -16,10 +16,13 @@ const TEST_QUERIES = [
   { intent: 'WEB_SEARCH_GENERAL', path: '/api/miner/web-search?prompt=Search%20Telegraph%20Protocol%20documentation', check: j => (j.ok === true || j.status === 'ok') && j.confidence >= 0.7 },
   { intent: 'ONCHAIN_TX_LOOKUP_GENERAL', path: '/api/miner/onchain-tx?prompt=Lookup%20onchain%20transaction%200x524f24c37819fe77c5ba0f6cd125dca6a63e3f0fb193df87beddd363da0a4800', check: j => j.status !== 'error' },
   { intent: 'TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL', path: '/api/miner/token-supply?prompt=Verify%20token%20supply%20for%20USDC%20on%20Sepolia', check: j => (j.ok === true || j.status === 'confirmed') && Number(j.total_supply) > 0 },
-  { intent: 'WALLET_TOKEN_BALANCE_GENERAL', path: '/api/miner/wallet-balance?prompt=Check%20token%20balance%20for%200x98021b20Efdb7ae2C57366010a6E0fDE207b4466', check: j => j.status !== 'error' },
+  { intent: 'WALLET_BALANCE_CHECK_GENERAL', path: '/api/miner/wallet-balance?prompt=Check%20token%20balance%20for%200x98021b20Efdb7ae2C57366010a6E0fDE207b4466', check: j => j.status !== 'error' && /ETH|USDC|balance/i.test(String(j.answer || '')) },
   { intent: 'RESEARCH_QUERY_GENERAL', path: '/api/miner/research?prompt=Research%20post-quantum%20cryptography', check: j => j.status !== 'error' && j.confidence > 0 },
   { intent: 'RESEARCH_QUERY_GENERAL_ALIAS', path: '/api/miner/research-query?prompt=Research%20post-quantum%20cryptography', check: j => j.status !== 'error' && j.confidence > 0 },
-  { intent: 'LIQUIDITY_DEPTH_VERIFY_GENERAL', path: '/api/miner/liquidity-depth?prompt=Verify%20liquidity%20depth%20for%20USDC-WETH', check: j => j.ok === true && Number(j.liquidity_usd) > 0 && j.confidence >= 0.9 }
+  { intent: 'LIQUIDITY_DEPTH_VERIFY_GENERAL', path: '/api/miner/liquidity-depth?prompt=Verify%20liquidity%20depth%20for%20USDC-WETH', check: j => j.ok === true && Number(j.liquidity_usd) > 0 && j.confidence >= 0.9 },
+  { intent: 'B2B_IDENTITY_ENRICHMENT_GENERAL', path: '/api/miner/b2b-identity?prompt=Enrich%20siemens.com%20legal%20entity%20name%20and%20LEI', check: j => j.ok === true && j.found === true && Boolean(j.lei) },
+  { intent: 'FRAUD_RISK_GENERAL', path: '/api/miner/fraud-risk?prompt=Score%20fraud%20risk%20of%20signup%20IP%2045.83.x.x%20headless%20browser%20disposable%20email', check: j => j.ok === true && Number(j.fraud_probability) >= 0.7 },
+  { intent: 'PAYMENT_METHOD_VERIFY_GENERAL', path: '/api/miner/payment-method-verify?prompt=Is%20BIN%20411111%20a%20valid%20Visa%20and%20routing%20021000021%20active', check: j => j.ok === true && j.valid === true }
 ];
 
 async function main() {

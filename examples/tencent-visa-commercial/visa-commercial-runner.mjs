@@ -12,6 +12,7 @@ import {
   DIAMOND_PORT
 } from '../../src/handlers.mjs';
 import { getWasmInstance } from '../../comparator/wasm-buffer.mjs';
+import { purchaseTelegraphSignal } from '../lib/telegraph-live-buyer.mjs';
 
 const SPECIALIST_UNIT_PRICE_USDC = 0.01; // Verified Devnode & Sepolia Ledger fee per specialist call
 
@@ -46,6 +47,12 @@ export async function runVisaCommercialJob(job) {
     }
 
     let result;
+    const liveBuyer = await purchaseTelegraphSignal({
+      intent: step.intent,
+      query: `[${step.intent}] Verify ${step.vendor || step.company || job.vendor} (${step.intent})`,
+      live: Boolean(job.live)
+    });
+
     if (step.intent === 'SANCTIONS_SCREENING_MATCH_GENERAL') {
       result = await screenSanctions({ name: step.vendor || job.vendor });
     } else if (step.intent === 'CORPORATE_REGISTRY_LOOKUP_GENERAL') {
@@ -62,7 +69,7 @@ export async function runVisaCommercialJob(job) {
     }
 
     spentUsd = Number((spentUsd + stepCost).toFixed(4));
-    const receiptHash = '0x' + crypto
+    const localDigest = '0x' + crypto
       .createHash('sha256')
       .update(JSON.stringify({ jobId, intent: step.intent, spentUsd, result }))
       .digest('hex');
@@ -71,7 +78,13 @@ export async function runVisaCommercialJob(job) {
       intent: step.intent,
       costUsdc: stepCost,
       diamondPort: DIAMOND_PORT,
-      receiptHash,
+      mode: liveBuyer.mode,
+      simulated_offline: Boolean(liveBuyer.simulated_offline),
+      rail: liveBuyer.rail || null,
+      liveSettled: Boolean(liveBuyer.settled),
+      receiptHash: liveBuyer.receiptHash || localDigest,
+      signalHash: liveBuyer.signalHash || null,
+      txHash: liveBuyer.txHash || null,
       resultSummary: result.verdict || result.status || (result.found ? `LEI:${result.registration_id}` : 'COMPLETED')
     });
   }

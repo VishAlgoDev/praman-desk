@@ -1,0 +1,109 @@
+{
+  "timestamp": "2026-11-26T03:27:04.086Z",
+  "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "results": [
+    {
+      "intentId": "B2B_IDENTITY_ENRICHMENT_GENERAL",
+      "status": 200,
+      "bodySha256": "45a13a66ec29c90ca837ec55eab2a005239448a4bcbf86456d7ee34d457f0840",
+      "nonce": "daef17b1e78250b1504e7bd0ec5da37b",
+      "response": {
+        "intent_id": "B2B_IDENTITY_ENRICHMENT_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 2,
+        "accepted": 2,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 2,
+        "state_counts": {
+          "admitted": 2,
+          "eligible": 364,
+          "quarantine": 101
+        }
+      }
+    },
+    {
+      "intentId": "FRAUD_RISK_GENERAL",
+      "status": 200,
+      "bodySha256": "f2671353d3cb792c3c1d52da06ff76a6388ffedfaf3361a9903514c892e2898c",
+      "nonce": "c71f34e9321db373b29bc3a5640999a6",
+      "response": {
+        "intent_id": "FRAUD_RISK_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 2,
+        "accepted": 2,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 2,
+        "state_counts": {
+          "admitted": 2,
+          "eligible": 132,
+          "superseded": 1
+        }
+      }
+    },
+    {
+      "intentId": "PAYMENT_METHOD_VERIFY_GENERAL",
+      "status": 200,
+      "bodySha256": "0bb8fdf941b082bc6a32424d4c9a077ef7ac5e47a8de431b1d8e824705eb2ac8",
+      "nonce": "3fe564e2f6e01127298878d8c07a25c3",
+      "response": {
+        "intent_id": "PAYMENT_METHOD_VERIFY_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 2,
+        "accepted": 2,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 2,
+        "state_counts": {
+          "admitted": 2,
+          "eligible": 123
+        }
+      }
+    },
+    {
+      "intentId": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+      "status": 200,
+      "bodySha256": "b6b3aab085e0610f08fafe768e17077f39a1374e06003eb8609a3db9ccb2ba92",
+      "nonce": "d9082c03d53c4ad6f72a2e7e795e9168",
+      "response": {
+        "intent_id": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 1,
+        "accepted": 1,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 1,
+        "state_counts": {
+          "admitted": 1,
+          "eligible": 1120,
+          "quarantine": 279
+        }
+      }
+    },
+    {
+      "intentId": "REGULATORY_FILING_MONITOR_GENERAL",
+      "status": 200,
+      "bodySha256": "97ad54a579f4b50c90b0f4fdbc3127b638eb22e2b3c1f74ef2687c77b5ac3a36",
+      "nonce": "bcedf37cc05fbe2828046f1e54003cc9",
+      "response": {
+        "intent_id": "REGULATORY_FILING_MONITOR_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 1,
+        "accepted": 1,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 1,
+        "state_counts": {
+          "admitted": 1,
+          "eligible": 62
+        }
+      }
+    }
+  ]
+}

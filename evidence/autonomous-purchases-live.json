@@ -1,0 +1,481 @@
+{
+  "recordedAt": "2026-11-26T03:26:03.109Z",
+  "buyerWallet": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "alibabaPurchase": {
+    "ok": true,
+    "settled": true,
+    "mode": "LIVE_TELEGRAPH_PAID",
+    "simulated_offline": false,
+    "rail": "escrow",
+    "status": 200,
+    "buyer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "minerId": "20260828",
+    "minerName": "PREFLIGHT Infrastructure Signals",
+    "intent": "TELEGRAPH_KNOWLEDGE_GENERAL",
+    "costUsdc": 0.01,
+    "signalHash": "0xea0ad9bdc146b1edd2637185cca6d945f91cfadcc657c083aec34224ea6f5742",
+    "receiptHash": "0x78960519a95283385ea287f106f3bb7412b29ced3e5fbfeec93853f0348e3d87",
+    "txHash": null,
+    "durationMs": 17370,
+    "response": {
+      "miner_id": "20260828",
+      "miner_name": "PREFLIGHT Infrastructure Signals",
+      "endpoint": "/telegraph-knowledge",
+      "result": {
+        "answer": null,
+        "knowledge_topic": "telegraph",
+        "sources": [
+          "miners miner registration › Registering as a Miner (docs/miners_miner_registration.md)",
+          "miners miner registration › Troubleshooting (docs/miners_miner_registration.md)",
+          "miners miner registration › Identity rejections (docs/miners_miner_registration.md)"
+        ],
+        "brief": null
+      },
+      "result_shape": "intent",
+      "format_version": 3,
+      "field_status": {
+        "answer": "missing",
+        "knowledge_topic": "ok",
+        "sources": "ok",
+        "brief": "missing"
+      },
+      "input": {
+        "question": "What is the official corporate registration status of Siemens Aktiengesellschaft?"
+      },
+      "input_schema_version": 3,
+      "cost_usd": 0.01,
+      "duration_ms": 1285,
+      "timestamp": "2026-11-26T03:25:20.792470322Z",
+      "reasoning": "Intent: The user is explicitly asking for the official corporate registration status of a specific company, Siemens Aktiengesellschaft. This directly maps to the CORPORATE_REGISTRY_LOOKUP_GENERAL intent. The user also included a potential intent in brackets, which is TELEGRAPH_KNOWLEDGE_GENERAL. While the query is not about Telegraph, it's possible the user is testing the system's ability to recognize provided intents, making TELEGRAPH_KNOWLEDGE_GENERAL a secondary choice if the primary intent is not directly supported or if there's a meta-level instruction to consider provided intents. (runner-up: the top intent's required input is not in the request)\nMiner: The user is asking a question about the Telegraph protocol, specifically about the corporate registration status of a company. The PREFLIGHT Infrastructure Signals miner has an endpoint `/telegraph-knowledge` that is designed to answer questions about the Telegraph protocol using its documentation. The intent TELEGRAPH_KNOWLEDGE_GENERAL matches this endpoint's description. The question is provided directly and is used for both the `query` and `question` parameters as required by the miner's configuration.",
+      "intent": "TELEGRAPH_KNOWLEDGE_GENERAL",
+      "intent_version": 1,
+      "signal_hash": "0xea0ad9bdc146b1edd2637185cca6d945f91cfadcc657c083aec34224ea6f5742",
+      "warnings": [
+        "The response does not include: official corporate registration status of Siemens Aktiengesellschaft"
+      ],
+      "cost_usd_total": 0.01,
+      "delivery": "specialist",
+      "served_rank": 1,
+      "sources": [
+        {
+          "miner": "a1-preflight",
+          "intent": "TELEGRAPH_KNOWLEDGE_GENERAL"
+        }
+      ],
+      "findings": {
+        "items": [
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "Registration is permissionless — anyone can register a miner. Once registered, Telegraph nodes automatically detect your YAML, validate it, and add you to the routing pool. No approval needed, no contact with the team required.",
+            "name": "answer",
+            "path": "$.answer",
+            "type": "string",
+            "value": "Registration is permissionless — anyone can register a miner. Once registered, Telegraph nodes automatically detect your YAML, validate it, and add you to the routing pool. No approval needed, no contact with the team required."
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "Registration is permissionless — anyone can register a miner.",
+            "name": "brief",
+            "path": "$.brief",
+            "type": "string",
+            "value": "Registration is permissionless — anyone can register a miner."
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "2026-11-26T03:25:19.805Z",
+            "name": "checked_at",
+            "path": "$.checked_at",
+            "type": "date",
+            "value": "2026-11-26T03:25:19.805Z"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "0.788488021217883",
+            "name": "confidence",
+            "path": "$.confidence",
+            "type": "number",
+            "value": 0.788488021217883
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "true",
+            "name": "found",
+            "path": "$.found",
+            "type": "bool",
+            "value": true
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "telegraph",
+            "name": "knowledge_topic",
+            "path": "$.knowledge_topic",
+            "type": "string",
+            "value": "telegraph"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "BM25 retrieval over the Telegraph documentation (telegraph-docs)",
+            "name": "method",
+            "path": "$.method",
+            "type": "string",
+            "value": "BM25 retrieval over the Telegraph documentation (telegraph-docs)"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "Registration is permissionless — anyone can register a miner. Once registered, Telegraph nodes automatically detect your YAML, validate it, and add you to the routing pool. No approval needed, no contact with the team required. (Telegraph...",
+            "name": "reason",
+            "path": "$.reason",
+            "type": "string",
+            "value": "Registration is permissionless — anyone can register a miner. Once registered, Telegraph nodes automatically detect your YAML, validate it, and add you to the routing pool. No approval needed, no contact with the team required. (Telegraph docs: miners miner registration › Registering as a Miner)"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "[\"miners miner registration › Registering as a Miner (docs/miners_miner_registration.md)\",\"miners miner registration › Troubleshooting (docs/miners_miner_registration.md)\",\"miners miner registration › Identity rejections (docs/miners_...",
+            "name": "sources",
+            "path": "$.sources",
+            "type": "list",
+            "value": [
+              "miners miner registration › Registering as a Miner (docs/miners_miner_registration.md)",
+              "miners miner registration › Troubleshooting (docs/miners_miner_registration.md)",
+              "miners miner registration › Identity rejections (docs/miners_miner_registration.md)"
+            ]
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "found",
+            "name": "verdict",
+            "path": "$.verdict",
+            "type": "string",
+            "value": "found"
+          }
+        ],
+        "raw_sha256": "3599ced14d7065fcaab10a5605cb70c60421f6476cd79b768a89a043f7c7a480"
+      }
+    }
+  },
+  "directMiner6164Purchase": {
+    "ok": true,
+    "settled": true,
+    "mode": "LIVE_TELEGRAPH_PAID",
+    "simulated_offline": false,
+    "rail": "escrow",
+    "status": 200,
+    "buyer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "minerId": "6164",
+    "minerName": "Praman Desk Compliance & Procurement Auditor",
+    "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+    "costUsdc": 0.01,
+    "signalHash": "0xa876c9ed9411d16a72c82992c4a0e71f89e367473ee8398d6009d1332ab53faa",
+    "receiptHash": "0x86e237a059ba253f1db3d0bc021d4b2251ab9e2a501b914dfc1fe406f6218f05",
+    "txHash": null,
+    "durationMs": 3066,
+    "response": {
+      "miner_id": "6164",
+      "miner_name": "Praman Desk Compliance & Procurement Auditor",
+      "endpoint": "/api/miner/sanctions-screen",
+      "result": {
+        "name": "Siemens Aktiengesellschaft",
+        "matched": false,
+        "matches": null,
+        "lists": [
+          "US Treasury OFAC SDN"
+        ],
+        "match_score": 0
+      },
+      "result_shape": "intent",
+      "format_version": 3,
+      "field_status": {
+        "name": "ok",
+        "matched": "ok",
+        "matches": "missing",
+        "lists": "ok",
+        "match_score": "ok"
+      },
+      "input": {
+        "name": "Siemens Aktiengesellschaft"
+      },
+      "input_schema_version": 3,
+      "cost_usd": 0.01,
+      "duration_ms": 264,
+      "timestamp": "2026-11-26T03:25:25.949321481Z",
+      "reasoning": "Intent: miner praman-compliance-miner given by the caller\nMiner: input schema v3 mapped in code to GET /api/miner/sanctions-screen",
+      "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+      "intent_version": 1,
+      "signal_hash": "0xa876c9ed9411d16a72c82992c4a0e71f89e367473ee8398d6009d1332ab53faa"
+    }
+  },
+  "visaLiveJob": {
+    "jobId": "VISA-LIVE-SEASON2-01",
+    "status": "COMPLETED_WITHIN_CAP",
+    "vendor": "Siemens Aktiengesellschaft",
+    "pnl": {
+      "grossRevenueUsd": 25,
+      "telegraphSpendUsd": 0.03,
+      "intelligenceBudgetUsd": 0.1,
+      "budgetHeadroomUsd": 0.07,
+      "netProfitUsd": 24.97,
+      "grossMarginPct": 99.88
+    },
+    "receiptLedger": [
+      {
+        "intent": "SANCTIONS_SCREENING_MATCH_GENERAL",
+        "costUsdc": 0.01,
+        "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
+        "mode": "LIVE_TELEGRAPH_PAID",
+        "simulated_offline": false,
+        "rail": "escrow",
+        "liveSettled": true,
+        "receiptHash": "0x624c9be9df7f9d7c7d60e9f1e264265f7bef6a6b6bbb2b3e2e961a31e9be9179",
+        "signalHash": "0x31041aaa60b399beeba5b3f55b50ad216aec967ccbc91a5901f87186ba0ef579",
+        "txHash": null,
+        "resultSummary": "COMPLETED"
+      },
+      {
+        "intent": "CORPORATE_REGISTRY_LOOKUP_GENERAL",
+        "costUsdc": 0.01,
+        "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
+        "mode": "LIVE_TELEGRAPH_PAID",
+        "simulated_offline": false,
+        "rail": "escrow",
+        "liveSettled": false,
+        "receiptHash": "0x976da6a10c1551f51bf9f8b9aeadb3e0e47d7ca0bb876e50b356682430993d69",
+        "signalHash": null,
+        "txHash": null,
+        "resultSummary": "found"
+      },
+      {
+        "intent": "INVOICE_LEDGER_RECONCILE_GENERAL",
+        "costUsdc": 0.01,
+        "diamondPort": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
+        "mode": "LIVE_TELEGRAPH_PAID",
+        "simulated_offline": false,
+        "rail": "escrow",
+        "liveSettled": true,
+        "receiptHash": "0xdf1f4371e66aaf70bb4780aa26709598b53466758d37df6ab435681d64efaa98",
+        "signalHash": "0xf1b929368d1382c710543950b288a6bffbcbafe04ebc1378979da21fc5f8617d",
+        "txHash": null,
+        "resultSummary": "COMPLETED"
+      }
+    ]
+  },
+  "tencentDecisionPurchase": {
+    "ok": true,
+    "settled": true,
+    "mode": "LIVE_TELEGRAPH_PAID",
+    "simulated_offline": false,
+    "rail": "escrow",
+    "status": 200,
+    "buyer": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+    "minerId": "20260828",
+    "minerName": "PREFLIGHT Infrastructure Signals",
+    "intent": "B2B_IDENTITY_ENRICHMENT_GENERAL",
+    "costUsdc": 0.01,
+    "signalHash": "0xee7fb0fced1fd22f992d9943794746cf504b4f85c3ef14ef5dea1ab8e3330596",
+    "receiptHash": "0x34173ff2faadf56df51e00c2174a19230714a649fa2e37b6350ee20f753ed619",
+    "txHash": null,
+    "durationMs": 17955,
+    "response": {
+      "miner_id": "20260828",
+      "miner_name": "PREFLIGHT Infrastructure Signals",
+      "endpoint": "/employees",
+      "result": {
+        "company": "Siemens Aktiengesellschaft",
+        "domain": "siemens.com",
+        "employee_count": 320000,
+        "industry": "electrical engineering",
+        "headquarters": "Berlin"
+      },
+      "result_shape": "intent",
+      "format_version": 3,
+      "field_status": {
+        "company": "ok",
+        "domain": "ok",
+        "employee_count": "ok",
+        "industry": "ok",
+        "headquarters": "ok"
+      },
+      "input": {
+        "company": "Siemens Aktiengesellschaft"
+      },
+      "input_schema_version": 3,
+      "cost_usd": 0.01,
+      "duration_ms": 921,
+      "timestamp": "2026-11-26T03:26:06.398902866Z",
+      "reasoning": "Intent: The user is asking for the official corporate registration status of a specific company, Siemens Aktiengesellschaft. This directly maps to the CORPORATE_REGISTRY_LOOKUP_GENERAL intent. As a secondary option, B2B_IDENTITY_ENRICHMENT_GENERAL could be considered if the user was looking for broader company information beyond just registration status, but the query is specific to registration. (runner-up: the top intent's required input is not in the request)\nMiner: The user is asking for company headcount information, which falls under the B2B_IDENTITY_ENRICHMENT_GENERAL intent. The PREFLIGHT Infrastructure Signals miner has an endpoint `/employees` that serves this intent. The `query` parameter is set to a verbatim question about the company's headcount, and the `company` parameter is set to the provided company name 'Siemens Aktiengesellschaft' as specified in the miner's configuration.",
+      "intent": "B2B_IDENTITY_ENRICHMENT_GENERAL",
+      "intent_version": 1,
+      "signal_hash": "0xee7fb0fced1fd22f992d9943794746cf504b4f85c3ef14ef5dea1ab8e3330596",
+      "warnings": [
+        "The response does not include: What is the official corporate registration status of Siemens Aktiengesellschaft?"
+      ],
+      "cost_usd_total": 0.01,
+      "delivery": "specialist",
+      "served_rank": 1,
+      "sources": [
+        {
+          "miner": "a1-preflight",
+          "intent": "B2B_IDENTITY_ENRICHMENT_GENERAL"
+        }
+      ],
+      "findings": {
+        "items": [
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "2023-09-30",
+            "name": "as_of",
+            "path": "$.as_of",
+            "type": "date",
+            "value": "2023-09-30"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "2026-11-26T03:26:05.733Z",
+            "name": "checked_at",
+            "path": "$.checked_at",
+            "type": "date",
+            "value": "2026-11-26T03:26:05.733Z"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "Siemens Aktiengesellschaft",
+            "name": "company",
+            "path": "$.company",
+            "type": "string",
+            "value": "Siemens Aktiengesellschaft"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "0.8",
+            "name": "confidence",
+            "path": "$.confidence",
+            "type": "number",
+            "value": 0.8
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "German multinational conglomerate company",
+            "name": "description",
+            "path": "$.description",
+            "type": "string",
+            "value": "German multinational conglomerate company"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "siemens.com",
+            "name": "domain",
+            "path": "$.domain",
+            "type": "string",
+            "value": "siemens.com"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "320000",
+            "name": "employee_count",
+            "path": "$.employee_count",
+            "type": "integer",
+            "value": 320000
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "true",
+            "name": "found",
+            "path": "$.found",
+            "type": "bool",
+            "value": true
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "Berlin",
+            "name": "headquarters",
+            "path": "$.headquarters",
+            "type": "string",
+            "value": "Berlin"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "electrical engineering",
+            "name": "industry",
+            "path": "$.industry",
+            "type": "string",
+            "value": "electrical engineering"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "Siemens",
+            "name": "name",
+            "path": "$.name",
+            "type": "string",
+            "value": "Siemens"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "Siemens (German multinational conglomerate company) has 320,000 employees as of 2023-09-30, per Wikidata (Q81230, property P1128). Headcounts are reported by the company and update yearly at best.",
+            "name": "reason",
+            "path": "$.reason",
+            "type": "string",
+            "value": "Siemens (German multinational conglomerate company) has 320,000 employees as of 2023-09-30, per Wikidata (Q81230, property P1128). Headcounts are reported by the company and update yearly at best."
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "Wikidata",
+            "name": "source",
+            "path": "$.source",
+            "type": "string",
+            "value": "Wikidata"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "found",
+            "name": "verdict",
+            "path": "$.verdict",
+            "type": "string",
+            "value": "found"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "https://www.siemens.com/",
+            "name": "website",
+            "path": "$.website",
+            "type": "url",
+            "value": "https://www.siemens.com/"
+          },
+          {
+            "basis": "provider_reported",
+            "delivery": "specialist",
+            "evidence": "Q81230",
+            "name": "wikidata_id",
+            "path": "$.wikidata_id",
+            "type": "string",
+            "value": "Q81230"
+          }
+        ],
+        "raw_sha256": "d4ec80f4513dc0a6011c9e3c16b7248e75c400192435021f6b71d39e87f7520f"
+      }
+    }
+  }
+}

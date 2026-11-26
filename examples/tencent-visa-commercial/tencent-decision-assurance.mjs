@@ -14,13 +14,14 @@ export async function runTencentDecisionAssurance(request, options = {}) {
   const auditTrail = [];
 
   // Stage #01: Pre-Spend Diligence & Escrow Clearance (Mind 1 + Mind 2)
-  const caseFile = await investigateProcurement(request);
+  const caseFile = await investigateProcurement({ ...request, live: Boolean(options.live) });
   const preSpendVerdict = await reviewAndGateSpend(caseFile);
   auditTrail.push({
     stage: '01_PRE_SPEND_GATE',
     verdict: preSpendVerdict.verdict,
     caseId: caseFile.caseId,
     caseDigest: caseFile.caseDigest,
+    telegraphPurchase: caseFile.evidence?.telegraphPurchase || null,
     blockingFlags: preSpendVerdict.blockingFlags
   });
 

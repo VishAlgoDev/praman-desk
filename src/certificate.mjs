@@ -75,8 +75,8 @@ export async function generateComplianceCertificate({
     clearanceVerdict,
     ofacZeroHit: !isSanctionsHit,
     onChainAnchor: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
-    minerId: 5281,
-    diamondRegistration: 6164
+    minerId: 6164,
+    diamondRegistration: 6199
   });
   const sha256Seal = crypto.createHash('sha256').update(canonicalPayload).digest('hex');
 
@@ -106,9 +106,9 @@ export async function generateComplianceCertificate({
     onChainAttestation: {
       network: 'Ethereum Sepolia Diamond Proxy',
       diamondContract: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
-      minerId: 5281,
-      diamondRegistration: 6164,
-      registrationSlug: 'praman-compliance-miner (Devnode #5281 / Diamond #6164)',
+      minerId: 6164,
+      diamondRegistration: 6199,
+      registrationSlug: 'praman-compliance-miner (Devnode #6164 / Diamond #6199)',
       standard: 'ERC-x402 ExactEvmScheme',
       explorerUrl: 'https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b'
     },
@@ -124,11 +124,12 @@ export async function generateComplianceCertificate({
 }
 
 export function renderCertificateHtml(cert) {
-  const isCleared = cert.clearanceVerdict === 'COMPLIANT_CLEARED';
-  const isBlocked = cert.clearanceVerdict === 'SANCTIONED_BLOCKED';
+  const verdictUpper = String(cert.clearanceVerdict || cert.verdict || '').toUpperCase();
+  const isCleared = ['COMPLIANT_CLEARED', 'RECONCILED_PARTIAL_SETTLEMENT', 'ONCHAIN_RESOLVED', 'APPROVED', 'APPROVED_FOR_PAYMENT', 'CLEAR_FOR_PAYMENT'].includes(verdictUpper);
+  const isBlocked = ['SANCTIONED_BLOCKED', 'HALTED', 'HALT_AND_FREEZE'].includes(verdictUpper);
   const badgeColor = isCleared ? '#10b981' : (isBlocked ? '#ef4444' : '#f59e0b');
   const badgeBg = isCleared ? 'rgba(16, 185, 129, 0.1)' : (isBlocked ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)');
-  const badgeText = cert.clearanceVerdict.replace(/_/g, ' ');
+  const badgeText = (verdictUpper || 'VERIFIED').replace(/_/g, ' ');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -362,7 +363,7 @@ export function renderCertificateHtml(cert) {
         <div class="box-title">🔗 On-Chain Sepolia Anchor</div>
         <div class="row"><span class="row-key">Network:</span><span class="row-val">Sepolia Diamond</span></div>
         <div class="row"><span class="row-key">Contract:</span><span class="row-val">0x72a7...a08b</span></div>
-        <div class="row"><span class="row-key">Network Route:</span><span class="row-val">Devnode #5281 / Diamond #6164</span></div>
+        <div class="row"><span class="row-key">Network Route:</span><span class="row-val">Devnode #6164 / Diamond #6199</span></div>
         <div class="row"><span class="row-key">Settlement:</span><span class="row-val">x402 Protocol</span></div>
       </div>
     </div>

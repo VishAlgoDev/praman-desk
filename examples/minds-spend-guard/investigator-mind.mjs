@@ -26,6 +26,7 @@ import {
   lookupCorporateViaTelegraph,
   checkPaymentDomainViaTelegraph
 } from '../lib/telegraph-specialists.mjs';
+import { purchaseTelegraphSignal } from '../lib/telegraph-live-buyer.mjs';
 
 const telegraphClient = createPramanTelegraphClient();
 
@@ -119,7 +120,7 @@ async function queryAnjomanSkill(prompt, timeoutMs = 60000) {
     }
   }
   return {
-    source: 'Praman Desk Live Specialist API (Route #5281 / https://praman-desk.vercel.app/api/mcp)',
+    source: 'Praman Desk Live Specialist API (Devnode #6164 / https://praman-desk.vercel.app/api/mcp)',
     raw: null,
     success: false
   };
@@ -174,7 +175,7 @@ export async function investigateProcurement(request) {
 
   // 2. Parallel Telegraph intelligence dispatch
   const targetDomain = request.domain || (request.vendor ? `${request.vendor.toLowerCase().replace(/[^a-z0-9]/g, '')}.com` : '');
-  const [sanctionsRes, corporateRes, domainRes, anjomanRes] = await Promise.all([
+  const [sanctionsRes, corporateRes, domainRes, anjomanRes, telegraphPurchaseRes] = await Promise.all([
     // A. OFAC Sanctions screening
     screenSanctionsViaTelegraph(telegraphClient, {
       name: request.recipientAddress || request.vendor,
@@ -196,7 +197,14 @@ export async function investigateProcurement(request) {
     })) : Promise.resolve(null),
 
     // D. Anjoman skill query for corroborating signals
-    queryAnjomanSkill(`Verify vendor corporate existence and regulatory status: ${request.vendor} (${request.country || 'Global'})`)
+    queryAnjomanSkill(`Verify vendor corporate existence and regulatory status: ${request.vendor} (${request.country || 'Global'})`),
+
+    // E. Live autonomous Telegraph 402 escrow/x402 purchase (when TELEGRAPH_MODE=live or --live)
+    purchaseTelegraphSignal({
+      intent: 'CORPORATE_REGISTRY_LOOKUP_GENERAL',
+      query: `[CORPORATE_REGISTRY_LOOKUP_GENERAL] What is the official corporate registration status of ${request.vendor || 'Siemens AG'}?`,
+      live: Boolean(request.live)
+    })
   ]);
 
   // 3. Process Sanctions Findings
@@ -206,7 +214,7 @@ export async function investigateProcurement(request) {
     matched: Boolean(sanctionsRes?.matched),
     matchCount: sanctionsRes?.matches?.length || 0,
     matches: sanctionsRes?.matches || [],
-    provider: 'Praman Desk OFAC SDN Engine (Miner #6127)',
+    provider: 'Praman Desk OFAC SDN Engine (Devnode #6164)',
     timestamp: new Date().toISOString()
   };
 
@@ -230,7 +238,7 @@ export async function investigateProcurement(request) {
     lei: corporateRes?.registration_id || corporateRes?.lei || topResult?.lei || null,
     status: corporateRes?.registration_status || corporateRes?.entity_status || topResult?.status || 'UNKNOWN',
     jurisdiction: corporateRes?.jurisdiction || topResult?.jurisdiction || request.country || null,
-    provider: 'GLEIF Primary Registry via Praman Desk (Miner #6127)'
+    provider: 'GLEIF Primary Registry via Praman Desk (Devnode #6164)'
   };
 
   if (!corporateData.found) {
@@ -346,7 +354,8 @@ export async function investigateProcurement(request) {
       sanctionsScreening: sanctionsData,
       domainSafety: domainData,
       fxValidation: fxData,
-      anjomanIntelligence: anjomanRes
+      anjomanIntelligence: anjomanRes,
+      telegraphPurchase: telegraphPurchaseRes
     },
     anomalies,
     riskScore,

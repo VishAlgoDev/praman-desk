@@ -1,6 +1,6 @@
 version: "1"
 kind: miner
-id: 6164 # Sepolia Diamond Registration #6164 (Devnode Route #5281; on-chain yaml pin 09927be)
+id: 6164 # Devnode Miner #6164 (Sepolia Diamond Registration #6199+ pending 18-intent re-pin)
 slug: praman-compliance-miner
 protocol: generic
 name: Praman Desk Compliance & Procurement Auditor
@@ -600,6 +600,103 @@ endpoints:
             intents: ["*"]
             description: "Verbatim query prompt string"
 
+  - path: /api/miner/b2b-identity
+    external_path: /api/miner/b2b-identity
+    method: GET
+    intents:
+      - B2B_IDENTITY_ENRICHMENT_GENERAL
+    description: >-
+      Enriches a business domain, work email, brand, or legal name with verified GLEIF LEI, entity status, HQ address, jurisdiction, and live RDAP/DNS MX domain validity.
+    params:
+      query:
+        optional:
+          - name: domain
+            type: string
+            intents: ["*"]
+            description: "Company domain name (e.g. siemens.com)"
+          - name: email
+            type: string
+            intents: ["*"]
+            description: "Work email address"
+          - name: company
+            type: string
+            intents: ["*"]
+            description: "Legal company or brand name"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Verbatim enrichment query"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Evaluation prompt string"
+
+  - path: /api/miner/fraud-risk
+    external_path: /api/miner/fraud-risk
+    method: GET
+    intents:
+      - FRAUD_RISK_GENERAL
+    description: >-
+      Computes forward-looking fraud probability (0.00-1.00) and risk level from actor context: IP/ASN RDAP reputation, disposable email, headless browser fingerprint, phishing domain, and OFAC SDN signals.
+    params:
+      query:
+        optional:
+          - name: ip
+            type: string
+            intents: ["*"]
+            description: "Client IP address"
+          - name: email
+            type: string
+            intents: ["*"]
+            description: "Actor email address"
+          - name: user_agent
+            type: string
+            intents: ["*"]
+            description: "HTTP User-Agent string"
+          - name: fingerprint
+            type: string
+            intents: ["*"]
+            description: "Browser/session fingerprint context"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Verbatim fraud risk scoring query"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Evaluation prompt string"
+
+  - path: /api/miner/payment-method-verify
+    external_path: /api/miner/payment-method-verify
+    method: GET
+    intents:
+      - PAYMENT_METHOD_VERIFY_GENERAL
+    description: >-
+      Validates card BIN / PAN (Luhn + live BIN directory), 9-digit US ABA routing numbers (mod-10 checksum + Fedwire/ACH directory), and IBANs (ISO 13616 mod-97).
+    params:
+      query:
+        optional:
+          - name: bin
+            type: string
+            intents: ["*"]
+            description: "6-8 digit card BIN / IIN"
+          - name: routing_number
+            type: string
+            intents: ["*"]
+            description: "9-digit US ABA routing number"
+          - name: iban
+            type: string
+            intents: ["*"]
+            description: "International Bank Account Number"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Verbatim payment method verification query"
+          - name: prompt
+            type: string
+            intents: ["*"]
+            description: "Evaluation prompt string"
+
   - path: /api/miner/arbitrate
     external_path: /api/miner/arbitrate
     method: POST
@@ -644,6 +741,9 @@ semantics:
     - WALLET_BALANCE_CHECK_GENERAL
     - RESEARCH_QUERY_GENERAL
     - LIQUIDITY_DEPTH_VERIFY_GENERAL
+    - B2B_IDENTITY_ENRICHMENT_GENERAL
+    - FRAUD_RISK_GENERAL
+    - PAYMENT_METHOD_VERIFY_GENERAL
     - MINING_INTELLIGENCE_GENERAL
 
 docs:

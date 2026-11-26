@@ -1,4 +1,0 @@
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/mastered/v1_act1_problem_48k_ebur128.wav'
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/mastered/v1_act2_discovery_48k_ebur128.wav'
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/mastered/v1_act3_consensus_48k_ebur128.wav'
-file 'C:/Users/Public/My Agent/telegraph-h2/public/audio/mastered/v1_act4_proof_48k_ebur128.wav'

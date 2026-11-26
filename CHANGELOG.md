@@ -81,4 +81,33 @@ All remediation work, newly discovered defects, regressions, security issues, pr
   - Reading Lucian's (`@epistemedeus`) follow-up comment on `VishAlgoDev/praman-desk#1` showed `INVOICE_LEDGER_RECONCILE_GENERAL` in `evaluateMinerAgreement` still used `parseNumber` instead of `parseStrictNumber` and failed to reject `field_status.reconciled === "missing" | "rejected" | "unavailable"` or `field_status.discrepancy === "missing" | "unavailable"`.
   - Fix: Switched `evaluateMinerAgreement` to `parseStrictNumber` and blocked `confirmed` whenever `field_status.reconciled` or `field_status.discrepancy` is `'rejected' | 'missing' | 'unavailable'` (leaving `'ok'`/`'verified'` allowed). Added automated unit assertions covering all 5 of Lucian's Issue `#1` test cases.
 
+---
+
+## Season II Hardening, 3-Intent Expansion & Autonomous Settlement (`2026-11-26`)
+
+### Newly Discovered Issues Logged Before Remediation (`ND-18` - `ND-23`)
+- **ND-18 (Devnode `/engine/v1/ask/5281` `404 miner_not_found` & Canonical Intent Naming Drift)**:
+  - Live probe confirmed `POST https://devnode.telegraphprotocol.com/engine/v1/ask/5281` returns `HTTP 404 {"error":"miner_not_found"}`, whereas `/engine/v1/ask/6164` is the active bonded Praman Compliance Miner route (`id: "6164"`). `evaluateAutonomousSpendPolicy` (`src/handlers.mjs`), `/api/health`, `/api/status`, `src/certificate.mjs`, `public/index.html`, and bridge files still hardcoded stale `#5281` / `#6127` / `#6169` references instead of unified Devnode `#6164` / Sepolia Diamond `#6199+`. Additionally, docs and `scripts/verify-15-miner-endpoints.mjs` referenced `WALLET_TOKEN_BALANCE_GENERAL` instead of Devnode's canonical `WALLET_BALANCE_CHECK_GENERAL`.
+- **ND-19 (Core API Security, Crashes & Verdict Consistency Bugs in `src/handlers.mjs` & `src/certificate.mjs`)**:
+  - `parseCorporateRegistryQuery` misses multi-word phrasing (`"What is the corporate registration status of Nvidia Corporation?"`) causing Epoch 58 score `0`.
+  - `evaluateDocumentEndpoint` (`hasNegation`) flags valid assertions like `"certificate not expired"` as negated/tampered.
+  - `evaluateAutonomousSpendPolicy` passes `NaN` from malformed non-numeric `spendAmountUsdc` / `statedTotal` into WASM `scoreDeterministic`, triggering an unhandled `RangeError` (`HTTP 500`) instead of `HTTP 400`.
+  - `countersign` on `/api/spend-guard/evaluate` echoes `countersignReportHash` / `countersignSignature` without verifying EIP-191 ECDSA signatures (`recoverMessageAddress`).
+  - `alibaba_reconciled` falls back to `p.statedTotal` (`80000`) for `poCommitmentVal` when `poCommitment` is omitted, producing `$0.00` refund instead of `$20,000.00`.
+  - `/api/audit/case?case=po-ali-9021&format=html` inherits `DISCREPANCY_DETECTED` from `generateComplianceCertificate` despite `verdict: RECONCILED_PARTIAL_SETTLEMENT`, rendering a discrepancy banner on HTML certificates.
+  - `evaluateSolanaSpendGuardRequest` lacks `VersionedTransaction.deserialize` fallback and misses HTTP scenario + UI branches for Token-2022 `PermanentDelegate`, `TransferHook`, and `FreezeAuthority`.
+  - `/api/mcp` instructions still claim `10 deterministic` instead of matching `MCP_TOOLS.length`, and `/api/evalpool` fetches `limit=200` instead of `500` (truncating `301` contributor rows).
+- **ND-20 (Track 2 Scoring Bugs & Zero-Score Market Opportunities)**:
+  - `src/intelligence/mining-intelligence.mjs` uses bare `mine` without word boundaries (`\bmine\b`), stripping `"miner"` to `"r"`.
+  - `src/universal-intents.mjs`: `verifyTokenTotalSupply` lacks fallback lookup when a token is absent from `KNOWN_TOKEN_ADDRESSES` and converts `BigInt` via `Number(...)`; `checkWalletBalance` assigns `answer: verdictStr` on native coin responses; `verifyLiquidityDepth` fails when `LIVE_UNIV3_POOLS` lacks the pair instead of querying DexScreener pair search.
+  - Devnode `/engine/v1/intents` shows unclaimed commercial synergy in `B2B_IDENTITY_ENRICHMENT_GENERAL`, `FRAUD_RISK_GENERAL`, and `PAYMENT_METHOD_VERIFY_GENERAL` (`+0.21 USD` marginal MACHINA bond on `DIAMOND_PORT`).
+- **ND-21 (Track 1 Section 05 Autonomous Purchase Requirement)**:
+  - Track 1 standalone scripts (`alibaba-trade-assurance-demo.mjs`, `investigator-mind.mjs`, `visa-commercial-runner.mjs`, `tencent-decision-assurance.mjs`) execute local imports instead of running real `402 -> X-PAYMENT` autonomous purchases over Devnode `/engine/v1/ask`.
+- **ND-22 (Frontend Slop, Broken Anchors & 97.44 MB Repo Bloat)**:
+  - `public/index.html` contains broken hero links (`#desk-5`, swapped `#trade-assurance`), cosmetic toy `dbMove` card buttons on Desk 0, missing Token-2022 options + `.toLocaleString('en-US')` syntax bug in Desk 0/2, bare `/api/miner/doc-authenticity` call on Desk 5, 4 dead `href="#"` footer links, `"ZERO AI SLOP"`, nonexistent `npm install @praman/sdk`, and outdated EAS Schema UID on line `1977`.
+  - Git tracks `89` redundant media/test bundle files (`97.44 MB`: `public/audio/` raw/mastered binaries, PNG debug frames, duplicate `demo.mp4`/`narration.mp3`, tracked `CASE-7C-*.json`) inflating repo & Vercel deploys.
+- **ND-23 (EvalPool Unverified Rows & Legacy TryCloudflare Reference)**:
+  - `8` contributor rows on Devnode EvalPool carry `provenance_class: "unverified"` (`7` eligible + `1` superseded), and `evidence/adapter-registration-receipt.json` logs an ephemeral `trycloudflare.com` host that must never be cited as persistent Track 3 runtime.
+
+
 

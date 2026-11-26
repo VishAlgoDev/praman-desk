@@ -17,16 +17,23 @@
  */
 
 import { TakarPramanEscrowBridge, TAKAR_SETTLE_V4_ADDRESS } from '../takar-second-opinion/takar-praman-escrow-bridge.mjs';
+import { purchaseTelegraphSignal, isLiveTelegraphMode } from '../lib/telegraph-live-buyer.mjs';
 
 async function runAlibabaScenario() {
   console.log(`
 ╔════════════════════════════════════════════════════════════════════════════╗
-║   🏢 PRAMAN DESK × ALIBABA TRADE ASSURANCE CLEARING GATEWAY                ║
-║   Cross-Border B2B Escrow Arbitration • Devnode Route #5281 • Takar Settle ║
+║   PRAMAN DESK x ALIBABA TRADE ASSURANCE CLEARING GATEWAY                   ║
+║   Cross-Border B2B Escrow Arbitration · Devnode #6164 · TakarSettle v4     ║
 ╚════════════════════════════════════════════════════════════════════════════╝
 `);
 
   const bridge = new TakarPramanEscrowBridge();
+  const liveBuyerProof = await purchaseTelegraphSignal({
+    intent: 'CORPORATE_REGISTRY_LOOKUP_GENERAL',
+    query: '[CORPORATE_REGISTRY_LOOKUP_GENERAL] What is the official corporate registration status of Siemens Aktiengesellschaft?',
+    live: isLiveTelegraphMode()
+  });
+  console.log(`[TELEGRAPH NETWORK PURCHASE] Mode: ${liveBuyerProof.mode}${liveBuyerProof.settled ? ` | Receipt: ${liveBuyerProof.receiptHash} | Cost: $${liveBuyerProof.costUsdc} USDC` : ''}`);
 
   console.log(`[CONTRACT CONTEXT]`);
   console.log(`• Buyer: Alibaba Verified Importer (US West Logistics Hub)`);

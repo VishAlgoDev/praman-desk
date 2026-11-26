@@ -3,3 +3,11 @@ node_modules
 .env
 .git
 evidence/extra-x402-calls.json
+public/audio
+public/audit_frame_*.png
+public/clean_frame_*.png
+public/demo.mp4
+public/narration.mp3
+eval-data
+*.bak*
+examples/minds-spend-guard/test-bundles

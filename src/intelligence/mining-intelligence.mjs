@@ -522,7 +522,7 @@ export function evaluateMiningIntelligencePrompt(rawText = '') {
   }
 
   // Case 12: Universal Global Resource Extractor for ANY other deposit, entity, or search prompt
-  const detectedName = text.replace(/(?:what\s+is|tell\s+me\s+about|query|history\s+of|historical\s+records?\s+for|information\s+on|mine|deposit|goldfield)\s*/gi, '').trim() || text;
+  const detectedName = text.replace(/\b(?:what\s+is|tell\s+me\s+about|query|history\s+of|historical\s+records?\s+for|information\s+on|mine|deposit|goldfield)\b\s*/gi, '').replace(/\s+/g, ' ').trim() || text;
   let jurisdictionCountry = 'International';
   let jurisdictionState = 'Global Geological District';
   let authorityName = 'Global Earth Science & Geological Survey Consortium (USGS / BGS / GA)';

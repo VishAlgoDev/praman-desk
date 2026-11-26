@@ -11,6 +11,7 @@
  */
 
 import crypto from 'node:crypto';
+import { formatUnits } from 'viem';
 
 // Public verified JSON-RPC endpoints for EVM chains (non-pruned archive-capable nodes first)
 const RPC_ENDPOINTS = {
@@ -619,10 +620,37 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
   }
 
   if (!targetAddress) {
-    const symMatch = combinedText.match(/\b(TESTUSDC|USDC|USDT|WETH|WBTC|DAI|LINK|UNI|AAVE|USDY)\b/i);
+    const symMatch = combinedText.match(/\b(TESTUSDC|USDC|USDT|WETH|WBTC|DAI|LINK|UNI|AAVE|USDY|PEPE|SHIB|ARB|OP|MKR|LDO|CRV|COMP|ENS|RPL|cbETH)\b/i);
     if (symMatch) {
       const sym = symMatch[1].toUpperCase();
       targetAddress = KNOWN_TOKEN_ADDRESSES[targetChain]?.[sym] || KNOWN_TOKEN_ADDRESSES.ethereum[sym] || null;
+    }
+  }
+
+  // Fallback: dynamically resolve unmapped ERC-20 token addresses via DexScreener search
+  if (!targetAddress && combinedText) {
+    const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon' };
+    const tokenTokenMatch = combinedText.match(/\b(?:for|of|token)\s+([A-Za-z0-9]{2,15})\b/i) || combinedText.match(/\b([A-Z]{2,12})\b/);
+    const searchTicker = (explicitTokenText || tokenTokenMatch?.[1] || '').trim();
+    if (searchTicker) {
+      try {
+        const dsRes = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(searchTicker)}`, {
+          signal: AbortSignal.timeout(4000)
+        });
+        if (dsRes.ok) {
+          const dsJson = await dsRes.json();
+          const wantChain = dexChainMap[targetChain] || 'ethereum';
+          const matches = (dsJson?.pairs || []).filter(p =>
+            p.chainId === wantChain &&
+            /^0x[a-fA-F0-9]{40}$/.test(p.baseToken?.address || '') &&
+            String(p.baseToken?.symbol || '').toLowerCase() === searchTicker.toLowerCase()
+          );
+          matches.sort((a, b) => Number(b.liquidity?.usd || 0) - Number(a.liquidity?.usd || 0));
+          if (matches[0]) {
+            targetAddress = matches[0].baseToken.address;
+          }
+        }
+      } catch {}
     }
   }
 
@@ -678,7 +706,12 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
           }
         } catch {}
 
-        const formattedSupply = Number(rawSupplyBigInt) / (10 ** decimals);
+        const exactDecimalStr = formatUnits(rawSupplyBigInt, decimals);
+        const [intPart, fracPart] = exactDecimalStr.split('.');
+        const groupedInt = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        const trimmedFrac = fracPart ? fracPart.slice(0, 4).replace(/0+$/, '') : '';
+        const formattedSupplyStr = trimmedFrac ? `${groupedInt}.${trimmedFrac}` : groupedInt;
+        const numericSupply = Number(exactDecimalStr);
 
         return {
           status: 'confirmed',
@@ -686,10 +719,11 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
           chain: targetChain,
           decimals,
           total_supply_raw: rawSupplyBigInt.toString(),
-          total_supply: formattedSupply,
-          total_supply_formatted: formattedSupply.toLocaleString('en-US', { maximumFractionDigits: 4 }),
+          total_supply_exact: exactDecimalStr,
+          total_supply: Number.isFinite(numericSupply) ? numericSupply : exactDecimalStr,
+          total_supply_formatted: formattedSupplyStr,
           confidence: 1.0,
-          summary: `Token ${targetAddress} on ${targetChain} total supply is ${formattedSupply.toLocaleString('en-US', { maximumFractionDigits: 4 })} (decimals: ${decimals})`
+          summary: `Token ${targetAddress} on ${targetChain} total supply is ${formattedSupplyStr} (decimals: ${decimals})`
         };
       }
     } catch (e) {
@@ -912,7 +946,7 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
             symbol: symbolStr,
             funded: isFunded,
             verdict: verdictStr,
-            answer: verdictStr,
+            answer: summaryStr,
             confidence: 1.0,
             reason: summaryStr,
             summary: summaryStr
@@ -1351,7 +1385,85 @@ export async function verifyLiquidityDepth(params = {}) {
     }
   }
 
-  const summaryText = `LIQUIDITY DEPTH UNAVAILABLE: Unable to query live on-chain DEX state for ${pair} on ${chain}. No synthetic fallback emitted.`;
+  // 3. Fallback: dynamic pair lookup on DexScreener (/tokens/:address when known, then /search) when pool is absent from LIVE_UNIV3_POOLS
+  try {
+    const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon', bsc: 'bsc' };
+    const wantChain = dexChainMap[chain] || 'ethereum';
+    const pairTokens = pair.split('/').map(s => s.trim().toUpperCase()).filter(Boolean);
+    const knownBaseAddr = KNOWN_TOKEN_ADDRESSES[chain]?.[pairTokens[0]] || KNOWN_TOKEN_ADDRESSES.ethereum?.[pairTokens[0]] || null;
+    const knownQuoteAddr = KNOWN_TOKEN_ADDRESSES[chain]?.[pairTokens[1]] || KNOWN_TOKEN_ADDRESSES.ethereum?.[pairTokens[1]] || null;
+
+    let rawPairs = [];
+    for (const tokAddr of [knownBaseAddr, knownQuoteAddr].filter(Boolean)) {
+      const tRes = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${tokAddr}`, { signal: AbortSignal.timeout(4500) });
+      if (tRes.ok) {
+        const tj = await tRes.json();
+        if (Array.isArray(tj?.pairs)) rawPairs.push(...tj.pairs);
+      }
+    }
+    if (rawPairs.length === 0) {
+      const dsSearch = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(pairTokens.join(' '))}`, {
+        signal: AbortSignal.timeout(4500)
+      });
+      if (dsSearch.ok) {
+        const dsJson = await dsSearch.json();
+        if (Array.isArray(dsJson?.pairs)) rawPairs.push(...dsJson.pairs);
+      }
+    }
+
+    const candidates = rawPairs.filter(p => {
+      if (p.chainId !== wantChain || !p.liquidity?.usd) return false;
+      const b = String(p.baseToken?.symbol || '').toUpperCase();
+      const qt = String(p.quoteToken?.symbol || '').toUpperCase();
+      const matchesExact = pairTokens.length === 2 && (
+        (b === pairTokens[0] && qt === pairTokens[1]) ||
+        (b === pairTokens[1] && qt === pairTokens[0])
+      );
+      return matchesExact || pairTokens.length < 2;
+    });
+    candidates.sort((a, b) => Number(b.liquidity?.usd || 0) - Number(a.liquidity?.usd || 0));
+    const best = candidates[0];
+    if (best) {
+      const liqUsd = Math.round(Number(best.liquidity?.usd || 0) * 100) / 100;
+      const vol24h = Number(best.volume?.h24 || 0);
+      const priceUsd = Number(best.priceUsd || 0);
+      const slippagePct = liqUsd > 0 ? Math.min(100.0, Math.round(((notionalUsd / (liqUsd * 2)) * 100) * 1000) / 1000) : 100.0;
+      const depthSufficient = liqUsd >= notionalUsd * 2.0;
+      const formattedLiq = liqUsd.toLocaleString('en-US', { maximumFractionDigits: 2 });
+      const txt = `LIVE DEX LIQUIDITY: ${best.baseToken?.symbol || pairTokens[0]}/${best.quoteToken?.symbol || pairTokens[1]} on ${best.chainId} (${best.dexId}, pool ${best.pairAddress}) liquidity $${formattedLiq} USD (24h vol $${Math.round(vol24h).toLocaleString('en-US')}, est. slippage ${slippagePct}%) - ${depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING'}`;
+      const outPayload = {
+        ok: true,
+        status: 'confirmed',
+        intent: 'LIQUIDITY_DEPTH_VERIFY_GENERAL',
+        pair: `${best.baseToken?.symbol || pairTokens[0]}/${best.quoteToken?.symbol || pairTokens[1]}`,
+        chain: best.chainId,
+        pool_address: best.pairAddress,
+        dex: best.dexId,
+        current_price_usd: priceUsd || null,
+        depth_range_pct: depthPct,
+        notional_tested_usd: notionalUsd,
+        total_depth_usd: liqUsd,
+        liquidity_usd: liqUsd,
+        tvl_usd: liqUsd,
+        volume_24h_usd: vol24h || null,
+        estimated_slippage_pct: slippagePct,
+        depth_sufficient: depthSufficient,
+        verdict: depthSufficient ? 'DEPTH_SUFFICIENT' : 'SHALLOW_LIQUIDITY_WARNING',
+        summary: txt,
+        explanation: txt,
+        reason: txt,
+        answer: txt,
+        results: [txt],
+        confidence: 0.95,
+        verification_method: 'LIVE_DEXSCREENER_PAIR_SEARCH',
+        timestamp: new Date().toISOString()
+      };
+      outPayload.canonical_sha256 = `0x${crypto.createHash('sha256').update(JSON.stringify(outPayload, Object.keys(outPayload).sort())).digest('hex')}`;
+      return outPayload;
+    }
+  } catch {}
+
+  const fallbackSummary = `LIQUIDITY DEPTH UNAVAILABLE: Unable to query live on-chain DEX state for ${pair} on ${chain}. No synthetic fallback emitted.`;
   return {
     ok: false,
     status: 'rpc_unavailable',
@@ -1364,11 +1476,11 @@ export async function verifyLiquidityDepth(params = {}) {
     tvl_usd: null,
     depth_sufficient: false,
     verdict: 'RPC_UNAVAILABLE',
-    summary: summaryText,
-    explanation: summaryText,
-    reason: summaryText,
-    answer: summaryText,
-    results: [summaryText],
+    summary: fallbackSummary,
+    explanation: fallbackSummary,
+    reason: fallbackSummary,
+    answer: fallbackSummary,
+    results: [fallbackSummary],
     confidence: 0.0,
     verification_method: 'LIVE_UNISWAP_V3_JSON_RPC',
     timestamp: new Date().toISOString()

@@ -33,7 +33,7 @@ cd praman-desk
 npm install
 
 # 2. Run the core compliance gate demo & Alibaba Trade Assurance arbitration
-npm run gate demo
+npm run gate -- demo
 npm run alibaba:demo
 
 # 3. Run Solana Pre-Signature Spend Guard unit & Devnet suite (26 unit + 5 Devnet tests)
@@ -57,7 +57,8 @@ npm run comparator:test
   - `SANCTIONS_SCREENING_MATCH_GENERAL` (19,565 OFAC SDN entities + digital currency/EVM addresses screened in-memory in <25ms)
   - `REGULATORY_FILING_MONITOR_GENERAL` (Live SEC EDGAR & US Federal Register)
   - `GRID_POWER_PRICE_GENERAL` (Live CAISO OASIS `PRC_LMP` / `PRC_INTVL_LMP` SingleZip feed; fails closed to `live_feed_unavailable` when an ISO blocks unauthenticated access)
-  - `LIQUIDITY_DEPTH_VERIFY_GENERAL`, `TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL`, `ONCHAIN_TX_LOOKUP_GENERAL`, `WALLET_TOKEN_BALANCE_GENERAL` (Live Ethereum & Sepolia JSON-RPC, including Uniswap v3 `slot0` / `liquidity` depth math)
+  - `LIQUIDITY_DEPTH_VERIFY_GENERAL`, `TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL`, `ONCHAIN_TX_LOOKUP_GENERAL`, `WALLET_BALANCE_CHECK_GENERAL` (Live Ethereum & Sepolia JSON-RPC, including Uniswap v3 `slot0` / `liquidity` depth math and DexScreener pair fallback)
+  - `B2B_IDENTITY_ENRICHMENT_GENERAL`, `FRAUD_RISK_GENERAL`, `PAYMENT_METHOD_VERIFY_GENERAL` (Live RDAP + DNS MX/GLEIF corporate enrichment, deterministic signup/IP/fingerprint fraud risk scoring, and Luhn/BIN + ABA routing mod-10 + IBAN mod-97 verification)
 - **Verified On-Chain Takar Escrow Settlements (Ethereum Sepolia):**
   - `TakarSettle v4` (`0x310275e6D66818E068245326bB9e398822304248`) Deal 0: [`0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75`](https://sepolia.etherscan.io/tx/0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75) (Block `12190408`) & Case 1: [`0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13`](https://sepolia.etherscan.io/tx/0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13) (Block `12200598`)
   - `TakarSettle5` (`0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B`) Case 2: [`0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de`](https://sepolia.etherscan.io/tx/0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de) (Block `12200597`)
@@ -101,7 +102,7 @@ npm run comparator:test
 
 ### Q3: What does it do today?
 - **Live Concrete Capabilities in Production**:
-  1. **15 Production Specialist Intents**: Deployed at `https://praman-desk.vercel.app`, serving sub-second queries across corporate registries, OFAC sanctions, SEC filings, invoice reconciliation, PO verification, power pricing, multi-chain EVM transactions, and multi-miner arbitration.
+  1. **18 Bonded Specialist Intents (+ `MINING_INTELLIGENCE_GENERAL`)**: Deployed at `https://praman-desk.vercel.app`, serving live queries across corporate registries, OFAC sanctions, SEC filings, invoice reconciliation, PO verification, power pricing, multi-chain EVM transactions, B2B identity enrichment, fraud risk scoring, payment method validation, and multi-miner arbitration.
   2. **EIP-191 Escrow Payment Integration**: Native client for Telegraph Devnode x402 / escrow scheme on Sepolia Diamond (`0x72a7...aa08b`), executing paid asks with sub-penny efficiency.
   3. **WASM Arithmetic Comparator**: 651-byte standalone binary compiled from Rust (`comparator.wasm`), executing bit-exact floating and fixed-point line-item reconciliation in zero memory overhead.
   4. **Two-Mind Spend Guard Architecture**: Fully implemented Animoca Brands Minds specification (`examples/minds-spend-guard/`) with Diligence Investigator and Escrow Reviewer minds.
@@ -164,8 +165,8 @@ Following public guidance from Telegraph Protocol Co-Founder **Ahmed Ali (`1xahm
                ▼
    ┌───────────────────────┐
    │        MIND 1         │ ──(Anjoman Skill / telegraph-mcp)──► Telegraph Network Specialists
-   │ Diligence Investigator│                                       • GLEIF Registry (Miner #6127)
-   └───────────────────────┘                                       • OFAC SDN Screening (Miner #6127)
+   │ Diligence Investigator│                                       • GLEIF Registry (Devnode #6164)
+   └───────────────────────┘                                       • OFAC SDN Screening (Devnode #6164)
                │                                                   • FakeWatch Domain Safety (#42420)
        (Signed Case File)                                          • Cross-Currency Parity (FX_NOW)
                │
@@ -203,7 +204,7 @@ node examples/minds-spend-guard/test-two-minds.mjs
 
 We evaluated five adversarial scenarios under a deterministic counterfactual baseline:
 1. **Without Telegraph (Ungrounded Parameter Pass-Through Baseline)**: Simulated unassisted pass-through with no live oracle verification or deterministic math checks.
-2. **With Telegraph (Praman Desk Two-Mind Architecture)**: Powered by Devnode Route `#5281`, FakeWatch Miner `#42420`, and the 651-byte WASM engine.
+2. **With Telegraph (Praman Desk Two-Mind Architecture)**: Powered by Devnode Miner `#6164`, FakeWatch Miner `#42420`, and the 651-byte WASM engine. Also supports live autonomous `402 -> X-PAYMENT` Devnode escrow purchases via [`examples/lib/telegraph-live-buyer.mjs`](examples/lib/telegraph-live-buyer.mjs) (`evidence/autonomous-purchases-live.json`).
 
 | Benchmark Metric | Without Telegraph (Counterfactual Baseline) | With Telegraph (Praman Desk) | Advantage |
 |---|:---:|:---:|:---:|

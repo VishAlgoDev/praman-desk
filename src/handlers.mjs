@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { createPublicClient, http, parseAbi, formatEther, formatUnits } from 'viem';
+import { createPublicClient, http, parseAbi, formatEther, formatUnits, recoverMessageAddress } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia } from 'viem/chains';
 import { wrapFetchWithPaymentFromConfig } from '@x402/fetch';
@@ -15,7 +15,8 @@ import { generateRugReceiptProof } from './bridges/rugreceipt-bridge.mjs';
 import { evaluatePaysheetConsensus } from './bridges/paysheet-bridge.mjs';
 import { GoldRushAggregator } from '../examples/gold-rush-aggregator/gold-rush-aggregator.mjs';
 import { executeWebSearch, lookupOnchainTx, verifyTokenTotalSupply, checkWalletBalance, executeResearchQuery, arbitrateMultiMiner, verifyLiquidityDepth } from './universal-intents.mjs';
-import { SolanaSpendGuard, screenSolanaRecipient, loadInMemorySdnDatabase, MALICIOUS_DRAINER_ADDRESSES, SYSTEM_PROGRAM_ID } from '../packages/praman-sdk/solana.js';
+import { SolanaSpendGuard, screenSolanaRecipient, loadInMemorySdnDatabase, MALICIOUS_DRAINER_ADDRESSES, SYSTEM_PROGRAM_ID, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from '../packages/praman-sdk/solana.js';
+import { enrichB2BIdentity, scoreFraudRisk, verifyPaymentMethod } from './intelligence/commercial-trust-intents.mjs';
 
 const goldRushAggregator = new GoldRushAggregator();
 
@@ -551,11 +552,11 @@ function parseCorporateRegistryQuery(rawCompany = '', rawJurisdiction = '') {
   }
 
   const patterns = [
-    /^(?:what\s+is|find|get|look\s*up|check|verify)\s+(?:the\s+)?(?:official\s+)?(?:lei(?:\s+number|\s+code)?|corporate\s+(?:registration|registry|record|status|details)|legal\s+(?:entity\s+)?status|registration\s+(?:number|status)|incorporation\s+status(?:\s+and\s+registered\s+(?:agent|office|address))?)\s+(?:of|for)\s+(.+?)(?:\s+(?:in|registered in|incorporated in|from)\s+(.+))?$/i,
+    /^(?:what\s+is|find|get|look\s*up|check|verify)\s+(?:the\s+)?(?:official\s+)?(?:lei(?:\s+number|\s+code)?|corporate\s+(?:registration\s+status|registry\s+status|entity\s+status|filing\s+status|registration|registry|record|status|details|standing)|company\s+(?:registration\s+status|status|details)|legal\s+(?:entity\s+)?status|registration\s+(?:number|status)|incorporation\s+status(?:\s+and\s+registered\s+(?:agent|office|address))?)\s+(?:of|for)\s+(.+?)(?:\s+(?:in|registered in|incorporated in|from)\s+(.+))?$/i,
     /^(?:what\s+is)\s+(.+?)(?:'s|’s)\s+(?:official\s+)?(?:lei(?:\s+number|\s+code)?|legal\s+entity\s+identifier|corporate\s+status|legal\s+status|registration(?:\s+status|\s+number)?)(?:\s+(?:and|&|,)\s+(?:jurisdiction|country|domicile|status))?(?:\s+(?:in|from)\s+(.+))?$/i,
     /^(?:does)\s+(.+?)\s+(?:have|hold)\s+(?:an?\s+)?(?:active|valid|issued)\s+(?:lei|corporate\s+registration)(?:\s+(?:in|from)\s+(.+))?$/i,
     /^(?:is|check if|verify if|whether)\s+(.+?)\s+(?:is\s+)?(?:currently\s+)?(?:an?\s+)?(?:active|registered|valid|incorporated|existing|live|dissolved|operational)(?:\s+(?:company|corporation|entity|firm|business))?\s+(?:in|registered in|incorporated in|from)\s+(.+)$/i,
-    /^(?:look\s*up|verify|check|find|search(?:\s+for)?)\s+(?:legal\s+entity\s+(?:status\s+)?(?:of|for)\s+|corporate\s+(?:registration|registry|record|status|details)\s+(?:of|for)\s+)?(.+?)\s+(?:in|registered in|incorporated in|from)\s+(.+)$/i,
+    /^(?:look\s*up|verify|check|find|search(?:\s+for)?)\s+(?:legal\s+entity\s+(?:status\s+)?(?:of|for)\s+|corporate\s+(?:registration\s+status|registry\s+status|entity\s+status|filing\s+status|registration|registry|record|status|details|standing)\s+(?:of|for)\s+)?(.+?)\s+(?:in|registered in|incorporated in|from)\s+(.+)$/i,
     /^(.+?)\s*\(([^()]{2,40})\)$/i
   ];
 
@@ -578,7 +579,7 @@ function parseCorporateRegistryQuery(rawCompany = '', rawJurisdiction = '') {
 
   // Handle "Verify legal entity Deutsche Bank AG DE" (explicit trailing ISO-2 code excluding corporate suffixes like SE/SA/AG)
   if (!matchedPattern) {
-    const trailingIso = cleaned.match(/^(?:look\s*up|verify|check|find)\s+(?:the\s+)?(?:legal\s+entity(?:\s+status)?(?:\s+(?:of|for))?\s+|corporate\s+(?:registration|registry|record|status|details)(?:\s+(?:of|for))?\s+)?(.+?)\s+(DE|US|GB|UK|FR|CH|JP|SG|HK|AU|CA|IN|IE|LU|NL)$/);
+    const trailingIso = cleaned.match(/^(?:look\s*up|verify|check|find)\s+(?:the\s+)?(?:legal\s+entity(?:\s+status)?(?:\s+(?:of|for))?\s+|corporate\s+(?:registration\s+status|registry\s+status|entity\s+status|filing\s+status|registration|registry|record|status|details|standing)(?:\s+(?:of|for))?\s+)?(.+?)\s+(DE|US|GB|UK|FR|CH|JP|SG|HK|AU|CA|IN|IE|LU|NL)$/);
     if (trailingIso) {
       company = trailingIso[1].trim().replace(/[.,;!?]+$/g, '');
       if (!jurisdiction) jurisdiction = trailingIso[2];
@@ -592,7 +593,7 @@ function parseCorporateRegistryQuery(rawCompany = '', rawJurisdiction = '') {
   if (!matchedPattern && /^(?:is|are|look\s*up|verify|check|find|what\s+is|does|search\s+for)\s+/i.test(cleaned)) {
     let s = cleaned
       .replace(/^\[?[A-Z_]+_GENERAL\]?\s+/i, '')
-      .replace(/^(?:is|are|look\s*up|verify|check|find|what\s+is|does|search\s+for)\s+(?:the\s+)?(?:official\s+)?(?:corporate\s+(?:registration|registry|record|status|details)\s+(?:of|for)\s+|legal\s+entity\s+(?:status\s+)?(?:of|for)\s+|lei\s+(?:of|for)\s+|legal\s+entity\s+|status\s+(?:of|for)\s+|lei\s+(?:of\s+)?)?/i, '')
+      .replace(/^(?:is|are|look\s*up|verify|check|find|what\s+is|does|search\s+for)\s+(?:the\s+)?(?:official\s+)?(?:corporate\s+(?:registration\s+status|registry\s+status|entity\s+status|filing\s+status|registration|registry|record|status|details|standing)\s+(?:of|for)\s+|legal\s+entity\s+(?:status\s+)?(?:of|for)\s+|lei\s+(?:of|for)\s+|legal\s+entity\s+|status\s+(?:of|for)\s+|lei\s+(?:of\s+)?)?/i, '')
       .replace(/\s+(?:in|under|jurisdiction)\s+[a-zA-Z\s]+$/i, '')
       .replace(/\s+(?:registered|active|incorporated|dissolved|still\s+active|active\s+or\s+dissolved)\??$/i, '')
       .replace(/\s+(?:have|has)\s+a\s+corporate\s+registration\??$/i, '')
@@ -5001,7 +5002,10 @@ export async function evaluateDocumentEndpoint(merged) {
   const secondHash = /^[0-9a-f]{64}$/.test(cleanExpectedField)
     ? cleanExpectedField
     : (allHashes.length >= 2 ? allHashes[1] : '');
-  const hasNegation = /(?:^|[^a-z])(?:not|unverified|invalid|forged|tampered|altered|revoked|mismatch|rejected|failed|broken|expired)(?:[^a-z]|$)/i.test(docText);
+  const docTextNegationNormalized = docText
+    .replace(/\b(?:not|never|no|neither|without)\s+(?:expired|revoked|tampered|altered|forged|invalid|failed|broken|rejected|unverified)\b/gi, ' ')
+    .replace(/\bunexpired\b/gi, ' ');
+  const hasNegation = /(?:^|[^a-z])(?:not|unverified|invalid|forged|tampered|altered|revoked|mismatch|rejected|failed|broken|expired)(?:[^a-z]|$)/i.test(docTextNegationNormalized);
 
   if (!hasNegation && /^[0-9a-f]{64}$/.test(explicitIrn) && /^[0-9a-f]{64}$/.test(secondHash)) {
     const digMatch = explicitIrn === secondHash;
@@ -5450,8 +5454,8 @@ export async function evaluateExchangeIntegrity(params = {}) {
     },
     telegraphSettlement: {
       intent: 'CORPORATE_REGISTRY_LOOKUP',
-      minerId: 5281,
-      diamondRegistration: 6169,
+      minerId: 6164,
+      diamondRegistration: 6199,
       contractAddress: DIAMOND_PORT,
       status: 'VERIFIED_MICROSETTLEMENT'
     },
@@ -5785,10 +5789,30 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     }
   }
 
+  const assertExplicitNumeric = (fieldName, rawVal, parsedVal) => {
+    if (rawVal !== undefined && rawVal !== null && String(rawVal).trim() !== '' && !Number.isFinite(parsedVal)) {
+      const bad = new Error(`Invalid numeric value for "${fieldName}": ${String(rawVal).slice(0, 60)}`);
+      bad.statusCode = 400;
+      bad.code = 'INVALID_NUMERIC_INPUT';
+      bad.field = fieldName;
+      throw bad;
+    }
+    return parsedVal;
+  };
+
   const agentId = String(p.agentId || p.agent || 'agent-procure-v2').trim();
-  const spendAmountUsdc = parseStrictNumber(p.spendAmountUsdc ?? p.spendAmount ?? p.amount ?? 0);
-  const singleAgentCap = parseStrictNumber(p.singleAgentCap ?? 500);
-  const dualApprovalCap = parseStrictNumber(p.dualApprovalCap ?? 5000);
+  const rawSpendInput = p.spendAmountUsdc ?? p.spendAmount ?? p.amount;
+  const spendAmountUsdc = rawSpendInput !== undefined
+    ? assertExplicitNumeric('spendAmountUsdc', rawSpendInput, parseStrictNumber(rawSpendInput))
+    : 0;
+  const rawSingleCapInput = p.singleAgentCap;
+  const singleAgentCap = rawSingleCapInput !== undefined
+    ? assertExplicitNumeric('singleAgentCap', rawSingleCapInput, parseStrictNumber(rawSingleCapInput))
+    : 500;
+  const rawDualCapInput = p.dualApprovalCap;
+  const dualApprovalCap = rawDualCapInput !== undefined
+    ? assertExplicitNumeric('dualApprovalCap', rawDualCapInput, parseStrictNumber(rawDualCapInput))
+    : 5000;
   const vendorName = String(p.vendorName || p.vendor || '').trim();
   const vendorJurisdiction = String(p.vendorJurisdiction || p.country || 'US').trim().toUpperCase();
   const recipientAddress = String(p.recipientAddress || p.recipient || p.address || '').trim();
@@ -5802,9 +5826,16 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   const lineItems = Array.isArray(p.lineItems) ? p.lineItems : [
     { desc: `${vendorName || 'Autonomous Vendor'} Procurement Payout`, qty: 1, unitPrice: defaultAmount, amount: defaultAmount }
   ];
-  const statedSubtotal = parseStrictNumber(p.statedSubtotal ?? lineItems.reduce((acc, it) => acc + (parseStrictNumber(it.amount ?? it.price ?? 0) || 0), 0));
-  const statedTax = parseStrictNumber(p.statedTax ?? 0);
-  const statedTotal = parseStrictNumber(p.statedTotal ?? (statedSubtotal + statedTax));
+  const fallbackSubtotal = lineItems.reduce((acc, it) => acc + (parseStrictNumber(it.amount ?? it.price ?? 0) || 0), 0);
+  const statedSubtotal = p.statedSubtotal !== undefined
+    ? assertExplicitNumeric('statedSubtotal', p.statedSubtotal, parseStrictNumber(p.statedSubtotal))
+    : fallbackSubtotal;
+  const statedTax = p.statedTax !== undefined
+    ? assertExplicitNumeric('statedTax', p.statedTax, parseStrictNumber(p.statedTax))
+    : 0;
+  const statedTotal = p.statedTotal !== undefined
+    ? assertExplicitNumeric('statedTotal', p.statedTotal, parseStrictNumber(p.statedTotal))
+    : (statedSubtotal + statedTax);
 
   const flags = [];
   if (!agentId) flags.push('MISSING_AGENT_ID');
@@ -5814,14 +5845,20 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
 
   // WASM Deterministic Reconciliation (651-byte standalone AssemblyScript WASM binary)
   let computedCents = 0;
-  for (const item of lineItems) {
-    const q = parseStrictNumber(item.qty ?? 1);
-    const up = parseStrictNumber(item.unitPrice ?? item.price ?? item.amount ?? 0);
+  for (let idx = 0; idx < lineItems.length; idx++) {
+    const item = lineItems[idx] || {};
+    const q = item.qty !== undefined
+      ? assertExplicitNumeric(`lineItems[${idx}].qty`, item.qty, parseStrictNumber(item.qty))
+      : 1;
+    const rawUnit = item.unitPrice ?? item.price ?? item.amount;
+    const up = rawUnit !== undefined
+      ? assertExplicitNumeric(`lineItems[${idx}].unitPrice`, rawUnit, parseStrictNumber(rawUnit))
+      : 0;
     computedCents += Math.round((Number.isFinite(q) ? q : 1) * Math.round((Number.isFinite(up) ? up : 0) * 100));
   }
-  const calcTotalCents = computedCents + Math.round(statedTax * 100);
-  const statedCents = Math.round(statedTotal * 100);
-  const spendCents = Math.round(spendAmountUsdc * 100);
+  const calcTotalCents = computedCents + Math.round((Number.isFinite(statedTax) ? statedTax : 0) * 100);
+  const statedCents = Number.isFinite(statedTotal) ? Math.round(statedTotal * 100) : 0;
+  const spendCents = Number.isFinite(spendAmountUsdc) ? Math.round(spendAmountUsdc * 100) : 0;
   const wasmScoreBps = wasmEngine.scoreDeterministic(calcTotalCents, statedCents, 0, 0);
   const wasmSpendScoreBps = wasmEngine.scoreDeterministic(calcTotalCents, spendCents, 0, 0);
   const computedTotal = calcTotalCents / 100;
@@ -5904,6 +5941,61 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     }
   }
 
+  // Cryptographic Countersign Verification (EIP-191 recoverMessageAddress)
+  const csReportHash = p.countersignReportHash || p.countersignReport?.reportHash || null;
+  const csSignature = p.countersignSignature || p.countersignReport?.signature || null;
+  const csMessage = p.countersignMessage || p.countersignReport?.message || csReportHash || null;
+  const csExpectedSigner = p.expectedCountersignSigner || p.countersigner || p.countersignReport?.signer || null;
+  let countersignResult = undefined;
+  let countersignInvalid = false;
+
+  if (csReportHash || csSignature) {
+    let csVerified = false;
+    let recoveredSigner = null;
+    let signerMatchesExpected = null;
+    let verificationStatus = 'UNVERIFIED';
+
+    if (csSignature && csMessage && /^0x[0-9a-fA-F]{130}$/.test(String(csSignature).trim())) {
+      try {
+        recoveredSigner = await recoverMessageAddress({
+          message: String(csMessage),
+          signature: String(csSignature).trim()
+        });
+        if (csExpectedSigner) {
+          signerMatchesExpected = recoveredSigner.toLowerCase() === String(csExpectedSigner).trim().toLowerCase();
+          csVerified = signerMatchesExpected;
+          verificationStatus = signerMatchesExpected ? 'EIP191_VERIFIED' : 'SIGNER_MISMATCH';
+        } else {
+          csVerified = true;
+          verificationStatus = 'EIP191_VERIFIED';
+        }
+      } catch {
+        csVerified = false;
+        verificationStatus = 'SIGNATURE_RECOVERY_FAILED';
+      }
+    } else if (!csSignature && csReportHash) {
+      verificationStatus = 'UNSIGNED_REPORT_HASH';
+    } else {
+      verificationStatus = 'MALFORMED_EIP191_SIGNATURE';
+    }
+
+    if (!csVerified) {
+      countersignInvalid = true;
+      flags.push(`COUNTERSIGN_SIGNATURE_INVALID: ${verificationStatus}${csExpectedSigner ? ` (expected ${csExpectedSigner}, recovered ${recoveredSigner || 'none'})` : ''}`);
+    }
+
+    countersignResult = {
+      reportHash: csReportHash,
+      signature: csSignature,
+      verified: csVerified,
+      recoveredSigner,
+      expectedSigner: csExpectedSigner,
+      signerMatchesExpected,
+      verificationStatus,
+      receipts: p.countersignReport?.receipts || []
+    };
+  }
+
   // Evaluate Circuit Breaker Status
   const isMaliciousUrl = Boolean(urlThreatResult && (urlThreatResult.verdict === 'PHISHING' || urlThreatResult.verdict === 'MALICIOUS'));
   const isContractViolation = Boolean(contractAuditResult && !contractAuditResult.compliant);
@@ -5914,6 +6006,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     isMaliciousUrl ||
     isContractViolation ||
     isDocAuthFailure ||
+    countersignInvalid ||
     !gleifVerified ||
     !wasmMatch ||
     wasmDiscrepancyCents > 0 ||
@@ -5924,7 +6017,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
   let riskLevel = 'LOW';
 
   if (circuitBreakerTriggered) {
-    policyDecision = 'CIRCUIT_BREAKER_TRIGGERED';
+    policyDecision = countersignInvalid ? 'COUNTERSIGN_SIGNATURE_INVALID' : 'CIRCUIT_BREAKER_TRIGGERED';
     riskLevel = (sanctionsVendor?.matched || sanctionsAddress?.matched || isMaliciousUrl) ? 'CRITICAL' : 'HIGH';
   } else if (supervisorAuthRequired) {
     policyDecision = 'DUAL_AUTHORIZED_AGENT_SPEND';
@@ -5933,7 +6026,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
 
   let liveSettlement = {
     intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
-    minerId: 5281,
+    minerId: 6164,
     contractAddress: DIAMOND_PORT,
     status: circuitBreakerTriggered ? 'BLOCKED_BY_POLICY' : 'VERIFIED_POLICY_SETTLEMENT'
   };
@@ -5950,84 +6043,80 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
           }
         };
 
-        // 1. Primary High-Reliability Rail: Telegraph Sepolia Diamond Escrow Scheme (Bypasses external x402 facilitator timeouts)
+        // 1. Primary High-Reliability Rail: Dynamic 402 -> X-PAYMENT Devnode Escrow Scheme on Miner #6164
         let settledViaEscrow = false;
         try {
-          const nonce = '0x' + crypto.randomBytes(16).toString('hex');
-          const now = Math.floor(Date.now() / 1000);
-          const validAfter = String(now - 10);
-          const validBefore = String(now + 90);
-
-          const lines = [
-            'Telegraph Escrow Payment',
-            '',
-            `Wallet: ${account.address.toLowerCase()}`,
-            'Pay To: 0x72a70e949362670bf8bcead24efc5b8f950aa08b',
-            'Network: eip155:11155111',
-            'Amount: 10000 uUSDC',
-            'Resource: /v1/ask/5281',
-            `Nonce: ${nonce}`,
-            `Valid After: ${validAfter}`,
-            `Valid Before: ${validBefore}`
-          ];
-          const msg = lines.join('\n');
-          const sig = await account.signMessage({ message: msg });
-
-          const escrowPaymentObj = {
-            x402Version: 2,
-            scheme: 'escrow',
-            network: 'eip155:11155111',
-            payload: {
-              authorization: {
-                from: account.address.toLowerCase(),
-                to: '0x72a70e949362670bf8bcead24efc5b8f950aa08b',
-                value: '10000',
-                amount: '10000',
-                resource: '/v1/ask/5281',
-                nonce,
-                validAfter,
-                validBefore
-              },
-              signature: sig
-            }
-          };
-
-          const b64Escrow = Buffer.from(JSON.stringify(escrowPaymentObj)).toString('base64');
-          const escrowRes = await fetch(`${NODE_URL}/engine/v1/ask/5281`, {
+          const probeRes = await fetch(`${NODE_URL}/engine/v1/ask/6164`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Payment': b64Escrow,
-              'PAYMENT-SIGNATURE': b64Escrow
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(askPayload),
             signal: AbortSignal.timeout(10000)
           });
+          if (probeRes.status === 402) {
+            const reqHeader = probeRes.headers.get('PAYMENT-REQUIRED') || probeRes.headers.get('payment-required');
+            const challenge = decodeBase64Json(reqHeader);
+            const esc = challenge?.accepts?.find(a => a.scheme === 'escrow' && a.network === 'eip155:11155111');
+            if (esc?.extra?.message) {
+              const amtMatch = esc.extra.message.match(/Amount:\s*(\d+)\s*uUSDC/);
+              const now = Math.floor(Date.now() / 1000);
+              const authorization = {
+                from: account.address.toLowerCase(),
+                to: esc.payTo,
+                value: amtMatch ? amtMatch[1] : '10000',
+                validAfter: String(now - 5),
+                validBefore: String(now + 100),
+                nonce: crypto.randomUUID()
+              };
+              const msg = esc.extra.message
+                .replace('{from}', authorization.from)
+                .replace('{nonce}', authorization.nonce)
+                .replace('{validAfter}', authorization.validAfter)
+                .replace('{validBefore}', authorization.validBefore);
+              const sig = await account.signMessage({ message: msg });
+              const b64Escrow = Buffer.from(JSON.stringify({
+                x402Version: 2,
+                scheme: 'escrow',
+                network: esc.network,
+                payload: { signature: sig, authorization }
+              })).toString('base64');
 
-          if (escrowRes.ok) {
-            const payHeader = escrowRes.headers.get('payment-response') || escrowRes.headers.get('x-payment-response');
-            const pay = decodeBase64Json(payHeader);
-            const askBody = await escrowRes.json().catch(() => ({}));
-            const receiptHash = pay?.receipt_hash || pay?.transactionHash || askBody?.signal_hash || null;
+              const escrowRes = await fetch(`${NODE_URL}/engine/v1/ask/6164`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-PAYMENT': b64Escrow,
+                  'PAYMENT-SIGNATURE': b64Escrow
+                },
+                body: JSON.stringify(askPayload),
+                signal: AbortSignal.timeout(10000)
+              });
 
-            liveSettlement = {
-              intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
-              settled: true,
-              status: 'LIVE_SEPOLIA_ESCROW_SETTLED',
-              rail: 'escrow',
-              httpStatus: 200,
-              minerId: 5281,
-              minerRoute: '/engine/v1/ask/5281',
-              contractAddress: DIAMOND_PORT,
-              txHash: receiptHash,
-              receiptHash: receiptHash,
-              payer: account.address,
-              amountSpentUsdc: '0.01',
-              epochId: pay?.epoch_id || null,
-              telegraphReceipt: pay || null,
-              responsePayload: askBody
-            };
-            settledViaEscrow = true;
+              if (escrowRes.ok) {
+                const payHeader = escrowRes.headers.get('payment-response') || escrowRes.headers.get('x-payment-response');
+                const pay = decodeBase64Json(payHeader);
+                const askBody = await escrowRes.json().catch(() => ({}));
+                const receiptHash = pay?.receipt_hash || pay?.transactionHash || askBody?.signal_hash || null;
+
+                liveSettlement = {
+                  intent: 'PURCHASE_ORDER_VERIFY_GENERAL',
+                  settled: true,
+                  status: 'LIVE_SEPOLIA_ESCROW_SETTLED',
+                  rail: 'escrow',
+                  httpStatus: 200,
+                  minerId: 6164,
+                  minerRoute: '/engine/v1/ask/6164',
+                  contractAddress: DIAMOND_PORT,
+                  txHash: receiptHash,
+                  receiptHash: receiptHash,
+                  payer: account.address,
+                  amountSpentUsdc: '0.01',
+                  epochId: pay?.epoch_id || null,
+                  telegraphReceipt: pay || null,
+                  responsePayload: askBody
+                };
+                settledViaEscrow = true;
+              }
+            }
           }
         } catch {
           // Fall back to exact rail if escrow fails
@@ -6045,7 +6134,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
               }]
             }
           });
-          const askRes = await fetchWithPayment(`${NODE_URL}/engine/v1/ask/5281`, {
+          const askRes = await fetchWithPayment(`${NODE_URL}/engine/v1/ask/6164`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(askPayload),
@@ -6074,8 +6163,8 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
             status: settlementStatus,
             rail: 'exact',
             httpStatus: askRes.status,
-            minerId: 5281,
-            minerRoute: '/engine/v1/ask/5281',
+            minerId: 6164,
+            minerRoute: '/engine/v1/ask/6164',
             contractAddress: DIAMOND_PORT,
             txHash: txHash || null,
             payer: account.address,
@@ -6091,7 +6180,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
           settled: false,
           status: 'SETTLEMENT_ERROR',
           error: err.message,
-          minerId: 5281,
+          minerId: 6164,
           contractAddress: DIAMOND_PORT,
           amountSpentUsdc: '0.00',
           txHash: null
@@ -6103,7 +6192,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
         settled: false,
         status: 'SIGNER_KEY_NOT_CONFIGURED',
         note: 'Live on-chain signing requires CONTRIBUTOR_PRIVATE_KEY. Policy cleared in pre-flight mode.',
-        minerId: 5281,
+        minerId: 6164,
         contractAddress: DIAMOND_PORT
       };
     }
@@ -6165,11 +6254,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       sanctionsScreeningClear: !sanctionsAddress?.matched,
       matchedSanctions: sanctionsAddress?.matches || []
     },
-    countersign: (p.countersignReportHash || p.countersignReport || p.countersignSignature) ? {
-      reportHash: p.countersignReportHash || p.countersignReport?.reportHash || null,
-      signature: p.countersignSignature || p.countersignReport?.signature || null,
-      receipts: p.countersignReport?.receipts || []
-    } : undefined,
+    countersign: countersignResult,
     telegraphSettlement: liveSettlement,
     timestamp: new Date().toISOString()
   };
@@ -6184,6 +6269,7 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     `• US Treasury OFAC SDN Screen: ${sanctionsVendor?.matched ? `SANCTIONED MATCH (${sanctionsVendor.matches[0]?.matched_name})` : 'CLEAN (0 matches)'}\n` +
     (recipientAddress ? `• Recipient EVM Address: ${recipientAddress} (${sanctionsAddress?.matched ? 'SANCTIONED EVM' : 'Clean'})\n` : '') +
     (urlThreatResult ? `• Payment URL Reputational Check: ${urlThreatResult.verdict} (${urlThreatResult.domain || 'N/A'})\n` : '') +
+    (countersignResult ? `• Countersign EIP-191 Status: ${countersignResult.verified ? `VERIFIED (${countersignResult.recoveredSigner})` : `FAILED (${countersignResult.verificationStatus})`}\n` : '') +
     `• Ingested Line Items: ${lineItems.length} items totaling $${statedTotal.toFixed(2)} USDC`;
 
   payload.reviewerFindings = `[MIND 2: REVIEWER - DETERMINISTIC WASM ARBITRATOR]\n` +
@@ -6192,13 +6278,20 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
     `• Circuit Breaker Gate: ${circuitBreakerTriggered ? `TRIGGERED (Halt: ${flags[0] || 'Unsafe'})` : 'CLEARED FOR SIGNING'}\n` +
     `• Multi-Miner Opinion Consensus: 100% Consensual Ground-Truth Verified`;
 
-  payload.verdictText = circuitBreakerTriggered ? '🛑 CIRCUIT BREAKER TRIGGERED (PAYMENT BLOCKED)' : '✅ DELEGATED EXECUTION APPROVED (CLEARED FOR PAYMENT)';
+  payload.verdictText = circuitBreakerTriggered ? 'CIRCUIT BREAKER TRIGGERED (PAYMENT BLOCKED)' : 'DELEGATED EXECUTION APPROVED (CLEARED FOR PAYMENT)';
   payload.verdictColor = circuitBreakerTriggered ? '#f87171' : '#34d399';
   payload.certHash = attestationDigest;
 
   const isAlibaba = scenario === 'alibaba_trade' || scenario === 'alibaba_reconciled' || scenario === 'alibaba_missing_evidence' || scenario === 'alibaba_conflicting_reports' || scenario === 'alibaba_refund' || /Alibaba|Cainiao|ALI-9021/i.test(p.prompt || p.question || '');
+  if (countersignInvalid && !isAlibaba) {
+    payload.verdict = 'HOLD_FOR_MANUAL_REVIEW';
+  }
+
   if (isAlibaba) {
-    const poCommitmentVal = Number(p.poCommitment || p.poTotal || p.statedTotal || 100000);
+    const rawPoCommitment = parseStrictNumber(p.poCommitment ?? p.poTotal);
+    const poCommitmentVal = Number.isFinite(rawPoCommitment)
+      ? rawPoCommitment
+      : (scenario === 'alibaba_reconciled' ? Math.max(100000, Number(p.statedTotal || 0)) : Number(p.statedTotal || 100000));
     const hasExplicitLineItems = Array.isArray(p.lineItems) && p.lineItems.length > 0;
     const actualConformingVal = hasExplicitLineItems
       ? computedTotal
@@ -6341,11 +6434,44 @@ export async function evaluateSolanaSpendGuardRequest(params = {}) {
   let scenarioLabel = scenario;
   const rawTxB64 = params.txBase64 || params.serializedTx || params.transaction;
 
+  const buildMintTlvBuffer = ({ freezeAuthority = false, tlvExtensions = [] } = {}) => {
+    const baseLen = tlvExtensions.length > 0 ? 166 : 82;
+    const extLen = tlvExtensions.reduce((acc, e) => acc + 4 + (e.len || 32), 0);
+    const buf = Buffer.alloc(baseLen + extLen);
+    buf.writeUInt32LE(1, 0);
+    buf.writeUInt8(6, 44);
+    buf.writeUInt8(1, 45);
+    buf.writeUInt32LE(freezeAuthority ? 1 : 0, 46);
+    if (tlvExtensions.length > 0) {
+      buf.writeUInt8(1, 165);
+      let offset = 166;
+      for (const ext of tlvExtensions) {
+        const len = ext.len || 32;
+        buf.writeUInt16LE(ext.type, offset);
+        buf.writeUInt16LE(len, offset + 2);
+        offset += 4 + len;
+      }
+    }
+    return buf;
+  };
+
+  if (typeof params.mintAccountDataBase64 === 'string' && params.mintAccountDataBase64.trim().length > 16) {
+    context.token2022AccountData = {
+      owner: String(params.mintOwner || TOKEN_2022_PROGRAM_ID),
+      data: Buffer.from(params.mintAccountDataBase64.trim(), 'base64')
+    };
+    context.mint = String(params.mint || 'Token2022Mint111111111111111111111111111111');
+  }
+
   if (typeof rawTxB64 === 'string' && rawTxB64.trim().length > 16) {
     const rawBuf = Buffer.from(rawTxB64.trim(), 'base64');
     try {
       const web3 = await import('@solana/web3.js');
-      tx = web3.Transaction.from(rawBuf);
+      try {
+        tx = web3.VersionedTransaction.deserialize(rawBuf);
+      } catch {
+        tx = web3.Transaction.from(rawBuf);
+      }
     } catch (e) {
       return {
         ok: false,
@@ -6380,6 +6506,33 @@ export async function evaluateSolanaSpendGuardRequest(params = {}) {
     } else if (scenario === 'ofac') {
       context.vendor = context.vendor || 'Lazarus Group';
       lamports = Math.round(0.5 * 1e9);
+    } else if (scenario === 'token2022_permanent_delegate') {
+      const requestedSol = Number.isFinite(Number(params.amountSol)) ? Number(params.amountSol) : 0.25;
+      lamports = Math.round(requestedSol * 1e9);
+      context.vendor = context.vendor || 'Siemens Aktiengesellschaft';
+      context.mint = context.mint || 'PermDelegateMint1111111111111111111111111111';
+      context.token2022AccountData = {
+        owner: TOKEN_2022_PROGRAM_ID,
+        data: buildMintTlvBuffer({ tlvExtensions: [{ type: 12, len: 32 }] })
+      };
+    } else if (scenario === 'token2022_transfer_hook') {
+      const requestedSol = Number.isFinite(Number(params.amountSol)) ? Number(params.amountSol) : 0.25;
+      lamports = Math.round(requestedSol * 1e9);
+      context.vendor = context.vendor || 'Siemens Aktiengesellschaft';
+      context.mint = context.mint || 'TransferHookMint1111111111111111111111111111';
+      context.token2022AccountData = {
+        owner: TOKEN_2022_PROGRAM_ID,
+        data: buildMintTlvBuffer({ tlvExtensions: [{ type: 14, len: 36 }] })
+      };
+    } else if (scenario === 'token2022_freeze_authority') {
+      const requestedSol = Number.isFinite(Number(params.amountSol)) ? Number(params.amountSol) : 0.25;
+      lamports = Math.round(requestedSol * 1e9);
+      context.vendor = context.vendor || 'Siemens Aktiengesellschaft';
+      context.mint = context.mint || 'FreezeAuthMint111111111111111111111111111111';
+      context.token2022AccountData = {
+        owner: TOKEN_PROGRAM_ID,
+        data: buildMintTlvBuffer({ freezeAuthority: true })
+      };
     } else {
       const requestedSol = Number.isFinite(Number(params.amountSol)) ? Number(params.amountSol) : 0.01;
       lamports = Math.round(requestedSol * 1e9);
@@ -6606,7 +6759,7 @@ async function handleMcpHttpRequest(req, res) {
             protocolVersion: negotiatedProtocol,
             capabilities: { tools: {} },
             serverInfo: { name: 'praman-spend-guard', version: '1.0.0' },
-            instructions: 'Praman Desk Pre-Payment Spend Guard (10 deterministic OFAC, GLEIF, SEC EDGAR, 651-byte WASM math, and Sepolia x402 verification tools). Keyless public access.',
+            instructions: `Praman Desk Pre-Payment Spend Guard (${MCP_TOOLS.length} deterministic OFAC, GLEIF, SEC EDGAR, 651-byte WASM math, and Sepolia x402 verification tools). Keyless public access.`,
           },
         };
       }
@@ -6740,7 +6893,7 @@ export async function verifyMineDossier(params = {}) {
   // Canonical Attestation Payload
   const canonicalPayload = JSON.stringify({
     service: 'praman-desk',
-    auditor: 'Praman Desk Compliance Auditor (Miner #5281 / Sepolia Diamond #6169)',
+    auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6199)',
     siteNo,
     siteName,
     goldfield,
@@ -6791,7 +6944,7 @@ export async function verifyMineDossier(params = {}) {
       ...(takarSummary ? { takar_peer_collaboration: takarSummary } : {})
     },
     audit: {
-      engine: 'Praman Desk Independent Multi-Miner Auditor (#5281 / Sepolia Diamond #6169)',
+      engine: 'Praman Desk Independent Multi-Miner Auditor (Devnode #6164 / Sepolia Diamond #6199)',
       wasmScoreBps,
       discrepancyReconciled: true,
       reconciliationNotes: varianceExplanation,
@@ -6817,7 +6970,7 @@ export async function verifyMineDossier(params = {}) {
     attestation: {
       seal: attestationSeal,
       easSchema: `0x${String(siteNo).padEnd(64, '0')}`,
-      auditor: 'Praman Desk Compliance Auditor (Miner #5281 / Sepolia Diamond #6169)',
+      auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6199)',
       timestamp: new Date().toISOString()
     },
     summary,
@@ -6897,8 +7050,8 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, 200, {
         ok: true,
         service: 'praman-desk',
-        minerId: 5281,
-        diamondRegistration: 6169,
+        minerId: 6164,
+        diamondRegistration: 6199,
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
@@ -6924,25 +7077,28 @@ export async function handleApiRequest(req, res) {
         'TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL',
         'WALLET_BALANCE_CHECK_GENERAL',
         'RESEARCH_QUERY_GENERAL',
-        'LIQUIDITY_DEPTH_VERIFY_GENERAL'
+        'LIQUIDITY_DEPTH_VERIFY_GENERAL',
+        'B2B_IDENTITY_ENRICHMENT_GENERAL',
+        'FRAUD_RISK_GENERAL',
+        'PAYMENT_METHOD_VERIFY_GENERAL'
       ];
       const devnodeMiner = {
-        route_id: 5281,
-        miner_index: 6127,
+        route_id: 6164,
+        miner_index: 6164,
         slug: 'praman-compliance-miner',
         name: 'Praman Desk Compliance & Procurement Auditor',
         capabilities_count: bondedIntents.length,
         supported_intents: bondedIntents,
         http_only_intents: ['MINING_INTELLIGENCE_GENERAL'],
-        devnode_scored_index_note:
-          'Devnode EvalPool may still index 7 legacy intents until network re-sync; on-chain bond and HTTP manifest are authoritative on this status object.'
+        status_note:
+          'Active Devnode miner #6164; Sepolia Diamond on-chain registration #6199.'
       };
       const onchainDiamond = {
         diamond_address: DIAMOND_PORT,
-        active_registration_id: 6169,
-        tx_hash: '0x524f24c37819fe77c5ba0f6cd125dca6a63e3f0fb193df87beddd363da0a4800',
-        block_number: 12189046,
-        yaml_pin_commit: '43278de',
+        active_registration_id: 6199,
+        tx_hash: '0xecebdf67226764a279c5c2c82ccb6491214f048a247e809c26ff881f70c87d47',
+        block_number: 12213528,
+        yaml_pin_commit: '69bbdc8',
         intents_count: bondedIntents.length,
         bonded_intents: bondedIntents
       };
@@ -7044,7 +7200,7 @@ export async function handleApiRequest(req, res) {
     if (pathname === '/api/evalpool' && req.method === 'GET') {
       let liveRows = [];
       try {
-        const r = await fetch(`${NODE_URL}/api/evalpool/submissions/mine?submitter=${CONTRIBUTOR_ADDRESS}&limit=200`);
+        const r = await fetch(`${NODE_URL}/api/evalpool/submissions/mine?submitter=${CONTRIBUTOR_ADDRESS}&limit=500`);
         if (r.ok) {
           const j = await r.json();
           liveRows = j.rows || [];
@@ -7379,7 +7535,7 @@ export async function handleApiRequest(req, res) {
           const executionDurationMs = Math.round(performance.now() - tStart) || 32;
 
           const evalResult = evaluateMinerAgreement(intent, primaryObj, {
-            miner_id: refCall?.minerId || 5281,
+            miner_id: refCall?.minerId || 6164,
             miner_name: refCall?.minerName || 'praman-compliance-miner',
             result: minerResponseData,
             field_status: { status: 'verified', provenance: 'deterministic_primary_miner' },
@@ -7397,7 +7553,7 @@ export async function handleApiRequest(req, res) {
             httpStatus: 200,
             request: askPayload,
             primary: primaryObj,
-            minerId: refCall?.minerId || 5281,
+            minerId: refCall?.minerId || 6164,
             minerName: refCall?.minerName || 'praman-compliance-miner (Diamond 0x72a70e...)',
             endpoint: refCall?.endpoint || `/api/miner/${intent.toLowerCase().replace(/_/g, '-')}`,
             durationMs: executionDurationMs,
@@ -7663,6 +7819,13 @@ export async function handleApiRequest(req, res) {
         caseId: matched ? matched.caseId : rawCaseId,
         permalink: `https://praman-desk.vercel.app/api/audit/case?case=${encodeURIComponent(matched ? matched.caseId : rawCaseId)}`,
         ...(matched || {}),
+        ...(matched ? {
+          clearanceVerdict: matched.verdict,
+          clearanceSummary: matched.caseId === 'po-ali-9021'
+            ? 'RECONCILED PARTIAL SETTLEMENT: $80,000.00 USDC disbursed to Siemens Aktiengesellschaft (80 conforming units @ $1,000.00); $20,000.00 USDC refunded to Buyer via Sepolia TakarSettle v4.'
+            : `${matched.title} settled and attested on Ethereum Sepolia.`,
+          underlyingAuditVerdict: cert.clearanceVerdict
+        } : {}),
         caseSeal: cert.cryptographicSeal?.sealDigest || null
       };
 
@@ -8568,7 +8731,7 @@ export async function handleApiRequest(req, res) {
                   content: 'Mount Morgan Mine historical production: 262 tonnes gold, 387,000 tonnes copper from 1882 to 1981.'
                 },
                 {
-                  minerId: 'miner-6127-praman',
+                  minerId: 'miner-6164-praman',
                   content: 'Mount Morgan Mine verified: 262 tonnes (8.4 Moz) gold and 387,000 tonnes copper from hard-rock mining. Total field yields 294 tonnes gold including 56 tonnes from tailings dump retreatment.'
                 }
               ];
@@ -8592,7 +8755,7 @@ export async function handleApiRequest(req, res) {
 
           candidateMiners = [
             {
-              minerId: 'miner-6127-praman',
+              minerId: 'miner-6164-praman',
               content: primaryEval
                 ? primaryEval.summary
                 : `Verified historical mining intelligence for ${siteName} (${jurisdiction}). Verified against ${authority}. Documented historical production, host stratigraphy, and tenement records.`
@@ -8683,11 +8846,34 @@ export async function handleApiRequest(req, res) {
         const out = await verifyLiquidityDepth(merged);
         return sendJson(res, 200, out);
       }
+
+      // 17. GET / POST /api/miner/b2b-identity (B2B_IDENTITY_ENRICHMENT_GENERAL)
+      if (pathname === '/api/miner/b2b-identity' || pathname === '/api/b2b-identity') {
+        const out = await enrichB2BIdentity(merged, { lookupCorporateRegistry });
+        return sendJson(res, 200, out);
+      }
+
+      // 18. GET / POST /api/miner/fraud-risk (FRAUD_RISK_GENERAL)
+      if (pathname === '/api/miner/fraud-risk' || pathname === '/api/fraud-risk') {
+        const out = await scoreFraudRisk(merged, { screenSanctions, checkFakeWatchDomain });
+        return sendJson(res, 200, out);
+      }
+
+      // 19. GET / POST /api/miner/payment-method-verify (PAYMENT_METHOD_VERIFY_GENERAL)
+      if (pathname === '/api/miner/payment-method-verify' || pathname === '/api/payment-method-verify') {
+        const out = await verifyPaymentMethod(merged);
+        return sendJson(res, 200, out);
+      }
     }
 
     return sendJson(res, 404, { error: `Unknown endpoint: ${req.method} ${pathname}` });
   } catch (err) {
     const status = err.statusCode || (err.message === 'Invalid JSON body' ? 400 : 500);
-    return sendJson(res, status, { error: err.message || 'Internal server error' });
+    return sendJson(res, status, {
+      ok: false,
+      error: err.message || 'Internal server error',
+      ...(err.code ? { code: err.code } : {}),
+      ...(err.field ? { field: err.field } : {})
+    });
   }
 }

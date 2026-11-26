@@ -58,6 +58,9 @@ If you run an agent on [hellominds.ai](https://hellominds.ai), add a simple HTTP
   - `GET /invoice-reconcile?po_total=1000&invoice_total=1000`
   - `GET /corporate-registry?name=<COMPANY_NAME>`
   - `GET /regulatory-filing?name=<COMPANY_NAME>`
+  - `GET /b2b-identity?domain=<DOMAIN>`
+  - `GET /fraud-risk?prompt=<ACTOR_CONTEXT>`
+  - `GET /payment-method-verify?bin=<BIN>&routing_number=<ABA>`
 
 No API keys, no bearer tokens, no credit card required.
 
