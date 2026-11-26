@@ -16,14 +16,18 @@ Posting Policy: Nothing has been posted externally without user approval. Every 
    - Published Bazaar Skill: `Praman_Spend_Guard` (`skillId: 5BD48D42-F36B-1410-8467-00039CE7DF11`, `artifactId: 58D48D42-F36B-1410-8467-00039CE7DF11`, read-only `HTTP_Execute` wired to `https://praman-desk.vercel.app/api/mcp` and `/api/miner/*`)
 
 ### Critical Reminders & Pending Actions Before Submission (`Dec 1, 2026 23:59 UTC`)
-1. **Live Discord & Anjoman Explorer Re-Check Blocked on Chrome Prompt**: Re-check live Discord (`#announcements`, `#hackathon`, `#showcase`, partner threads) and Anjoman Explorer Epoch 59 scoring once Chrome **"Allow remote debugging?"** is clicked.
+1. **Urgent Today-Live Discord Follow-Ups (Captured `14:12-14:22 IST`):**
+   - **`@Chrysolite494` (`Supplier Buyer Check`, `Alibaba` thread `12:39 PM`):** Replied *"I'll run your trade-assurance/audit and sanctions-screen endpoints this afternoon and post what I see, good or bad. Could you send me one example request for the audit one?"* -> Send Section 2J right away and run her two flows (`Siemens AG` + `"Invoice pays someone else"`) on `https://supplier-buyer-check.vercel.app/` (external mutual tester points!).
+   - **`@Ahmed Ali` DM (`12:20 PM`) + `Solana` Thread (`Truvian` updated `1:49 PM`):** Ahmed explicitly asked: *"great, can you add in the solana thread?"* -> Post Section 2C inside `Solana Institutional AI & Commercial Applications` (`1574380609839833139`) and reply in Section 2I DM!
+   - **`@Anthony` (`anthony_rix`, Countersign) DM (`12:18 PM`):** Confirmed he ALREADY re-ran both `liveSettle: false` cases and saved them for the joint evidence pack -> Send Section 2F follow-up acknowledging his re-run (no duplicate re-test request).
+   - **Epoch 59/60 Verification (`after ~15:00 IST`):** Anjoman Explorer (`14:21 IST`) showed Epoch 59 ongoing (`next epoch in 37m 50s`), while `#6164` was last scored in **Epoch 58 (`11/26/2026, 11:48:19 AM IST`)** before our `ND-30..39` / `#6201` fixes (`0.500` avg, `#2` best rank, `390` requests). Check `#6164` again after `15:00 IST`.
 2. **App ID Mapping Verified Live**:
    - `praman-desk` (`AGENTS` track, approved & live on `anjoman.ai/dashboard/apps/praman-desk`): **`9ae7025e-65be-490b-8e59-2aa598f16992`** (currently displays stale Nov 10 / Miner `#5165` copy -> replace with Section 1A).
    - `praman-desk-2` (`SECURITY` track, currently `In review` / HTTP `404` on public API): **`c7c1adbb-304d-42ec-91df-5811f5e7f49e`** (update with Section 1B and ask Ahmed Ali to approve or advise on consolidating).
-3. **Replace/Supersede Stale Nov 25 GitHub Comments (`#189, #190, #191, #192, #196, #199, #200, #201, #202`)**: Existing Nov 25 `/submit` comments (`7168309193..7168315358`) still contain `RegID #6169 / Route #5281`, `(1m 48s)` duration text, and em dashes (`#192, #196, #202`). Edit them or post the refreshed Section 4 update.
+3. **Replace/Supersede Stale Nov 25 GitHub Comments (`#189, #190, #191, #192, #196, #199, #200, #201, #202`)**: Existing Nov 25 `/submit` comments (`7168309193..7168315358`) still contain `RegID #6169 / Route #5281`, duration text on the walkthrough video link, and em dashes (`#192, #196, #202`). Edit them or post the refreshed Section 4 update.
 4. **Replace Broken X Post (`2125698555092553987`) & Spread Across 3 Dates (`Nov 26`, `Nov 27-28`, `Nov 29-30`)**: Delete/replace `2125698555092553987` (had `@TelegraphProto` typo, em dash, duration tag, `#6169/#5281`) and post Updates 1, 2, 3 on 3 distinct calendar dates with explicit Season II hackathon disclosure and `@Telegraphprotoc` tag (Section 06 requirement).
 5. **Disclose Related Wallet on Official H2 Form (`Section 10`)**: Disclose primary contributor wallet `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466` (`309` Devnode EvalPool rows: `307 eligible / 2 superseded`; `301 attested / 8 earlier unverified`) AND secondary wallet `0x497FF1bE8cc0C95A7a14165A4999768C47fc0109` (`22` `eligible`, `attested` rows) if the H2 form asks for related addresses.
-6. **Wait for / Submit Official H2 Form + Partner Activation (`Bangdrop`, `Anthony`, `quincybob`)**: Final official hackathon entries must be submitted on `anjoman.ai` when the Season II closing form opens (Tracks 01, 02, 03), and watch Discord `#announcements` for the Final-Week Anjoman Session.
+6. **Wait for / Submit Official H2 Form (`~5d 15h` left)**: Final official hackathon entries must be submitted on `anjoman.ai` when the Season II closing form opens (Tracks 01, 02, 03), and watch Discord `#announcements` for the Final-Week Anjoman Session.
 
 ---
 
@@ -84,12 +88,12 @@ Replace obsolete Season 1 (`Miner #5165`, `6 stdio tools`, `41 eval rows`) text 
 `- On-chain Sepolia TakarSettle v4 & v5 settlement receipts: 0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75 (Block 12190408), 0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13 (Block 12200598), and 0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de (Block 12200597). EAS UID: 0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115.`
 `- Interactive console & walkthrough video: https://praman-desk.vercel.app and https://praman-desk.vercel.app/praman-desk-walkthrough.mp4`
 
-### C. Discord Solana Channel Post (`Solana Institutional AI & Commercial Applications`)
-`Sharing Praman Desk's Solana Pre-Signature Spend Guard SDK and live Solana RPC coverage on Telegraph Miner #6164 (Diamond #6201):`
-`- Pre-Signature Spend Guard (packages/praman-sdk/solana.js + Desk 1 live console): inspects legacy Transaction and v0 VersionedTransaction bytes before signing, blocking hijacked @solana/web3.js (1.95.6/1.95.7 addToQueue tampering), drainer wallet FnvLGtucz4..., SPL Token-2022 TLV PermanentDelegate (12) / TransferHook (14) / FreezeAuthority mints, unresolved ALTs, and cumulative session spend-cap breaches. HTTP policy gate (POST /api/audit/solana-spend-guard?chain=solana) validates Base58 recipient/sender addresses fail-closed.`
-`- Live Devnet guarded settlement confirmed (0.001 SOL, certHash 0xe3fccaf8...): https://solscan.io/tx/E3qVPMwcssFhxQuZyCgJ47yzZAk7UAUUgtxRwUAYtyD8pFZjnRrHcC91MLwMWxLixhb3YRMjWB8ifkk4cJjNEQq?cluster=devnet`
-`- Live Solana Miner Endpoints on https://praman-desk.vercel.app: /api/miner/wallet-balance, /api/miner/token-supply (exact SPL decimals), /api/miner/onchain-tx (Base58 v0/v1 with as_of), and /api/miner/liquidity-depth?pair=SOL/USDC.`
-`- Local reproduction: npm run solana:test (30 unit + 7 Devnet tests) and npm run solana:demo.`
+### C. Discord Solana Channel Post (`Solana Institutional AI & Commercial Applications`, Requested by Ahmed Ali in DM)
+`Hi @Ahmed Ali and Solana builders, sharing Praman Desk's live Solana Pre-Signature Spend Guard SDK, live Devnet settlement, and Solana RPC endpoints on Telegraph Miner #6164 (Diamond #6201):`
+`- Pre-Signature Spend Guard (packages/praman-sdk/solana.js + live Desk 1 console): inspects legacy Transaction and v0 VersionedTransaction bytes before signing, blocking hijacked @solana/web3.js (1.95.6/1.95.7 addToQueue tampering), drainer wallet FnvLGtucz4..., SPL Token-2022 TLV PermanentDelegate (12) / TransferHook (14) / FreezeAuthority mints, unresolved ALTs, and cumulative session spend-cap breaches. HTTP policy gate (POST https://praman-desk.vercel.app/api/audit/solana-spend-guard?chain=solana) validates Base58 recipient/sender addresses fail-closed.`
+`- Live Devnet guarded settlement confirmed (0.001 SOL, certHash 0xe3fccaf88769bb2c31d97d0982f0c283ec00aa0c6cc2e35152319a20b402cb3d): https://solscan.io/tx/E3qVPMwcssFhxQuZyCgJ47yzZAk7UAUUgtxRwUAYtyD8pFZjnRrHcC91MLwMWxLixhb3YRMjWB8ifkk4cJjNEQq?cluster=devnet`
+`- Live Solana Miner Endpoints on https://praman-desk.vercel.app: /api/miner/wallet-balance (SOL + SPL token balances), /api/miner/token-supply (exact SPL decimals), /api/miner/onchain-tx (Base58 v0/v1 with as_of), and /api/miner/liquidity-depth?pair=SOL/USDC.`
+`- Walkthrough video & local reproduction: https://praman-desk.vercel.app/praman-desk-walkthrough.mp4 | https://praman-desk.vercel.app | npm run solana:test (30 unit + 7 Devnet tests) and npm run solana:demo.`
 
 ### D. Discord Use Cases Channel Post (`Use Cases - Apps, Agents & Integrations`)
 `Shipping the reproducible code, UI, and live Devnode escrow receipt for our Tencent #01/#03 Enterprise Agent Decision Assurance workflow:`
@@ -103,11 +107,10 @@ Replace obsolete Season 1 (`Miner #5165`, `6 stdio tools`, `41 eval rows`) text 
 `- Published Bazaar Skill: Praman_Spend_Guard (skillId 5BD48D42-F36B-1410-8467-00039CE7DF11)`
 `- How it works: any Mind equipped with Praman_Spend_Guard uses read-only HTTP_Execute calls against https://praman-desk.vercel.app/api/mcp (18 keyless MCP tools) and /api/miner/* to screen OFAC SDN sanctions, verify GLEIF legal entities, reconcile line-item invoice math down to $0.01, check EVM/Solana transactions, and audit other agents' numeric claims without holding keys or fabricating omitted document IDs/caps.`
 
-### F. For Anthony (EIP-191 Countersign + PO-ALI-9021 Case + 18-Intent Diamond `#6201`)
-`Hey @anthony, sharing direct endpoints on Praman Desk so you can test our countersign gate, claim verifier, Minds Bazaar skill, and 18-intent Diamond #6201 miner:`
-`1. Real EIP-191 Countersign Verification (POST https://praman-desk.vercel.app/api/spend-guard/evaluate): invalid countersign payloads fail closed with COUNTERSIGN_SIGNATURE_INVALID and HOLD_FOR_MANUAL_REVIEW via viem recoverMessageAddress; non-numeric spend fields return HTTP 400 (INVALID_NUMERIC_INPUT).`
-`2. Shareable Trade Assurance Case (GET https://praman-desk.vercel.app/api/audit/case?case=po-ali-9021&format=html): renders $80,000 release / $20,000 refund (RECONCILED_PARTIAL_SETTLEMENT) with Sepolia TakarSettle v4 + EAS links.`
-`3. Diamond #6201 (warnings: 0) & Agent Verifier: test POST /api/agent/verify-output, POST /api/evaluator/sanctions-batch, Solana/EVM /api/miner/* routes, or equip Praman_Spend_Guard (5BD48D42-F36B-1410-8467-00039CE7DF11) on hellominds.ai.`
+### F. For Anthony (`@Anthony` / `anthony_rix`, Follow-Up After 12:18 PM Joint Evidence Confirmation)
+`Thanks for confirming the dry-run re-run and saving both HALTED + APPROVED responses to the joint evidence pack! Two quick updates from our side if you want to reference or test them too:`
+`1. Live Trade Assurance Case Link: GET https://praman-desk.vercel.app/api/audit/case?case=po-ali-9021&format=html ($80,000 release / $20,000 refund on TakarSettle v4 + EAS).`
+`2. New Minds Bazaar Skill & Claim Verifier: We also published Minds Bazaar Skill Praman_Spend_Guard (5BD48D42-F36B-1410-8467-00039CE7DF11) on hellominds.ai alongside POST /api/agent/verify-output and POST /api/evaluator/sanctions-batch if you want to test against Diamond #6201 (warnings: 0). Happy to coordinate a combined post in #showcase / Alibaba whenever ready.`
 
 ### G. For Bangdrop (Takar Escrow Integration & Case 0 / 1 / 2 Sepolia Receipts in Desk 0 & Desk 3)
 `Hey @bangdrop, confirming full on-chain verification and live ledger indexing for all three Takar escrow resolutions settled by Praman Desk (0x98021b20Efdb7ae2C57366010a6E0fDE207b4466) on Ethereum Sepolia:`
@@ -121,13 +124,42 @@ Replace obsolete Season 1 (`Miner #5165`, `6 stdio tools`, `41 eval rows`) text 
 `1. POST https://praman-desk.vercel.app/api/agent/verify-output (json {"vendor":"Siemens AG","output":"..."}) -> returns GO / HOLD_FOR_MISSING_EVIDENCE / NO_GO decomposing arithmetic + ECB FX, Luhn/ABA/IBAN checksums, GLEIF/RDAP entities, FakeWatch domains, and OFAC SDN hits.`
 `2. POST https://praman-desk.vercel.app/api/evaluator/sanctions-batch (json {"items":[...]}) -> stateless 1 to 50 item deterministic OFAC SDN + EVM batch scoring returning per-item results and precision/recall/F1 when expected_matched labels are supplied.`
 
-### I. For Ahmed Ali (Direct Season II Pre-Deadline Summary + App Review Ping)
-`Hey @Ahmed Ali, sharing our concise Season II status across all three tracks (Miner #6164 / Diamond #6201 + praman-desk 9ae7025e-65be-490b-8e59-2aa598f16992 + praman-desk-2 c7c1adbb-304d-42ec-91df-5811f5e7f49e):`
+### I. For Ahmed Ali (DM Reply to 12:20 PM Solana Request + Season II Summary & App Review Ping)
+`Hey @Ahmed Ali, I added our full Solana Spend Guard + Solscan Devnet tx + live Solana RPCs into the Solana Institutional AI & Commercial Applications thread as requested.`
+`Sharing our concise Season II status across all three tracks (Miner #6164 / Diamond #6201 + praman-desk 9ae7025e-65be-490b-8e59-2aa598f16992 + praman-desk-2 c7c1adbb-304d-42ec-91df-5811f5e7f49e):`
 `- Could you also check praman-desk-2 (c7c1adbb-304d-42ec-91df-5811f5e7f49e), which is still in "In review" (we are updating the approved praman-desk 9ae7025e-65be-490b-8e59-2aa598f16992 listing too, or let us know if we should consolidate into one app)?`
 `- Live App, 18-Tool MCP & Walkthrough Video: https://praman-desk.vercel.app, https://praman-desk.vercel.app/api/mcp, https://praman-desk.vercel.app/praman-desk-walkthrough.mp4`
 `- Track 01: Published Minds Bazaar Skill Praman_Spend_Guard (5BD48D42-F36B-1410-8467-00039CE7DF11 on Mind 47b85842-f36b-1410-8467-00039ce7df11), Alibaba/Takar Sepolia settlements (TakarSettle v4 & v5), Tencent #01/#03 deterministic claim verifier (/api/agent/verify-output + evidence/tencent-live-proof.json), and Solana Pre-Signature Spend Guard (30 unit + 7 Devnet tests; live Solscan Devnet settlement E3qVPMwcssFhxQuZyCgJ47yzZAk7UAUUgtxRwUAYtyD8pFZjnRrHcC91MLwMWxLixhb3YRMjWB8ifkk4cJjNEQq).`
-`- Track 02: Sepolia Diamond #6201 (tx 0x50b34afc..., Block 12214472) active on /api/miners/6201 with 0 warnings across 18 intents and 30/30 live endpoint checks passing (awaiting Epoch 59 scoring).`
+`- Track 02: Sepolia Diamond #6201 (tx 0x50b34afc..., Block 12214472) active on /api/miners/6201 with 0 warnings across 18 intents and 30/30 live endpoint checks passing (registered 11/26, awaiting Epoch 59 scoring).`
 `- Track 03: 651-byte AssemblyScript WASM comparator (1,043/1,043), stateless deterministic batch evaluator POST /api/evaluator/sanctions-batch (superseding retired legacy #469 trycloudflare tunnel), and 309 Devnode EvalPool rows on primary wallet (301 attested, 8 earlier unverified; plus 22 attested rows on related wallet 0x497FF1bE8cc0C95A7a14165A4999768C47fc0109).`
+
+### J. Urgent Reply to `@Chrysolite494` (`Alibaba` Thread, Answering 12:39 PM Example Request)
+`Hey @Chrysolite494, awesome, thank you! Here are the exact tested request examples on https://praman-desk.vercel.app (all no-key):`
+
+`1. Trade Assurance Case A (Overbilling Halt, returns HALTED / HALT_AND_FREEZE catching $20,000 WASM math mismatch):`
+```bash
+curl -sS -X POST https://praman-desk.vercel.app/api/trade-assurance/audit \
+  -H "Content-Type: application/json" \
+  -d '{"scenario":"alibaba","liveSettle":false}'
+```
+
+`2. Trade Assurance Case B (Reconciled Conforming 80-Unit Dry Run, returns APPROVED / CLEAR_FOR_PAYMENT with PRE_FLIGHT_DRY_RUN_NO_FUNDS_MOVED):`
+```bash
+curl -sS -X POST https://praman-desk.vercel.app/api/trade-assurance/audit \
+  -H "Content-Type: application/json" \
+  -d '{"scenario":"alibaba_reconciled","disputeResolutionAuthorized":true,"liveSettle":false}'
+```
+
+`3. Custom Vendor & Line-Item Evaluation (or Sanctions Screen):`
+```bash
+curl -sS -X POST https://praman-desk.vercel.app/api/spend-guard/evaluate \
+  -H "Content-Type: application/json" \
+  -d '{"agentId":"supplier-check-swap","vendorName":"Siemens Aktiengesellschaft","recipientAddress":"0x1111111111111111111111111111111111111111","spendAmountUsdc":450,"lineItems":[{"desc":"Sensors","qty":9,"unitPrice":50,"amount":450}]}'
+
+curl -sS "https://praman-desk.vercel.app/api/miner/sanctions-screen?name=Viktor%20Bout"
+curl -sS "https://praman-desk.vercel.app/api/miner/sanctions-screen?name=Siemens%20Aktiengesellschaft"
+```
+`Testing both your Siemens AG and "Invoice pays someone else" flows on https://supplier-buyer-check.vercel.app/ on our side too and will report back honestly.`
 
 ---
 
@@ -167,7 +199,7 @@ https://github.com/VishAlgoDev/praman-desk
 
 ## 4. GitHub Mission Refreshes (`telegraphprotocol/bounties` Issues `#189, #190, #191, #192, #196, #199, #200, #201, #202`)
 
-Action note: Your Nov 25 `/submit` comments (`7168309193..7168315358`) currently still display `RegID #6169 / Route #5281`, `(1m 48s)`, and em dashes (`#192, #196, #202`). Edit those comments in-place OR post the refreshed `/progress` update below so judges see updated `#6201 / #6164` facts:
+Action note: Your Nov 25 `/submit` comments (`7168309193..7168315358`) currently still display `RegID #6169 / Route #5281`, a duration tag on the walkthrough video link, and em dashes (`#192, #196, #202`). Edit those comments in-place OR post the refreshed `/progress` update below so judges see updated `#6201 / #6164` facts:
 
 ```markdown
 /progress Update (Season II Verification Sync, Nov 26):
