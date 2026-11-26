@@ -3617,18 +3617,29 @@ let secTickersCache = null;
 let secTickersLoadedAt = 0;
 
 async function fetchSecWithRetry(url, timeoutMs = 10000) {
-  let res = await fetch(url, { headers: SEC_HEADERS, signal: AbortSignal.timeout(timeoutMs) });
-  if (res.status === 403 || res.status === 429) {
-    res = await fetch(url, {
-      headers: {
-        'User-Agent': 'PramanDeskAudit ops@praman-desk.vercel.app',
-        Accept: 'application/json',
-        'Accept-Encoding': 'gzip, deflate'
-      },
-      signal: AbortSignal.timeout(timeoutMs)
-    });
+  let lastErr = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const headers = attempt === 0
+        ? SEC_HEADERS
+        : {
+            'User-Agent': 'PramanDeskAudit ops@praman-desk.vercel.app',
+            Accept: 'application/json',
+            'Accept-Encoding': 'gzip, deflate'
+          };
+      const res = await fetch(url, { headers, signal: AbortSignal.timeout(timeoutMs) });
+      if (res.ok || (res.status !== 403 && res.status !== 429 && res.status < 500)) {
+        return res;
+      }
+      lastErr = new Error(`SEC HTTP ${res.status}`);
+      if (attempt === 2) return res;
+    } catch (err) {
+      lastErr = err;
+      if (attempt === 2) throw err;
+    }
+    await new Promise(r => setTimeout(r, 350 * (attempt + 1)));
   }
-  return res;
+  throw lastErr || new Error('SEC fetch failed');
 }
 
 async function resolveSecCik(companyQuery) {
@@ -5631,7 +5642,7 @@ export async function evaluateExchangeIntegrity(params = {}) {
     telegraphSettlement: {
       intent: 'CORPORATE_REGISTRY_LOOKUP',
       minerId: 6164,
-      diamondRegistration: 6200,
+      diamondRegistration: 6201,
       contractAddress: DIAMOND_PORT,
       status: 'VERIFIED_MICROSETTLEMENT'
     },
@@ -7069,7 +7080,7 @@ export async function verifyMineDossier(params = {}) {
   // Canonical Attestation Payload
   const canonicalPayload = JSON.stringify({
     service: 'praman-desk',
-    auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6200)',
+    auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6201)',
     siteNo,
     siteName,
     goldfield,
@@ -7120,7 +7131,7 @@ export async function verifyMineDossier(params = {}) {
       ...(takarSummary ? { takar_peer_collaboration: takarSummary } : {})
     },
     audit: {
-      engine: 'Praman Desk Independent Multi-Miner Auditor (Devnode #6164 / Sepolia Diamond #6200)',
+      engine: 'Praman Desk Independent Multi-Miner Auditor (Devnode #6164 / Sepolia Diamond #6201)',
       wasmScoreBps,
       discrepancyReconciled: true,
       reconciliationNotes: varianceExplanation,
@@ -7146,7 +7157,7 @@ export async function verifyMineDossier(params = {}) {
     attestation: {
       seal: attestationSeal,
       easSchema: `0x${String(siteNo).padEnd(64, '0')}`,
-      auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6200)',
+      auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6201)',
       timestamp: new Date().toISOString()
     },
     summary,
@@ -7227,7 +7238,7 @@ export async function handleApiRequest(req, res) {
         ok: true,
         service: 'praman-desk',
         minerId: 6164,
-        diamondRegistration: 6200,
+        diamondRegistration: 6201,
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
@@ -7267,14 +7278,14 @@ export async function handleApiRequest(req, res) {
         supported_intents: bondedIntents,
         http_only_intents: ['MINING_INTELLIGENCE_GENERAL'],
         status_note:
-          'Active Devnode miner #6164; Sepolia Diamond on-chain registration #6200.'
+          'Active Devnode miner #6164; Sepolia Diamond on-chain registration #6201.'
       };
       const onchainDiamond = {
         diamond_address: DIAMOND_PORT,
-        active_registration_id: 6200,
-        tx_hash: '0x2ce4e556f2960d0eaf38eeecf49a6158d940225264198e956da03e3b56c12b97',
-        block_number: 12213939,
-        yaml_pin_commit: 'fa59b90',
+        active_registration_id: 6201,
+        tx_hash: '0x50b34afc2b4044ff23a67eebc7170e3aeb2c276fc3c54ee83edc10b438af9e65',
+        block_number: 12214472,
+        yaml_pin_commit: '8ee560bc',
         intents_count: bondedIntents.length,
         bonded_intents: bondedIntents
       };

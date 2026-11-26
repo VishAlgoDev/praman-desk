@@ -97,7 +97,7 @@ export async function generateRugReceiptProof({
     receiptVerdict,
     flags,
     minerId: 6164,
-    diamondRegistration: 6200,
+    diamondRegistration: 6201,
     timestamp: new Date().toISOString().slice(0, 10)
   });
   const attestationHash = '0x' + crypto.createHash('sha256').update(canonicalData).digest('hex');
@@ -128,12 +128,12 @@ export async function generateRugReceiptProof({
       sha256Seal: attestationHash,
       onChainDiamond: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       settlementMinerId: 6164,
-      diamondRegistration: 6200,
+      diamondRegistration: 6201,
       explorerUrl: 'https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b'
     },
     reciprocalAttribution: {
       collaborator: 'RugReceipt (Issue #208 / Gajanand)',
-      provider: 'Praman Desk Autonomous Compliance Engine (Devnode #6164 / Diamond #6200)',
+      provider: 'Praman Desk Autonomous Compliance Engine (Devnode #6164 / Diamond #6201)',
       protocol: 'Telegraph Protocol Season II'
     },
     latency_ms: totalLatencyMs,

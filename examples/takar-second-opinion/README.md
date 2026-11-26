@@ -1,6 +1,6 @@
 # Takar-Praman Cross-Miner Escrow Consensus Bridge
 
-> Cooperative Clearing Gate between **Bangdrop's Takar** (Second Opinion Heuristic Protocol, Sepolia: `0x310275e6D66818E068245326bB9e398822304248`) and **Praman Desk** (Deterministic WebAssembly Comparator & OFAC Trie, Devnode Miner `#6164` / Diamond `#6200`).
+> Cooperative Clearing Gate between **Bangdrop's Takar** (Second Opinion Heuristic Protocol, Sepolia: `0x310275e6D66818E068245326bB9e398822304248`) and **Praman Desk** (Deterministic WebAssembly Comparator & OFAC Trie, Devnode Miner `#6164` / Diamond `#6201`).
 
 ## Why Multi-Miner Consensus Matters
 - **Heuristic LLM opinions alone** can be fooled by prompt injection, miss subtle 1-cent math fraud, or fail to cross-reference OFAC sanctions lists.

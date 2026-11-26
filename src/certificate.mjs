@@ -76,7 +76,7 @@ export async function generateComplianceCertificate({
     ofacZeroHit: !isSanctionsHit,
     onChainAnchor: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
     minerId: 6164,
-    diamondRegistration: 6200
+    diamondRegistration: 6201
   });
   const sha256Seal = crypto.createHash('sha256').update(canonicalPayload).digest('hex');
 
@@ -107,8 +107,8 @@ export async function generateComplianceCertificate({
       network: 'Ethereum Sepolia Diamond Proxy',
       diamondContract: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
       minerId: 6164,
-      diamondRegistration: 6200,
-      registrationSlug: 'praman-compliance-miner (Devnode #6164 / Diamond #6200)',
+      diamondRegistration: 6201,
+      registrationSlug: 'praman-compliance-miner (Devnode #6164 / Diamond #6201)',
       standard: 'ERC-x402 ExactEvmScheme',
       explorerUrl: 'https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b'
     },
@@ -363,7 +363,7 @@ export function renderCertificateHtml(cert) {
         <div class="box-title">🔗 On-Chain Sepolia Anchor</div>
         <div class="row"><span class="row-key">Network:</span><span class="row-val">Sepolia Diamond</span></div>
         <div class="row"><span class="row-key">Contract:</span><span class="row-val">0x72a7...a08b</span></div>
-        <div class="row"><span class="row-key">Network Route:</span><span class="row-val">Devnode #6164 / Diamond #6200</span></div>
+        <div class="row"><span class="row-key">Network Route:</span><span class="row-val">Devnode #6164 / Diamond #6201</span></div>
         <div class="row"><span class="row-key">Settlement:</span><span class="row-val">x402 Protocol</span></div>
       </div>
     </div>

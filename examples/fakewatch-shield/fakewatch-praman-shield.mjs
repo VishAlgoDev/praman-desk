@@ -11,7 +11,7 @@
 
 export const PRAMAN_DESK_CONFIG = {
   minerId: 6164,
-  registrationId: 6200,
+  registrationId: 6201,
   diamondPort: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
   endpoint: 'https://praman-desk.vercel.app/api/spend-guard/evaluate'
 };

@@ -138,7 +138,7 @@ if (verdict.approved) {
 ## Live Telegraph Network Coordinates
 
 - **Devnode Miner ID**: `#6164` (`praman-compliance-miner`, 18 capabilities)
-- **Sepolia Diamond Registration**: `#6200`
+- **Sepolia Diamond Registration**: `#6201`
 - **Diamond Escrow Port**: `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`
 - **Rank Standings**:
   - `CONTRACT_OBLIGATION_AUDIT_GENERAL`: **Rank #1**

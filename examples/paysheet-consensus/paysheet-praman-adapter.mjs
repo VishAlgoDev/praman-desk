@@ -5,7 +5,7 @@
  * to screen payout counterparties across 3 independent Telegraph Season II miners:
  *  - Miner #710637
  *  - Miner #64175
- *  - Miner #6164 / Diamond #6200 (Praman Desk - in-memory <25ms OFAC SDN lookup)
+ *  - Miner #6164 / Diamond #6201 (Praman Desk - in-memory <25ms OFAC SDN lookup)
  * 
  * Demonstrates both:
  *  1. Direct keyless HTTP query fallback
@@ -16,7 +16,7 @@ export const MINERS = {
   PRAMAN_DESK: {
     id: 6164,
     devnodeId: 6164,
-    diamondRegId: 6200,
+    diamondRegId: 6201,
     slug: 'praman-compliance-miner',
     endpoint: 'https://praman-desk.vercel.app/api/miner/sanctions-screen',
     devnodeAsk: 'https://devnode.telegraphprotocol.com/engine/v1/ask/6164',
