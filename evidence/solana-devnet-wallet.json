@@ -1,9 +1,9 @@
 {
   "network": "solana-devnet",
   "treasuryAddress": "3r428Z8YSgQFJpsyPcQyxmt1faQQBuNRpqz92m9ucbuL",
-  "balanceSol": 4.984925,
+  "balanceSol": 4.98392,
   "fundingRequired": false,
-  "lastSignature": "67DHs789zuvBjdykBKWNcTNZgqnVssVV2gbPWGe4PN7xmdc4gbPtgzHnGKzjoYNiQSXNBRNYNnv3Sib1Ucf6xXXR",
-  "solscanUrl": "https://solscan.io/tx/67DHs789zuvBjdykBKWNcTNZgqnVssVV2gbPWGe4PN7xmdc4gbPtgzHnGKzjoYNiQSXNBRNYNnv3Sib1Ucf6xXXR?cluster=devnet",
-  "timestamp": "2026-11-26T15:12:03.974Z"
+  "lastSignature": "3fMnv25X21zJJMav5ENCTL8reUpaEVqSq6DjPz5BUzPHpB93kfWsbfsr7V1ryvw1tXMjj53yKscoiGr7QU3E38LQ",
+  "solscanUrl": "https://solscan.io/tx/3fMnv25X21zJJMav5ENCTL8reUpaEVqSq6DjPz5BUzPHpB93kfWsbfsr7V1ryvw1tXMjj53yKscoiGr7QU3E38LQ?cluster=devnet",
+  "timestamp": "2026-11-26T15:17:55.536Z"
 }
