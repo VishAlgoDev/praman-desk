@@ -7349,15 +7349,16 @@ export async function handleApiRequest(req, res) {
       const spendPayload = sanitizeCurrencyStrings(body);
       const stage01 = await evaluateAutonomousSpendPolicy(spendPayload);
       const stage03 = await verifyEnterpriseAgentOutput(body, { liveModel: Boolean(body.liveModel) });
-      const overallApproved = Boolean(stage01.cleared) && stage03.verdict === 'GO';
+      const stage01Cleared = Boolean(stage01.cleared || stage01.status === 'APPROVED');
+      const overallApproved = stage01Cleared && stage03.verdict === 'GO';
       return sendJson(res, 200, {
         ok: true,
         mission: 'TENCENT_DECISION_ASSURANCE_01_03',
         approved: overallApproved,
-        verdict: overallApproved ? 'SETTLED_AND_ATTESTED' : (stage03.verdict === 'HOLD_FOR_MISSING_EVIDENCE' && stage01.cleared ? 'HOLD_FOR_MISSING_EVIDENCE' : 'HALTED_POLICY_OR_CLAIM_MISMATCH'),
+        verdict: overallApproved ? 'SETTLED_AND_ATTESTED' : (stage03.verdict === 'HOLD_FOR_MISSING_EVIDENCE' && stage01Cleared ? 'HOLD_FOR_MISSING_EVIDENCE' : 'HALTED_POLICY_OR_CLAIM_MISMATCH'),
         stage01PreSpendGate: {
           status: stage01.status,
-          cleared: stage01.cleared,
+          cleared: stage01Cleared,
           flags: stage01.flags || [],
           certHash: stage01.certHash || null
         },

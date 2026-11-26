@@ -781,7 +781,15 @@ async function run() {
     if (agentGo.json.verdict !== 'GO' || agentGo.json.approved !== true || agentNoGo.json.verdict !== 'NO_GO' || !(agentNoGo.json.financialExposurePreventedUsd > 0)) {
       throw new Error(`Agent verify-output GO/NO_GO failed: ${JSON.stringify({ agentGo: agentGo.json, agentNoGo: agentNoGo.json })}`);
     }
-    const tencentAssurance = await check('/api/mission/tencent-assurance', 'POST', {
+    const tencentAssuranceOk = await check('/api/mission/tencent-assurance', 'POST', {
+      vendor: 'Stripe, Inc.',
+      domain: 'stripe.com',
+      poCommitment: '450.00',
+      statedTotal: '450.00',
+      spendAmountUsdc: '450.00',
+      output: 'Stripe, Inc. (stripe.com) | 9 units x $50.00 = $450.00 | ABA 021000021'
+    });
+    const tencentAssuranceCap = await check('/api/mission/tencent-assurance', 'POST', {
       vendor: 'Stripe, Inc.',
       domain: 'stripe.com',
       poCommitment: '5000.00',
@@ -789,8 +797,8 @@ async function run() {
       spendAmountUsdc: '5000.00',
       output: 'Stripe, Inc. (stripe.com) | 100 units x $50.00 = $5,000.00 | ABA 021000021'
     });
-    if (tencentAssurance.status !== 200 || tencentAssurance.json.ok !== true || tencentAssurance.json.mission !== 'TENCENT_DECISION_ASSURANCE_01_03') {
-      throw new Error(`Tencent assurance endpoint failed: ${JSON.stringify(tencentAssurance.json)}`);
+    if (tencentAssuranceOk.status !== 200 || tencentAssuranceOk.json.approved !== true || tencentAssuranceOk.json.verdict !== 'SETTLED_AND_ATTESTED' || tencentAssuranceCap.json.approved !== false) {
+      throw new Error(`Tencent assurance endpoint failed: ${JSON.stringify({ ok: tencentAssuranceOk.json, cap: tencentAssuranceCap.json })}`);
     }
     const batchBad = await check('/api/evaluator/sanctions-batch', 'POST', {});
     const batchGood = await check('/api/evaluator/sanctions-batch', 'POST', {
