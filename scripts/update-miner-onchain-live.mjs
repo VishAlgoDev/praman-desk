@@ -22,6 +22,7 @@ const PREVIOUS_REGISTRATION_ID = BigInt(process.env.MINER_REGISTRATION_ID || '61
 const DRY_RUN = process.argv.includes('--dry-run');
 
 const MACHINA = '0xd68305cA83C7AF42A4F720144E7416fB53F8AaF4';
+const TEST_USDC = '0xcc194e1a843B658526D0D5C431f670028582Ae17';
 
 const SUPPORTED_INTENTS = [
   'PURCHASE_ORDER_VERIFY_GENERAL',
@@ -83,29 +84,6 @@ async function main() {
   });
   console.log(`Bond quote (${SUPPORTED_INTENTS.length} bonded intents) usd/machina:`, bondQuote);
 
-  let simulatedNewRegId = null;
-  const sim = await client.simulateContract({
-    account: address,
-    address: DIAMOND_PORT,
-    abi: diamondAbi,
-    functionName: 'updateMiner',
-    args: [
-      PREVIOUS_REGISTRATION_ID,
-      PINNED_URL,
-      yamlHash,
-      address,
-      10000n,
-      SUPPORTED_INTENTS
-    ]
-  });
-  simulatedNewRegId = sim.result.toString();
-  console.log('Simulation OK — projected new registrationId:', simulatedNewRegId);
-
-  if (DRY_RUN) {
-    console.log('--dry-run: stopping before approve/broadcast');
-    return;
-  }
-
   const neededAllowance = 1000000000000000000n;
   const currentAllowance = await client.readContract({
     address: MACHINA,
@@ -113,7 +91,7 @@ async function main() {
     functionName: 'allowance',
     args: [address, DIAMOND_PORT]
   });
-  if (currentAllowance < neededAllowance) {
+  if (!DRY_RUN && currentAllowance < neededAllowance) {
     console.log('Approving MACHINA for Diamond...');
     const approveTx = await walletClient.writeContract({
       address: MACHINA,
@@ -122,6 +100,56 @@ async function main() {
       args: [DIAMOND_PORT, neededAllowance]
     });
     await client.waitForTransactionReceipt({ hash: approveTx });
+  }
+
+  const neededUsdcAllowance = 3000000n; // 3.00 USDC allowance covers incremental +0.21 USDC delta cleanly
+  const currentUsdcAllowance = await client.readContract({
+    address: TEST_USDC,
+    abi: erc20Abi,
+    functionName: 'allowance',
+    args: [address, DIAMOND_PORT]
+  });
+  console.log('Current USDC / MACHINA allowance:', currentUsdcAllowance.toString(), currentAllowance.toString());
+  if (!DRY_RUN && currentUsdcAllowance < neededUsdcAllowance) {
+    console.log('Approving TEST_USDC for Diamond...');
+    const approveUsdcTx = await walletClient.writeContract({
+      address: TEST_USDC,
+      abi: erc20Abi,
+      functionName: 'approve',
+      args: [DIAMOND_PORT, neededUsdcAllowance]
+    });
+    await client.waitForTransactionReceipt({ hash: approveUsdcTx });
+  }
+
+  let simulatedNewRegId = null;
+  try {
+    const sim = await client.simulateContract({
+      account: address,
+      address: DIAMOND_PORT,
+      abi: diamondAbi,
+      functionName: 'updateMiner',
+      args: [
+        PREVIOUS_REGISTRATION_ID,
+        PINNED_URL,
+        yamlHash,
+        address,
+        10000n,
+        SUPPORTED_INTENTS
+      ]
+    });
+    simulatedNewRegId = sim.result.toString();
+    console.log('Simulation OK — projected new registrationId:', simulatedNewRegId);
+  } catch (simErr) {
+    if (DRY_RUN) {
+      console.warn('Dry-run simulation note:', simErr.shortMessage || simErr.message);
+      return;
+    }
+    throw simErr;
+  }
+
+  if (DRY_RUN) {
+    console.log('--dry-run: stopping before broadcast');
+    return;
   }
 
   const updateTx = await walletClient.writeContract({

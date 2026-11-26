@@ -1,12 +1,12 @@
 {
-  "previousRegistrationId": "6169",
-  "registrationId": "6199",
-  "txHash": "0xecebdf67226764a279c5c2c82ccb6491214f048a247e809c26ff881f70c87d47",
-  "blockNumber": 12213528,
+  "previousRegistrationId": "6199",
+  "registrationId": "6200",
+  "txHash": "0x2ce4e556f2960d0eaf38eeecf49a6158d940225264198e956da03e3b56c12b97",
+  "blockNumber": 12213939,
   "diamond": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
   "miner": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
-  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/69bbdc8842623b4e21ba30801f626f77cd9c3d67/miner.yaml",
-  "yamlHash": "0xc610588a1d0ca116fea7d57adb31100250ba6ec27b1fd606ab28b9cf7009d669",
+  "yamlUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/fa59b90d6308b2adf9a9428ec73fd89e1a1ba169/miner.yaml",
+  "yamlHash": "0x630144505d27712b15ec663c1ec252eeafc8066ee0a822af6c8c9e0d95f11ceb",
   "supportedIntents": [
     "PURCHASE_ORDER_VERIFY_GENERAL",
     "INVOICE_LEDGER_RECONCILE_GENERAL",
@@ -22,7 +22,10 @@
     "TOKEN_TOTAL_SUPPLY_VERIFY_GENERAL",
     "WALLET_BALANCE_CHECK_GENERAL",
     "RESEARCH_QUERY_GENERAL",
-    "LIQUIDITY_DEPTH_VERIFY_GENERAL"
+    "LIQUIDITY_DEPTH_VERIFY_GENERAL",
+    "B2B_IDENTITY_ENRICHMENT_GENERAL",
+    "FRAUD_RISK_GENERAL",
+    "PAYMENT_METHOD_VERIFY_GENERAL"
   ],
-  "updatedAt": "2026-11-26T02:15:47.008Z"
+  "updatedAt": "2026-11-26T03:39:20.055Z"
 }

@@ -5455,7 +5455,7 @@ export async function evaluateExchangeIntegrity(params = {}) {
     telegraphSettlement: {
       intent: 'CORPORATE_REGISTRY_LOOKUP',
       minerId: 6164,
-      diamondRegistration: 6199,
+      diamondRegistration: 6200,
       contractAddress: DIAMOND_PORT,
       status: 'VERIFIED_MICROSETTLEMENT'
     },
@@ -6893,7 +6893,7 @@ export async function verifyMineDossier(params = {}) {
   // Canonical Attestation Payload
   const canonicalPayload = JSON.stringify({
     service: 'praman-desk',
-    auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6199)',
+    auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6200)',
     siteNo,
     siteName,
     goldfield,
@@ -6944,7 +6944,7 @@ export async function verifyMineDossier(params = {}) {
       ...(takarSummary ? { takar_peer_collaboration: takarSummary } : {})
     },
     audit: {
-      engine: 'Praman Desk Independent Multi-Miner Auditor (Devnode #6164 / Sepolia Diamond #6199)',
+      engine: 'Praman Desk Independent Multi-Miner Auditor (Devnode #6164 / Sepolia Diamond #6200)',
       wasmScoreBps,
       discrepancyReconciled: true,
       reconciliationNotes: varianceExplanation,
@@ -6970,7 +6970,7 @@ export async function verifyMineDossier(params = {}) {
     attestation: {
       seal: attestationSeal,
       easSchema: `0x${String(siteNo).padEnd(64, '0')}`,
-      auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6199)',
+      auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6200)',
       timestamp: new Date().toISOString()
     },
     summary,
@@ -7051,7 +7051,7 @@ export async function handleApiRequest(req, res) {
         ok: true,
         service: 'praman-desk',
         minerId: 6164,
-        diamondRegistration: 6199,
+        diamondRegistration: 6200,
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
@@ -7091,14 +7091,14 @@ export async function handleApiRequest(req, res) {
         supported_intents: bondedIntents,
         http_only_intents: ['MINING_INTELLIGENCE_GENERAL'],
         status_note:
-          'Active Devnode miner #6164; Sepolia Diamond on-chain registration #6199.'
+          'Active Devnode miner #6164; Sepolia Diamond on-chain registration #6200.'
       };
       const onchainDiamond = {
         diamond_address: DIAMOND_PORT,
-        active_registration_id: 6199,
-        tx_hash: '0xecebdf67226764a279c5c2c82ccb6491214f048a247e809c26ff881f70c87d47',
-        block_number: 12213528,
-        yaml_pin_commit: '69bbdc8',
+        active_registration_id: 6200,
+        tx_hash: '0x2ce4e556f2960d0eaf38eeecf49a6158d940225264198e956da03e3b56c12b97',
+        block_number: 12213939,
+        yaml_pin_commit: 'fa59b90',
         intents_count: bondedIntents.length,
         bonded_intents: bondedIntents
       };
