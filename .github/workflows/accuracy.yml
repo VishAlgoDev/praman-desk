@@ -50,15 +50,24 @@ jobs:
 
       - name: Probe Live Production Endpoints (https://praman-desk.vercel.app)
         run: |
-          set -e
-          curl -fsS https://praman-desk.vercel.app/api/health | grep -q '"ok":true'
-          curl -fsS https://praman-desk.vercel.app/api/business | grep -q '"minerId":6164'
-          curl -fsS -X POST https://praman-desk.vercel.app/api/spend-guard/evaluate \
-            -H 'Content-Type: application/json' \
-            -d '{"vendorName":"Siemens Aktiengesellschaft","spendAmountUsdc":450,"liveSettle":false}' \
-            | grep -q 'W38RGI023J3WT1HWRP32'
-          curl -fsS "https://praman-desk.vercel.app/api/miner/sanctions-screen?name=Viktor%20But" \
-            | grep -q 'NEAR_MISS_REVIEW'
-          curl -fsS "https://praman-desk.vercel.app/api/miner/liquidity-depth?pair=ARB/USDC&chain=arbitrum" \
-            | grep -q '"status":"confirmed"'
-          echo "All live production verification checks passed!"
+          node -e '
+            const assert = require("node:assert/strict");
+            (async () => {
+              const base = "https://praman-desk.vercel.app";
+              const health = await fetch(base + "/api/health").then(r => r.json());
+              assert.equal(health.ok, true, "health.ok");
+              const biz = await fetch(base + "/api/business").then(r => r.json());
+              assert.equal(biz.minerId, 6164, "biz.minerId");
+              const sg = await fetch(base + "/api/spend-guard/evaluate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ vendorName: "Siemens Aktiengesellschaft", spendAmountUsdc: 450, liveSettle: false })
+              }).then(r => r.json());
+              assert.equal(sg.vendorVerification?.lei, "W38RGI023J3WT1HWRP32", "Siemens LEI");
+              const sanc = await fetch(base + "/api/miner/sanctions-screen?name=Viktor%20But").then(r => r.json());
+              assert.equal(sanc.verdict, "NEAR_MISS_REVIEW", "Viktor But near-miss verdict");
+              const liq = await fetch(base + "/api/miner/liquidity-depth?pair=ARB/USDC&chain=arbitrum").then(r => r.json());
+              assert.equal(liq.status, "confirmed", "ARB/USDC liquidity depth confirmed");
+              console.log("All live production JSON assertions passed!");
+            })().catch(e => { console.error(e); process.exit(1); });
+          '
