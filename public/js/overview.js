@@ -250,7 +250,6 @@ function initTelemetryScrollTrigger() {
   if (!section || !frame) return;
 
   let wasVisible = false;
-  let frameLoaded = false;
   let lastPlayAt = 0;
 
   const isReducedMotion = () =>
@@ -259,7 +258,7 @@ function initTelemetryScrollTrigger() {
 
   const sendToFrame = (payload) => {
     try {
-      if (frame.contentWindow && frameLoaded) {
+      if (frame.contentWindow) {
         frame.contentWindow.postMessage(payload, location.origin);
         return true;
       }
@@ -267,23 +266,31 @@ function initTelemetryScrollTrigger() {
     return false;
   };
 
-  const triggerPlay = (force) => {
-    const now = Date.now();
-    if (!force && now - lastPlayAt < 350) return;
-    if (sendToFrame({ type: "praman-play" })) {
-      lastPlayAt = now;
+  const syncIfInView = (forcePlay) => {
+    const rect = section.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight || 900;
+    const inViewNow = rect.bottom > 60 && rect.top < vh - 60;
+    if (inViewNow) {
+      wasVisible = true;
+      const now = Date.now();
+      if (forcePlay || now - lastPlayAt >= 300) {
+        if (sendToFrame({ type: "praman-play" })) lastPlayAt = now;
+      }
+    } else if (!isReducedMotion()) {
+      wasVisible = false;
+      sendToFrame({ type: "praman-reset" });
     }
   };
 
-  frame.addEventListener("load", () => {
-    frameLoaded = true;
-    const rect = section.getBoundingClientRect();
-    const vh = window.innerHeight || document.documentElement.clientHeight || 900;
-    const inViewNow = rect.bottom > 80 && rect.top < vh - 80;
-    if (inViewNow) {
-      wasVisible = true;
-      triggerPlay(true);
+  window.addEventListener("message", (ev) => {
+    if (ev.origin !== location.origin || !ev.data || typeof ev.data !== "object") return;
+    if (ev.data.type === "praman-pencil-ready") {
+      syncIfInView(true);
     }
+  });
+
+  frame.addEventListener("load", () => {
+    syncIfInView(true);
   });
 
   if (typeof IntersectionObserver !== "undefined") {
@@ -293,10 +300,13 @@ function initTelemetryScrollTrigger() {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.14) {
             if (!wasVisible) {
               wasVisible = true;
-              triggerPlay(false);
+              const now = Date.now();
+              if (now - lastPlayAt >= 300 && sendToFrame({ type: "praman-play" })) {
+                lastPlayAt = now;
+              }
             }
-          } else if (!entry.isIntersecting && entry.intersectionRatio === 0) {
-            if (wasVisible) {
+          } else if (!entry.isIntersecting || entry.intersectionRatio === 0) {
+            if (wasVisible && !entry.isIntersecting) {
               wasVisible = false;
               if (!isReducedMotion()) {
                 sendToFrame({ type: "praman-reset" });
@@ -309,7 +319,12 @@ function initTelemetryScrollTrigger() {
     );
     observer.observe(section);
   } else {
-    frame.addEventListener("load", () => triggerPlay(true), { once: true });
+    syncIfInView(true);
+  }
+
+  // Handle already-loaded eager iframe when script executes after load
+  if (frame.contentDocument && frame.contentDocument.readyState === "complete") {
+    syncIfInView(true);
   }
 }
 
