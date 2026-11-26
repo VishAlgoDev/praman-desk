@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Praman Verification Infrastructure Architecture",
+    "output": "public/diagrams/system-architecture.html",
+    "quality_profile": "showcase",
+    "viewBox": [1120, 640]
+  },
+  "components": [
+    { "id": "agents", "type": "external", "label": "AI Agents & ERPs", "sublabel": "HTTP + 18-Tool MCP", "pos": [38, 250], "size": [146, 70] },
+    { "id": "solana_sdk", "type": "security", "label": "Solana Spend Guard", "sublabel": "packages/praman-sdk/solana.js", "pos": [228, 120], "size": [156, 70] },
+    { "id": "api_gw", "type": "backend", "label": "Praman API Desk", "sublabel": "src/handlers.mjs", "pos": [228, 250], "size": [156, 70] },
+    { "id": "quorum", "type": "messagebus", "label": "Telegraph Miners", "sublabel": "15 Nodes (#6164 / #6201)", "pos": [432, 250], "size": [156, 70] },
+    { "id": "wasm", "type": "security", "label": "651B WASM Engine", "sublabel": "comparator/comparator.wasm", "pos": [636, 120], "size": [156, 70] },
+    { "id": "intel", "type": "backend", "label": "Domain Solvers", "sublabel": "Trade + GSQ + FX + Tencent", "pos": [636, 250], "size": [156, 70] },
+    { "id": "signer", "type": "database", "label": "Memo & Cert Signer", "sublabel": "EIP-191 + src/certificate.mjs", "pos": [840, 250], "size": [156, 70] },
+    { "id": "chains", "type": "cloud", "label": "Sepolia & Solana", "sublabel": "TakarSettle v4 + Diamond + Devnet", "pos": [840, 420], "size": [156, 70] },
+    { "id": "sdn", "type": "database", "label": "Sanctions & Registries", "sublabel": "OFAC 19,565 + GLEIF + GSQ", "pos": [432, 420], "size": [156, 70] }
+  ],
+  "connections": [
+    { "id": "c1", "from": "agents", "to": "api_gw", "label": "POST /api/audit", "variant": "emphasis" },
+    { "id": "c2", "from": "agents", "to": "solana_sdk", "label": "pre-sign check", "fromSide": "top", "toSide": "left" },
+    { "id": "c3", "from": "solana_sdk", "to": "wasm", "label": "halt > cap", "variant": "emphasis" },
+    { "id": "c4", "from": "api_gw", "to": "quorum", "label": "fan-out", "labelDy": -33 },
+    { "id": "c5", "from": "quorum", "to": "intel", "label": "reconcile", "labelDy": -33 },
+    { "id": "c6", "from": "intel", "to": "wasm", "label": "verify bps", "fromSide": "top", "toSide": "bottom" },
+    { "id": "c7", "from": "intel", "to": "signer", "label": "signed verdict", "variant": "emphasis" },
+    { "id": "c8", "from": "sdn", "to": "intel", "label": "OFAC / GSQ lookup", "fromSide": "top", "toSide": "bottom" },
+    { "id": "c9", "from": "signer", "to": "chains", "label": "EAS / tx anchor", "fromSide": "bottom", "toSide": "top", "variant": "emphasis" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Modular Verification Planes", "items": ["Client SDK intercepts Solana spends pre-signature", "Server Desk arbitrates multi-miner consensus in <11ms"] },
+    { "dot": "emerald", "title": "Zero-Drift On-Chain Anchor", "items": ["651B comparator.wasm guarantees identical arithmetic", "EIP-191 memos verify offline or via /verify"] }
+  ]
+}

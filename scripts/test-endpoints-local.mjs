@@ -655,7 +655,7 @@ async function run() {
 
     // 32. Shareable Case Permalink Route (/api/audit/case) JSON + HTML Verdict Parity
     const caseRes = await check('/api/audit/case?case=po-ali-9021');
-    if (caseRes.status !== 200 || caseRes.json.caseId !== 'po-ali-9021' || caseRes.json.releasedAmountUsdc !== 80000 || !caseRes.json.permalink?.includes('/api/audit/case?case=po-ali-9021') || caseRes.json.clearanceVerdict !== 'RECONCILED_PARTIAL_SETTLEMENT') {
+    if (caseRes.status !== 200 || caseRes.json.caseId !== 'po-ali-9021' || caseRes.json.releasedAmountUsdc !== 80000 || !caseRes.json.permalink?.includes('/verify?case=po-ali-9021') || !caseRes.json.apiPermalink?.includes('/api/audit/case?case=po-ali-9021') || caseRes.json.clearanceVerdict !== 'RECONCILED_PARTIAL_SETTLEMENT') {
       throw new Error(`GET /api/audit/case?case=po-ali-9021 failed: ${JSON.stringify(caseRes.json)}`);
     }
     const htmlRes = await fetch('http://127.0.0.1:3499/api/audit/case?case=po-ali-9021&format=html');
@@ -873,7 +873,46 @@ async function run() {
       throw new Error(`ND-34/ND-36/ND-37/ND-38 failed: ${JSON.stringify({ rec: recNoIds.json.details, b2b: b2bSiemens.json, txAsOf: txWithAsOf.json, recNoTax: recNoTax.json })}`);
     }
 
-    console.log('\nALL SEASON II ADVERSARIAL REGRESSION GUARDS, TOKEN-2022 HTTP SCENARIOS, EIP-191 COUNTERSIGN, 3 NEW TRACK 2 INTENTS & LIVE VERIFICATION TESTS PASSED!');
+    // 14. Multi-page v4.1 regression checks (/api/audit/case EIP-191 + /api/memo/verify + /api/pilot-inquiry)
+    console.log('\n--- Checking Signed Memo Verifier & Pilot Inquiry Endpoints ---');
+    const signedCase = await check('/api/audit/case?case=po-ali-9021&format=json');
+    if (
+      signedCase.status !== 200 ||
+      !signedCase.json.memoVerification?.canonicalMessage ||
+      !signedCase.json.memoVerification?.sha256
+    ) {
+      throw new Error(`Canonical case memoVerification missing: ${JSON.stringify(signedCase.json)}`);
+    }
+    const mv = signedCase.json.memoVerification;
+    if (mv.signed && mv.signature) {
+      const verifyOk = await check('/api/memo/verify', 'POST', {
+        message: mv.canonicalMessage,
+        signature: mv.signature,
+        expectedSha256: mv.sha256,
+        expectedSigner: mv.signerAddress
+      });
+      const verifyTampered = await check('/api/memo/verify', 'POST', {
+        message: mv.canonicalMessage + ' ',
+        signature: mv.signature,
+        expectedSha256: mv.sha256,
+        expectedSigner: mv.signerAddress
+      });
+      if (!verifyOk.json.validSignature || !verifyOk.json.sha256Matches || verifyTampered.json.validSignature !== false) {
+        throw new Error(`Memo verification gate failed: ${JSON.stringify({ ok: verifyOk.json, tampered: verifyTampered.json })}`);
+      }
+    }
+    const pilotOk = await check('/api/pilot-inquiry', 'POST', {
+      organization: 'Praman QA Test',
+      email: 'ops@example.com',
+      useCase: 'B2B Trade Assurance',
+      monthlyVolume: '$1M'
+    });
+    const pilotBad = await check('/api/pilot-inquiry', 'POST', { organization: 'Bad', email: 'not-an-email' });
+    if (pilotOk.status !== 200 || !pilotOk.json.inquiryId || pilotBad.status !== 400) {
+      throw new Error(`Pilot inquiry endpoint check failed: ${JSON.stringify({ ok: pilotOk.json, bad: pilotBad.status })}`);
+    }
+
+    console.log('\nALL SEASON II ADVERSARIAL REGRESSION GUARDS, SIGNED MEMO VERIFIER, PILOT INTAKE & LIVE VERIFICATION TESTS PASSED!');
   } finally {
     server.close();
   }

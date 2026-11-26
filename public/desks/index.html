@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('praman-theme');
+        var theme = saved === 'dark' ? 'dark' : 'light';
+        var m = document.querySelector('meta[name="color-scheme"]');
+        if (m) m.setAttribute('content', theme);
+        document.documentElement.dataset.theme = theme;
+        if (localStorage.getItem('praman-motion') === 'reduced') {
+          document.documentElement.dataset.motion = 'reduced';
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <title>Operator Desks | Praman Deterministic Clearing Workbench</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="description" content="Interactive Praman operator workbench: Trade Assurance escrow, Solana Token-2022 Spend Guard, 32-tx Sepolia Settlement Ledger, GSQ Mining Arbitration, and 651B WASM runner.">
+  <link rel="canonical" href="https://praman-desk.vercel.app/desks">
+  <link rel="stylesheet" href="/styles/praman-tokens.css">
+  <link rel="stylesheet" href="/styles/praman-shell.css">
+  <style>
+    .workbench-bar {
+      background: var(--surface-subtle);
+      border-bottom: 1px solid var(--border);
+      padding-block: 0.75rem;
+    }
+    .workbench-bar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+    }
+    .desk-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .desk-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-block-size: 2.3rem;
+      padding: 0.4rem 0.82rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--ink-secondary);
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .desk-tab:hover {
+      background: var(--surface-well);
+      color: var(--ink);
+    }
+    .desk-tab[aria-selected="true"] {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
+    .desk-panel {
+      padding-block: 2rem 3.5rem;
+    }
+    .desk-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .desk-heading h1, .desk-heading h2 {
+      margin: 0.35rem 0 0;
+      font-family: var(--font-serif);
+      font-size: var(--text-2xl);
+      line-height: 1.1;
+    }
+    .split-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.15rem;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .lanes-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+    @media (max-width: 980px) {
+      .split-2, .grid-3 { grid-template-columns: 1fr; }
+      .lanes-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 580px) {
+      .lanes-4 { grid-template-columns: 1fr; }
+    }
+    .lane-col {
+      background: var(--surface-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.85rem;
+      min-block-size: 11rem;
+    }
+    .lane-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.7rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .lane-card-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.72rem;
+      margin-bottom: 0.55rem;
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .lane-card-btn:hover {
+      border-color: var(--brand);
+    }
+    .doc-kv {
+      display: grid;
+      grid-template-columns: minmax(7.5rem, auto) 1fr;
+      gap: 0.45rem 0.9rem;
+      margin: 0.75rem 0 0;
+      font-size: 0.86rem;
+    }
+    .doc-kv dt {
+      color: var(--ink-muted);
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+    }
+    .doc-kv dd {
+      margin: 0;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+    .stages-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0.4rem;
+      margin-block: 0.75rem 0.65rem;
+    }
+    @media (max-width: 640px) {
+      .stages-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    .stage-cell {
+      padding: 0.4rem 0.45rem;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border);
+      background: var(--surface-subtle);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .stage-cell.is-pass {
+      background: var(--ok-soft);
+      border-color: color-mix(in oklab, var(--ok) 35%, transparent);
+      color: var(--ok);
+    }
+    .stage-cell.is-halted {
+      background: var(--halt-soft);
+      border-color: color-mix(in oklab, var(--halt) 40%, transparent);
+      color: var(--halt);
+    }
+    .verdict-box {
+      padding: 1.15rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+      background: var(--surface-subtle);
+    }
+    .verdict-box.is-approved {
+      border-color: color-mix(in oklab, var(--ok) 45%, transparent);
+      background: var(--ok-soft);
+    }
+    .verdict-box.is-halt {
+      border-color: color-mix(in oklab, var(--halt) 45%, transparent);
+      background: var(--halt-soft);
+    }
+    .pre-out {
+      margin: 0.75rem 0 0;
+      padding: 0.8rem 0.9rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--island-border);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      max-block-size: 16rem;
+      overflow-y: auto;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+      gap: 1rem;
+    }
+    .toast-bar {
+      position: fixed;
+      inset-block-end: 1.25rem;
+      inset-inline-end: 1.25rem;
+      z-index: 90;
+      padding: 0.65rem 1rem;
+      border-radius: var(--radius-sm);
+      background: var(--ink);
+      color: var(--bg);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      box-shadow: var(--shadow-float);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(8px);
+      transition: opacity 0.16s ease, transform 0.16s ease;
+    }
+    .toast-bar.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    th[data-sort] {
+      cursor: pointer;
+      user-select: none;
+    }
+    th[data-sort]:hover {
+      color: var(--brand);
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to operator workbench</a>
+
+  <header class="site-header is-wide">
+    <div class="site-header-inner">
+      <a class="brand-link" href="/" aria-label="Praman Home">
+        <span class="brand-mark-3d" aria-hidden="true">
+          <svg width="38" height="38" viewBox="0 0 40 40" fill="none">
+            <defs>
+              <linearGradient id="pm-shield-bg" x1="6" y1="4" x2="34" y2="36" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#3b82f6"/><stop offset="55%" stop-color="#1d4ed8"/><stop offset="100%" stop-color="#0f296b"/></linearGradient>
+              <linearGradient id="pm-shield-bevel" x1="8" y1="5" x2="26" y2="28" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#ffffff" stop-opacity="0.52"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0"/></linearGradient>
+              <linearGradient id="pm-facet-left" x1="8" y1="8" x2="20" y2="34" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#60a5fa" stop-opacity="0.35"/><stop offset="100%" stop-color="#1e3a8a" stop-opacity="0.1"/></linearGradient>
+            </defs>
+            <path d="M20 3.2L6.5 8.6V19.2C6.5 27.6 12.2 34.4 20 37C27.8 34.4 33.5 27.6 33.5 19.2V8.6L20 3.2Z" fill="url(#pm-shield-bg)"/>
+            <path d="M20 3.2L6.5 8.6V19.2C6.5 27.6 12.2 34.4 20 37V3.2Z" fill="url(#pm-facet-left)"/>
+            <path d="M20 4.2L7.5 9.2V19.2C7.5 27 12.8 33.3 20 35.8C27.2 33.3 32.5 27 32.5 19.2V9.2L20 4.2Z" stroke="url(#pm-shield-bevel)" stroke-width="1.25"/>
+            <path d="M13.8 20.1L18.1 24.4L26.6 15.6" stroke="#ffffff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="brand-title-wrap"><span class="brand-title">Praman</span><span class="brand-dot" aria-hidden="true"></span></span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary">
+        <div id="nav-drawer" class="nav-drawer-wrap">
+          <ul id="nav-links-list" class="nav-links">
+            <li><a href="/">Overview</a></li>
+            <li><a href="/desks" aria-current="page">Operator Desks</a></li>
+            <li><a href="/verify">Verify Receipt</a></li>
+            <li><a href="/docs">Docs</a></li>
+            <li><a href="/roadmap">Roadmap</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <div class="header-controls">
+        <button type="button" class="icon-btn" data-open-cmd aria-label="Open command search">
+          <span>Search</span>
+          <span class="kbd-pill">Ctrl+K</span>
+        </button>
+        <button type="button" class="icon-btn theme-icon-btn" id="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode" title="Toggle light or dark mode">
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+        <button type="button" class="icon-btn nav-menu-btn" id="nav-menu-btn" popovertarget="nav-drawer" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open navigation menu">
+          Menu
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content" tabindex="-1">
+    <div class="workbench-bar">
+      <div class="container workbench-bar-inner">
+        <div class="desk-tabs" role="tablist" aria-label="Verification Desks">
+          <button type="button" class="desk-tab" id="tabbtn-0" role="tab" aria-selected="true" aria-controls="desk-0" data-desk-id="disposition-board">Disposition Board</button>
+          <button type="button" class="desk-tab" id="tabbtn-1" role="tab" aria-selected="false" aria-controls="desk-1" data-desk-id="trade-assurance">Trade Assurance</button>
+          <button type="button" class="desk-tab" id="tabbtn-2" role="tab" aria-selected="false" aria-controls="desk-2" data-desk-id="spend-guard">Spend Guard</button>
+          <button type="button" class="desk-tab" id="tabbtn-3" role="tab" aria-selected="false" aria-controls="desk-3" data-desk-id="settlement-ledger">Settlement Ledger <span class="badge" id="ledger-tab-count">32</span></button>
+          <button type="button" class="desk-tab" id="tabbtn-4" role="tab" aria-selected="false" aria-controls="desk-4" data-desk-id="mining-registry">Mining Registry</button>
+          <button type="button" class="desk-tab" id="tabbtn-5" role="tab" aria-selected="false" aria-controls="desk-5" data-desk-id="verification-labs">Procurement &amp; WASM</button>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <a class="btn" href="/verify?case=po-ali-9021">Verify Signed Memo</a>
+          <button type="button" class="btn btn-primary" id="dev-drawer-btn">API &amp; MCP Config</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- DESK 0: DISPOSITION BOARD -->
+      <section class="desk-panel" id="desk-0" role="tabpanel" aria-labelledby="tabbtn-0">
+        <div class="desk-heading">
+          <div>
+            <span class="eyebrow">Desk 0 / Disposition Board</span>
+            <h1>$100k held. Evidence decides where it goes.</h1>
+            <p class="section-lead">Each commercial case remains in one of four lanes until live policy evaluation moves it. Open a case to inspect Praman's independent calculation and receipt hash.</p>
+          </div>
+          <div style="display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap">
+            <label for="db-eval-select" class="sr-only">Case to evaluate via Policy API</label>
+            <select id="db-eval-select" class="select" style="width:auto;min-inline-size:17rem">
+              <option value="PO-ALI-9021">PO-ALI-9021: Reconcile 80 units ($80k / $100k)</option>
+              <option value="PO-7781">PO-7781: Ties out cleanly (1,000 x $12.40)</option>
+              <option value="CN-LAX-88201">CN-LAX-88201: Audit 20 damaged units (-$20k shortfall)</option>
+              <option value="PO-DEMO-REF">PO-DEMO-REF: Missing delivery proof (refund)</option>
+            </select>
+            <button type="button" class="btn btn-brand" id="db-eval-btn">Evaluate via Policy API</button>
+          </div>
+        </div>
+
+        <div id="db-lanes" class="lanes-4" aria-live="polite"></div>
+
+        <div class="card card-pad" style="margin-top:1.5rem">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:0.75rem">
+            <h2 style="margin:0;font-size:1.1rem">Recent Sepolia Settlement Rail</h2>
+            <span class="badge badge-ok">LIVE /api/ledger</span>
+          </div>
+          <div id="db-receipt-rail" style="display:grid;gap:0.55rem"></div>
+        </div>
+
+        <dialog id="db-case-drawer" aria-labelledby="db-drawer-title">
+          <div class="dialog-head">
+            <h3 id="db-drawer-title" style="margin:0;font-size:1.05rem">Case Details</h3>
+            <button type="button" class="btn" data-close-dialog style="min-block-size:1.9rem;padding:0.2rem 0.65rem">Close</button>
+          </div>
+          <div class="dialog-body" id="db-drawer-body"></div>
+        </dialog>
+      </section>
+
+      <!-- DESK 1: ALIBABA & CAINIAO TRADE ASSURANCE -->
+      <section class="desk-panel" id="desk-1" role="tabpanel" aria-labelledby="tabbtn-1" hidden>
+        <div class="desk-heading">
+          <div>
+            <span class="eyebrow">Desk 1 / Trade Assurance Clearinghouse</span>
+            <h2>Alibaba &amp; Cainiao Freight Escrow Reconciliation</h2>
+            <p class="section-lead">Validates commercial delivery counts against purchase order commitments via the 15-stage pipeline and 651-byte WASM comparator before TakarSettle escrow release.</p>
+          </div>
+          <span class="badge">WORKED EXAMPLE + REAL SEPOLIA ANCHOR</span>
+        </div>
+
+        <div class="grid-3">
+          <article class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong>Commercial Contract</strong>
+              <span class="badge badge-ok">PO-ALI-9021</span>
+            </div>
+            <dl class="doc-kv">
+              <dt>Buyer</dt><dd>Alibaba US Logistics Hub</dd>
+              <dt>Supplier</dt><dd>Siemens Aktiengesellschaft</dd>
+              <dt>GLEIF LEI</dt><dd class="mono">W38RGI023J3WT1HWRP32</dd>
+              <dt>Escrow</dt><dd class="mono tabular">$100,000.00 USDC</dd>
+              <dt>Terms</dt><dd>100 Units @ $1,000.00</dd>
+            </dl>
+          </article>
+
+          <article class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong>Cainiao Pier-Pass Receipt</strong>
+              <span class="badge badge-ok">CN-LAX-88201</span>
+            </div>
+            <dl class="doc-kv">
+              <dt>Terminal</dt><dd>Port of LA Pier 400 Berth</dd>
+              <dt>Accepted</dt><dd class="mono tabular" style="color:var(--ok)">80 Units ($80,000.00)</dd>
+              <dt>Damaged</dt><dd class="mono tabular" style="color:var(--halt)">20 Units (-$20,000.00)</dd>
+              <dt>Inspector</dt><dd>Maritime Inspector #14</dd>
+              <dt>Signature</dt><dd class="mono">0x789a...bc12</dd>
+            </dl>
+          </article>
+
+          <article class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong>WASM Circuit Breaker</strong>
+              <span class="badge badge-brand">651B BYTECODE</span>
+            </div>
+            <dl class="doc-kv">
+              <dt>Comparator</dt><dd>3-Way Line-Item Solver</dd>
+              <dt>Execution</dt><dd class="mono tabular">&lt; 3 ms deterministic</dd>
+              <dt>Overbill Delta</dt><dd class="mono tabular" style="color:var(--halt)">-$20,000.00 USD</dd>
+              <dt>Resolution</dt><dd style="color:var(--ok)">$80k Release / $20k Refund</dd>
+              <dt>Attestation</dt><dd class="mono">0xba98...1f75 (EAS Sepolia)</dd>
+            </dl>
+          </article>
+        </div>
+
+        <div class="split-2" style="margin-top:1.25rem">
+          <div class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem">
+              <h3 style="margin:0;font-size:1.05rem">Run Trade Assurance Audit</h3>
+              <span class="mono" style="font-size:0.75rem;color:var(--ink-muted)">POST /api/trade-assurance/audit</span>
+            </div>
+
+            <div class="split-2">
+              <div class="field">
+                <label for="ta-po">Purchase Order</label>
+                <input id="ta-po" class="input" value="PO-ALI-9021">
+              </div>
+              <div class="field">
+                <label for="ta-rcpt">Pier-Pass Receipt</label>
+                <input id="ta-rcpt" class="input" value="CN-LAX-88201">
+              </div>
+            </div>
+
+            <div class="split-2" style="margin-top:0.85rem">
+              <div class="field">
+                <label for="ta-scenario">Commercial Scenario (Case A..E)</label>
+                <select id="ta-scenario" class="select">
+                  <option value="alibaba_trade">Case A: Full Claim Shortfall ($20k caught) -> HALT</option>
+                  <option value="alibaba_reconciled">Case B: Reconciled Split ($80k / $20k) -> APPROVED</option>
+                  <option value="alibaba_missing_evidence">Case C: Missing Delivery Receipt -> HOLD</option>
+                  <option value="alibaba_conflicting_reports">Case D: Conflicting Miner Reports -> ARBITRATE</option>
+                  <option value="alibaba_refund">Case E: Corrupted Freight -> FULL REFUND</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="ta-usdc">Requested / Reconciled USDC</label>
+                <input id="ta-usdc" class="input mono" value="100000" inputmode="decimal">
+              </div>
+            </div>
+
+            <div style="margin-top:1rem;display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center">
+              <button type="button" class="btn btn-primary" id="ta-run">Execute Audit Run</button>
+              <a class="btn" id="ta-verify-case" href="/verify?case=po-ali-9021">Inspect Signed Memo</a>
+            </div>
+            <p id="ta-status" role="status" class="mono" style="margin:0.85rem 0 0;font-size:0.78rem;color:var(--ink-secondary)"></p>
+          </div>
+
+          <div class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+              <h3 style="margin:0;font-size:1.05rem">15-Stage Pipeline &amp; Reconciliation</h3>
+              <span class="badge" id="pipe-count">IDLE</span>
+            </div>
+            <progress id="pipe-progress" class="praman-progress" value="0" max="15" aria-label="15-stage verification progress"></progress>
+            <div class="stages-grid" id="pipe"></div>
+            <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:0.74rem;color:var(--ink-muted);margin-bottom:0.85rem">
+              <span id="pipe-left">Awaiting trigger</span>
+              <span id="pipe-right">651B WASM</span>
+            </div>
+
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Preview Breakdown</th>
+                    <th>Contract</th>
+                    <th>Accepted / Action</th>
+                    <th>Variance</th>
+                  </tr>
+                </thead>
+                <tbody id="ta-preview-rows">
+                  <tr>
+                    <th scope="row">Case A (Full Invoice Claim)</th>
+                    <td class="mono tabular">$100,000</td>
+                    <td class="mono tabular">80 units ($80k)</td>
+                    <td class="mono tabular" style="color:var(--halt)">-$20,000 Halt</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="verdict-panel" class="card card-pad" style="margin-top:1.25rem" hidden>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:0.85rem">
+            <h3 style="margin:0;font-size:1.05rem">Statutory Audit Verdict</h3>
+            <div style="display:flex;gap:0.5rem;align-items:center">
+              <span class="badge" id="verdict-risk">-</span>
+              <button type="button" class="btn" id="ta-cert-btn" hidden>Statutory Certificate</button>
+            </div>
+          </div>
+          <div id="verdict-body" class="verdict-box" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- DESK 2: AUTONOMOUS SPEND GUARD -->
+      <section class="desk-panel" id="desk-2" role="tabpanel" aria-labelledby="tabbtn-2" hidden>
+        <div class="desk-heading">
+          <div>
+            <span class="eyebrow">Desk 2 / Pre-Signature Defense</span>
+            <h2>Solana Token-2022 Armor &amp; General Spend Gate</h2>
+            <p class="section-lead">Intercepts malicious drainers, Token-2022 PermanentDelegate/TransferHook traps, unresolved lookup tables, OFAC hits, and invoice anomalies before signing.</p>
+          </div>
+          <span class="badge badge-ok">LIVE SDK + SERVER POLICY</span>
+        </div>
+
+        <div class="split-2">
+          <div class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap">
+              <h3 style="margin:0;font-size:1.05rem">Solana Pre-Signature Armor</h3>
+              <span class="mono" style="font-size:0.74rem;color:var(--ink-muted)">packages/praman-sdk/solana.js</span>
+            </div>
+            <p style="font-size:0.88rem;color:var(--ink-secondary);margin:0.55rem 0 1rem">
+              Screens legacy &amp; VersionedTransaction (v0) spends with an atomic runningSessionSpend cap and Token-2022 TLV inspection.
+            </p>
+            <div class="field">
+              <label for="sg-scenario">Attack / Legit Vector</label>
+              <select id="sg-scenario" class="select">
+                <option value="legit">Legitimate Treasury Transfer (0.01 SOL) -> APPROVED</option>
+                <option value="hijack">Hijacked @solana/web3.js Prototype Hook -> HALTED</option>
+                <option value="drainer">Known Drainer Wallet (FnvLGtucz4...) -> HALTED</option>
+                <option value="token2022_permanent_delegate">Token-2022 PermanentDelegate (TLV 12) -> HALTED</option>
+                <option value="token2022_transfer_hook">Token-2022 TransferHook (TLV 14) -> HALTED</option>
+                <option value="token2022_freeze_authority">Token-2022 FreezeAuthority Active -> HALTED</option>
+                <option value="cap">Session Cap Breach ($502.40 &gt; $500) -> HALTED</option>
+                <option value="ofac">OFAC SDN Sanctions Screening Hit -> HALTED</option>
+              </select>
+            </div>
+            <div style="margin-top:0.85rem;display:flex;gap:0.6rem;flex-wrap:wrap">
+              <button type="button" class="btn btn-primary" id="sg-run">Screen Transaction</button>
+              <a class="btn" href="/verify?case=solana-devnet-release">Devnet Release Proof (E3qVPMwc)</a>
+              <a class="btn" href="/verify?case=solana-token2022-halt">Token-2022 Halt Receipt</a>
+            </div>
+            <div id="sg-out" style="margin-top:1rem" aria-live="polite"></div>
+          </div>
+
+          <div class="spend-beam-card">
+            <div class="spend-beam-inner">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap">
+                <h3 style="margin:0;font-size:1.05rem">General Spend Gate</h3>
+                <span class="mono" style="font-size:0.74rem;color:var(--ink-muted)">POST /api/spend-guard/evaluate</span>
+              </div>
+              <p style="font-size:0.86rem;color:var(--ink-secondary);margin:0.5rem 0 0.85rem">
+                Test custom vendor names, spend amounts, and FX rates directly against Praman's server-side policy gate.
+              </p>
+              <div class="split-2">
+                <div class="field">
+                  <label for="gsg-vendor">Vendor Name</label>
+                  <input id="gsg-vendor" class="input" value="Siemens Aktiengesellschaft">
+                </div>
+                <div class="field">
+                  <label for="gsg-jur">Jurisdiction</label>
+                  <input id="gsg-jur" class="input" value="DE">
+                </div>
+              </div>
+              <div class="split-2" style="margin-top:0.7rem">
+                <div class="field">
+                  <label for="gsg-amount">Spend Amount (USDC)</label>
+                  <input id="gsg-amount" class="input mono" value="420" inputmode="decimal">
+                </div>
+                <div class="field">
+                  <label for="gsg-cap">Single Agent Cap (USDC)</label>
+                  <input id="gsg-cap" class="input mono" value="500" inputmode="decimal">
+                </div>
+              </div>
+              <div style="margin-top:0.85rem;display:flex;gap:0.6rem;flex-wrap:wrap">
+                <button type="button" class="btn btn-brand" id="gsg-run">Evaluate Spend Gate</button>
+                <button type="button" class="btn" id="gsg-preset-ofac">Test SDN Block</button>
+              </div>
+              <pre id="gsg-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-pad" style="margin-top:1.25rem">
+          <h3 style="margin:0 0 0.85rem;font-size:1.05rem">EVM Diamond &amp; Solana Policy Tier Matrix</h3>
+          <div class="table-wrapper">
+            <table class="data-table stack-mobile">
+              <thead>
+                <tr>
+                  <th>Agent Tier</th>
+                  <th>Single Cap</th>
+                  <th>Dual-Auth Cap</th>
+                  <th>Unresolved ALT</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row" data-label="Tier">TIER_1_AUTONOMOUS</th>
+                  <td data-label="Single Cap" class="mono tabular">$500.00</td>
+                  <td data-label="Dual-Auth" class="mono tabular">-</td>
+                  <td data-label="ALT"><span class="badge badge-halt">HALT</span></td>
+                </tr>
+                <tr>
+                  <th scope="row" data-label="Tier">TIER_2_DUAL_AUTH</th>
+                  <td data-label="Single Cap" class="mono tabular">$500.00</td>
+                  <td data-label="Dual-Auth" class="mono tabular">$150,000.00</td>
+                  <td data-label="ALT"><span class="badge badge-halt">HALT</span></td>
+                </tr>
+                <tr>
+                  <th scope="row" data-label="Tier">SUPERVISOR</th>
+                  <td data-label="Single Cap" class="mono tabular">$150,000.00</td>
+                  <td data-label="Dual-Auth" class="mono tabular">$150,000.00</td>
+                  <td data-label="ALT"><span class="badge badge-halt">HALT</span></td>
+                </tr>
+                <tr>
+                  <th scope="row" data-label="Tier">ANY / Unknown Program</th>
+                  <td data-label="Single Cap" class="mono tabular">-</td>
+                  <td data-label="Dual-Auth" class="mono tabular">-</td>
+                  <td data-label="ALT"><span class="badge badge-halt">HALT</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- DESK 3: SETTLEMENT LEDGER -->
+      <section class="desk-panel" id="desk-3" role="tabpanel" aria-labelledby="tabbtn-3" hidden>
+        <div class="desk-heading">
+          <div>
+            <span class="eyebrow">Desk 3 / Immutable Execution</span>
+            <h2>On-Chain Sepolia Settlement Telemetry Ledger</h2>
+            <p class="section-lead"><span id="lg-hero-count">32</span> verified settlements across independent Telegraph miners plus Takar Dispute resolvers and Devnode signals.</p>
+          </div>
+          <span class="badge badge-ok">RECORDED /api/ledger</span>
+        </div>
+
+        <div class="lanes-4" style="margin-bottom:1.25rem">
+          <div class="card card-pad">
+            <div class="kpi-label">Paid Settlements</div>
+            <div class="kpi-value tabular" id="lg-count">-</div>
+          </div>
+          <div class="card card-pad">
+            <div class="kpi-label">Independent Miners</div>
+            <div class="kpi-value tabular" id="lg-miners">-</div>
+          </div>
+          <div class="card card-pad">
+            <div class="kpi-label">Total Paid (USDC)</div>
+            <div class="kpi-value tabular" id="lg-spent">-</div>
+          </div>
+          <div class="card card-pad">
+            <div class="kpi-label">Median Latency</div>
+            <div class="kpi-value tabular" id="lg-latency">-</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-bottom:1px solid var(--border);gap:0.75rem;flex-wrap:wrap">
+            <div style="display:flex;gap:0.6rem;flex-wrap:wrap;flex:1 1 auto">
+              <label for="lg-q" class="sr-only">Search settlement ledger</label>
+              <input id="lg-q" class="input" placeholder="Search intent, miner, or tx hash..." style="max-inline-size:20rem">
+              <label for="lg-intent" class="sr-only">Filter by intent</label>
+              <select id="lg-intent" class="select" style="max-inline-size:15rem">
+                <option value="">ALL INTENTS</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:0.5rem;align-items:center">
+              <button type="button" class="btn" id="lg-export">Export JSON</button>
+            </div>
+          </div>
+          <p id="lg-sort-status" role="status" class="sr-only"></p>
+
+          <div class="table-wrapper" style="border:0;border-radius:0;max-block-size:34rem">
+            <table id="lg-table" class="data-table stack-mobile" aria-label="Settlement ledger">
+              <thead>
+                <tr>
+                  <th data-sort="index" scope="col">#</th>
+                  <th data-sort="title" scope="col">Verification Target</th>
+                  <th data-sort="intent" scope="col">Intent</th>
+                  <th data-sort="minerName" scope="col">Miner</th>
+                  <th data-sort="durationMs" scope="col">Latency</th>
+                  <th data-sort="costUsd" scope="col">Cost</th>
+                  <th data-sort="txHash" scope="col">Sepolia Proof</th>
+                </tr>
+              </thead>
+              <tbody id="lg-body"></tbody>
+            </table>
+          </div>
+          <div id="lg-empty" style="padding:1.5rem;text-align:center" hidden>
+            No matching settlements. <button type="button" class="btn" id="lg-clear" style="margin-left:0.5rem">Clear Filters</button>
+          </div>
+        </div>
+
+        <div id="lg-escrow-wrap" style="margin-top:1.25rem" hidden></div>
+      </section>
+
+      <!-- DESK 4: MINING REGISTRY -->
+      <section class="desk-panel" id="desk-4" role="tabpanel" aria-labelledby="tabbtn-4" hidden>
+        <div class="desk-heading">
+          <div>
+            <span class="eyebrow">Desk 4 / Historical Arbitration</span>
+            <h2>Queensland GSQ Forensic Mining Arbitration</h2>
+            <p class="section-lead">Reconciles GSQ ground-truth tenure &amp; production records against miner submissions using 651B WASM scoring and EAS attestations. Unknown site numbers report UNVERIFIED_PROSPECT.</p>
+          </div>
+          <span class="badge badge-ok">LIVE /api/verify/mine-dossier</span>
+        </div>
+
+        <div class="card card-pad">
+          <div style="display:flex;gap:0.65rem;flex-wrap:wrap;align-items:flex-end">
+            <div class="field" style="min-inline-size:14rem">
+              <label for="mr-site-input">GSQ Site Number</label>
+              <input id="mr-site-input" class="input mono" value="494270">
+            </div>
+            <button type="button" class="btn btn-primary" id="mr-load">Verify Mine Dossier</button>
+            <button type="button" class="btn" data-mr-preset="494270">Mount Morgan (494270)</button>
+            <button type="button" class="btn" data-mr-preset="43836">Tyrconnel (43836)</button>
+            <button type="button" class="btn" data-mr-preset="999999">Unknown Site (999999)</button>
+            <a id="mr-raw-link" class="btn btn-ghost" href="/api/verify/mine-dossier?siteNo=494270" target="_blank" rel="noopener">Raw API JSON</a>
+          </div>
+          <div id="mr-out" style="margin-top:1.25rem" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <!-- DESK 5: PROCUREMENT VERIFY, TRACK 3 BATCH & CLIENT WASM -->
+      <section class="desk-panel" id="desk-5" role="tabpanel" aria-labelledby="tabbtn-5" hidden>
+        <div class="desk-heading">
+          <div>
+            <span class="eyebrow">Desk 5 / Live Procurement, Batch &amp; WASM</span>
+            <h2>Live API Verification, Tencent #01/#03 &amp; In-Browser 651B WASM</h2>
+            <p class="section-lead">Execute live math/NLP queries on arbitrary input, evaluate Track 3 batch sanctions screening, and invoke the raw 651-byte WebAssembly comparator right inside your browser.</p>
+          </div>
+          <span class="badge badge-ok">LIVE /api/miner/* + /comparator.wasm</span>
+        </div>
+
+        <div class="tools-grid">
+          <div class="card card-pad">
+            <h3 style="margin:0 0 0.7rem;font-size:1rem">Purchase Order Verify</h3>
+            <div class="field">
+              <label for="pv-po">PO Number</label>
+              <input id="pv-po" class="input" value="PO-2026-7741">
+            </div>
+            <div class="field" style="margin-top:0.6rem">
+              <label for="pv-po-q">Line Claim</label>
+              <input id="pv-po-q" class="input" value="10 units at $250 = $2500">
+            </div>
+            <button type="button" class="btn btn-primary" id="pv-po-btn" style="margin-top:0.8rem;width:100%">Verify PO</button>
+            <pre id="pv-po-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+
+          <div class="card card-pad">
+            <h3 style="margin:0 0 0.7rem;font-size:1rem">Invoice &lt;-&gt; Ledger Reconcile</h3>
+            <div class="field">
+              <label for="pv-inv">Invoice Ref</label>
+              <input id="pv-inv" class="input" value="INV-7781">
+            </div>
+            <div class="field" style="margin-top:0.6rem">
+              <label for="pv-led">Ledger Equation</label>
+              <input id="pv-led" class="input" value="PO-7781: 1000 units x USD 12.40 = USD 12,400.00">
+            </div>
+            <button type="button" class="btn btn-primary" id="pv-inv-btn" style="margin-top:0.8rem;width:100%">Reconcile</button>
+            <pre id="pv-inv-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+
+          <div class="card card-pad">
+            <h3 style="margin:0 0 0.7rem;font-size:1rem">Corporate Registry (GLEIF LEI)</h3>
+            <div class="field">
+              <label for="pv-co">Company Name</label>
+              <input id="pv-co" class="input" value="SAP SE">
+            </div>
+            <div class="field" style="margin-top:0.6rem">
+              <label for="pv-jur">Jurisdiction (optional)</label>
+              <input id="pv-jur" class="input" value="DE">
+            </div>
+            <button type="button" class="btn btn-primary" id="pv-co-btn" style="margin-top:0.8rem;width:100%">Look Up Entity</button>
+            <pre id="pv-co-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+
+          <div class="card card-pad">
+            <h3 style="margin:0 0 0.7rem;font-size:1rem">Vendor &amp; Doc Authenticity</h3>
+            <div class="field">
+              <label for="pv-ven">Vendor Name</label>
+              <input id="pv-ven" class="input" value="SAP SE">
+            </div>
+            <button type="button" class="btn btn-primary" id="pv-ven-btn" style="margin-top:0.8rem;width:100%">Verify Vendor + Document</button>
+            <pre id="pv-ven-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+
+          <div class="card card-pad">
+            <h3 style="margin:0 0 0.7rem;font-size:1rem">Sanctions Screening (OFAC SDN)</h3>
+            <div class="field">
+              <label for="pv-sdn">Counterparty Name</label>
+              <input id="pv-sdn" class="input" value="Banco Nacional de Cuba">
+            </div>
+            <button type="button" class="btn btn-primary" id="pv-sdn-btn" style="margin-top:0.8rem;width:100%">Screen Name (19,565 RAM)</button>
+            <pre id="pv-sdn-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+
+          <div class="card card-pad">
+            <h3 style="margin:0 0 0.7rem;font-size:1rem">Agent Claim Verifier (Tencent #01 / #03)</h3>
+            <div class="field">
+              <label for="pv-agent-vendor">Vendor / Domain</label>
+              <input id="pv-agent-vendor" class="input" value="cloudflare.com">
+            </div>
+            <div class="field" style="margin-top:0.6rem">
+              <label for="pv-agent-output">Agent Output Claim</label>
+              <textarea id="pv-agent-output" class="textarea">Invoice USD 10,000 (EUR 9,200) -> IBAN DE89370400440532013000</textarea>
+            </div>
+            <button type="button" class="btn btn-primary" id="pv-agent-btn" style="margin-top:0.8rem;width:100%">Verify Output Claims</button>
+            <pre id="pv-agent-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+        </div>
+
+        <div class="split-2" style="margin-top:1.25rem">
+          <div class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap">
+              <h3 style="margin:0;font-size:1.05rem">Track 3: Sanctions Batch Screening</h3>
+              <span class="mono" style="font-size:0.74rem;color:var(--ink-muted)">POST /api/evaluator/sanctions-batch</span>
+            </div>
+            <div class="field" style="margin-top:0.75rem">
+              <label for="sb-input">Counterparties (1 per line, up to 50)</label>
+              <textarea id="sb-input" class="textarea">Siemens Aktiengesellschaft
+Banco Nacional de Cuba
+Cloudflare Inc
+Rosneft</textarea>
+            </div>
+            <button type="button" class="btn btn-brand" id="sb-run" style="margin-top:0.75rem">Run Batch Sanctions Audit</button>
+            <pre id="sb-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+
+          <div class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap">
+              <h3 style="margin:0;font-size:1.05rem">Client-Side 651B WASM Comparator</h3>
+              <span class="badge badge-brand">/comparator/comparator.wasm</span>
+            </div>
+            <p style="font-size:0.86rem;color:var(--ink-secondary);margin:0.55rem 0 0.85rem">
+              Runs the compiled 651-byte AssemblyScript binary locally in your browser with zero server round-trip.
+            </p>
+            <div class="split-2">
+              <div class="field">
+                <label for="wasm-truth">Truth (i64 cents/units)</label>
+                <input id="wasm-truth" class="input mono" value="100000">
+              </div>
+              <div class="field">
+                <label for="wasm-miner">Miner / Invoice (i64)</label>
+                <input id="wasm-miner" class="input mono" value="80000">
+              </div>
+            </div>
+            <div class="split-2" style="margin-top:0.65rem">
+              <div class="field">
+                <label for="wasm-mode">Scoring Mode</label>
+                <select id="wasm-mode" class="select">
+                  <option value="0">0: Exact Match</option>
+                  <option value="1">1: AbsTol (Tolerance units)</option>
+                  <option value="2">2: RelTol (Tolerance bps)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="wasm-tol">Tolerance</label>
+                <input id="wasm-tol" class="input mono" value="500">
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary" id="wasm-run" style="margin-top:0.8rem">Run 651B WASM in Browser</button>
+            <pre id="wasm-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a class="brand-link" href="/" aria-label="Praman Home" style="padding-inline:0">
+            <span class="brand-mark-3d" aria-hidden="true">
+              <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+                <defs><linearGradient id="pm-f-shield-bg" x1="6" y1="4" x2="34" y2="36" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#3b82f6"/><stop offset="55%" stop-color="#1d4ed8"/><stop offset="100%" stop-color="#0f296b"/></linearGradient></defs>
+                <path d="M20 3.2L6.5 8.6V19.2C6.5 27.6 12.2 34.4 20 37C27.8 34.4 33.5 27.6 33.5 19.2V8.6L20 3.2Z" fill="url(#pm-f-shield-bg)"/>
+                <path d="M13.8 20.1L18.1 24.4L26.6 15.6" stroke="#ffffff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="brand-title-wrap"><span class="brand-title">Praman</span><span class="brand-dot" aria-hidden="true"></span></span>
+          </a>
+          <p class="foot-brand-desc">Deterministic pre-signature clearinghouse for cross-border B2B trade assurance and autonomous AI agent treasuries on EVM chains and Solana.</p>
+          <div class="foot-social" aria-label="Social and community links">
+            <a class="social-link-btn" href="https://github.com/VishAlgoDev/praman-desk" target="_blank" rel="noopener" aria-label="Praman on GitHub" title="GitHub"><svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg></a>
+            <a class="social-link-btn" href="https://x.com/vishal_karad" target="_blank" rel="noopener" aria-label="Vishal Karad on X" title="Founder on X"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg></a>
+            <a class="social-link-btn" href="https://x.com/Telegraphprotoc" target="_blank" rel="noopener" aria-label="Telegraph Protocol on X" title="Telegraph Protocol"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+            <a class="social-link-btn" href="https://discord.com/channels/1438396125609463881" target="_blank" rel="noopener" aria-label="Telegraph Protocol Discord" title="Discord"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028ZM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418Zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418Z"/></svg></a>
+          </div>
+        </div>
+        <nav class="footer-col" aria-label="Product">
+          <h3>Product</h3>
+          <ul>
+            <li><a href="/">Company Overview</a></li>
+            <li><a href="/desks">Operator Desks (5 Workflows)</a></li>
+            <li><a href="/verify">Cryptographic Receipt Verifier</a></li>
+            <li><a href="/docs">Docs &amp; 18-Tool MCP</a></li>
+            <li><a href="/roadmap">Roadmap &amp; Pilot Intake</a></li>
+            <li><a href="/api/audit/case?case=po-ali-9021&format=html" target="_blank" rel="noopener">Sample Statutory Certificate</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Telegraph Protocol">
+          <h3>Telegraph Protocol</h3>
+          <ul>
+            <li><a href="https://anjoman.ai" target="_blank" rel="noopener">About Telegraph &amp; Anjoman</a></li>
+            <li><a href="https://anjoman.ai/docs" target="_blank" rel="noopener">Telegraph Protocol Docs</a></li>
+            <li><a href="https://anjoman.ai/dashboard/apps/praman-desk" target="_blank" rel="noopener">Praman on Anjoman Apps</a></li>
+            <li><a href="https://anjoman.ai/dashboard/explore/miners/6201" target="_blank" rel="noopener">Diamond Miner Node #6201</a></li>
+            <li><a href="https://devnode.telegraphprotocol.com/api/miners/6164" target="_blank" rel="noopener">Devnode Miner #6164 API</a></li>
+          </ul>
+        </nav>
+        <nav class="footer-col" aria-label="Verified Contracts">
+          <h3>Verified Roots</h3>
+          <ul>
+            <li><a href="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" target="_blank" rel="noopener">TakarSettle v4 · Sepolia</a></li>
+            <li><a href="https://sepolia.etherscan.io/address/0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B" target="_blank" rel="noopener">TakarSettle5 · Sepolia</a></li>
+            <li><a href="https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115" target="_blank" rel="noopener">EAS Record #33d85bed</a></li>
+            <li><a href="https://solscan.io/tx/E3qVPMwc?cluster=devnet" target="_blank" rel="noopener">Solana Devnet · E3qVPMwc</a></li>
+            <li><a href="/api/mcp" target="_blank" rel="noopener">Keyless Streamable MCP</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <span>2026 Praman · Clearing Infrastructure for Autonomous Finance</span>
+        <div class="footer-utils">
+          <button type="button" class="footer-motion-btn" id="motion-toggle" aria-pressed="false" aria-label="Reduce page animations">Animations: Auto</button>
+          <span class="mono">Ethereum Sepolia &amp; Solana Devnet</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Transaction Proof Drawer -->
+  <dialog id="tx-drawer" class="drawer-right" aria-labelledby="tx-drawer-title">
+    <div class="dialog-head">
+      <h3 id="tx-drawer-title" style="margin:0;font-size:1.05rem">Settlement Receipt Proof</h3>
+      <button type="button" class="btn" data-close-dialog style="min-block-size:1.9rem;padding:0.2rem 0.65rem">Close</button>
+    </div>
+    <div class="dialog-body">
+      <dl class="doc-kv" id="tx-drawer-body"></dl>
+    </div>
+  </dialog>
+
+  <!-- Statutory Certificate Modal -->
+  <dialog id="cert-modal" aria-labelledby="cert-modal-title">
+    <div class="dialog-head">
+      <h3 id="cert-modal-title" style="margin:0;font-size:1.05rem">Statutory Settlement Certificate</h3>
+      <button type="button" class="btn" data-close-dialog style="min-block-size:1.9rem;padding:0.2rem 0.65rem">Close</button>
+    </div>
+    <div class="dialog-body" id="cert-body"></div>
+  </dialog>
+
+  <!-- Developer Console Drawer -->
+  <dialog id="dev-drawer" class="drawer-right" aria-labelledby="dev-drawer-title">
+    <div class="dialog-head">
+      <h3 id="dev-drawer-title" style="margin:0;font-size:1.05rem">API &amp; Keyless MCP Console</h3>
+      <button type="button" class="btn" data-close-dialog style="min-block-size:1.9rem;padding:0.2rem 0.65rem">Close</button>
+    </div>
+    <div class="dialog-body">
+      <p style="font-size:0.88rem;color:var(--ink-secondary);margin-top:0">CORS-enabled keyless endpoints and streamable Model Context Protocol (MCP) bindings.</p>
+      <p class="eyebrow" style="margin-top:1rem">NPM &amp; Python SDK</p>
+      <pre class="pre-out dark-island">npm install github:VishAlgoDev/praman-desk @solana/web3.js
+# Python client: packages/praman-sdk/praman.py</pre>
+      <p class="eyebrow" style="margin-top:1rem">Streamable MCP Config</p>
+      <pre class="pre-out dark-island">{
+  "mcpServers": {
+    "praman-desk": {
+      "url": "https://praman-desk.vercel.app/api/mcp"
+    }
+  }
+}</pre>
+      <div style="margin-top:1rem;display:flex;gap:0.6rem;flex-wrap:wrap">
+        <button type="button" class="btn btn-primary" id="copy-mcp-json-btn">Copy MCP JSON</button>
+        <a class="btn" href="/docs#http-api">Full HTTP API Docs</a>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Command Palette Dialog -->
+  <dialog id="cmd-palette" class="cmd-palette" aria-labelledby="cmd-title">
+    <h2 id="cmd-title" class="sr-only">Command Search</h2>
+    <div class="cmd-input-wrap">
+      <input id="cmd-search-input" type="search" placeholder="Jump to desk, receipt case, or documentation..." aria-label="Search routes and cases">
+      <button type="button" class="btn" data-close-dialog style="min-block-size:1.9rem;padding:0.2rem 0.6rem">Esc</button>
+    </div>
+    <ul id="cmd-results-list" class="cmd-results" role="listbox" aria-label="Matching destinations"></ul>
+  </dialog>
+
+  <div id="toast" class="toast-bar" role="status" aria-live="polite"></div>
+
+  <script src="/js/praman-shell.js"></script>
+  <script src="/js/desks.js"></script>
+</body>
+</html>

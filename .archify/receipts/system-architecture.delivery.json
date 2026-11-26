@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "c6a7196b-a29d-48fd-86bb-e94ce6755da3",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "C:\\Users\\Public\\My Agent\\telegraph-h2\\.archify\\system-architecture.json",
+  "output": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\system-architecture.html",
+  "specification": {
+    "sha256": "c6f69fe4e4631088a3ed3b2ab26d559dffe4649c387391546ca89d870eb6b4df",
+    "bytes": 3045
+  },
+  "artifact": {
+    "sha256": "3aa17924b4596cdec14fd16803cf4769a4bf6d8e04c4d9f8986b0438a9d0fcc7",
+    "bytes": 846047
+  }
+}

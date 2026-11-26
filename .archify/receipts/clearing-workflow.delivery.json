@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "dba120cf-8d25-43f8-928d-1afeb8895341",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "C:\\Users\\Public\\My Agent\\telegraph-h2\\.archify\\clearing-workflow.json",
+  "output": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.html",
+  "specification": {
+    "sha256": "88e6e95b4c79356dd8483d634ec8607b666d77f3bea8fa3a86c057e0fece0b6d",
+    "bytes": 4457
+  },
+  "artifact": {
+    "sha256": "eb3604020835279404e08a7f26c84525af26180486c7ba458c0d66804969e686",
+    "bytes": 849414
+  }
+}

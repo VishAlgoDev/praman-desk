@@ -1,11 +1,20 @@
 /**
- * Bank-Grade Compliance Audit Certificate Generator
- * Produces cryptographic attestation certificates (JSON & Printable HTML)
- * for institutional compliance, CFO sign-off, and audit trails.
+ * Institutional Compliance & Clearing Audit Certificate Generator
+ * Produces cryptographic attestation certificates (JSON & Daylight Museum-Paper HTML)
+ * for CFO sign-off, trade assurance disputes, and browser verification.
  */
 
 import crypto from 'node:crypto';
-import { screenSanctions, lookupCorporateRegistry, reconcileInvoicePrimary } from './handlers.mjs';
+import { screenSanctions, lookupCorporateRegistry } from './handlers.mjs';
+
+function escapeHtml(raw) {
+  return String(raw ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 export async function generateComplianceCertificate({
   entity = '',
@@ -23,17 +32,14 @@ export async function generateComplianceCertificate({
   const certificateId = `CERT-PRAMAN-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
   const issueDate = new Date().toISOString();
 
-  // 1. OFAC Sanctions Screening
   const sanctionsResult = await screenSanctions({ name: targetEntity, threshold: 0.70 });
   const isSanctionsHit = Boolean(sanctionsResult && sanctionsResult.matched);
 
-  // 2. GLEIF / Corporate Registry Lookup
   let corporateResult = null;
   if (targetEntity || lei) {
     corporateResult = await lookupCorporateRegistry({ query: lei || targetEntity });
   }
 
-  // 3. WebAssembly Bit-Exact Reconciliation (if amounts provided)
   let wasmReconciliation = null;
   const numInv = invoiceAmount !== null && invoiceAmount !== undefined ? Number(invoiceAmount) : null;
   const numPo = poAmount !== null && poAmount !== undefined ? Number(poAmount) : null;
@@ -51,9 +57,8 @@ export async function generateComplianceCertificate({
     };
   }
 
-  // 4. Determine Master Clearance Verdict
   let clearanceVerdict = 'COMPLIANT_CLEARED';
-  let clearanceSummary = 'Entity cleared all autonomous compliance checks: Zero OFAC SDN hits, verified legal identity, and bit-exact ledger match.';
+  let clearanceSummary = 'Entity cleared all autonomous compliance checks: zero OFAC SDN hits, verified legal identity, and bit-exact ledger match.';
 
   if (isSanctionsHit) {
     clearanceVerdict = 'SANCTIONED_BLOCKED';
@@ -66,7 +71,6 @@ export async function generateComplianceCertificate({
     clearanceSummary = 'UNVERIFIED LEGAL IDENTITY: Corporate LEI record not confirmed in global GLEIF registry. Manual CFO sign-off required.';
   }
 
-  // 5. Compute SHA-256 Cryptographic Seal
   const canonicalPayload = JSON.stringify({
     certificateId,
     targetEntity,
@@ -80,7 +84,7 @@ export async function generateComplianceCertificate({
   });
   const sha256Seal = crypto.createHash('sha256').update(canonicalPayload).digest('hex');
 
-  const certData = {
+  return {
     certificateId,
     issueDate,
     clearanceVerdict,
@@ -117,273 +121,292 @@ export async function generateComplianceCertificate({
       sealDigest: `0x${sha256Seal}`,
       verificationStandard: 'PRAMAN-AUDIT-SEAL-v1'
     },
-    executionTimeMs: Math.round(performance.now() - tStart)
+    executionTimeMs: Math.round(performance.now() - tStart),
+    format
   };
-
-  return certData;
 }
 
 export function renderCertificateHtml(cert) {
   const verdictUpper = String(cert.clearanceVerdict || cert.verdict || '').toUpperCase();
-  const isCleared = ['COMPLIANT_CLEARED', 'RECONCILED_PARTIAL_SETTLEMENT', 'ONCHAIN_RESOLVED', 'APPROVED', 'APPROVED_FOR_PAYMENT', 'CLEAR_FOR_PAYMENT'].includes(verdictUpper);
-  const isBlocked = ['SANCTIONED_BLOCKED', 'HALTED', 'HALT_AND_FREEZE'].includes(verdictUpper);
-  const badgeColor = isCleared ? '#10b981' : (isBlocked ? '#ef4444' : '#f59e0b');
-  const badgeBg = isCleared ? 'rgba(16, 185, 129, 0.1)' : (isBlocked ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)');
+  const isCleared = ['COMPLIANT_CLEARED', 'RECONCILED_PARTIAL_SETTLEMENT', 'ONCHAIN_RESOLVED', 'APPROVED', 'APPROVED_FOR_PAYMENT', 'CLEAR_FOR_PAYMENT', 'RELEASE'].includes(verdictUpper);
+  const isBlocked = ['SANCTIONED_BLOCKED', 'HALTED', 'HALT_AND_FREEZE', 'HALTED_POLICY_BREACH', 'REJECT', 'REJECTED'].includes(verdictUpper);
+  const badgeColor = isCleared ? '#15803d' : (isBlocked ? '#b91c1c' : '#b45309');
+  const badgeSoft = isCleared ? 'rgba(21, 128, 61, 0.08)' : (isBlocked ? 'rgba(185, 28, 28, 0.08)' : 'rgba(180, 83, 9, 0.08)');
+  const stampWord = isCleared ? 'CLEARED' : (isBlocked ? 'HALTED' : 'REVIEW');
   const badgeText = (verdictUpper || 'VERIFIED').replace(/_/g, ' ');
+  const caseLink = cert.caseId ? `/verify?case=${encodeURIComponent(cert.caseId)}` : `/verify`;
+  const varianceDisplay = cert.wasmReconciliation?.variance !== undefined
+    ? `${Number(cert.wasmReconciliation.variance).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD`
+    : '0.00 USD';
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Compliance Certificate ${cert.certificateId} | Praman Desk</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Statutory Clearing Certificate ${escapeHtml(cert.certificateId)} | Praman Desk</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <style>
+    @font-face { font-family: 'Instrument Serif'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/instrument-serif-400.woff2') format('woff2'); }
+    @font-face { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap; src: url('/fonts/instrument-serif-400-italic.woff2') format('woff2'); }
+    @font-face { font-family: 'Inter Tight'; font-style: normal; font-weight: 300 700; font-display: swap; src: url('/fonts/inter-tight-var.woff2') format('woff2'); }
+    @font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('/fonts/jetbrains-mono-var.woff2') format('woff2'); }
+
     :root {
-      --bg: #090d16;
-      --card: #0f172a;
-      --border: #1e293b;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent: #38bdf8;
-      --accent-grad: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+      --paper: #f8f6f1;
+      --surface: #ffffff;
+      --ink: #14151a;
+      --muted: #525866;
+      --line: #ddd8ce;
+      --accent: #c2410c;
+      --verdict: ${badgeColor};
+      --verdict-soft: ${badgeSoft};
+      color-scheme: light;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'Inter Tight', system-ui, -apple-system, sans-serif;
+      background: var(--paper);
+      color: var(--ink);
       display: flex;
       justify-content: center;
-      padding: 40px 20px;
+      padding: 36px 20px;
       line-height: 1.5;
     }
-    .cert-container {
-      max-width: 860px;
+    .cert-sheet {
+      max-width: 880px;
       width: 100%;
-      background: var(--card);
-      border: 2px solid #334155;
-      border-radius: 16px;
-      padding: 48px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 60px -28px rgba(20, 21, 26, 0.16);
+      padding: 44px;
       position: relative;
       overflow: hidden;
     }
-    .cert-container::before {
+    .cert-sheet::before {
       content: "";
       position: absolute;
-      top: 0; left: 0; right: 0; height: 6px;
-      background: var(--accent-grad);
-    }
-    .watermark {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%) rotate(-30deg);
-      font-size: 80px;
-      font-weight: 900;
-      color: rgba(255, 255, 255, 0.02);
-      pointer-events: none;
-      white-space: nowrap;
-      text-transform: uppercase;
-      letter-spacing: 8px;
+      inset: 0 0 auto 0;
+      height: 4px;
+      background: linear-gradient(90deg, #14151a 0%, #c2410c 55%, #b45309 100%);
     }
     .header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 24px;
-      margin-bottom: 32px;
+      gap: 20px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 22px;
+      margin-bottom: 26px;
+      flex-wrap: wrap;
     }
-    .brand {
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 40px; height: 40px;
+      border: 1px solid var(--ink);
+      display: grid; place-items: center;
+      color: var(--ink);
+    }
+    .brand-title { font-family: 'Instrument Serif', serif; font-size: 26px; line-height: 1; font-weight: 400; }
+    .brand-sub { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .meta-box { text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .meta-id { font-weight: 700; color: var(--ink); }
+    .meta-date { color: var(--muted); margin-top: 4px; font-size: 11px; }
+
+    .verdict-band {
       display: flex;
       align-items: center;
-      gap: 12px;
-    }
-    .brand-logo {
-      width: 44px; height: 44px;
-      background: var(--accent-grad);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; font-weight: bold; color: #fff;
-    }
-    .brand-title { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-    .brand-sub { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-    .meta-box { text-align: right; }
-    .meta-id { font-family: monospace; font-size: 13px; color: var(--accent); font-weight: 600; }
-    .meta-date { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-    
-    .verdict-banner {
-      background: ${badgeBg};
-      border: 1px solid ${badgeColor};
-      border-radius: 12px;
-      padding: 20px 24px;
-      margin-bottom: 32px;
-      display: flex;
       justify-content: space-between;
-      align-items: center;
+      gap: 24px;
+      padding: 20px 24px;
+      background: var(--verdict-soft);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--verdict);
+      margin-bottom: 28px;
+      flex-wrap: wrap;
     }
-    .verdict-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.5px; }
-    .verdict-status { font-size: 24px; font-weight: 800; color: ${badgeColor}; letter-spacing: -0.5px; margin-top: 2px; }
-    .verdict-desc { font-size: 13px; color: var(--text-muted); max-width: 500px; }
+    .rubber-stamp {
+      display: inline-block;
+      border: 3px double var(--verdict);
+      padding: 5px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--verdict);
+      transform: rotate(-3deg);
+      background: rgba(255, 255, 255, 0.72);
+    }
+    .verdict-status { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--verdict); margin-top: 8px; }
+    .verdict-desc { font-size: 14px; color: var(--ink); max-width: 520px; }
 
     .grid-section {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-bottom: 32px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
     }
     .box {
-      background: #090e1a;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 20px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      padding: 18px 20px;
     }
     .box-title {
-      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--accent);
-      margin-bottom: 14px;
-      display: flex; align-items: center; gap: 8px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
     }
-    .row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
-    .row-key { color: var(--text-muted); }
-    .row-val { font-weight: 600; font-family: monospace; }
+    .row { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 7px; font-size: 13px; }
+    .row:last-child { margin-bottom: 0; }
+    .row-key { color: var(--muted); }
+    .row-val { font-weight: 600; font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; }
 
     .seal-section {
-      background: #090e1a;
-      border: 1px dashed #334155;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 32px;
+      background: #14151a;
+      color: #f8f6f1;
+      padding: 18px 20px;
+      margin: 22px 0 26px;
     }
+    .seal-title { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #a1a1aa; }
     .seal-hash {
-      font-family: monospace;
+      font-family: 'JetBrains Mono', monospace;
       font-size: 12px;
       word-break: break-all;
-      background: #05070d;
-      padding: 10px 14px;
-      border-radius: 6px;
-      border: 1px solid #1e293b;
-      color: #38bdf8;
       margin-top: 8px;
+      color: #fbbf24;
     }
 
     .footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-top: 1px solid var(--border);
-      padding-top: 24px;
+      gap: 16px;
+      border-top: 1px solid var(--line);
+      padding-top: 20px;
+      flex-wrap: wrap;
     }
-    .footer-note { font-size: 11px; color: var(--text-muted); max-width: 550px; }
-    .btn-group { display: flex; gap: 10px; }
+    .footer-note { font-size: 12px; color: var(--muted); max-width: 480px; }
+    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
     .btn {
-      padding: 10px 18px;
-      border-radius: 8px;
-      font-size: 13px;
+      padding: 9px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
-      display: inline-flex; align-items: center; gap: 6px;
-      transition: all 0.2s ease;
-      border: 1px solid #334155;
-      background: #1e293b;
-      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
     }
-    .btn:hover { background: #334155; }
-    .btn-primary { background: var(--accent); color: #090d16; border: none; }
-    .btn-primary:hover { opacity: 0.9; }
+    .btn:hover { border-color: var(--ink); }
+    .btn-primary { background: var(--ink); color: #ffffff; border-color: var(--ink); }
 
+    @media (max-width: 640px) {
+      .cert-sheet { padding: 24px 18px; }
+      .grid-section { grid-template-columns: minmax(0, 1fr); }
+      .meta-box { text-align: left; }
+    }
     @media print {
-      body { background: #fff; color: #000; padding: 0; }
-      .cert-container { border: 2px solid #000; box-shadow: none; background: #fff; color: #000; }
-      .box, .seal-section { background: #f8fafc; border: 1px solid #cbd5e1; }
-      .row-key, .brand-sub, .footer-note { color: #475569; }
+      body { background: #ffffff; padding: 0; }
+      .cert-sheet { border: 1px solid #000000; box-shadow: none; }
       .btn-group { display: none; }
-      .seal-hash { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; }
     }
   </style>
 </head>
 <body>
-  <div class="cert-container">
-    <div class="watermark">PRAMAN VERIFIED</div>
-
-    <div class="header">
+  <article class="cert-sheet">
+    <header class="header">
       <div class="brand">
-        <div class="brand-logo">P</div>
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
         <div>
-          <div class="brand-title">PRAMAN DESK</div>
-          <div class="brand-sub">Autonomous Spend & Compliance Engine</div>
+          <h1 class="brand-title">Praman Desk Clearing Certificate</h1>
+          <p class="brand-sub">Autonomous B2B Escrow &amp; Spend Guard Record</p>
         </div>
       </div>
       <div class="meta-box">
-        <div class="meta-id">${cert.certificateId}</div>
-        <div class="meta-date">Issued: ${new Date(cert.issueDate).toUTCString()}</div>
+        <div class="meta-id">${escapeHtml(cert.certificateId)}</div>
+        <div class="meta-date">Issued ${escapeHtml(new Date(cert.issueDate).toUTCString())}</div>
       </div>
-    </div>
+    </header>
 
-    <div class="verdict-banner">
+    <section class="verdict-band" aria-label="Audit verdict">
       <div>
-        <div class="verdict-label">Official Audit Verdict</div>
-        <div class="verdict-status">${badgeText}</div>
+        <span class="rubber-stamp">${escapeHtml(stampWord)}</span>
+        <div class="verdict-status">${escapeHtml(badgeText)}</div>
       </div>
-      <div class="verdict-desc">${cert.clearanceSummary}</div>
-    </div>
+      <p class="verdict-desc">${escapeHtml(cert.clearanceSummary)}</p>
+    </section>
 
-    <div class="grid-section">
+    <section class="grid-section" aria-label="Identity and sanctions audit">
       <div class="box">
-        <div class="box-title">🏢 Legal Entity Identity</div>
-        <div class="row"><span class="row-key">Legal Name:</span><span class="row-val">${cert.targetEntity.name}</span></div>
-        <div class="row"><span class="row-key">GLEIF LEI:</span><span class="row-val">${cert.targetEntity.lei}</span></div>
-        <div class="row"><span class="row-key">Jurisdiction:</span><span class="row-val">${cert.targetEntity.jurisdiction}</span></div>
-        <div class="row"><span class="row-key">Status:</span><span class="row-val" style="color:#10b981">${cert.targetEntity.status}</span></div>
-      </div>
-
-      <div class="box">
-        <div class="box-title">🛡️ OFAC Sanctions Screening</div>
-        <div class="row"><span class="row-key">SDN List Match:</span><span class="row-val" style="color:${isBlocked ? '#ef4444' : '#10b981'}">${cert.ofacSanctionsAudit.status}</span></div>
-        <div class="row"><span class="row-key">RAM Database:</span><span class="row-val">19,565 Entities</span></div>
-        <div class="row"><span class="row-key">Inspection Latency:</span><span class="row-val">${cert.ofacSanctionsAudit.latency_ms} ms</span></div>
-        <div class="row"><span class="row-key">EVM Blacklist:</span><span class="row-val">Zero-Hit Cleared</span></div>
-      </div>
-    </div>
-
-    <div class="grid-section">
-      <div class="box">
-        <div class="box-title">⚙️ WebAssembly Ledger Reconciler</div>
-        <div class="row"><span class="row-key">Engine:</span><span class="row-val">651-byte WASM i64</span></div>
-        <div class="row"><span class="row-key">Reconciliation:</span><span class="row-val">${cert.wasmReconciliation.status}</span></div>
-        <div class="row"><span class="row-key">Variance:</span><span class="row-val">${cert.wasmReconciliation.variance !== undefined ? cert.wasmReconciliation.variance + ' USD' : '0.00 USD'}</span></div>
-        <div class="row"><span class="row-key">Float Drift:</span><span class="row-val">0 bits (Exact)</span></div>
+        <div class="box-title">01 · Legal Entity Identity</div>
+        <div class="row"><span class="row-key">Legal Name</span><span class="row-val">${escapeHtml(cert.targetEntity?.name)}</span></div>
+        <div class="row"><span class="row-key">GLEIF LEI</span><span class="row-val">${escapeHtml(cert.targetEntity?.lei)}</span></div>
+        <div class="row"><span class="row-key">Jurisdiction</span><span class="row-val">${escapeHtml(cert.targetEntity?.jurisdiction)}</span></div>
+        <div class="row"><span class="row-key">Status</span><span class="row-val" style="color:${badgeColor}">${escapeHtml(cert.targetEntity?.status)}</span></div>
       </div>
 
       <div class="box">
-        <div class="box-title">🔗 On-Chain Sepolia Anchor</div>
-        <div class="row"><span class="row-key">Network:</span><span class="row-val">Sepolia Diamond</span></div>
-        <div class="row"><span class="row-key">Contract:</span><span class="row-val">0x72a7...a08b</span></div>
-        <div class="row"><span class="row-key">Network Route:</span><span class="row-val">Devnode #6164 / Diamond #6201</span></div>
-        <div class="row"><span class="row-key">Settlement:</span><span class="row-val">x402 Protocol</span></div>
+        <div class="box-title">02 · OFAC Sanctions Screening</div>
+        <div class="row"><span class="row-key">SDN Screening</span><span class="row-val" style="color:${isBlocked ? '#b91c1c' : '#15803d'}">${escapeHtml(cert.ofacSanctionsAudit?.status)}</span></div>
+        <div class="row"><span class="row-key">Records Indexed</span><span class="row-val">19,565 Entities</span></div>
+        <div class="row"><span class="row-key">Latency</span><span class="row-val">${escapeHtml(cert.ofacSanctionsAudit?.latency_ms)} ms</span></div>
+        <div class="row"><span class="row-key">Digital Currency List</span><span class="row-val">${isBlocked ? 'Match Flagged' : 'Zero-Hit Cleared'}</span></div>
       </div>
-    </div>
+    </section>
 
-    <div class="seal-section">
-      <div class="box-title">🔒 Cryptographic Attestation Digest</div>
-      <div style="font-size: 12px; color: var(--text-muted);">Canonical SHA-256 Digest over audit assertions and identity payload:</div>
-      <div class="seal-hash">${cert.cryptographicSeal.sealDigest}</div>
-    </div>
-
-    <div class="footer">
-      <div class="footer-note">
-        This certificate provides deterministic cryptographic attestation generated by Praman Desk on Telegraph Protocol Season II. Validated against official US Treasury OFAC, GLEIF global LEI database, and Ethereum Sepolia on-chain verification diamond.
+    <section class="grid-section" aria-label="Reconciliation and on-chain anchor">
+      <div class="box">
+        <div class="box-title">03 · 651B WebAssembly Comparator</div>
+        <div class="row"><span class="row-key">Engine</span><span class="row-val">651-byte WASM i64</span></div>
+        <div class="row"><span class="row-key">Reconciliation</span><span class="row-val">${escapeHtml(cert.wasmReconciliation?.status)}</span></div>
+        <div class="row"><span class="row-key">Variance</span><span class="row-val">${escapeHtml(varianceDisplay)}</span></div>
+        <div class="row"><span class="row-key">Floating-Point Drift</span><span class="row-val">0 bits</span></div>
       </div>
+
+      <div class="box">
+        <div class="box-title">04 · On-Chain &amp; EIP-191 Anchor</div>
+        <div class="row"><span class="row-key">Network</span><span class="row-val">Ethereum Sepolia</span></div>
+        <div class="row"><span class="row-key">Diamond Registry</span><span class="row-val">0x72a7...a08b</span></div>
+        <div class="row"><span class="row-key">Miner / Diamond ID</span><span class="row-val">#6164 / #6201</span></div>
+        <div class="row"><span class="row-key">Signer</span><span class="row-val">${escapeHtml(cert.memoVerification?.signerAddress ? cert.memoVerification.signerAddress.slice(0, 10) + '...' : 'SHA-256 Sealed')}</span></div>
+      </div>
+    </section>
+
+    <section class="seal-section" aria-label="Cryptographic attestation seal">
+      <div class="seal-title">Canonical SHA-256 Audit Digest (${escapeHtml(cert.cryptographicSeal?.verificationStandard || 'PRAMAN-AUDIT-SEAL-v1')})</div>
+      <div class="seal-hash">${escapeHtml(cert.cryptographicSeal?.sealDigest)}</div>
+    </section>
+
+    <footer class="footer">
+      <p class="footer-note">
+        Generated deterministically by Praman Desk on Telegraph Protocol (Sepolia Testnet + OFAC SDN + GLEIF). Statutory reference only; testnet settlement tokens where labeled.
+      </p>
       <div class="btn-group">
-        <button class="btn btn-primary" onclick="window.print()">🖨️ Print / Save PDF</button>
-        <a class="btn" href="/api/audit/certificate?vendor=${encodeURIComponent(cert.targetEntity.name)}&format=json" target="_blank">📄 View JSON</a>
+        <button class="btn btn-primary" type="button" id="btn-print-cert">Print / Save PDF</button>
+        <a class="btn" href="${escapeHtml(caseLink)}">Verify in Browser</a>
+        <a class="btn" href="/api/audit/certificate?vendor=${encodeURIComponent(cert.targetEntity?.name || '')}&format=json" target="_blank" rel="noopener">View JSON</a>
       </div>
-    </div>
-  </div>
+    </footer>
+  </article>
+  <script>
+    document.getElementById('btn-print-cert')?.addEventListener('click', function () { window.print(); });
+  </script>
 </body>
 </html>`;
 }

@@ -8,6 +8,12 @@ public/audit_frame_*.png
 public/clean_frame_*.png
 public/demo.mp4
 public/narration.mp3
+public/scene_*.mp4
+public/test_neerja*.mp3
+public/recorded_*
+public/concat_list.txt
+public/benchmark-recording-shell.html
 eval-data
 *.bak*
 examples/minds-spend-guard/test-bundles
+.archify

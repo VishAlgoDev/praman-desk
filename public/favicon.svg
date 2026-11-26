@@ -1,5 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="8" fill="#070b14"/>
-  <path d="M16 4L6 8V15C6 21.5 10.3 27.5 16 29C21.7 27.5 26 21.5 26 15V8L16 4Z" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" stroke-linejoin="round"/>
-  <path d="M11 16L14.5 19.5L21 12.5" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none">
+  <defs>
+    <linearGradient id="pm-bg" x1="6" y1="4" x2="34" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="55%" stop-color="#1d4ed8"/>
+      <stop offset="100%" stop-color="#0f296b"/>
+    </linearGradient>
+    <linearGradient id="pm-facet" x1="8" y1="8" x2="20" y2="34" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.38"/>
+      <stop offset="100%" stop-color="#1e3a8a" stop-opacity="0.12"/>
+    </linearGradient>
+    <linearGradient id="pm-bevel" x1="8" y1="5" x2="26" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.58"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path d="M20 3.2L6.5 8.6V19.2C6.5 27.6 12.2 34.4 20 37C27.8 34.4 33.5 27.6 33.5 19.2V8.6L20 3.2Z" fill="url(#pm-bg)"/>
+  <path d="M20 3.2L6.5 8.6V19.2C6.5 27.6 12.2 34.4 20 37V3.2Z" fill="url(#pm-facet)"/>
+  <path d="M20 4.2L7.5 9.2V19.2C7.5 27 12.8 33.3 20 35.8C27.2 33.3 32.5 27 32.5 19.2V9.2L20 4.2Z" stroke="url(#pm-bevel)" stroke-width="1.35"/>
+  <path d="M13.6 20.1L18.1 24.6L26.8 15.4" stroke="#ffffff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

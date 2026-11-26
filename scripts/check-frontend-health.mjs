@@ -1,51 +1,53 @@
 import { performance } from 'node:perf_hooks';
 
+const ROUTES = ['/', '/desks', '/verify', '/docs', '/roadmap'];
+
 async function checkFrontend() {
-  const url = 'https://praman-desk.vercel.app';
-  console.log(`Checking frontend at: ${url}...`);
+  const baseUrl = process.env.PRAMAN_BASE_URL || 'https://praman-desk.vercel.app';
+  console.log(`Checking multi-page frontend at: ${baseUrl}...`);
+  const seenAssets = new Set();
 
-  const start = performance.now();
-  const res = await fetch(url);
-  const dur = performance.now() - start;
+  for (const route of ROUTES) {
+    const url = `${baseUrl}${route}`;
+    const start = performance.now();
+    const res = await fetch(url);
+    const dur = performance.now() - start;
+    console.log(`\nRoute ${route} -> HTTP ${res.status} (${dur.toFixed(1)} ms)`);
+    if (res.status !== 200) {
+      throw new Error(`Route ${route} returned HTTP ${res.status}`);
+    }
 
-  console.log(`HTTP Status: ${res.status} ${res.statusText}`);
-  console.log(`Latency:     ${dur.toFixed(1)} ms`);
-  console.log('Headers:');
-  console.log('  content-type:', res.headers.get('content-type'));
-  console.log('  cache-control:', res.headers.get('cache-control'));
-  console.log('  server:', res.headers.get('server'));
-  console.log('  x-vercel-id:', res.headers.get('x-vercel-id'));
+    const html = await res.text();
+    const h1Count = (html.match(/<h1[\s>]/gi) || []).length;
+    const checks = {
+      doctype: /<!doctype\s+html>/i.test(html),
+      hasTitle: /<title>.*<\/title>/i.test(html),
+      h1Count,
+      hasMain: /<main[\s>]/i.test(html),
+      openDivs: (html.match(/<div[\s>]/g) || []).length,
+      closeDivs: (html.match(/<\/div>/g) || []).length,
+      bytes: html.length
+    };
+    console.log('  Structure:', checks);
+    if (!checks.doctype || !checks.hasTitle || h1Count !== 1 || !checks.hasMain) {
+      throw new Error(`Structure check failed on ${route}: ${JSON.stringify(checks)}`);
+    }
 
-  const html = await res.text();
-  console.log(`HTML Length: ${html.length} bytes`);
-
-  // Basic HTML validation checks
-  const checks = {
-    doctype: /<!doctype\s+html>/i.test(html),
-    head: /<head>[\s\S]*<\/head>/i.test(html),
-    body: /<body>[\s\S]*<\/body>/i.test(html),
-    title: /<title>(.*?)<\/title>/i.exec(html)?.[1],
-    hasH1: /<h1>(.*?)<\/h1>/i.exec(html)?.[1],
-    hasScript: /<script[\s\S]*?<\/script>/i.test(html),
-    hasStyle: /<style[\s\S]*?<\/style>/i.test(html),
-    openTagsCount: (html.match(/<div/g) || []).length,
-    closeTagsCount: (html.match(/<\/div>/g) || []).length,
-    unclosedBrackets: html.split('<').length === html.split('>').length
-  };
-
-  console.log('HTML Structure Verification:', checks);
-
-  // Check all referenced assets (links, src, etc.)
-  const srcMatches = [...html.matchAll(/(?:src|href)=["']([^"']+)["']/g)].map(m => m[1]);
-  console.log('Referenced URLs in HTML:', srcMatches.length);
-  const internalAssets = srcMatches.filter(u => u.startsWith('/') && !u.startsWith('//'));
-  console.log('Internal asset links:', internalAssets);
-
-  for (const asset of internalAssets) {
-    const assetUrl = `${url}${asset}`;
-    const aRes = await fetch(assetUrl);
-    console.log(`  Asset ${asset} -> HTTP ${aRes.status}`);
+    const srcMatches = [...html.matchAll(/(?:src|href)=["']([^"']+)["']/g)].map((m) => m[1]);
+    for (const asset of srcMatches) {
+      if (!asset.startsWith('/') || asset.startsWith('//')) continue;
+      if (seenAssets.has(asset)) continue;
+      seenAssets.add(asset);
+      const aRes = await fetch(`${baseUrl}${asset}`);
+      console.log(`  Asset ${asset} -> HTTP ${aRes.status}`);
+      if (aRes.status !== 200) {
+        throw new Error(`Asset ${asset} returned HTTP ${aRes.status}`);
+      }
+    }
   }
 }
 
-checkFrontend().catch(console.error);
+checkFrontend().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

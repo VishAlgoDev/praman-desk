@@ -11,6 +11,30 @@
       "destination": "/favicon.svg"
     },
     {
+      "source": "/desks",
+      "destination": "/desks/index.html"
+    },
+    {
+      "source": "/verify",
+      "destination": "/verify/index.html"
+    },
+    {
+      "source": "/case/:id",
+      "destination": "/verify/index.html"
+    },
+    {
+      "source": "/docs",
+      "destination": "/docs/index.html"
+    },
+    {
+      "source": "/docs/:slug",
+      "destination": "/docs/index.html"
+    },
+    {
+      "source": "/roadmap",
+      "destination": "/roadmap/index.html"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/index.mjs"
     }

@@ -1,0 +1,1608 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "workflow",
+  "quality": "showcase",
+  "startedAt": "2026-11-26T12:23:36.561Z",
+  "specification": {
+    "path": "C:\\Users\\Public\\My Agent\\telegraph-h2\\.archify\\clearing-workflow.json",
+    "sha256": "88e6e95b4c79356dd8483d634ec8607b666d77f3bea8fa3a86c057e0fece0b6d",
+    "bytes": 4457
+  },
+  "artifact": {
+    "path": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.html",
+    "sha256": "eb3604020835279404e08a7f26c84525af26180486c7ba458c0d66804969e686",
+    "bytes": 849414
+  },
+  "stages": {
+    "validate": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": null,
+      "execution": "embedded-in-deliver",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\visha\\.agents\\skills\\archify\\bin\\archify.mjs",
+        "deliver",
+        "workflow",
+        "C:\\Users\\Public\\My Agent\\telegraph-h2\\.archify\\clearing-workflow.json",
+        "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "c:\\Users\\Public\\My Agent\\telegraph-h2",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "validate",
+        "specification": {
+          "sha256": "88e6e95b4c79356dd8483d634ec8607b666d77f3bea8fa3a86c057e0fece0b6d",
+          "bytes": 4457
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        }
+      }
+    },
+    "deliver": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 528,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\visha\\.agents\\skills\\archify\\bin\\archify.mjs",
+        "deliver",
+        "workflow",
+        "C:\\Users\\Public\\My Agent\\telegraph-h2\\.archify\\clearing-workflow.json",
+        "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "c:\\Users\\Public\\My Agent\\telegraph-h2",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "receiptId": "dba120cf-8d25-43f8-928d-1afeb8895341",
+        "ok": true,
+        "command": "deliver",
+        "type": "workflow",
+        "input": "C:\\Users\\Public\\My Agent\\telegraph-h2\\.archify\\clearing-workflow.json",
+        "output": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.html",
+        "specification": {
+          "sha256": "88e6e95b4c79356dd8483d634ec8607b666d77f3bea8fa3a86c057e0fece0b6d",
+          "bytes": 4457
+        },
+        "artifact": {
+          "sha256": "eb3604020835279404e08a7f26c84525af26180486c7ba458c0d66804969e686",
+          "bytes": 849414
+        },
+        "validation": {
+          "checksPassed": 9,
+          "checkCount": 9,
+          "compositionProfile": "showcase",
+          "compositionStatus": "pass",
+          "errors": 0,
+          "warnings": 0
+        },
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      }
+    },
+    "check": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 197,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\visha\\.agents\\skills\\archify\\bin\\archify.mjs",
+        "check",
+        "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.html",
+        "--require-provenance"
+      ],
+      "receipt": {
+        "ok": true,
+        "file": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.html",
+        "artifact": {
+          "sha256": "eb3604020835279404e08a7f26c84525af26180486c7ba458c0d66804969e686",
+          "bytes": 849414
+        },
+        "checks": [
+          {
+            "name": "single_svg",
+            "ok": true,
+            "details": [
+              "found 1 <svg> block(s)"
+            ]
+          },
+          {
+            "name": "finite_svg",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "orthogonal_arrows",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "label_route_clearance",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_crossings",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "relationship_corridors",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "container_border_runs",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "route_rhythm",
+            "ok": true,
+            "details": []
+          },
+          {
+            "name": "legend_clearance",
+            "ok": true,
+            "details": []
+          }
+        ],
+        "composition": {
+          "schemaVersion": 1,
+          "profile": "showcase",
+          "status": "pass",
+          "summary": {
+            "errors": 0,
+            "warnings": 0
+          },
+          "metrics": {
+            "properCrossings": 0,
+            "resolvedCrossovers": 0,
+            "ambiguousCorridors": 0,
+            "arrowheadCollisions": 0,
+            "containerBorderRuns": 0,
+            "labelRouteClearanceIssues": 0,
+            "labelCanvasOverflowIssues": 0,
+            "minLabelRouteClearance": 16.4,
+            "desktopReadabilityIssues": 0,
+            "viewportHeightIssues": 0,
+            "minProjectedNodeTextPx": 6.97282099343955,
+            "maxBends": 0,
+            "routesOverSuggestedBends": 0,
+            "maxStretch": 1,
+            "routesOverSuggestedStretch": 0,
+            "minSegmentPx": 8,
+            "minInteriorSegmentPx": null,
+            "shortSegmentCount": 3,
+            "shortEndpointSegmentCount": 3,
+            "shortInteriorSegmentCount": 0,
+            "microSegmentCount": 0
+          },
+          "suggestedLimits": {
+            "bendsPerRelationship": 2,
+            "stretch": 1.35,
+            "segmentPx": 16,
+            "microSegmentPx": 8
+          },
+          "routeReview": {
+            "crossings": [],
+            "detours": []
+          },
+          "leadingSpace": {
+            "measured": false,
+            "reviewSuggested": false
+          },
+          "desktopReadability": {
+            "budgetBasis": "legacy-930",
+            "readerContract": "declared-wide-v1",
+            "availableDiagramWidth": 930,
+            "actualBudgetPx": 930,
+            "limit": "legacy",
+            "requestedTargetPx": null,
+            "requestedTargetMet": null,
+            "hardFloorPx": 6,
+            "hardFloorMet": true,
+            "minimumOwner": {
+              "kind": "node",
+              "id": "caller"
+            },
+            "minimumSourceTextPx": 8,
+            "minimumProjectedTextPx": 6.97282099343955,
+            "semanticTextCount": 28
+          },
+          "issues": []
+        },
+        "provenance": "current",
+        "deliveryReceiptId": "dba120cf-8d25-43f8-928d-1afeb8895341"
+      }
+    },
+    "browser-check": {
+      "status": "pass",
+      "exitCode": 0,
+      "durationMs": 2236,
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "C:\\Users\\visha\\.agents\\skills\\archify\\bin\\archify.mjs",
+        "browser-check",
+        "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.html",
+        "--json",
+        "--require-provenance"
+      ],
+      "execution": "in-process",
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": true,
+        "command": "browser-check",
+        "evidenceKind": "automated-browser",
+        "status": "pass",
+        "visualReview": "not-requested",
+        "provenance": "current",
+        "deliveryReceiptId": "dba120cf-8d25-43f8-928d-1afeb8895341",
+        "artifact": {
+          "path": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.html",
+          "sha256": "eb3604020835279404e08a7f26c84525af26180486c7ba458c0d66804969e686",
+          "bytes": 849414
+        },
+        "state": {
+          "detail": "read",
+          "motion": "still"
+        },
+        "chrome": {
+          "status": "available",
+          "executable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+        },
+        "diagnostics": [],
+        "containment": {
+          "status": "pass",
+          "policy": "fit-or-reader-declared-readable-vertical-scroll",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1197,
+              "diagramWidth": 1167,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 52,
+                "diagramChromePx": 78,
+                "svgPx": 746,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 125,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 74,
+                  "spaceAboveNodesPx": 45,
+                  "spaceBelowNodesPx": 5
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 125,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 74,
+                  "spaceAboveNodesPx": 45,
+                  "spaceBelowNodesPx": 5
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 122,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 74,
+                  "spaceAboveNodesPx": 43,
+                  "spaceBelowNodesPx": 5
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 116,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 57,
+                  "spaceAboveNodesPx": 46,
+                  "spaceBelowNodesPx": 13
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1000,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1250,
+              "diagramWidth": 1220,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 780,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 130,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 78,
+                  "spaceAboveNodesPx": 47,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 130,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 78,
+                  "spaceAboveNodesPx": 47,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 128,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 78,
+                  "spaceAboveNodesPx": 45,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 121,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 59,
+                  "spaceAboveNodesPx": 48,
+                  "spaceBelowNodesPx": 14
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1080,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1375,
+              "diagramWidth": 1345,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 860,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 144,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 86,
+                  "spaceAboveNodesPx": 52,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 144,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 86,
+                  "spaceAboveNodesPx": 52,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 141,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 86,
+                  "spaceAboveNodesPx": 49,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 134,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 66,
+                  "spaceAboveNodesPx": 53,
+                  "spaceBelowNodesPx": 15
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1320,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1743,
+              "diagramWidth": 1693,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1082,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 181,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 108,
+                  "spaceAboveNodesPx": 65,
+                  "spaceBelowNodesPx": 8
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 181,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 108,
+                  "spaceAboveNodesPx": 65,
+                  "spaceBelowNodesPx": 8
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 178,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 108,
+                  "spaceAboveNodesPx": 62,
+                  "spaceBelowNodesPx": 8
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 168,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 83,
+                  "spaceAboveNodesPx": 67,
+                  "spaceBelowNodesPx": 19
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "themeStates": {
+          "status": "pass",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "requestedTheme": "light",
+              "resolvedTheme": "light",
+              "ok": true
+            },
+            {
+              "width": 1440,
+              "height": 900,
+              "requestedTheme": "dark",
+              "resolvedTheme": "dark",
+              "ok": true
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "requestedTheme": "dark",
+              "resolvedTheme": "dark",
+              "ok": true
+            }
+          ]
+        },
+        "readability": {
+          "status": "pass",
+          "minimumProjectedNodeTextPx": 6,
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1197,
+              "diagramWidth": 1167,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 52,
+                "diagramChromePx": 78,
+                "svgPx": 746,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 125,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 74,
+                  "spaceAboveNodesPx": 45,
+                  "spaceBelowNodesPx": 5
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 125,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 74,
+                  "spaceAboveNodesPx": 45,
+                  "spaceBelowNodesPx": 5
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 122,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 74,
+                  "spaceAboveNodesPx": 43,
+                  "spaceBelowNodesPx": 5
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 116,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 57,
+                  "spaceAboveNodesPx": 46,
+                  "spaceBelowNodesPx": 13
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1000,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1250,
+              "diagramWidth": 1220,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 780,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 130,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 78,
+                  "spaceAboveNodesPx": 47,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 130,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 78,
+                  "spaceAboveNodesPx": 47,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 128,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 78,
+                  "spaceAboveNodesPx": 45,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 121,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 59,
+                  "spaceAboveNodesPx": 48,
+                  "spaceBelowNodesPx": 14
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1080,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1375,
+              "diagramWidth": 1345,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 860,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 144,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 86,
+                  "spaceAboveNodesPx": 52,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 144,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 86,
+                  "spaceAboveNodesPx": 52,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 141,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 86,
+                  "spaceAboveNodesPx": 49,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 134,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 66,
+                  "spaceAboveNodesPx": 53,
+                  "spaceBelowNodesPx": 15
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1320,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1743,
+              "diagramWidth": 1693,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1082,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 181,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 108,
+                  "spaceAboveNodesPx": 65,
+                  "spaceBelowNodesPx": 8
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 181,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 108,
+                  "spaceAboveNodesPx": 65,
+                  "spaceBelowNodesPx": 8
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 178,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 108,
+                  "spaceAboveNodesPx": 62,
+                  "spaceBelowNodesPx": 8
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 168,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 83,
+                  "spaceAboveNodesPx": 67,
+                  "spaceBelowNodesPx": 19
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "viewerChrome": {
+          "status": "pass",
+          "viewports": [
+            {
+              "width": 1440,
+              "height": 900,
+              "theme": "light",
+              "innerWidth": 1440,
+              "innerHeight": 900,
+              "scrollWidth": 1440,
+              "scrollHeight": 900,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1197,
+              "diagramWidth": 1167,
+              "pageComposition": {
+                "bodyPaddingPx": 12,
+                "headerPx": 52,
+                "diagramChromePx": 78,
+                "svgPx": 746,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 125,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 74,
+                  "spaceAboveNodesPx": 45,
+                  "spaceBelowNodesPx": 5
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 125,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 74,
+                  "spaceAboveNodesPx": 45,
+                  "spaceBelowNodesPx": 5
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 122,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 74,
+                  "spaceAboveNodesPx": 43,
+                  "spaceBelowNodesPx": 5
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 116,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 57,
+                  "spaceAboveNodesPx": 46,
+                  "spaceBelowNodesPx": 13
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1600,
+              "height": 1000,
+              "theme": "light",
+              "innerWidth": 1600,
+              "innerHeight": 1000,
+              "scrollWidth": 1600,
+              "scrollHeight": 1000,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1250,
+              "diagramWidth": 1220,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 780,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 130,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 78,
+                  "spaceAboveNodesPx": 47,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 130,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 78,
+                  "spaceAboveNodesPx": 47,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 128,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 78,
+                  "spaceAboveNodesPx": 45,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 121,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 59,
+                  "spaceAboveNodesPx": 48,
+                  "spaceBelowNodesPx": 14
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 1920,
+              "height": 1080,
+              "theme": "light",
+              "innerWidth": 1920,
+              "innerHeight": 1080,
+              "scrollWidth": 1920,
+              "scrollHeight": 1080,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1375,
+              "diagramWidth": 1345,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 60,
+                "diagramChromePx": 84,
+                "svgPx": 860,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 144,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 86,
+                  "spaceAboveNodesPx": 52,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 144,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 86,
+                  "spaceAboveNodesPx": 52,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 141,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 86,
+                  "spaceAboveNodesPx": 49,
+                  "spaceBelowNodesPx": 6
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 134,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 66,
+                  "spaceAboveNodesPx": 53,
+                  "spaceBelowNodesPx": 15
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 54,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            },
+            {
+              "width": 2048,
+              "height": 1320,
+              "theme": "light",
+              "innerWidth": 2048,
+              "innerHeight": 1320,
+              "scrollWidth": 2048,
+              "scrollHeight": 1320,
+              "overflowX": false,
+              "overflowY": false,
+              "verticalScrollAccepted": false,
+              "overflowDisposition": "contained",
+              "readerLayout": "adaptive",
+              "readerOverflow": null,
+              "readerFit": null,
+              "ok": true,
+              "readerWidth": 1743,
+              "diagramWidth": 1693,
+              "pageComposition": {
+                "bodyPaddingPx": 64,
+                "headerPx": 68,
+                "diagramChromePx": 94,
+                "svgPx": 1082,
+                "cardsPx": 0,
+                "viewBoxHeight": 682
+              },
+              "viewBoxWidth": 1067,
+              "workflowLanes": [
+                {
+                  "frameId": "lane-2",
+                  "heightPx": 181,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "wasm",
+                    "halted",
+                    "reconcile"
+                  ],
+                  "nodeSpanPx": 108,
+                  "spaceAboveNodesPx": 65,
+                  "spaceBelowNodesPx": 8
+                },
+                {
+                  "frameId": "lane-3",
+                  "heightPx": 181,
+                  "nodeCount": 3,
+                  "nodeIds": [
+                    "sanctions",
+                    "memo",
+                    "escrow"
+                  ],
+                  "nodeSpanPx": 108,
+                  "spaceAboveNodesPx": 65,
+                  "spaceBelowNodesPx": 8
+                },
+                {
+                  "frameId": "lane-1",
+                  "heightPx": 178,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "intake",
+                    "solver"
+                  ],
+                  "nodeSpanPx": 108,
+                  "spaceAboveNodesPx": 62,
+                  "spaceBelowNodesPx": 8
+                },
+                {
+                  "frameId": "lane-0",
+                  "heightPx": 168,
+                  "nodeCount": 2,
+                  "nodeIds": [
+                    "caller",
+                    "outcome"
+                  ],
+                  "nodeSpanPx": 83,
+                  "spaceAboveNodesPx": 67,
+                  "spaceBelowNodesPx": 19
+                }
+              ],
+              "minimumProjectedNodeTextPx": 8,
+              "minimumProjectedNonEdgeTextPx": 8,
+              "minimumProjectedEdgeTextPx": 8,
+              "minimumProjectedNodeText": "PO + invoice + tx",
+              "minimumProjectedNodeTextDetail": "context",
+              "minimumProjectedNodeTextOwner": {
+                "kind": "node",
+                "id": "caller"
+              },
+              "minimumRequiredNodeTextPx": 6,
+              "readabilityOk": true,
+              "hasLegend": true,
+              "hasNavigationDock": true,
+              "legendDockIntersectionArea": 0,
+              "dockStageIntersectionArea": 0,
+              "dockStageGap": 10,
+              "requiredDockStageGap": 10,
+              "viewerChromeStageOk": true,
+              "viewerChromeReserve": 44,
+              "viewerChromeActive": true,
+              "viewerChromeOk": true,
+              "resolvedTheme": "light"
+            }
+          ]
+        },
+        "captures": {
+          "status": "not-requested",
+          "screenshots": [],
+          "contactSheet": null
+        },
+        "sidecars": {
+          "receipt": "clearing-workflow.browser-check.json",
+          "files": []
+        }
+      }
+    }
+  },
+  "browserCheck": {
+    "requested": true,
+    "ran": true
+  },
+  "diagnostics": [],
+  "evidence": {
+    "receipt": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.finalize.json",
+    "summaryReceipt": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.finalize-summary.json",
+    "browserCheckReceipt": "C:\\Users\\Public\\My Agent\\telegraph-h2\\public\\diagrams\\clearing-workflow.browser-check.json"
+  },
+  "visualReview": "not-requested",
+  "finishedAt": "2026-11-26T12:23:39.962Z",
+  "durationMs": 3401,
+  "update": {
+    "status": "update_available",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.3.1",
+    "releaseNotes": "https://github.com/tt-a1i/archify/releases/tag/v3.3.1",
+    "severity": "normal",
+    "summary": "Polishes automatic Architecture layout, spine labels, crossing reduction, and Classic styling, and deduplicates cited Explainer files.",
+    "checkedAt": "2026-11-26T12:23:08.447Z",
+    "source": "cache",
+    "noticeRequired": true,
+    "noticeText": "Archify update: 3.2.0 → 3.3.1. A previous check at 2026-11-26T12:23:08.447Z found a newer release. Release notes: https://github.com/tt-a1i/archify/releases/tag/v3.3.1. Would you like me to update Archify?",
+    "eventKey": "archify@sha256:b92b4d55446966fd74e5338a45d6de9a7a1b194420cd5eb14d2cdc39f1053b80"
+  }
+}

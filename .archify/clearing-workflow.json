@@ -1,0 +1,69 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Praman Autonomous Clearing & Halt Workflow",
+    "animation": "trace",
+    "visual_preset": "signal-flow",
+    "quality_profile": "showcase",
+    "output": "public/diagrams/clearing-workflow.html"
+  },
+  "lanes": [
+    { "id": "client", "label": "Buyer / Autonomous Agent" },
+    { "id": "gateway", "label": "Praman Desk (src/handlers.mjs)" },
+    { "id": "circuit", "label": "WASM & Sanctions Gate", "variant": "exception" },
+    { "id": "settlement", "label": "Attestation & Chain Settlement" }
+  ],
+  "phases": [
+    { "id": "submit", "label": "Submit Evidence", "fromCol": 0, "toCol": 1 },
+    { "id": "verify", "label": "Evaluate + Halt", "fromCol": 2, "toCol": 3, "variant": "emphasis" },
+    { "id": "attest", "label": "Sign + Settle", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [
+    { "id": "ingest_group", "label": "Intake & Normalization", "lane": "gateway", "fromCol": 1, "toCol": 2, "variant": "emphasis" },
+    { "id": "halt_group", "label": "Deterministic Circuit Breaker", "lane": "circuit", "fromCol": 3, "toCol": 5, "variant": "security" },
+    { "id": "chain_group", "label": "Cryptographic Proof", "lane": "settlement", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "mainPath": ["caller", "intake", "solver", "wasm", "memo", "escrow"],
+  "nodes": [
+    { "id": "caller", "lane": "client", "col": 0, "type": "external", "label": "Agent / ERP", "sublabel": "PO + invoice + tx", "width": 138 },
+    { "id": "outcome", "lane": "client", "col": 5, "type": "frontend", "label": "Signed Verdict", "sublabel": "EIP-191 + cert", "width": 138 },
+    { "id": "intake", "lane": "gateway", "col": 1, "type": "backend", "label": "API Router", "sublabel": "src/handlers.mjs", "width": 138 },
+    { "id": "solver", "lane": "gateway", "col": 2, "type": "backend", "label": "Line-Item Solver", "sublabel": "dynamic-solver.mjs", "tag": "deterministic", "width": 138 },
+    { "id": "wasm", "lane": "circuit", "col": 3, "type": "security", "label": "651B WASM Gate", "sublabel": "comparator.wasm", "tag": "<3ms quorum", "width": 138 },
+    { "id": "halted", "lane": "circuit", "col": 4, "type": "security", "label": "Halt Settlement", "sublabel": "OFAC / variance", "width": 138 },
+    { "id": "reconcile", "lane": "circuit", "col": 5, "type": "messagebus", "label": "Prorate Escrow", "sublabel": "$80k release / $20k refund", "width": 138 },
+    { "id": "memo", "lane": "settlement", "col": 4, "type": "database", "label": "SHA-256 + EIP-191", "sublabel": "/api/memo/verify", "tag": "verifiable", "width": 138 },
+    { "id": "escrow", "lane": "settlement", "col": 5, "type": "cloud", "label": "Sepolia / Solana", "sublabel": "TakarSettle + EAS", "width": 138 },
+    { "id": "sanctions", "lane": "settlement", "col": 2, "type": "database", "label": "OFAC SDN List", "sublabel": "19,565 records", "width": 138 }
+  ],
+  "edges": [
+    { "id": "e1", "from": "caller", "to": "intake", "label": "POST /api/audit", "variant": "default" },
+    { "id": "e2", "from": "intake", "to": "solver", "variant": "emphasis" },
+    { "id": "e3", "from": "solver", "to": "wasm", "label": "bps score", "variant": "emphasis" },
+    { "id": "e4", "from": "sanctions", "to": "wasm", "label": "screen", "variant": "dashed" },
+    { "id": "e5", "from": "wasm", "to": "halted", "label": "fail", "variant": "security", "role": "error" },
+    { "id": "e6", "from": "halted", "to": "reconcile", "label": "partial delivery", "variant": "dashed", "role": "branch" },
+    { "id": "e7", "from": "wasm", "to": "memo", "label": "pass", "variant": "emphasis" },
+    { "id": "e8", "from": "memo", "to": "escrow", "label": "anchor", "variant": "default" },
+    { "id": "e9", "from": "escrow", "to": "outcome", "label": "receipt", "variant": "emphasis", "role": "return", "fromSide": "right", "toSide": "right", "route": "outside-right", "labelSegment": 1, "width": 1.2 }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Fail-Closed Pre-Signature Gate",
+      "items": [
+        "Every disbursement clears 651B comparator.wasm before signing",
+        "Partial delivery routes cleanly to prorated settlement"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Verifiable Cryptographic Proof",
+      "items": [
+        "Canonical payloads hash via SHA-256 and sign via EIP-191",
+        "Receipts anchor on Ethereum Sepolia EAS or Solana Devnet"
+      ]
+    }
+  ]
+}

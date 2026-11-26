@@ -1,1553 +1,959 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Praman Desk - Autonomous B2B Escrow & Cryptographic Spend Guard</title>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="/fonts/jetbrains-mono-var.woff2" as="font" type="font/woff2" crossorigin>
-<meta name="description" content="Institutional verification and autonomous settlement middleware. 15-stage WASM verification, pre-signature spend guards, multi-miner dispute resolution, and on-chain Sepolia execution.">
-
-<style>
-@font-face {
-  font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap;
-  src: url('/fonts/inter-var.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'JetBrains Mono'; font-style: normal; font-weight: 100 800; font-display: swap;
-  src: url('/fonts/jetbrains-mono-var.woff2') format('woff2');
-}
-
-:root {
-  /* Dark Tech System Tokens */
-  --bg-base: #15131C;
-  --bg-surface: #1B1824;
-  --bg-surface-elevated: #232030;
-  --bg-surface-glass: rgba(21, 19, 28, 0.78);
-  
-  --border-subtle: rgba(255, 255, 255, 0.09);
-  --border-ring: rgba(255, 255, 255, 0.145);
-  --border-strong: rgba(255, 255, 255, 0.28);
-  
-  /* Accent Blue & Positive Green & Halt Crimson */
-  --brand: #FF7A59;
-  --brand-dim: rgba(255, 122, 89, 0.14);
-  --brand-glow: rgba(255, 122, 89, 0.35);
-  
-  --accent-emerald: #62C073;
-  --accent-emerald-dim: rgba(98, 192, 115, 0.14);
-  --accent-emerald-border: rgba(98, 192, 115, 0.38);
-  
-  --halt-crimson: #EF4444;
-  --halt-crimson-dim: rgba(239, 68, 68, 0.14);
-  --halt-crimson-border: rgba(239, 68, 68, 0.40);
-  
-  --warning-amber: #F59E0B;
-  --warning-amber-dim: rgba(245, 158, 11, 0.14);
-  
-  --text-primary: #FFFFFF;
-  --text-secondary: #999999;
-  --text-muted: #8a8a8a;
-  
-  /* Pencil Sketch Plot Color */
-  --plot: #2E6FFF;
-  --plot-glow: rgba(46, 111, 255, 0.4);
-  
-  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --font-text: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  
-  --t-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
-  --t-smooth: 250ms cubic-bezier(0.16, 1, 0.3, 1);
-  --t-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; background: var(--bg-base); color: var(--text-primary); }
-body {
-  background: var(--bg-base);
-  color: var(--text-primary);
-  font-family: var(--font-text);
-  font-size: 14.5px;
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
-  padding-right: 60px; /* Space for Fixed 60px Right Edge HUD Sidebar */
-}
-
-@media (max-width: 1024px) {
-  body { padding-right: 0; }
-}
-
-/* Atmospheric Ambient Lighting */
-body::before {
-  content: '';
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background: 
-    radial-gradient(1100px circle at 50% -10%, rgba(255, 122, 89, 0.08), transparent 60%),
-    radial-gradient(800px circle at 90% 25%, rgba(98, 192, 115, 0.05), transparent 50%),
-    radial-gradient(900px circle at 10% 40%, rgba(255, 122, 89, 0.04), transparent 60%);
-}
-
-.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
-.tnum { font-variant-numeric: tabular-nums; }
-.wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
-a { color: var(--brand); text-decoration: none; transition: color var(--t-fast); }
-a:hover { color: #FFB39D; text-decoration: underline; }
-
-/* ==========================================================================
-   1. FIXED 60PX RIGHT EDGE HUD SIDEBAR
-   ========================================================================== */
-#hud-sidebar {
-  position: fixed; right: 0; top: 0; width: 60px; height: 100vh; z-index: 90;
-  background: rgba(8, 12, 20, 0.85);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-left: 1px solid var(--border-subtle);
-  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-  padding: 24px 0; user-select: none;
-}
-
-.hud-ticks-track {
-  position: absolute; right: 10px; top: 0; width: 30px; height: 100%;
-  pointer-events: none;
-}
-.hud-tick {
-  position: absolute; right: 0; height: 1px; background: rgba(255, 255, 255, 0.2);
-  width: 14px; transform: translateY(-50%);
-}
-.hud-tick.major {
-  width: 28px; background: rgba(255, 255, 255, 0.6); height: 1.5px;
-}
-
-/* Vertical Blue Progress Bar (#6B9EFF) with 10px Outer Glow */
-.hud-progress-rail {
-  position: absolute; right: 8px; top: 0; width: 3px; height: 100%;
-  background: rgba(255, 255, 255, 0.06);
-}
-#hud-progress-bar {
-  position: absolute; right: 0; top: 0; width: 100%; height: 0%;
-  background: #6B9EFF;
-  box-shadow: 0 0 10px #6B9EFF, 0 0 20px rgba(107, 158, 255, 0.6);
-  border-radius: 2px;
-  transition: height 60ms linear;
-}
-
-/* Rotating / Fading Section Labels at 42% and 58% Viewport Height */
-.hud-label-42 {
-  position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%) rotate(-90deg);
-  font-family: var(--font-mono); font-size: 9.5px; font-weight: 600;
-  letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-secondary);
-  white-space: nowrap; transition: all var(--t-smooth);
-}
-.hud-label-58 {
-  position: absolute; top: 58%; left: 50%; transform: translate(-50%, -50%) rotate(-90deg);
-  font-family: var(--font-mono); font-size: 9.5px; font-weight: 700;
-  letter-spacing: 0.16em; color: var(--brand); white-space: nowrap;
-  transition: all var(--t-smooth);
-}
-
-@media (max-width: 1024px) {
-  #hud-sidebar {
-    top: 0; left: 0; right: 0; width: 100%; height: 3px; border-left: none;
-    border-bottom: 1px solid var(--border-subtle); padding: 0; flex-direction: row;
-  }
-  .hud-ticks-track, .hud-label-42, .hud-label-58 { display: none; }
-  .hud-progress-rail, #hud-progress-bar { display: none; }
-  #hud-sidebar { overflow: hidden; height: 3px; }
-  .hud-progress-rail { width: 100%; height: 3px; right: 0; }
-  #hud-progress-bar { height: 100%; width: 0%; transition: width 60ms linear; }
-}
-
-/* ==========================================================================
-   2. STICKY INSTITUTIONAL TOPBAR
-   ========================================================================== */
-header {
-  position: sticky; top: 0; z-index: 50;
-  background: rgba(0, 0, 0, 0.82);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--border-subtle);
-  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.04);
-}
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; padding: 14px 0; flex-wrap: wrap;
-}
-.brand-group { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.brand-logo {
-  display: flex; align-items: center; gap: 8px;
-  font-family: var(--font-mono); font-weight: 700; font-size: 14.5px;
-  letter-spacing: 0.06em; color: var(--text-primary);
-}
-.brand-seal { width: 22px; height: 22px; color: var(--brand); flex-shrink: 0; }
-
-.brand-badge {
-  font-family: var(--font-mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 0.08em; padding: 2px 7px; border-radius: 4px;
-  background: var(--brand-dim); color: #FFB39D; border: 1px solid rgba(255, 122, 89, 0.28);
-  text-transform: uppercase;
-}
-
-/* Multi-Miner Consensus Ribbon */
-.miner-ribbon {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 4px 10px; background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-subtle); border-radius: 100px;
-  font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
-}
-.miner-pulse {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent-emerald); box-shadow: 0 0 0 3px var(--accent-emerald-dim);
-  animation: pulse-dot 2s infinite;
-}
-@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-/* Navigation Tab Group (Mercury/Linear Standard) */
-.tab-nav {
-  display: flex; align-items: center; gap: 4px;
-  background: rgba(14, 22, 38, 0.6); padding: 3px;
-  border: 1px solid var(--border-subtle); border-radius: 6px;
-  max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.tab-btn {
-  font-family: var(--font-mono); font-size: 12px; font-weight: 500;
-  letter-spacing: 0.02em; background: transparent; color: var(--text-secondary);
-  border: 1px solid transparent; border-radius: 4px;
-  padding: 6px 14px; min-height: 32px; cursor: pointer;
-  transition: all var(--t-fast);
-}
-@media (max-width: 900px) {
-  .topbar { flex-direction: column; align-items: stretch; }
-  .brand-group .miner-ribbon { display: none; }
-  .tab-nav { width: 100%; flex: 1 1 auto; flex-wrap: wrap; overflow-x: auto; }
-  .tab-btn { white-space: nowrap; }
-  .topbar-actions { width: 100%; justify-content: flex-start; }
-}
-.tab-btn:hover { color: var(--text-primary); background: rgba(255, 255, 255, 0.04); }
-.tab-btn[aria-selected="true"] {
-  color: var(--text-primary); background: var(--bg-surface-elevated);
-  border-color: rgba(255, 255, 255, 0.12); font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.desk { scroll-margin-top: 150px; padding-top: 8px; }
-@media (max-width: 900px) {
-  .desk { scroll-margin-top: 230px; }
-  #db-lanes { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-}
-@media (max-width: 480px) {
-  #db-lanes { grid-template-columns: minmax(0, 1fr) !important; }
-}
-.search-pill {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle);
-  border-radius: 6px; padding: 5px 10px; font-family: var(--font-mono);
-  font-size: 11.5px; color: var(--text-secondary); cursor: pointer;
-  transition: border-color var(--t-fast);
-}
-.search-pill:hover { border-color: var(--border-ring); color: var(--text-primary); }
-.kbd {
-  background: rgba(255, 255, 255, 0.08); border-radius: 3px;
-  padding: 1px 4px; font-size: 10px; border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-/* ==========================================================================
-   3. HERO SURFACE & FORCE-FIELD CANVAS
-   ========================================================================== */
-.hero-surface {
-  position: relative; width: 100%; min-height: 540px; display: flex; flex-direction: column;
-  justify-content: center; overflow: hidden; padding: 48px 0 36px;
-}
-#hero-canvas {
-  position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none;
-}
-/* Pencil sketch hero layer (light paper inverted to chalk-on-slate, feathered into the hero) */
-.hero-sketch {
-  position: absolute; top: 50%; right: -6%; transform: translateY(-50%);
-  width: 56%; height: 94%; z-index: 1; pointer-events: none; overflow: hidden;
-  -webkit-mask-image: radial-gradient(ellipse 82% 78% at 50% 50%, #000 75%, transparent 100%);
-  mask-image: radial-gradient(ellipse 82% 78% at 50% 50%, #000 75%, transparent 100%);
-}
-.hero-sketch iframe {
-  width: 112%; height: 130%; border: none; display: block; background: transparent;
-  position: relative; top: -64px; left: -6%;
-  filter: invert(1) hue-rotate(180deg) brightness(2.4) contrast(1.35);
-}
-@media (max-width: 1024px) {
-  .hero-sketch {
-    right: auto; left: 50%; transform: translate(-50%, -50%);
-    width: 130%; height: 80%; opacity: 0.4;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-sketch iframe { filter: invert(1) hue-rotate(180deg) brightness(1.55) contrast(1.1); }
-}
-.hero-sketch { transition: opacity 1.2s ease; }
-.hero-sketch--settled { opacity: 0; }
-.hero-scrim {
-  position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.4) 60%, rgba(0, 0, 0, 0.92) 100%);
-}
-.hero-content {
-  position: relative; z-index: 2; max-width: 900px;
-}
-.hero-eyebrow {
-  display: inline-flex; align-items: center; gap: 8px; margin-bottom: 16px;
-}
-.hero-title {
-  font-family: var(--font-text); font-weight: 500;
-  font-size: clamp(34px, 5.2vw, 56px); line-height: 1.08;
-  letter-spacing: -2px; color: #FFFFFF;
-}
-.hero-subtitle {
-  font-size: clamp(15px, 1.8vw, 17px); line-height: 1.6;
-  color: var(--text-secondary); max-width: 68ch; margin-top: 18px;
-}
-
-/* Brutalist Buttons (0px radius) vs Status Chips (100px radius) */
-.hero-cta-row {
-  display: flex; align-items: center; gap: 14px; margin-top: 28px; flex-wrap: wrap;
-}
-.btn-square {
-  border-radius: 0px; background: #FFFFFF; color: #121212;
-  font-family: var(--font-mono); font-weight: 600; font-size: 12.5px;
-  text-transform: uppercase; letter-spacing: 0.06em; padding: 12px 24px;
-  border: none; cursor: pointer; transition: all var(--t-fast);
-  display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
-}
-.btn-square:hover {
-  background: #E5E7EB; transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.25);
-  text-decoration: none; color: #000000;
-}
-.btn-square.ghost-square {
-  background: rgba(255, 255, 255, 0.05); color: #FFFFFF;
-  border: 1px solid var(--border-ring);
-}
-.btn-square.ghost-square:hover {
-  background: rgba(255, 255, 255, 0.1); border-color: var(--brand);
-}
-
-.pill-chip {
-  border-radius: 100px; background: #1F1F1F; color: #FFFFFF;
-  font-family: var(--font-mono); font-size: 11.5px; padding: 5px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.12); display: inline-flex;
-  align-items: center; gap: 6px;
-}
-
-/* ==========================================================================
-   4. EXECUTIVE PROTOCOL KPI STRIP
-   ========================================================================== */
-.kpi-strip {
-  position: relative; z-index: 2;
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 36px;
-}
-.kpi-card {
-  background: #0E1626; border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 8px; padding: 18px 20px;
-  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.7);
-  transition: all var(--t-fast);
-}
-.kpi-card:hover { border-color: var(--brand); transform: translateY(-1px); }
-.kpi-card:hover { border-color: rgba(255, 255, 255, 0.28); }
-.kpi-label {
-  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--text-secondary); margin-bottom: 6px;
-}
-.kpi-val {
-  font-family: var(--font-mono); font-size: clamp(20px, 2.5vw, 26px);
-  font-weight: 700; color: var(--text-primary); letter-spacing: -0.02em;
-}
-@media (max-width: 480px) {
-  .kpi-val { font-size: 17px; }
-}
-.kpi-sub {
-  font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
-  margin-top: 4px; display: flex; align-items: center; gap: 4px;
-}
-
-/* ==========================================================================
-   5. PRAMAN BLUEPRINT CARD : SKETCH-TO-REVELATION ENGINE
-   ========================================================================== */
-.blueprint-card-outer {
-  background: #1B1824;
-  border-radius: 40px;
-  padding: 18px;
-  margin: 40px 0 56px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.7);
-}
-.blueprint-card-inner {
-  background: #fafaf8;
-  border-radius: 24px;
-  padding: 0;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  position: relative; overflow: hidden;
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
-}
-.blueprint-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding-bottom: 18px; border-bottom: 1px solid var(--border-subtle);
-  flex-wrap: wrap; gap: 12px;
-}
-.blueprint-title-group h3 {
-  font-family: var(--font-mono); font-size: 18px; font-weight: 700;
-  letter-spacing: -0.01em; color: #FFFFFF; display: flex; align-items: center; gap: 10px;
-}
-.blueprint-tag {
-  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
-  letter-spacing: 0.08em; padding: 3px 8px; border-radius: 4px;
-  background: rgba(46, 111, 255, 0.18); color: #60A5FA;
-  border: 1px solid rgba(46, 111, 255, 0.35); text-transform: uppercase;
-}
-
-/* Diagonal Stripes Hatch for Funnel & Bars */
-.hatch {
-  background-image: repeating-linear-gradient(135deg, rgba(255, 122, 89, 0.28) 0 1.5px, transparent 1.5px 6px);
-}
-
-/* Blueprint Morph Active State */
-.plot-root {
-  position: relative; transition: all 400ms ease;
-}
-.plot-sketch-layer {
-  position: absolute; inset: 0; pointer-events: none; z-index: 5;
-  opacity: 0; transition: opacity 300ms ease;
-}
-.plot-root.sketching .plot-sketch-layer { opacity: 1; }
-.plot-root.sketching .plot-real-content { opacity: 0.15; filter: blur(1px); }
-
-.blueprint-grid {
-  display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; margin-top: 24px;
-}
-@media (max-width: 900px) { .blueprint-grid { grid-template-columns: 1fr; } }
-
-.blueprint-panel {
-  background: #111827; border: 1px solid var(--border-ring);
-  border-radius: 12px; padding: 20px;
-}
-
-/* ==========================================================================
-   6. INTERACTIVE INPUT POLISH & TRAVELING BORDER-BEAM
-   ========================================================================== */
-.border-beam-card {
-  position: relative;
-  background: var(--bg-surface);
-  border-radius: 12px;
-  border: 1px solid var(--border-ring);
-  overflow: hidden;
-}
-.border-beam-card::after {
-  content: ''; position: absolute; inset: -150%;
-  background: conic-gradient(from 0deg, transparent 0deg, var(--brand) 60deg, transparent 120deg);
-  animation: border-rotate 5s linear infinite;
-  opacity: 0.22; pointer-events: none; z-index: 0;
-}
-.border-beam-inner {
-  position: relative; z-index: 1; background: var(--bg-surface);
-  border-radius: 11px; padding: 22px; margin: 1px;
-}
-@keyframes border-rotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.field { margin-bottom: 16px; }
-.field label {
-  display: block; font-family: var(--font-mono); font-size: 11px;
-  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary);
-  margin-bottom: 6px;
-}
-.form-control, select.form-control, textarea.form-control {
-  width: 100%; background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-ring); color: var(--text-primary);
-  border-radius: 4px; padding: 10px 14px; min-height: 42px;
-  font-family: var(--font-mono); font-size: 13px; transition: all var(--t-fast);
-}
-.form-control:focus {
-  outline: none; border-color: var(--brand);
-  box-shadow: 0 0 0 2px var(--brand), 0 0 16px var(--brand-glow);
-}
-
-/* Typewriter Input Caret */
-.typewriter-caret {
-  border-right: 2px solid var(--brand);
-  animation: blink-caret 0.75s step-end infinite;
-}
-@keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--brand); } }
-
-/* Traveling Border Beam Input Wrapper */
-.border-beam-input-wrapper {
-  position: relative;
-  border-radius: 6px;
-  overflow: hidden;
-  background: var(--bg-surface-elevated);
-  padding: 1px;
-  display: inline-flex;
-  align-items: center;
-  transition: all var(--t-fast);
-}
-.border-beam-input-wrapper::before {
-  content: '';
-  position: absolute;
-  inset: -200%;
-  background: conic-gradient(from 0deg, transparent 0deg, transparent 280deg, var(--brand) 320deg, #6B9EFF 360deg);
-  animation: border-rotate 3.5s linear infinite;
-  opacity: 0.45;
-  pointer-events: none;
-  z-index: 0;
-}
-.border-beam-input-wrapper:focus-within::before {
-  opacity: 1;
-  filter: drop-shadow(0 0 10px #6B9EFF);
-}
-.border-beam-input-wrapper input {
-  position: relative;
-  z-index: 1;
-  background: var(--bg-surface-elevated) !important;
-  border: none !important;
-  outline: none !important;
-  box-shadow: none !important;
-  width: 100%;
-  border-radius: 5px;
-}
-
-/* ==========================================================================
-   7. 15-STAGE VERIFICATION PIPELINE STRIP
-   ========================================================================== */
-.pipe {
-  display: grid; grid-template-columns: repeat(15, 1fr); gap: 4px;
-}
-.stage {
-  background: var(--bg-surface-elevated); border: 1px solid var(--border-subtle);
-  border-radius: 4px; padding: 8px 3px; text-align: center;
-  min-height: 52px; display: flex; flex-direction: column; justify-content: center;
-  gap: 5px; transition: all var(--t-fast);
-}
-.stage .n {
-  font-family: var(--font-mono); font-size: 9px; color: var(--text-muted);
-}
-.stage .bar {
-  height: 3px; background: rgba(255, 255, 255, 0.1); border-radius: 1px; margin: 0 4px;
-}
-.stage.pass .bar { background: var(--accent-emerald); }
-.stage.pass .n { color: var(--accent-emerald); font-weight: 600; }
-.stage.halted .bar { background: var(--halt-crimson); }
-.stage.halted .n { color: var(--halt-crimson); font-weight: 600; }
-.pipe-caption {
-  display: flex; justify-content: space-between; margin-top: 10px;
-  font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);
-}
-
-/* ==========================================================================
-   8. VISUAL DOCUMENT EVIDENCE DECK (DESK 0)
-   ========================================================================== */
-.doc-deck {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px;
-}
-.doc-card {
-  background: var(--bg-surface-elevated); border: 1px solid var(--border-ring);
-  border-radius: 8px; padding: 18px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-}
-.doc-card-hd {
-  display: flex; align-items: center; justify-content: space-between;
-  padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 12px;
-}
-.doc-card-title {
-  font-family: var(--font-mono); font-size: 11.5px; font-weight: 600;
-  letter-spacing: 0.04em; color: var(--text-primary); text-transform: uppercase;
-}
-.doc-kv {
-  display: grid; grid-template-columns: 100px 1fr; gap: 6px 12px;
-  font-family: var(--font-mono); font-size: 11.5px; line-height: 1.45;
-}
-.doc-kv dt { color: var(--text-muted); }
-.doc-kv dd { color: var(--text-primary); word-break: break-all; }
-
-/* Grid Reconciliation Table */
-.recon-grid {
-  width: 100%; border-collapse: collapse; margin-top: 14px;
-  font-family: var(--font-mono); font-size: 12px;
-}
-.recon-grid th {
-  text-align: left; color: var(--text-muted); font-weight: 500;
-  font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase;
-  padding: 8px 12px; border-bottom: 1px solid var(--border-subtle);
-  white-space: nowrap;
-}
-.recon-grid td { overflow-wrap: anywhere; }
-.recon-grid td {
-  padding: 10px 12px; border-bottom: 1px solid var(--border-subtle);
-  color: var(--text-primary);
-}
-.recon-grid tr:last-child td { border-bottom: none; }
-.recon-grid tr.summary-row {
-  background: rgba(255, 255, 255, 0.03); font-weight: 600;
-}
-
-/* ==========================================================================
-   9. VERDICT STATES & DRAWERS
-   ========================================================================== */
-.verdict {
-  border: 1px solid var(--border-subtle); border-left-width: 4px;
-  border-radius: 6px; padding: 18px 20px;
-}
-.verdict.approved {
-  border-left-color: var(--accent-emerald);
-  background: linear-gradient(135deg, var(--accent-emerald-dim) 0%, rgba(17, 24, 39, 0.4) 100%);
-}
-.verdict.halt {
-  border-left-color: var(--halt-crimson);
-  background: linear-gradient(135deg, var(--halt-crimson-dim) 0%, rgba(17, 24, 39, 0.4) 100%);
-}
-.verdict-badge {
-  font-family: var(--font-mono); font-weight: 700; font-size: 18px;
-  letter-spacing: 0.02em; display: flex; align-items: center; gap: 8px;
-}
-.verdict.approved .verdict-badge { color: #4ADE80; }
-.verdict.halt .verdict-badge { color: #F87171; }
-.verdict .summary {
-  margin-top: 8px; color: var(--text-primary); max-width: 72ch; font-size: 13.5px;
-}
-.flags { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
-.flag {
-  font-family: var(--font-mono); font-size: 11.5px; color: #FCA5A5;
-  border: 1px solid var(--halt-crimson-border); background: var(--halt-crimson-dim);
-  padding: 6px 10px; border-radius: 4px;
-}
-.flag.ok {
-  color: #86EFAC; border-color: var(--accent-emerald-border);
-  background: var(--accent-emerald-dim);
-}
-.kv {
-  display: grid; grid-template-columns: minmax(140px, auto) 1fr; gap: 6px 16px;
-  margin-top: 14px; font-family: var(--font-mono); font-size: 12px;
-}
-.kv dt { color: var(--text-secondary); }
-.kv dd { color: var(--text-primary); min-width: 0; overflow-wrap: anywhere; }
-@media (max-width: 640px) {
-  .kv { grid-template-columns: minmax(0, 1fr); }
-  .kv dd { margin: 0 0 10px; }
-  .flowing-item { height: auto; min-height: 88px; flex-wrap: wrap; gap: 8px; padding: 16px; }
-  .flowing-sub { flex-basis: 100%; }
-}
-.flowing-item.hovered .flowing-title, .flowing-item.hovered .flowing-sub { visibility: hidden; }
-
-/* Table & Ledger Styles */
-.table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-#lg-body td { overflow-wrap: anywhere; }
-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 12px; }
-th {
-  text-align: left; color: var(--text-muted); font-weight: 500; font-size: 10.5px;
-  letter-spacing: 0.08em; text-transform: uppercase; padding: 11px 14px;
-  border-bottom: 1px solid var(--border-subtle); background: var(--bg-surface);
-  position: sticky; top: 0; cursor: pointer; user-select: none;
-}
-th:hover { color: var(--text-primary); }
-td {
-  padding: 11px 14px; border-bottom: 1px solid var(--border-subtle);
-  color: var(--text-primary); vertical-align: middle;
-}
-tbody tr { transition: background var(--t-fast); }
-tbody tr:hover td { background: var(--bg-surface-elevated); }
-td.num, th.num { text-align: right; }
-.tx-link { color: var(--brand); word-break: break-all; }
-.tx-link:hover { text-decoration: underline; color: #FFB39D; }
-
-.badge {
-  display: inline-block; font-family: var(--font-mono); font-size: 10px;
-  letter-spacing: 0.05em; padding: 2px 7px; border-radius: 4px;
-  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-subtle);
-  color: var(--text-secondary); white-space: nowrap;
-}
-.badge.ok {
-  color: #4ADE80; border-color: var(--accent-emerald-border); background: var(--accent-emerald-dim);
-}
-.badge.warn {
-  color: #FBBF24; border-color: rgba(245, 158, 11, 0.35); background: var(--warning-amber-dim);
-}
-.badge.evidence-live { color: #4ADE80; border-color: var(--accent-emerald-border); background: var(--accent-emerald-dim); }
-.badge.evidence-example { color: #FBBF24; border-color: rgba(245, 158, 11, 0.35); background: var(--warning-amber-dim); }
-.badge.evidence-recorded { color: #FFB39D; border-color: rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.12); }
-.evidence-note {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.04em;
-  color: var(--text-muted); margin-top: 10px;
-}
-
-/* Modals & Dialogs */
-dialog {
-  background: var(--bg-surface); color: var(--text-primary);
-  border: 1px solid var(--border-strong); border-radius: 12px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85); padding: 0;
-  max-width: min(720px, calc(100vw - 32px)); width: 100%;
-}
-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.82); backdrop-filter: blur(10px);
-}
-dialog .dialog-hd {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 20px; border-bottom: 1px solid var(--border-subtle);
-  position: sticky; top: 0; background: var(--bg-surface); z-index: 2;
-}
-dialog .dialog-body { padding: 22px; max-height: 75vh; overflow-y: auto; }
-.x-btn {
-  background: transparent; border: 1px solid var(--border-subtle); color: var(--text-secondary);
-  border-radius: 4px; width: 30px; height: 30px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; font-size: 14px;
-}
-.x-btn:hover { color: var(--text-primary); border-color: var(--border-strong); }
-.code-block {
-  background: #050505; border: 1px solid var(--border-subtle);
-  border-radius: 6px; padding: 14px; font-family: var(--font-mono);
-  font-size: 12px; color: #CBD5E1; overflow-x: auto; margin-top: 10px;
-}
-
-/* ==========================================================================
-   10. FLOWINGMENU DIRECTIONAL HOVER MARQUEE
-   ========================================================================== */
-.flowing-menu-container {
-  margin: 64px 0 32px; border-top: 1px solid var(--border-ring);
-  border-bottom: 1px solid var(--border-ring);
-}
-.flowing-item {
-  position: relative; overflow: hidden; height: 72px; border-bottom: 1px solid var(--border-subtle);
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 24px; cursor: pointer; transition: background var(--t-fast);
-}
-.flowing-item:last-child { border-bottom: none; }
-.flowing-item:hover { background: rgba(255, 122, 89, 0.04); }
-.flowing-title {
-  font-family: var(--font-mono); font-size: 16px; font-weight: 600;
-  letter-spacing: 0.02em; color: var(--text-primary); text-transform: uppercase;
-}
-.flowing-sub {
-  font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);
-}
-.flowing-marquee-layer {
-  position: absolute; inset: 0; background: var(--brand); color: #000000;
-  display: flex; align-items: center; pointer-events: none;
-  transform: translateY(101%); transition: transform 380ms cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden; z-index: 2;
-}
-.flowing-item.enter-top .flowing-marquee-layer { transform: translateY(-101%); }
-.flowing-item.hovered .flowing-marquee-layer { transform: translateY(0%); }
-.flowing-marquee-inner {
-  display: flex; align-items: center; white-space: nowrap; gap: 32px;
-  animation: marquee-scroll 16s linear infinite;
-  font-family: var(--font-mono); font-size: 15px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 0.05em;
-}
-@keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-
-/* Toast */
-#toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(10px);
-  background: var(--bg-surface-elevated); border: 1px solid var(--border-strong);
-  color: var(--text-primary); font-family: var(--font-mono); font-size: 12px;
-  padding: 10px 18px; border-radius: 100px; opacity: 0; pointer-events: none;
-  transition: all var(--t-fast); z-index: 100; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-}
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* Layout Splits */
-.split { display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; align-items: start; }
-@media (max-width: 960px) {
-  .split { grid-template-columns: 1fr; }
-  .doc-deck { grid-template-columns: 1fr; }
-  .kpi-strip { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 640px) {
-  .kpi-strip { grid-template-columns: 1fr; }
-  .pipe { grid-template-columns: repeat(5, 1fr); }
-}
-
-/* Institutional Multi-Column Footer */
-footer {
-  border-top: 1px solid var(--border-subtle); background: #050505;
-  padding: 56px 0 32px; margin-top: 80px; font-size: 12.5px; color: var(--text-secondary);
-}
-.footer-grid {
-  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px;
-  padding-bottom: 36px; border-bottom: 1px solid var(--border-subtle);
-}
-@media (max-width: 800px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 500px) { .footer-grid { grid-template-columns: 1fr; } }
-.footer-col h4 {
-  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--text-primary); margin-bottom: 12px;
-}
-.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.footer-col ul a { color: var(--text-secondary); font-family: var(--font-mono); font-size: 11.5px; }
-.footer-col ul a:hover { color: var(--text-primary); }
-.footer-bottom {
-  display: flex; justify-content: space-between; align-items: center;
-  padding-top: 24px; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); flex-wrap: wrap; gap: 12px;
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <script>
+    (function () {
+      var deskHashes = {
+        '#disposition-board': 1,
+        '#trade-assurance': 1,
+        '#spend-guard': 1,
+        '#ledger': 1,
+        '#settlement-ledger': 1,
+        '#mining': 1,
+        '#mining-registry': 1,
+        '#procurement-verify': 1,
+        '#verification-labs': 1
+      };
+      if (location.hash && deskHashes[location.hash]) {
+        location.replace('/desks' + location.hash);
+        return;
+      }
+      try {
+        var saved = localStorage.getItem('praman-theme');
+        var theme = saved === 'dark' ? 'dark' : 'light';
+        var m = document.querySelector('meta[name="color-scheme"]');
+        if (m) m.setAttribute('content', theme);
+        document.documentElement.dataset.theme = theme;
+        if (localStorage.getItem('praman-motion') === 'reduced') {
+          document.documentElement.dataset.motion = 'reduced';
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <title>Praman | Deterministic Pre-Signature Clearing & Autonomous Spend Guard</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="description" content="Praman verifies autonomous payouts, trade assurance escrows, OFAC SDN compliance, and deterministic 651-byte WASM arithmetic before cryptographic signatures execute.">
+  <link rel="canonical" href="https://praman-desk.vercel.app/">
+  <meta property="og:title" content="Praman | Deterministic Pre-Signature Clearing & Spend Guard">
+  <meta property="og:description" content="Autonomous B2B escrow reconciliation, Solana Token-2022 pre-signature armor, EIP-191 signed clearing memos, and multi-miner Telegraph consensus.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://praman-desk.vercel.app/">
+  <link rel="stylesheet" href="/styles/praman-tokens.css">
+  <link rel="stylesheet" href="/styles/praman-shell.css">
+  <style>
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+      gap: clamp(1.35rem, 2.6vw, 2.5rem);
+      align-items: start;
+      padding-block: clamp(1.5rem, 2.6vw, 2.35rem) 1.5rem;
+    }
+    @media (max-width: 960px) {
+      .hero-grid { grid-template-columns: 1fr; }
+    }
+    .hero-eyebrows {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-block-end: 0.85rem;
+    }
+    .hero-copy h1 {
+      margin: 0 0 0.85rem;
+    }
+    .hero-copy h1 em {
+      font-style: italic;
+      color: var(--brand);
+      text-decoration: underline;
+      text-decoration-color: color-mix(in oklab, var(--brand) 38%, transparent);
+      text-underline-offset: 0.14em;
+      text-decoration-thickness: 2px;
+    }
+    .hero-lead {
+      font-size: clamp(1rem, 0.94rem + 0.3vw, 1.125rem);
+      color: var(--ink-secondary);
+      max-inline-size: 55ch;
+      margin: 0 0 1.25rem;
+    }
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+    }
+    .proof-anchors {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      align-items: center;
+    }
+    .proof-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.22rem 0.58rem;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--ink-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-decoration: none;
+      transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+    }
+    .proof-chip:hover {
+      border-color: var(--brand);
+      color: var(--brand);
+      background: var(--brand-soft);
+    }
+    .memo-card {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-float);
+      overflow: hidden;
+    }
+    .memo-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.85rem 1.15rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-subtle);
+      flex-wrap: wrap;
+    }
+    .memo-tabs {
+      display: inline-flex;
+      gap: 0.35rem;
+    }
+    .memo-tab {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--ink-secondary);
+      border-radius: var(--radius-xs);
+      padding: 0.25rem 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .memo-tab[aria-pressed="true"] {
+      background: var(--ink);
+      color: var(--bg);
+      border-color: var(--ink);
+    }
+    .memo-body {
+      padding: 1.15rem;
+    }
+    .memo-kv {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.7rem 1rem;
+      margin: 0.85rem 0 1rem;
+    }
+    .memo-kv dt {
+      font-family: var(--font-mono);
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-muted);
+    }
+    .memo-kv dd {
+      margin: 0.15rem 0 0;
+      font-weight: 600;
+      font-size: 0.92rem;
+      overflow-wrap: anywhere;
+    }
+    .memo-sig {
+      padding: 0.65rem 0.8rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface-subtle);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--ink-secondary);
+      overflow-wrap: anywhere;
+      white-space: pre-line;
+      line-height: 1.45;
+    }
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.85rem;
+      padding-block-end: 2rem;
+    }
+    @media (max-width: 900px) {
+      .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 520px) {
+      .kpi-strip { grid-template-columns: 1fr; }
+    }
+    .kpi-box {
+      padding: 1.05rem 1.15rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .kpi-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-muted);
+    }
+    .kpi-value {
+      font-family: var(--font-sans);
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-block: 0.28rem 0.22rem;
+    }
+    .kpi-meta {
+      font-size: 0.8rem;
+      color: var(--ink-secondary);
+      margin: 0;
+    }
+    .cards-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    @media (max-width: 1000px) {
+      .cards-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 580px) {
+      .cards-4 { grid-template-columns: 1fr; }
+    }
+    .role-card {
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .role-card h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
+    }
+    .role-card p {
+      margin: 0;
+      font-size: 0.89rem;
+      color: var(--ink-secondary);
+    }
+    .diagram-frame-shell {
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: var(--surface);
+      box-shadow: var(--shadow-card);
+    }
+    .diagram-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-subtle);
+      flex-wrap: wrap;
+    }
+    .diagram-iframe {
+      display: block;
+      width: 100%;
+      height: 540px;
+      border: 0;
+    }
+    .telemetry-embed-frame {
+      display: block;
+      width: 100%;
+      height: 632px;
+      border: 0;
+      background: transparent;
+    }
+    @media (max-width: 900px) {
+      .telemetry-embed-frame { height: 505px; }
+    }
+    @media (max-width: 720px) {
+      .diagram-iframe, .telemetry-embed-frame { height: 420px; }
+    }
+    .desks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+      gap: 1rem;
+    }
+    .desk-launch-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.85rem;
+      padding: 1.25rem;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.16s ease, transform 0.16s ease;
+    }
+    .desk-launch-card:hover {
+      border-color: var(--brand);
+      transform: translateY(-2px);
+    }
+    .desk-launch-card h3 {
+      margin: 0.35rem 0 0;
+      font-size: 1.12rem;
+    }
+    .desk-launch-card p {
+      margin: 0.4rem 0 0;
+      font-size: 0.89rem;
+      color: var(--ink-secondary);
+    }
+    .ecosystem-band {
+      position: relative;
+      overflow: hidden;
+      padding-block: clamp(3rem, 5vw, 4.5rem);
+      border-bottom: 1px solid var(--island-border);
+    }
+    #hero-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.72;
+    }
+    .ecosystem-inner {
+      position: relative;
+      z-index: 2;
+    }
+    .flowing-list {
+      margin-top: 1.75rem;
+      border: 1px solid var(--island-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background: color-mix(in oklab, var(--island-surface) 92%, transparent);
+    }
+    .flowing-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 1.1rem 1.35rem;
+      border-bottom: 1px solid var(--island-border);
+      color: var(--island-ink);
+      text-decoration: none;
+      transition: background-color 0.16s ease;
+    }
+    .flowing-row:last-child { border-bottom: 0; }
+    .flowing-row:hover {
+      background: color-mix(in oklab, #3b82f6 16%, var(--island-surface));
+    }
+    .flowing-row-title {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1.02rem;
+      letter-spacing: -0.01em;
+    }
+    .flowing-row-sub {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--island-muted);
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+    .code-island {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--island-border);
+      overflow: hidden;
+    }
+    .code-tabs {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--island-border);
+      background: var(--island-surface);
+      flex-wrap: wrap;
+    }
+    .code-tab-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .code-tab-btn {
+      border: 1px solid var(--island-border);
+      background: transparent;
+      color: var(--island-muted);
+      border-radius: var(--radius-xs);
+      padding: 0.3rem 0.65rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .code-tab-btn[aria-selected="true"] {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+    }
+    .code-pre {
+      margin: 0;
+      padding: 1.15rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      color: var(--island-ink);
+    }
+  </style>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
-<!-- ==========================================================================
-     1. FIXED 60PX RIGHT EDGE HUD SIDEBAR
-     ========================================================================== -->
-<aside id="hud-sidebar" aria-label="Precision Navigation HUD">
-  <div class="hud-ticks-track" id="hud-ticks-track"></div>
-  <div class="hud-progress-rail">
-    <div id="hud-progress-bar"></div>
-  </div>
-  <span class="hud-label-42" id="hud-section-label">OVERVIEW</span>
-  <span class="hud-label-58" id="hud-scroll-pct">0% SCROLL</span>
-</aside>
-
-<!-- ==========================================================================
-     2. STICKY TOPBAR
-     ========================================================================== -->
-<header>
-  <div class="wrap topbar">
-    <div class="brand-group">
-      <div class="brand-logo">
-        <svg class="brand-seal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"/>
-          <path d="M9 12l2 2 4-4"/>
-        </svg>
-        PRAMAN DESK
-      </div>
-      <span class="brand-badge">INSTITUTIONAL SETTLEMENT</span>
-      
-      <div class="miner-ribbon" title="Active Telegraph Specialist Miner Consensus">
-        <span class="miner-pulse"></span>
-        <span>CLUSTER: PRAMAN #6164 (DIAMOND #6201) · TAKAR #20261117 · FACTWIRE #74351</span>
-      </div>
-    </div>
-    
-    <nav class="tab-nav" role="tablist" aria-label="Desks">
-      <button class="tab-btn" role="tab" aria-selected="true" data-tab="0" id="tabbtn-0" aria-controls="desk-0">Disposition Board</button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="1" id="tabbtn-1" aria-controls="desk-1">Trade Assurance</button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="2" id="tabbtn-2" aria-controls="desk-2">Spend Guard</button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="3" id="tabbtn-3" aria-controls="desk-3">Settlement Ledger</button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="4" id="tabbtn-4" aria-controls="desk-4">Mining Registry</button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="5" id="tabbtn-5" aria-controls="desk-5">Procurement Verify</button>
-    </nav>
-    
-    <div class="topbar-actions">
-      <div class="search-pill" id="global-search-btn" title="Quick Search Settlement Ledger">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        <span>Search</span>
-        <span class="kbd">⌘K</span>
-      </div>
-      <button class="btn-square ghost-square" id="dev-drawer-btn" style="padding:6px 14px;font-size:11px">Developer API</button>
-    </div>
-  </div>
-</header>
-
-<main class="wrap">
-
-<!-- ==========================================================================
-     3. HERO SECTION WITH FORCEFIELDBACKGROUND PARTICLE PHYSICS
-     ========================================================================== -->
-<section class="hero-surface" id="hero-section">
-  <canvas id="hero-canvas"></canvas>
-  <div class="hero-scrim"></div>
-  
-  <div class="hero-content">
-    <div class="hero-eyebrow">
-      <span class="pill-chip">
-        <span style="width:6px;height:6px;border-radius:50%;background:var(--accent-emerald);"></span>
-        SEPOLIA LIVE · MAINNET-PATH ARCHITECTURE · 15-STAGE DETERMINISTIC CLEARING
-      </span>
-      <span class="pill-chip" style="color:var(--brand)">WASM 651b BYTECODE</span>
-    </div>
-    
-    <h1 class="hero-title">
-      Autonomous B2B Escrow & Cryptographic Spend Guard
-    </h1>
-    
-    <p class="hero-subtitle">
-      Mathematical verification middleware for cross-border commerce and agentic treasuries. 
-      Intercepts discrepancies against purchase orders in under 3ms, enforces pre-signature spend policies, 
-      and settles reconciled escrow directly into on-chain TakarSettle vaults on Ethereum Sepolia.
-    </p>
-    
-    <div class="hero-cta-row">
-      <a href="#procurement-verify" class="btn-square" id="hero-cta-audit">
-        <span>Run a Live Verification</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+  <header class="site-header is-wide">
+    <div class="site-header-inner">
+      <a class="brand-link" href="/" aria-label="Praman Home">
+        <span class="brand-mark-3d" aria-hidden="true">
+          <svg width="38" height="38" viewBox="0 0 40 40" fill="none">
+            <defs>
+              <linearGradient id="pm-shield-bg" x1="6" y1="4" x2="34" y2="36" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#3b82f6"/>
+                <stop offset="55%" stop-color="#1d4ed8"/>
+                <stop offset="100%" stop-color="#0f296b"/>
+              </linearGradient>
+              <linearGradient id="pm-shield-bevel" x1="8" y1="5" x2="26" y2="28" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0.52"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+              </linearGradient>
+              <linearGradient id="pm-facet-left" x1="8" y1="8" x2="20" y2="34" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#1e3a8a" stop-opacity="0.1"/>
+              </linearGradient>
+              <filter id="pm-elevate" x="-10%" y="-10%" width="120%" height="125%">
+                <feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-color="#0a1638" flood-opacity="0.35"/>
+              </filter>
+            </defs>
+            <path d="M20 3.2L6.5 8.6V19.2C6.5 27.6 12.2 34.4 20 37C27.8 34.4 33.5 27.6 33.5 19.2V8.6L20 3.2Z" fill="url(#pm-shield-bg)" filter="url(#pm-elevate)"/>
+            <path d="M20 3.2L6.5 8.6V19.2C6.5 27.6 12.2 34.4 20 37V3.2Z" fill="url(#pm-facet-left)"/>
+            <path d="M20 4.2L7.5 9.2V19.2C7.5 27 12.8 33.3 20 35.8C27.2 33.3 32.5 27 32.5 19.2V9.2L20 4.2Z" stroke="url(#pm-shield-bevel)" stroke-width="1.25"/>
+            <path d="M13.8 20.1L18.1 24.4L26.6 15.6" stroke="#ffffff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13.8 20.1L18.1 24.4L26.6 15.6" stroke="#93c5fd" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+          </svg>
+        </span>
+        <span class="brand-title-wrap">
+          <span class="brand-title">Praman</span><span class="brand-dot" aria-hidden="true"></span>
+        </span>
       </a>
-      <a href="#spend-guard" class="btn-square ghost-square" id="hero-cta-spend">
-        <span>Screen Spend Guard</span>
-      </a>
-    </div>
-  </div>
 
-  <!-- Pencil sketch layer: hand-drawn Praman Disposition Board case, auto-plays on load
-       and replays via IntersectionObserver when the hero scrolls back into view -->
-  <div class="hero-sketch" id="hero-sketch-layer" aria-hidden="true">
-    <iframe id="pencil-iframe" src="/pencil/" title="Praman Pencil Sketch Dashboard"></iframe>
-  </div>
+      <nav class="site-nav" aria-label="Primary">
+        <div id="nav-drawer" class="nav-drawer-wrap">
+          <ul id="nav-links-list" class="nav-links">
+            <li><a href="/" aria-current="page">Overview</a></li>
+            <li><a href="/desks">Operator Desks</a></li>
+            <li><a href="/verify">Verify Receipt</a></li>
+            <li><a href="/docs">Docs</a></li>
+            <li><a href="/roadmap">Roadmap</a></li>
+          </ul>
+        </div>
+      </nav>
 
-  <!-- Executive Protocol KPI Strip -->
-  <div class="kpi-strip">
-    <div class="kpi-card">
-      <div class="kpi-label">Total Escrow Capital</div>
-      <div class="kpi-val tnum">$100,000.00 USDC</div>
-      <div class="kpi-sub"><span style="color:var(--brand)">TakarSettle v4 Vault</span></div>
-      <p class="evidence-note"><span class="badge evidence-example" style="font-size:9px;padding:1px 6px">WORKED EXAMPLE</span> Canonical Desk 0 contract</p>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Deliverable Conformance</div>
-      <div class="kpi-val tnum" style="color:var(--accent-emerald)">80.0% (80 / 100 Units)</div>
-      <div class="kpi-sub">Port of LA Cainiao Pier-Pass Audited</div>
-      <p class="evidence-note"><span class="badge evidence-example" style="font-size:9px;padding:1px 6px">WORKED EXAMPLE</span> Fixed demo dataset</p>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Overbilling Intercepted</div>
-      <div class="kpi-val tnum" style="color:var(--halt-crimson)">-$20,000.00 USD</div>
-      <div class="kpi-sub">WASM Circuit Breaker &lt;3ms</div>
-      <p class="evidence-note"><span class="badge evidence-example" style="font-size:9px;padding:1px 6px">WORKED EXAMPLE</span> Derived from Case A</p>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Multi-Miner Quorum</div>
-      <div class="kpi-val tnum">2-of-2 MINERS</div>
-      <div class="kpi-sub">Praman Devnode #6164 + Takar #20261117</div>
-      <p class="evidence-note"><span class="badge evidence-live" style="font-size:9px;padding:1px 6px">LIVE</span> Registered miner consensus</p>
-    </div>
-  </div>
-</section>
-
-<!-- ==========================================================================
-     4. (Pencil sketch now lives in the hero as an inverted, feathered layer.)
-     ========================================================================== -->
-
-<!-- ==========================================================================
-     5. FINGERTIP BENTO DESKS: CORE FUNCTIONALITY KEPT ACCESSIBLE
-     ========================================================================== -->
-
-<!-- ============ DESK 0 · ALIBABA TRADE ASSURANCE ============ -->
-<!-- ============ DESK 0 · DISPOSITION BOARD ============ -->
-<section class="desk active" id="desk-0" role="tabpanel" aria-labelledby="tabbtn-0">
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
-    <div>
-      <p class="eyebrow" style="font-size:11px;letter-spacing:0.14em;color:var(--text-secondary);margin:0 0 6px">PRAMAN TRADE ASSURANCE</p>
-      <h2 style="font-size:26px;font-weight:700;color:var(--text-primary);margin:0">$100k held. Evidence decides where it goes.</h2>
-      <p style="font-size:14px;color:var(--text-secondary);margin:6px 0 0;max-width:640px">Each case sits in one of four lanes until the evidence moves it. Open a card to see the figure Praman computed independently, the rule that fired, and the settlement receipt behind the outcome.</p>
-    </div>
-    <a href="#trade-assurance" class="btn-square" style="text-decoration:none">Open a live case</a>
-  </div>
-
-  <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <label for="db-eval-select" style="font-size:12px;color:var(--text-secondary)">Live Policy Evaluation:</label>
-    <select id="db-eval-select" class="form-control" style="min-height:32px;max-width:440px" aria-label="Case to evaluate via backend policy">
-      <option value="PO-ALI-9021">PO-ALI-9021: Reconcile 80 conforming units ($80k / $100k)</option>
-      <option value="PO-7781">PO-7781: Equation ties out (1,000 units x $12.40)</option>
-      <option value="CN-LAX-88201">CN-LAX-88201: Audit 20 damaged units shortfall ($20k overbill)</option>
-      <option value="PO-DEMO-REF">PO-DEMO-REF: Audit missing delivery receipt (hold vs refund)</option>
-    </select>
-    <button id="db-eval-btn" class="btn-square ghost-square" style="padding:5px 14px;font-size:12px">Evaluate via Policy API</button>
-  </div>
-
-  <div id="db-lanes" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:22px"></div>
-
-  <div style="margin-top:26px">
-    <h3 style="font-size:15px;font-weight:600;color:var(--text-primary);margin:0 0 4px">Receipt rail</h3>
-    <p style="font-size:13px;color:var(--text-secondary);margin:0 0 10px">TakarSettle v4 receipts and Sepolia transaction hashes from the live settlement ledger.</p>
-    <div id="db-receipt-rail" style="display:flex;flex-direction:column;gap:8px"></div>
-  </div>
-
-  <dialog id="db-case-drawer" aria-labelledby="db-drawer-title" style="border:1px solid var(--border-subtle);border-radius:14px;background:var(--bg-surface-elevated);color:var(--text-primary);max-width:560px;width:min(92vw,560px);padding:0">
-    <div style="padding:20px 22px">
-      <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
-        <h3 id="db-drawer-title" style="font-size:17px;font-weight:700;margin:0">Case</h3>
-        <button data-close aria-label="Close" style="background:none;border:1px solid var(--border-subtle);border-radius:8px;color:var(--text-secondary);width:30px;height:30px;cursor:pointer">✕</button>
+      <div class="header-controls">
+        <button type="button" class="icon-btn" data-open-cmd aria-label="Open command search">
+          <span>Search</span>
+          <span class="kbd-pill">Ctrl+K</span>
+        </button>
+        <button type="button" class="icon-btn theme-icon-btn" id="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode" title="Toggle light or dark mode">
+          <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+          </svg>
+          <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+          </svg>
+        </button>
+        <button type="button" class="icon-btn nav-menu-btn" id="nav-menu-btn" popovertarget="nav-drawer" aria-expanded="false" aria-controls="nav-drawer" aria-label="Open navigation menu">
+          Menu
+        </button>
       </div>
-      <div id="db-drawer-body" style="margin-top:14px;font-size:13.5px;line-height:1.6;color:var(--text-secondary)"></div>
     </div>
-  </dialog>
-</section>
+  </header>
 
-<!-- ============ DESK 1 · TRADE ASSURANCE (100% PRESERVED) ============ -->
-<section class="desk" id="desk-1" role="tabpanel" aria-labelledby="tabbtn-1" hidden>
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
-    <div>
-      <span class="pill-chip" style="margin-bottom:8px">DESK 01 · B2B COMMERCE ESCROW</span>
-      <h2 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.02em;margin-top:4px">
-        Alibaba & Cainiao Trade Assurance Clearinghouse
-      </h2>
-      <p style="color:var(--text-secondary);max-width:72ch;margin-top:8px">
-        Independent mathematical verification and multi-miner consensus for international freight. 
-        Validates delivery against purchase orders, executes sub-3ms WASM circuit breakers on shortfalls, 
-        and settles reconciled disbursements directly into TakarSettle escrow vaults on Ethereum Sepolia.
-      </p>
-      <p class="evidence-note"><span class="badge evidence-example" style="font-size:9px;padding:1px 6px">WORKED EXAMPLE</span> Canonical PO-ALI-9021 / CN-LAX-88201 dataset · on-chain anchor is real (Sepolia, receipt-backed)</p>
+  <aside class="hud-sidebar" aria-label="Page sections">
+    <div class="hud-progress-track" aria-hidden="true">
+      <div class="hud-progress-fill"></div>
     </div>
-  </div>
+    <a href="#hero">00 Hero &amp; Memo</a>
+    <a href="#who-we-serve">01 Who We Serve</a>
+    <a href="#how-it-clears">02 Clearing Flow</a>
+    <a href="#blueprint">03 Live Telemetry</a>
+    <a href="#five-desks">04 Operator Desks</a>
+    <a href="#benchmark">05 Benchmark</a>
+    <a href="#ecosystem">06 Anchors</a>
+    <a href="#pricing">07 Limits &amp; Fees</a>
+    <a href="#quickstart">08 API Quickstart</a>
+  </aside>
 
-  <!-- Side-by-Side Visual Document Evidence Cards -->
-  <div class="doc-deck">
-    <div class="doc-card">
-      <div class="doc-card-hd">
-        <span class="doc-card-title">Commercial Contract</span>
-        <span class="badge ok">PO-ALI-9021</span>
-      </div>
-      <dl class="doc-kv">
-        <dt>Buyer</dt><dd>Alibaba US Logistics Hub</dd>
-        <dt>Supplier</dt><dd>Siemens Aktiengesellschaft</dd>
-        <dt>GLEIF LEI</dt><dd>W38RGI023J3WT1HWRP32</dd>
-        <dt>Commitment</dt><dd class="tnum">$100,000.00 USDC</dd>
-        <dt>Specification</dt><dd>100 Units @ $1,000.00</dd>
-        <dt>Escrow Vault</dt><dd>0x3102...4248 (Takar v4)</dd>
-      </dl>
-    </div>
+  <main id="main-content" tabindex="-1">
+    <!-- 00 HERO + LIVE SIGNED CLEARING MEMO CARD -->
+    <section id="hero" class="section-block" style="padding-block:0">
+      <div class="container">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="hero-eyebrows">
+              <span class="badge badge-ok"><span class="dot-pulse" aria-hidden="true"></span> MAINNET-PATH CLEARINGHOUSE</span>
+              <span class="badge badge-brand">DETERMINISTIC MATH ENGINE</span>
+              <span class="badge">EIP-191 + SHA-256 MEMOS</span>
+            </div>
 
-    <div class="doc-card">
-      <div class="doc-card-hd">
-        <span class="doc-card-title">Cainiao Pier-Pass Receipt</span>
-        <span class="badge ok">CN-LAX-88201</span>
-      </div>
-      <dl class="doc-kv">
-        <dt>Terminal</dt><dd>Port of LA Pier 400 Berth</dd>
-        <dt>Total Billed</dt><dd class="tnum">100 Units ($100k)</dd>
-        <dt>Conforming</dt><dd class="tnum" style="color:var(--accent-emerald)">80 Units Accepted ($80k)</dd>
-        <dt>Shortfall</dt><dd class="tnum" style="color:var(--halt-crimson)">20 Units Damaged (-$20k)</dd>
-        <dt>Inspector</dt><dd>Cainiao Maritime Inspector #14</dd>
-        <dt>Receipt Sig</dt><dd>0x789a...bc12 (Verified)</dd>
-      </dl>
-    </div>
+            <h1 class="display-serif">
+              Autonomous payouts clear only after <em>the math checks out</em>.
+            </h1>
 
-    <div class="doc-card">
-      <div class="doc-card-hd">
-        <span class="doc-card-title">Deterministic WASM Engine</span>
-        <span class="badge">651b BYTECODE</span>
-      </div>
-      <dl class="doc-kv">
-        <dt>Evaluator</dt><dd>Praman 3-Way Math Comparator</dd>
-        <dt>Execution</dt><dd class="tnum">&lt;3 ms (Deterministic)</dd>
-        <dt>Overbill Delta</dt><dd class="tnum" style="color:var(--halt-crimson)">-$20,000.00 USD (2,000,000 ¢)</dd>
-        <dt>Circuit Action</dt><dd style="color:var(--halt-crimson);font-weight:600">HALT FULL DISBURSEMENT</dd>
-        <dt>Reconciliation</dt><dd style="color:var(--accent-emerald)">Release $80k / Refund $20k</dd>
-        <dt>Attestation</dt><dd>0xba98...1f75 (Sepolia EAS)</dd>
-      </dl>
-    </div>
-  </div>
+            <p class="hero-lead">
+              Praman is pre-signature verification middleware for B2B escrow and autonomous AI agent treasuries. Every disbursement passes WASM arithmetic reconciliation, 19,565-record OFAC SDN screening, Solana Token-2022 inspection, and multi-miner consensus before signing.
+            </p>
 
-  <!-- Audit Run Control & 15-Stage Pipeline in Traveling Border-Beam Cards -->
-  <div class="split" style="margin-top:24px">
-    <div class="border-beam-card">
-      <div class="border-beam-inner">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <h3 style="font-family:var(--font-mono);font-size:14px;letter-spacing:0.02em">Run Trade Assurance Audit</h3>
-          <span class="pill-chip" style="font-size:10px">POST /api/trade-assurance/audit</span>
+            <div class="cta-row">
+              <a class="btn btn-primary" href="/desks">Open Operator Desks</a>
+              <a class="btn" href="/verify?case=po-ali-9021">Verify Signed Receipt</a>
+              <a class="btn btn-ghost" href="/docs">Read Documentation</a>
+            </div>
+
+            <div class="proof-anchors" aria-label="Verified infrastructure anchors">
+              <a class="proof-chip" href="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" target="_blank" rel="noopener">Sepolia TakarSettle v4</a>
+              <a class="proof-chip" href="https://anjoman.ai/dashboard/explore/miners/6201" target="_blank" rel="noopener">Anjoman Miner #6201</a>
+              <a class="proof-chip" href="https://solscan.io/tx/E3qVPMwc?cluster=devnet" target="_blank" rel="noopener">Solana Devnet Settlement</a>
+            </div>
+          </div>
+
+          <aside class="memo-card" aria-label="Live Signed Clearing Memo">
+            <div class="memo-head">
+              <div>
+                <span class="eyebrow">Signed Clearing Memo</span>
+              </div>
+              <div class="memo-tabs" role="group" aria-label="Canonical receipt selector">
+                <button type="button" class="memo-tab" data-hero-case="po-ali-9021" aria-pressed="true">PO-ALI-9021 ($80k)</button>
+                <button type="button" class="memo-tab" data-hero-case="po-ali-9021-halt" aria-pressed="false">Shortfall Halt (-$20k)</button>
+                <button type="button" class="memo-tab" data-hero-case="solana-token2022-halt" aria-pressed="false">Token-2022 Halt</button>
+              </div>
+            </div>
+            <div class="memo-body" id="hero-memo-body" aria-live="polite">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:0.75rem;flex-wrap:wrap">
+                <span class="badge">WORKED EXAMPLE + REAL EIP-191 SIG</span>
+                <span class="rubber-stamp is-cleared" id="hm-stamp">CLEARED</span>
+              </div>
+              <dl class="memo-kv">
+                <div>
+                  <dt>Case Reference</dt>
+                  <dd class="mono" id="hm-ref">PO-ALI-9021</dd>
+                </div>
+                <div>
+                  <dt>Cleared / Protected</dt>
+                  <dd class="mono tabular" id="hm-amount">$80,000.00 USDC</dd>
+                </div>
+                <div>
+                  <dt>Verifier Rule</dt>
+                  <dd id="hm-rule">WASM 3-Way Match + 2-of-2 Quorum</dd>
+                </div>
+                <div>
+                  <dt>Anchor Network</dt>
+                  <dd id="hm-net">Ethereum Sepolia (TakarSettle v4)</dd>
+                </div>
+              </dl>
+              <div class="memo-sig" id="hm-sig">
+                Loading live EIP-191 memo digest from /api/audit/case...
+              </div>
+              <div style="margin-top:0.9rem;display:flex;gap:0.55rem;flex-wrap:wrap">
+                <a class="btn btn-brand" id="hm-verify-link" href="/verify?case=po-ali-9021">Verify Signature in Browser</a>
+                <a class="btn" id="hm-cert-link" href="/api/audit/case?case=po-ali-9021&format=html" target="_blank" rel="noopener">Printable Certificate</a>
+              </div>
+            </div>
+          </aside>
         </div>
 
-        <div class="form-grid">
-          <div class="field">
-            <label for="ta-po">Purchase Order Identifier</label>
-            <input class="form-control" id="ta-po" value="PO-ALI-9021" aria-describedby="ta-po-help">
-            <p class="mono" id="ta-po-help" style="font-size:10.5px;color:var(--text-muted);margin-top:4px">Canonical $100,000.00 USDC contract commitment</p>
+        <div class="kpi-strip" aria-label="Protocol verification highlights">
+          <div class="kpi-box">
+            <div class="kpi-label">Canonical Escrow Baseline</div>
+            <div class="kpi-value tabular">$100,000.00</div>
+            <p class="kpi-meta"><span class="badge">WORKED EXAMPLE</span> PO-ALI-9021 TakarSettle v4</p>
           </div>
-          <div class="field">
-            <label for="ta-rcpt">Pier-Pass Receipt Number</label>
-            <input class="form-control" id="ta-rcpt" value="CN-LAX-88201">
+          <div class="kpi-box">
+            <div class="kpi-label">Conforming Acceptance</div>
+            <div class="kpi-value tabular" style="color:var(--ok)">80.0% (80 / 100)</div>
+            <p class="kpi-meta"><span class="badge">WORKED EXAMPLE</span> Cainiao PierPass CN-LAX-88201</p>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Overbilling Intercepted</div>
+            <div class="kpi-value tabular" style="color:var(--halt)">-$20,000.00</div>
+            <p class="kpi-meta"><span class="badge">WASM 651B</span> Halted &amp; prorated &lt;3 ms</p>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Sepolia Telemetry Ledger</div>
+            <div class="kpi-value tabular">32 On-Chain Tx</div>
+            <p class="kpi-meta"><span class="badge badge-ok">RECORDED</span> Across 15 Telegraph miners</p>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="form-grid">
-          <div class="field">
-            <label for="ta-scenario">Commercial Evidence Scenario</label>
-            <select class="form-control" id="ta-scenario">
-              <option value="alibaba_trade">Case A: Full Claim Discrepancy ($20k shortfall caught) → HALT</option>
-              <option value="alibaba_reconciled">Case B: Reconciled Partial Settlement ($80k release / $20k refund) → APPROVED</option>
-              <option value="alibaba_missing_evidence">Case C: Goods-Received Note Missing → HOLD FOR EVIDENCE</option>
-              <option value="alibaba_conflicting_reports">Case D: Competing Miner / Inspection Reports → ARBITRATE</option>
-              <option value="alibaba_refund">Case E: Total Non-Delivery / Corrupted Freight → FULL REFUND</option>
-            </select>
+    <!-- 01 WHO WE SERVE (WITH @lucasmarkes/hairline) -->
+    <section id="who-we-serve" class="section-block">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow">01 / Who We Serve</span>
+            <h2>Built for teams who cannot afford silent payout bugs</h2>
           </div>
-          <div class="field">
-            <label for="ta-usdc">Reconciled Disbursement (USDC)</label>
-            <input class="form-control" id="ta-usdc" value="0" inputmode="decimal">
+          <p class="section-lead">
+            Whether reconciling ocean freight invoices, capping autonomous Solana wallet agents, or auditing competing miner outputs, Praman returns deterministic evidence.
+          </p>
+        </div>
+
+        <div class="cards-4">
+          <article class="card role-card">
+            <div class="hairline-slot" id="hl-vault" aria-hidden="true"></div>
+            <div>
+              <h3>Procurement &amp; Freight Ops</h3>
+              <p>Split-settle partial deliveries cleanly. Release verified conforming units while refunding documented cargo damage automatically.</p>
+            </div>
+            <a class="btn" href="/desks#trade-assurance">Open Trade Assurance</a>
+          </article>
+
+          <article class="card role-card">
+            <div class="hairline-slot" id="hl-padlock" aria-hidden="true"></div>
+            <div>
+              <h3>AI Agent Builders</h3>
+              <p>Wrap Solana and EVM disbursements with pre-signature session caps, OFAC SDN checks, and Token-2022 TLV-12/14 freeze traps.</p>
+            </div>
+            <a class="btn" href="/desks#spend-guard">Screen Spend Guard</a>
+          </article>
+
+          <article class="card role-card">
+            <div class="hairline-slot" id="hl-riffle" aria-hidden="true"></div>
+            <div>
+              <h3>Risk &amp; Compliance Auditors</h3>
+              <p>Inspect statutory certificates, verify raw SHA-256 digests and EIP-191 signatures client-side, and review GSQ historical trails.</p>
+            </div>
+            <a class="btn" href="/verify">Verify a Receipt</a>
+          </article>
+
+          <article class="card role-card">
+            <div class="hairline-slot" id="hl-branches" aria-hidden="true"></div>
+            <div>
+              <h3>Telegraph Protocol Operators</h3>
+              <p>Audit 32 settled transactions across 15 registered miners, evaluate batch sanctions calls, and run 651-byte WASM scoring in-browser.</p>
+            </div>
+            <a class="btn" href="/desks#verification-labs">Run Batch &amp; WASM</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 HOW A DOLLAR CLEARS (ARCHIFY SHOWCASE WORKFLOW) -->
+    <section id="how-it-clears" class="section-block">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow">02 / Architecture Workflow</span>
+            <h2>How a dollar clears, or halts before signing</h2>
           </div>
+          <p class="section-lead">
+            Every request routes through repo-grounded solvers, 651-byte deterministic WASM comparison, OFAC sanctions screening, and EIP-191 cryptographic signing before settlement contracts move funds.
+          </p>
         </div>
 
-        <div style="margin-top:8px">
-          <button class="btn-square" id="ta-run">Execute Audit Run</button>
+        <div class="diagram-frame-shell">
+          <div class="diagram-toolbar">
+            <span class="mono" style="font-size:0.78rem;color:var(--ink-secondary)">Interactive Showcase Diagram: clearing-workflow.html (Archify Verified)</span>
+            <a class="btn" href="/diagrams/clearing-workflow.html" target="_blank" rel="noopener">Open Fullscreen Diagram</a>
+          </div>
+          <iframe
+            id="archify-workflow-frame"
+            class="diagram-iframe"
+            data-theme-sync
+            data-reload-on-theme="true"
+            src="/diagrams/clearing-workflow.html?embed=1&theme=light"
+            title="Praman Autonomous Clearing and Halt Workflow Diagram"
+            loading="lazy"
+          ></iframe>
         </div>
-        <p class="mono" id="ta-status" role="status" style="margin-top:14px;font-size:12px;color:var(--text-secondary);min-height:18px"></p>
       </div>
-    </div>
+    </section>
 
-    <div class="border-beam-card">
-      <div class="border-beam-inner">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-          <h3 style="font-family:var(--font-mono);font-size:14px;letter-spacing:0.02em">15-Stage Verification Pipeline</h3>
-          <span class="pill-chip" id="pipe-count" style="font-size:10px">IDLE</span>
+    <!-- 03 LIVE VERIFICATION TELEMETRY (SEAMLESS BORDERLESS EMBED) -->
+    <section id="blueprint" class="section-block">
+      <div class="container">
+        <div class="section-header" style="margin-bottom:1.25rem">
+          <div>
+            <span class="eyebrow">03 / Live Protocol Telemetry</span>
+            <h2>Observed settlement latency and verification coverage</h2>
+          </div>
+          <p class="section-lead">
+            Drawn dynamically on scroll directly from <span class="mono">/api/ledger</span> (32 recorded Sepolia settlements across 15 registered Telegraph miners), PO-ALI-9021 escrow clearing, and $79,373 counterfactual guard evaluations.
+          </p>
         </div>
 
-        <div class="pipe" id="pipe" aria-label="15-stage verification status"></div>
-        <div class="pipe-caption">
-          <span id="pipe-left">AWAITING TRIGGER</span>
-          <span id="pipe-right">WASM 651b · DETERMINISTIC</span>
-        </div>
-
-        <!-- Commercial Line-Item Reconciliation Breakdown Table -->
-        <table class="recon-grid">
-          <thead>
-            <tr>
-              <th>Line Item Specification</th>
-              <th class="num">Contract</th>
-              <th class="num">Accepted</th>
-              <th class="num">Variance</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>100GbE Optical Transceivers (Industrial)</td>
-              <td class="num">100 @ $1k</td>
-              <td class="num">80 Units</td>
-              <td class="num" style="color:var(--halt-crimson)">-20 Units</td>
-            </tr>
-            <tr class="summary-row">
-              <td>Financial Settlement Baseline</td>
-              <td class="num">$100,000</td>
-              <td class="num">$80,000</td>
-              <td class="num" style="color:var(--halt-crimson)">-$20,000</td>
-            </tr>
-          </tbody>
-        </table>
+        <iframe
+          id="pencil-iframe"
+          class="telemetry-embed-frame"
+          data-theme-sync
+          src="/pencil/?embed=1&theme=light"
+          title="Praman Live Verification Telemetry"
+          loading="eager"
+        ></iframe>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- Verdict Panel -->
-  <div class="border-beam-card" id="verdict-panel" style="margin-top:24px" hidden>
-    <div class="border-beam-inner">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <h3 style="font-family:var(--font-mono);font-size:14px">Statutory Audit Verdict</h3>
-        <span class="pill-chip" id="verdict-risk">-</span>
+    <!-- 04 FIVE SPECIALIZED OPERATOR DESKS -->
+    <section id="five-desks" class="section-block">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow">04 / Five Operator Desks</span>
+            <h2>Every claim type has a dedicated verification desk</h2>
+          </div>
+          <p class="section-lead">
+            Launch straight into any interactive desk inside <a href="/desks">/desks</a> to submit real inputs, inspect miner signals, or download statutory JSON/HTML evidence.
+          </p>
+        </div>
+
+        <div class="desks-grid">
+          <a class="card desk-launch-card" href="/desks#disposition-board">
+            <div>
+              <span class="badge badge-brand">DESK 0 / DISPOSITION BOARD</span>
+              <h3>Escrow Queue &amp; Case Flow</h3>
+              <p>Move commercial cases dynamically between Hold, Release, Partial, and Refund lanes using live Policy API verdicts.</p>
+            </div>
+            <span class="mono" style="font-size:0.78rem;color:var(--brand)">Open Disposition Board -></span>
+          </a>
+
+          <a class="card desk-launch-card" href="/desks#trade-assurance">
+            <div>
+              <span class="badge">DESK 1 / WORKED EXAMPLE</span>
+              <h3>Alibaba &amp; Cainiao Trade Assurance</h3>
+              <p>Run 15-stage verification on PO-ALI-9021, test 5 commercial scenarios (Case A..E), and issue printable statutory certificates.</p>
+            </div>
+            <span class="mono" style="font-size:0.78rem;color:var(--brand)">Open Trade Assurance -></span>
+          </a>
+
+          <a class="card desk-launch-card" href="/desks#spend-guard">
+            <div>
+              <span class="badge badge-ok">DESK 2 / LIVE SDK + API</span>
+              <h3>Solana &amp; EVM Spend Guard</h3>
+              <p>Intercept drainer wallets, Token-2022 PermanentDelegate/TransferHook traps, session cap overruns, and custom vendor payloads.</p>
+            </div>
+            <span class="mono" style="font-size:0.78rem;color:var(--brand)">Open Spend Guard -></span>
+          </a>
+
+          <a class="card desk-launch-card" href="/desks#settlement-ledger">
+            <div>
+              <span class="badge badge-ok">DESK 3 / RECORDED ON-CHAIN</span>
+              <h3>32-Tx Sepolia Settlement Ledger</h3>
+              <p>Search, sort, and inspect 32 Sepolia payouts across 15 registered Telegraph miners, Takar Dispute resolvers, and Devnode signals.</p>
+            </div>
+            <span class="mono" style="font-size:0.78rem;color:var(--brand)">Open Settlement Ledger -></span>
+          </a>
+
+          <a class="card desk-launch-card" href="/desks#mining-registry">
+            <div>
+              <span class="badge badge-ok">DESK 4 / GSQ ARCHIVE + EAS</span>
+              <h3>Forensic Mining Arbitration</h3>
+              <p>Reconcile Queensland Government Mining Survey (GSQ Site 494270 &amp; 43836) ground truth against miner reports and EAS seals.</p>
+            </div>
+            <span class="mono" style="font-size:0.78rem;color:var(--brand)">Open Mining Registry -></span>
+          </a>
+
+          <a class="card desk-launch-card" href="/desks#verification-labs">
+            <div>
+              <span class="badge badge-ok">DESK 5 / LIVE TOOLS + WASM</span>
+              <h3>Procurement Verify, Batch &amp; WASM</h3>
+              <p>Test 6 live NLP/math tools, Tencent #01/#03 agent claim checks, Track 3 sanctions batch eval, and client-side 651B WASM scoring.</p>
+            </div>
+            <span class="mono" style="font-size:0.78rem;color:var(--brand)">Open Verification Labs -></span>
+          </a>
+        </div>
       </div>
-      <div id="verdict-body" class="verdict" aria-live="polite"></div>
-      <div style="margin-top:16px">
-        <button class="btn-square ghost-square" id="ta-cert-btn" hidden>View Statutory Certificate</button>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ============ DESK 1 · SPEND GUARD ============ -->
-<section class="desk" id="desk-2" role="tabpanel" aria-labelledby="tabbtn-2" hidden>
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
-    <div>
-      <span class="pill-chip" style="margin-bottom:8px">DESK 02 · PRE-SIGNATURE DEFENSE</span>
-      <h2 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.02em;margin-top:4px">
-        Autonomous Spend Guard & Policy Armor
-      </h2>
-      <p style="color:var(--text-secondary);max-width:72ch;margin-top:8px">
-        Interception middleware executing before cryptographic signatures touch the wire. 
-        Screens all counterparty addresses against 19,565 OFAC SDN records in under 25ms, halts hijacked client runtimes, 
-        and enforces atomic session caps for Solana and EVM agent treasuries.
-      </p>
-      <p class="evidence-note"><span class="badge evidence-live" style="font-size:9px;padding:1px 6px">LIVE</span> Scenario runs execute the real SDK policy engine via <span class="mono">/api/audit/*</span></p>
-    </div>
-  </div>
-
-  <div class="split" style="margin-top:24px">
-    <div class="border-beam-card">
-      <div class="border-beam-inner">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-          <h3 style="font-family:var(--font-mono);font-size:14px">Solana Pre-Signature Armor</h3>
-          <span class="pill-chip" style="font-size:10px">packages/praman-sdk/solana.js</span>
+    <!-- 05 BENCHMARK -->
+    <section id="benchmark" class="section-block">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow">05 / Counterfactual Empirical Benchmark</span>
+            <h2>With vs Without Telegraph: 5 / 5 adversarial catches</h2>
+          </div>
+          <p class="section-lead">
+            Evaluated locally via <span class="mono">npm run benchmark</span> (<span class="mono">benchmark/with-vs-without-telegraph.mjs</span>): ungrounded agent pass-through leaked all $79,373 across 5 failure modes while Praman halted 100.0%.
+          </p>
         </div>
 
-        <div class="verdict approved">
-          <div class="verdict-badge tnum">30/30 UNIT + TOKEN-2022 VECTORS PASS</div>
-          <p class="summary">Atomic runningSessionSpend accumulator, unresolvable address-lookup-table circuit breaker, Token-2022 TLV inspection, drainer blacklist, and sub-25ms OFAC SDN screening.</p>
-        </div>
-
-        <div class="field" style="margin-top:18px">
-          <label for="sg-scenario">Interception Scenario Vector</label>
-          <select class="form-control" id="sg-scenario">
-            <option value="legit">Legitimate Treasury Transfer (0.01 SOL to Siemens AG) -> APPROVED</option>
-            <option value="hijack">Hijacked @solana/web3.js (Prototype Backdoor Hook) -> HALTED</option>
-            <option value="drainer">Known Drainer Exfiltration Wallet (FnvLGtucz4...) -> HALTED</option>
-            <option value="token2022_permanent_delegate">Token-2022 PermanentDelegate (TLV 12 Seize Trap) -> HALTED</option>
-            <option value="token2022_transfer_hook">Token-2022 TransferHook (TLV 14 Arbitary Program) -> HALTED</option>
-            <option value="token2022_freeze_authority">Token-2022 Active FreezeAuthority Trap -> HALTED</option>
-            <option value="cap">Cumulative Session Spend Cap Breach ($502.40 > $500.00) -> HALTED</option>
-            <option value="ofac">OFAC SDN Counterparty Screening Hit -> HALTED</option>
-          </select>
-        </div>
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn-square" id="sg-run">Screen Transaction</button>
-          <button class="btn-square ghost-square" id="sg-cli">CLI Demo (5 Scenarios)</button>
-        </div>
-        <div id="sg-out" style="margin-top:16px" aria-live="polite"></div>
-      </div>
-    </div>
-
-    <div class="border-beam-card">
-      <div class="border-beam-inner" style="padding:0">
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border-subtle)">
-          <h3 style="font-family:var(--font-mono);font-size:14px">EVM Diamond Policy Matrix</h3>
-          <span class="pill-chip" style="font-size:10px">SEPOLIA · DIAMOND #6201 / DEVNODE #6164</span>
-        </div>
-        <div class="table-scroll">
-          <table>
+        <div class="table-wrapper">
+          <table class="data-table stack-mobile" aria-label="Counterfactual benchmark results">
             <thead>
               <tr>
-                <th>Agent Tier</th>
-                <th class="num">Single Cap</th>
-                <th class="num">Dual-Auth Cap</th>
-                <th>Unresolved ALT</th>
+                <th>Adversarial Scenario</th>
+                <th>Without Praman</th>
+                <th>With Praman Verdict</th>
+                <th>Loss Averted</th>
+                <th>Blocking Policy Flag</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td>TIER_1_AUTONOMOUS</td>
-                <td class="num">$500.00</td>
-                <td class="num">-</td>
-                <td><span class="badge warn">HALT</span></td>
+                <th scope="row" data-label="Scenario">Scenario A: Inverted FX Rate Overcharge</th>
+                <td data-label="Without">Approve Payment (Loss)</td>
+                <td data-label="With Praman"><span class="badge badge-warn">HELD_FOR_MANUAL_REVIEW</span></td>
+                <td data-label="Averted" class="mono tabular">$1,373.00</td>
+                <td data-label="Flag" class="mono">INVERTED_FX_OVERCHARGE_PREVENTED</td>
               </tr>
               <tr>
-                <td>TIER_2_DUAL_AUTH</td>
-                <td class="num">$500.00</td>
-                <td class="num">$150,000.00</td>
-                <td><span class="badge warn">HALT</span></td>
+                <th scope="row" data-label="Scenario">Scenario B: Lapsed GLEIF LEI Entity</th>
+                <td data-label="Without">Approve Payment (Loss)</td>
+                <td data-label="With Praman"><span class="badge badge-warn">HELD_FOR_MANUAL_REVIEW</span></td>
+                <td data-label="Averted" class="mono tabular">$24,500.00</td>
+                <td data-label="Flag" class="mono">LAPSED_CORPORATE_LEI_STATUS</td>
               </tr>
               <tr>
-                <td>SUPERVISOR</td>
-                <td class="num">$150,000.00</td>
-                <td class="num">$150,000.00</td>
-                <td><span class="badge warn">HALT</span></td>
+                <th scope="row" data-label="Scenario">Scenario C: Typosquat Phishing Domain</th>
+                <td data-label="Without">Approve Payment (Loss)</td>
+                <td data-label="With Praman"><span class="badge badge-halt">REJECT_PAYMENT</span></td>
+                <td data-label="Averted" class="mono tabular">$15,000.00</td>
+                <td data-label="Flag" class="mono">PHISHING_DOMAIN_HARD_BLOCK</td>
               </tr>
               <tr>
-                <td>ANY / Unknown Program</td>
-                <td class="num">-</td>
-                <td class="num">-</td>
-                <td><span class="badge warn">HALT</span></td>
+                <th scope="row" data-label="Scenario">Scenario D: Sub-Cent Arithmetic Drift</th>
+                <td data-label="Without">Approve Payment (Loss)</td>
+                <td data-label="With Praman"><span class="badge badge-warn">HELD_FOR_MANUAL_REVIEW</span></td>
+                <td data-label="Averted" class="mono tabular">$500.00</td>
+                <td data-label="Flag" class="mono">WASM_ARITHMETIC_DRIFT_DETECTED</td>
+              </tr>
+              <tr>
+                <th scope="row" data-label="Scenario">Scenario E: OFAC SDN Transliteration Collision</th>
+                <td data-label="Without">Approve Payment (Loss)</td>
+                <td data-label="With Praman"><span class="badge badge-halt">REJECT_PAYMENT</span></td>
+                <td data-label="Averted" class="mono tabular">$38,000.00</td>
+                <td data-label="Flag" class="mono">OFAC_SDN_SANCTIONS_BLOCK</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
-<!-- ============ DESK 2 · SETTLEMENT LEDGER ============ -->
-<section class="desk" id="desk-3" role="tabpanel" aria-labelledby="tabbtn-3" hidden>
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
-    <div>
-      <span class="pill-chip" style="margin-bottom:8px">DESK 03 · IMMUTABLE EXECUTION</span>
-      <h2 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.02em;margin-top:4px">
-        On-Chain Settlement Telemetry Ledger
-      </h2>
-      <p style="color:var(--text-secondary);max-width:72ch;margin-top:8px">
-        <span id="lg-hero-count">32</span> verified on-chain settlements executed across independent Telegraph miners, alongside paid Devnode escrow signals.
-        Every record carries immutable Sepolia transaction proof or verified cryptographic escrow signal/receipt hashes.
-      </p>
-      <p class="evidence-note"><span class="badge evidence-recorded" style="font-size:9px;padding:1px 6px">RECORDED</span> Receipt-backed on-chain transactions · <span class="mono">/api/ledger</span></p>
-    </div>
-  </div>
-
-  <div class="kpi-strip" style="margin-top:20px">
-    <div class="kpi-card">
-      <div class="kpi-label">Paid Settlements</div>
-      <div class="kpi-val tnum" id="lg-count">-</div>
-      <div class="kpi-sub">On-Chain Sepolia Executed</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Independent Miners</div>
-      <div class="kpi-val tnum" id="lg-miners">-</div>
-      <div class="kpi-sub">Telegraph Protocol Ranked</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Total Spent (USDC)</div>
-      <div class="kpi-val tnum" id="lg-spent">-</div>
-      <div class="kpi-sub">Sepolia Diamond Facilitated</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-label">Median Latency</div>
-      <div class="kpi-val tnum" id="lg-latency">-</div>
-      <div class="kpi-sub">Milliseconds (Verified)</div>
-    </div>
-  </div>
-
-  <div class="border-beam-card" style="margin-top:24px">
-    <div class="border-beam-inner" style="padding:0">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;gap:12px">
-        <h3 style="font-family:var(--font-mono);font-size:14px">Confirmed Settlement Ledger</h3>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <div class="border-beam-input-wrapper" style="max-width:320px;flex:1">
-            <input class="form-control" id="lg-q" placeholder="Search intent, miner, hash…" style="min-height:36px" aria-label="Search ledger">
+    <!-- 06 FORCEFIELD + ECOSYSTEM ANCHORS (DARK ISLAND CONTRAST) -->
+    <section id="ecosystem" class="ecosystem-band dark-island">
+      <canvas id="hero-canvas" aria-hidden="true"></canvas>
+      <div class="container ecosystem-inner">
+        <div class="section-header" style="margin-bottom:1.25rem">
+          <div>
+            <span class="eyebrow" style="color:var(--island-muted)">06 / On-Chain Anchors &amp; Endpoints</span>
+            <h2 style="color:var(--island-ink)">Cryptographic roots verifiable outside our servers</h2>
           </div>
-          <select class="form-control" id="lg-intent" style="max-width:200px;min-height:36px" aria-label="Filter by intent">
-            <option value="">ALL INTENTS</option>
-          </select>
-          <button class="btn-square ghost-square" id="lg-export" style="padding:6px 14px;font-size:11.5px">Export JSON</button>
+          <p class="section-lead" style="color:var(--island-muted)">
+            Contracts deployed on Ethereum Sepolia, Solana Devnet anchors, EAS statutory schemas, and keyless streamable MCP endpoints.
+          </p>
+        </div>
+
+        <div class="flowing-list">
+          <a class="flowing-row" href="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" target="_blank" rel="noopener">
+            <span class="flowing-row-title">01 / TakarSettle v4 Settlement Vault</span>
+            <span class="flowing-row-sub">0x310275e6D66818E068245326bB9e398822304248 · Sepolia</span>
+          </a>
+          <a class="flowing-row" href="/desks#settlement-ledger">
+            <span class="flowing-row-title">02 / 32-Transaction Sepolia Settlement Ledger</span>
+            <span class="flowing-row-sub">15 Registered Telegraph Miners · Click to Inspect</span>
+          </a>
+          <a class="flowing-row" href="/verify?case=po-ali-9021">
+            <span class="flowing-row-title">03 / EIP-191 &amp; EAS Statutory Receipt Verifier</span>
+            <span class="flowing-row-sub">Schema #d84485... · Client-Side SHA-256 + Signer Recovery</span>
+          </a>
+          <a class="flowing-row" href="/docs#mcp-integration">
+            <span class="flowing-row-title">04 / Keyless 18-Tool Streamable MCP Server</span>
+            <span class="flowing-row-sub">https://praman-desk.vercel.app/api/mcp · Zero Auth Gate</span>
+          </a>
         </div>
       </div>
-      
-      <div class="table-scroll" style="max-height:560px;overflow-y:auto">
-        <table id="lg-table" aria-label="Settlement ledger">
-          <thead>
-            <tr>
-              <th data-sort="index">#</th>
-              <th data-sort="title">Verification Target</th>
-              <th data-sort="intent">Intent Specification</th>
-              <th data-sort="minerName">Specialist Miner</th>
-              <th class="num" data-sort="durationMs">Latency</th>
-              <th class="num" data-sort="costUsd">Cost</th>
-              <th data-sort="txHash">Sepolia Transaction</th>
-            </tr>
-          </thead>
-          <tbody id="lg-body"></tbody>
-        </table>
+    </section>
+
+    <!-- 07 PRICING & HONEST OPERATIONAL LIMITS -->
+    <section id="pricing" class="section-block">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow">07 / Pricing &amp; Operational Transparency</span>
+            <h2>Predictable per-verification economics and honest scope limits</h2>
+          </div>
+          <p class="section-lead">
+            Built with zero lock-in: audit individual receipts for cents on Telegraph, or run the 651-byte WASM and Solana SDK completely offline in your own runtime.
+          </p>
+        </div>
+
+        <div class="pricing-grid">
+          <div class="card card-pad">
+            <span class="badge">OPEN SDK &amp; WASM</span>
+            <h3 style="margin:0.7rem 0 0.35rem;font-size:1.2rem">$0 / Local Runtime</h3>
+            <p style="font-size:0.9rem;color:var(--ink-secondary)">Pre-signature Solana guard (<span class="mono">packages/praman-sdk</span>) + 651-byte <span class="mono">comparator.wasm</span> run inside your own process.</p>
+          </div>
+          <div class="card card-pad">
+            <span class="badge badge-brand">TELEGRAPH PROTOCOL</span>
+            <h3 style="margin:0.7rem 0 0.35rem;font-size:1.2rem">$0.01 - $0.10 USDC / Intent</h3>
+            <p style="font-size:0.9rem;color:var(--ink-secondary)">Bonded multi-miner clearing across PO math, FX cross-checks, GLEIF LEI, OFAC SDN screening, and EAS memo anchoring.</p>
+          </div>
+          <div class="card card-pad">
+            <span class="badge badge-ok">DEDICATED ENTERPRISE PILOT</span>
+            <h3 style="margin:0.7rem 0 0.35rem;font-size:1.2rem">Custom SLA</h3>
+            <p style="font-size:0.9rem;color:var(--ink-secondary)">Private resolver keys, custom ERP/PierPass webhook connectors, and dedicated audit trails. <a href="/roadmap#pilot">Request Pilot Access</a>.</p>
+          </div>
+        </div>
+
+        <div style="display:grid;gap:0.75rem">
+          <details class="praman-accordion">
+            <summary>Honest Testnet &amp; Mainnet-Path Boundaries <span class="kbd-pill">Expand</span></summary>
+            <p style="margin:0">
+              All smart contracts currently live on <strong>Ethereum Sepolia</strong> (TakarSettle v4 &amp; v5) and <strong>Solana Devnet</strong>. No Ethereum Mainnet or Solana Mainnet-Beta real user funds move unless you deploy your own production signer keys and RPC endpoints.
+            </p>
+          </details>
+          <details class="praman-accordion">
+            <summary>Canonical Worked Examples vs Live Endpoint Calls <span class="kbd-pill">Expand</span></summary>
+            <p style="margin:0">
+              Case studies labeled <strong>WORKED EXAMPLE</strong> (such as PO-ALI-9021 $100k / $80k / $20k) demonstrate canonical arbitration scenarios backed by real Sepolia attestation records. Endpoints marked <strong>LIVE</strong> compute fresh math, OFAC screening, and EIP-191 hashes directly on arbitrary user text.
+            </p>
+          </details>
+        </div>
       </div>
-      <div class="empty" id="lg-empty" style="padding:24px;text-align:center" hidden>
-        No settlements match filter query. <button class="btn-square ghost-square" id="lg-clear" style="padding:4px 10px;font-size:11px;margin-left:8px">Clear Filters</button>
-      </div>
-    </div>
-  </div>
-  <div id="lg-escrow-wrap" style="margin-top:24px" hidden></div>
-</section>
+    </section>
 
-<!-- ============ DESK 3 · MINING REGISTRY ============ -->
-<section class="desk" id="desk-4" role="tabpanel" aria-labelledby="tabbtn-4" hidden>
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
-    <div>
-      <span class="pill-chip" style="margin-bottom:8px">DESK 04 · HISTORICAL ARBITRATION</span>
-      <h2 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.02em;margin-top:4px">
-        Ground Truth Historical Mining Arbitration
-      </h2>
-      <p style="color:var(--text-secondary);max-width:72ch;margin-top:8px">
-        Forensic reconciliation of historical resources: Queensland Government Mining Survey (GSQ)
-        ground-truth records evaluated against competing miner claims using the 651b WASM comparator and anchored with EAS attestations.
-      </p>
-      <p class="evidence-note"><span class="badge evidence-recorded" style="font-size:9px;padding:1px 6px">RECORDED</span> GSQ ground truth + EAS attestation · <span class="mono">/api/verify/mine-dossier</span></p>
-    </div>
-  </div>
+    <!-- 08 DEVELOPER CODE ISLAND -->
+    <section id="quickstart" class="section-block" style="border-bottom:0">
+      <div class="container">
+        <div class="section-header">
+          <div>
+            <span class="eyebrow">08 / Developer Integration</span>
+            <h2>Gate any payout with one POST request</h2>
+          </div>
+          <p class="section-lead">
+            Keyless, CORS-enabled HTTP endpoints, zero-dependency Python client, pre-signature Solana middleware, and streamable MCP bindings.
+          </p>
+        </div>
 
-  <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap">
-    <button class="btn-square" id="mr-load">Load Mount Morgan Dossier (GSQ Site 494270)</button>
-    <a class="btn-square ghost-square" href="/api/verify/mine-dossier?siteNo=494270" target="_blank" rel="noopener">Raw API Response</a>
-  </div>
-  <div id="mr-out" style="margin-top:20px" aria-live="polite"></div>
-</section>
-
-<!-- ============ DESK 5 · PROCUREMENT VERIFY (original product surface, live APIs) ============ -->
-<section class="desk" id="desk-5" role="tabpanel" aria-labelledby="tabbtn-5" hidden>
-  <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px">
-    <div>
-      <span class="pill-chip" style="margin-bottom:8px">DESK 05 · ORIGINAL PRODUCT SURFACE</span>
-      <h2 style="font-size:clamp(22px,3vw,32px);font-weight:700;letter-spacing:-0.02em;margin-top:4px">
-        Procurement Verify
-      </h2>
-      <p style="color:var(--text-secondary);max-width:72ch;margin-top:8px">
-        The capabilities Praman was built for, on real inputs: purchase-order arithmetic verification,
-        invoice-to-ledger reconciliation, corporate registry lookups, vendor validation, document authenticity,
-        and OFAC SDN sanctions screening. Every run below executes a live API call on your text. Nothing here is pre-scripted.
-      </p>
-      <p class="evidence-note"><span class="badge evidence-live" style="font-size:9px;padding:1px 6px">LIVE</span> Real generalized NLP + arithmetic solving · <span class="mono">/api/miner/*</span></p>
-    </div>
-  </div>
-
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:14px;margin-top:24px">
-    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
-      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Purchase Order Verify</h3>
-      <input class="form-control" id="pv-po" placeholder="PO-2026-7741" aria-label="PO number">
-      <input class="form-control" id="pv-po-q" placeholder='Optional claim, e.g. "10 units at $250 = $2500"' style="margin-top:8px" aria-label="PO claim">
-      <button class="btn-square" id="pv-po-btn" style="margin-top:10px;width:100%">Verify PO</button>
-      <pre id="pv-po-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
-    </div>
-
-    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
-      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Invoice ↔ Ledger Reconcile</h3>
-      <input class="form-control" id="pv-inv" placeholder="INV-101" aria-label="Invoice">
-      <input class="form-control" id="pv-led" placeholder="LEDGER-101 or 'PO-7781: 1000 units x USD 12.40 = USD 12,400.00'" style="margin-top:8px" aria-label="Ledger">
-      <button class="btn-square" id="pv-inv-btn" style="margin-top:10px;width:100%">Reconcile</button>
-      <pre id="pv-inv-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
-    </div>
-
-    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
-      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Corporate Registry</h3>
-      <input class="form-control" id="pv-co" placeholder="SAP SE" aria-label="Company">
-      <input class="form-control" id="pv-jur" placeholder="Jurisdiction, e.g. DE (optional)" style="margin-top:8px" aria-label="Jurisdiction">
-      <button class="btn-square" id="pv-co-btn" style="margin-top:10px;width:100%">Look up</button>
-      <pre id="pv-co-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
-    </div>
-
-    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
-      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Vendor &amp; Document Authenticity</h3>
-      <input class="form-control" id="pv-ven" placeholder="Vendor name, e.g. SAP SE" aria-label="Vendor">
-      <button class="btn-square" id="pv-ven-btn" style="margin-top:10px;width:100%">Verify vendor + doc</button>
-      <pre id="pv-ven-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
-    </div>
-
-    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
-      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Sanctions Screening (OFAC SDN)</h3>
-      <input class="form-control" id="pv-sdn" placeholder="Counterparty name, e.g. Banco Nacional de Cuba" aria-label="Name to screen">
-      <button class="btn-square" id="pv-sdn-btn" style="margin-top:10px;width:100%">Screen</button>
-      <pre id="pv-sdn-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
-    </div>
-    <div class="blueprint-card-inner" style="padding:18px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
-      <h3 style="font-size:14px;font-weight:600;margin:0 0 10px;color:var(--text-primary)">Agent Output Claim Verifier (Tencent #01 / #03)</h3>
-      <input class="form-control" id="pv-agent-vendor" placeholder="Vendor domain/entity, e.g. cloudflare.com" aria-label="Vendor or counterparty">
-      <textarea class="form-control" id="pv-agent-output" rows="2" placeholder="Agent claim, e.g. Invoice USD 10,000 (EUR 9,200) -> IBAN DE89370400440532013000" aria-label="Agent claim to verify" style="margin-top:8px"></textarea>
-      <button class="btn-square" id="pv-agent-btn" style="margin-top:10px;width:100%">Verify Output Claims</button>
-      <pre id="pv-agent-out" class="mono" style="margin:12px 0 0;font-size:12px;white-space:pre-wrap;color:var(--text-secondary)" aria-live="polite"></pre>
-    </div>
-  </div>
-
-  <!-- Evidence: counterfactual benchmark (source: docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md) -->
-  <div class="blueprint-card-inner" style="padding:18px;margin-top:20px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle)">
-    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-      <h3 style="font-size:14px;font-weight:600;margin:0;color:var(--text-primary)">Evidence: With vs Without Telegraph (5 adversarial vectors)</h3>
-      <span class="badge evidence-recorded">RECORDED</span>
-    </div>
-    <p style="color:var(--text-secondary);font-size:13px;margin:8px 0 14px">
-      Counterfactual policy evaluation, 2026-11-25: ungrounded agent pass-through vs Praman Two-Mind Spend Guard.
-      Catch rate 0/5 vs 5/5; $79,373 of direct capital loss averted. Source: <span class="mono">docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md</span> ·
-      Reproduce: <span class="mono">node benchmark/with-vs-without-telegraph.mjs</span>
-    </p>
-    <div style="overflow-x:auto">
-      <table style="width:100%;min-width:640px;border-collapse:collapse;font-size:13px">
-        <thead>
-          <tr style="text-align:left;color:var(--text-muted);font-size:11px;letter-spacing:0.06em">
-            <th style="padding:8px 10px">Vector</th>
-            <th style="padding:8px 10px" class="num">Exposure</th>
-            <th style="padding:8px 10px">Blocking Flag</th>
-            <th style="padding:8px 10px">Digest</th>
-          </tr>
-        </thead>
-        <tbody class="mono" style="font-variant-numeric:tabular-nums">
-          <tr><td style="padding:8px 10px">Inverted FX rate overcharge</td><td class="num">$1,373</td><td style="padding:8px 10px">INVERTED_FX_OVERCHARGE_PREVENTED</td><td style="padding:8px 10px">0xc2f2890d65e4cdaf…</td></tr>
-          <tr><td style="padding:8px 10px">Lapsed LEI / unregistered entity</td><td class="num">$24,500</td><td style="padding:8px 10px">LAPSED_CORPORATE_LEI_STATUS</td><td style="padding:8px 10px">0x5829d26b01dd1ca1…</td></tr>
-          <tr><td style="padding:8px 10px">Typosquat phishing domain</td><td class="num">$15,000</td><td style="padding:8px 10px">PHISHING_DOMAIN_HARD_BLOCK</td><td style="padding:8px 10px">0x25e8d1fedf9e7dfa…</td></tr>
-          <tr><td style="padding:8px 10px">Sub-cent line-item inflation</td><td class="num">$500</td><td style="padding:8px 10px">WASM_ARITHMETIC_DRIFT_DETECTED</td><td style="padding:8px 10px">0xac5f5f2873a345a1…</td></tr>
-          <tr><td style="padding:8px 10px">OFAC SDN transliteration collision</td><td class="num">$38,000</td><td style="padding:8px 10px">OFAC_SDN_SANCTIONS_BLOCK</td><td style="padding:8px 10px">0x5f438c1557c704db…</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- ==========================================================================
-     6. PROTOCOL ECOSYSTEM LINK ROWS (marquee hover layer removed as decorative)
-     ========================================================================== -->
-<section class="flowing-menu-container" id="flowing-menu-section" aria-label="Protocol Ecosystem Marquee">
-  
-  <div class="flowing-item" data-link="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" data-external="true">
-    <span class="flowing-title">01 · TAKARSETTLE V4 VAULT</span>
-    <span class="flowing-sub">0x3102...4248 · SEPOLIA ETHEREUM</span>
-  </div>
-
-  <div class="flowing-item" data-action="ledger">
-    <span class="flowing-title">02 · VISUAL SETTLEMENT LEDGER</span>
-    <span class="flowing-sub" id="flowing-ledger-count">32 ON-CHAIN + ESCROW SIGNALS</span>
-  </div>
-
-  <div class="flowing-item" data-action="certificate">
-    <span class="flowing-title">03 · STATUTORY EAS ATTESTATION REGISTRY</span>
-    <span class="flowing-sub">SCHEMA #d84485... · UCC ART. 2</span>
-  </div>
-
-  <div class="flowing-item" data-action="developer">
-    <span class="flowing-title">04 · DEVELOPER MCP SERVER & API</span>
-    <span class="flowing-sub">KEYLESS CORS ENDPOINTS · STREAMABLE TOOLS</span>
-  </div>
-
-</section>
-
-</main>
-
-<!-- ==========================================================================
-     7. INSTITUTIONAL MULTI-COLUMN FOOTER
-     ========================================================================== -->
-<footer>
-  <div class="wrap">
-    <div class="footer-grid">
-      <div class="footer-col">
-        <h4>Praman Institutional Infrastructure</h4>
-        <p style="line-height:1.6;font-size:12px;color:var(--text-secondary);max-width:38ch">
-          Autonomous financial clearinghouse and spend guard middleware for AI agents, cross-border commerce, and institutional web3 protocols.
-        </p>
-      </div>
-      <div class="footer-col">
-        <h4>On-Chain Contracts</h4>
-        <ul>
-          <li><a href="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" target="_blank" rel="noopener">TakarSettle v4 (Sepolia)</a></li>
-          <li><a href="https://sepolia.etherscan.io/address/0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B" target="_blank" rel="noopener">TakarSettle5 (Sepolia)</a></li>
-          <li><a href="https://sepolia.etherscan.io/address/0x98021b20Efdb7ae2C57366010a6E0fDE207b4466" target="_blank" rel="noopener">Praman Resolver Seat</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Verification Standards</h4>
-        <ul>
-          <li><a href="/api/audit/case?case=po-ali-9021&format=html" target="_blank" rel="noopener">UCC Art. 2 / UN CISG Statutory Seal</a></li>
-          <li><a href="https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115" target="_blank" rel="noopener">EAS Attestation Record #33d85bed</a></li>
-          <li><a href="/api/mcp" target="_blank" rel="noopener">Keyless Streamable MCP Endpoint</a></li>
-          <li><a href="https://github.com/VishAlgoDev/praman-desk" target="_blank" rel="noopener">Open-Source Audit Repository</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Network Nodes</h4>
-        <ul>
-          <li><span class="mono">Devnode #6164</span></li>
-          <li><span class="mono">Diamond #6201</span></li>
-          <li><span class="mono">18 Bonded Intents</span></li>
-          <li><button id="motion-toggle" class="btn-square ghost-square" style="padding:3px 10px;font-size:10.5px;margin-top:6px">MOTION: ON</button></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="footer-bottom">
-      <span>© 2026 PRAMAN DESK · TELEGRAPH PROTOCOL HACKATHON SEASON II</span>
-      <span>DETERMINISTIC WASM 651b · SUB-3MS CIRCUIT BREAKER · 19,565 OFAC SDN RAM</span>
-    </div>
-  </div>
-</footer>
-
-<!-- Transaction Drawer Dialog -->
-<dialog id="tx-drawer" aria-labelledby="tx-drawer-title">
-  <div class="dialog-hd">
-    <h3 id="tx-drawer-title" style="font-family:var(--font-mono);font-size:14px">Settlement Receipt Audit</h3>
-    <button class="x-btn" data-close aria-label="Close">✕</button>
-  </div>
-  <div class="dialog-body">
-    <dl class="kv" id="tx-drawer-body"></dl>
-  </div>
-</dialog>
-
-<!-- Statutory Certificate Modal -->
-<dialog id="cert-modal" aria-labelledby="cert-modal-title">
-  <div class="dialog-hd">
-    <h3 id="cert-modal-title" style="font-family:var(--font-mono);font-size:14px">Statutory Settlement Certificate</h3>
-    <button class="x-btn" data-close aria-label="Close">✕</button>
-  </div>
-  <div class="dialog-body" id="cert-body"></div>
-</dialog>
-
-<!-- Developer API Drawer Dialog -->
-<dialog id="dev-drawer" aria-labelledby="dev-drawer-title">
-  <div class="dialog-hd">
-    <h3 id="dev-drawer-title" style="font-family:var(--font-mono);font-size:14px">Developer Integration Console</h3>
-    <button class="x-btn" data-close aria-label="Close">✕</button>
-  </div>
-  <div class="dialog-body">
-    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px">
-      Praman Desk provides keyless, CORS-enabled endpoints and streamable Model Context Protocol (MCP) tool bindings.
-    </p>
-
-    <h4 style="font-family:var(--font-mono);font-size:11.5px;color:var(--brand);margin-top:16px;text-transform:uppercase">SDK Installation (JS / TS &amp; Python)</h4>
-    <div class="code-block">npm install github:VishAlgoDev/praman-desk @solana/web3.js</div>
-    <div class="code-block" style="margin-top:8px">git clone https://github.com/VishAlgoDev/praman-desk.git
-# Python zero-dependency client: packages/praman-sdk/praman.py</div>
-
-    <h4 style="font-family:var(--font-mono);font-size:11.5px;color:var(--brand);margin-top:16px;text-transform:uppercase">cURL Live Trade Assurance Audit</h4>
-    <div class="code-block">curl -X POST https://praman-desk.vercel.app/api/trade-assurance/audit \
+        <div class="code-island dark-island">
+          <div class="code-tabs">
+            <div class="code-tab-btns" role="tablist" aria-label="Quickstart language examples">
+              <button type="button" class="code-tab-btn" role="tab" aria-selected="true" data-code-tab="curl">cURL Audit</button>
+              <button type="button" class="code-tab-btn" role="tab" aria-selected="false" data-code-tab="solana">Solana SDK</button>
+              <button type="button" class="code-tab-btn" role="tab" aria-selected="false" data-code-tab="python">Python SDK</button>
+              <button type="button" class="code-tab-btn" role="tab" aria-selected="false" data-code-tab="mcp">MCP Config</button>
+            </div>
+            <button type="button" class="btn" id="copy-quickstart-btn" style="background:var(--island-bg);color:var(--island-ink);border-color:var(--island-border)">Copy Snippet</button>
+          </div>
+          <pre class="code-pre" id="quickstart-code">curl -X POST https://praman-desk.vercel.app/api/trade-assurance/audit \
   -H "Content-Type: application/json" \
   -d '{
     "scenario": "alibaba_reconciled",
@@ -1555,1029 +961,114 @@ footer {
     "pierPassReceiptId": "CN-LAX-88201",
     "disputeResolutionAuthorized": true,
     "reconciledDisbursementUsdc": 80000
-  }'</div>
-
-    <h4 style="font-family:var(--font-mono);font-size:11.5px;color:var(--brand);margin-top:16px;text-transform:uppercase">Keyless MCP Configuration (Cursor / Claude Desktop / Antigravity)</h4>
-    <div class="code-block">{
-  "mcpServers": {
-    "praman-desk": {
-      "url": "https://praman-desk.vercel.app/api/mcp"
-    }
-  }
-}</div>
-  </div>
-</dialog>
-
-<div id="toast" role="status"></div>
-
-<!-- ==========================================================================
-     8. JAVASCRIPT ENGINE & CONTROLLERS
-     ========================================================================== -->
-<script>
-'use strict';
-
-/* ----------------- Data & Utilities ----------------- */
-const STAGES = [
-  'Document authenticity seal', 'OFAC SDN screening', 'Counterparty registry lookup',
-  'Purchase-order parse', 'Arithmetic line-item verify', 'Currency normalization',
-  'Quantity × price tie-out', 'Pier-pass receipt match', 'Conforming-unit count',
-  'Damaged-unit reconciliation', 'WASM 3-way math comparator', 'Circuit-breaker evaluation',
-  'Policy-cap & dual-auth check', 'Miner 2-of-2 consensus', 'Settlement routing & attestation'
-];
-const ETHERSCAN = 'https://sepolia.etherscan.io/tx/';
-
-const $ = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const fmtUsd = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-function toast(msg) {
-  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200);
-}
-
-function countUp(el, target, { prefix = '', decimals = 0, group = false, duration = 600 } = {}) {
-  if (!el) return;
-  const fmt = v => prefix + (group ? Math.round(v).toLocaleString() : v.toFixed(decimals));
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'off';
-  if (reduce || !isFinite(target)) { el.textContent = fmt(target); return; }
-  const t0 = performance.now();
-  const step = now => {
-    const p = Math.min((now - t0) / duration, 1), eased = 1 - Math.pow(1 - p, 4);
-    el.textContent = fmt(target * eased);
-    if (p < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
-}
-
-/* ----------------- Motion Toggle ----------------- */
-const motionBtn = $('#motion-toggle');
-function applyMotion(on) {
-  document.documentElement.dataset.motion = on ? 'on' : 'off';
-  motionBtn.textContent = 'MOTION: ' + (on ? 'ON' : 'OFF');
-}
-motionBtn.addEventListener('click', () => applyMotion(document.documentElement.dataset.motion !== 'off'));
-applyMotion(true);
-
-/* ----------------- Tab Navigation ----------------- */
-const DESK_NAMES = ['Disposition Board', 'Trade Assurance', 'Spend Guard', 'Settlement Ledger', 'Mining Registry', 'Procurement Verify'];
-function switchTab(i) {
-  $$('.desk').forEach((d, k) => {
-    d.classList.toggle('active', k === i);
-    d.hidden = k !== i;
-  });
-  $$('.tab-btn').forEach((b, k) => b.setAttribute('aria-selected', String(k === i)));
-  history.replaceState(null, '', '#' + ['disposition-board', 'trade-assurance', 'spend-guard', 'ledger', 'mining', 'procurement-verify'][i]);
-  $('#hud-section-label').textContent = DESK_NAMES[i].toUpperCase();
-}
-$$('.tab-btn').forEach(b => b.addEventListener('click', () => switchTab(+b.dataset.tab)));
-
-/* ----------------- Desk 5 · Procurement Verify (live API calls) ----------------- */
-async function pvCall(btn, out, path) {
-  btn.disabled = true;
-  out.textContent = 'Running…';
-  try {
-    const res = await fetch(path);
-    const json = await res.json();
-    out.textContent = JSON.stringify(json, null, 2);
-  } catch (err) {
-    out.textContent = 'Request failed: ' + err.message;
-  } finally {
-    btn.disabled = false;
-  }
-}
-const q = s => encodeURIComponent(s.trim());
-$('#pv-po-btn')?.addEventListener('click', e => {
-  const n = $('#pv-po').value.trim();
-  if (!n) { toast('Enter a PO number'); return; }
-  const claim = $('#pv-po-q').value.trim();
-  pvCall(e.currentTarget, $('#pv-po-out'), `/api/miner/po-verify?po_number=${q(n)}${claim ? `&question=${q(claim)}` : ''}`);
-});
-$('#pv-inv-btn')?.addEventListener('click', () => {
-  const inv = $('#pv-inv').value.trim(), led = $('#pv-led').value.trim();
-  if (!inv || !led) { toast('Enter invoice and ledger text'); return; }
-  pvCall($('#pv-inv-btn'), $('#pv-inv-out'), `/api/miner/invoice-reconcile?invoice=${q(inv)}&ledger=${q(led)}`);
-});
-$('#pv-co-btn')?.addEventListener('click', () => {
-  const co = $('#pv-co').value.trim();
-  if (!co) { toast('Enter a company name'); return; }
-  const jur = $('#pv-jur').value.trim();
-  pvCall($('#pv-co-btn'), $('#pv-co-out'), `/api/miner/corporate-registry?company=${q(co)}${jur ? `&jurisdiction=${q(jur)}` : ''}`);
-});
-$('#pv-ven-btn')?.addEventListener('click', async () => {
-  const v = $('#pv-ven').value.trim();
-  if (!v) { toast('Enter a vendor name'); return; }
-  const out = $('#pv-ven-out'), btn = $('#pv-ven-btn');
-  btn.disabled = true; out.textContent = 'Running…';
-  try {
-    const [ven, doc] = await Promise.all([
-      fetch(`/api/miner/vendor-verify?vendor=${q(v)}`).then(r => r.json()),
-      fetch(`/api/miner/doc-authenticity?prompt=${q('Verify commercial invoice and statutory certificate authenticity for ' + v)}`).then(r => r.json()),
-    ]);
-    out.textContent = JSON.stringify({ vendor: ven, document: doc }, null, 2);
-  } catch (err) {
-    out.textContent = 'Request failed: ' + err.message;
-  } finally {
-    btn.disabled = false;
-  }
-});
-$('#pv-sdn-btn')?.addEventListener('click', () => {
-  const n = $('#pv-sdn').value.trim();
-  if (!n) { toast('Enter a counterparty name'); return; }
-  pvCall($('#pv-sdn-btn'), $('#pv-sdn-out'), `/api/miner/sanctions-screen?name=${q(n)}`);
-});
-$('#pv-agent-btn')?.addEventListener('click', async () => {
-  const btn = $('#pv-agent-btn');
-  const out = $('#pv-agent-out');
-  const vendor = ($('#pv-agent-vendor')?.value || '').trim();
-  const output = ($('#pv-agent-output')?.value || '').trim();
-  if (!output) { toast('Paste an AI agent claim or output to verify'); return; }
-  btn.disabled = true;
-  out.textContent = 'Verifying output claims...';
-  try {
-    const res = await fetch('/api/agent/verify-output', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ output, vendor: vendor || undefined })
-    });
-    const json = await res.json();
-    out.textContent = JSON.stringify(json, null, 2);
-  } catch (err) {
-    out.textContent = 'Error: ' + err.message;
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-/* ----------------- Global Modals & Keyboard ----------------- */
-$$('dialog').forEach(d => {
-  d.addEventListener('click', e => { if (e.target === d) d.close(); });
-  $$('[data-close]', d).forEach(x => x.addEventListener('click', () => d.close()));
-});
-addEventListener('keydown', e => {
-  if (e.key === 'Escape') $$('dialog[open]').forEach(d => d.close());
-  if ((e.key === 'k' && (e.metaKey || e.ctrlKey)) || (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))) {
-    e.preventDefault(); switchTab(3); $('#lg-q').focus();
-  }
-});
-$('#global-search-btn').addEventListener('click', () => { switchTab(3); $('#lg-q').focus(); });
-$('#dev-drawer-btn').addEventListener('click', () => { $('#dev-drawer').showModal(); });
-
-function openHashTab() {
-  const openIdx = ['disposition-board', 'trade-assurance', 'spend-guard', 'ledger', 'mining', 'procurement-verify'].indexOf(location.hash.slice(1));
-  if (openIdx >= 0) switchTab(openIdx);
-}
-addEventListener('hashchange', openHashTab);
-openHashTab();
-
-/* ==========================================================================
-   A. FIXED 60PX RIGHT HUD SIDEBAR CONTROLLER
-   ========================================================================== */
-function initHudSidebar() {
-  const track = $('#hud-ticks-track');
-  let ticksHtml = '';
-  for (let i = 0; i <= 20; i++) {
-    const pct = i * 5;
-    const isMajor = pct % 25 === 0;
-    ticksHtml += `<div class="hud-tick ${isMajor ? 'major' : ''}" style="top:${pct}%"></div>`;
-  }
-  track.innerHTML = ticksHtml;
-
-  const bar = $('#hud-progress-bar');
-  const pctLabel = $('#hud-scroll-pct');
-
-  function updateHud() {
-    const h = document.documentElement.scrollHeight - window.innerHeight;
-    const y = window.scrollY;
-    const progress = h > 0 ? Math.min(Math.max(y / h, 0), 1) : 0;
-    const pct = Math.round(progress * 100);
-
-    if (window.innerWidth <= 1024) {
-      bar.style.width = pct + '%';
-    } else {
-      bar.style.height = pct + '%';
-    }
-    pctLabel.textContent = pct + '% SCROLL';
-  }
-
-  window.addEventListener('scroll', updateHud, { passive: true });
-  window.addEventListener('resize', updateHud, { passive: true });
-  updateHud();
-}
-initHudSidebar();
-
-/* ==========================================================================
-   B. FORCEFIELDBACKGROUND PARTICLE CANVAS
-   ========================================================================== */
-function initForceFieldCanvas() {
-  const canvas = $('#hero-canvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  let width, height;
-  const particles = [];
-  const COUNT = 110;
-  let mouse = { x: -9999, y: -9999, active: false };
-
-  function resize() {
-    const rect = canvas.parentElement.getBoundingClientRect();
-    width = canvas.width = rect.width;
-    height = canvas.height = rect.height;
-    initParticles();
-  }
-
-  function initParticles() {
-    particles.length = 0;
-    const cols = Math.floor(Math.sqrt(COUNT * (width / height)));
-    const rows = Math.ceil(COUNT / cols);
-    const xStep = width / (cols + 1);
-    const yStep = height / (rows + 1);
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const homeX = (c + 1) * xStep + (Math.random() - 0.5) * 16;
-        const homeY = (r + 1) * yStep + (Math.random() - 0.5) * 16;
-        particles.push({
-          x: homeX, y: homeY, homeX, homeY,
-          vx: 0, vy: 0,
-          radius: 1.5 + Math.random() * 2,
-          color: Math.random() > 0.3 ? '#52A8FF' : '#62C073'
-        });
-      }
-    }
-  }
-
-  const heroSection = $('#hero-section');
-  heroSection.addEventListener('mousemove', e => {
-    const rect = heroSection.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
-    mouse.active = true;
-  });
-  heroSection.addEventListener('mouseleave', () => { mouse.active = false; });
-
-  const MAGNIFIER = 150;
-  const FORCE = 14;
-  const FRICTION = 0.90;
-  const RESTORE = 0.045;
-
-  function render() {
-    ctx.clearRect(0, 0, width, height);
-
-    for (let i = 0; i < particles.length; i++) {
-      const p = particles[i];
-
-      // Mouse repulsion
-      if (mouse.active) {
-        const dx = p.x - mouse.x;
-        const dy = p.y - mouse.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < MAGNIFIER && dist > 0) {
-          const force = (1 - dist / MAGNIFIER) * FORCE;
-          p.vx += (dx / dist) * force;
-          p.vy += (dy / dist) * force;
-        }
-      }
-
-      // Spring restoration to home
-      const hdx = p.homeX - p.x;
-      const hdy = p.homeY - p.y;
-      p.vx += hdx * RESTORE;
-      p.vy += hdy * RESTORE;
-
-      // Friction
-      p.vx *= FRICTION;
-      p.vy *= FRICTION;
-
-      p.x += p.vx;
-      p.y += p.vy;
-
-      // Draw particle
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
-      ctx.shadowBlur = 8;
-      ctx.shadowColor = p.color;
-      ctx.fill();
-
-      // Connector filaments
-      for (let j = i + 1; j < particles.length; j++) {
-        const p2 = particles[j];
-        const ndx = p.x - p2.x;
-        const ndy = p.y - p2.y;
-        const ndist = Math.sqrt(ndx * ndx + ndy * ndy);
-        if (ndist < 36) {
-          ctx.beginPath();
-          ctx.moveTo(p.x, p.y);
-          ctx.lineTo(p2.x, p2.y);
-          ctx.strokeStyle = `rgba(255, 122, 89, ${0.2 * (1 - ndist / 36)})`;
-          ctx.lineWidth = 0.75;
-          ctx.stroke();
-        }
-      }
-    }
-
-    requestAnimationFrame(render);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-  requestAnimationFrame(render);
-}
-initForceFieldCanvas();
-
-/* ==========================================================================
-   C. PLOTREVEAL BLUEPRINT MORPH ENGINE
-   ========================================================================== */
-(function initHeroSketchReplay() {
-  const hero = document.getElementById('hero-section');
-  const frame = document.getElementById('pencil-iframe');
-  const layer = frame ? frame.closest('.hero-sketch') : null;
-  if (!hero || !frame || !layer) return;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced) return; // sketch stays as loaded
-  let lastReplay = Date.now(); // plays on first load; guard stops rapid scroll flicker from restarting it
-  let settleTimer = null;
-  const replay = () => {
-    lastReplay = Date.now();
-    layer.classList.remove('hero-sketch--settled');
-    try { frame.contentWindow.location.reload(); } catch (_) { frame.src = '/pencil/'; }
-    armSettle();
-  };
-  function armSettle() {
-    clearTimeout(settleTimer);
-    settleTimer = setTimeout(checkSettled, 500);
-  }
-  // The pencil app ends its sketch on its rendered dashboard UI, which would bleed into the
-  // hero as inverted chrome. Poll for the sketch's "done" state and fade the layer out;
-  // scrolling back to the hero replays it (IntersectionObserver below).
-  function checkSettled() {
-    try {
-      const plot = frame.contentDocument && frame.contentDocument.querySelector('[data-plot-state]');
-      if (plot && plot.getAttribute('data-plot-state') === 'done') {
-        layer.classList.add('hero-sketch--settled');
-        return; // stay faded until a scroll-back replay
-      }
-    } catch (_) { /* frame not ready */ }
-    settleTimer = setTimeout(checkSettled, 500);
-  }
-  const observer = new IntersectionObserver((entries) => {
-    for (const entry of entries) {
-      if (entry.isIntersecting && entry.intersectionRatio >= 0.5 && Date.now() - lastReplay > 4000) {
-        replay();
-      }
-    }
-  }, { threshold: [0.5] });
-  observer.observe(hero);
-  armSettle();
-})();
-
-/* ==========================================================================
-   D. TYPEWRITER PLACEHOLDER ANIMATION
-   ========================================================================== */
-function initTypewriterPlaceholders() {
-  const poInput = $('#ta-po');
-  const rcptInput = $('#ta-rcpt');
-  if (!poInput || !rcptInput) return;
-
-  const poPrompts = [
-    'PO-ALI-9021 ($100k USDC Commitment)',
-    'PO-SIEMENS-8812 (100GbE Transceivers)',
-    'PO-CAINIAO-4091 (Maritime Freight)'
-  ];
-  let pIdx = 0, charIdx = 0, isDeleting = false;
-  let active = true;
-
-  [poInput, rcptInput].forEach(inp => {
-    inp.addEventListener('focus', () => { active = false; });
-  });
-
-  function tick() {
-    if (!active) return;
-    const target = poPrompts[pIdx];
-    if (isDeleting) {
-      charIdx--;
-      poInput.placeholder = target.substring(0, charIdx);
-      if (charIdx === 0) {
-        isDeleting = false;
-        pIdx = (pIdx + 1) % poPrompts.length;
-        setTimeout(tick, 400);
-        return;
-      }
-    } else {
-      charIdx++;
-      poInput.placeholder = target.substring(0, charIdx);
-      if (charIdx === target.length) {
-        isDeleting = true;
-        setTimeout(tick, 2200);
-        return;
-      }
-    }
-    setTimeout(tick, isDeleting ? 30 : 60);
-  }
-  tick();
-}
-initTypewriterPlaceholders();
-
-/* ==========================================================================
-   E. FLOWINGMENU DIRECTIONAL HOVER MARQUEE
-   ========================================================================== */
-function initFlowingMenu() {
-  const items = $$('.flowing-item');
-  items.forEach(item => {
-    item.addEventListener('mouseenter', e => {
-      const rect = item.getBoundingClientRect();
-      const fromTop = e.clientY - rect.top < rect.height / 2;
-      item.classList.toggle('enter-top', fromTop);
-      item.classList.add('hovered');
-    });
-    item.addEventListener('mouseleave', () => {
-      item.classList.remove('hovered');
-    });
-    item.addEventListener('click', () => {
-      if (item.dataset.external) {
-        window.open(item.dataset.link, '_blank');
-      } else if (item.dataset.action === 'ledger') {
-        switchTab(3);
-        $('html').scrollTo({ top: $('#desk-3').offsetTop - 80, behavior: 'smooth' });
-      } else if (item.dataset.action === 'certificate') {
-        openCertificate({
-          status: 'APPROVED', verdict: 'RECONCILED PARTIAL DISBURSEMENT APPROVED',
-          spendAmountUsdc: 80000, network: 'Sepolia Ethereum',
-          certHash: '0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75',
-          easSchemaUid: '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04',
-          settlementContract: '0x310275e6D66818E068245326bB9e398822304248'
-        }, { poNumber: 'PO-ALI-9021', pierPassReceiptId: 'CN-LAX-88201' });
-      } else if (item.dataset.action === 'developer') {
-        $('#dev-drawer').showModal();
-      }
-    });
-  });
-}
-initFlowingMenu();
-
-/* ==========================================================================
-   F. DESK 0 · ALIBABA TRADE ASSURANCE (100% PRESERVED & ZERO REGRESSION)
-   ========================================================================== */
-const pipe = $('#pipe');
-pipe.innerHTML = STAGES.map((s, i) => `<div class="stage" id="stage-${i}" title="${i + 1}. ${s}"><span class="n">${String(i + 1).padStart(2, '0')}</span><span class="bar"></span></div>`).join('');
-let pipeTimer = null;
-
-function runPipeline(haltAt) {
-  clearInterval(pipeTimer);
-  $$('.stage').forEach(el => el.classList.remove('pass', 'halted'));
-  $('#pipe-count').textContent = 'RUNNING';
-  $('#pipe-left').textContent = 'EXECUTING 15-STAGE VERIFICATION…';
-  let i = 0;
-  pipeTimer = setInterval(() => {
-    if (i >= STAGES.length || i >= haltAt) {
-      clearInterval(pipeTimer);
-      if (i < STAGES.length) {
-        $('#stage-' + i).classList.add('halted');
-        $('#pipe-count').textContent = 'HALTED @ STAGE ' + (i + 1);
-        $('#pipe-left').textContent = 'STAGE ' + (i + 1) + ': ' + STAGES[i].toUpperCase();
-      } else {
-        $('#pipe-count').textContent = '15/15 PASS';
-        $('#pipe-left').textContent = 'ALL STAGES VERIFIED';
-      }
-      return;
-    }
-    $('#stage-' + i).classList.add('pass');
-    $('#pipe-left').textContent = 'STAGE ' + (i + 1) + ': ' + STAGES[i].toUpperCase();
-    i++;
-  }, 90);
-}
-
-function parseMoney(str) {
-  const s = String(str).replace(/[$,\s]/g, '');
-  const n = Number(s);
-  return Number.isFinite(n) ? n : NaN;
-}
-
-async function runAudit({ scenario, auth, usdc }) {
-  const btn = $('#ta-run');
-  btn.disabled = true;
-  $('#ta-status').textContent = 'POST /api/trade-assurance/audit: executing...';
-  $('#verdict-panel').hidden = true;
-  const payload = {
-    poNumber: $('#ta-po').value.trim() || 'PO-ALI-9021',
-    pierPassReceiptId: $('#ta-rcpt').value.trim() || 'CN-LAX-88201',
-    scenario,
-    disputeResolutionAuthorized: auth,
-    reconciledDisbursementUsdc: usdc
-  };
-  const halts = { alibaba_trade: 12, alibaba_reconciled: 15, alibaba_missing_evidence: 8, alibaba_conflicting_reports: 10, alibaba_refund: 15 };
-  runPipeline(halts[scenario] ?? 12);
-  try {
-    const t0 = performance.now();
-    const res = await fetch('/api/trade-assurance/audit', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-    });
-    const d = await res.json();
-    const ms = (performance.now() - t0).toFixed(1);
-    renderVerdict(d, ms, payload);
-    $('#ta-status').textContent = `Completed in ${ms} ms · ${d.status}`;
-  } catch (err) {
-    $('#ta-status').textContent = 'Request failed: ' + err.message + '. Verify local or live server.';
-    clearInterval(pipeTimer);
-  } finally {
-    btn.disabled = false;
-  }
-}
-
-function renderVerdict(d, ms, payload) {
-  const settled = d.status === 'APPROVED' || d.status === 'REFUNDED';
-  const v = $('#verdict-body');
-  v.className = 'verdict ' + (settled ? 'approved' : 'halt');
-  v.innerHTML = `
-    <div class="verdict-badge">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        ${settled ? '<path d="M20 6L9 17l-5-5"/>' : '<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>'}
-      </svg>
-      <span>${d.status}: ${d.verdict}</span>
-    </div>
-    <p class="summary">${d.summary}</p>
-    <div class="flags">
-      ${(d.flags || []).map(f => `<div class="flag">${f}</div>`).join('') || '<div class="flag ok">✓ No policy flags: all compliance gates clear</div>'}
-    </div>
-    <dl class="kv">
-      <dt>Circuit Breaker</dt><dd>${d.circuitBreaker && d.circuitBreaker.triggered ? 'TRIGGERED: ' + d.circuitBreaker.reason : 'Not Triggered (Pass)'}</dd>
-      <dt>Policy Decision</dt><dd>${d.policyDecision}</dd>
-      <dt>Spend Amount</dt><dd class="tnum" style="font-weight:600">${fmtUsd(d.spendAmountUsdc)}</dd>
-      <dt>Risk Level</dt><dd>${d.riskLevel}</dd>
-      <dt>Latency (Local)</dt><dd class="tnum">${ms} ms</dd>
-      <dt>Miner Settlement</dt><dd>${d.telegraphSettlement ? `${d.telegraphSettlement.status} · Miner #${d.telegraphSettlement.minerId}` : '-'}</dd>
-      <dt>Cert Hash</dt><dd class="mono">${d.certHash || '-'}</dd>
-      <dt>EAS Attestation</dt><dd class="mono">${d.attestationSha256 || '-'}</dd>
-    </dl>`;
-  $('#verdict-risk').textContent = d.riskLevel;
-  $('#verdict-panel').hidden = false;
-  $('#ta-cert-btn').hidden = !d.certHash;
-  $('#ta-cert-btn').onclick = () => openCertificate(d, payload);
-}
-
-function openCertificate(d, payload) {
-  $('#cert-body').innerHTML = `
-    <p class="mono" style="font-size:11.5px;color:var(--text-secondary);letter-spacing:0.04em">
-      UCC ARTICLE 2 · UN CISG STATUTORY COMMERCIAL DISPOSITION
-    </p>
-    <dl class="kv" style="margin-top:14px">
-      <dt>Purchase Order</dt><dd>${payload.poNumber}</dd>
-      <dt>Pier-Pass Receipt</dt><dd>${payload.pierPassReceiptId}</dd>
-      <dt>Final Verdict</dt><dd>${d.status}: ${d.verdict}</dd>
-      <dt>Settled Amount</dt><dd class="tnum" style="font-weight:700">${fmtUsd(d.spendAmountUsdc)}</dd>
-      <dt>Network</dt><dd>${d.network}</dd>
-      <dt>Certificate Hash</dt><dd class="mono">${d.certHash || '-'}</dd>
-      <dt>EAS Schema UID</dt><dd class="mono">${d.easSchemaUid || '-'}</dd>
-      <dt>Settlement Contract</dt><dd class="mono">${d.settlementContract || '-'}</dd>
-    </dl>
-    <div style="margin-top:20px">
-      <button class="btn-square" onclick="window.print()">Print Statutory Certificate</button>
-    </div>`;
-  $('#cert-modal').showModal();
-}
-
-$('#ta-run').addEventListener('click', () => {
-  const usdc = parseMoney($('#ta-usdc').value);
-  if (Number.isNaN(usdc)) { toast('Disbursement must be a valid number'); return; }
-  const scenario = $('#ta-scenario').value;
-  runAudit({ scenario, auth: scenario === 'alibaba_reconciled', usdc: scenario === 'alibaba_reconciled' ? 80000 : usdc });
-});
-
-/* ==========================================================================
-   G. DESK 1 · SPEND GUARD (100% PRESERVED & ZERO REGRESSION)
-   ========================================================================== */
-const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-$('#sg-run').addEventListener('click', async () => {
-  const scenario = $('#sg-scenario').value;
-  const out = $('#sg-out');
-  const btn = $('#sg-run');
-  btn.disabled = true;
-  out.innerHTML = `<div class="verdict"><div class="verdict-badge">EVALUATING</div><p class="summary">Running live SolanaSpendGuard middleware &amp; 19,565 OFAC SDN check...</p></div>`;
-  try {
-    const r = await fetch('/api/audit/solana-spend-guard', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ scenario })
-    });
-    const d = await r.json();
-    const isApproved = d.verdict === 'APPROVED';
-    const cls = isApproved ? 'approved' : 'halt';
-    const flags = Array.isArray(d.flags) ? [...d.flags] : [];
-    if (d.latencyMs !== undefined) flags.push(`${d.latencyMs} ms`);
-    if (d.certHash) flags.push(`cert:${String(d.certHash).slice(0, 12)}…`);
-    out.innerHTML = `
-      <div class="verdict ${cls}">
-        <div class="verdict-badge">${escapeHtml(d.verdict || (isApproved ? 'APPROVED' : 'HALTED'))}</div>
-        <p class="summary">${escapeHtml(d.summary || '')}</p>
-        <div class="flags">${flags.map(x => `<div class="flag ${isApproved ? 'ok' : ''}">${escapeHtml(x)}</div>`).join('')}</div>
-      </div>`;
-  } catch (e) {
-    out.innerHTML = `<div class="verdict halt"><div class="verdict-badge">ERROR</div><p class="summary">${escapeHtml(e.message || 'Solana Spend Guard request failed')}</p></div>`;
-  } finally {
-    btn.disabled = false;
-  }
-});
-$('#sg-cli').addEventListener('click', () => toast('Run: node bin/praman-gate.mjs solana-demo (5/5 scenarios)'));
-
-/* ==========================================================================
-   Z. DESK 0 · DISPOSITION BOARD
-   ========================================================================== */
-const DB_LANES = [
-  { id: 'hold',    label: 'Hold',    tone: 'var(--accent-rose, #ff7a8a)' },
-  { id: 'release', label: 'Release', tone: 'var(--accent-emerald)' },
-  { id: 'partial', label: 'Partial', tone: '#d4a017' },
-  { id: 'refund',  label: 'Refund',  tone: '#4c8dff' }
-];
-const DB_CASES = [
-  { id: 'PO-ALI-9021', lane: 'hold', buyer: 'Alibaba buyer', supplier: 'Cainiao consignee', escrow: 100000, computed: 80000, rule: 'WASM Circuit Breaker: $20,000 overbilling shortfall (80/100 units conforming)', flag: 'ARBITRATION' },
-  { id: 'PO-7781', lane: 'release', buyer: 'Siemens AG', supplier: 'Telegraph miner cluster', escrow: 12400, computed: 12400, rule: 'Equation matcher: 1000 units x USD 12.40 reconciled with zero discrepancy', flag: null },
-  { id: 'CN-LAX-88201', lane: 'partial', buyer: 'Alibaba buyer', supplier: 'Port of LA Cainiao PierPass', escrow: 100000, computed: 80000, rule: 'PierPass manifest audit: 80 conforming / 20 damaged units accepted', flag: null },
-  { id: 'PO-DEMO-REF', lane: 'refund', buyer: 'Buyer of record', supplier: 'Undelivered PO', escrow: 25000, computed: 0, rule: 'Evidence completeness gate FAIL: 0 of 1 required delivery artifacts on file', flag: null }
-];
-function dbRender() {
-  const wrap = document.getElementById('db-lanes');
-  if (!wrap) return;
-  wrap.innerHTML = DB_LANES.map(l => {
-    const cards = DB_CASES.filter(c => c.lane === l.id);
-    return `<div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:12px;padding:12px;min-height:180px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;color:${l.tone}">${l.label.toUpperCase()}</span>
-        <span style="font-size:11px;color:var(--text-secondary)">${cards.length} case${cards.length === 1 ? '' : 's'}</span>
-      </div>
-      ${cards.map(c => `<button data-db-case="${c.id}" style="display:block;width:100%;text-align:left;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);border-radius:10px;padding:10px;margin-bottom:8px;cursor:pointer;color:var(--text-primary)">
-        <span style="font-size:13px;font-weight:600">${c.id}</span>
-        <span style="display:block;font-size:12px;color:var(--text-secondary);margin-top:2px">$${c.escrow.toLocaleString('en-US')} escrow</span>
-        ${c.flag ? `<span style="display:inline-block;margin-top:6px;font-size:10px;letter-spacing:0.1em;color:${l.tone};border:1px solid ${l.tone};border-radius:999px;padding:1px 8px">${c.flag}</span>` : ''}
-      </button>`).join('') || '<p style="font-size:12px;color:var(--text-secondary);margin:0">No cases in this lane.</p>'}
-    </div>`;
-  }).join('');
-  wrap.querySelectorAll('[data-db-case]').forEach(b => b.addEventListener('click', () => dbOpen(b.dataset.dbCase)));
-}
-function dbOpen(id) {
-  const c = DB_CASES.find(x => x.id === id);
-  if (!c) return;
-  const dlg = document.getElementById('db-case-drawer');
-  document.getElementById('db-drawer-title').textContent = c.id;
-  const d = c.escrow - c.computed;
-  document.getElementById('db-drawer-body').innerHTML = `
-    <p style="margin:0 0 10px">${c.rule}</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace;font-size:13px">
-      <div style="background:var(--bg-surface);border-radius:8px;padding:8px">Escrow held<div style="color:var(--text-primary);font-weight:600">$${c.escrow.toLocaleString('en-US')}</div></div>
-      <div style="background:var(--bg-surface);border-radius:8px;padding:8px">Praman computed<div style="color:var(--text-primary);font-weight:600">$${c.computed.toLocaleString('en-US')}</div></div>
-      <div style="background:var(--bg-surface);border-radius:8px;padding:8px">Disposition<div style="color:var(--text-primary);font-weight:600;text-transform:capitalize">${c.lane}</div></div>
-      <div style="background:var(--bg-surface);border-radius:8px;padding:8px">Variance<div style="color:var(--text-primary);font-weight:600">${d === 0 ? '$0' : '-$' + d.toLocaleString('en-US')}</div></div>
-    </div>
-    ${c.flag ? `<p style="margin:12px 0 0;font-size:12px;color:#ff9d9d">Flagged for multi-miner arbitration: 2-of-2 quorum required before release.</p>` : ''}`;
-  dlg.showModal();
-}
-var LEDGER_FAILED = null;
-function dbRenderReceipts() {
-  const rail = document.getElementById('db-receipt-rail');
-  if (!rail) return;
-  let rows = [];
-  try { rows = (typeof LEDGER !== 'undefined' && LEDGER.length ? LEDGER : []).slice(0, 6); } catch (_) { rows = []; }
-  if (!rows.length) {
-    rail.innerHTML = LEDGER_FAILED
-      ? `<p style="font-size:12.5px;color:var(--text-secondary)">Receipts unavailable (${LEDGER_FAILED}). Live on the production deployment. <button class="btn-square ghost-square" id="db-led-retry" style="padding:3px 10px;font-size:11px">Retry</button></p>`
-      : '<p style="font-size:12.5px;color:var(--text-secondary)">Loading receipts from /api/ledger…</p>';
-    if (LEDGER_FAILED) { const b = document.getElementById('db-led-retry'); if (b) b.addEventListener('click', loadLedger); }
-    return;
-  }
-  rail.innerHTML = rows.map(t => {
-    const h = t.txHash || t.tx || '';
-    return `<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:10px;padding:10px 12px;font-size:12.5px">
-      <span style="color:var(--text-primary);font-weight:600">${t.miner || t.id || 'Settlement'}</span>
-      ${h ? `<a href="https://sepolia.etherscan.io/tx/${h}" target="_blank" rel="noopener" style="color:var(--accent-emerald);font-family:'JetBrains Mono',monospace">${h.slice(0, 10)}…${h.slice(-8)}</a>` : '<span>-</span>'}
-    </div>`;
-  }).join('');
-}
-dbRender();
-dbRenderReceipts();
-const dbDlg = document.getElementById('db-case-drawer');
-if (dbDlg) dbDlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => dbDlg.close()));
-try { document.addEventListener('ledger-loaded', dbRenderReceipts); } catch (_) {}
-setTimeout(dbRenderReceipts, 1500);
-
-/* Moves a case strictly based on live backend policy evaluation (/api/trade-assurance/audit). */
-function animateDbMove(id, newLane) {
-  const c = DB_CASES.find(x => x.id === id);
-  if (!c) return;
-  const wrap = document.getElementById('db-lanes');
-  const card = wrap && wrap.querySelector(`[data-db-case="${id}"]`);
-  if (card && c.lane !== newLane) {
-    const from = card.getBoundingClientRect();
-    c.lane = newLane;
-    dbRender();
-    const moved = wrap.querySelector(`[data-db-case="${id}"]`);
-    if (moved) {
-      const to = moved.getBoundingClientRect();
-      const dx = from.left - to.left, dy = from.top - to.top;
-      if (dx || dy) {
-        moved.animate(
-          [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: 'translate(0, 0)' }],
-          { duration: 550, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)' }
-        );
-        moved.style.boxShadow = '0 0 0 2px var(--brand-glow)';
-        setTimeout(() => { moved.style.boxShadow = ''; }, 900);
-      }
-    }
-  } else {
-    c.lane = newLane;
-    dbRender();
-  }
-}
-
-const DB_POLICY_PAYLOADS = {
-  'PO-ALI-9021': { scenario: 'alibaba_reconciled', poCommitment: 100000, spendAmountUsdc: 80000, statedTotal: 80000 },
-  'PO-7781': {
-    vendorName: 'Siemens Aktiengesellschaft',
-    vendorJurisdiction: 'DE',
-    spendAmountUsdc: 12400,
-    singleAgentCap: 500,
-    dualApprovalCap: 50000,
-    supervisorSignature: '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466d3a948192305bad61042781bcf8291048291823ba78192304891283ba192384fca81',
-    lineItems: [{ desc: 'PO-7781 Conforming Units (1000 x $12.40)', qty: 1000, unitPrice: 12.40, amount: 12400 }],
-    statedSubtotal: 12400,
-    statedTax: 0,
-    statedTotal: 12400
-  },
-  'CN-LAX-88201': { scenario: 'alibaba_trade', poCommitment: 100000, spendAmountUsdc: 100000, statedTotal: 100000 },
-  'PO-DEMO-REF': { scenario: 'alibaba_refund', poCommitment: 25000, conformingUnits: 0, unitPrice: 1000, statedTotal: 25000, lineItems: [{ desc: 'Undelivered PO-DEMO-REF', qty: 25, unitPrice: 1000, amount: 25000 }] }
-};
-
-const dbEvalBtn = document.getElementById('db-eval-btn');
-if (dbEvalBtn) dbEvalBtn.addEventListener('click', async () => {
-  const id = document.getElementById('db-eval-select').value;
-  const c = DB_CASES.find(x => x.id === id);
-  const body = DB_POLICY_PAYLOADS[id];
-  if (!c || !body) return;
-  dbEvalBtn.disabled = true;
-  dbEvalBtn.textContent = 'Evaluating...';
-  try {
-    const res = await fetch('/api/trade-assurance/audit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    const out = await res.json();
-    let targetLane = 'hold';
-    if (out.status === 'REFUNDED' || out.verdict === 'FULL_REFUND_APPROVED') targetLane = 'refund';
-    else if (out.status === 'APPROVED' && Number(out.shortfallUsd || 0) > 0) targetLane = 'partial';
-    else if (out.status === 'APPROVED' || out.verdict === 'APPROVED_FOR_PAYMENT' || out.verdict === 'CLEAR_FOR_PAYMENT') targetLane = 'release';
-    else targetLane = 'hold';
-
-    c.computed = Number(out.conformingAmountUsd ?? (out.status === 'REFUNDED' ? 0 : (out.spendAmountUsdc ?? c.computed)));
-    c.rule = out.summary || c.rule;
-    c.flag = (out.flags && out.flags[0]) ? out.flags[0].slice(0, 24) : null;
-    animateDbMove(id, targetLane);
-    toast(`${id} policy verdict -> ${targetLane.toUpperCase()} (${out.verdict || out.status})`);
-  } catch (err) {
-    toast('Policy API error: ' + err.message);
-  } finally {
-    dbEvalBtn.disabled = false;
-    dbEvalBtn.textContent = 'Evaluate via Policy API';
-  }
-});
-
-/* ==========================================================================
-   H. DESK 3 · SETTLEMENT LEDGER (100% PRESERVED & ZERO REGRESSION)
-   ========================================================================== */
-let LEDGER = [], ledSort = { key: 'index', dir: 1 }, ledFiltered = [];
-function median(a) { const s = [...a].sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
-
-async function loadLedger() {
-  $('#lg-body').innerHTML = '<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--text-muted)">Loading on-chain settlements from Sepolia…</td></tr>';
-  // Static-export hosts (no Node backend) hydrate from the bundled snapshot;
-  // production and the local Node server use the live /api/ledger endpoint.
-  const staticExport = location.hostname.endsWith('.vercel.run');
-  const url = staticExport ? '/data/ledger-snapshot.json' : '/api/ledger';
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('ledger HTTP ' + res.status);
-    const d = await res.json();
-    LEDGER = Array.isArray(d) ? d : (d.calls || []);
-    LEDGER_FAILED = null;
-    dbRenderReceipts();
-    renderLedgerStats(d);
-    renderEscrowSignals(d);
-    if ($('#lg-hero-count')) $('#lg-hero-count').textContent = String(d.totalPaidCalls ?? LEDGER.length);
-    if ($('#flowing-ledger-count')) {
-      const esc = Array.isArray(d.escrowPurchases) ? d.escrowPurchases.length : 0;
-      $('#flowing-ledger-count').textContent = `${d.totalPaidCalls ?? LEDGER.length} ON-CHAIN + ${esc} ESCROW SIGNALS`;
-    }
-    const intents = [...new Set(LEDGER.map(c => c.intent))].sort();
-    $('#lg-intent').innerHTML = '<option value="">ALL INTENTS</option>' + intents.map(i => `<option>${i}</option>`).join('');
-    applyLedgerFilters();
-  } catch (err) {
-    LEDGER_FAILED = err.message;
-    dbRenderReceipts();
-    $('#lg-body').innerHTML = '';
-    $('#lg-empty').hidden = false;
-    $('#lg-empty').innerHTML = 'Ledger endpoint unavailable: ' + err.message + '. <button class="btn-square ghost-square" id="lg-retry" style="padding:3px 10px;font-size:11px">Retry</button>';
-    $('#lg-retry').addEventListener('click', loadLedger);
-  }
-}
-
-function renderEscrowSignals(d) {
-  const wrap = $('#lg-escrow-wrap');
-  if (!wrap) return;
-  const escrow = Array.isArray(d.escrowPurchases) ? d.escrowPurchases : [];
-  const takar = Array.isArray(d.takarResolvers) ? d.takarResolvers : [];
-  if (!escrow.length && !takar.length) { wrap.hidden = true; return; }
-  wrap.hidden = false;
-  const rows = [
-    ...takar.map(r => `<tr>
-      <td class="mono">TAKAR #${r.minerId || '20261117'}</td>
-      <td>${r.caseName || 'Takar Dispute Resolution'}</td>
-      <td class="mono">${r.contractName || r.contract || '-'}</td>
-      <td class="num">Block ${r.blockNumber ?? '-'}</td>
-      <td class="mono"><a href="${ETHERSCAN}${r.txHash}" target="_blank" rel="noopener" style="color:var(--accent-emerald)">${String(r.txHash || '').slice(0, 12)}...</a></td>
-    </tr>`),
-    ...escrow.map(e => `<tr>
-      <td class="mono">${e.source || 'DEVNODE_ESCROW'} · #${e.minerId || '6164'}</td>
-      <td>${e.intent || '-'}</td>
-      <td class="mono" style="font-size:11px">${e.receiptHash ? e.receiptHash.slice(0, 14) + '...' : '-'}</td>
-      <td class="num">${e.amountUsdc != null ? '$' + Number(e.amountUsdc).toFixed(4) : '-'}</td>
-      <td class="mono" style="font-size:11px">${e.signalHash ? e.signalHash.slice(0, 14) + '...' : (e.txHash ? `<a href="${ETHERSCAN}${e.txHash}" target="_blank" rel="noopener" style="color:var(--accent-emerald)">${e.txHash.slice(0, 12)}...</a>` : 'ESCROW_SIGNAL')}</td>
-    </tr>`)
-  ].join('');
-  wrap.innerHTML = `<div class="border-beam-card"><div class="border-beam-inner" style="padding:0">
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;gap:8px">
-      <h3 style="font-size:14px;font-weight:600;margin:0;color:var(--text-primary)">Devnode Escrow Signals & Takar Dispute Resolutions</h3>
-      <span class="pill-chip">${takar.length} Takar On-Chain · ${escrow.length} Devnode Escrow Signals</span>
-    </div>
-    <div class="table-wrap"><table>
-      <thead><tr><th>Source / Miner</th><th>Intent / Case</th><th>Receipt / Contract</th><th class="num">Amount / Block</th><th>Signal / Tx Proof</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>
-  </div></div>`;
-}
-
-function renderLedgerStats(d) {
-  const uniqueMiners = new Set(LEDGER.map(c => c.minerId)).size;
-  countUp($('#lg-count'), LEDGER.length);
-  countUp($('#lg-miners'), uniqueMiners);
-  countUp($('#lg-spent'), Number(d.totalSpentUsd ?? LEDGER.reduce((s, c) => s + c.costUsd, 0)), { prefix: '$', decimals: 2 });
-  const validDurs = LEDGER.map(c => c.durationMs).filter(n => typeof n === 'number' && isFinite(n) && n > 0);
-  countUp($('#lg-latency'), validDurs.length ? Math.round(median(validDurs)) : 0, { group: true });
-}
-
-function applyLedgerFilters() {
-  const q = $('#lg-q').value.trim().toLowerCase();
-  const intent = $('#lg-intent').value;
-  ledFiltered = LEDGER.filter(c =>
-    (!intent || c.intent === intent) &&
-    (!q || [c.title, c.intent, c.minerName, c.txHash, c.receiptHash].join(' ').toLowerCase().includes(q))
-  );
-  const { key, dir } = ledSort;
-  ledFiltered.sort((a, b) => {
-    const x = a[key], y = b[key];
-    return (typeof x === 'number' ? x - y : String(x).localeCompare(String(y))) * dir;
-  });
-  const body = $('#lg-body');
-  if (!ledFiltered.length) {
-    body.innerHTML = '';
-    $('#lg-empty').hidden = false;
-    return;
-  }
-  $('#lg-empty').hidden = true;
-  body.innerHTML = ledFiltered.map(c => `
-    <tr>
-      <td class="num">${c.index}</td>
-      <td style="max-width:320px;font-weight:500">${c.title}</td>
-      <td><span class="badge">${c.intent.replace(/_/g, ' ').replace(/ GENERAL$/, '')}</span></td>
-      <td>${c.minerName}</td>
-      <td class="num">${c.durationMs != null ? `${c.durationMs} ms` : '-'}</td>
-      <td class="num">$${c.costUsd.toFixed(2)}</td>
-      <td><a class="tx-link" href="${ETHERSCAN}${c.txHash}" target="_blank" rel="noopener" data-tx="${c.index}">${c.txHash.slice(0, 10)}…${c.txHash.slice(-8)}</a></td>
-    </tr>`).join('');
-}
-
-$$('#lg-table th').forEach(th => th.addEventListener('click', () => {
-  const key = th.dataset.sort;
-  ledSort = { key, dir: ledSort.key === key ? -ledSort.dir : 1 };
-  applyLedgerFilters();
-}));
-$('#lg-q').addEventListener('input', applyLedgerFilters);
-$('#lg-intent').addEventListener('change', applyLedgerFilters);
-$('#lg-clear').addEventListener('click', () => { $('#lg-q').value = ''; $('#lg-intent').value = ''; applyLedgerFilters(); });
-
-$('#lg-body').addEventListener('click', e => {
-  const a = e.target.closest('a[data-tx]');
-  if (!a) return;
-  const c = LEDGER.find(x => x.index === +a.dataset.tx);
-  if (!c) return;
-  $('#tx-drawer-body').innerHTML = [
-    ['Verification Target', c.title],
-    ['Intent Specification', c.intent],
-    ['Specialist Miner', `${c.minerName} (#${c.minerId})`],
-    ['Miner Endpoint', c.endpoint],
-    ['Execution Latency', c.durationMs != null ? `${c.durationMs} ms` : '-'],
-    ['Cost (USDC)', fmtUsd(c.costUsd)],
-    ['Settlement Timestamp', c.timestamp || '-'],
-    ['Sepolia Transaction Hash', `<a href="${ETHERSCAN}${c.txHash}" target="_blank" class="tx-link">${c.txHash}</a>`],
-    ['Cryptographic Receipt Hash', c.receiptHash || '-'],
-    ['Verified Signal Hash', c.signalHash || '-']
-  ].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
-  $('#tx-drawer').showModal();
-});
-
-$('#lg-export').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(ledFiltered, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = 'praman-ledger-export.json'; a.click();
-  URL.revokeObjectURL(a.href);
-  toast(`Exported ${ledFiltered.length} settlements to JSON`);
-});
-loadLedger();
-
-/* ==========================================================================
-   I. DESK 3 · MINING REGISTRY (100% PRESERVED & ZERO REGRESSION)
-   ========================================================================== */
-$('#mr-load').addEventListener('click', async () => {
-  const out = $('#mr-out');
-  out.innerHTML = '<div class="border-beam-card"><div class="border-beam-inner" style="color:var(--text-secondary)">Loading Mount Morgan statutory records from Queensland Government Survey…</div></div>';
-  try {
-    const res = await fetch('/api/verify/mine-dossier?siteNo=494270');
-    const d = await res.json();
-    const a = d.audit || {};
-    const att = d.attestation || {};
-    out.innerHTML = `
-      <div class="border-beam-card">
-        <div class="border-beam-inner">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-            <h3 style="font-family:var(--font-mono);font-size:15px">${d.siteName || 'Mine Dossier'}</h3>
-            <span class="badge ${d.verified ? 'ok' : 'warn'}">${d.verdict || 'UNVERIFIED'}</span>
-          </div>
-          <p class="summary" style="margin-bottom:16px;color:var(--text-secondary)">${d.summary || ''}</p>
-          <dl class="kv">
-            <dt>GSQ Site</dt><dd class="tnum">${d.siteNo} · ${d.tenure || ''}</dd>
-            <dt>Goldfield</dt><dd>${d.goldfield || ''}</dd>
-            <dt>Jurisdiction</dt><dd>${d.jurisdiction || ''}</dd>
-            <dt>Heritage Record</dt><dd>${d.heritageRecord || ''}</dd>
-            <dt>WASM Score</dt><dd class="tnum">${(a.wasmScoreBps ?? 0).toLocaleString()} bps</dd>
-            <dt>Variance Reconciled</dt><dd>${a.discrepancyReconciled ? 'YES: ' + (a.reconciliationNotes || 'reconciled') : 'NO'}</dd>
-            <dt>Sanctions Screening</dt><dd>${a.sanctionsScreening?.status || '-'} · ${Array.isArray(a.sanctionsScreening?.lists) ? a.sanctionsScreening.lists.join(', ') : ''}</dd>
-            <dt>Confidence</dt><dd class="tnum">${(Number(d.confidence) * 100).toFixed(0)}%</dd>
-            <dt>Attestation Seal</dt><dd class="mono">${att.seal || '-'}</dd>
-          </dl>
+  }'</pre>
         </div>
-      </div>`;
-  } catch (err) {
-    out.innerHTML = `<div class="border-beam-card"><div class="border-beam-inner" style="color:var(--halt-crimson)">Dossier unavailable: ${err.message}.</div></div>`;
-  }
-});
+      </div>
+    </section>
+  </main>
 
-/* ----------------- Typewriter Animated Placeholders ----------------- */
-function initTypewriterPlaceholder(inputId, phrases, typeSpeed = 35, deleteSpeed = 20, pauseTime = 2200) {
-  const el = document.getElementById(inputId);
-  if (!el) return;
-  let phraseIdx = 0;
-  let charIdx = 0;
-  let isDeleting = false;
-  let isFocused = false;
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <a class="brand-link" href="/" aria-label="Praman Home" style="padding-inline:0">
+            <span class="brand-mark-3d" aria-hidden="true">
+              <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
+                <defs>
+                  <linearGradient id="pm-f-shield-bg" x1="6" y1="4" x2="34" y2="36" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#3b82f6"/>
+                    <stop offset="55%" stop-color="#1d4ed8"/>
+                    <stop offset="100%" stop-color="#0f296b"/>
+                  </linearGradient>
+                  <linearGradient id="pm-f-shield-bevel" x1="8" y1="5" x2="26" y2="28" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#ffffff" stop-opacity="0.5"/>
+                    <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M20 3.2L6.5 8.6V19.2C6.5 27.6 12.2 34.4 20 37C27.8 34.4 33.5 27.6 33.5 19.2V8.6L20 3.2Z" fill="url(#pm-f-shield-bg)"/>
+                <path d="M20 4.2L7.5 9.2V19.2C7.5 27 12.8 33.3 20 35.8C27.2 33.3 32.5 27 32.5 19.2V9.2L20 4.2Z" stroke="url(#pm-f-shield-bevel)" stroke-width="1.25"/>
+                <path d="M13.8 20.1L18.1 24.4L26.6 15.6" stroke="#ffffff" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span class="brand-title-wrap">
+              <span class="brand-title">Praman</span><span class="brand-dot" aria-hidden="true"></span>
+            </span>
+          </a>
+          <p class="foot-brand-desc">
+            Deterministic pre-signature clearinghouse for cross-border B2B trade assurance and autonomous AI agent treasuries on EVM chains and Solana.
+          </p>
+          <div class="foot-social" aria-label="Social and community links">
+            <a class="social-link-btn" href="https://github.com/VishAlgoDev/praman-desk" target="_blank" rel="noopener" aria-label="Praman on GitHub" title="GitHub: VishAlgoDev/praman-desk">
+              <svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+            </a>
+            <a class="social-link-btn" href="https://x.com/vishal_karad" target="_blank" rel="noopener" aria-label="Vishal Karad on X" title="Founder on X (@vishal_karad)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z"/></svg>
+            </a>
+            <a class="social-link-btn" href="https://x.com/Telegraphprotoc" target="_blank" rel="noopener" aria-label="Telegraph Protocol on X" title="Telegraph Protocol (@Telegraphprotoc)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </a>
+            <a class="social-link-btn" href="https://discord.com/channels/1438396125609463881" target="_blank" rel="noopener" aria-label="Telegraph Protocol Discord" title="Telegraph Community Discord">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028ZM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418Zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418Z"/></svg>
+            </a>
+          </div>
+        </div>
 
-  el.addEventListener('focus', () => { isFocused = true; });
-  el.addEventListener('blur', () => {
-    isFocused = false;
-    if (!el.value) setTimeout(type, 300);
-  });
+        <nav class="footer-col" aria-label="Product">
+          <h3>Product</h3>
+          <ul>
+            <li><a href="/">Company Overview</a></li>
+            <li><a href="/desks">Operator Desks (5 Workflows)</a></li>
+            <li><a href="/verify">Cryptographic Receipt Verifier</a></li>
+            <li><a href="/docs">Docs &amp; 18-Tool MCP</a></li>
+            <li><a href="/roadmap">Roadmap &amp; Pilot Intake</a></li>
+            <li><a href="/api/audit/case?case=po-ali-9021&format=html" target="_blank" rel="noopener">Sample Statutory Certificate</a></li>
+          </ul>
+        </nav>
 
-  function type() {
-    if (isFocused || el.value.length > 0) return;
-    const current = phrases[phraseIdx];
-    if (isDeleting) {
-      charIdx--;
-      el.setAttribute('placeholder', current.substring(0, charIdx) + '▊');
-      if (charIdx <= 0) {
-        isDeleting = false;
-        phraseIdx = (phraseIdx + 1) % phrases.length;
-        setTimeout(type, 400);
-        return;
-      }
-      setTimeout(type, deleteSpeed);
-    } else {
-      charIdx++;
-      el.setAttribute('placeholder', current.substring(0, charIdx) + (charIdx < current.length ? '▊' : ''));
-      if (charIdx >= current.length) {
-        isDeleting = true;
-        setTimeout(type, pauseTime);
-        return;
-      }
-      setTimeout(type, typeSpeed);
-    }
-  }
-  type();
-}
+        <nav class="footer-col" aria-label="Telegraph Protocol">
+          <h3>Telegraph Protocol</h3>
+          <ul>
+            <li><a href="https://anjoman.ai" target="_blank" rel="noopener">About Telegraph &amp; Anjoman</a></li>
+            <li><a href="https://anjoman.ai/docs" target="_blank" rel="noopener">Telegraph Protocol Docs</a></li>
+            <li><a href="https://anjoman.ai/dashboard/apps/praman-desk" target="_blank" rel="noopener">Praman on Anjoman Apps</a></li>
+            <li><a href="https://anjoman.ai/dashboard/explore/miners/6201" target="_blank" rel="noopener">Diamond Miner Node #6201</a></li>
+            <li><a href="https://devnode.telegraphprotocol.com/api/miners/6164" target="_blank" rel="noopener">Devnode Miner #6164 API</a></li>
+          </ul>
+        </nav>
 
-// Initialize dynamic typewriter animations with authentic Praman queries
-initTypewriterPlaceholder('lg-q', [
-  'Verify PO-ALI-9021 for Siemens AG ($100k USDC)…',
-  'Screen 0x98021b… against 19,565 OFAC SDN records…',
-  'Audit CAISO NP15 Day-Ahead power price ($41.20/MWh)…',
-  'Reconcile Mount Morgan (GSQ Site 494270) gold records…',
-  'Evaluate Solana VersionedTransaction spend cap…'
-]);
-</script>
+        <nav class="footer-col" aria-label="Verified Contracts">
+          <h3>Verified Roots</h3>
+          <ul>
+            <li><a href="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" target="_blank" rel="noopener">TakarSettle v4 · Sepolia</a></li>
+            <li><a href="https://sepolia.etherscan.io/address/0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B" target="_blank" rel="noopener">TakarSettle5 · Sepolia</a></li>
+            <li><a href="https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115" target="_blank" rel="noopener">EAS Record #33d85bed</a></li>
+            <li><a href="https://solscan.io/tx/E3qVPMwc?cluster=devnet" target="_blank" rel="noopener">Solana Devnet · E3qVPMwc</a></li>
+            <li><a href="/api/mcp" target="_blank" rel="noopener">Keyless Streamable MCP</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="footer-bottom">
+        <span>2026 Praman · Clearing Infrastructure for Autonomous Finance</span>
+        <div class="footer-utils">
+          <button type="button" class="footer-motion-btn" id="motion-toggle" aria-pressed="false" aria-label="Reduce page animations">Animations: Auto</button>
+          <span class="mono">Ethereum Sepolia &amp; Solana Devnet</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Shared Command Palette Dialog -->
+  <dialog id="cmd-palette" class="cmd-palette" aria-labelledby="cmd-title">
+    <h2 id="cmd-title" class="sr-only">Command Search</h2>
+    <div class="cmd-input-wrap">
+      <input id="cmd-search-input" type="search" placeholder="Jump to desk, receipt case, or documentation..." aria-label="Search routes and cases">
+      <button type="button" class="btn" data-close-dialog style="min-block-size:1.9rem;padding:0.2rem 0.6rem">Esc</button>
+    </div>
+    <ul id="cmd-results-list" class="cmd-results" role="listbox" aria-label="Matching destinations"></ul>
+  </dialog>
+
+  <script src="/js/praman-shell.js"></script>
+  <script type="module" src="/js/overview.js"></script>
 </body>
 </html>
