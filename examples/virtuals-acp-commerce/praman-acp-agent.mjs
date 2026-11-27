@@ -181,7 +181,7 @@ async function runCli() {
         })
       : new PramanViemEvmAcpProvider({ privateKey: signerPrivateKey, chain: base });
 
-    const agent = await AcpAgent.create({ provider });
+    const agent = await AcpAgent.create({ evmProvider: provider });
     const myAddr = await agent.getAddress('evm');
     console.log(`Virtuals ACP Agent initialized for address: ${myAddr}`);
 
