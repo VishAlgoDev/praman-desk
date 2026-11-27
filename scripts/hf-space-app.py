@@ -1,6 +1,9 @@
 import asyncio
 import hashlib
 import os
+
+os.environ["GRADIO_SSR_MODE"] = "false"
+
 import shutil
 import subprocess
 import tarfile
