@@ -467,7 +467,7 @@
     const out = $("#sg-out");
     const scenario = $("#sg-scenario").value;
     btn.disabled = true;
-    out.innerHTML = `<div class="verdict-box">Evaluating SolanaSpendGuard &amp; 19,565 OFAC SDN RAM...</div>`;
+    out.innerHTML = `<div class="verdict-box">Evaluating SolanaSpendGuard &amp; 19,629 OFAC SDN RAM...</div>`;
     try {
       const r = await fetch("/api/audit/solana-spend-guard", {
         method: "POST",

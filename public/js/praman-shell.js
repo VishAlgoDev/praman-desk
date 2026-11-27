@@ -18,7 +18,7 @@
     { label: "Receipt: Solana Token-2022 Halt", meta: "/verify?case=solana-token2022-halt", href: "/verify?case=solana-token2022-halt" },
     { label: "Receipt: Two-Mind FX Divergence", meta: "/verify?case=minds-fx-divergence", href: "/verify?case=minds-fx-divergence" },
     { label: "Receipt: Tencent #01 Hallucination Halt", meta: "/verify?case=tencent-01-halt", href: "/verify?case=tencent-01-halt" },
-    { label: "Documentation & 18-Tool MCP Reference", meta: "/docs", href: "/docs" },
+    { label: "Documentation & 19-Tool MCP Reference", meta: "/docs", href: "/docs" },
     { label: "Product Roadmap & Enterprise Pilot", meta: "/roadmap", href: "/roadmap" }
   ];
 
