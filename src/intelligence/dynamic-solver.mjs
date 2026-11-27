@@ -259,9 +259,9 @@ export function parseDynamicInvoiceReconciliation(text) {
  * liability caps, and notice conditions to solve legal liabilities mathematically.
  */
 export function parseDynamicContractObligation(text) {
-  if (!text || text.length < 20) return null;
+  if (!text || text.length < 12) return null;
 
-  const isLegal = /(?:contract|obligation|clause|sub-clause|liquidated damages|delay|penalty|eot|extension of time|retention|breach|liability|time-barred|notice window|(?:supplier|vendor|seller|buyer|contractor)\s+must\b|governing\s+law|termination\s+notice|\bnet\s+\d{1,3}\b)/i.test(text);
+  const isLegal = /(?:contract|obligation|clause|sub-clause|liquidated damages|delay|penalty|eot|extension of time|retention|breach|liability|time-barred|notice window|agreement|sla|uptime|indemnif|warranty|confidential|\b(?:shall|must|may\s+not|prohibited|entitled\s+to)\b|\bnet\s+\d{1,3}\b)/i.test(text);
   if (!isLegal) return null;
 
   const currMatch = text.match(/\b(INR|USD|EUR|GBP|AED|AUD|CAD)\b/i) || text.match(/([\$€£₹])/);
@@ -333,7 +333,7 @@ export function parseDynamicContractObligation(text) {
     }
   }
 
-  // Deterministic clause & obligation extraction for general contract prompts
+  // Deterministic sentence-level obligation, prohibition & right extraction (never splits decimals like 99.9%)
   const obligations = [];
   const citedClauses = [...citations];
   const pushObs = (val) => {
@@ -345,28 +345,40 @@ export function parseDynamicContractObligation(text) {
     if (v && !citedClauses.includes(v)) citedClauses.push(v);
   };
 
-  for (const m of text.matchAll(/\b(?:(?:supplier|vendor|seller|contractor|provider)\s+(?:must|shall|agrees?\s+to)\s+[^.;\n?!]{4,120}|deliver(?:y)?[^.;\n?!]{0,60}\bwithin\s+\d+\s*(?:business\s+)?(?:days?|weeks?|months?)(?:\s+of\s+[^.;\n?!]{2,40})?)/gi)) {
-    pushObs(m[0]);
-    pushClause(m[0]);
-  }
-  for (const m of text.matchAll(/\b(?:payment\s+(?:is|terms?\s*(?:are|:)|due|shall\s+be)\s*[^.;\n?!]{2,80}|net\s+\d{1,3}(?:\s+days?)?|upon\s+(?:delivery|acceptance|milestone)|advance\s+payment\s+of\s+\d+%|\d+%\s+(?:late|overdue)\s+interest)\b[^.;\n?!]*/gi)) {
-    pushObs(`Payment term: ${m[0].replace(/^payment\s+(?:is|terms?\s*(?:are|:)|shall\s+be)\s*/i, '')}`);
-    pushClause(m[0]);
-  }
-  for (const m of text.matchAll(/\b(?:\d+[-\s]day(?:s)?\s+(?:written\s+)?(?:termination|notice|cure)|(?:termination|notice|cure)\s+(?:window|period)\s*(?:of|:)?\s*\d+\s*days?)\b[^.;\n?!]*/gi)) {
-    pushObs(`Notice / termination: ${m[0]}`);
-    pushClause(m[0]);
-  }
-  for (const m of text.matchAll(/\b(?:governed\s+by\s+[A-Za-z\s]{2,35}\blaw|\b(?:Singapore|English|Delaware|New\s+York|California|Indian|German|Swiss|French|UAE)\s+law|\b(?:SIAC|ICC|LCIA|AAA|UNCITRAL)\s+arbitration)\b/gi)) {
-    pushObs(`Governing law / forum: ${m[0]}`);
-    pushClause(m[0]);
-  }
-  for (const m of text.matchAll(/\b(?:liability\s+(?:cap(?:ped)?|limited)\s+(?:to|at)\s+[^.;\n?!]{2,60}|unlimited\s+liability|warranty\s+(?:period\s+of\s+)?\d+\s*(?:months?|years?|days?)|liquidated\s+damages\s+of\s+[^.;\n?!]{2,60}|indemnif[a-z]+\s+[^.;\n?!]{4,60})/gi)) {
-    pushObs(m[0]);
-    pushClause(m[0]);
+  // Split safely on sentence terminators (do not split 99.9 or Clause 4.2 or $12.50)
+  const sentences = text
+    .replace(/\r\n/g, '\n')
+    .split(/(?<!\d)(?<!Clause\s*\d)(?<!Section\s*\d)(?<!Article\s*\d)\.(?!\d)|\s*[;\n?!]+\s*/i)
+    .map(s => s.replace(/^(?:audit\s+contract\s+obligations|audit\s+obligations|contract\s+terms?)\s*:\s*/i, '').trim())
+    .filter(s => s.length >= 6);
+
+  const PARTY_ROLES = '(?:supplier|vendor|seller|contractor|provider|service\\s+provider|customer|buyer|client|company|platform|operator|licensor|licensee|landlord|lessor|tenant|lessee|employer|employee|borrower|lender|insurer|host|recipient|disclosing\\s+party|neither\\s+party|either\\s+party|each\\s+party|both\\s+parties|party|parties)';
+  const deonticSentenceRe = new RegExp(`\\b${PARTY_ROLES}\\s+(?:shall\\s+not|must\\s+not|may\\s+not|shall|must|agrees?\\s+to|is\\s+(?:obligated|required|prohibited|entitled)\\s+to|has\\s+the\\s+(?:right|obligation)\\s+to|warrants?\\s+(?:that|to)|covenants?\\s+to|may\\b)`, 'i');
+
+  for (const sent of sentences) {
+    if (deonticSentenceRe.test(sent) && sent.length <= 260) {
+      pushObs(sent);
+      pushClause(`"${sent}"`);
+    }
   }
 
-  const hasExplicitBreach = /\b(?:failed\s+to\s+deliver|non[-\s]?payment|in\s+default|breach(?:ed)?\s+(?:clause|contract|obligation|warranty)|short[-\s]?shipped|missed\s+deadline|waive(?:s|d)?\s+statutory|prohibited\s+by\s+law|statutorily\s+void)\b/i.test(text);
+  const termMatches = [
+    ...text.matchAll(/\b(?:deliver(?:y)?[^,;\n?!]{0,60}\bwithin\s+\d+\s*(?:business\s+)?(?:days?|weeks?|months?)(?:\s+of\s+[^,;\n?!]{2,40})?)/gi),
+    ...text.matchAll(/\b(?:payment\s+(?:is|terms?\s*(?:are|:)|due|shall\s+be)\s*[^,;\n?!]{2,80}|net\s+\d{1,3}(?:\s+days?)?|upon\s+(?:delivery|acceptance|milestone)|advance\s+payment\s+of\s+\d+(?:\.\d+)?%|\d+(?:\.\d+)?%\s+(?:late|overdue)\s+interest)\b/gi),
+    ...text.matchAll(/\b(?:\d+[-\s]day(?:s)?\s+(?:written\s+)?(?:termination|notice|cure)|(?:termination|notice|cure)\s+(?:window|period)\s*(?:of|:)?\s*\d+\s*days?|notice\s+\d+\s+days)\b/gi),
+    ...text.matchAll(/\b(?:governed\s+by\s+(?:the\s+laws?\s+of\s+)?[A-Za-z\s]{2,35}(?:\blaw\b)?|\b(?:Singapore|English|Delaware|New\s+York|California|Indian|German|Swiss|French|UAE)\s+laws?|\b(?:SIAC|ICC|LCIA|AAA|UNCITRAL)\s+arbitration)\b/gi),
+    ...text.matchAll(/\b(?:liability\s+(?:cap(?:ped)?|limited)\s+(?:to|at)\s+[^,;\n?!]{2,60}|unlimited\s+liability|warranty\s+(?:period\s+of\s+)?\d+\s*(?:months?|years?|days?)|liquidated\s+damages\s+of\s+[^,;\n?!]{2,60})/gi)
+  ];
+  for (const m of termMatches) {
+    const phrase = String(m[0] || '').trim();
+    if (!phrase) continue;
+    const alreadyCovered = obligations.some(o => o.toLowerCase().includes(phrase.toLowerCase()));
+    if (!alreadyCovered) pushObs(phrase);
+    pushClause(phrase);
+  }
+
+  const hasExplicitBreach = /\b(?:failed\s+to\s+deliver|failed\s+to\s+pay|non[-\s]?payment|in\s+default|breach(?:ed)?\s+(?:clause|contract|obligation|warranty|agreement)|short[-\s]?shipped|missed\s+(?:the\s+)?deadline|paid\s+\d+\s+days\s+(?:late|after)|overdue\s+by\s+\d+\s+days|waive(?:s|d)?\s+statutory|prohibited\s+by\s+law|statutorily\s+void|below\s+(?:the\s+)?sla|outage\s+exceeded)\b/i.test(text);
+  const hasExplicitComplianceEvent = /\b(?:delivered\s+on\s+time|paid\s+(?:within|on)\s+time|all\s+obligations?\s+(?:met|fulfilled|satisfied)|in\s+full\s+compliance|met\s+(?:the\s+)?sla|achieved\s+\d+(?:\.\d+)?%\s+uptime|confirmed\s+compliant|no\s+overdue)\b/i.test(text);
   const hasConditionalRisk = /\b(?:unlimited\s+liability|unilateral\s+(?:variation|change|termination(?:\s+without\s+cause)?)|no\s+liability\s+cap|ambiguous|uncapped|sole\s+discretion|without\s+prior\s+notice|auto(?:matically)?\s+renew(?:s|al)?\s+unless|waives?\s+all\s+claims|no\s+refund)\b/i.test(text);
 
   if (!citedClauses.length) citedClauses.push('Standard Contract Terms');
@@ -387,17 +399,22 @@ export function parseDynamicContractObligation(text) {
     compliant = false;
   } else if (hasExplicitBreach) {
     verdict = 'AUDIT VERDICT: NON-COMPLIANT BREACH INDICATOR IDENTIFIED.';
-    explanation = `Contract breach or non-performance indicator identified (${obligations.slice(0, 3).join('; ') || 'supplied contract record'}). Review remedies and notice cure windows (${citedClauses.slice(0, 3).join(', ')}).`;
+    explanation = `Non-compliant: contract breach or non-performance event identified (${obligations.slice(0, 4).join('; ') || 'supplied contract record'}). Review remedies and notice cure windows (${citedClauses.slice(0, 4).join(', ')}).`;
     compliant = false;
   } else if (hasConditionalRisk) {
     verdict = 'AUDIT VERDICT: PARTIALLY COMPLIANT (HIGH-RISK CLAUSE DETECTED).';
-    explanation = `Contract creates defined obligations (${obligations.slice(0, 3).join('; ')}) but contains an elevated commercial/risk exposure clause requiring bilateral redline or cap.`;
+    explanation = `Partially compliant: contract creates defined obligations (${obligations.slice(0, 4).join('; ')}) but contains an elevated commercial/risk exposure clause requiring bilateral redline or cap.`;
     partiallyCompliant = true;
     compliant = false;
-  } else if (obligations.length > 0) {
+  } else if (obligations.length > 0 && hasExplicitComplianceEvent) {
     verdict = 'AUDIT VERDICT: CONTRACT OBLIGATIONS EXTRACTED AND COMPLIANT.';
-    explanation = `Extracted obligations: ${obligations.join('; ')}. Cited terms reflect consistent commercial performance, payment, notice, and governing-law structure with no breach or delay penalty indicated.`;
+    explanation = `Compliant — stated performance satisfies contractual obligations: ${obligations.join('; ')}.`;
     compliant = true;
+  } else if (obligations.length > 0) {
+    verdict = 'AUDIT VERDICT: UNCLEAR COMPLIANCE (OBLIGATIONS EXTRACTED; PERFORMANCE RECORD MISSING).';
+    explanation = `Extracted obligations, prohibitions & rights: ${obligations.join('; ')}. Verdict is Unclear because the supplied contract text defines obligations/clauses without stating actual performance, delivery dates, payment timestamps, or incident metrics needed to determine compliance.`;
+    unclear = true;
+    compliant = false;
   } else {
     return null;
   }

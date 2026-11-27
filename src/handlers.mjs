@@ -772,11 +772,12 @@ function resolvePeriodRange(period = '') {
     return { startdt: `${yr}-${m}-01`, enddt: `${yr}-${m}-${MONTH_DAYS_MAP[m]}`, label: period.trim() };
   }
 
-  // Quarters: e.g. "q4 2026", "q1 2026"
-  const qMatch = p.match(/\bq([1-4])\s*(?:of\s+)?(20\d{2})\b/);
+  // Quarters: e.g. "2025-Q3", "q4 2026", "q1 of 2026"
+  const qMatch = p.match(/\b(20\d{2})[-_\s]?q([1-4])\b/) || p.match(/\bq([1-4])\s*(?:of\s+)?(20\d{2})\b/);
   if (qMatch) {
-    const q = qMatch[1];
-    const yr = qMatch[2];
+    const isYrFirst = qMatch[1].length === 4;
+    const yr = isYrFirst ? qMatch[1] : qMatch[2];
+    const q = isYrFirst ? qMatch[2] : qMatch[1];
     const qMap = {
       '1': { start: '01-01', end: '03-31' },
       '2': { start: '04-01', end: '06-30' },
@@ -786,7 +787,7 @@ function resolvePeriodRange(period = '') {
     return { startdt: `${yr}-${qMap[q].start}`, enddt: `${yr}-${qMap[q].end}`, label: period.trim() };
   }
 
-  const betweenMatch = p.match(/(20\d{2}-\d{2}-\d{2})\s+(?:to|through|until|and|-)\s+(20\d{2}-\d{2}-\d{2})/);
+  const betweenMatch = p.match(/(20\d{2}-\d{2}-\d{2})\s*(?:\.\.|to|through|until|and|-)\s*(20\d{2}-\d{2}-\d{2})/);
   if (betweenMatch) {
     return { startdt: betweenMatch[1], enddt: betweenMatch[2], label: period.trim() };
   }
@@ -794,6 +795,11 @@ function resolvePeriodRange(period = '') {
   const sinceDateMatch = p.match(/\bsince\s+(20\d{2}-\d{2}-\d{2})\b/);
   if (sinceDateMatch) {
     return { startdt: sinceDateMatch[1], enddt, label: period.trim() };
+  }
+
+  const singleDateMatch = p.match(/^\s*(20\d{2}-\d{2}-\d{2})\s*$/);
+  if (singleDateMatch) {
+    return { startdt: singleDateMatch[1], enddt: singleDateMatch[1], label: period.trim() };
   }
 
   const sinceYearMatch = p.match(/\bsince\s+(19\d{2}|20\d{2})\b/);
@@ -839,15 +845,15 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '', rawForm = '
   const wantsFederalRegisterOnly = /federal\s+register/.test(rawLower) && !/\bsec\b|\bedgar\b|\b10-[kq]\b|\b8-k\b|\b20-f\b|\bs-1\b/i.test(rawLower);
   const wantsSecOnly = /\bsec\b|\bedgar\b|\b10-[kq]\b|\b8-k\b|\b20-f\b|\b6-k\b|\bs-1\b/i.test(rawLower) && !/federal\s+register/.test(rawLower);
 
-  // Extract explicit SEC form types from both text and explicit ?form= param (e.g. 10-K, 10-Q, 8-K, 20-F, S-1)
-  const formMatches = [...`${company} ${formStr}`.matchAll(/\b(10-[KQ]|8-K|20-F|6-K|S-1|DEF\s*14A|DEFA14A|13F-HR)\b/gi)]
+  // Extract explicit SEC form types from both text and explicit ?form= param (e.g. 10-K, 10-Q, 8-K, 10-K/A, 144/A)
+  const formMatches = [...`${company} ${formStr}`.matchAll(/\b(10-[KQ](?:\/A)?|8-K(?:\/A)?|20-F(?:\/A)?|6-K(?:\/A)?|S-[134](?:\/A)?|F-1(?:\/A)?|DEF\s*14A|DEFA14A|13F-HR|144(?:\/A)?)\b/gi)]
     .map(m => m[1].toUpperCase().replace(/\s+/, ' '));
   if (formStr && formMatches.length === 0) {
     formMatches.push(formStr.toUpperCase());
   }
   const formsFilter = [...new Set(formMatches)];
 
-  const cikMatch = company.match(/\bCIK\s*[:#]?\s*(\d{4,10})\b/i);
+  const cikMatch = company.match(/\bCIK\s*[:#]?\s*(\d{4,10})\b/i) || company.match(/^\s*(\d{5,10})\s*$/);
   const explicitCik = cikMatch ? cikMatch[1].padStart(10, '0') : null;
 
   const leiMatch = company.match(/\bLEI\s*[:#]?\s*([A-Z0-9]{20})\b/i);
@@ -903,13 +909,16 @@ function parseRegulatoryFilingQuery(rawCompany = '', rawPeriod = '', rawForm = '
     }
   }
 
-  // Strip trailing metadata and prefixes
+  // Strip trailing metadata, inline SEC form suffixes (e.g. "Tesla 10-Q"), and prefixes
   company = company
     .replace(/\s*\(\s*CIK\s*[:#]?\s*\d{4,10}[\s\S]*?\)/ig, '')
     .replace(/\s*\(\s*LEI\s*[:#]?\s*[A-Z0-9]{20}[\s\S]*?\)/ig, '')
+    .replace(/\b(?:sec\s+)?(?:form\s+)?(10-[KQ](?:\/A)?|8-K(?:\/A)?|20-F(?:\/A)?|6-K(?:\/A)?|S-[134](?:\/A)?|F-1(?:\/A)?|DEF\s*14A|DEFA14A|13F-HR|144(?:\/A)?)\b(?:\s+filings?\s+(?:by|for|of)\s+)?/ig, ' ')
     .replace(/^(?:show|list|get|check|monitor|find|did|does|has|will|is|audit|verify)\s+/i, '')
+    .replace(/\b(?:filings?|sec\s+edgar|edgar)\s*$/i, '')
     .replace(/(?:'s|’s)\s*$/i, '')
     .replace(/[?!.]+$/g, '')
+    .replace(/\s+/g, ' ')
     .trim();
 
   return { company, period, formsFilter, explicitCik, explicitLei, wantsFederalRegisterOnly, wantsSecOnly };
@@ -3841,32 +3850,52 @@ export async function monitorRegulatoryFiling({ company = '', period = '', form 
             const subRes = await fetchSecWithRetry(subUrl, 10000);
             if (subRes.ok) {
               const sub = await subRes.json();
-              const recent = sub?.filings?.recent;
+                const recent = sub?.filings?.recent;
               if (recent?.form && recent?.filingDate) {
                 const defaultForms = new Set(['10-K', '10-Q', '8-K', '20-F', '6-K', 'S-1', 'DEF 14A']);
                 const targetSet = formsFilter.length > 0 ? new Set(formsFilter) : defaultForms;
                 const matched = [];
-                for (let i = 0; i < recent.form.length; i++) {
-                  const f = String(recent.form[i] || '').toUpperCase();
-                  const d = String(recent.filingDate[i] || '');
-                  if (!targetSet.has(f)) continue;
-                  if (d < range.startdt || d > range.enddt) continue;
-                  const acc = String(recent.accessionNumber?.[i] || '');
-                  const doc = String(recent.primaryDocument?.[i] || '');
-                  matched.push({
-                    form_type: f,
-                    filing_date: d,
-                    company_name: sub.name || cikInfo.title || companyTrim,
-                    period_ending: recent.reportDate?.[i] || null,
-                    cik: cikInfo.cik,
-                    accession_number: acc,
-                    source: 'SEC EDGAR Submissions API',
-                    url: acc
-                      ? `https://www.sec.gov/Archives/edgar/data/${Number(cikInfo.cik)}/${acc.replace(/-/g, '')}/${doc || `${acc}-index.htm`}`
-                      : null
-                  });
+                const collectFromChunk = (chunk) => {
+                  if (!chunk?.form || !chunk?.filingDate) return;
+                  for (let i = 0; i < chunk.form.length; i++) {
+                    const f = String(chunk.form[i] || '').toUpperCase();
+                    const d = String(chunk.filingDate[i] || '');
+                    if (!targetSet.has(f)) continue;
+                    if (d < range.startdt || d > range.enddt) continue;
+                    const acc = String(chunk.accessionNumber?.[i] || '');
+                    const doc = String(chunk.primaryDocument?.[i] || '');
+                    matched.push({
+                      form_type: f,
+                      filing_date: d,
+                      company_name: sub.name || cikInfo.title || companyTrim,
+                      period_ending: chunk.reportDate?.[i] || null,
+                      cik: cikInfo.cik,
+                      accession_number: acc,
+                      source: 'SEC EDGAR Submissions API',
+                      url: acc
+                        ? `https://www.sec.gov/Archives/edgar/data/${Number(cikInfo.cik)}/${acc.replace(/-/g, '')}/${doc || `${acc}-index.htm`}`
+                        : null
+                    });
+                  }
+                };
+                collectFromChunk(recent);
+                const oldestRecentDate = recent.filingDate[recent.filingDate.length - 1] || '';
+                const overflowFiles = Array.isArray(sub?.filings?.files) ? sub.filings.files : [];
+                if (oldestRecentDate && range.startdt < oldestRecentDate && overflowFiles.length > 0) {
+                  for (const fileMeta of overflowFiles.slice(0, 3)) {
+                    const fFrom = String(fileMeta?.filingFrom || '');
+                    const fTo = String(fileMeta?.filingTo || '');
+                    if ((fTo && fTo < range.startdt) || (fFrom && fFrom > range.enddt)) continue;
+                    if (!fileMeta?.name) continue;
+                    try {
+                      const histRes = await fetchSecWithRetry(`https://data.sec.gov/submissions/${fileMeta.name}`, 8000);
+                      if (histRes.ok) {
+                        collectFromChunk(await histRes.json());
+                      }
+                    } catch {}
+                  }
                 }
-                return { hits: matched.slice(0, 20), total: matched.length, mode: 'issuer_submissions', upstreamStatus: 200 };
+                return { hits: matched.slice(0, 25), total: matched.length, mode: 'issuer_submissions', upstreamStatus: 200 };
               }
             }
             // If submissions failed or returned non-200, do not bail out with 0; fall through to EFTS search below!
@@ -4027,15 +4056,19 @@ export async function monitorRegulatoryFiling({ company = '', period = '', form 
   const upstreamErrors = [secResult.error, frDocsResult.error].filter(Boolean);
   const upstreamDegraded = upstreamErrors.length > 0 && secCount === 0 && frCount === 0;
 
+  const isSecIssuer = secResult.mode === 'issuer_submissions' && !parsed.wantsFederalRegisterOnly;
+  const effectiveSecFilings = isSecIssuer ? secFilings : (parsed.wantsFederalRegisterOnly ? [] : secFilings);
+  const effectiveFrNotices = isSecIssuer ? [] : fedRegNotices;
+
   // Combine sample documents chronologically (newest first) into flat lists matching Telegraph schema
   const combinedFilings = [
-    ...secFilings.map(f => ({
+    ...effectiveSecFilings.map(f => ({
       date: f.filing_date || '',
       title: `SEC Form ${f.form_type} (${f.filing_date}) - ${f.company_name}`,
       url: f.url || '',
       type: f.form_type || 'SEC'
     })),
-    ...fedRegNotices.map(r => ({
+    ...effectiveFrNotices.map(r => ({
       date: r.publication_date || '',
       title: `${r.title} (${r.publication_date})`,
       url: r.url || '',
@@ -4053,11 +4086,11 @@ export async function monitorRegulatoryFiling({ company = '', period = '', form 
     url: item.url
   }));
 
-  const filingCount = (parsed.wantsSecOnly || formsFilter.length > 0)
-    ? (secCount > 0 ? secCount : combinedFilings.length)
-    : (frCount > 0 ? frCount : (secCount > 0 ? secCount : combinedFilings.length));
+  const filingCount = (isSecIssuer || parsed.wantsSecOnly || formsFilter.length > 0)
+    ? secCount
+    : (parsed.wantsFederalRegisterOnly ? frCount : (frCount > 0 ? frCount : (secCount > 0 ? secCount : combinedFilings.length)));
 
-  const effectiveByType = (byType && Object.keys(byType).length > 0)
+  const effectiveByType = (!isSecIssuer && byType && Object.keys(byType).length > 0)
     ? byType
     : combinedFilings.reduce((acc, f) => {
         const t = f.type || 'Filing';
@@ -9290,11 +9323,11 @@ export async function handleApiRequest(req, res) {
       if (pathname === '/api/miner/regulatory-filing') {
         const rawCompany = String(
           merged.company ||
+          merged.entity ||
           merged['filter[entity.legalName]'] ||
           merged['filter%5Bentity.legalName%5D'] ||
           merged['filter[entity.lei]'] ||
           merged['filter%5Bentity.lei%5D'] ||
-          merged.entity ||
           merged.issuer ||
           merged.name ||
           merged.ticker ||
@@ -9311,21 +9344,28 @@ export async function handleApiRequest(req, res) {
           ''
         ).trim();
 
-        const promptEval = evaluateRegulatoryFilingPrompt(rawCompany);
-        if (promptEval) {
-          return sendJson(res, 200, {
-            ...promptEval,
-            intent: 'REGULATORY_FILING_MONITOR_GENERAL',
-            schema_version: 2,
-            as_of: new Date().toISOString()
-          });
-        }
+        const reqPeriod = String(merged.period || '').trim();
+        const reqForm = String(merged.form || merged.form_type || merged.formType || '').trim();
 
         const out = await monitorRegulatoryFiling({
           company: rawCompany,
-          period: merged.period || '',
-          form: merged.form || merged.form_type || ''
+          period: reqPeriod,
+          form: reqForm
         });
+
+        // Only use curated emergency fallback if SEC/Federal Register upstream itself timed out/errored
+        if (out.upstream_status === 'degraded' && !reqPeriod && !reqForm) {
+          const promptEval = evaluateRegulatoryFilingPrompt(rawCompany);
+          if (promptEval) {
+            return sendJson(res, 200, {
+              ...promptEval,
+              intent: 'REGULATORY_FILING_MONITOR_GENERAL',
+              schema_version: 2,
+              as_of: new Date().toISOString()
+            });
+          }
+        }
+
         return sendJson(res, 200, {
           ...out,
           verdict: out.verdict || (out.found ? 'found' : 'not_found'),
@@ -9342,23 +9382,25 @@ export async function handleApiRequest(req, res) {
       }
 
       if (pathname === '/api/miner/contract-obligation' || pathname === '/api/mission/contract-audit') {
-        let rawText = String(
-          merged.question ||
-          merged.query ||
-          merged.prompt ||
+        const contractBody = String(
           merged.contractText ||
           merged.contract_text ||
-          merged.text ||
           merged.contract ||
+          merged.terms ||
+          merged.text ||
           merged.clause ||
           merged.description ||
-          merged.terms ||
           ''
         ).trim();
+        const questionBody = String(merged.question || merged.query || merged.prompt || '').trim();
+        let rawText = contractBody.length >= 25
+          ? (questionBody && !contractBody.includes(questionBody) && questionBody.length > 25 ? `${contractBody}\n${questionBody}` : contractBody)
+          : (questionBody || contractBody);
 
-        // Support public contract URL passed via `contract` or `url` param (per Devnode CONTRACT_OBLIGATION_AUDIT schema)
-        const contractUrlCandidate = rawText.match(/^https?:\/\/[^\s"'<>]+$/i)?.[0]
-          || (typeof merged.url === 'string' && /^https?:\/\/[^\s"'<>]+$/i.test(merged.url.trim()) ? merged.url.trim() : null);
+        // Support public contract URL passed via `contract`, `url`, or embedded inside prompt text
+        const contractUrlCandidate = (typeof merged.url === 'string' && /^https?:\/\/[^\s"'<>]+$/i.test(merged.url.trim()) ? merged.url.trim() : null)
+          || rawText.match(/https?:\/\/[^\s"'<>)]+/i)?.[0]
+          || null;
         if (contractUrlCandidate) {
           try {
             const safe = await isSafePublicHttpUrl(contractUrlCandidate);

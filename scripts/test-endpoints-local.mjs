@@ -1009,6 +1009,50 @@ async function run() {
       throw new Error(`ByteDance Creative QA endpoint failed: ${JSON.stringify({ hold: cqaHold.json, ok: cqaOk.json })}`);
     }
 
+    // 17. Epoch 67 Low-Scoring Intent Fixes Regression Guards
+    console.log('\n--- Checking Epoch 67 Intent Fixes ---');
+    const regQ3 = await check('/api/miner/regulatory-filing?entity=AAPL&period=2025-Q3');
+    if (regQ3.status !== 200 || regQ3.json.from !== '2025-07-01' || regQ3.json.to !== '2025-09-30' || !(regQ3.json.sec_filing_count >= 1) || regQ3.json.filing_count !== regQ3.json.sec_filing_count) {
+      throw new Error(`REGULATORY_FILING 2025-Q3 SEC count check failed: ${JSON.stringify({ from: regQ3.json.from, to: regQ3.json.to, count: regQ3.json.filing_count, sec: regQ3.json.sec_filing_count })}`);
+    }
+
+    const regTesla10Q = await check('/api/miner/regulatory-filing?entity=' + encodeURIComponent('Tesla 10-Q') + '&period=2025');
+    if (regTesla10Q.status !== 200 || !regTesla10Q.json.found || !(regTesla10Q.json.sec_filing_count >= 1) || !String(regTesla10Q.json.filings?.[0] || '').includes('10-Q')) {
+      throw new Error(`REGULATORY_FILING Tesla 10-Q live SEC check failed: ${JSON.stringify(regTesla10Q.json)}`);
+    }
+
+    const conUnclear = await check('/api/miner/contract-obligation?question=' + encodeURIComponent('Audit contract obligations: Customer shall pay fees within 30 days of invoice. Provider shall maintain 99.9% availability. Neither party shall disclose confidential information.'));
+    if (
+      conUnclear.status !== 200 ||
+      conUnclear.json.verdict !== 'Unclear' ||
+      conUnclear.json.compliant !== false ||
+      !conUnclear.json.obligations.some(o => o.includes('99.9%')) ||
+      !conUnclear.json.obligations.some(o => /Customer shall pay/i.test(o)) ||
+      !conUnclear.json.obligations.some(o => /Neither party shall/i.test(o))
+    ) {
+      throw new Error(`CONTRACT_OBLIGATION decimal + Unclear verdict check failed: ${JSON.stringify(conUnclear.json)}`);
+    }
+
+    const wbOp = await check('/api/miner/wallet-balance?address=0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045&chain=' + encodeURIComponent('OP Mainnet'));
+    if (wbOp.status !== 200 || wbOp.json.chain !== 'optimism' || typeof wbOp.json.balance_eth !== 'number') {
+      throw new Error(`WALLET_BALANCE OP Mainnet alias check failed: ${JSON.stringify(wbOp.json)}`);
+    }
+
+    const txSep = await check('/api/miner/onchain-tx?tx_hash=0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13');
+    if (txSep.status !== 200 || txSep.json.chain !== 'sepolia' || txSep.json.status !== 'confirmed' || !txSep.json.block_hash || !txSep.json.fee_wei) {
+      throw new Error(`ONCHAIN_TX parallel chain + receipt fields check failed: ${JSON.stringify(txSep.json)}`);
+    }
+
+    const resWasm = await check('/api/miner/research-query?query=' + encodeURIComponent('Investigate formal verification semantics of WebAssembly deterministic execution'));
+    if (resWasm.status !== 200 || resWasm.json.status !== 'ok' || !(resWasm.json.sources?.length >= 1) || /No authoritative public index entry returned/i.test(String(resWasm.json.answer || ''))) {
+      throw new Error(`RESEARCH_QUERY WASM academic citation check failed: ${JSON.stringify(resWasm.json)}`);
+    }
+
+    const resFrance = await check('/api/miner/research-query?question=' + encodeURIComponent('What is the capital of France'));
+    if (resFrance.status !== 200 || /Closed-ended question/i.test(String(resFrance.json.answer || '')) || !/Paris/i.test(String(resFrance.json.answer || ''))) {
+      throw new Error(`RESEARCH_QUERY topic ranking check failed: ${JSON.stringify(resFrance.json)}`);
+    }
+
     console.log('\nALL SEASON II ADVERSARIAL REGRESSION GUARDS, SIGNED MEMO VERIFIER, PILOT INTAKE & LIVE VERIFICATION TESTS PASSED!');
   } finally {
     server.close();

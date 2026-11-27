@@ -78,20 +78,20 @@ const KNOWN_SOLANA_MINTS = {
 function normalizeChainName(rawChain = '', fallbackQuery = '') {
   const c = String(rawChain || '').toLowerCase().trim();
   const aliasMap = {
-    eth: 'ethereum', ethereum: 'ethereum', mainnet: 'ethereum', 'ethereum-mainnet': 'ethereum', l1: 'ethereum',
-    sepolia: 'sepolia', 'eth-sepolia': 'sepolia',
-    base: 'base', 'base-mainnet': 'base',
-    'base-sepolia': 'base-sepolia',
-    arb: 'arbitrum', arbitrum: 'arbitrum', 'arbitrum-one': 'arbitrum', arb1: 'arbitrum',
-    op: 'optimism', optimism: 'optimism', 'op-mainnet': 'optimism',
-    matic: 'polygon', poly: 'polygon', polygon: 'polygon', pol: 'polygon',
-    bsc: 'bsc', bnb: 'bsc', 'bnb-chain': 'bsc',
-    avax: 'avalanche', avalanche: 'avalanche',
-    sol: 'solana', solana: 'solana', 'solana-mainnet': 'solana', 'mainnet-beta': 'solana',
-    'solana-devnet': 'solana-devnet', 'sol-devnet': 'solana-devnet', devnet: 'solana-devnet'
+    '1': 'ethereum', eth: 'ethereum', ethereum: 'ethereum', mainnet: 'ethereum', 'ethereum mainnet': 'ethereum', 'ethereum-mainnet': 'ethereum', l1: 'ethereum',
+    '11155111': 'sepolia', sepolia: 'sepolia', 'eth-sepolia': 'sepolia', 'ethereum sepolia': 'sepolia',
+    '8453': 'base', base: 'base', 'base mainnet': 'base', 'base-mainnet': 'base',
+    '84532': 'base-sepolia', 'base-sepolia': 'base-sepolia', 'base sepolia': 'base-sepolia',
+    '42161': 'arbitrum', arb: 'arbitrum', arbitrum: 'arbitrum', 'arbitrum one': 'arbitrum', 'arbitrum-one': 'arbitrum', arb1: 'arbitrum', 'arbitrum mainnet': 'arbitrum',
+    '10': 'optimism', op: 'optimism', optimism: 'optimism', 'op mainnet': 'optimism', 'op-mainnet': 'optimism', 'optimism mainnet': 'optimism', 'optimistic-ethereum': 'optimism',
+    '137': 'polygon', matic: 'polygon', poly: 'polygon', polygon: 'polygon', 'polygon mainnet': 'polygon', 'polygon pos': 'polygon', pol: 'polygon',
+    '56': 'bsc', bsc: 'bsc', bnb: 'bsc', 'bnb chain': 'bsc', 'bnb-chain': 'bsc', 'bnb smart chain': 'bsc', 'binance smart chain': 'bsc',
+    '43114': 'avalanche', avax: 'avalanche', avalanche: 'avalanche', 'avalanche c-chain': 'avalanche',
+    sol: 'solana', solana: 'solana', 'solana mainnet': 'solana', 'solana-mainnet': 'solana', 'mainnet-beta': 'solana',
+    'solana-devnet': 'solana-devnet', 'solana devnet': 'solana-devnet', 'sol-devnet': 'solana-devnet', devnet: 'solana-devnet'
   };
   if (aliasMap[c]) return aliasMap[c];
-  const q = String(fallbackQuery || '');
+  const q = `${c} ${String(fallbackQuery || '')}`.trim();
   if (/\bsolana\s*devnet\b|\bdevnet\b.*\bsol/i.test(q)) return 'solana-devnet';
   if (/\bsolana\b|\bspl\b|\braydium\b|\borca\b/i.test(q)) return 'solana';
   if (/base\s*sepolia/i.test(q)) return 'base-sepolia';
@@ -102,6 +102,7 @@ function normalizeChainName(rawChain = '', fallbackQuery = '') {
   if (/polygon|\bmatic\b/i.test(q)) return 'polygon';
   if (/\bbsc\b|\bbnb\b/i.test(q)) return 'bsc';
   if (/avalanche|\bavax\b/i.test(q)) return 'avalanche';
+  if (/\bethereum\b/i.test(q)) return 'ethereum';
   return '';
 }
 
@@ -308,10 +309,12 @@ export async function executeWebSearch({ query, question, q, prompt, text } = {}
     }
   }
 
-  // 2b. Authoritative technical / corporate registry resolution before Wikipedia
+  // 2b. Clean conversational framing for targeted Wikipedia & encyclopedic lookup
   const cleanSearch = rawQuery
-    .replace(/^(?:search|look\s*up|find|query|research)\s+(?:the\s+web\s+for\s+|for\s+)?/i, '')
+    .replace(/^(?:search|look\s*up|find|query|research|investigate|explain|summarize|what\s+does\s+the\s+evidence\s+say\s+about|what\s+is\s+(?:the\s+)?|who\s+is\s+(?:the\s+)?|when\s+did\s+|how\s+(?:does|did|do|much|many)\s+)/i, '')
+    .replace(/\b(?:cite\s+your\s+sources?|with\s+citations?|and\s+explain|please)\b[.?!]*/gi, '')
     .replace(/\s+documentation$/i, '')
+    .replace(/[?!.]+$/g, '')
     .trim();
 
   if (!answer && /\b(?:gleif|lei)\b/i.test(rawQuery)) {
@@ -487,7 +490,7 @@ export async function executeWebSearch({ query, question, q, prompt, text } = {}
     } catch {}
   }
 
-  // 3. Wikipedia search with direct snippet synthesis (answers direct factual questions e.g. "capital of Australia")
+  // 3. Wikipedia search with topic-token ranking + direct snippet synthesis
   if (!answer) {
     try {
       const wikiQuery = cleanSearch || rawQuery;
@@ -500,13 +503,25 @@ export async function executeWebSearch({ query, question, q, prompt, text } = {}
         const wData = await wRes.json();
         const hits = wData.query?.search || [];
         if (hits.length > 0) {
-          const bestHit = hits[0];
+          const topicTokens = wikiQuery.toLowerCase().split(/\W+/).filter(t => t.length >= 3 && !/^(?:what|the|and|for|with|from|does|about|cite|sources|evidence|say)$/.test(t));
+          const rankedHits = [...hits].map((h, idx) => {
+            const titleLc = String(h.title || '').toLowerCase();
+            const snipLc = String(h.snippet || '').toLowerCase();
+            let rel = hits.length - idx;
+            for (const tok of topicTokens) {
+              if (titleLc.includes(tok)) rel += 15;
+              if (snipLc.includes(tok)) rel += 4;
+            }
+            if (/^closed-ended question$/i.test(h.title || '')) rel -= 50;
+            return { h, rel };
+          }).sort((a, b) => b.rel - a.rel);
+          const bestHit = rankedHits[0].h;
           const pageTitle = bestHit.title;
           const pageUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(pageTitle.replace(/ /g, '_'))}`;
           sources.push(pageUrl);
 
-          const cleanSnippets = hits.slice(0, 3)
-            .map(h => (h.snippet || '').replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&#039;/g, "'").trim())
+          const cleanSnippets = rankedHits.slice(0, 3)
+            .map(({ h }) => (h.snippet || '').replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&#039;/g, "'").trim())
             .filter(Boolean);
 
           let extract = '';
@@ -562,8 +577,29 @@ export async function executeWebSearch({ query, question, q, prompt, text } = {}
   };
 }
 
+function reconstructAbstract(invIndex) {
+  if (!invIndex || typeof invIndex !== 'object') return '';
+  const words = [];
+  for (const [word, positions] of Object.entries(invIndex)) {
+    if (!Array.isArray(positions)) continue;
+    for (const pos of positions) {
+      words[pos] = word;
+    }
+  }
+  return words.filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+}
+
+function extractResearchKeywords(rawQuery = '') {
+  return String(rawQuery || '')
+    .replace(/^(?:please\s+|could\s+you\s+|can\s+you\s+)?(?:research|investigate|analyze|analyse|examine|explore|explain|summarize|what\s+does\s+(?:the\s+)?(?:scientific\s+|clinical\s+)?evidence\s+say\s+about|what\s+(?:is|are)\s+(?:the\s+)?|how\s+(?:does|do)\s+)/i, '')
+    .replace(/\b(?:cite\s+your\s+sources?|with\s+citations?|supporting\s+sources?|evidence-grounded)\b[.?!]*/gi, '')
+    .replace(/[?!.]+$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 /**
- * Execute Deep Research Query with multi-source attribution
+ * Execute Deep Research Query with multi-source scholarly & encyclopedic attribution
  * Conforms to Devnode RESEARCH_QUERY_GENERAL spec
  */
 export async function executeResearchQuery({ query, question, q, prompt, text } = {}) {
@@ -575,52 +611,187 @@ export async function executeResearchQuery({ query, question, q, prompt, text } 
       summary: 'Empty research query received',
       key_findings: [],
       sources: [],
+      citations: [],
+      evidence: [],
       confidence: 0.0
     };
   }
 
-  const searchRes = await executeWebSearch({ query: rawQuery });
+  const topic = extractResearchKeywords(rawQuery) || rawQuery;
+  const openAlexKeywords = topic
+    .replace(/\b(?:the|of|in|for|and|or|to|a|an|with|about|into|on|zero-dependency)\b/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 7)
+    .join(' ');
+
+  const openAlexPromise = (async () => {
+    try {
+      const url = `https://api.openalex.org/works?search=${encodeURIComponent(openAlexKeywords || topic)}&sort=cited_by_count:desc&per-page=4`;
+      const r = await fetch(url, {
+        headers: { 'User-Agent': 'PramanDeskResearch/2.0 (mailto:vishalkarad98@gmail.com)', Accept: 'application/json' },
+        signal: AbortSignal.timeout(4500)
+      });
+      if (!r.ok) return [];
+      const data = await r.json();
+      return (data?.results || []).map(w => {
+        const srcUrl = w.doi || w.primary_location?.landing_page_url || w.id || '';
+        const abs = reconstructAbstract(w.abstract_inverted_index);
+        return {
+          title: String(w.title || '').trim(),
+          year: w.publication_year || null,
+          citedBy: w.cited_by_count || 0,
+          abstract: abs ? abs.slice(0, 320) : '',
+          url: srcUrl,
+          provider: 'OpenAlex'
+        };
+      }).filter(x => x.title && x.url);
+    } catch {
+      return [];
+    }
+  })();
+
+  const crossrefPromise = (async () => {
+    try {
+      const url = `https://api.crossref.org/works?query=${encodeURIComponent(openAlexKeywords || topic)}&rows=3`;
+      const r = await fetch(url, {
+        headers: { 'User-Agent': 'PramanDeskResearch/2.0 (mailto:vishalkarad98@gmail.com)', Accept: 'application/json' },
+        signal: AbortSignal.timeout(4500)
+      });
+      if (!r.ok) return [];
+      const data = await r.json();
+      return (data?.message?.items || []).map(item => {
+        const title = Array.isArray(item.title) ? String(item.title[0] || '').trim() : '';
+        const doiUrl = item.DOI ? `https://doi.org/${item.DOI}` : (item.URL || '');
+        const year = item.published?.['date-parts']?.[0]?.[0] || null;
+        return {
+          title,
+          year,
+          citedBy: item['is-referenced-by-count'] || 0,
+          abstract: String(item.abstract || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 260),
+          url: doiUrl,
+          provider: 'Crossref'
+        };
+      }).filter(x => x.title && x.url);
+    } catch {
+      return [];
+    }
+  })();
+
+  const webPromise = executeWebSearch({ query: rawQuery });
+
+  const [oaWorks, crWorks, searchRes] = await Promise.all([
+    openAlexPromise,
+    crossrefPromise,
+    webPromise
+  ]);
+
   const findings = [];
-  if (searchRes.answer) {
-    const sentences = searchRes.answer.split(/(?<=[.?!])\s+/).filter(s => s.trim().length > 15);
-    for (const s of sentences.slice(0, 5)) {
-      findings.push(s.trim());
+  const evidence = [];
+  const allSources = [];
+  const seenUrls = new Set();
+  const pushSource = (u) => {
+    const clean = typeof u === 'string' ? u.trim() : (u?.url || '').trim();
+    if (clean && /^https?:\/\//.test(clean) && !seenUrls.has(clean)) {
+      seenUrls.add(clean);
+      allSources.push(clean);
+    }
+  };
+
+  for (const w of [...oaWorks, ...crWorks]) {
+    if (evidence.length >= 4) break;
+    pushSource(w.url);
+    const yrTag = w.year ? ` (${w.year})` : '';
+    const snippet = w.abstract ? ` — ${w.abstract.split(/(?<=[.?!])\s+/)[0]}` : '';
+    const line = `${w.title}${yrTag}${snippet} [${w.url}]`;
+    findings.push(line);
+    evidence.push({
+      claim: w.abstract ? w.abstract.split(/(?<=[.?!])\s+/)[0] : w.title,
+      source: `${w.provider}: ${w.title}${yrTag}`,
+      url: w.url
+    });
+  }
+
+  const webHasUsefulAnswer = searchRes?.answer
+    && !/No authoritative public index entry returned/i.test(searchRes.answer);
+
+  if (webHasUsefulAnswer) {
+    for (const s of (searchRes.sources || [])) pushSource(s);
+    const sentences = searchRes.answer.split(/(?<=[.?!])\s+/).filter(s => s.trim().length > 20);
+    for (const s of sentences.slice(0, 3)) {
+      const cleaned = s.trim();
+      if (!findings.some(f => f.includes(cleaned.slice(0, 35)))) {
+        findings.push(cleaned);
+      }
+      if (evidence.length < 5) {
+        evidence.push({
+          claim: cleaned,
+          source: 'Reference Synthesis',
+          url: searchRes.sources?.[0] || ''
+        });
+      }
     }
   }
 
-  // Build a crisp, evidence-dense answer (allow up to 750 chars so multi-clause facts & sources are preserved)
-  const rawAnswer = searchRes.answer || `Research summary for: ${rawQuery}`;
-  const answer = rawAnswer.length > 750 ? rawAnswer.slice(0, 747) + '...' : rawAnswer;
+  let composedAnswer = '';
+  if (webHasUsefulAnswer && oaWorks.length + crWorks.length > 0) {
+    const leadWeb = searchRes.answer.split('\n\nSearch Context:')[0].trim().slice(0, 420);
+    const topCites = [...oaWorks, ...crWorks].slice(0, 3).map((w, idx) => `[${idx + 1}] ${w.title}${w.year ? ` (${w.year})` : ''} (${w.url})`).join(' ');
+    composedAnswer = `${leadWeb} Key cited research: ${topCites}`;
+  } else if (oaWorks.length + crWorks.length > 0) {
+    const leadPaper = oaWorks.find(w => w.abstract) || oaWorks[0] || crWorks[0];
+    const leadText = leadPaper?.abstract ? `${leadPaper.abstract} ` : '';
+    const citeList = [...oaWorks, ...crWorks].slice(0, 3).map((w, idx) => `[${idx + 1}] ${w.title}${w.year ? ` (${w.year})` : ''} — ${w.url}`).join(' ');
+    composedAnswer = `Research synthesis for "${topic}": ${leadText}Sources: ${citeList}`;
+  } else if (webHasUsefulAnswer) {
+    composedAnswer = searchRes.answer;
+  }
 
-  // Normalize sources to array of URL strings (Devnode expects string array)
-  const normalizedSources = Array.isArray(searchRes.sources)
-    ? searchRes.sources.map(s => (typeof s === 'string' ? s : s?.url || String(s))).filter(Boolean).slice(0, 5)
-    : [];
+  if (!composedAnswer || allSources.length === 0) {
+    return {
+      status: 'insufficient_evidence',
+      query: rawQuery,
+      verdict: 'insufficient_evidence',
+      found: false,
+      answer: `Insufficient external evidence retrieved for "${rawQuery}" after querying OpenAlex, Crossref, and Wikipedia.`,
+      summary: `Insufficient evidence retrieved for "${rawQuery}".`,
+      reason: 'No verifiable primary sources or scholarly works matched query.',
+      key_findings: [],
+      sources: [],
+      citations: [],
+      evidence: [],
+      confidence: 0.2
+    };
+  }
+
+  const answer = composedAnswer.length > 1100 ? composedAnswer.slice(0, 1097) + '...' : composedAnswer;
 
   return {
     status: 'ok',
     query: rawQuery,
     verdict: 'found',
     found: true,
-    answer,                                     // primary field (Devnode evaluator checks this)
-    summary: answer,                            // alias for compatibility
+    answer,
+    summary: answer,
     reason: answer,
-    key_findings: findings.length > 0 ? findings.slice(0, 3) : [searchRes.brief || answer.slice(0, 100)],
-    sources: normalizedSources,
-    brief: searchRes.brief || answer.slice(0, 80),
-    confidence: 1.0
+    key_findings: findings.slice(0, 5),
+    sources: allSources.slice(0, 6),
+    citations: allSources.slice(0, 6),
+    evidence: evidence.slice(0, 5),
+    brief: (findings[0] || answer).replace(/[\r\n\t]+/g, ' ').slice(0, 80),
+    confidence: oaWorks.length + crWorks.length > 0 ? 0.96 : 0.9
   };
 }
 
 /**
- * Lookup and verify onchain EVM transactions across major public networks
- * Conforms bit-exact to Devnode ONCHAIN_TX_LOOKUP_GENERAL spec v4
+ * Lookup and verify onchain EVM / Solana transactions across major public networks
+ * Conforms bit-exact to Devnode ONCHAIN_TX_LOOKUP_GENERAL spec v5
  */
 export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, question, query, prompt, text } = {}) {
   const rawQuery = (question || query || prompt || text || '').trim();
   let targetHash = (tx_hash || tx || hash || signature || '').trim();
 
-  // Extract 64-hex EVM hash or Solana Base58 signature from query text
   if (!targetHash && rawQuery) {
     const evmMatch = rawQuery.match(/0x[a-fA-F0-9]{64}/);
     if (evmMatch) {
@@ -631,23 +802,91 @@ export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, que
     }
   }
 
+  const explicitChainProvided = Boolean(chain && String(chain).trim());
   let targetChain = normalizeChainName(chain, rawQuery);
-  const isEvmHash = /^0x[a-fA-F0-9]{64}$/.test(targetHash);
-  const isSolanaSig = !isEvmHash && /^[1-9A-HJ-NP-Za-km-z]{64,90}$/.test(targetHash);
-  if (!targetChain) {
-    targetChain = isSolanaSig ? (/devnet/i.test(rawQuery) ? 'solana-devnet' : 'solana') : 'ethereum';
-  }
-
-  if (!targetHash || (!isEvmHash && !isSolanaSig)) {
+  if (explicitChainProvided && !targetChain) {
     return {
       tx_hash: targetHash || null,
-      status: 'error',
+      status: 'unsupported',
+      verdict: 'unsupported_chain',
       from: null,
       to: null,
       block_number: null,
       gas_used: null,
       value_eth: 0,
-      chain: targetChain,
+      chain: String(chain).trim(),
+      confidence: 0.0,
+      as_of: new Date().toISOString(),
+      summary: `Unsupported chain "${String(chain).trim()}" for on-chain lookup`,
+      answer: `Unsupported chain "${String(chain).trim()}" for on-chain lookup`
+    };
+  }
+
+  const isEvmHash = /^0x[a-fA-F0-9]{64}$/.test(targetHash);
+  const isSolanaSig = !isEvmHash && /^[1-9A-HJ-NP-Za-km-z]{64,90}$/.test(targetHash);
+
+  // Address activity lookup fallback when query passes a 20-byte EVM address instead of a tx hash
+  if (!isEvmHash && !isSolanaSig) {
+    const addrMatch = `${tx_hash || tx || hash || ''} ${rawQuery}`.match(/0x[a-fA-F0-9]{40}\b/);
+    if (addrMatch) {
+      const targetAddr = addrMatch[0];
+      const checkChain = targetChain || 'ethereum';
+      const rpcs = RPC_ENDPOINTS[checkChain] || RPC_ENDPOINTS.ethereum;
+      for (const rpc of rpcs) {
+        try {
+          const r = await fetch(rpc, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify([
+              { jsonrpc: '2.0', id: 1, method: 'eth_getCode', params: [targetAddr, 'latest'] },
+              { jsonrpc: '2.0', id: 2, method: 'eth_getTransactionCount', params: [targetAddr, 'latest'] },
+              { jsonrpc: '2.0', id: 3, method: 'eth_blockNumber', params: [] }
+            ]),
+            signal: AbortSignal.timeout(4000)
+          });
+          if (!r.ok) continue;
+          const arr = await r.json();
+          const code = Array.isArray(arr) ? arr.find(x => x.id === 1)?.result : null;
+          const nonceHex = Array.isArray(arr) ? arr.find(x => x.id === 2)?.result : null;
+          const tipHex = Array.isArray(arr) ? arr.find(x => x.id === 3)?.result : null;
+          if (code !== undefined && code !== null && nonceHex) {
+            const isEip7702 = String(code).toLowerCase().startsWith('0xef0100');
+            const isContract = !isEip7702 && String(code).length > 2;
+            const acctType = isEip7702 ? 'eip7702_delegated_eoa' : (isContract ? 'contract' : 'eoa');
+            const txCount = parseInt(nonceHex, 16);
+            const tipBlock = tipHex ? parseInt(tipHex, 16) : null;
+            const summary = `Address ${targetAddr} on ${checkChain} is a ${acctType} with ${txCount} outbound/creation transactions as of block ${tipBlock || 'latest'}.`;
+            return {
+              tx_hash: null,
+              address: targetAddr,
+              account_type: acctType,
+              is_contract: isContract,
+              transaction_count: txCount,
+              status: 'confirmed',
+              verdict: 'confirmed',
+              block_number: tipBlock,
+              chain: checkChain,
+              confidence: 1.0,
+              as_of: new Date().toISOString(),
+              summary,
+              explanation: summary,
+              reason: summary,
+              answer: summary
+            };
+          }
+        } catch {}
+      }
+    }
+    return {
+      tx_hash: targetHash || null,
+      status: 'error',
+      verdict: 'invalid_input',
+      from: null,
+      to: null,
+      block_number: null,
+      gas_used: null,
+      value_eth: 0,
+      chain: targetChain || 'ethereum',
       confidence: 0.0,
       as_of: new Date().toISOString(),
       summary: 'Invalid or missing 64-character EVM tx hash or Solana Base58 transaction signature'
@@ -660,12 +899,14 @@ export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, que
       ? [{ name: 'solana-devnet', devnet: true }]
       : [{ name: 'solana', devnet: false }, { name: 'solana-devnet', devnet: true }];
 
+    let rpcResponded = false;
     for (const net of checkNets) {
       const solRes = await solanaRpcCall(
         'getTransaction',
         [targetHash, { encoding: 'jsonParsed', maxSupportedTransactionVersion: 1, commitment: 'confirmed' }],
         net.devnet
       );
+      if (solRes) rpcResponded = true;
       const tx = solRes?.result;
       if (tx && typeof tx.slot === 'number') {
         const meta = tx.meta || {};
@@ -675,7 +916,6 @@ export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, que
         let toAddr = accountKeys[1] || null;
         let transferredSol = 0;
 
-        // Parse systemProgram transfer amount when available; otherwise derive net SOL delta excluding fee
         const topIxs = tx.transaction?.message?.instructions || [];
         for (const ix of topIxs) {
           const parsedInfo = ix?.parsed?.info;
@@ -694,6 +934,8 @@ export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, que
         return {
           tx_hash: targetHash,
           status,
+          receipt_status: status,
+          verdict: status,
           from: fromAddr,
           to: toAddr,
           block_number: tx.slot,
@@ -701,6 +943,8 @@ export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, que
           gas_used: meta.computeUnitsConsumed ?? null,
           fee_lamports: meta.fee ?? null,
           native_symbol: 'SOL',
+          symbol: 'SOL',
+          value: Math.round(transferredSol * 1e6) / 1e6,
           native_amount: Math.round(transferredSol * 1e6) / 1e6,
           value_eth: null,
           value_sol: Math.round(transferredSol * 1e6) / 1e6,
@@ -717,97 +961,163 @@ export async function lookupOnchainTx({ tx_hash, tx, hash, signature, chain, que
 
     return {
       tx_hash: targetHash,
-      status: 'not_found',
+      status: rpcResponded ? 'not_found' : 'unknown',
+      verdict: rpcResponded ? 'not_found' : 'unavailable',
       from: null,
       to: null,
       block_number: null,
       gas_used: null,
       value_eth: 0,
-      chain: targetChain,
+      chain: targetChain || 'solana',
       confidence: 0.0,
       as_of: new Date().toISOString(),
-      summary: `Solana transaction ${targetHash} not found on mainnet-beta or devnet`
+      summary: rpcResponded
+        ? `Solana transaction ${targetHash} not found on mainnet-beta or devnet`
+        : `Solana RPC unavailable while checking transaction ${targetHash}`
     };
   }
 
-  // Branch B: Parallel EVM Race Lookup on targetChain first, then secondary chains
-  const candidateChains = [targetChain, ...Object.keys(RPC_ENDPOINTS).filter(c => c !== targetChain)];
-  for (const c of candidateChains) {
-    const found = await findEvmTxAcrossRpcs(c, targetHash);
-    if (found && found.tx) {
-      const { tx, rpc } = found;
-      let status = 'confirmed';
-      let blockNumber = tx.blockNumber ? parseInt(tx.blockNumber, 16) : null;
-      let gasUsed = null;
-      let txFeeEth = null;
+  // Branch B: Parallel EVM Lookup across named chain or ALL supported EVM chains simultaneously (<600ms)
+  let hit = null;
+  if (targetChain && RPC_ENDPOINTS[targetChain]) {
+    const found = await findEvmTxAcrossRpcs(targetChain, targetHash);
+    if (found && found.tx) hit = { ...found, chain: targetChain };
+  } else {
+    const allChains = Object.keys(RPC_ENDPOINTS);
+    try {
+      hit = await Promise.any(
+        allChains.map(async (c) => {
+          const found = await findEvmTxAcrossRpcs(c, targetHash);
+          if (found && found.tx) return { ...found, chain: c };
+          throw new Error('not found');
+        })
+      );
+    } catch {
+      hit = null;
+    }
+  }
 
-      try {
-        const receiptRes = await fetch(rpc, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 2,
-            method: 'eth_getTransactionReceipt',
-            params: [targetHash]
-          }),
-          signal: AbortSignal.timeout(3500)
-        });
-        if (receiptRes.ok) {
-          const receiptData = await receiptRes.json();
-          const receipt = receiptData.result;
-          if (receipt) {
-            status = receipt.status === '0x1' ? 'confirmed' : 'reverted';
-            if (receipt.blockNumber) blockNumber = parseInt(receipt.blockNumber, 16);
-            if (receipt.gasUsed) {
-              const gBig = BigInt(receipt.gasUsed);
-              gasUsed = Number(gBig);
-              const effPrice = receipt.effectiveGasPrice ? BigInt(receipt.effectiveGasPrice) : (tx.gasPrice ? BigInt(tx.gasPrice) : 0n);
-              if (effPrice > 0n) {
-                txFeeEth = Number(formatUnits(gBig * effPrice, 18));
-              }
-            }
-          } else if (!blockNumber) {
-            status = 'pending';
+  if (hit && hit.tx) {
+    const { tx, rpc, chain: c } = hit;
+    let status = 'confirmed';
+    let receiptStatus = 'pending';
+    let blockNumber = tx.blockNumber ? parseInt(tx.blockNumber, 16) : null;
+    let blockHash = tx.blockHash || null;
+    let gasUsed = null;
+    let feeWei = null;
+    let txFeeEth = null;
+    let gasPriceGwei = tx.gasPrice ? Math.round((Number(BigInt(tx.gasPrice)) / 1e9) * 1e4) / 1e4 : null;
+    let confirmations = null;
+
+    try {
+      const chainRpcs = RPC_ENDPOINTS[c] || [rpc];
+      const [receipt, tipHex] = await Promise.all([
+        Promise.any(
+          chainRpcs.map(async (rUrl) => {
+            const rRes = await fetch(rUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'eth_getTransactionReceipt', params: [targetHash] }),
+              signal: AbortSignal.timeout(4000)
+            });
+            if (!rRes.ok) throw new Error(`HTTP ${rRes.status}`);
+            const rData = await rRes.json().catch(() => null);
+            if (rData?.result && (rData.result.status || rData.result.blockNumber)) return rData.result;
+            throw new Error('empty receipt');
+          })
+        ).catch(() => null),
+        Promise.any(
+          chainRpcs.map(async (rUrl) => {
+            const tRes = await fetch(rUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ jsonrpc: '2.0', id: 3, method: 'eth_blockNumber', params: [] }),
+              signal: AbortSignal.timeout(4000)
+            });
+            if (!tRes.ok) throw new Error(`HTTP ${tRes.status}`);
+            const tData = await tRes.json().catch(() => null);
+            if (tData?.result) return tData.result;
+            throw new Error('empty tip');
+          })
+        ).catch(() => null)
+      ]);
+      if (receipt) {
+        status = receipt.status === '0x1' ? 'confirmed' : 'reverted';
+        receiptStatus = status;
+        if (receipt.blockNumber) blockNumber = parseInt(receipt.blockNumber, 16);
+        if (receipt.blockHash) blockHash = receipt.blockHash;
+        if (receipt.gasUsed) {
+          const gBig = BigInt(receipt.gasUsed);
+          gasUsed = Number(gBig);
+          const effPrice = receipt.effectiveGasPrice ? BigInt(receipt.effectiveGasPrice) : (tx.gasPrice ? BigInt(tx.gasPrice) : 0n);
+          if (effPrice > 0n) {
+            feeWei = (gBig * effPrice).toString();
+            txFeeEth = Number(formatUnits(gBig * effPrice, 18));
+            gasPriceGwei = Math.round((Number(effPrice) / 1e9) * 1e4) / 1e4;
           }
         }
-      } catch {}
+      } else if (!blockNumber) {
+        status = 'pending';
+        receiptStatus = 'pending';
+      }
+      if (tipHex && blockNumber !== null) {
+        const tipNum = parseInt(tipHex, 16);
+        if (tipNum >= blockNumber) confirmations = tipNum - blockNumber + 1;
+      }
+    } catch {}
 
-      const valueEth = tx.value ? Math.round(Number(formatUnits(BigInt(tx.value), 18)) * 1e6) / 1e6 : 0;
-      const summary = `Transaction ${tx.hash} is ${status} in block ${blockNumber || 'pending'} on ${c} (from: ${tx.from}, to: ${tx.to || 'contract_creation'}, value: ${valueEth} ETH${gasUsed !== null ? `, gas used: ${gasUsed}` : ''}).`;
+    const nativeSym = c === 'polygon' ? 'POL' : c === 'bsc' ? 'BNB' : c === 'avalanche' ? 'AVAX' : 'ETH';
+    const valueWei = tx.value ? BigInt(tx.value).toString() : '0';
+    const valueWhole = tx.value ? Math.round(Number(formatUnits(BigInt(tx.value), 18)) * 1e6) / 1e6 : 0;
+    const methodSig = tx.input && tx.input.length >= 10 ? tx.input.slice(0, 10) : '0x';
+    const baseFeeBurned = c === 'ethereum' || c === 'polygon';
+    const summary = `Transaction ${tx.hash} is ${status} in block ${blockNumber || 'pending'} on ${c} (from: ${tx.from}, to: ${tx.to || 'contract_creation'}, value: ${valueWhole} ${nativeSym}${gasUsed !== null ? `, gas used: ${gasUsed}` : ''}${confirmations !== null ? `, confirmations: ${confirmations}` : ''}).`;
 
-      return {
-        tx_hash: tx.hash,
-        status,
-        from: tx.from,
-        to: tx.to,
-        block_number: blockNumber,
-        gas_used: gasUsed,
-        tx_fee_eth: txFeeEth,
-        value_eth: valueEth,
-        chain: c,
-        confidence: 1.0,
-        as_of: new Date().toISOString(),
-        summary,
-        explanation: summary,
-        reason: summary,
-        answer: summary
-      };
-    }
+    return {
+      tx_hash: tx.hash,
+      status,
+      receipt_status: receiptStatus,
+      verdict: status,
+      from: tx.from,
+      to: tx.to,
+      block_number: blockNumber,
+      block_hash: blockHash,
+      confirmations,
+      method: methodSig,
+      gas_used: gasUsed,
+      fee_wei: feeWei,
+      gas_price_gwei: gasPriceGwei,
+      base_fee_burned: baseFeeBurned,
+      tx_fee_eth: txFeeEth,
+      value_wei: valueWei,
+      value: valueWhole,
+      symbol: nativeSym,
+      value_eth: valueWhole,
+      chain: c,
+      confidence: 1.0,
+      as_of: new Date().toISOString(),
+      summary,
+      explanation: summary,
+      reason: summary,
+      answer: summary
+    };
   }
 
   return {
     tx_hash: targetHash,
     status: 'not_found',
+    verdict: 'not_found',
     from: null,
     to: null,
     block_number: null,
     gas_used: null,
     value_eth: 0,
-    chain: targetChain,
+    chain: targetChain || 'ethereum',
     confidence: 0.0,
     as_of: new Date().toISOString(),
-    summary: `Transaction ${targetHash} not found on any checked chain (${targetChain})`
+    summary: targetChain
+      ? `Transaction ${targetHash} not found on ${targetChain}`
+      : `Transaction ${targetHash} not found across checked EVM chains`
   };
 }
 
@@ -1101,24 +1411,67 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
   let targetWallet = evmAddresses[0] || null;
   let targetToken = explicitToken || (evmAddresses.length > 1 ? evmAddresses[1] : '');
 
-  let targetChain = normalizeChainName(chain, combinedText) || 'ethereum';
+  const explicitChainProvided = Boolean(chain && String(chain).trim());
+  let targetChain = normalizeChainName(chain, combinedText);
+  if (explicitChainProvided && !targetChain) {
+    return {
+      status: 'unsupported',
+      verdict: 'unsupported_chain',
+      address: targetWallet,
+      wallet_address: targetWallet,
+      chain: String(chain).trim(),
+      balance: null,
+      token_symbol: null,
+      funded: null,
+      confidence: 0.0,
+      checked_at: new Date().toISOString(),
+      as_of: new Date().toISOString(),
+      reason: `Unsupported chain "${String(chain).trim()}"`,
+      summary: `Unsupported chain "${String(chain).trim()}"`,
+      answer: `Unsupported chain "${String(chain).trim()}"`
+    };
+  }
+  if (!targetChain) targetChain = 'ethereum';
 
-  // Resolve .eth ENS names via public ENS resolver when no 0x address is given
+  // Resolve .eth ENS names via public ENS resolvers when no 0x address is given
   if (!targetWallet) {
     const ensMatch = combinedText.match(/\b([a-zA-Z0-9-]+\.eth)\b/i);
     if (ensMatch) {
       const ensName = ensMatch[1].toLowerCase();
-      try {
-        const ensRes = await fetch(`https://api.ensideas.com/ens/resolve/${encodeURIComponent(ensName)}`, {
-          signal: AbortSignal.timeout(4000)
-        });
-        if (ensRes.ok) {
-          const ensData = await ensRes.json();
-          if (ensData?.address && /^0x[a-fA-F0-9]{40}$/.test(ensData.address)) {
-            targetWallet = ensData.address;
+      for (const ensUrl of [
+        `https://api.ensideas.com/ens/resolve/${encodeURIComponent(ensName)}`,
+        `https://api.ensdata.net/${encodeURIComponent(ensName)}`
+      ]) {
+        try {
+          const ensRes = await fetch(ensUrl, { signal: AbortSignal.timeout(4000) });
+          if (ensRes.ok) {
+            const ensData = await ensRes.json();
+            const resolved = ensData?.address || ensData?.resolvedAddress;
+            if (resolved && /^0x[a-fA-F0-9]{40}$/.test(resolved)) {
+              targetWallet = resolved;
+              break;
+            }
           }
-        }
-      } catch {}
+        } catch {}
+      }
+      if (!targetWallet) {
+        return {
+          status: 'not_found',
+          verdict: 'ens_not_found',
+          address: null,
+          wallet_address: null,
+          chain: targetChain,
+          balance: null,
+          token_symbol: null,
+          funded: null,
+          confidence: 0.0,
+          checked_at: new Date().toISOString(),
+          as_of: new Date().toISOString(),
+          reason: `Could not resolve ENS name ${ensName}`,
+          summary: `Could not resolve ENS name ${ensName}`,
+          answer: `Could not resolve ENS name ${ensName}`
+        };
+      }
     }
   }
 
@@ -1270,118 +1623,121 @@ export async function checkWalletBalance({ wallet_address, address, account, tok
   }
 
   const rpcs = RPC_ENDPOINTS[targetChain] || RPC_ENDPOINTS.ethereum;
-  for (const rpc of rpcs) {
+  if (targetToken) {
     try {
-      if (targetToken) {
-        const paddedAddr = targetWallet.toLowerCase().replace(/^0x/, '').padStart(64, '0');
-        const res = await fetch(rpc, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify([
-            {
-              jsonrpc: '2.0',
-              id: 1,
-              method: 'eth_call',
-              params: [{ to: targetToken, data: `0x70a08231${paddedAddr}` }, 'latest']
-            },
-            {
-              jsonrpc: '2.0',
-              id: 2,
-              method: 'eth_call',
-              params: [{ to: targetToken, data: '0x313ce567' }, 'latest']
-            }
-          ]),
-          signal: AbortSignal.timeout(4000)
-        });
-        if (!res.ok) continue;
-        const arr = await res.json();
-        const balRes = Array.isArray(arr) ? arr.find(x => x.id === 1) : arr;
-        const decRes = Array.isArray(arr) ? arr.find(x => x.id === 2) : null;
-        if (balRes?.result && balRes.result !== '0x') {
-          const rawBalance = BigInt(balRes.result);
-          const decimals = (decRes?.result && decRes.result !== '0x') ? Number(BigInt(decRes.result)) : (requestedSymbol === 'USDC' || requestedSymbol === 'USDT' ? 6 : 18);
-          const humanBalance = Number(rawBalance) / (10 ** decimals);
-          const isFunded = rawBalance > 0n;
-          const verdictStr = isFunded ? 'funded' : 'empty';
-          const symLabel = requestedSymbol || 'TOKEN';
-          const summaryStr = `The address ${targetWallet} currently has a ${symLabel} token balance of ${humanBalance.toLocaleString('en-US', { maximumFractionDigits: 6 })} ${symLabel} (${rawBalance.toString()} raw units) on ${targetChain}.`;
-          return {
-            status: 'confirmed',
-            address: targetWallet,
-            wallet_address: targetWallet,
-            token_address: targetToken,
-            chain: targetChain,
-            decimals,
-            balance: humanBalance,
-            balance_raw: rawBalance.toString(),
-            symbol: symLabel,
-            token_symbol: symLabel,
-            funded: isFunded,
-            verdict: verdictStr,
-            answer: summaryStr,
-            confidence: 1.0,
-            reason: summaryStr,
-            summary: summaryStr,
-            as_of: new Date().toISOString()
-          };
-        }
-      } else {
-        const res = await fetch(rpc, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            jsonrpc: '2.0',
-            id: 1,
-            method: 'eth_getBalance',
-            params: [targetWallet, 'latest']
-          }),
-          signal: AbortSignal.timeout(4000)
-        });
-        if (!res.ok) continue;
-        const data = await res.json();
-        if (data.result) {
-          const rawBalance = BigInt(data.result);
-          const ethBalance = Number(rawBalance) / 1e18;
-          const isFunded = ethBalance > 0;
-          const verdictStr = isFunded ? 'funded' : 'empty';
-          const symbolStr = targetChain === 'polygon' ? 'POL' : targetChain === 'bsc' ? 'BNB' : targetChain === 'avalanche' ? 'AVAX' : 'ETH';
-          const summaryStr = `The address ${targetWallet} currently has a native-coin balance of ${ethBalance.toFixed(8)} ${symbolStr} on ${targetChain}.`;
-          return {
-            status: 'confirmed',
-            address: targetWallet,
-            wallet_address: targetWallet,
-            chain: targetChain,
-            balance: ethBalance,
-            balance_wei: rawBalance.toString(),
-            balance_eth: ethBalance,
-            symbol: symbolStr,
-            token_symbol: symbolStr,
-            funded: isFunded,
-            verdict: verdictStr,
-            answer: summaryStr,
-            confidence: 1.0,
-            reason: summaryStr,
-            summary: summaryStr,
-            as_of: new Date().toISOString()
-          };
-        }
-      }
+      const paddedAddr = targetWallet.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+      const tokenRead = await Promise.any(
+        rpcs.map(async (rpc) => {
+          const [resBal, resDec] = await Promise.all([
+            fetch(rpc, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: targetToken, data: `0x70a08231${paddedAddr}` }, 'latest'] }),
+              signal: AbortSignal.timeout(4000)
+            }),
+            fetch(rpc, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'eth_call', params: [{ to: targetToken, data: '0x313ce567' }, 'latest'] }),
+              signal: AbortSignal.timeout(4000)
+            })
+          ]);
+          if (!resBal.ok) throw new Error(`HTTP ${resBal.status}`);
+          const balRes = await resBal.json();
+          const decRes = resDec.ok ? await resDec.json().catch(() => null) : null;
+          if (balRes?.result && balRes.result !== '0x') return { balRes, decRes };
+          throw new Error('empty eth_call');
+        })
+      );
+      const rawBalance = BigInt(tokenRead.balRes.result);
+      const decimals = (tokenRead.decRes?.result && tokenRead.decRes.result !== '0x') ? Number(BigInt(tokenRead.decRes.result)) : (requestedSymbol === 'USDC' || requestedSymbol === 'USDT' ? 6 : 18);
+      const humanBalance = Number(rawBalance) / (10 ** decimals);
+      const isFunded = rawBalance > 0n;
+      const verdictStr = isFunded ? 'funded' : 'empty';
+      const symLabel = requestedSymbol || 'TOKEN';
+      const nowIso = new Date().toISOString();
+      const summaryStr = `The address ${targetWallet} currently has a ${symLabel} token balance of ${humanBalance.toLocaleString('en-US', { maximumFractionDigits: 6 })} ${symLabel} (${rawBalance.toString()} raw units) on ${targetChain}.`;
+      return {
+        status: 'confirmed',
+        address: targetWallet,
+        wallet_address: targetWallet,
+        token_address: targetToken,
+        chain: targetChain,
+        decimals,
+        balance: humanBalance,
+        balance_raw: rawBalance.toString(),
+        symbol: symLabel,
+        token_symbol: symLabel,
+        funded: isFunded,
+        verdict: verdictStr,
+        answer: summaryStr,
+        confidence: 1.0,
+        reason: summaryStr,
+        summary: summaryStr,
+        checked_at: nowIso,
+        as_of: nowIso
+      };
+    } catch {}
+  } else {
+    try {
+      const balData = await Promise.any(
+        rpcs.map(async (rpc) => {
+          const res = await fetch(rpc, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_getBalance', params: [targetWallet, 'latest'] }),
+            signal: AbortSignal.timeout(4000)
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data?.result) return data;
+          throw new Error('no balance result');
+        })
+      );
+      const rawBalance = BigInt(balData.result);
+      const ethBalance = Number(rawBalance) / 1e18;
+      const isFunded = ethBalance > 0;
+      const verdictStr = isFunded ? 'funded' : 'empty';
+      const symbolStr = targetChain === 'polygon' ? 'POL' : targetChain === 'bsc' ? 'BNB' : targetChain === 'avalanche' ? 'AVAX' : 'ETH';
+      const nowIso = new Date().toISOString();
+      const summaryStr = `The address ${targetWallet} currently has a native-coin balance of ${ethBalance.toFixed(8)} ${symbolStr} on ${targetChain}.`;
+      return {
+        status: 'confirmed',
+        address: targetWallet,
+        wallet_address: targetWallet,
+        chain: targetChain,
+        balance: ethBalance,
+        balance_wei: rawBalance.toString(),
+        balance_eth: ethBalance,
+        symbol: symbolStr,
+        token_symbol: symbolStr,
+        funded: isFunded,
+        verdict: verdictStr,
+        answer: summaryStr,
+        confidence: 1.0,
+        reason: summaryStr,
+        summary: summaryStr,
+        checked_at: nowIso,
+        as_of: nowIso
+      };
     } catch {}
   }
 
   return {
-    status: 'not_found',
+    status: 'unavailable',
     address: targetWallet,
     wallet_address: targetWallet,
     chain: targetChain,
     balance: null,
     token_symbol: requestedSymbol || null,
-    funded: false,
-    verdict: 'unfunded',
-    answer: 'unfunded',
+    funded: null,
+    verdict: 'unavailable',
+    answer: `RPC unavailable while reading balance for ${targetWallet} on ${targetChain}`,
     confidence: 0.0,
-    reason: `Could not retrieve balance for ${targetWallet} on ${targetChain}`,
-    summary: `Could not retrieve balance for ${targetWallet} on ${targetChain}`
+    checked_at: new Date().toISOString(),
+    as_of: new Date().toISOString(),
+    reason: `RPC unavailable while reading balance for ${targetWallet} on ${targetChain}`,
+    summary: `RPC unavailable while reading balance for ${targetWallet} on ${targetChain}`
   };
 }
 
