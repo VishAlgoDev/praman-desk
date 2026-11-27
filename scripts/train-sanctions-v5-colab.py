@@ -91,7 +91,8 @@ def main():
             f"--lora-rank 8 --lora-alpha 32 --epochs 4 --batch-size 8 --lr 5e-4"
         )
 
-    # 7. Export canonical safetensors delta (class: hybrid)
+    # 7. Sync pinned tokenizer.json into adapter dir & export canonical safetensors delta (class: hybrid)
+    shutil.copy2(fdir / "tokenizer.json", RUN_DIR / "adapter" / "tokenizer.json")
     sh(
         f"python -m float_runtime.export_adapter --run '{RUN_DIR}' "
         f"--intent SANCTIONS_SCREENING_MATCH --class hybrid --foundation foundation/foundation.json"
