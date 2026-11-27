@@ -1053,6 +1053,46 @@ async function run() {
       throw new Error(`RESEARCH_QUERY topic ranking check failed: ${JSON.stringify(resFrance.json)}`);
     }
 
+    // 18. External developer regression guards (quincybob unit-price + flat-tax format & sanctions-batch metadata)
+    const qbInline = await check('/api/agent/verify-output', 'POST', {
+      vendor: 'Siemens AG',
+      agentOutput: 'Vendor Siemens AG verified. 4 units at USD 6.25 each; tax USD 0.00; total USD 25.00.',
+      claimedTotal: 25.00,
+      expectedTotal: 25.00
+    });
+    if (qbInline.status !== 200 || qbInline.json.verdict !== 'GO' || !qbInline.json.approved) {
+      throw new Error(`verify-output inline unit-price + flat-tax check failed: ${JSON.stringify(qbInline.json)}`);
+    }
+
+    const qbStructuredTotal = await check('/api/agent/verify-output', 'POST', {
+      vendor: 'Siemens AG',
+      agentOutput: '4 units at USD 6.25 each; tax USD 0.00',
+      claimedTotal: 25.00
+    });
+    if (qbStructuredTotal.status !== 200 || qbStructuredTotal.json.verdict !== 'GO' || !qbStructuredTotal.json.approved) {
+      throw new Error(`verify-output structured total with inline unit-price check failed: ${JSON.stringify(qbStructuredTotal.json)}`);
+    }
+
+    const qbOverbill = await check('/api/agent/verify-output', 'POST', {
+      vendor: 'Siemens AG',
+      agentOutput: '4 units at USD 6.25 each; tax USD 0.00; total USD 30.00',
+      claimedTotal: 30.00,
+      expectedTotal: 25.00
+    });
+    if (qbOverbill.status !== 200 || qbOverbill.json.verdict !== 'NO_GO' || qbOverbill.json.financialExposurePreventedUsd !== 5) {
+      throw new Error(`verify-output real overbill variance check failed: ${JSON.stringify(qbOverbill.json)}`);
+    }
+
+    const sbBatch = await check('/api/evaluator/sanctions-batch', 'POST', {
+      batch: [
+        { id: 1, name: 'Viktor Bout', expected_matched: true },
+        { id: 2, name: 'Siemens Aktiengesellschaft', expected_matched: false }
+      ]
+    });
+    if (sbBatch.status !== 200 || !sbBatch.json.sdn_last_loaded || sbBatch.json.retentionPolicy?.mode !== 'zero_persistence_stateless' || !(sbBatch.json.sdnEntriesLoaded >= 19600)) {
+      throw new Error(`sanctions-batch snapshot & retention metadata check failed: ${JSON.stringify(sbBatch.json)}`);
+    }
+
     console.log('\nALL SEASON II ADVERSARIAL REGRESSION GUARDS, SIGNED MEMO VERIFIER, PILOT INTAKE & LIVE VERIFICATION TESTS PASSED!');
   } finally {
     server.close();

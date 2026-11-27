@@ -7622,13 +7622,25 @@ export async function handleApiRequest(req, res) {
         ok: true,
         intent: 'SANCTIONS_SCREENING_MATCH_GENERAL',
         evaluatorMode: 'DETERMINISTIC_TRIE_FUZZY_RAM_INDEX',
-        note: 'Executes deterministic in-memory 19,565-entry OFAC SDN + alias + EVM digital currency scoring (offline ModernBERT LoRA safetensors export lives in eval/sanctions-adapter/).',
+        evaluatorBuild: {
+          mode: 'deterministic_ram_index',
+          engine: 'praman-sanctions-batch-v2',
+          pinnedTrack3AdapterRegId: 285,
+          note: `Executes deterministic in-memory ${sdnEntries.size.toLocaleString('en-US')}-entry OFAC SDN + alias + ${sdnEvmAddresses.size} EVM digital currency screening.`
+        },
+        retentionPolicy: {
+          mode: 'zero_persistence_stateless',
+          logsRetained: false,
+          note: 'Request payloads, batch entries, and verdicts are evaluated strictly in memory and are not stored or persisted after the response.'
+        },
         retiredLegacyAdapter: {
           registrationId: 469,
           status: 'retired_ephemeral_tunnel',
           supersededBy: 'POST /api/evaluator/sanctions-batch + 301 attested EvalPool pairs + comparator.wasm (1043/1043)'
         },
         sdnEntriesLoaded: sdnEntries.size,
+        sdnEvmAddressesLoaded: sdnEvmAddresses.size,
+        ...getSdnFreshnessMeta(),
         count: results.length,
         matchedCount: results.filter(r => r.matched).length,
         ...(labeledCount > 0 ? { metrics: { labeledCount, tp, fp, tn, fn, accuracy, precision, recall, f1 } } : {}),

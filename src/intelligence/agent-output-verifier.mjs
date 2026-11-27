@@ -11,7 +11,7 @@ import { getWasmInstance } from '../../comparator/wasm-buffer.mjs';
 import { screenSanctions, lookupCorporateRegistry } from '../handlers.mjs';
 import { enrichB2BIdentity, verifyPaymentMethod } from './commercial-trust-intents.mjs';
 import { checkFakeWatchDomain } from '../bridges/fakewatch-bridge.mjs';
-import { parseDynamicInvoiceReconciliation } from './dynamic-solver.mjs';
+import { parseDynamicInvoiceReconciliation, parseLocalizedNumber } from './dynamic-solver.mjs';
 
 function extractAgentClaimsFromText(agentOutput = '') {
   const text = String(agentOutput || '').trim();
@@ -114,12 +114,14 @@ export async function verifyEnterpriseAgentOutput(payload = {}, options = {}) {
   const omittedOrUnverifiedClaims = [];
   let preventedUsd = 0;
 
-  // 1. Domain A: Sanctions Screening Claim (OFAC 19,565 + Digital Currency Addresses)
+  let sdnListSize = 19629;
+  // 1. Domain A: Sanctions Screening Claim (US Treasury OFAC SDN + Digital Currency Addresses)
   const sdnTargets = [...new Set([targetVendor, targetRecipient, ...extracted.evmMatches].filter(Boolean))];
   if (sdnTargets.length > 0) {
     let hit = null;
     for (const target of sdnTargets) {
       const s = await screenSanctions({ name: target, threshold: 0.72 });
+      if (s?.sdn_list_size) sdnListSize = s.sdn_list_size;
       if (s?.matched) {
         hit = { target, s };
         break;
@@ -136,7 +138,7 @@ export async function verifyEnterpriseAgentOutput(payload = {}, options = {}) {
           : `Agent proposed payout/interaction involving "${hit.target}"`,
         groundTruth: `OFAC SDN HIT: ${matchedName} (UID ${hit.s.matches?.[0]?.sdn_uid || 'N/A'}, score ${hit.s.match_score})`,
         status: 'CONTRADICTED',
-        evidenceSource: 'US Treasury OFAC SDN & Consolidated RAM Index (19,565 entries)',
+        evidenceSource: `US Treasury OFAC SDN & Consolidated RAM Index (${sdnListSize.toLocaleString('en-US')} entries)`,
         varianceUsd: riskAmt
       });
     } else {
@@ -145,7 +147,7 @@ export async function verifyEnterpriseAgentOutput(payload = {}, options = {}) {
         claim: `Screen ${sdnTargets.join(', ')} against OFAC SDN`,
         groundTruth: 'Zero OFAC SDN name or EVM digital currency matches found',
         status: 'VERIFIED',
-        evidenceSource: 'US Treasury OFAC SDN & Consolidated RAM Index (19,565 entries)',
+        evidenceSource: `US Treasury OFAC SDN & Consolidated RAM Index (${sdnListSize.toLocaleString('en-US')} entries)`,
         varianceUsd: 0
       });
     }
@@ -239,27 +241,34 @@ export async function verifyEnterpriseAgentOutput(payload = {}, options = {}) {
   }
 
   // 3. Domain C: 651-Byte WASM Arithmetic Parity + ECB/Frankfurter Live FX Check
-  const dynamicMath = extracted.text ? parseDynamicInvoiceReconciliation(extracted.text) : null;
+  const hasExplicitExpected = payload.expectedTotal !== undefined || payload.poAmount !== undefined;
+  let dynamicMath = extracted.text ? parseDynamicInvoiceReconciliation(extracted.text) : null;
+  if (!dynamicMath && Number.isFinite(claimedTotal) && claimedTotal > 0 && /\b[0-9,.]+\s*(?:[a-zA-Z]{1,12})?\s*(?:x|\*|@|\bat\b)\s*(?:INR|USD|EUR|GBP|AED|AUD|CAD|CHF|JPY|SGD|USDC|USDT|[\$€£₹])?\s*[0-9,.]+/i.test(extracted.text)) {
+    dynamicMath = parseDynamicInvoiceReconciliation(`${extracted.text}; total USD ${claimedTotal.toFixed(2)}`);
+  }
   const wasm = await getWasmInstance();
   const hasStructuredAmounts = Number.isFinite(claimedTotal) && claimedTotal > 0 && Number.isFinite(expectedTotal) && expectedTotal > 0;
   let mathChecked = false;
 
   if (dynamicMath && dynamicMath.details) {
     mathChecked = true;
-    const invCents = Math.round((dynamicMath.details.invoice_total || 0) * 100);
-    const ledCents = Math.round((dynamicMath.details.ledger_total || 0) * 100);
+    const invVal = dynamicMath.details.invoice_total || claimedTotal || 0;
+    const targetLedgerVal = hasExplicitExpected ? expectedTotal : (dynamicMath.details.ledger_total || expectedTotal || 0);
+    const invCents = Math.round(invVal * 100);
+    const ledCents = Math.round(targetLedgerVal * 100);
     const wasmScore = wasm.scoreDeterministic(ledCents, invCents, 1, 1);
-    const diffUsd = Math.abs(Math.round((dynamicMath.details.delta_total || 0) * 100) / 100);
+    const diffUsd = Math.abs(Math.round((invVal - (dynamicMath.details.ledger_total || 0)) * 100) / 100) || Math.abs(Math.round((invVal - targetLedgerVal) * 100) / 100);
+    const finalDiff = hasExplicitExpected ? Math.round(Math.abs(invVal - targetLedgerVal) * 100) / 100 : diffUsd;
     if (!dynamicMath.reconciled || wasmScore < 10000) {
-      preventedUsd += diffUsd;
+      preventedUsd += finalDiff;
       claimMatrix.push({
         domain: 'INVOICE_LEDGER_RECONCILE_GENERAL',
         claim: 'Inline financial equations & invoice totals in agent output',
-        groundTruth: `ARITHMETIC MISMATCH DETECTED: variance ${diffUsd.toFixed(2)} (${dynamicMath.explanation})`,
+        groundTruth: `ARITHMETIC MISMATCH DETECTED: variance ${finalDiff.toFixed(2)} (${dynamicMath.explanation})`,
         status: 'CONTRADICTED',
         evidenceSource: '651-byte WebAssembly Bit-Exact Comparator',
         wasmScore,
-        varianceUsd: diffUsd
+        varianceUsd: finalDiff
       });
     } else {
       claimMatrix.push({
