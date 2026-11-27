@@ -158,3 +158,7 @@ Also: NLP entity extraction bugs exist for sanctions intent when query is phrase
 
 ### 2026-11-25 â€” Portal fragment navigation
 - Reading location.hash only at startup does not activate desks when an in-page link changes the fragment. Handle hashchange as well, accepting desk index zero. Verify the visible target panel after clicking the actual link, not merely the resulting URL.
+
+### 2026-11-27 — ZeroGPU ModernBERT PicklingError Fix
+- ModernBERT on Blackwell MIG (\NVIDIA RTX PRO 6000 Blackwell\) inside HuggingFace \@spaces.GPU\ can fail during forward pass or raise unpicklable Dynamo/module exceptions through \es_queue.put(res)\, surfacing as \ZeroGPUTaskException('PicklingError')\.
+- Always set \os.environ['TORCH_COMPILE_DISABLE']='1'\, \os.environ['TORCHDYNAMO_DISABLE']='1'\, and \	orch._dynamo.config.disable=True\ inside the GPU function, and wrap the GPU function body in \	ry/except\ returning plain JSON-roundtripped primitives.
