@@ -1,15 +1,15 @@
 {
-  "timestamp": "2026-11-27T08:31:40.189Z",
+  "timestamp": "2026-11-27T16:31:47.187Z",
   "event": "registerWasm",
   "intent": "SANCTIONS_SCREENING_MATCH",
-  "wasmHash": "0xdb925b9d4b102a309f32af199e8a7cf5ea9c3f5a98fa04eb836063147c90a867",
-  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH_v6.safetensors",
+  "wasmHash": "0x254ec83585c8a589c72538c2e0b9b002309dbd5331bb24913407688725031a4c",
+  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH_v7.safetensors",
   "wasmRunnableUrl": "https://karadakash1-praman-sanctions-evaluator.hf.space",
   "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
   "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
-  "txHash": "0x3d235859c25cfbb41aa77e5f4c1b15fe31518feafb5020952f4c5f37da76bcf0",
-  "blockNumber": "12222226",
+  "txHash": "0x3cf46445219eae7d1e923e180762ec5467c6496a823b8045e627660efa555281",
+  "blockNumber": "12224443",
   "status": "success",
-  "predictedRegistrationId": "277",
-  "etherscanUrl": "https://sepolia.etherscan.io/tx/0x3d235859c25cfbb41aa77e5f4c1b15fe31518feafb5020952f4c5f37da76bcf0"
+  "predictedRegistrationId": "285",
+  "etherscanUrl": "https://sepolia.etherscan.io/tx/0x3cf46445219eae7d1e923e180762ec5467c6496a823b8045e627660efa555281"
 }
