@@ -23,8 +23,9 @@ def sh(cmd, cwd=None, check=True):
 def main():
     os.chdir(BASE_DIR)
 
-    # 1. Install dependencies & Node.js if needed
-    sh("pip install -q 'transformers>=4.48' peft datasets onnx onnxruntime safetensors tokenizers httpx")
+    # 1. Remove incompatible Colab torchao & install dependencies
+    sh("pip uninstall -y torchao || true")
+    sh("pip install -q 'transformers>=4.48' 'peft>=0.14,<0.18' accelerate datasets onnx onnxruntime safetensors tokenizers httpx")
     if not shutil.which("node"):
         sh("curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs")
 
