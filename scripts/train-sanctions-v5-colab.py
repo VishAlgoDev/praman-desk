@@ -23,14 +23,16 @@ def sh(cmd, cwd=None, check=True):
 def main():
     os.chdir(BASE_DIR)
 
-    # 1. Remove incompatible Colab torchao & install dependencies
+    # 1. Remove incompatible Colab torchao cleanly & install compatible PEFT/Transformers
     sh("pip uninstall -y torchao || true")
-    sh("pip install -q 'transformers>=4.48' 'peft>=0.14,<0.18' accelerate datasets onnx onnxruntime safetensors tokenizers httpx")
+    sh("rm -rf /usr/local/lib/python*/dist-packages/torchao*")
+    sh("pip install -q 'transformers>=4.48,<5' 'peft==0.14.0' accelerate datasets onnx onnxruntime safetensors tokenizers httpx")
     if not shutil.which("node"):
         sh("curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs")
 
-    # 2. Clone fresh repos
-    sh("rm -rf baseline && git clone --depth 1 https://github.com/telegraphprotocol/telegraph-wasm-baseline.git baseline")
+    # 2. Clone fresh repos (reuse downloaded foundation weights if already present)
+    if not (BASELINE_DIR / "float_runtime" / "train_adapter.py").exists():
+        sh("rm -rf baseline && git clone --depth 1 https://github.com/telegraphprotocol/telegraph-wasm-baseline.git baseline")
     os.chdir(BASELINE_DIR)
 
     # 3. Download pinned Foundation assets
