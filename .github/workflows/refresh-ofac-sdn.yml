@@ -1,0 +1,36 @@
+name: Refresh Daily OFAC SDN Snapshot
+
+on:
+  schedule:
+    - cron: '15 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-sdn:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Rebuild OFAC SDN snapshot from treasury.gov
+        run: node scripts/build-sdn-snapshot.mjs
+
+      - name: Commit and push updated snapshot if changed
+        run: |
+          if ! git diff --quiet data/sdn-snapshot.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/sdn-snapshot.json
+            git commit -m "chore(ofac): daily treasury.gov SDN snapshot refresh"
+            git push
+          else
+            echo "OFAC SDN snapshot unchanged."
+          fi

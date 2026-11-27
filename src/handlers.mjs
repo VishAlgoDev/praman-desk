@@ -191,9 +191,12 @@ function refreshSdnInBackground() {
   return sdnRefreshPromise;
 }
 
-async function loadSdnData() {
+async function loadSdnData(forceRefresh = false) {
   initSdnFromSnapshot();
   const now = Date.now();
+  if (forceRefresh) {
+    await refreshSdnInBackground();
+  }
   if (sdnEntries && sdnEntries.size > 0) {
     if ((now - sdnLoadedAt) >= SDN_TTL_MS && (now - sdnLastFailedAt) >= SDN_RETRY_BACKOFF_MS && !sdnRefreshPromise) {
       // Stale-while-revalidate: serve snapshot in <1ms instead of blocking serverless requests for ~12s
@@ -206,6 +209,16 @@ async function loadSdnData() {
     sdnEntries = new Map();
     sdnAliases = new Map();
   }
+}
+
+function getSdnFreshnessMeta() {
+  const loadedMs = sdnLoadedAt || Date.now();
+  const ageHours = Math.max(0, Math.round(((Date.now() - loadedMs) / 3600000) * 10) / 10);
+  return {
+    sdn_last_loaded: new Date(loadedMs).toISOString(),
+    sdn_age_hours: ageHours,
+    sdn_fresh_24h: (Date.now() - loadedMs) < 24 * 60 * 60 * 1000
+  };
 }
 
 const CORP_STOP_TOKENS = new Set([
@@ -3529,7 +3542,7 @@ function cleanSanctionsQuery(raw = '') {
   return { primary: candidates[candidates.length - 1] || q, candidates: [...new Set(candidates.filter(Boolean))] };
 }
 
-export async function screenSanctions({ name = '', threshold = 0.70 }) {
+export async function screenSanctions({ name = '', threshold = 0.70, refresh = false }) {
   const rawNameTrim = String(name).trim();
   if (!rawNameTrim) {
     return {
@@ -3550,13 +3563,14 @@ export async function screenSanctions({ name = '', threshold = 0.70 }) {
 
   const parsedThresh = parseStrictNumber(threshold);
   const THRESHOLD = Number.isFinite(parsedThresh) && parsedThresh >= 0.5 && parsedThresh <= 0.99 ? parsedThresh : 0.70;
+  const forceRefresh = refresh === true || refresh === 'true' || refresh === '1';
   const cacheKey = `${nameTrim}::${THRESHOLD}`;
-  const cached = getCachedSanctions(cacheKey);
+  const cached = forceRefresh ? null : getCachedSanctions(cacheKey);
   if (cached) {
     return { ...cached, latency_ms: 1, cached: true };
   }
 
-  await loadSdnData();
+  await loadSdnData(forceRefresh);
 
   // Direct OFAC Digital Currency EVM address screening (0x + 40 hex)
   const evmMatch = rawNameTrim.match(/\b(0x[0-9a-fA-F]{40})\b/);
@@ -3589,7 +3603,7 @@ export async function screenSanctions({ name = '', threshold = 0.70 }) {
       match_count: addrMatches.length,
       sdn_list_size: sdnEntries.size,
       sdn_evm_address_count: sdnEvmAddresses.size,
-      sdn_last_loaded: new Date(sdnLoadedAt).toISOString(),
+      ...getSdnFreshnessMeta(),
       source: 'US Treasury OFAC SDN List (treasury.gov/ofac)',
       source_url: 'https://sanctionssearch.ofac.treas.gov/',
       summary: isMatched
@@ -3676,7 +3690,7 @@ export async function screenSanctions({ name = '', threshold = 0.70 }) {
     match_count: matches.length,
     near_miss_count: nearMisses.length,
     sdn_list_size: sdnEntries.size,
-    sdn_last_loaded: new Date(sdnLoadedAt).toISOString(),
+    ...getSdnFreshnessMeta(),
     source: 'US Treasury OFAC SDN List (treasury.gov/ofac)',
     source_url: 'https://sanctionssearch.ofac.treas.gov/',
     summary: isMatched
@@ -9256,7 +9270,7 @@ export async function handleApiRequest(req, res) {
             as_of: new Date().toISOString()
           });
         }
-        const out = await screenSanctions({ name: rawName, threshold: merged.threshold });
+        const out = await screenSanctions({ name: rawName, threshold: merged.threshold, refresh: merged.refresh });
         const summary = out.summary || (out.matched ? `Sanctions match found for ${rawName}` : `No sanctions matches found for ${rawName}`);
         return sendJson(res, 200, {
           ...out,
