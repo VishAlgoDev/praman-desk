@@ -1,6 +1,6 @@
 # Telegraph Hackathon Season II — Ready-to-Publish Replies & Growth Posts (`Nov 27 – Dec 1, 2026`)
 
-> Prepared strictly from verified local & live `https://praman-desk.vercel.app` outputs (`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`, Devnode Miner `#6164` / `praman-compliance-miner`, Solana Devnet `jxFEyjZY...`, Track 3 EvalPool `324` rows).
+> Prepared strictly from verified local & live `https://praman-desk.vercel.app` outputs (`0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`, Devnode Miner `#6164` / `praman-compliance-miner`, Solana Devnet `h53RM3ZZ...`, Track 3 EvalPool `324` rows).
 
 ---
 
@@ -39,7 +39,7 @@ Praman's Pre-Signature Spend Guard inspects both legacy & `VersionedTransaction 
 - Supply-chain `@solana/web3.js` 1.95.6/1.95.7 tamper guard
 - Known drainer & Token-2022 `PermanentDelegate` / `TransferHook` blocks
 - Fail-closed unresolved ALT circuit breaker
-- Sub-25ms OFAC SDN + live Devnet settlement proof (`jxFEyjZY...`)
+- Sub-25ms OFAC SDN + live Devnet settlement proof (`h53RM3ZZ...`: https://solscan.io/tx/h53RM3ZZGpBR4twXEMj461PdKYwRr7X1rFnyKbVSwGY4AXyHADRx3Z8mbCxofoiVAze92NnmjKujJ7KfCJmmwQw?cluster=devnet)
 
 Run 30 unit + 7 Devnet checks in 1 command: `npm run solana:test`
 https://github.com/VishAlgoDev/praman-desk @solana @Telegraphprotoc
