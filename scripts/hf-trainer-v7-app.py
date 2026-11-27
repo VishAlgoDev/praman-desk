@@ -77,38 +77,57 @@ def prepare_workspace_cpu():
 
 @spaces.GPU(duration=120)
 def gpu_train_and_export() -> dict:
-    import torch
-    print(f"GPU active: {torch.cuda.is_available()} {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'none'}", flush=True)
-    sys.path.insert(0, str(BASELINE))
-    from float_runtime import train_adapter, export_adapter
+    import os
+    import traceback
+    os.environ["TORCH_COMPILE_DISABLE"] = "1"
+    os.environ["TORCHDYNAMO_DISABLE"] = "1"
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
+    try:
+        import torch
+        try:
+            torch._dynamo.config.disable = True
+            torch._dynamo.config.suppress_errors = True
+        except Exception:
+            pass
+        print(f"GPU active: {torch.cuda.is_available()} {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'none'}", flush=True)
+        if str(BASELINE) not in sys.path:
+            sys.path.insert(0, str(BASELINE))
+        from float_runtime import train_adapter, export_adapter
 
-    ddir = WORK / "data"
-    fdir = BASELINE / "foundation"
-    if RUN_DIR.exists():
-        shutil.rmtree(RUN_DIR)
+        ddir = WORK / "data"
+        fdir = BASELINE / "foundation"
+        if RUN_DIR.exists():
+            shutil.rmtree(RUN_DIR)
 
-    train_adapter.main([
-        "--intent", "SANCTIONS_SCREENING_MATCH",
-        "--data", str(ddir / "pairs_sanctions_v7_train.jsonl"),
-        "--val-data", str(ddir / "pairs_sanctions_v7_val.jsonl"),
-        "--out", str(RUN_DIR),
-        "--no-grad-checkpointing",
-        "--batch-size", "32",
-        "--grad-accum", "2",
-        "--lora-rank", "8",
-        "--lora-alpha", "32",
-        "--epochs", "3",
-        "--lr", "2e-4",
-    ])
+        train_adapter.main([
+            "--intent", "SANCTIONS_SCREENING_MATCH",
+            "--data", str(ddir / "pairs_sanctions_v7_train.jsonl"),
+            "--val-data", str(ddir / "pairs_sanctions_v7_val.jsonl"),
+            "--out", str(RUN_DIR),
+            "--no-grad-checkpointing",
+            "--batch-size", "32",
+            "--grad-accum", "2",
+            "--lora-rank", "8",
+            "--lora-alpha", "32",
+            "--epochs", "3",
+            "--lr", "2e-4",
+        ])
 
-    shutil.copy2(fdir / "tokenizer.json", RUN_DIR / "adapter" / "tokenizer.json")
-    export_adapter.main([
-        "--run", str(RUN_DIR),
-        "--intent", "SANCTIONS_SCREENING_MATCH",
-        "--class", "hybrid",
-        "--foundation", str(fdir / "foundation.json"),
-    ])
-    return json.loads((RUN_DIR / "result.json").read_text())
+        shutil.copy2(fdir / "tokenizer.json", RUN_DIR / "adapter" / "tokenizer.json")
+        export_adapter.main([
+            "--run", str(RUN_DIR),
+            "--intent", "SANCTIONS_SCREENING_MATCH",
+            "--class", "hybrid",
+            "--foundation", str(fdir / "foundation.json"),
+        ])
+        out = json.loads((RUN_DIR / "result.json").read_text())
+        return json.loads(json.dumps(out))
+    except BaseException as exc:
+        if isinstance(exc, KeyboardInterrupt):
+            raise
+        tb = traceback.format_exc()
+        print("GPU_TRAIN_ERROR:\n" + tb, flush=True)
+        return {"ok": False, "error": tb}
 
 
 def run_cpu_validation_and_finalize(res: dict):
