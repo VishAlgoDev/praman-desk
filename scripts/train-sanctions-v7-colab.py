@@ -123,19 +123,26 @@ def main():
         ("Is wallet 0x742d35Cc6634C0532925a3b844Bc454e4438f44e sanctioned by OFAC?", '{"sanctioned":false,"entity":null,"program":null,"verdict":"ALLOW"}', '{"sanctioned":true,"entity":"Tornado Cash","program":"CYBER2","uid":"36019","verdict":"BLOCK"}'),
     ]
 
+    run_env = os.environ.copy()
+    run_env["FOUNDATION_MODEL_PATH"] = str(fdir / "foundation_lora_fp32.onnx")
+    run_env["FOUNDATION_MODEL_HASH"] = "0a49b325304bb4cf292e683929689d0457966be264f60bfc94d0072b614bf8e6"
+    run_env["FOUNDATION_ENGINE_WASM_PATH"] = str(fdir / "foundation_engine.wasm")
+    run_env["FOUNDATION_ENGINE_WASM_HASH"] = "77643d6e1176ab8744801cef93ccb844d0136ed32b8daa865d541f37d13292de"
+
     proc = subprocess.Popen(
-        ["./adapterexec", "--package", str(pkg_path), "--listen", "127.0.0.1:8093",
-         "--foundation-onnx", "foundation/foundation_lora_fp32.onnx",
-         "--engine", "foundation/foundation_engine.wasm", "--tokenizer-hash", "67bc76f8b9386efba1a761c1c8e5ad439fd0eaf1c2826e9dd1a205c7af4dc456"],
-        cwd=str(BASELINE_DIR)
+        ["./adapterexec", "--package", str(pkg_path), "--listen", "127.0.0.1:8093"],
+        cwd=str(BASELINE_DIR),
+        env=run_env,
     )
     try:
-        for _ in range(30):
+        for _ in range(120):
             try:
-                httpx.get("http://127.0.0.1:8093/health", timeout=1.0)
-                break
+                r = httpx.get("http://127.0.0.1:8093/health", timeout=1.0)
+                if r.status_code == 200:
+                    break
             except Exception:
-                time.sleep(0.5)
+                pass
+            time.sleep(1.0)
         batch = []
         for p, c, r in stress_pairs:
             batch.append({"tokens": tok.encode(render(p, c)).ids})
