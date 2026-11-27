@@ -1003,3 +1003,11 @@ pm run alibaba:demo: Cases A and B verified.
 - Trained \SANCTIONS_SCREENING_MATCH_v7.safetensors\ on ZeroGPU Blackwell 48GB: \al_accuracy=0.985\, \al_loss=0.021202\, \ytes=6776916\, \sha256=e89a67271e84546be26d55d13d8f9d58da97cf075b44d96ac9e0b7b8f63fab6e\, \keccak256=0x254ec83585c8a589c72538c2e0b9b002309dbd5331bb24913407688725031a4c\, \score_hex=0xc022eba4\.
 - Updated live HuggingFace Space \karadakash1/praman-sanctions-evaluator\ to v7 (\/health ready: true\) and verified 8/10 (80.0%) on \scratch/eval_sanctions_hf.py\ (Toyota +6.48, BANCO +7.06, Putin +10.98, Gazprombank +9.11).
 - Registered on Sepolia Diamond as Registration ID \285\ (tx \ x3cf46445219eae7d1e923e180762ec5467c6496a823b8045e627660efa555281\, block \12224443\, 0.5 test MACHINA bond, \$0\ real money). Devnode indexing pending.
+
+## 2026-11-27T17:31Z — Refreshed OFAC SDN Snapshot to 2026-11-27 (19,629 entries) & Deployed Live
+- Rebuilt \data/sdn-snapshot.json\ from treasury.gov/ofac (\19,565\ -> \19,629\ entries, +64 new records since Nov 15).
+- Added \sdn_age_hours\ and \sdn_fresh_24h\ fields plus \?refresh=1\ override in \src/handlers.mjs\. Added daily auto-refresh workflow \.github/workflows/refresh-ofac-sdn.yml\ (\ 2:15 UTC\).
+- Verified \
+ode scripts/test-endpoints-local.mjs\, \
+pm run sdk:test\, \
+pm run mcp:test\ all PASS; pushed \5962eb3\ and confirmed Vercel live deploy \https://praman-desk.vercel.app\ reports \sdn_fresh_24h: true\, \sdn_list_size: 19629\, \sdn_age_hours: 0.1\.
