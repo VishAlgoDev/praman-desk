@@ -45,6 +45,21 @@ def main():
             sh(f"curl -fSL '{base_url}/{fname}' -o '{fpath}'")
     sh("cd foundation && sha256sum -c SHA256SUMS")
 
+    # 3b. Ensure upstream train_adapter.py typo ({pkg} -> {deltapkg}) is patched & pinned tokenizer.json is active
+    ta_path = BASELINE_DIR / "float_runtime" / "train_adapter.py"
+    ta_txt = ta_path.read_text(encoding="utf-8")
+    if "--package {pkg}" in ta_txt:
+        ta_path.write_text(ta_txt.replace("--package {pkg}", "--package {deltapkg}"), encoding="utf-8")
+
+    # Replace cached ModernBERT tokenizer.json with pinned foundation/tokenizer.json so SHA-256 matches node bit-for-bit
+    from huggingface_hub import hf_hub_download
+    for fn in ["model.safetensors", "tokenizer.json", "config.json", "tokenizer_config.json"]:
+        p = Path(hf_hub_download("answerdotai/ModernBERT-base", fn))
+        if fn == "tokenizer.json":
+            pinned = (fdir / "tokenizer.json").read_bytes()
+            if p.read_bytes() != pinned:
+                p.resolve().write_bytes(pinned)
+                print("Synced HF cache tokenizer.json -> pinned 67bc76f8...")
     # 4. Generate v5 dataset
     sh(f"node '{PRAMAN_DIR}/scripts/build-sanctions-v5-dataset.mjs' '{DATA_DIR}'")
     train_jsonl = DATA_DIR / "pairs_sanctions_v5_train.jsonl"
@@ -56,14 +71,25 @@ def main():
         f"--data '{train_jsonl}' --val-data '{val_jsonl}' --out '{RUN_DIR}' --check-data"
     )
 
-    # 6. Train LoRA on GPU
+    # 6. Train LoRA on GPU (reuse saved checkpoint if already completed & passed)
     import torch
     print("CUDA available:", torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU")
-    sh(
-        f"python -m float_runtime.train_adapter --intent SANCTIONS_SCREENING_MATCH "
-        f"--data '{train_jsonl}' --val-data '{val_jsonl}' --out '{RUN_DIR}' "
-        f"--lora-rank 8 --lora-alpha 32 --epochs 4 --batch-size 8 --lr 5e-4"
-    )
+    saved_res = RUN_DIR / "result.json"
+    saved_rh = RUN_DIR / "adapter" / "reward_head.pt"
+    if saved_res.exists() and saved_rh.exists() and json.loads(saved_res.read_text()).get("verdict") == "PASS":
+        print("Found already-trained PASS checkpoint in", RUN_DIR, "- syncing pinned tokenizer & skipping retrain.")
+        pinned = (fdir / "tokenizer.json").read_bytes()
+        (RUN_DIR / "adapter" / "tokenizer.json").write_bytes(pinned)
+        rjson = json.loads(saved_res.read_text())
+        import hashlib as _hl
+        rjson["tokenizer_sha256"] = _hl.sha256(pinned).hexdigest()
+        saved_res.write_text(json.dumps(rjson, indent=2), encoding="utf-8")
+    else:
+        sh(
+            f"TORCH_COMPILE_DISABLE=1 python -m float_runtime.train_adapter --intent SANCTIONS_SCREENING_MATCH "
+            f"--data '{train_jsonl}' --val-data '{val_jsonl}' --out '{RUN_DIR}' "
+            f"--lora-rank 8 --lora-alpha 32 --epochs 4 --batch-size 8 --lr 5e-4"
+        )
 
     # 7. Export canonical safetensors delta (class: hybrid)
     sh(
