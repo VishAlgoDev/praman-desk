@@ -25,9 +25,9 @@ FOUNDATION_ONNX_URL = "https://github.com/telegraphprotocol/telegraph-foundation
 FOUNDATION_ONNX_HASH = "0a49b325304bb4cf292e683929689d0457966be264f60bfc94d0072b614bf8e6"
 FOUNDATION_WASM_URL = "https://github.com/telegraphprotocol/telegraph-foundation/releases/download/modernbert-base-lora16-v1/foundation_engine.wasm"
 FOUNDATION_WASM_HASH = "77643d6e1176ab8744801cef93ccb844d0136ed32b8daa865d541f37d13292de"
-ADAPTER_PKG_URL = "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH_v6.safetensors"
-ADAPTER_PKG_SHA256 = "8df626e21ad9c0ed12a26ff5fa224f42d2c5ee1c85f735b5bd2fe7db0fb119b3"
-ADAPTER_KECCAK256 = "0xdb925b9d4b102a309f32af199e8a7cf5ea9c3f5a98fa04eb836063147c90a867"
+ADAPTER_PKG_URL = "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH_v7.safetensors"
+ADAPTER_PKG_SHA256 = "e89a67271e84546be26d55d13d8f9d58da97cf075b44d96ac9e0b7b8f63fab6e"
+ADAPTER_KECCAK256 = "0x254ec83585c8a589c72538c2e0b9b002309dbd5331bb24913407688725031a4c"
 GO_TARBALL_URL = "https://go.dev/dl/go1.25.7.linux-amd64.tar.gz"
 BASELINE_TARBALL = "https://github.com/telegraphprotocol/telegraph-wasm-baseline/archive/refs/heads/main.tar.gz"
 
@@ -97,7 +97,7 @@ def bootstrap_and_supervise():
         STATE["stage"] = "downloading_foundation_and_adapter"
         onnx_path = WORK_DIR / "foundation_lora_fp32.onnx"
         wasm_path = WORK_DIR / "foundation_engine.wasm"
-        pkg_path = WORK_DIR / "SANCTIONS_SCREENING_MATCH_v6.safetensors"
+        pkg_path = WORK_DIR / "SANCTIONS_SCREENING_MATCH_v7.safetensors"
 
         download_verified(FOUNDATION_ONNX_URL, onnx_path, FOUNDATION_ONNX_HASH)
         download_verified(FOUNDATION_WASM_URL, wasm_path, FOUNDATION_WASM_HASH)
@@ -151,7 +151,7 @@ def health():
         "stage": STATE["stage"],
         "error": STATE["error"],
         "intent": "SANCTIONS_SCREENING_MATCH",
-        "package": "SANCTIONS_SCREENING_MATCH_v6.safetensors",
+        "package": "SANCTIONS_SCREENING_MATCH_v7.safetensors",
         "keccak256": ADAPTER_KECCAK256,
         "foundation_hash": FOUNDATION_ONNX_HASH,
         "engine_hash": FOUNDATION_WASM_HASH,
