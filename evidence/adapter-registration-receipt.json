@@ -1,15 +1,15 @@
 {
-  "timestamp": "2026-11-16T02:18:11.239Z",
+  "timestamp": "2026-11-27T01:48:59.580Z",
   "event": "registerWasm",
   "intent": "SANCTIONS_SCREENING_MATCH",
-  "wasmHash": "0x50b30e260e7137728aaa44ea1fd507e77f8eec8062810bb2c8e58d2cbbb82346",
-  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH.safetensors",
-  "wasmRunnableUrl": "https://sport-mill-since-link.trycloudflare.com",
+  "wasmHash": "0x500dffd21a55f2cba0494eca164b54fb25529e9d8663b3cc3a6e81a65075dfd0",
+  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH_v3.safetensors",
+  "wasmRunnableUrl": "https://karadakash1-praman-sanctions-evaluator.hf.space/score",
   "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
   "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
-  "txHash": "0x721f21fdd014cea85fe8a7cc43557b2a3ce49559caef26cea1bfc294ce3f8512",
-  "blockNumber": "12144313",
+  "txHash": "0x84eeab080182576fff9d37bdbbfd840cdfa1afb0df111a279df58b081548ceb2",
+  "blockNumber": "12220341",
   "status": "success",
-  "predictedRegistrationId": "469",
-  "etherscanUrl": "https://sepolia.etherscan.io/tx/0x721f21fdd014cea85fe8a7cc43557b2a3ce49559caef26cea1bfc294ce3f8512"
+  "predictedRegistrationId": "275",
+  "etherscanUrl": "https://sepolia.etherscan.io/tx/0x84eeab080182576fff9d37bdbbfd840cdfa1afb0df111a279df58b081548ceb2"
 }

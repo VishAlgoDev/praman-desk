@@ -68,6 +68,9 @@ jobs:
               assert.equal(sanc.verdict, "NEAR_MISS_REVIEW", "Viktor But near-miss verdict");
               const liq = await fetch(base + "/api/miner/liquidity-depth?pair=ARB/USDC&chain=arbitrum").then(r => r.json());
               assert.equal(liq.status, "confirmed", "ARB/USDC liquidity depth confirmed");
-              console.log("All live production JSON assertions passed!");
+              const hf = await fetch("https://karadakash1-praman-sanctions-evaluator.hf.space/health").then(r => r.json());
+              assert.equal(hf.ok, true, "HF Space /health ok");
+              assert.equal(hf.ready, true, "HF Space adapterexec ready");
+              console.log("All live production + Track 3 evaluator checks passed!");
             })().catch(e => { console.error(e); process.exit(1); });
           '
