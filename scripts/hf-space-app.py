@@ -12,7 +12,7 @@ from pathlib import Path
 import gradio as gr
 import httpx
 from fastapi import FastAPI, Request, Response
-import uvicorn
+from fastapi.routing import APIRoute
 
 WORK_DIR = Path("/tmp/praman_eval")
 WORK_DIR.mkdir(parents=True, exist_ok=True)
@@ -139,10 +139,7 @@ def bootstrap_and_supervise():
 
 threading.Thread(target=bootstrap_and_supervise, daemon=True).start()
 
-app = FastAPI(title="Praman Track 3 Evaluator Executor (adapterexec)")
 
-
-@app.get("/health")
 def health():
     return {
         "ok": True,
@@ -179,16 +176,6 @@ async def proxy_to_adapterexec(request: Request) -> Response:
     )
 
 
-@app.post("/")
-async def score_root(request: Request):
-    return await proxy_to_adapterexec(request)
-
-
-@app.post("/score")
-async def score_endpoint(request: Request):
-    return await proxy_to_adapterexec(request)
-
-
 def ui_status():
     return STATE
 
@@ -204,7 +191,13 @@ with gr.Blocks(title="Praman Sanctions Evaluator (Track 3)") as demo:
     btn = gr.Button("Refresh Status")
     btn.click(fn=ui_status, outputs=out)
 
-app = gr.mount_gradio_app(app, demo, path="/")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", "7860")))
+    print("ENV PORTS:", {k: v for k, v in os.environ.items() if "PORT" in k or "GRADIO" in k or "SPACE" in k})
+    fastapi_app, local_url, _ = demo.launch(server_name="0.0.0.0", prevent_thread_lock=True)
+    fastapi_app.router.routes.insert(0, APIRoute("/health", health, methods=["GET"]))
+    fastapi_app.router.routes.insert(0, APIRoute("/score", proxy_to_adapterexec, methods=["POST"]))
+    fastapi_app.router.routes.insert(0, APIRoute("/", proxy_to_adapterexec, methods=["POST"]))
+    print("Mounted /health, /score, POST / on", local_url)
+    while True:
+        time.sleep(3600)
