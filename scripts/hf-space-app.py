@@ -11,6 +11,7 @@ from pathlib import Path
 
 import gradio as gr
 import httpx
+import spaces
 from fastapi import FastAPI, Request, Response
 from fastapi.routing import APIRoute
 
@@ -176,6 +177,7 @@ async def proxy_to_adapterexec(request: Request) -> Response:
     )
 
 
+@spaces.GPU
 def ui_status():
     return STATE
 
