@@ -33,49 +33,49 @@ INTENT_SPECS = {
         "class": "judgment",
         "train_file": "pairs_sanctions_v7_train.jsonl",
         "val_file": "pairs_sanctions_v7_val.jsonl",
-        "epochs": "2",
-        "batch_size": "8",
-        "grad_accum": "4",
+        "epochs": "1",
+        "batch_size": "32",
+        "grad_accum": "1",
     },
     "INVOICE_LEDGER_RECONCILE": {
         "class": "judgment",
         "train_file": "v8_invoice_reconcile_train.jsonl",
         "val_file": "v8_invoice_reconcile_val.jsonl",
-        "epochs": "3",
-        "batch_size": "8",
-        "grad_accum": "2",
+        "epochs": "2",
+        "batch_size": "16",
+        "grad_accum": "1",
     },
     "CONTRACT_OBLIGATION_AUDIT": {
         "class": "judgment",
         "train_file": "v8_contract_obligation_train.jsonl",
         "val_file": "v8_contract_obligation_val.jsonl",
-        "epochs": "3",
-        "batch_size": "8",
-        "grad_accum": "2",
+        "epochs": "2",
+        "batch_size": "16",
+        "grad_accum": "1",
     },
     "FRAUD_RISK": {
         "class": "judgment",
         "train_file": "v8_fraud_risk_train.jsonl",
         "val_file": "v8_fraud_risk_val.jsonl",
-        "epochs": "3",
-        "batch_size": "8",
-        "grad_accum": "2",
+        "epochs": "2",
+        "batch_size": "16",
+        "grad_accum": "1",
     },
     "DOCUMENT_AUTHENTICITY": {
         "class": "judgment",
         "train_file": "v8_document_authenticity_train.jsonl",
         "val_file": "v8_document_authenticity_val.jsonl",
-        "epochs": "3",
-        "batch_size": "8",
-        "grad_accum": "2",
+        "epochs": "2",
+        "batch_size": "16",
+        "grad_accum": "1",
     },
     "URL_SCAN": {
         "class": "hybrid",
         "train_file": "v8_url_scan_train.jsonl",
         "val_file": "v8_url_scan_val.jsonl",
-        "epochs": "3",
-        "batch_size": "8",
-        "grad_accum": "2",
+        "epochs": "2",
+        "batch_size": "16",
+        "grad_accum": "1",
     },
 }
 
@@ -189,7 +189,7 @@ def ensure_tools_and_foundation():
     log("Workspace prep complete: MiniCheck 512 foundation + Go binaries + datasets ready.")
 
 
-@spaces.GPU(duration=240)
+@spaces.GPU(duration=120)
 def gpu_train_one(intent_key: str) -> dict:
     import traceback
     os.environ["TORCH_COMPILE_DISABLE"] = "1"
