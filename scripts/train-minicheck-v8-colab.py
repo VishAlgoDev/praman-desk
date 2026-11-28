@@ -62,12 +62,15 @@ def main():
     targets = list(SPECS) if args.intent.upper() == "ALL" else [args.intent.upper()]
     for intent_key in targets:
         cls, tr, va = SPECS[intent_key]
-        run_dir = BASELINE_DIR / "runs" / intent_key
+        run_dir = BASE_DIR / "runs" / intent_key
         out_pkg = BASE_DIR / f"{intent_key}_v8.safetensors"
+        bs = "16" if intent_key == "SANCTIONS_SCREENING_MATCH" else "8"
+        ga = "2"
+        ep = "2" if intent_key == "SANCTIONS_SCREENING_MATCH" else "4"
         sh(
             f"TORCH_COMPILE_DISABLE=1 python -m float_runtime.train_adapter --intent {intent_key} "
             f"--data '{DATA_DIR / tr}' --val-data '{DATA_DIR / va}' --out '{run_dir}' "
-            f"--no-grad-checkpointing --max-length 512 --batch-size 8 --grad-accum 2 --lora-rank 8 --lora-alpha 16 --epochs 3 --lr 1e-4",
+            f"--no-grad-checkpointing --max-length 512 --batch-size {bs} --grad-accum {ga} --lora-rank 8 --lora-alpha 32 --epochs {ep} --lr 2e-4",
             cwd=str(BASELINE_DIR),
         )
         shutil.copy2(fdir / "tokenizer.json", run_dir / "adapter" / "tokenizer.json")

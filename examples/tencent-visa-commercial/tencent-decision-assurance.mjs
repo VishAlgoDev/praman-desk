@@ -1,6 +1,6 @@
 /**
  * Praman Desk - Tencent Agent Decision Assurance Adapter (#01 Pre-Spend, #02 Watchlist Monitor, #03 Post-Task Audit)
- * Zero extra UI needed: composes Two-Mind Spend Guard, OFAC 19,565 SDN RAM screen, GLEIF lookup, and 651-byte WASM arithmetic.
+ * Zero extra UI needed: composes Two-Mind Spend Guard, OFAC 19,629 SDN RAM screen, GLEIF lookup, and 651-byte WASM arithmetic.
  */
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';

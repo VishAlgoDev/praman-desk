@@ -3,7 +3,7 @@
  * Pre-Payment Autonomous Agent Firewall for ElizaOS (@elizaos/core)
  *
  * Intercepts outbound wallet transfers & actions before signing:
- * 1. Screens recipient against 19,565 US Treasury OFAC SDN entries
+ * 1. Screens recipient against 19,629 US Treasury OFAC SDN entries
  * 2. Resolves legal corporate identity via Global LEI Index (GLEIF)
  * 3. Enforces 651-byte WebAssembly bit-exact arithmetic reconciliation
  * 4. Yields cryptographic attestation seal or triggers circuit-breaker halt

@@ -4,7 +4,7 @@
  * 
  * Verifies:
  * - Supply Chain Compromise Defense (@solana/web3.js 1.95.6/1.95.7 & backdoor hooks)
- * - In-Memory 19,565 OFAC SDN Sanctions Screening (<25ms RAM lookup)
+ * - In-Memory 19,629 OFAC SDN Sanctions Screening (<25ms RAM lookup)
  * - Drainer Exfiltration Wallet & Malicious Program Interception
  * - Legacy Transaction & VersionedTransaction (v0) Pre-Signature Wrapping
  * - SystemProgram.transfer (SOL) & TokenProgram.transferChecked (USDC SPL)

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Praman Desk — Virtuals Protocol Agent Commerce Protocol (ACP v2) Agent & Evaluator
- * Uses @virtuals-protocol/acp-node-v2 + Praman 651B WASM + 19,565 OFAC SDN + GLEIF + Creative QA.
+ * Uses @virtuals-protocol/acp-node-v2 + Praman 651B WASM + 19,629 OFAC SDN + GLEIF + Creative QA.
  *
  * Modes:
  *   --check-wallet   Verify Base & Base Sepolia ETH/USDC balances and ACP contract bindings cleanly

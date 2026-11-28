@@ -17,7 +17,7 @@ Use this skill whenever an autonomous agent is about to transfer USDC, SOL, ETH,
 
 ## Required Pre-Payment Workflow
 1. Always call `clear_spend` (or `screen_sanctions` + `verify_counterparty` + `reconcile_invoice`) before executing a wallet transfer or escrow release.
-2. For Solana payouts (`SystemProgram.transfer`, `TokenProgram.transferChecked`, or Token-2022 mints), verify `PermanentDelegate`, `TransferHook`, and `freezeAuthority` alongside 19,565 OFAC SDN screening.
+2. For Solana payouts (`SystemProgram.transfer`, `TokenProgram.transferChecked`, or Token-2022 mints), verify `PermanentDelegate`, `TransferHook`, and `freezeAuthority` alongside 19,629 OFAC SDN screening.
 3. For disputed commercial deliveries, generate a verifiable receipt via `get_compliance_certificate` or permalink `/api/audit/case?case=<id>`.
 4. Fail closed: if `cleared === false` or `status === "HALTED"`, do not sign or broadcast any transaction.
 

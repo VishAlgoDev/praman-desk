@@ -2,7 +2,7 @@
  * RugReceipt x Praman Desk Smart Contract & Deployer Screen Adapter
  * 
  * Provides deep smart contract, deployer, and token screening for RugReceipt (Issue #208)
- * by evaluating EVM addresses against 19,565 US Treasury OFAC SDN records, Lazarus Group
+ * by evaluating EVM addresses against 19,629 US Treasury OFAC SDN records, Lazarus Group
  * digital currency addresses, and Sepolia on-chain bytecode status.
  * 
  * Usage:

@@ -10,7 +10,7 @@
 ElizaOS autonomous agents are frequently granted execution keys to execute transfers, swap assets, and pay bounties across Solana, EVM, and Base. When exposed to adversarial prompts, spoofed invoices, or arithmetic rounding errors, funds drain irreversibly in seconds.
 
 **Praman Desk** provides a native ElizaOS plugin action (`EVALUATE_SPEND_POLICY`):
-1. **19,565 OFAC SDN Sanctions Blacklist**: Screens recipient addresses against US Treasury sanctions (e.g. Lazarus Group).
+1. **19,629 OFAC SDN Sanctions Blacklist**: Screens recipient addresses against US Treasury sanctions (e.g. Lazarus Group).
 2. **Global LEI Statutory Verification**: Validates vendor legal status in the GLEIF registry.
 3. **651-byte WASM Arithmetic Engine**: Proves bit-exact invoice reconciliation with zero floating-point drift.
 4. **Autonomous Spend Ceilings**: Enforces single-agent caps ($500 limit) requiring supervisor co-signatures.
