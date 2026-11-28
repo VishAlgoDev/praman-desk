@@ -7,6 +7,10 @@
   },
   "rewrites": [
     {
+      "source": "/praman-s2.mp4",
+      "destination": "/praman-desk-walkthrough.mp4"
+    },
+    {
       "source": "/video.mp4",
       "destination": "/praman-desk-walkthrough.mp4"
     },
