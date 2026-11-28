@@ -98,7 +98,7 @@ export async function generateComplianceCertificate({
     },
     ofacSanctionsAudit: {
       status: isSanctionsHit ? 'MATCH_SANCTIONED' : 'CLEARED_ZERO_HIT',
-      entitiesScreened: 19565,
+      entitiesScreened: sanctionsResult?.sdn_list_size || 19629,
       lists: ['US Treasury OFAC Specially Designated Nationals (SDN)', 'Consolidated Sanctions', 'Digital Currency Blacklist'],
       matches: sanctionsResult.matches || [],
       latency_ms: sanctionsResult.latency_ms || 3
@@ -364,7 +364,7 @@ export function renderCertificateHtml(cert) {
       <div class="box">
         <div class="box-title">02 · OFAC Sanctions Screening</div>
         <div class="row"><span class="row-key">SDN Screening</span><span class="row-val" style="color:${isBlocked ? '#b91c1c' : '#15803d'}">${escapeHtml(cert.ofacSanctionsAudit?.status)}</span></div>
-        <div class="row"><span class="row-key">Records Indexed</span><span class="row-val">19,565 Entities</span></div>
+        <div class="row"><span class="row-key">Records Indexed</span><span class="row-val">${escapeHtml((cert.ofacSanctionsAudit?.entitiesScreened || 19629).toLocaleString())} Entities</span></div>
         <div class="row"><span class="row-key">Latency</span><span class="row-val">${escapeHtml(cert.ofacSanctionsAudit?.latency_ms)} ms</span></div>
         <div class="row"><span class="row-key">Digital Currency List</span><span class="row-val">${isBlocked ? 'Match Flagged' : 'Zero-Hit Cleared'}</span></div>
       </div>

@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "Official TypeScript & Node.js SDK for Praman Desk autonomous compliance and x402 spend clearance on Telegraph Protocol",
   "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./index.js",
+    "./solana": "./solana.js"
+  },
   "types": "index.d.ts",
   "type": "module",
   "scripts": {

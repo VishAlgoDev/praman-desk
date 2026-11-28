@@ -19,6 +19,18 @@ import { SolanaSpendGuard, screenSolanaRecipient, loadInMemorySdnDatabase, MALIC
 import { enrichB2BIdentity, scoreFraudRisk, verifyPaymentMethod } from './intelligence/commercial-trust-intents.mjs';
 import { verifyEnterpriseAgentOutput } from './intelligence/agent-output-verifier.mjs';
 import { evaluateCreativeQa } from './creative-qa.mjs';
+import {
+  scanUrlVerdict,
+  checkThreatIndicator,
+  assessTransactionRisk,
+  verifySslCertificate,
+  lookupCveCvss,
+  assessShipmentDelayRisk,
+  geolocateIpAddress,
+  getTokenHolderCount,
+  detectWashTrading,
+  answerTelegraphKnowledge
+} from './intelligence/expansion-intents.mjs';
 
 const goldRushAggregator = new GoldRushAggregator();
 
@@ -4500,50 +4512,60 @@ export function loadStoredLedger() {
     } catch {}
   }
 
-  const takarResolvers = [];
-  const takarPath = path.join(evidenceDir, 'takar-resolver-receipts.json');
-  if (fs.existsSync(takarPath)) {
+  const escrowResolvers = [];
+  const pramanEscrowPath = path.join(evidenceDir, 'praman-escrow-receipts.json');
+  if (fs.existsSync(pramanEscrowPath)) {
     try {
-      const tr = JSON.parse(fs.readFileSync(takarPath, 'utf8'));
-      for (const d of tr.disputes || []) {
-        takarResolvers.push({
-          caseId: d.case_id,
-          contractName: d.contract_name,
-          contractAddress: d.contract_address,
-          dealId: d.deal_id,
-          txHash: d.tx_hash,
-          blockNumber: d.block_number,
-          status: d.status,
-          etherscanLink: d.etherscan_link,
-          disputeSummary: d.dispute_summary
+      const pe = JSON.parse(fs.readFileSync(pramanEscrowPath, 'utf8'));
+      for (const d of pe.deals || []) {
+        escrowResolvers.push({
+          caseId: d.caseId,
+          caseName: d.title,
+          contractName: 'PramanEscrow',
+          contractAddress: pe.contractAddress,
+          dealId: d.dealId,
+          txHash: d.settleTxHash,
+          blockNumber: d.settleBlockNumber,
+          status: d.statusLabel,
+          etherscanLink: d.etherscanUrl,
+          disputeSummary: d.commercialScaleNote,
+          minerId: '6164',
+          escrowAmountUsdc: d.escrowAmountUsdc,
+          sellerReleasedUsdc: d.sellerReleasedUsdc,
+          buyerRefundedUsdc: d.buyerRefundedUsdc
         });
-        if (d.tx_hash && !seenTx.has(String(d.tx_hash).toLowerCase())) {
-          seenTx.add(String(d.tx_hash).toLowerCase());
+        if (d.settleTxHash && !seenTx.has(String(d.settleTxHash).toLowerCase())) {
+          seenTx.add(String(d.settleTxHash).toLowerCase());
           normalizedCalls.push({
             index: normalizedCalls.length + 1,
             mission: 'Mission 04',
             intent: 'INVOICE_LEDGER_RECONCILE_GENERAL',
-            title: `TakarSettle On-Chain Resolution - ${d.case_id}`,
-            timestamp: tr.executed_at || null,
+            title: `PramanEscrow On-Chain Resolution - ${d.caseId} (Deal #${d.dealId})`,
+            timestamp: pe.recordedAt || null,
             minerId: '6164',
-            minerName: `Praman Desk Resolver Seat 2 (${d.contract_name})`,
+            minerName: 'PramanEscrow Settlement Vault (Sepolia)',
             minerSlug: 'praman-compliance-miner',
-            endpoint: d.contract_address,
+            endpoint: pe.contractAddress,
             costUsd: 0.00,
-            amountUusdc: '0',
-            durationMs: d.elapsed_ms ?? null,
-            txHash: d.tx_hash,
-            receiptHash: d.proposal_hash || d.tx_hash,
-            signalHash: d.proposal_hash || null,
+            amountUusdc: d.escrowAmountUusdc,
+            durationMs: null,
+            txHash: d.settleTxHash,
+            receiptHash: d.complianceBundleHash || d.haltReasonHash || d.settleTxHash,
+            signalHash: d.poHash || null,
             epochId: null,
-            request: { dealId: d.deal_id, contract: d.contract_address },
-            normalizedResult: { status: d.status, blockNumber: d.block_number },
-            fieldStatus: { settlement: 'verified_sepolia_takar_resolver' },
+            request: { dealId: d.dealId, contract: pe.contractAddress, escrowTestUsdc: d.escrowAmountUsdc },
+            normalizedResult: {
+              status: d.statusLabel,
+              blockNumber: d.settleBlockNumber,
+              sellerReleasedUsdc: d.sellerReleasedUsdc,
+              buyerRefundedUsdc: d.buyerRefundedUsdc
+            },
+            fieldStatus: { settlement: 'verified_sepolia_praman_escrow' },
             warnings: [],
             rawMinerPayload: d,
             agreement: 'confirmed',
-            badgeText: `on-chain resolver (${d.contract_name})`,
-            diagnostic: d.dispute_summary
+            badgeText: `PramanEscrow Deal #${d.dealId} (${d.statusLabel})`,
+            diagnostic: `${d.title}. ${d.commercialScaleNote}`
           });
         }
       }
@@ -4598,7 +4620,8 @@ export function loadStoredLedger() {
     totalSpentUsd: (normalizedCalls.filter(c => (c.costUsd ?? 0) > 0).length * 0.01).toFixed(2),
     calls: normalizedCalls,
     escrowPurchases,
-    takarResolvers
+    escrowResolvers,
+    pramanEscrowAddress: '0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c'
   };
 }
 
@@ -6646,11 +6669,11 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       payload.verdictText = `HOLD — GOODS-RECEIVED NOTE MISSING ($${poCommitmentVal.toLocaleString()} HELD, NOT RELEASED)`;
       payload.verdictColor = '#facc15';
       payload.flags = [...(payload.flags || []), 'MISSING_GOODS_RECEIVED_NOTE', 'CANNOT_VERIFY_DELIVERY', 'ESCROW_HOLD_PENDING_EVIDENCE'];
-      payload.summary = `Escrow hold, not a halt: line-item math is bit-exact, but the decisive evidence is absent. Supplier invoices ${billedUnits} units ($${poCommitmentVal.toLocaleString()}.00) yet no goods-received note or Cainiao warehouse receipt exists for contract #ALI-9023. Delivery cannot be verified or refuted, so $${poCommitmentVal.toLocaleString()}.00 USDC stays secured in TakarSettle v4 escrow and an evidence request is issued to the supplier. No release without verified receipt.`;
+      payload.summary = `Escrow hold, not a halt: line-item math is bit-exact, but the decisive evidence is absent. Supplier invoices ${billedUnits} units ($${poCommitmentVal.toLocaleString()}.00) yet no goods-received note or Cainiao warehouse receipt exists for contract #ALI-9023. Delivery cannot be verified or refuted, so $${poCommitmentVal.toLocaleString()}.00 USDC stays secured in PramanEscrow vault and an evidence request is issued to the supplier. No release without verified receipt.`;
       payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_EVIDENCE_COMPLETENESS\n• Platform: Alibaba Trade Assurance Contract #ALI-9023\n• PO Commitment: ${billedUnits} industrial units @ $1,000.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Supplier Claim: Full delivery of ${billedUnits} units, invoice INV-ALI-9023-MISSING-EVIDENCE\n• Delivery & Warehouse Evidence: ABSENT — no goods-received note, no Cainiao receipt, no Port of LA inbound record\n• Arithmetic: Invoice line-item math internally consistent (WASM bit-exact) — consistency is NOT proof of delivery`;
       payload.reviewerFindings = `• Evidence Completeness Gate: FAIL (0 of 1 required delivery artifacts on file)\n• WASM Fixed-Point Arithmetic: no discrepancy found — case turns on missing evidence, not bad math\n• Required to clear: goods-received note signed by buyer warehouse OR Cainiao delivery receipt with unit-level tally\n• Circuit Breaker: Not triggered (no overbilling detected) — disposition is evidentiary hold`;
       payload.easSchemaUid = '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04';
-      payload.settlementContract = '0x310275e6D66818E068245326bB9e398822304248';
+      payload.settlementContract = '0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c';
       payload.certHash = '0x' + crypto.createHash('sha256').update('ALIBABA-EVIDENCE-HOLD:' + JSON.stringify(payload)).digest('hex');
     } else if (scenario === 'alibaba_conflicting_reports') {
       const billedUnits = Math.round(poCommitmentVal / unitPrice) || 50;
@@ -6665,12 +6688,12 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       payload.verdictHeadline = `ALIBABA TRADE ASSURANCE DISPUTE — CONFLICTING INSPECTION REPORTS ($${conflictVal.toLocaleString()} IN CONFLICT)`;
       payload.verdictText = `ARBITRATION REQUIRED — REPORTS CONFLICT ON ${conflictUnits} UNITS ($${conflictVal.toLocaleString()})`;
       payload.verdictColor = '#facc15';
-      payload.flags = [...(payload.flags || []), 'CONFLICTING_INSPECTION_REPORTS', `UNIT_COUNT_VARIANCE_${conflictUnits}_UNITS`, 'TAKAR_PANEL_ARBITRATION_QUEUED'];
-      payload.summary = `Two independent inspection reports disagree on the same shipment, so neither can settle it. Inspector report (SGS, pre-shipment) certifies ${inspectorClaimUnits} of ${billedUnits} units conforming; the Port of LA warehouse tally (post-arrival) counts ${warehouseClaimUnits} conforming and ${billedUnits - warehouseClaimUnits} damaged — a ${conflictUnits}-unit / ${conflictPct}% variance worth $${conflictVal.toLocaleString()}.00. Payment condition cannot be established from contradictory evidence: the low-confidence figure ($${(warehouseClaimUnits * unitPrice).toLocaleString()}.00 maximum) is held in TakarSettle v4 escrow and the ${conflictUnits}-unit variance is queued for Takar panel arbitration with both reports anchored as EAS attestations.`;
+      payload.flags = [...(payload.flags || []), 'CONFLICTING_INSPECTION_REPORTS', `UNIT_COUNT_VARIANCE_${conflictUnits}_UNITS`, 'PRAMAN_ESCROW_ARBITRATION_QUEUED'];
+      payload.summary = `Two independent inspection reports disagree on the same shipment, so neither can settle it. Inspector report (SGS, pre-shipment) certifies ${inspectorClaimUnits} of ${billedUnits} units conforming; the Port of LA warehouse tally (post-arrival) counts ${warehouseClaimUnits} conforming and ${billedUnits - warehouseClaimUnits} damaged — a ${conflictUnits}-unit / ${conflictPct}% variance worth $${conflictVal.toLocaleString()}.00. Payment condition cannot be established from contradictory evidence: the low-confidence figure ($${(warehouseClaimUnits * unitPrice).toLocaleString()}.00 maximum) is held in PramanEscrow vault and the ${conflictUnits}-unit variance is queued for PramanEscrow arbitration with both reports anchored cryptographically.`;
       payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_CONFLICTING_EVIDENCE_ARBITRATION\n• Platform: Alibaba Trade Assurance Contract #ALI-9024\n• PO Commitment: ${billedUnits} industrial units @ $1,000.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Evidence A (Inspector, pre-shipment): ${inspectorClaimUnits} conforming units certified\n• Evidence B (Warehouse, post-arrival): ${warehouseClaimUnits} conforming, ${billedUnits - warehouseClaimUnits} damaged/rejected\n• Variance: ${conflictUnits} units ($${conflictVal.toLocaleString()}.00 / ${conflictPct}% drift) — contradictory, not additive`;
-      payload.reviewerFindings = `• Conflict Detection: ${conflictUnits}-unit variance between independent verifiers (${conflictPct}% of consignment)\n• WASM 3-Way Math Comparator: invoice math bit-exact vs BOTH claims — arithmetic cannot resolve a factual dispute\n• Disposition Rule: when material evidence conflicts, settle on the buyer-protective figure pending arbitration; never average, never assume\n• Takar Escrow Panel (Sepolia): arbitration docket opened; both reports anchored as attestations for panel review`;
+      payload.reviewerFindings = `• Conflict Detection: ${conflictUnits}-unit variance between independent verifiers (${conflictPct}% of consignment)\n• WASM 3-Way Math Comparator: invoice math bit-exact vs BOTH claims — arithmetic cannot resolve a factual dispute\n• Disposition Rule: when material evidence conflicts, settle on the buyer-protective figure pending arbitration; never average, never assume\n• PramanEscrow Arbitration Vault (Sepolia): arbitration docket opened pending buyer signoff`;
       payload.easSchemaUid = '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04';
-      payload.settlementContract = '0x310275e6D66818E068245326bB9e398822304248';
+      payload.settlementContract = '0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c';
       payload.certHash = '0x' + crypto.createHash('sha256').update('ALIBABA-CONFLICTING-EVIDENCE-ARBITRATION:' + JSON.stringify(payload)).digest('hex');
     } else if (scenario === 'alibaba_refund') {
       const billedUnits = Math.round(poCommitmentVal / unitPrice) || 40;
@@ -6686,11 +6709,11 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
         : `FULL REFUND APPROVED — $${poCommitmentVal.toLocaleString()} USDC RETURNED TO BUYER`;
       payload.verdictColor = '#34d399';
       payload.flags = [...(payload.flags || []), 'ZERO_CONFORMING_UNITS', 'DELIVERY_CONDITION_UNSATISFIED', ...(liveSettle ? ['FULL_REFUND_EXECUTED'] : ['PRE_FLIGHT_DRY_RUN_NO_FUNDS_MOVED'])];
-      payload.summary = `${!liveSettle ? 'Pre-flight audit (liveSettle=false; zero funds moved in this call): ' : ''}Verified non-delivery settles as a full refund, not a partial reconciliation. Cainiao receipt CN-LAX-88299 records ${conformingUnitsRefund} of ${billedUnits} billed units discharged — the vessel never off-loaded and the buyer's warehouse accepted nothing. The payment condition (${billedUnits} conforming units into US inventory) is wholly unsatisfied, so the full $${poCommitmentVal.toLocaleString()}.00 USDC ${isLiveExecuted ? 'is refunded' : 'refund is authorized'} to the Buyer on TakarSettle v4 escrow, $0.00 released to Siemens Aktiengesellschaft.`;
+      payload.summary = `${!liveSettle ? 'Pre-flight audit (liveSettle=false; zero funds moved in this call): ' : ''}Verified non-delivery settles as a full refund, not a partial reconciliation. Cainiao receipt CN-LAX-88299 records ${conformingUnitsRefund} of ${billedUnits} billed units discharged — the vessel never off-loaded and the buyer's warehouse accepted nothing. The payment condition (${billedUnits} conforming units into US inventory) is wholly unsatisfied, so the full $${poCommitmentVal.toLocaleString()}.00 USDC ${isLiveExecuted ? 'is refunded' : 'refund is authorized'} to the Buyer on PramanEscrow vault, $0.00 released to Siemens Aktiengesellschaft.`;
       payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_NON_DELIVERY_REFUND\n• Platform: Alibaba Trade Assurance Contract #ALI-9025\n• PO Commitment: ${billedUnits} industrial units @ $1,000.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Delivery & Warehouse Evidence: Cainiao receipt CN-LAX-88299 — 0 units discharged, vessel never completed off-load\n• Supplier Claim: Invoice INV-ALI-9025-FULL-REFUND bills the full ${billedUnits} units`;
-      payload.reviewerFindings = `• Conforming-Unit Count: 0 / ${billedUnits} accepted into Port of LA inventory\n• WASM 3-Way Math Comparator: stated $${poCommitmentVal.toLocaleString()}.00 vs conforming $0.00 — 100% shortfall (WASM_3WAY_MATH_MISMATCH)\n• Payment Condition: 0% satisfied → full refund, no partial release, no supplier credit memo\n• Settlement Execution: ${isLiveExecuted ? `$${poCommitmentVal.toLocaleString()}.00 USDC refunded to Buyer, $0.00 to supplier — settled on TakarSettle v4` : `DRY RUN ONLY (liveSettle=false; zero funds moved) — $${poCommitmentVal.toLocaleString()}.00 USDC refund authorized for Buyer, $0.00 to supplier`}`;
+      payload.reviewerFindings = `• Conforming-Unit Count: 0 / ${billedUnits} accepted into Port of LA inventory\n• WASM 3-Way Math Comparator: stated $${poCommitmentVal.toLocaleString()}.00 vs conforming $0.00 — 100% shortfall (WASM_3WAY_MATH_MISMATCH)\n• Payment Condition: 0% satisfied → full refund, no partial release, no supplier credit memo\n• Settlement Execution: ${isLiveExecuted ? `$${poCommitmentVal.toLocaleString()}.00 USDC refunded to Buyer, $0.00 to supplier — settled on PramanEscrow (Sepolia)` : `DRY RUN ONLY (liveSettle=false; zero funds moved) — $${poCommitmentVal.toLocaleString()}.00 USDC refund authorized for Buyer, $0.00 to supplier`}`;
       payload.easSchemaUid = '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04';
-      payload.settlementContract = '0x310275e6D66818E068245326bB9e398822304248';
+      payload.settlementContract = '0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c';
       payload.certHash = '0x' + crypto.createHash('sha256').update('ALIBABA-FULL-REFUND-NON-DELIVERY:' + JSON.stringify(payload)).digest('hex');
     } else if (scenario === 'alibaba_reconciled' || (spendAmountUsdc === actualConformingVal && wasmMatch && !circuitBreakerTriggered)) {
       payload.status = 'APPROVED';
@@ -6706,12 +6729,12 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
         payload.flags = [...(payload.flags || []), 'PRE_FLIGHT_DRY_RUN_NO_FUNDS_MOVED'];
       }
       payload.summary = isLiveExecuted
-        ? `Conforming delivery verified (${conformingUnits} units accepted into Port of LA inventory @ $${unitPrice.toLocaleString()}.00 = $${actualConformingVal.toLocaleString()}.00). $${actualConformingVal.toLocaleString()}.00 USDC released to Siemens Aktiengesellschaft; $${shortfallVal.toLocaleString()}.00 USDC refunded to Buyer. Settled on TakarSettle v4.`
-        : `Dry-run pre-flight verification (liveSettle=false; no on-chain funds moved in this call): Conforming delivery verified (${conformingUnits} units accepted into Port of LA inventory @ $${unitPrice.toLocaleString()}.00 = $${actualConformingVal.toLocaleString()}.00). Authorized settlement split is $${actualConformingVal.toLocaleString()}.00 USDC to Siemens Aktiengesellschaft and $${shortfallVal.toLocaleString()}.00 USDC refund to Buyer via TakarSettle v4 when liveSettle=true is executed.`;
+        ? `Conforming delivery verified (${conformingUnits} units accepted into Port of LA inventory @ $${unitPrice.toLocaleString()}.00 = $${actualConformingVal.toLocaleString()}.00). $${actualConformingVal.toLocaleString()}.00 USDC released to Siemens Aktiengesellschaft; $${shortfallVal.toLocaleString()}.00 USDC refunded to Buyer. Settled via PramanEscrow.`
+        : `Dry-run pre-flight verification (liveSettle=false; no on-chain funds moved in this call): Conforming delivery verified (${conformingUnits} units accepted into Port of LA inventory @ $${unitPrice.toLocaleString()}.00 = $${actualConformingVal.toLocaleString()}.00). Authorized settlement split is $${actualConformingVal.toLocaleString()}.00 USDC to Siemens Aktiengesellschaft and $${shortfallVal.toLocaleString()}.00 USDC refund to Buyer via PramanEscrow (Deal #0 executed on Sepolia at 1.00 TEST_USDC scale).`;
       payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_DELIVERY_ARBITRATION\n• Platform: Alibaba Trade Assurance Contract #ALI-9021\n• PO Commitment: ${totalUnits} industrial units @ $${unitPrice.toLocaleString()}.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Delivery & Warehouse Evidence: Inspection Certificate confirms ${conformingUnits} conforming units accepted into US inventory\n• Reconciled Invoice: Adjusted to ${conformingUnits} conforming units ($${actualConformingVal.toLocaleString()}.00 USD)`;
-      payload.reviewerFindings = `• Variance Reconciliation: ${conformingUnits} units @ $${unitPrice.toLocaleString()}.00 = $${actualConformingVal.toLocaleString()}.00 bit-exact integer match (0 bps drift)\n• Takar Verification: Pre-flight escrow condition satisfied against warehouse tally\n• Quorum Consensus: Policy & arithmetic gates cleared (${liveSettle ? (isLiveExecuted ? 'live settlement executed' : `live settlement attempted: ${liveSettlement?.status || 'skipped'}`) : 'dry-run mode'})\n• Disbursement: ${isLiveExecuted ? `$${actualConformingVal.toLocaleString()}.00 USDC released to supplier, $${shortfallVal.toLocaleString()}.00 USDC refunded to buyer` : `DRY RUN (liveSettle=false; zero funds moved in this call) — authorized payout $${actualConformingVal.toLocaleString()}.00 USDC to supplier, $${shortfallVal.toLocaleString()}.00 USDC refund to buyer on TakarSettle v4`}`;
+      payload.reviewerFindings = `• Variance Reconciliation: ${conformingUnits} units @ $${unitPrice.toLocaleString()}.00 = $${actualConformingVal.toLocaleString()}.00 bit-exact integer match (0 bps drift)\n• PramanEscrow Verification: Pre-flight escrow condition satisfied against warehouse tally\n• Quorum Consensus: Policy & arithmetic gates cleared (${liveSettle ? (isLiveExecuted ? 'live settlement executed' : `live settlement attempted: ${liveSettlement?.status || 'skipped'}`) : 'dry-run mode'})\n• Disbursement: ${isLiveExecuted ? `$${actualConformingVal.toLocaleString()}.00 USDC released to supplier, $${shortfallVal.toLocaleString()}.00 USDC refunded to buyer` : `DRY RUN (liveSettle=false; zero funds moved in this call) — authorized payout $${actualConformingVal.toLocaleString()}.00 USDC to supplier, $${shortfallVal.toLocaleString()}.00 USDC refund to buyer via PramanEscrow`}`;
       payload.easSchemaUid = '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04';
-      payload.settlementContract = '0x310275e6D66818E068245326bB9e398822304248';
+      payload.settlementContract = '0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c';
       payload.certHash = '0x' + crypto.createHash('sha256').update('ALIBABA-APPROVED-DISBURSEMENT:' + JSON.stringify(payload)).digest('hex');
     } else {
       payload.status = 'HALTED';
@@ -6720,11 +6743,11 @@ export async function evaluateAutonomousSpendPolicy(params = {}) {
       payload.verdictHeadline = `ALIBABA TRADE ASSURANCE HALT ($${shortfallVal.toLocaleString()} SHORTFALL BLOCKED)`;
       payload.verdictText = `ALIBABA TRADE ASSURANCE HALT ($${shortfallVal.toLocaleString()} SHORTFALL BLOCKED BEFORE RELEASE)`;
       payload.verdictColor = '#f87171';
-      payload.summary = `Alibaba Trade Assurance Escrow Protected: Full $${poCommitmentVal.toLocaleString()} release blocked by WASM line-item math (${!liveSettle ? 'dry-run pre-flight; zero funds moved' : 'escrow locked'}). Port of LA Cainiao receipt confirms ${conformingUnits} conforming units ($${actualConformingVal.toLocaleString()}) vs ${totalUnits} billed ($${poCommitmentVal.toLocaleString()}). Funds remain secured in TakarSettle v4 escrow.`;
+      payload.summary = `Alibaba Trade Assurance Escrow Protected: Full $${poCommitmentVal.toLocaleString()} release blocked by WASM line-item math (${!liveSettle ? 'dry-run pre-flight; zero funds moved' : 'escrow locked'}). Port of LA Cainiao receipt confirms ${conformingUnits} conforming units ($${actualConformingVal.toLocaleString()}) vs ${totalUnits} billed ($${poCommitmentVal.toLocaleString()}). Funds remain secured in PramanEscrow vault.`;
       payload.investigatorFindings = `• Task Classification: TRADE_ASSURANCE_DELIVERY_ARBITRATION\n• Platform: Alibaba Trade Assurance Contract #ALI-9021\n• PO Commitment: ${totalUnits} industrial units @ $${unitPrice.toLocaleString()}.00 = $${poCommitmentVal.toLocaleString()}.00 USD\n• Delivery & Warehouse Evidence: Port of LA Cainiao receipt confirms ${conformingUnits} units accepted, ${damagedUnits} rejected/damaged\n• Supplier Claim: Invoiced full ${totalUnits} units ($${poCommitmentVal.toLocaleString()}.00 USD)`;
-      payload.reviewerFindings = `• Variance Detection: ${damagedUnits}-unit shortfall (-$${shortfallVal.toLocaleString()}.00 variance / -${driftPct}% drift)\n• WASM Arbitration: Full $${(poCommitmentVal/1000).toFixed(0)}k payment condition UNSATISFIED (WASM_3WAY_MATH_MISMATCH: Stated $${poCommitmentVal.toLocaleString()}.00 differs from conforming $${actualConformingVal.toLocaleString()}.00)\n• Takar Escrow Panel: Claim fails deterministic 3-way warehouse tally gate\n• Circuit Breaker: Blocked unauthorized $${(poCommitmentVal/1000).toFixed(0)}k release; Reconciled partial settlement ($${(actualConformingVal/1000).toFixed(0)}k) queued pending buyer signoff`;
+      payload.reviewerFindings = `• Variance Detection: ${damagedUnits}-unit shortfall (-$${shortfallVal.toLocaleString()}.00 variance / -${driftPct}% drift)\n• WASM Arbitration: Full $${(poCommitmentVal/1000).toFixed(0)}k payment condition UNSATISFIED (WASM_3WAY_MATH_MISMATCH: Stated $${poCommitmentVal.toLocaleString()}.00 differs from conforming $${actualConformingVal.toLocaleString()}.00)\n• PramanEscrow Gate: Claim fails deterministic 3-way warehouse tally check\n• Circuit Breaker: Blocked unauthorized $${(poCommitmentVal/1000).toFixed(0)}k release; Reconciled partial settlement ($${(actualConformingVal/1000).toFixed(0)}k) queued pending buyer signoff`;
       payload.easSchemaUid = '0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04';
-      payload.settlementContract = '0x310275e6D66818E068245326bB9e398822304248';
+      payload.settlementContract = '0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c';
       payload.certHash = '0x' + crypto.createHash('sha256').update('ALIBABA-ESCROW-FREEZE-SHORTFALL:' + JSON.stringify(payload)).digest('hex');
     }
   }
@@ -7187,34 +7210,90 @@ export async function verifyMineDossier(params = {}) {
   const isTyrconnel = /43836/i.test(rawSite) || /tyrconnel/i.test(rawSite);
 
   const rawIntel = evaluateMiningIntelligencePrompt(rawSite) || {};
+  const isCuratedVerified = isMountMorgan || isTyrconnel || (rawIntel && rawIntel.verdict === 'VERIFIED_HISTORICAL_RECORD');
+
+  if (!isCuratedVerified) {
+    const unverifiedSiteNo = rawSite.match(/^\d+$/) ? parseInt(rawSite, 10) : rawSite;
+    const unverifiedSummary = rawIntel.summary || `UNVERIFIED PROSPECT: Site "${rawSite}" was not matched against Praman's curated geological ground-truth catalog (confidence 0.20; failing closed instead of extrapolating production figures).`;
+    const failSeal = '0x' + crypto.createHash('sha256').update(JSON.stringify({ service: 'praman-desk', siteNo: unverifiedSiteNo, verdict: 'UNVERIFIED_PROSPECT' })).digest('hex');
+    return {
+      ok: false,
+      verified: false,
+      verdict: 'UNVERIFIED_PROSPECT',
+      auditStatus: 'UNVERIFIED_EXTERNAL_REGISTRY',
+      siteNo: unverifiedSiteNo,
+      siteName: rawSite.match(/^\d+$/) ? `External Site ${rawSite} (Unverified)` : rawSite,
+      goldfield: rawIntel.goldfield || 'Unverified / External Prospect',
+      jurisdiction: rawIntel.state && rawIntel.country ? `${rawIntel.state}, ${rawIntel.country}` : 'Unverified Registry Lookup',
+      tenure: 'UNCONFIRMED',
+      heritageRecord: 'NOT_FOUND_IN_CURATED_GSQ_CATALOG',
+      badge: {
+        text: 'UNVERIFIED PROSPECT',
+        status: 'UNVERIFIED_EXTERNAL_REGISTRY',
+        verdict: 'UNVERIFIED_PROSPECT',
+        color: '#f59e0b',
+        background: 'rgba(245, 158, 11, 0.1)',
+        border: '1px solid #f59e0b',
+        watermark: 'UNVERIFIED PROSPECT',
+        seal: failSeal,
+        html: `<span class="praman-badge" style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:9999px;font-weight:700;font-size:12px;background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid #f59e0b;font-family:system-ui,-apple-system,sans-serif;">UNVERIFIED PROSPECT</span>`,
+        svg: `<svg xmlns="http://www.w3.org/2000/svg" width="176" height="28" viewBox="0 0 176 28"><rect width="176" height="28" rx="14" fill="#f59e0b" fill-opacity="0.1" stroke="#f59e0b" stroke-width="1"/><text x="18" y="18" fill="#f59e0b" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="700" letter-spacing="0.5">UNVERIFIED PROSPECT</text></svg>`
+      },
+      reconciliation: {
+        reconciled: false,
+        wasmScoreBps: 0,
+        variance_explanation: 'Site not present in verified GSQ/statutory ground-truth registry; failing closed rather than synthesizing production history.'
+      },
+      provenance: rawIntel.provenance || {
+        source_kind: 'registry_query',
+        authority: 'Geological Survey Open Data (Unmatched)'
+      },
+      audit: {
+        engine: 'Praman Desk Independent Auditor (Devnode #6164 / Sepolia Diamond #6201)',
+        wasmScoreBps: 0,
+        discrepancyReconciled: false,
+        reconciliationNotes: 'Unverified external registry entry — no historical production or tenure record confirmed.'
+      },
+      attestation: {
+        seal: failSeal,
+        auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6201)',
+        timestamp: new Date().toISOString()
+      },
+      summary: unverifiedSummary,
+      explanation: unverifiedSummary,
+      reason: unverifiedSummary,
+      answer: unverifiedSummary,
+      results: [unverifiedSummary],
+      confidence: 0.2
+    };
+  }
 
   const siteNo = rawIntel.site_no || (isMountMorgan ? 494270 : isTyrconnel ? 43836 : (rawSite.match(/^\d+$/) ? parseInt(rawSite, 10) : rawSite));
-  const siteName = rawIntel.site || (isMountMorgan ? 'Mount Morgan Mine' : isTyrconnel ? 'Tyrconnel Mine (Hodgkinson Reef)' : (rawSite.match(/^\d+$/) ? `GSQ Site ${rawSite}` : rawSite));
+  const siteName = rawIntel.site || (isMountMorgan ? 'Mount Morgan Mine' : isTyrconnel ? 'Tyrconnel Mine (Hodgkinson Reef)' : rawSite);
   const goldfield = rawIntel.goldfield || (isMountMorgan ? 'Mount Morgan / Rockhampton District' : isTyrconnel ? 'Hodgkinson Goldfield (near Kingsborough)' : 'Queensland Goldfield');
   const state = rawIntel.state || 'Queensland';
   const country = rawIntel.country || 'Australia';
-  const tenure = rawIntel.provenance?.tenure_reference || (isMountMorgan ? 'ML 4022' : isTyrconnel ? 'Historical Claims / ML 43836' : `Historical ML / Claim ${siteNo}`);
+  const tenure = rawIntel.provenance?.tenure_reference || (isMountMorgan ? 'ML 4022' : isTyrconnel ? 'Historical Claims / ML 43836' : `GSQ Verified Tenure ${siteNo}`);
   const heritageRecord = isMountMorgan ? '600752 (Queensland Heritage Register)' : isTyrconnel ? '600687 (Queensland Heritage Register)' : (rawIntel.heritageRecord || 'GSQ Open Data Record');
 
   const discovery = rawIntel.discovery || {
-    year: isMountMorgan ? 1882 : isTyrconnel ? 1876 : 1880,
-    discoverers: isMountMorgan ? ['Ned Morgan', 'Tom Morgan', 'Fred Morgan', 'T.S. Hall', 'William Knox D\'Arcy'] : ['Prospectors & Historical Syndicates'],
-    historical_owners: isMountMorgan ? ['Mount Morgan Gold Mining Co. Ltd. (1886)', 'Mount Morgan Ltd. (1929)', 'Peko-Wallsend (1968)'] : ['Historical Mining Syndicate']
+    year: isMountMorgan ? 1882 : 1876,
+    discoverers: isMountMorgan ? ['Ned Morgan', 'Tom Morgan', 'Fred Morgan', 'T.S. Hall', 'William Knox D\'Arcy'] : ['Warde & Co', 'A. Forsythe'],
+    historical_owners: isMountMorgan ? ['Mount Morgan Gold Mining Co. Ltd. (1886)', 'Mount Morgan Ltd. (1929)', 'Peko-Wallsend (1968)'] : ['Tyrconnel Gold Mining Co. (1884)']
   };
 
   const production = rawIntel.production || {
-    gold_tonnes: isMountMorgan ? 262.0 : isTyrconnel ? 0.964 : 1.0,
-    gold_oz: isMountMorgan ? 8423500 : isTyrconnel ? 31000 : 32000,
-    span_years: isMountMorgan ? '1882-1990' : isTyrconnel ? '1876-1930s' : 'Historical'
+    gold_tonnes: isMountMorgan ? 262.0 : 0.964,
+    gold_oz: isMountMorgan ? 8423500 : 31000,
+    span_years: isMountMorgan ? '1882-1990' : '1876-1930s'
   };
 
   const geology = rawIntel.geology || {
-    deposit_type: isMountMorgan ? 'Subvolcanic Volcanic-Hosted Massive Sulfide (VHMS) replacement pipe' : isTyrconnel ? 'Auriferous quartz-stibnite fissure reef (orogenic lode gold)' : 'Orogenic lode gold deposit'
+    deposit_type: isMountMorgan ? 'Subvolcanic Volcanic-Hosted Massive Sulfide (VHMS) replacement pipe' : 'Auriferous quartz-stibnite fissure reef (orogenic lode gold)'
   };
 
-  // Deterministic WASM Variance & Reconciliation Logic
   let varianceExplanation = '';
-  let wasmScoreBps = 10000;
+  const wasmScoreBps = 10000;
   if (isMountMorgan) {
     varianceExplanation = 'The 44-tonne variance between the 294 t survey total and the 250 t government historical baseline is accounted for by the 56 tonnes of gold recovered during dump/tailings retreatment (1983-1990). Different records measure primary ore extraction vs post-closure retreatment.';
   } else if (isTyrconnel) {
@@ -7222,31 +7301,7 @@ export async function verifyMineDossier(params = {}) {
   } else if (rawIntel.production?.discrepancy_reconciliation?.variance_explanation) {
     varianceExplanation = rawIntel.production.discrepancy_reconciliation.variance_explanation;
   } else {
-    varianceExplanation = `Historical production of ${production.gold_oz ? Number(production.gold_oz).toLocaleString() + ' oz' : production.gold_tonnes + ' tonnes'} verified against GSQ open data registry.`;
-  }
-
-  // Live Takar event capsule ingestion (collaborative peer miner data)
-  let takarSummary = null;
-  if (isMountMorgan) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
-      const takarRes = await fetch('https://takar-telegraph.vercel.app/receipts/events-mount-morgan.json', { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (takarRes.ok) {
-        const takarData = await takarRes.json();
-        if (takarData && takarData.capsules) {
-          takarSummary = {
-            capsules_count: Array.isArray(takarData.capsules) ? takarData.capsules.length : 0,
-            people_named_count: Array.isArray(takarData.people) ? takarData.people.length : 0,
-            heritage_records: takarData.summary?.records || ['600752'],
-            miner_peer: 'Takar (Peer Hackathon Miner)'
-          };
-        }
-      }
-    } catch {
-      takarSummary = null;
-    }
+    varianceExplanation = rawIntel.summary || `Verified historical record for ${siteName} against geological survey archive.`;
   }
 
   // Dynamic Corporate Entity Resolution (GLEIF Level 1/2)
@@ -7254,7 +7309,7 @@ export async function verifyMineDossier(params = {}) {
   if (siteName.includes('Charters Towers')) targetCorp = 'Citigold Corporation Limited';
   const corpResult = await lookupCorporateRegistry({ company: targetCorp });
 
-  // In-Memory OFAC SDN Sanctions Screening (19,565 entities)
+  // In-Memory OFAC SDN Sanctions Screening
   const screeningName = corpResult?.legal_name || targetCorp;
   const sanctionsResult = await screenSanctions({ name: screeningName });
 
@@ -7264,7 +7319,6 @@ export async function verifyMineDossier(params = {}) {
     variance_explanation: varianceExplanation
   };
 
-  // Canonical Attestation Payload
   const canonicalPayload = JSON.stringify({
     service: 'praman-desk',
     auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6201)',
@@ -7308,14 +7362,14 @@ export async function verifyMineDossier(params = {}) {
     jurisdiction: `${state}, ${country}`,
     tenure,
     heritageRecord,
+    reconciliation,
     badge,
     provenance: {
       source_kind: 'registry',
-      authority: 'Geological Survey of Queensland (GSQ)',
-      source_url: 'https://www.business.qld.gov.au/industries/mining-energy-water/resources/geoscience-information/gsq',
+      authority: rawIntel.provenance?.authority || 'Geological Survey of Queensland (GSQ)',
+      source_url: rawIntel.provenance?.source_url || 'https://www.business.qld.gov.au/industries/mining-energy-water/resources/geoscience-information/gsq',
       site_id: siteNo,
-      tenure_reference: tenure,
-      ...(takarSummary ? { takar_peer_collaboration: takarSummary } : {})
+      tenure_reference: tenure
     },
     audit: {
       engine: 'Praman Desk Independent Multi-Miner Auditor (Devnode #6164 / Sepolia Diamond #6201)',
@@ -7754,7 +7808,7 @@ export async function handleApiRequest(req, res) {
         liveMetrics: {
           sepoliaPaidSignals: paidSepoliaSignals,
           sepoliaEscrowPurchases: escrowPurchasesCount,
-          sepoliaTakarResolvers: Array.isArray(ledger.takarResolvers) ? ledger.takarResolvers.length : 0,
+          sepoliaPramanEscrowDeals: Array.isArray(ledger.escrowResolvers) ? ledger.escrowResolvers.length : 0,
           solanaDevnetSettlements: solanaDevnet?.signature ? 1 : 0,
           virtualsAcpJobsTotal: acpJobs.length,
           virtualsAcpPaidJobs: acpPaidJobs.length,
@@ -7771,13 +7825,15 @@ export async function handleApiRequest(req, res) {
           tradeAssurance: {
             route: 'POST /api/trade-assurance/audit',
             casesVerified: ['po-ali-9021'],
-            reconciledVaultUsdc: 100000
+            pramanEscrowContract: '0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c',
+            reconciledVaultUsdc: 100000,
+            testnetExecutionUsdc: 1.0
           },
           spendGuard: {
             route: 'POST /api/spend-guard/evaluate',
             solanaRoute: 'POST /api/audit/solana-spend-guard',
             solanaDevnetTx: solanaDevnet?.signature || null,
-            sdnRecordsInMemory: sdnEntries.size || 19565
+            sdnRecordsInMemory: sdnEntries?.size || 19629
           },
           bytedanceCreativeQa: {
             route: 'POST /api/creative-qa/audit',
@@ -8379,44 +8435,53 @@ export async function handleApiRequest(req, res) {
           invoiceAmount: 100000,
           releasedAmountUsdc: 80000,
           refundedAmountUsdc: 20000,
+          testnetScaleUsdc: 1.0,
+          testnetReleasedUsdc: 0.8,
+          testnetRefundedUsdc: 0.2,
           verdict: 'RECONCILED_PARTIAL_SETTLEMENT',
-          contract: '0x310275e6D66818E068245326bB9e398822304248',
-          txHash: '0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75',
-          etherscanUrl: 'https://sepolia.etherscan.io/tx/0xba98c51a20860d7019c8331138298fe319b6693002b51a88fc7a606de6891f75',
+          contract: '0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c',
+          txHash: '0xbfc224642b555cbeb957f3272740f0c8ff3830df2ff191f2c9513f09e50e6e99',
+          etherscanUrl: 'https://sepolia.etherscan.io/tx/0xbfc224642b555cbeb957f3272740f0c8ff3830df2ff191f2c9513f09e50e6e99',
+          blockNumber: 12227282,
           easUrl: 'https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115',
           diamondPort: DIAMOND_PORT,
           statutoryBasis: ['UCC Article 2-601', 'UN CISG Art. 35/50']
         },
-        'takar-case-1': {
-          caseId: 'takar-case-1',
-          title: 'TakarSettle v4 Ferry Dispute On-Chain Resolution',
-          entity: 'Takar Protocol Deal #1',
-          jurisdiction: 'US',
-          poNumber: 'TAKAR-DEAL-1',
-          invoiceNumber: 'TAKAR-CLAIM-1',
-          poAmount: 100,
-          invoiceAmount: 100,
-          verdict: 'ONCHAIN_RESOLVED',
-          contract: '0x310275e6D66818E068245326bB9e398822304248',
-          txHash: '0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13',
-          etherscanUrl: 'https://sepolia.etherscan.io/tx/0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13',
-          blockNumber: 12200598,
+        'praman-escrow-0': {
+          caseId: 'praman-escrow-0',
+          title: 'PramanEscrow Deal #0 Split Settlement (1.00 TEST_USDC -> 0.80 / 0.20)',
+          entity: 'Siemens Aktiengesellschaft',
+          lei: 'W38RGI023J3WT1HWRP32',
+          jurisdiction: 'DE',
+          poNumber: 'PRAMAN-ESCROW-DEAL-0',
+          invoiceNumber: 'PO-ALI-9021-SPLIT',
+          poAmount: 0.8,
+          invoiceAmount: 1.0,
+          releasedAmountUsdc: 0.8,
+          refundedAmountUsdc: 0.2,
+          verdict: 'RECONCILED_PARTIAL_SETTLEMENT',
+          contract: '0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c',
+          txHash: '0xbfc224642b555cbeb957f3272740f0c8ff3830df2ff191f2c9513f09e50e6e99',
+          etherscanUrl: 'https://sepolia.etherscan.io/tx/0xbfc224642b555cbeb957f3272740f0c8ff3830df2ff191f2c9513f09e50e6e99',
+          blockNumber: 12227282,
           diamondPort: DIAMOND_PORT
         },
-        'takar-case-2': {
-          caseId: 'takar-case-2',
-          title: 'TakarSettle5 Quantity Dispute On-Chain Resolution',
-          entity: 'Takar Protocol Deal #2',
+        'praman-escrow-1': {
+          caseId: 'praman-escrow-1',
+          title: 'PramanEscrow Deal #1 Circuit Breaker Halt & Full Refund (0.50 TEST_USDC)',
+          entity: 'Praman Desk Sepolia Escrow Vault',
           jurisdiction: 'US',
-          poNumber: 'TAKAR-DEAL-2',
-          invoiceNumber: 'TAKAR-CLAIM-2',
-          poAmount: 100,
-          invoiceAmount: 100,
-          verdict: 'ONCHAIN_RESOLVED',
-          contract: '0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B',
-          txHash: '0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de',
-          etherscanUrl: 'https://sepolia.etherscan.io/tx/0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de',
-          blockNumber: 12200597,
+          poNumber: 'PRAMAN-ESCROW-DEAL-1',
+          invoiceNumber: 'PO-ALI-9021-HALT',
+          poAmount: 0.5,
+          invoiceAmount: 0.5,
+          releasedAmountUsdc: 0.0,
+          refundedAmountUsdc: 0.5,
+          verdict: 'HALTED_POLICY_BREACH',
+          contract: '0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c',
+          txHash: '0xc69358c2763421436fb75e582e11220ccf0fad5662a1f5c7192bd935c7d428e0',
+          etherscanUrl: 'https://sepolia.etherscan.io/tx/0xc69358c2763421436fb75e582e11220ccf0fad5662a1f5c7192bd935c7d428e0',
+          blockNumber: 12227285,
           diamondPort: DIAMOND_PORT
         },
         'po-ali-9021-halt': {
@@ -8430,7 +8495,10 @@ export async function handleApiRequest(req, res) {
           poAmount: 80000,
           invoiceAmount: 100000,
           verdict: 'HALTED_POLICY_BREACH',
-          contract: '0x310275e6D66818E068245326bB9e398822304248',
+          contract: '0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c',
+          txHash: '0xc69358c2763421436fb75e582e11220ccf0fad5662a1f5c7192bd935c7d428e0',
+          etherscanUrl: 'https://sepolia.etherscan.io/tx/0xc69358c2763421436fb75e582e11220ccf0fad5662a1f5c7192bd935c7d428e0',
+          blockNumber: 12227285,
           diamondPort: DIAMOND_PORT,
           statutoryBasis: ['UCC Article 2-601', 'UN CISG Art. 35/50']
         },
@@ -8448,7 +8516,7 @@ export async function handleApiRequest(req, res) {
           diamondPort: DIAMOND_PORT,
           findings: [
             { severity: 'BLOCK', label: 'Token-2022 TLV Type 12 PermanentDelegate clawback authority detected', source: 'praman-solana-sdk' },
-            { severity: 'PASS', label: 'US Treasury OFAC SDN 19,565-entry screening cleared (<25ms)', source: 'praman-ofac-ram' }
+            { severity: 'PASS', label: `US Treasury OFAC SDN ${(sdnEntries?.size || 19629).toLocaleString()}-entry screening cleared (<25ms)`, source: 'praman-ofac-ram' }
           ]
         },
         'solana-devnet-release': {
@@ -8511,9 +8579,9 @@ export async function handleApiRequest(req, res) {
       const resolvedVerdict = matched ? matched.verdict : cert.clearanceVerdict;
       const resolvedSummary = matched
         ? (matched.caseId === 'po-ali-9021'
-          ? 'RECONCILED PARTIAL SETTLEMENT: $80,000.00 USDC disbursed to Siemens Aktiengesellschaft (80 conforming units @ $1,000.00); $20,000.00 USDC refunded to Buyer via Sepolia TakarSettle v4.'
+          ? 'RECONCILED PARTIAL SETTLEMENT: $80,000.00 USDC commercial split disbursed to Siemens Aktiengesellschaft (80 conforming units @ $1,000.00) & $20,000.00 USDC refunded to Buyer, executed on Sepolia PramanEscrow Deal #0 at 1.00 TEST_USDC scale.'
           : (matched.caseId === 'po-ali-9021-halt'
-            ? 'CIRCUIT BREAKER HALT AT STAGE 13: Claimed $100,000.00 USDC exceeds Cainiao Pier-Pass conforming delivery ($80,000.00) by -$20,000.00 variance (2,000,000 cents).'
+            ? 'CIRCUIT BREAKER HALT AT STAGE 13: Claimed $100,000.00 USDC exceeds Cainiao Pier-Pass conforming delivery ($80,000.00) by -$20,000.00 variance (2,000,000 cents). Protected by Sepolia PramanEscrow Deal #1 haltAndRefund.'
             : `${matched.title} recorded on Praman Desk.`))
         : cert.clearanceSummary;
 
@@ -9618,44 +9686,6 @@ export async function handleApiRequest(req, res) {
       if (pathname === '/api/gold-rush/aggregate' || pathname === '/api/miner/mining-aggregate' || pathname === '/api/intelligence/aggregate') {
         const site = String(merged.site || merged.query || merged.mine || 'Mount Morgan Mine').trim();
         let candidateMiners = Array.isArray(merged.candidates) && merged.candidates.length > 0 ? merged.candidates : null;
-        let takarLiveMetadata = null;
-
-        const isTakarRequested = merged.source === 'takar' || merged.fetch_takar === true || merged.live_dossier === true || (site.toLowerCase().includes('mount morgan') && merged.fetch_live === true);
-
-        if (!candidateMiners && isTakarRequested) {
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2500);
-            const takarUrl = 'https://takar-telegraph.vercel.app/receipts/dossier-mount-morgan.json';
-            const takarResp = await fetch(takarUrl, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            if (takarResp.ok) {
-              const takarData = await takarResp.json();
-              candidateMiners = [
-                {
-                  minerId: 'miner-takar-qldgov',
-                  content: 'Mount Morgan Mine recorded by Geological Survey of Queensland: Reported production 250 tonnes gold (8.04 Moz), 360,000 tonnes copper from 1882 to 1990.'
-                },
-                {
-                  minerId: 'miner-takar-wiki-historic',
-                  content: 'Mount Morgan Mine historical production: 262 tonnes gold, 387,000 tonnes copper from 1882 to 1981.'
-                },
-                {
-                  minerId: 'miner-6164-praman',
-                  content: 'Mount Morgan Mine verified: 262 tonnes (8.4 Moz) gold and 387,000 tonnes copper from hard-rock mining. Total field yields 294 tonnes gold including 56 tonnes from tailings dump retreatment.'
-                }
-              ];
-              takarLiveMetadata = {
-                sourceUrl: takarUrl,
-                verifiedReceipts: takarData.receipts?.length || 4,
-                conflictsAnalyzed: takarData.dossier?.miner_conflicts?.length || 6,
-                resolution: 'Arbitrated via 651-byte WASM: 250t primary ore vs 262t historical mine + 32-56t tailings retreatment = 294t cumulative production'
-              };
-            }
-          } catch (e) {
-            // graceful fallback to standard candidates if live fetch fails or offline
-          }
-        }
 
         if (!candidateMiners) {
           const primaryEval = evaluateMiningIntelligencePrompt(site);
@@ -9679,7 +9709,7 @@ export async function handleApiRequest(req, res) {
 
         const aggregationResult = goldRushAggregator.aggregateResponses(site, candidateMiners);
 
-        // Scope resolution for complex historical goldfields (addresses Bangdrop cross-team feedback)
+        // Scope resolution for complex historical goldfields
         let scopeBreakdown = null;
         if (/brilliant(?:\s+(?:lode|reef|deeps))?/i.test(site)) {
           scopeBreakdown = {
@@ -9710,8 +9740,7 @@ export async function handleApiRequest(req, res) {
         return sendJson(res, 200, {
           ok: true,
           ...aggregationResult,
-          ...(scopeBreakdown ? { scopeBreakdown } : {}),
-          ...(takarLiveMetadata ? { takarLive: takarLiveMetadata } : {})
+          ...(scopeBreakdown ? { scopeBreakdown } : {})
         });
       }
 
@@ -9772,6 +9801,75 @@ export async function handleApiRequest(req, res) {
       // 19. GET / POST /api/miner/payment-method-verify (PAYMENT_METHOD_VERIFY_GENERAL)
       if (pathname === '/api/miner/payment-method-verify' || pathname === '/api/payment-method-verify') {
         const out = await verifyPaymentMethod(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 20. URL_SCAN_VERDICT
+      if (pathname === '/api/miner/url-scan' || pathname === '/api/url-scan') {
+        const out = await scanUrlVerdict(merged, { checkFakeWatchDomain });
+        return sendJson(res, 200, out);
+      }
+
+      // 21. THREAT_INTELLIGENCE_INDICATOR
+      if (pathname === '/api/miner/threat-intel' || pathname === '/api/threat-intel') {
+        const out = await checkThreatIndicator(merged, {
+          screenSanctions,
+          checkFakeWatchDomain,
+          maliciousDrainers: MALICIOUS_DRAINER_ADDRESSES
+        });
+        return sendJson(res, 200, out);
+      }
+
+      // 22. TRANSACTION_RISK_GENERAL
+      if (pathname === '/api/miner/transaction-risk' || pathname === '/api/transaction-risk') {
+        const out = await assessTransactionRisk(merged, {
+          lookupOnchainTx,
+          screenSanctions,
+          scoreFraudRisk,
+          checkFakeWatchDomain
+        });
+        return sendJson(res, 200, out);
+      }
+
+      // 23. SSL_VERIFICATION_CERT
+      if (pathname === '/api/miner/ssl-verify' || pathname === '/api/ssl-verify') {
+        const out = await verifySslCertificate(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 24. CVE_LOOKUP_CVSS
+      if (pathname === '/api/miner/cve-lookup' || pathname === '/api/cve-lookup') {
+        const out = await lookupCveCvss(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 25. SHIPMENT_DELAY_RISK_GENERAL
+      if (pathname === '/api/miner/shipment-delay' || pathname === '/api/shipment-delay') {
+        const out = await assessShipmentDelayRisk(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 26. IP_GEOLOCATION_GENERAL
+      if (pathname === '/api/miner/ip-geolocation' || pathname === '/api/ip-geolocation') {
+        const out = await geolocateIpAddress(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 27. TOKEN_HOLDER_COUNT_GENERAL
+      if (pathname === '/api/miner/token-holders' || pathname === '/api/token-holders') {
+        const out = await getTokenHolderCount(merged, { verifyTokenTotalSupply });
+        return sendJson(res, 200, out);
+      }
+
+      // 28. WASH_TRADING_DETECTION_GENERAL
+      if (pathname === '/api/miner/wash-trading' || pathname === '/api/wash-trading') {
+        const out = await detectWashTrading(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 29. TELEGRAPH_KNOWLEDGE_GENERAL
+      if (pathname === '/api/miner/telegraph-knowledge' || pathname === '/api/telegraph-knowledge') {
+        const out = await answerTelegraphKnowledge(merged, { executeWebSearch });
         return sendJson(res, 200, out);
       }
     }

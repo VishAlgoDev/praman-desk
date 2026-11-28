@@ -27,7 +27,7 @@ async function main() {
   console.log(`Submitting EAS Attestation from ${address}...`);
 
   // schema: string intent, uint256 minerId, bytes32 signal, uint8 verdict, string truthSource
-  const truthStatement = 'GSQ GeoResGlobe + Takar Dossier consensus: 250t primary ore (1882-1990) + 56t tailings retreatment = 294t cumulative yield';
+  const truthStatement = 'GSQ GeoResGlobe + Praman Mining Arbitration consensus: 250t primary ore (1882-1990) + 56t tailings retreatment = 294t cumulative yield';
   const signalDigest = '0x5b3c26d15e86e7a2c6bd5ad0385f5fbef574bedb28bbafc60fa0cd279578a193';
 
   const encodedData = encodeAbiParameters(

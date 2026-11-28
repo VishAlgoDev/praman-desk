@@ -27,8 +27,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Known authoritative Telegraph miners for peer opinion buying
 const PEER_MINERS = {
   CORPORATE: [
-    { id: '6164', name: 'Praman Desk (Diamond #6164)', base_cost: 0.01, role: 'primary' },
-    { id: '20261117', name: 'Takar Global Registry (#20261117)', base_cost: 0.015, role: 'secondary' }
+    { id: '6164', name: 'Praman Desk (Diamond #6164 / Reg #6201)', base_cost: 0.01, role: 'primary' },
+    { id: '9002', name: 'Chrysolite / Telegraph Peer Registry', base_cost: 0.01, role: 'secondary' }
   ],
   SANCTIONS: [
     { id: '6164', name: 'Praman Desk OFAC Engine (#6164)', base_cost: 0.01, role: 'primary' },

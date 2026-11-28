@@ -1663,99 +1663,119 @@
       "index": 31,
       "mission": "Mission 04",
       "intent": "INVOICE_LEDGER_RECONCILE_GENERAL",
-      "title": "TakarSettle On-Chain Resolution - Case 2 (Quantity Dispute)",
-      "timestamp": "2026-11-24T05:32:21.363Z",
+      "title": "PramanEscrow On-Chain Resolution - po-ali-9021 (Deal #0)",
+      "timestamp": "2026-11-28T02:37:50.379Z",
       "minerId": "6164",
-      "minerName": "Praman Desk Resolver Seat 2 (TakarSettle5)",
+      "minerName": "PramanEscrow Settlement Vault (Sepolia)",
       "minerSlug": "praman-compliance-miner",
-      "endpoint": "0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B",
+      "endpoint": "0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c",
       "costUsd": 0,
-      "amountUusdc": "0",
-      "durationMs": 13475,
-      "txHash": "0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de",
-      "receiptHash": "0x5a328eb1b97a5bc02f7df0908ca147c30a8b88ac298f5ba7e209eba719b1c4f2",
-      "signalHash": "0x5a328eb1b97a5bc02f7df0908ca147c30a8b88ac298f5ba7e209eba719b1c4f2",
+      "amountUusdc": "1000000",
+      "durationMs": null,
+      "txHash": "0xbfc224642b555cbeb957f3272740f0c8ff3830df2ff191f2c9513f09e50e6e99",
+      "receiptHash": "0x3623dac7292b6bcc48f8480ec4eccb804914e3322b59e7fe6fc2152f0805a5a5",
+      "signalHash": "0xf5915a49653c2112f9d2de813fdcff81654962b772f34993c14505d8f7de57de",
       "epochId": null,
       "request": {
         "dealId": 0,
-        "contract": "0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B"
+        "contract": "0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c",
+        "escrowTestUsdc": 1
       },
       "normalizedResult": {
-        "status": "success",
-        "blockNumber": 12200597
+        "status": "SettledSplit",
+        "blockNumber": 12227282,
+        "sellerReleasedUsdc": 0.8,
+        "buyerRefundedUsdc": 0.2
       },
       "fieldStatus": {
-        "settlement": "verified_sepolia_takar_resolver"
+        "settlement": "verified_sepolia_praman_escrow"
       },
       "warnings": [],
       "rawMinerPayload": {
-        "case_id": "Case 2 (Quantity Dispute)",
-        "contract_name": "TakarSettle5",
-        "contract_address": "0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B",
-        "deal_id": 0,
-        "proposal_hash": "0x5a328eb1b97a5bc02f7df0908ca147c30a8b88ac298f5ba7e209eba719b1c4f2",
-        "tx_hash": "0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de",
-        "block_number": 12200597,
-        "gas_used": "154816",
-        "effective_gas_price_wei": "18",
-        "gas_fee_eth": "0.000000000002786688",
-        "status": "success",
-        "elapsed_ms": 13475,
-        "etherscan_link": "https://sepolia.etherscan.io/tx/0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de",
-        "dispute_summary": "Supplier invoiced 1,000 units @ $12.40 ($12,400.00), GRN accepted 960 units ($11,904.00), variance $496.00 (split: 96% supplier, 4% refund)."
+        "dealId": 0,
+        "caseId": "po-ali-9021",
+        "title": "PO-ALI-9021 Reconciled Split Settlement (80% Conforming / 20% Shortfall)",
+        "commercialScaleNote": "Models $100,000 commercial PO ($80k release / $20k refund) on Sepolia testnet at 1.00 test-USDC scale.",
+        "poHash": "0xf5915a49653c2112f9d2de813fdcff81654962b772f34993c14505d8f7de57de",
+        "complianceBundleHash": "0x3623dac7292b6bcc48f8480ec4eccb804914e3322b59e7fe6fc2152f0805a5a5",
+        "escrowAmountUusdc": "1000000",
+        "escrowAmountUsdc": 1,
+        "sellerReleasedUusdc": "800000",
+        "sellerReleasedUsdc": 0.8,
+        "buyerRefundedUusdc": "200000",
+        "buyerRefundedUsdc": 0.2,
+        "wasmScoreBps": 8000,
+        "status": 2,
+        "statusLabel": "SettledSplit",
+        "createTxHash": "0x53ca7948eb1865b12e3735d7f451888dd06fc48375e854a319be9cab9a23ed9f",
+        "createBlockNumber": 12227281,
+        "settleTxHash": "0xbfc224642b555cbeb957f3272740f0c8ff3830df2ff191f2c9513f09e50e6e99",
+        "settleBlockNumber": 12227282,
+        "gasUsed": 621005,
+        "etherscanUrl": "https://sepolia.etherscan.io/tx/0xbfc224642b555cbeb957f3272740f0c8ff3830df2ff191f2c9513f09e50e6e99"
       },
       "agreement": "confirmed",
-      "badgeText": "on-chain resolver (TakarSettle5)",
-      "diagnostic": "Supplier invoiced 1,000 units @ $12.40 ($12,400.00), GRN accepted 960 units ($11,904.00), variance $496.00 (split: 96% supplier, 4% refund)."
+      "badgeText": "PramanEscrow Deal #0 (SettledSplit)",
+      "diagnostic": "PO-ALI-9021 Reconciled Split Settlement (80% Conforming / 20% Shortfall). Models $100,000 commercial PO ($80k release / $20k refund) on Sepolia testnet at 1.00 test-USDC scale."
     },
     {
       "index": 32,
       "mission": "Mission 04",
       "intent": "INVOICE_LEDGER_RECONCILE_GENERAL",
-      "title": "TakarSettle On-Chain Resolution - Case 1 (Ferry Dispute)",
-      "timestamp": "2026-11-24T05:32:21.363Z",
+      "title": "PramanEscrow On-Chain Resolution - po-ali-9021-halt (Deal #1)",
+      "timestamp": "2026-11-28T02:37:50.379Z",
       "minerId": "6164",
-      "minerName": "Praman Desk Resolver Seat 2 (TakarSettle v4)",
+      "minerName": "PramanEscrow Settlement Vault (Sepolia)",
       "minerSlug": "praman-compliance-miner",
-      "endpoint": "0x310275e6D66818E068245326bB9e398822304248",
+      "endpoint": "0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c",
       "costUsd": 0,
-      "amountUusdc": "0",
-      "durationMs": 9561,
-      "txHash": "0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13",
-      "receiptHash": "0x8f4d39493e214e5e5a5a1f6ae92779895aa9935140e6ed5295c213b40d3efcf2",
-      "signalHash": "0x8f4d39493e214e5e5a5a1f6ae92779895aa9935140e6ed5295c213b40d3efcf2",
+      "amountUusdc": "500000",
+      "durationMs": null,
+      "txHash": "0xc69358c2763421436fb75e582e11220ccf0fad5662a1f5c7192bd935c7d428e0",
+      "receiptHash": "0x99ec5a5bec225fa619e8ff06d6eac6b9ae96b21cc783f7ca0a06c7bc043ad765",
+      "signalHash": "0x0e194729f0bdbc464a7b0929e962286f223dda100e63c4ccc01bad6be49418eb",
       "epochId": null,
       "request": {
         "dealId": 1,
-        "contract": "0x310275e6D66818E068245326bB9e398822304248"
+        "contract": "0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c",
+        "escrowTestUsdc": 0.5
       },
       "normalizedResult": {
-        "status": "success",
-        "blockNumber": 12200598
+        "status": "HaltedRefunded",
+        "blockNumber": 12227285,
+        "sellerReleasedUsdc": 0,
+        "buyerRefundedUsdc": 0.5
       },
       "fieldStatus": {
-        "settlement": "verified_sepolia_takar_resolver"
+        "settlement": "verified_sepolia_praman_escrow"
       },
       "warnings": [],
       "rawMinerPayload": {
-        "case_id": "Case 1 (Ferry Dispute)",
-        "contract_name": "TakarSettle v4",
-        "contract_address": "0x310275e6D66818E068245326bB9e398822304248",
-        "deal_id": 1,
-        "proposal_hash": "0x8f4d39493e214e5e5a5a1f6ae92779895aa9935140e6ed5295c213b40d3efcf2",
-        "tx_hash": "0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13",
-        "block_number": 12200598,
-        "gas_used": "152536",
-        "effective_gas_price_wei": "18",
-        "gas_fee_eth": "0.000000000002745648",
-        "status": "success",
-        "elapsed_ms": 9561,
-        "etherscan_link": "https://sepolia.etherscan.io/tx/0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13",
-        "dispute_summary": "Megastar berthed at Helsinki per AIS telemetry, GRN accepts 1,000 units conforming delivery."
+        "dealId": 1,
+        "caseId": "po-ali-9021-halt",
+        "title": "PO-ALI-9021 Unauthorized Overbill Circuit Breaker Halt & Full Refund",
+        "commercialScaleNote": "Full buyer refund executed after 651B WASM comparator flagged -20% delivery shortfall.",
+        "poHash": "0x0e194729f0bdbc464a7b0929e962286f223dda100e63c4ccc01bad6be49418eb",
+        "haltReasonHash": "0x99ec5a5bec225fa619e8ff06d6eac6b9ae96b21cc783f7ca0a06c7bc043ad765",
+        "escrowAmountUusdc": "500000",
+        "escrowAmountUsdc": 0.5,
+        "sellerReleasedUusdc": "0",
+        "sellerReleasedUsdc": 0,
+        "buyerRefundedUusdc": "500000",
+        "buyerRefundedUsdc": 0.5,
+        "wasmScoreBps": 0,
+        "status": 3,
+        "statusLabel": "HaltedRefunded",
+        "createTxHash": "0x5815cb9a0b2187212a3b0634aaf018cc2511a754fbac844de8c443a8fe6261be",
+        "createBlockNumber": 12227283,
+        "settleTxHash": "0xc69358c2763421436fb75e582e11220ccf0fad5662a1f5c7192bd935c7d428e0",
+        "settleBlockNumber": 12227285,
+        "gasUsed": 395596,
+        "etherscanUrl": "https://sepolia.etherscan.io/tx/0xc69358c2763421436fb75e582e11220ccf0fad5662a1f5c7192bd935c7d428e0"
       },
       "agreement": "confirmed",
-      "badgeText": "on-chain resolver (TakarSettle v4)",
-      "diagnostic": "Megastar berthed at Helsinki per AIS telemetry, GRN accepts 1,000 units conforming delivery."
+      "badgeText": "PramanEscrow Deal #1 (HaltedRefunded)",
+      "diagnostic": "PO-ALI-9021 Unauthorized Overbill Circuit Breaker Halt & Full Refund. Full buyer refund executed after 651B WASM comparator flagged -20% delivery shortfall."
     }
   ],
   "escrowPurchases": [
@@ -1812,28 +1832,39 @@
       "recordedAt": "2026-11-26T05:09:41.267Z"
     }
   ],
-  "takarResolvers": [
+  "escrowResolvers": [
     {
-      "caseId": "Case 2 (Quantity Dispute)",
-      "contractName": "TakarSettle5",
-      "contractAddress": "0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B",
+      "caseId": "po-ali-9021",
+      "caseName": "PO-ALI-9021 Reconciled Split Settlement (80% Conforming / 20% Shortfall)",
+      "contractName": "PramanEscrow",
+      "contractAddress": "0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c",
       "dealId": 0,
-      "txHash": "0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de",
-      "blockNumber": 12200597,
-      "status": "success",
-      "etherscanLink": "https://sepolia.etherscan.io/tx/0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de",
-      "disputeSummary": "Supplier invoiced 1,000 units @ $12.40 ($12,400.00), GRN accepted 960 units ($11,904.00), variance $496.00 (split: 96% supplier, 4% refund)."
+      "txHash": "0xbfc224642b555cbeb957f3272740f0c8ff3830df2ff191f2c9513f09e50e6e99",
+      "blockNumber": 12227282,
+      "status": "SettledSplit",
+      "etherscanLink": "https://sepolia.etherscan.io/tx/0xbfc224642b555cbeb957f3272740f0c8ff3830df2ff191f2c9513f09e50e6e99",
+      "disputeSummary": "Models $100,000 commercial PO ($80k release / $20k refund) on Sepolia testnet at 1.00 test-USDC scale.",
+      "minerId": "6164",
+      "escrowAmountUsdc": 1,
+      "sellerReleasedUsdc": 0.8,
+      "buyerRefundedUsdc": 0.2
     },
     {
-      "caseId": "Case 1 (Ferry Dispute)",
-      "contractName": "TakarSettle v4",
-      "contractAddress": "0x310275e6D66818E068245326bB9e398822304248",
+      "caseId": "po-ali-9021-halt",
+      "caseName": "PO-ALI-9021 Unauthorized Overbill Circuit Breaker Halt & Full Refund",
+      "contractName": "PramanEscrow",
+      "contractAddress": "0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c",
       "dealId": 1,
-      "txHash": "0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13",
-      "blockNumber": 12200598,
-      "status": "success",
-      "etherscanLink": "https://sepolia.etherscan.io/tx/0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13",
-      "disputeSummary": "Megastar berthed at Helsinki per AIS telemetry, GRN accepts 1,000 units conforming delivery."
+      "txHash": "0xc69358c2763421436fb75e582e11220ccf0fad5662a1f5c7192bd935c7d428e0",
+      "blockNumber": 12227285,
+      "status": "HaltedRefunded",
+      "etherscanLink": "https://sepolia.etherscan.io/tx/0xc69358c2763421436fb75e582e11220ccf0fad5662a1f5c7192bd935c7d428e0",
+      "disputeSummary": "Full buyer refund executed after 651B WASM comparator flagged -20% delivery shortfall.",
+      "minerId": "6164",
+      "escrowAmountUsdc": 0.5,
+      "sellerReleasedUsdc": 0,
+      "buyerRefundedUsdc": 0.5
     }
-  ]
+  ],
+  "pramanEscrowAddress": "0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c"
 }

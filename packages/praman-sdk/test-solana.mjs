@@ -108,17 +108,17 @@ it('Intercepts runtime backdoor addToQueue prototype tampering', () => {
 });
 
 // -------------------------------------------------------------------------
-// SECTION 2: IN-MEMORY 19,565 OFAC SDN SANCTIONS SCREENING
+// SECTION 2: IN-MEMORY OFAC SDN SANCTIONS SCREENING
 // -------------------------------------------------------------------------
-console.log(`\n▶ SECTION 2: In-Memory 19,565 OFAC SDN Sanctions Screening`);
+console.log(`\n▶ SECTION 2: In-Memory OFAC SDN Sanctions Screening`);
 
-it('Loads Praman 19,565 OFAC SDN entities into RAM in <25ms', () => {
+it('Loads Praman OFAC SDN entities into RAM in <25ms', () => {
   loadInMemorySdnDatabase(); // Ensure initial cold file read is primed into memory
   const t0 = Date.now();
   const db = loadInMemorySdnDatabase();
   const elapsed = Date.now() - t0;
 
-  assert.ok(db.count >= 19500, `Expected ~19,565 entries, found ${db.count}`);
+  assert.ok(db.count >= 19500, `Expected >=19,500 SDN entries, found ${db.count}`);
   assert.ok(elapsed <= 50, `RAM lookup took ${elapsed}ms (expected sub-50ms)`);
   console.log(`     (RAM Database loaded ${db.count.toLocaleString()} OFAC records in ${elapsed} ms)`);
 });

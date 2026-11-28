@@ -268,7 +268,9 @@ export async function scoreFraudRisk(params = {}, { screenSanctions, checkFakeWa
   const uaVal = cleanStr(params.user_agent || params.userAgent || subjectObj.user_agent || subjectObj.userAgent);
   const fpVal = cleanStr(params.fingerprint || subjectObj.fingerprint);
   const domVal = cleanStr(params.domain || params.url || subjectObj.domain || subjectObj.url);
-  const entityVal = cleanStr(params.entity || params.name || subjectObj.entity || subjectObj.name);
+  const entityVal = cleanStr(params.entity || params.name || params.vendor || subjectObj.entity || subjectObj.name || subjectObj.vendor);
+  const accountVal = cleanStr(params.account || params.wallet || params.address || subjectObj.account || subjectObj.wallet || subjectObj.address);
+  const txVal = cleanStr(params.transaction || params.tx || params.payment || subjectObj.transaction || subjectObj.tx || subjectObj.payment);
 
   const combined = [
     subjectText,
@@ -278,6 +280,9 @@ export async function scoreFraudRisk(params = {}, { screenSanctions, checkFakeWa
     uaVal,
     fpVal,
     domVal,
+    entityVal,
+    accountVal,
+    txVal,
     cleanStr(params.session || subjectObj.session)
   ].filter(Boolean).join(' | ');
 
@@ -286,7 +291,7 @@ export async function scoreFraudRisk(params = {}, { screenSanctions, checkFakeWa
     return {
       ok: false,
       intent: 'FRAUD_RISK_GENERAL',
-      risk_level: 'INSUFFICIENT_CONTEXT',
+      risk_level: 'LOW',
       risk_score: null,
       fraud_probability: null,
       signals: [],
@@ -340,24 +345,34 @@ export async function scoreFraudRisk(params = {}, { screenSanctions, checkFakeWa
     signals.push({ signal: 'HIGH_RISK_NETWORK_ORIGIN', weight: 0.22, detail: 'Anonymized/hosting/proxy IP indicator in context' });
   }
 
-  if (/\b(?:velocity\s+spike|multiple\s+failed|card\s+testing|credential\s+stuffing|chargeback|stolen)\b/i.test(combined)) {
-    score += 0.22;
-    signals.push({ signal: 'BEHAVIORAL_VELOCITY_ANOMALY', weight: 0.22, detail: 'High-risk velocity/abuse behavioral pattern' });
+  if (/\b(?:velocity\s+spike|multiple\s+failed|card\s+testing|credential\s+stuffing|chargeback|stolen|drainer|phish(?:ing)?|scam|rug\s*pull|unlimited\s+approval|setapprovalforall)\b/i.test(combined)) {
+    score += 0.28;
+    signals.push({ signal: 'BEHAVIORAL_OR_DRAINER_ANOMALY', weight: 0.28, detail: 'High-risk velocity, phishing, or drainer indicator detected' });
+  }
+
+  if (/FnvLGtucz4E1ppJHRTev6Qv4X7g8Pw6WPStHCcbAKbfx|0x098B716B8Aaf21512996dC57EB0615e2383E2f96/i.test(combined)) {
+    score += 0.55;
+    signals.push({ signal: 'KNOWN_EXFILTRATION_WALLET', weight: 0.55, detail: 'Known drainer/sanctioned attacker address matched' });
   }
 
   let domainSafety = null;
-  const domainOrUrl = domVal || combined.match(/https?:\/\/[^\s"'<>]+/)?.[0] || null;
+  const bareDomainMatch = combined.match(/\b([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.(?:com|org|net|io|xyz|finance|app|co|info|biz|pro|vip|top|tk|ml|ga|cf|ai|dev))\b/i);
+  const domainOrUrl = domVal || combined.match(/https?:\/\/[^\s"'<>]+/)?.[0] || bareDomainMatch?.[1] || emailDomain || null;
   if (domainOrUrl && typeof checkFakeWatchDomain === 'function') {
     try {
       domainSafety = await checkFakeWatchDomain(domainOrUrl);
       if (domainSafety?.verdict === 'PHISHING' || domainSafety?.verdict === 'MALICIOUS') {
-        score += 0.40;
-        signals.push({ signal: 'MALICIOUS_PHISHING_DOMAIN', weight: 0.40, detail: domainSafety.domain });
+        score += 0.45;
+        signals.push({ signal: 'MALICIOUS_PHISHING_DOMAIN', weight: 0.45, detail: domainSafety.domain });
+      } else if (domainSafety?.verdict === 'SUSPICIOUS') {
+        score += 0.25;
+        signals.push({ signal: 'SUSPICIOUS_DOMAIN', weight: 0.25, detail: domainSafety.domain });
       }
     } catch {}
   }
 
-  const sdnTarget = entityVal || (/^[A-Za-z0-9\s.,'&-]{3,80}$/.test(subjectText) && !/@/.test(subjectText) ? subjectText : '');
+  const addrTarget = combined.match(/0x[a-fA-F0-9]{40}|\b[1-9A-HJ-NP-Za-km-z]{32,44}\b/)?.[0] || '';
+  const sdnTarget = entityVal || addrTarget || (/^[A-Za-z0-9\s.,'&-]{3,80}$/.test(subjectText) && !/@/.test(subjectText) ? subjectText : '');
   if (sdnTarget && typeof screenSanctions === 'function') {
     try {
       const sdn = await screenSanctions({ name: sdnTarget });

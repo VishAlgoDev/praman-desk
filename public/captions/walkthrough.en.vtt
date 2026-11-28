@@ -13,7 +13,7 @@ On our homepage benchmark across five adversarial failure modes — inverted cur
 Let's open the live Operator Desks.
 
 00:00:34.702 --> 00:00:46.468
-In Trade Assurance, Purchase Order ninety-twenty-one holds one hundred thousand USDC in a TakarSettle vault on Ethereum Sepolia against a Cainiao warehouse receipt from the Port of Los Angeles.
+In Trade Assurance, Purchase Order ninety-twenty-one models a one-hundred-thousand-USDC commitment anchored to our PramanEscrow contract on Ethereum Sepolia against a Cainiao warehouse receipt from the Port of Los Angeles.
 
 00:00:46.468 --> 00:00:50.004
 Eighty units passed inspection and twenty arrived damaged.
@@ -37,7 +37,7 @@ Compliant transfers approve cleanly alongside live Solana Devnet confirmations, 
 Every verification carries an auditable receipt.
 
 00:02:00.219 --> 00:02:14.604
-Our Settlement Ledger logs thirty-two live Ethereum Sepolia settlements across fifteen independent Telegraph miners, Takar multi-seat dispute resolvers, and Devnode escrow signals — click any row to inspect its signal hash and Etherscan proof.
+Our Settlement Ledger logs thirty-two live Ethereum Sepolia settlements across fifteen independent Telegraph miners, sovereign PramanEscrow deals, and Devnode escrow signals — click any row to inspect its signal hash and Etherscan proof.
 
 00:02:14.604 --> 00:02:31.180
 In our Mining Registry, Pramaan resolves conflicting geological claims against Queensland Government records — reconciling Mount Morgan's forty-four-ton survey variance cleanly, while returning Unverified Prospect at twenty percent confidence on unknown sites instead of guessing.

@@ -105,7 +105,7 @@ const requiredKeywords = [
   'Cainiao',
   'WASM',
   'circuit breaker',
-  'Takar',
+  'PramanEscrow',
   'Praman',
   '2-of-3',
   'Sepolia',

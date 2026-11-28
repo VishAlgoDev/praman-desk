@@ -31,7 +31,21 @@ const TEST_QUERIES = [
   { intent: 'LIQUIDITY_DEPTH_SOL_USDC', path: '/api/miner/liquidity-depth?pair=SOL%2FUSDC', check: j => j.ok === true && Number(j.liquidity_usd) > 100000 },
   { intent: 'WALLET_BALANCE_SOLANA_SPL', path: '/api/miner/wallet-balance?address=3r428Z8YSgQFJpsyPcQyxmt1faQQBuNRpqz92m9ucbuL&chain=solana', check: j => j.status !== 'error' && j.chain === 'solana' && /SOL/i.test(String(j.answer || '')) },
   { intent: 'TOKEN_TOTAL_SUPPLY_SOLANA', path: '/api/miner/token-supply?token=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&chain=solana', check: j => j.status !== 'error' && Number(j.total_supply) > 1000000 },
-  { intent: 'ONCHAIN_TX_SOLANA', path: '/api/miner/onchain-tx?tx=mGGrojDg7cBeNpcWz9Vb9p3qkEpJm6iETVwR4AxtE56WkdMVjEkUbFHQDX4XR3SpSo4wRcKzvrP2TcMNSfMepNa&chain=solana', check: j => j.status === 'confirmed' && Number(j.slot) > 0 }
+  { intent: 'ONCHAIN_TX_SOLANA', path: '/api/miner/onchain-tx?tx=mGGrojDg7cBeNpcWz9Vb9p3qkEpJm6iETVwR4AxtE56WkdMVjEkUbFHQDX4XR3SpSo4wRcKzvrP2TcMNSfMepNa&chain=solana', check: j => j.status === 'confirmed' && Number(j.slot) > 0 },
+  { intent: 'TOKEN_TOTAL_SUPPLY_PARENS_ONDO', path: '/api/miner/token-supply?token=Ondo%20Finance%20(ONDO)%20on%20Ethereum', check: j => j.status === 'confirmed' && Number(j.total_supply) > 1000000000 },
+  { intent: 'FRAUD_RISK_PHISHING_DOMAIN', path: '/api/miner/fraud-risk?subject=unisvvap.org%20unlimited%20approval', check: j => j.ok === true && Number(j.risk_score) >= 0.7 && (j.risk_level === 'HIGH' || j.risk_level === 'CRITICAL') },
+  { intent: 'LIQUIDITY_DEPTH_FEE_TIER_30BPS', path: '/api/miner/liquidity-depth?pool=Uniswap%20v3%20ETH%2FUSDC%200.3%25&chain=ethereum', check: j => j.ok === true && /0\.30%/i.test(String(j.dex || '')) && Number(j.liquidity_usd) > 1000000 },
+  { intent: 'CONTRACT_OBLIGATION_NAMED_CORP', path: '/api/miner/contract-obligation?contract=Acme%20Corp%20shall%20deliver%20500%20servers%20within%2015%20business%20days.', check: j => j.verdict === 'Unclear' && Array.isArray(j.obligations) && j.obligations.some(o => /Acme Corp/i.test(o)) },
+  { intent: 'URL_SCAN_VERDICT', path: '/api/miner/url-scan?url=https%3A%2F%2Funiswap.org', check: j => j.ok === true && typeof j.safe === 'boolean' && j.safe === true },
+  { intent: 'THREAT_INTELLIGENCE_INDICATOR', path: '/api/miner/threat-intel?indicator=FnvLGtucz4E1ppJHRTev6Qv4X7g8Pw6WPStHCcbAKbfx', check: j => j.ok === true && j.malicious === true },
+  { intent: 'TRANSACTION_RISK_GENERAL', path: '/api/miner/transaction-risk?transaction=0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13&chain=sepolia', check: j => j.ok === true && ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(j.risk_level) && typeof j.risk_score === 'number' },
+  { intent: 'SSL_VERIFICATION_CERT', path: '/api/miner/ssl-verify?host=praman-desk.vercel.app', check: j => j.ok === true && j.certificate_valid === true },
+  { intent: 'CVE_LOOKUP_CVSS', path: '/api/miner/cve-lookup?cve_id=CVE-2024-3094', check: j => j.ok === true && Number(j.cvss_score) >= 9 && j.severity === 'CRITICAL' },
+  { intent: 'SHIPMENT_DELAY_RISK_GENERAL', path: '/api/miner/shipment-delay?shipment=Shanghai%20to%20Los%20Angeles%20container%20vessel', check: j => j.ok === true && ['low', 'moderate', 'high', 'severe'].includes(j.risk_level) && typeof j.delay_probability === 'number' },
+  { intent: 'IP_GEOLOCATION_GENERAL', path: '/api/miner/ip-geolocation?ip=8.8.8.8', check: j => j.ok === true && /United States/i.test(String(j.country || '')) && typeof j.latitude === 'number' },
+  { intent: 'TOKEN_HOLDER_COUNT_GENERAL', path: '/api/miner/token-holders?token=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&chain=ethereum', check: j => j.ok === true && Number(j.holders_count) > 100000 && j.token_symbol === 'USDC' },
+  { intent: 'WASH_TRADING_DETECTION_GENERAL', path: '/api/miner/wash-trading?subject=WETH%2FUSDC', check: j => j.ok === true && ['wash_trading', 'likely_wash_trading', 'inconclusive', 'organic'].includes(j.verdict) && typeof j.wash_volume_pct === 'number' },
+  { intent: 'TELEGRAPH_KNOWLEDGE_GENERAL', path: '/api/miner/telegraph-knowledge?question=What%20is%20the%20Sepolia%20Diamond%20address%20for%20Telegraph%20Protocol%3F', check: j => j.ok === true && j.knowledge_topic === 'telegraph' && String(j.brief || '').length <= 80 && String(j.brief || '').length > 0 }
 ];
 
 async function main() {

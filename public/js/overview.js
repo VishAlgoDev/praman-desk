@@ -10,7 +10,7 @@ const CODE_SNIPPETS = {
     "disputeResolutionAuthorized": true,
     "reconciledDisbursementUsdc": 80000
   }'`,
-  solana: `import { SolanaSpendGuard } from "praman-sdk/solana";
+  solana: `import { SolanaSpendGuard } from "@vishalgodev/praman-sdk/solana";
 
 const guard = new SolanaSpendGuard({
   maxSingleSpendUsdc: 500,
@@ -20,7 +20,8 @@ const guard = new SolanaSpendGuard({
 });
 
 await guard.verifyBeforeSign(transaction, { rpcConnection });`,
-  python: `from packages.praman_sdk.praman import PramanClient
+  python: `# Clone/install packages/praman-sdk and add packages/ to PYTHONPATH
+from praman_sdk.praman import PramanClient
 
 client = PramanClient("https://praman-desk.vercel.app")
 verdict = client.audit_trade_assurance(
@@ -118,7 +119,7 @@ async function loadHeroMemo(caseId) {
       }
     }
     if (rule) rule.textContent = data.title || data.clearanceSummary || verdict;
-    if (net) net.textContent = data.chain === "solana-devnet" ? "Solana Devnet / Pre-Sign" : "Ethereum Sepolia (TakarSettle)";
+    if (net) net.textContent = data.chain === "solana-devnet" ? "Solana Devnet / Pre-Sign" : "Ethereum Sepolia (PramanEscrow)";
     if (sig) {
       sig.textContent = memo.signature
         ? `SHA-256: ${memo.sha256 || "n/a"}\nSigner: ${memo.signerAddress || "n/a"}\nEIP-191: ${String(memo.signature).slice(0, 44)}...`

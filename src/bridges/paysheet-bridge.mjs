@@ -45,8 +45,7 @@ export async function evaluatePaysheetConsensus({
     }
   }
 
-  // 2. 3-Way Quorum Vote Synthesis
-  // Miner 1: Praman Desk (live in-memory)
+  // 2. Quorum Synthesis (Live Telegraph peer calls when TELEGRAPH_LIVE_QUORUM=true, else explicit single-miner mode)
   const votePraman = {
     miner: 'Praman Desk (Devnode #6164 / Diamond #6201)',
     minerId: 6164,
@@ -58,30 +57,45 @@ export async function evaluatePaysheetConsensus({
     reason: pramanReason
   };
 
-  // Miner 2 & 3: Independent Consensus Peers (Counterproof & Sanctions Name Evidence)
-  // If target matches known sanctioned entity/address, all 3 agree to halt.
-  const voteCounterproof = {
-    miner: 'Counterproof / ZK Sanctions (#731002)',
-    minerId: 731002,
-    status: pramanMatched ? 'SANCTIONED_HALT' : 'CLEARED',
-    matched: pramanMatched
-  };
+  const quorum = [votePraman];
+  let consensusMode = 'local_single_miner_screen';
+  const livePeerUrl = process.env.TELEGRAPH_NODE_URL || 'https://devnode.telegraphprotocol.com';
 
-  const voteSanctionsEvidence = {
-    miner: 'Sanctions Name Evidence (#64175)',
-    minerId: 64175,
-    status: pramanMatched ? 'SANCTIONED_HALT' : 'CLEARED',
-    matched: pramanMatched
-  };
+  if (process.env.TELEGRAPH_LIVE_QUORUM === 'true' && rawTarget) {
+    try {
+      const peerRes = await fetch(`${livePeerUrl.replace(/\/$/, '')}/api/ask`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          intent: 'SANCTIONS_SCREENING_MATCH_GENERAL',
+          params: { name: rawTarget }
+        }),
+        signal: AbortSignal.timeout(4000)
+      });
+      if (peerRes.ok) {
+        const peerJson = await peerRes.json();
+        const peerMatched = Boolean(peerJson?.matched ?? peerJson?.match_found);
+        quorum.push({
+          miner: `Telegraph Peer Network (${peerJson?.miner_id || 'ranked'})`,
+          minerId: peerJson?.miner_id || null,
+          status: peerMatched ? 'SANCTIONED_HALT' : 'CLEARED',
+          matched: peerMatched,
+          live: true
+        });
+        consensusMode = 'live_quorum';
+      }
+    } catch {
+      consensusMode = 'local_single_miner_screen_peer_timeout';
+    }
+  }
 
-  const quorum = [votePraman, voteCounterproof, voteSanctionsEvidence];
   const matchedCount = quorum.filter(v => v.matched).length;
   const clearedCount = quorum.filter(v => !v.matched).length;
 
-  const consensusReached = true;
-  const cleared = matchedCount === 0 && clearedCount === 3;
+  const consensusReached = consensusMode === 'live_quorum' ? quorum.length >= 2 : true;
+  const cleared = matchedCount === 0 && clearedCount === quorum.length;
   const action = cleared ? 'APPROVE_PAYROLL_STREAM' : 'HALT_AND_FREEZE';
-  const verdict = cleared ? 'CONSENSUS_CLEARED' : 'CRITICAL_SANCTIONS_BLOCK';
+  const verdict = cleared ? 'CLEARED' : 'CRITICAL_SANCTIONS_BLOCK';
 
   const tEnd = performance.now();
   const latencyMs = Number((tEnd - tStart).toFixed(2));
@@ -101,7 +115,8 @@ export async function evaluatePaysheetConsensus({
 
   return {
     success: true,
-    bridge: 'Praman Desk x Paysheet 3-Way Consensus Bridge',
+    mode: consensusMode,
+    bridge: 'Praman Desk x Paysheet Compliance Bridge',
     issueReference: 'https://github.com/telegraphprotocol/bounties/issues/214',
     pullRequest: 'https://github.com/Timidan/paysheet/pull/1',
     payrollId,

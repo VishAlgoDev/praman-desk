@@ -10,18 +10,18 @@ fs.mkdirSync(evalDir, { recursive: true });
 // 1. ONCHAIN_TX_LOOKUP_GENERAL (15 verified on-chain transactions)
 const ONCHAIN_TX_PAIRS = [
   {
-    prompt: "Verify the execution status, block number, gas used, and transfer value for Ethereum Sepolia transaction 0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de on TakarSettle5 contract.",
-    chosen: "ONCHAIN TX VERDICT: SUCCESS (CONFIRMED). (1) Network: Ethereum Sepolia (chainId: 11155111). (2) Block: 12200597. (3) Contract: TakarSettle5 (0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B). (4) Sender: 0x98021b20Efdb7ae2C57366010a6E0fDE207b4466. (5) Method: settleDispute(bytes32,uint8,uint256,bytes). (6) Status: 0x1 (Success), Gas Used: 112,450 gas. Transaction settled Case 2 Quantity Dispute on-chain.",
-    rejected: "ONCHAIN TX VERDICT: FAILED. The transaction reverted with error 'UnauthorizedCaller' at block 12200595 due to invalid dispute signature.",
+    prompt: "Verify the execution status, block number, gas used, and transfer value for Ethereum Sepolia transaction 0xbfc224642b555cbeb957f3272740f0c8ff3830df2ff191f2c9513f09e50e6e99 on PramanEscrow contract.",
+    chosen: "ONCHAIN TX VERDICT: SUCCESS (CONFIRMED). (1) Network: Ethereum Sepolia (chainId: 11155111). (2) Block: 12227282. (3) Contract: PramanEscrow (0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c). (4) Sender: 0x98021b20Efdb7ae2C57366010a6E0fDE207b4466. (5) Method: settleSplit(uint256,uint256,uint256,bytes32,bytes32,uint16). (6) Status: 0x1 (Success). Transaction settled Deal #0 PO-ALI-9021 split on-chain (0.80 TEST_USDC released / 0.20 TEST_USDC refunded).",
+    rejected: "ONCHAIN TX VERDICT: FAILED. The transaction reverted with error 'UnauthorizedArbiter' due to invalid split parameters.",
     label_kind: "preference_pair",
-    provenance: { source_kind: "block_explorer", source_url: "https://sepolia.etherscan.io/tx/0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de" }
+    provenance: { source_kind: "block_explorer", source_url: "https://sepolia.etherscan.io/tx/0xbfc224642b555cbeb957f3272740f0c8ff3830df2ff191f2c9513f09e50e6e99" }
   },
   {
-    prompt: "Verify transaction 0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13 on Ethereum Sepolia TakarSettle v4 contract.",
-    chosen: "ONCHAIN TX VERDICT: SUCCESS (CONFIRMED). (1) Network: Ethereum Sepolia (chainId: 11155111). (2) Block: 12200598. (3) Contract: TakarSettle v4 (0x310275e6D66818E068245326bB9e398822304248). (4) Function: resolveFerryDispute. (5) Status: 0x1 (Success), Gas Used: 98,230 gas. Transferred 80,000 USDC settlement to supplier with 20,000 USDC refund to buyer.",
-    rejected: "ONCHAIN TX VERDICT: PENDING. Transaction remains stuck in Sepolia mempool with underpriced gas (effective gas price 0.05 gwei below base fee).",
+    prompt: "Verify transaction 0xc69358c2763421436fb75e582e11220ccf0fad5662a1f5c7192bd935c7d428e0 on Ethereum Sepolia PramanEscrow contract.",
+    chosen: "ONCHAIN TX VERDICT: SUCCESS (CONFIRMED). (1) Network: Ethereum Sepolia (chainId: 11155111). (2) Block: 12227285. (3) Contract: PramanEscrow (0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c). (4) Function: haltAndRefund. (5) Status: 0x1 (Success). Returned 0.50 TEST_USDC in full to buyer after circuit breaker halt.",
+    rejected: "ONCHAIN TX VERDICT: PENDING. Transaction remains stuck in Sepolia mempool with underpriced gas.",
     label_kind: "preference_pair",
-    provenance: { source_kind: "block_explorer", source_url: "https://sepolia.etherscan.io/tx/0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13" }
+    provenance: { source_kind: "block_explorer", source_url: "https://sepolia.etherscan.io/tx/0xc69358c2763421436fb75e582e11220ccf0fad5662a1f5c7192bd935c7d428e0" }
   },
   {
     prompt: "Audit Ethereum Mainnet transaction 0x5c504ed432cb51138bcf09aa5e8a410dd4a1e204ef84bfed1be16dfba1b22060 (Uniswap V3 Swap).",

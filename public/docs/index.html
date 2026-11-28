@@ -20,7 +20,7 @@
   </script>
   <title>Documentation | Praman Pre-Signature Clearing, WASM &amp; MCP Spec</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <meta name="description" content="Technical documentation for Praman: 651-byte WASM arithmetic comparator, Solana Token-2022 TLV spend guard, 19-tool keyless MCP server, HTTP API reference, and threat model.">
+  <meta name="description" content="Technical documentation for Praman: 651-byte WASM arithmetic comparator, Solana Token-2022 TLV spend guard, 29-tool keyless MCP server, HTTP API reference, and threat model.">
   <link rel="canonical" href="https://praman-desk.vercel.app/docs">
   <link rel="stylesheet" href="/styles/praman-tokens.css">
   <link rel="stylesheet" href="/styles/praman-shell.css">
@@ -172,7 +172,7 @@
           <li><a href="#spend-guard-docs">Spend Guard &amp; Token-2022</a></li>
           <li><a href="#two-mind-docs">Two-Mind FX &amp; Tencent #01/#03</a></li>
           <li><a href="#wasm-spec">651B WASM Spec</a></li>
-          <li><a href="#mcp-integration">19-Tool MCP &amp; SDKs</a></li>
+          <li><a href="#mcp-integration">29-Tool MCP &amp; SDKs</a></li>
           <li><a href="#http-api">HTTP API Reference</a></li>
           <li><a href="#threat-model">Pricing &amp; Threat Model</a></li>
           <li><a href="#live-limits">Honest Live Limits</a></li>
@@ -242,7 +242,7 @@
 
         <section id="mcp-integration" class="doc-section">
           <span class="eyebrow">06 / Agent Tooling</span>
-          <h2>Keyless 19-Tool Streamable MCP Server &amp; SDKs</h2>
+          <h2>Keyless 29-Tool Streamable MCP Server &amp; SDKs</h2>
           <p>Connect Claude Desktop, Cursor, or Antigravity without API keys:</p>
           <pre class="pre-doc dark-island" id="docs-mcp-snippet">{
   "mcpServers": {
@@ -259,7 +259,7 @@
         <section id="http-api" class="doc-section">
           <span class="eyebrow">07 / HTTP API Reference</span>
           <h2>Core Public Endpoints</h2>
-          <div class="table-wrapper" style="margin-top:1rem">
+          <div class="table-wrapper" tabindex="0" role="region" aria-label="Core public API endpoints" style="margin-top:1rem">
             <table class="data-table stack-mobile">
               <thead>
                 <tr>
@@ -322,7 +322,7 @@
                 <tr>
                   <th scope="row" data-label="Endpoint" class="mono">/api/ledger</th>
                   <td data-label="Method" class="mono">GET</td>
-                  <td data-label="Purpose">32 Sepolia miner settlements + Takar dispute resolutions</td>
+                  <td data-label="Purpose">32 Sepolia miner settlements + PramanEscrow deals</td>
                 </tr>
                 <tr>
                   <th scope="row" data-label="Endpoint" class="mono">/api/pilot-inquiry</th>
@@ -384,7 +384,7 @@
             <li><a href="/">Company Overview</a></li>
             <li><a href="/desks">Operator Desks (5 Workflows)</a></li>
             <li><a href="/verify">Cryptographic Receipt Verifier</a></li>
-            <li><a href="/docs">Docs &amp; 19-Tool MCP</a></li>
+            <li><a href="/docs">Docs &amp; 29-Tool MCP</a></li>
             <li><a href="/roadmap">Roadmap &amp; Pilot Intake</a></li>
             <li><a href="/api/audit/case?case=po-ali-9021&format=html" target="_blank" rel="noopener">Sample Statutory Certificate</a></li>
           </ul>
@@ -402,8 +402,8 @@
         <nav class="footer-col" aria-label="Verified Contracts">
           <h3>Verified Roots</h3>
           <ul>
-            <li><a href="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" target="_blank" rel="noopener">TakarSettle v4 · Sepolia</a></li>
-            <li><a href="https://sepolia.etherscan.io/address/0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B" target="_blank" rel="noopener">TakarSettle5 · Sepolia</a></li>
+            <li><a href="https://sepolia.etherscan.io/address/0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c" target="_blank" rel="noopener">PramanEscrow · Sepolia</a></li>
+            <li><a href="https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b" target="_blank" rel="noopener">Telegraph Diamond #6201</a></li>
             <li><a href="https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115" target="_blank" rel="noopener">EAS Record #33d85bed</a></li>
             <li><a href="https://solscan.io/tx/E3qVPMwc?cluster=devnet" target="_blank" rel="noopener">Solana Devnet · E3qVPMwc</a></li>
             <li><a href="/api/mcp" target="_blank" rel="noopener">Keyless Streamable MCP</a></li>

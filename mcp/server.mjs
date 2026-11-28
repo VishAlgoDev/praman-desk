@@ -30,6 +30,20 @@ import {
   evaluateMiningIntelligencePrompt,
   getLiveGridPowerPrice,
 } from '../src/handlers.mjs';
+import { scoreFraudRisk } from '../src/intelligence/commercial-trust-intents.mjs';
+import { executeWebSearch, lookupOnchainTx, verifyTokenTotalSupply } from '../src/universal-intents.mjs';
+import {
+  scanUrlVerdict,
+  checkThreatIndicator,
+  assessTransactionRisk,
+  verifySslCertificate,
+  lookupCveCvss,
+  assessShipmentDelayRisk,
+  geolocateIpAddress,
+  getTokenHolderCount,
+  detectWashTrading,
+  answerTelegraphKnowledge,
+} from '../src/intelligence/expansion-intents.mjs';
 import { generateComplianceCertificate } from '../src/certificate.mjs';
 import { evaluateCounterpartyShield, checkFakeWatchDomain } from '../src/bridges/fakewatch-bridge.mjs';
 import { generateRugReceiptProof } from '../src/bridges/rugreceipt-bridge.mjs';
@@ -37,6 +51,7 @@ import { evaluatePaysheetConsensus } from '../src/bridges/paysheet-bridge.mjs';
 import { evaluateCreativeQa } from '../src/creative-qa.mjs';
 import { getWasmInstance } from '../comparator/wasm-buffer.mjs';
 import { GoldRushAggregator } from '../examples/gold-rush-aggregator/gold-rush-aggregator.mjs';
+import { MALICIOUS_DRAINER_ADDRESSES } from '../packages/praman-sdk/solana.js';
 
 const goldRushAggregator = new GoldRushAggregator();
 
@@ -848,6 +863,96 @@ export const TOOLS = [
       required: ['advertiserName', 'creativeCopy', 'spendAmountUsdc'],
     },
   },
+  {
+    name: 'scan_url_verdict',
+    description: 'URL_SCAN_VERDICT: Scan a URL across FakeWatch/ScamSniffer typosquatting heuristics and Abuse.ch URLhaus threat feeds.',
+    inputSchema: {
+      type: 'object',
+      properties: { url: { type: 'string', description: 'URL to scan for phishing or malware.' } },
+      required: ['url'],
+    },
+  },
+  {
+    name: 'check_threat_indicator',
+    description: 'THREAT_INTELLIGENCE_INDICATOR: Correlate IPv4, domain, file hash, CVE, or wallet address against CISA KEV, URLhaus, FakeWatch, and OFAC SDN.',
+    inputSchema: {
+      type: 'object',
+      properties: { indicator: { type: 'string', description: 'IP, domain, URL, hash, CVE, or wallet address.' } },
+      required: ['indicator'],
+    },
+  },
+  {
+    name: 'assess_transaction_risk',
+    description: 'TRANSACTION_RISK_GENERAL: Evaluate EVM transaction hash calldata (unlimited ERC-20 approve, setApprovalForAll, permit), counterparty SDN, and drainer risk.',
+    inputSchema: {
+      type: 'object',
+      properties: { transaction: { type: 'string', description: 'Transaction hash (0x...) or description.' }, chain: { type: 'string', description: 'Optional chain name.' } },
+      required: ['transaction'],
+    },
+  },
+  {
+    name: 'verify_ssl_certificate',
+    description: 'SSL_VERIFICATION_CERT: Perform live TLS handshake to verify certificate trust, issuer, expiry, and days remaining.',
+    inputSchema: {
+      type: 'object',
+      properties: { host: { type: 'string', description: 'Hostname to verify (e.g. "praman-desk.vercel.app").' } },
+      required: ['host'],
+    },
+  },
+  {
+    name: 'lookup_cve_cvss',
+    description: 'CVE_LOOKUP_CVSS: Look up official CVSS base score, severity, description, and references via NIST NVD v2 and MITRE CVE AWG.',
+    inputSchema: {
+      type: 'object',
+      properties: { cve_id: { type: 'string', description: 'CVE identifier (e.g. "CVE-2024-3094").' } },
+      required: ['cve_id'],
+    },
+  },
+  {
+    name: 'assess_shipment_delay_risk',
+    description: 'SHIPMENT_DELAY_RISK_GENERAL: Assess maritime/port logistics delay probability using live Open-Meteo port weather and Red Sea/Panama corridor signals.',
+    inputSchema: {
+      type: 'object',
+      properties: { shipment: { type: 'string', description: 'Shipment route, port, or tracking details.' } },
+      required: ['shipment'],
+    },
+  },
+  {
+    name: 'geolocate_ip',
+    description: 'IP_GEOLOCATION_GENERAL: Resolve country, city, latitude, longitude, and ISP/ASN for any public IP address.',
+    inputSchema: {
+      type: 'object',
+      properties: { ip: { type: 'string', description: 'IPv4 or IPv6 address.' } },
+      required: ['ip'],
+    },
+  },
+  {
+    name: 'get_token_holder_count',
+    description: 'TOKEN_HOLDER_COUNT_GENERAL: Retrieve live token holder count and symbol across Ethereum, Base, Arbitrum, Optimism, Polygon, and Sepolia via Blockscout/Ethplorer.',
+    inputSchema: {
+      type: 'object',
+      properties: { token: { type: 'string', description: 'Token contract address or symbol.' }, chain: { type: 'string', description: 'Blockchain name.', default: 'ethereum' } },
+      required: ['token'],
+    },
+  },
+  {
+    name: 'detect_wash_trading',
+    description: 'WASH_TRADING_DETECTION_GENERAL: Detect synthetic DEX turnover ratio, buy/sell symmetry, and shallow-pool churning via DexScreener.',
+    inputSchema: {
+      type: 'object',
+      properties: { subject: { type: 'string', description: 'Token symbol, address, or DEX pair.' } },
+      required: ['subject'],
+    },
+  },
+  {
+    name: 'answer_telegraph_knowledge',
+    description: 'TELEGRAPH_KNOWLEDGE_GENERAL: Answer Telegraph Protocol architecture/contract questions and general queries with grounded sources and <=80 char brief.',
+    inputSchema: {
+      type: 'object',
+      properties: { question: { type: 'string', description: 'Question to answer.' } },
+      required: ['question'],
+    },
+  },
 ];
 
 // Execute an MCP tool deterministically (shared by stdio and Streamable HTTP /api/mcp)
@@ -1064,6 +1169,55 @@ export async function executeMcpTool(name, inputArgs = {}) {
           });
           break;
 
+        case 'scan_url_verdict':
+          result = await scanUrlVerdict(args, { checkFakeWatchDomain });
+          break;
+
+        case 'check_threat_indicator':
+          result = await checkThreatIndicator(args, {
+            screenSanctions,
+            checkFakeWatchDomain,
+            maliciousDrainers: MALICIOUS_DRAINER_ADDRESSES,
+          });
+          break;
+
+        case 'assess_transaction_risk':
+          result = await assessTransactionRisk(args, {
+            lookupOnchainTx,
+            screenSanctions,
+            scoreFraudRisk,
+            checkFakeWatchDomain,
+          });
+          break;
+
+        case 'verify_ssl_certificate':
+          result = await verifySslCertificate(args);
+          break;
+
+        case 'lookup_cve_cvss':
+          result = await lookupCveCvss(args);
+          break;
+
+        case 'assess_shipment_delay_risk':
+          result = await assessShipmentDelayRisk(args);
+          break;
+
+        case 'geolocate_ip':
+          result = await geolocateIpAddress(args);
+          break;
+
+        case 'get_token_holder_count':
+          result = await getTokenHolderCount(args, { verifyTokenTotalSupply });
+          break;
+
+        case 'detect_wash_trading':
+          result = await detectWashTrading(args);
+          break;
+
+        case 'answer_telegraph_knowledge':
+          result = await answerTelegraphKnowledge(args, { executeWebSearch });
+          break;
+
         default:
           return {
             content: [{ type: 'text', text: `Unknown tool: ${name}` }],
@@ -1098,7 +1252,7 @@ export async function startServer() {
   if (cliArgs.includes('--help') || cliArgs.includes('-h') || cliArgs.includes('--version') || cliArgs.includes('-v')) {
     console.log([
       'Praman Spend Guard MCP Server v1.0.0',
-      'Autonomous Pre-Payment Firewall for AI Agents & DAOs (18 deterministic tools)',
+      'Autonomous Pre-Payment Firewall for AI Agents & DAOs (' + TOOLS.length + ' deterministic tools)',
       '',
       'Usage:',
       '  npx -y --package=github:VishAlgoDev/praman-desk praman-spend-guard-mcp [options]',

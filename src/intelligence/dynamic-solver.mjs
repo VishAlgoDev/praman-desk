@@ -395,9 +395,10 @@ export function parseDynamicContractObligation(text) {
 
   const PARTY_ROLES = '(?:supplier|vendor|seller|contractor|provider|service\\s+provider|customer|buyer|client|company|platform|operator|licensor|licensee|landlord|lessor|tenant|lessee|employer|employee|borrower|lender|insurer|host|recipient|disclosing\\s+party|neither\\s+party|either\\s+party|each\\s+party|both\\s+parties|party|parties)';
   const deonticSentenceRe = new RegExp(`\\b${PARTY_ROLES}\\s+(?:shall\\s+not|must\\s+not|may\\s+not|shall|must|agrees?\\s+to|is\\s+(?:obligated|required|prohibited|entitled)\\s+to|has\\s+the\\s+(?:right|obligation)\\s+to|warrants?\\s+(?:that|to)|covenants?\\s+to|may\\b)`, 'i');
+  const namedObligationRe = /\b[A-Z][A-Za-z0-9&.,\s-]{1,40}\s+(?:shall\s+not|must\s+not|shall|must|agrees?\s+to|is\s+(?:obligated|required|prohibited)\s+to|will\s+(?:deliver|pay|provide|notify|indemnify))\b/;
 
   for (const sent of sentences) {
-    if (deonticSentenceRe.test(sent) && sent.length <= 260) {
+    if ((deonticSentenceRe.test(sent) || namedObligationRe.test(sent)) && sent.length <= 260) {
       pushObs(sent);
       pushClause(`"${sent}"`);
     }

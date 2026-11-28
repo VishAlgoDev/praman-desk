@@ -36,10 +36,10 @@ async function runTests() {
   for (const t of toolsResult.tools) {
     console.log(`   - ${t.name}: ${t.description.slice(0, 65)}...`);
   }
-  if (toolsResult.tools.length !== 19) {
-    throw new Error(`Expected 19 tools, found ${toolsResult.tools.length}`);
+  if (toolsResult.tools.length !== 29) {
+    throw new Error(`Expected 29 tools, found ${toolsResult.tools.length}`);
   }
-  console.log('   PASS: All 19 tools registered.\n');
+  console.log('   PASS: All 29 tools registered.\n');
 
   // Test 2: verify_counterparty (STRIPE, LLC)
   console.log('3. Testing tool: verify_counterparty (STRIPE, LLC)...');
@@ -491,8 +491,31 @@ async function runTests() {
   console.log(`   Result: Pass=${qaPassParsed.verdict} (${qaPassParsed.advertiser?.lei}) | Hold=${qaHoldParsed.verdict} (${qaHoldParsed.flags.length} flags caught)`);
   console.log('   PASS: audit_creative_qa succeeded.\n');
 
+  // Test 25: verify_ssl_certificate (Expansion SSL_VERIFICATION_CERT)
+  console.log('25. Testing tool: verify_ssl_certificate (praman-desk.vercel.app)...');
+  const resSsl = await client.callTool({ name: 'verify_ssl_certificate', arguments: { host: 'praman-desk.vercel.app' } });
+  const sslParsed = JSON.parse(resSsl.content[0].text);
+  if (!sslParsed.certificate_valid) throw new Error(`Expected valid SSL cert, got ${JSON.stringify(sslParsed)}`);
+  console.log(`   Result: issuer=${sslParsed.issuer} days=${sslParsed.days_remaining}`);
+
+  // Test 26: geolocate_ip (Expansion IP_GEOLOCATION_GENERAL)
+  console.log('26. Testing tool: geolocate_ip (8.8.8.8)...');
+  const resIp = await client.callTool({ name: 'geolocate_ip', arguments: { ip: '8.8.8.8' } });
+  const ipParsed = JSON.parse(resIp.content[0].text);
+  if (!/United States/i.test(String(ipParsed.country || ''))) throw new Error(`Expected US geo, got ${JSON.stringify(ipParsed)}`);
+  console.log(`   Result: ${ipParsed.city}, ${ipParsed.country} (${ipParsed.isp})`);
+
+  // Test 27: answer_telegraph_knowledge (Expansion TELEGRAPH_KNOWLEDGE_GENERAL)
+  console.log('27. Testing tool: answer_telegraph_knowledge...');
+  const resTk = await client.callTool({ name: 'answer_telegraph_knowledge', arguments: { question: 'What is the Sepolia Diamond contract address?' } });
+  const tkParsed = JSON.parse(resTk.content[0].text);
+  if (tkParsed.knowledge_topic !== 'telegraph' || !tkParsed.brief || tkParsed.brief.length > 80) {
+    throw new Error(`Invalid telegraph knowledge output: ${JSON.stringify(tkParsed)}`);
+  }
+  console.log(`   Result: topic=${tkParsed.knowledge_topic} brief="${tkParsed.brief}"`);
+
   await client.close();
-  console.log('=== All 24 MCP Integration Tests Passed with 100% Determinism ===');
+  console.log('=== All 27 MCP Integration Tests Passed with 100% Determinism ===');
 }
 
 runTests().catch((err) => {

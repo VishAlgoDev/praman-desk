@@ -3,7 +3,7 @@
 Official zero-dependency SDKs (TypeScript / JavaScript and Python) for autonomous pre-payment compliance verification and spend guardrails on the **Telegraph Protocol Season II**.
 
 ## Features
-- **<25ms OFAC SDN Screening**: In-memory hash checking across 19,565 global sanctions entities and blacklisted EVM addresses (including Lazarus Group).
+- **<25ms OFAC SDN Screening**: In-memory hash checking across 19,629 global sanctions entities and blacklisted EVM addresses (including Lazarus Group).
 - **GLEIF LEI Registry**: Instant corporate registry verification.
 - **651-Byte WebAssembly Comparator**: Float-drift-free, bit-exact line item reconciliation.
 - **Wholesale Power Settlement**: CAISO / ERCOT Locational Marginal Pricing (LMP) breakdown via `getGridPowerPrice`.

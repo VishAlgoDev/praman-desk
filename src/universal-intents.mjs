@@ -1135,7 +1135,26 @@ const KNOWN_TOKEN_ADDRESSES = {
     LINK: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
     UNI: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
     AAVE: '0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9',
-    USDY: '0x96F6eF951840721AdBF46Ac996b59E0235CB985C'
+    USDY: '0x96F6eF951840721AdBF46Ac996b59E0235CB985C',
+    ONDO: '0xfAbA6f8e4a5E8Ab82F62fe7C39859FA577269BE3',
+    ENA: '0x57e114B691Db790C35207b2e685D4A43181e6061',
+    USDE: '0x4c9EDD5852cd905f086C759E8383e09bff1E68B3',
+    PENDLE: '0x808507121B80c02388fAd14726482e061B8da827',
+    PEPE: '0x6982508145454Ce325dDbE47a25d4ec3d2311933',
+    SHIB: '0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE',
+    MKR: '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2',
+    LDO: '0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32',
+    CRV: '0xD533a949740bb3306d119CC777fa900bA034cd52',
+    ENS: '0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72',
+    COMP: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
+    RPL: '0xD33526068D116cE69F19A9ee46F0bd304F21A51f',
+    STETH: '0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84',
+    CBETH: '0xBe9895146f7AF43049ca1c1AE358B0541Ea49704',
+    RENDER: '0x6De037ef9aD2725EB40118Bb1702EBb27e4Aeb24',
+    FET: '0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85',
+    GRT: '0xc944E90C64B2c07662A292be6244BDf05Cda44a7',
+    WLD: '0x163f8C2467924be0ae7B5347228CABF260318753',
+    SKY: '0x56072C95FAA701256059aa122697B133aDEd9279'
   },
   sepolia: {
     USDC: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238',
@@ -1160,26 +1179,51 @@ const KNOWN_TOKEN_ADDRESSES = {
     USDC: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
     WETH: '0x4200000000000000000000000000000000000006',
     OP: '0x4200000000000000000000000000000000000042'
+  },
+  polygon: {
+    USDC: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359',
+    USDT: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F',
+    WETH: '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+    LINK: '0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39'
+  },
+  bsc: {
+    USDT: '0x55d398326f99059fF775485246999027B3197955',
+    USDC: '0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',
+    CAKE: '0x0E09FaBB73Bd3Ade0a17ECC321fD13a19e81cE82'
   }
 };
 
 const SYMBOL_STOPWORDS = new Set([
   'WHAT', 'IS', 'ARE', 'THE', 'TOTAL', 'CIRCULATING', 'MAX', 'SUPPLY', 'OF', 'ON', 'FOR', 'TOKEN',
-  'COIN', 'CHECK', 'VERIFY', 'ERC20', 'SPL', 'CHAIN', 'NETWORK', 'MAINNET', 'CURRENT', 'MINT', 'ADDRESS'
+  'COIN', 'CHECK', 'VERIFY', 'ERC20', 'SPL', 'CHAIN', 'NETWORK', 'MAINNET', 'CURRENT', 'MINT', 'ADDRESS',
+  'ETHEREUM', 'ETH', 'SOLANA', 'SOL', 'BASE', 'ARBITRUM', 'OPTIMISM', 'POLYGON', 'BSC', 'AVALANCHE', 'SEPOLIA',
+  'FINANCE', 'PROTOCOL', 'NETWORK', 'DAO', 'IN', 'AND', 'ITS'
 ]);
 
 function extractTokenSymbolCandidate(explicitText, combinedText) {
-  if (explicitText && !/0x[a-fA-F0-9]{40}/i.test(explicitText) && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(explicitText)) {
-    return explicitText.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  const parenMatch = `${explicitText} ${combinedText}`.match(/\(\s*\$?([A-Za-z0-9]{2,12})\s*\)/);
+  if (parenMatch && !SYMBOL_STOPWORDS.has(parenMatch[1].toUpperCase())) {
+    return parenMatch[1].toUpperCase();
+  }
+  const singleExplicit = String(explicitText || '').trim();
+  if (singleExplicit && !/\s/.test(singleExplicit) && !/0x[a-fA-F0-9]{40}/i.test(singleExplicit) && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(singleExplicit)) {
+    const cleaned = singleExplicit.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    if (cleaned && !SYMBOL_STOPWORDS.has(cleaned)) return cleaned;
+  }
+  const dollarMatch = combinedText.match(/\$([A-Za-z][A-Za-z0-9]{1,11})\b/);
+  if (dollarMatch && !SYMBOL_STOPWORDS.has(dollarMatch[1].toUpperCase())) {
+    return dollarMatch[1].toUpperCase();
   }
   const phraseMatch = combinedText.match(/\b(?:for|of|token)\s+([A-Za-z0-9]{2,15})\b/i);
   if (phraseMatch && !SYMBOL_STOPWORDS.has(phraseMatch[1].toUpperCase())) {
     return phraseMatch[1].toUpperCase();
   }
-  const allCaps = [...combinedText.matchAll(/\b([A-Za-z0-9]{2,12})\b/g)]
+  const tokens = [...combinedText.matchAll(/\b([A-Za-z0-9]{2,12})\b/g)]
     .map(m => m[1])
-    .filter(w => !SYMBOL_STOPWORDS.has(w.toUpperCase()) && (w === w.toUpperCase() || /^(?:sol|usdc|usdt|weth|wbtc|dai|link|uni|aave|arb|op|bonk|jup|wif|pyth|ray|aero|virtual)$/i.test(w)));
-  return allCaps[0] ? allCaps[0].toUpperCase() : '';
+    .filter(w => !SYMBOL_STOPWORDS.has(w.toUpperCase()));
+  const upperFirst = tokens.find(w => w === w.toUpperCase() && /[A-Z]/.test(w));
+  if (upperFirst) return upperFirst.toUpperCase();
+  return tokens[0] ? tokens[0].toUpperCase() : '';
 }
 
 export async function verifyTokenTotalSupply({ token_address, address, token, chain, question, query, prompt, text } = {}) {
@@ -1279,18 +1323,21 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
   }
 
   let targetAddress = evmMatch ? evmMatch[0] : null;
+  const searchTicker = extractTokenSymbolCandidate(explicitTokenText, combinedText);
+  if (!targetAddress && searchTicker) {
+    targetAddress = KNOWN_TOKEN_ADDRESSES[targetChain]?.[searchTicker] || (targetChain === 'ethereum' ? KNOWN_TOKEN_ADDRESSES.ethereum[searchTicker] : null) || null;
+  }
   if (!targetAddress) {
-    const symMatch = combinedText.match(/\b(TESTUSDC|USDC|USDT|WETH|WBTC|DAI|LINK|UNI|AAVE|USDY|PEPE|SHIB|ARB|OP|MKR|LDO|CRV|COMP|ENS|RPL|cbETH)\b/i);
+    const symMatch = combinedText.match(/\b(TESTUSDC|USDC|USDT|WETH|WBTC|DAI|LINK|UNI|AAVE|USDY|ONDO|ENA|USDE|PENDLE|PEPE|SHIB|ARB|OP|MKR|LDO|CRV|COMP|ENS|RPL|cbETH|stETH|RENDER|FET|GRT|WLD|SKY)\b/i);
     if (symMatch) {
       const sym = symMatch[1].toUpperCase();
       targetAddress = KNOWN_TOKEN_ADDRESSES[targetChain]?.[sym] || KNOWN_TOKEN_ADDRESSES.ethereum[sym] || null;
     }
   }
 
-  // Fallback: dynamically resolve unmapped ERC-20 / SPL token addresses via DexScreener search
+  // Fallback 1: dynamically resolve unmapped ERC-20 / SPL token addresses via DexScreener search
   if (!targetAddress && combinedText) {
-    const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon', solana: 'solana' };
-    const searchTicker = extractTokenSymbolCandidate(explicitTokenText, combinedText);
+    const dexChainMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum', optimism: 'optimism', polygon: 'polygon', bsc: 'bsc', avalanche: 'avalanche', solana: 'solana' };
     if (searchTicker) {
       try {
         const dsRes = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(searchTicker)}`, {
@@ -1311,6 +1358,33 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
         }
       } catch {}
     }
+  }
+
+  // Fallback 2: CoinGecko coin search -> platform contract resolution
+  if (!targetAddress && searchTicker) {
+    const cgPlatformMap = { ethereum: 'ethereum', base: 'base', arbitrum: 'arbitrum-one', optimism: 'optimistic-ethereum', polygon: 'polygon-pos', bsc: 'binance-smart-chain', avalanche: 'avalanche' };
+    const wantPlatform = cgPlatformMap[targetChain] || 'ethereum';
+    try {
+      const cgSearch = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(searchTicker)}`, {
+        signal: AbortSignal.timeout(4000)
+      });
+      if (cgSearch.ok) {
+        const cgJson = await cgSearch.json();
+        const bestCoin = (cgJson?.coins || []).find(c => String(c.symbol || '').toUpperCase() === searchTicker) || cgJson?.coins?.[0];
+        if (bestCoin?.id) {
+          const cRes = await fetch(`https://api.coingecko.com/api/v3/coins/${encodeURIComponent(bestCoin.id)}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false`, {
+            signal: AbortSignal.timeout(4500)
+          });
+          if (cRes.ok) {
+            const cData = await cRes.json();
+            const platAddr = cData?.platforms?.[wantPlatform];
+            if (platAddr && /^0x[a-fA-F0-9]{40}$/.test(platAddr)) {
+              targetAddress = platAddr;
+            }
+          }
+        }
+      }
+    } catch {}
   }
 
   if (!targetAddress) {
@@ -1948,10 +2022,21 @@ export async function verifyLiquidityDepth(params = {}) {
       if (validDash) pair = `${validDash[1].toUpperCase()}/${validDash[2].toUpperCase()}`;
     }
   }
+  const dexHintMatch = queryText.match(/\b(uniswap(?:\s*v[234])?|curve(?:\s*3pool)?|aerodrome|velodrome|sushiswap|sushi|pancakeswap|pancake|raydium|orca|meteora|balancer|camelot|traderjoe)\b/i);
+  const dexHint = dexHintMatch ? dexHintMatch[1].toLowerCase().replace(/\s+/g, '') : '';
   const explicitChainProvided = Boolean(params.chain || params.network);
-  let chain = normalizeChainName(params.chain || params.network || '', `${pair || ''} ${queryText}`) || 'ethereum';
+  let chain = normalizeChainName(params.chain || params.network || '', `${pair || ''} ${queryText}`) || '';
+  if (!chain && !explicitChainProvided) {
+    if (/aerodrome|alienbase/i.test(dexHint)) chain = 'base';
+    else if (/velodrome/i.test(dexHint)) chain = 'optimism';
+    else if (/camelot|gmx/i.test(dexHint)) chain = 'arbitrum';
+    else if (/raydium|orca|meteora|jupiter/i.test(dexHint)) chain = 'solana';
+    else if (/pancake/i.test(dexHint)) chain = 'bsc';
+  }
+  if (!chain) chain = 'ethereum';
   if (explicitSolPoolMatch && explicitPoolAddress && chain === 'ethereum') chain = 'solana';
   if (!explicitChainProvided && pair && /\b(SOL|WSOL|JUP|BONK|WIF|RAY|PYTH|JTO|ORCA)\b/i.test(pair)) chain = 'solana';
+  if (!pair && /3pool/i.test(queryText)) pair = 'DAI/USDC';
   if (!pair) pair = chain === 'solana' ? 'SOL/USDC' : 'ETH/USDC';
   pair = pair.toUpperCase().replace('-', '/');
   if (pair === 'USDC/ETH' || pair === 'USDC/WETH' || pair === 'WETH/USDC') pair = 'ETH/USDC';
@@ -2066,7 +2151,27 @@ export async function verifyLiquidityDepth(params = {}) {
     }
   }
 
-  const poolCfg = LIVE_UNIV3_POOLS[pair]?.[chain];
+  const isNonUniV3Dex = Boolean(dexHint && !/uniswapv3|uniswap$/i.test(dexHint));
+  const wants30Bps = /(?:0\.3%|30\s*bps|3000)/i.test(queryText);
+  const wants100Bps = /(?:1(?:\.0+)?%|100\s*bps|10000)/i.test(queryText);
+  let poolCfg = isNonUniV3Dex ? null : LIVE_UNIV3_POOLS[pair]?.[chain];
+  if (poolCfg && pair === 'ETH/USDC' && chain === 'ethereum') {
+    if (wants30Bps) {
+      poolCfg = {
+        address: '0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8',
+        dex: 'Uniswap v3 (0.30%)',
+        token0: { sym: 'USDC', addr: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', dec: 6, isUsdStable: true },
+        token1: { sym: 'WETH', addr: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', dec: 18, isUsdStable: false }
+      };
+    } else if (wants100Bps) {
+      poolCfg = {
+        address: '0x7BeA39867e4169DBe237d55C8242a8f2fcDcc387',
+        dex: 'Uniswap v3 (1.00%)',
+        token0: { sym: 'USDC', addr: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', dec: 6, isUsdStable: true },
+        token1: { sym: 'WETH', addr: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', dec: 18, isUsdStable: false }
+      };
+    }
+  }
   const rpcs = RPC_ENDPOINTS[chain] || [];
 
   if (poolCfg && rpcs.length > 0) {
@@ -2249,7 +2354,14 @@ export async function verifyLiquidityDepth(params = {}) {
         }
       } catch {}
     }
-    candidates.sort((a, b) => Number(b.liquidity?.usd || 0) - Number(a.liquidity?.usd || 0));
+    candidates.sort((a, b) => {
+      if (dexHint) {
+        const aHit = String(a.dexId || '').toLowerCase().includes(dexHint) || (dexHint.includes('curve') && /curve/i.test(a.dexId || '')) ? 1 : 0;
+        const bHit = String(b.dexId || '').toLowerCase().includes(dexHint) || (dexHint.includes('curve') && /curve/i.test(b.dexId || '')) ? 1 : 0;
+        if (aHit !== bHit) return bHit - aHit;
+      }
+      return Number(b.liquidity?.usd || 0) - Number(a.liquidity?.usd || 0);
+    });
     const best = candidates[0];
     if (best) {
       const liqUsd = Math.round(Number(best.liquidity?.usd || 0) * 100) / 100;

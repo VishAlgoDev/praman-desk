@@ -511,7 +511,7 @@
             </div>
 
             <div class="proof-anchors" aria-label="Verified infrastructure anchors">
-              <a class="proof-chip" href="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" target="_blank" rel="noopener">Sepolia TakarSettle v4</a>
+              <a class="proof-chip" href="https://sepolia.etherscan.io/address/0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c" target="_blank" rel="noopener">Sepolia PramanEscrow</a>
               <a class="proof-chip" href="https://anjoman.ai/dashboard/explore/miners/6201" target="_blank" rel="noopener">Anjoman Miner #6201</a>
               <a class="proof-chip" href="https://solscan.io/tx/E3qVPMwc?cluster=devnet" target="_blank" rel="noopener">Solana Devnet Settlement</a>
             </div>
@@ -548,7 +548,7 @@
                 </div>
                 <div>
                   <dt>Anchor Network</dt>
-                  <dd id="hm-net">Ethereum Sepolia (TakarSettle v4)</dd>
+                  <dd id="hm-net">Ethereum Sepolia (PramanEscrow)</dd>
                 </div>
               </dl>
               <div class="memo-sig" id="hm-sig">
@@ -566,7 +566,7 @@
           <div class="kpi-box">
             <div class="kpi-label">Canonical Escrow Baseline</div>
             <div class="kpi-value tabular">$100,000.00</div>
-            <p class="kpi-meta"><span class="badge">WORKED EXAMPLE</span> PO-ALI-9021 TakarSettle v4</p>
+            <p class="kpi-meta"><span class="badge">WORKED EXAMPLE</span> PO-ALI-9021 PramanEscrow (1.00 TEST_USDC Sepolia)</p>
           </div>
           <div class="kpi-box">
             <div class="kpi-label">Conforming Acceptance</div>
@@ -733,7 +733,7 @@
             <div>
               <span class="badge badge-ok">DESK 3 / RECORDED ON-CHAIN</span>
               <h3>32-Tx Sepolia Settlement Ledger</h3>
-              <p>Search, sort, and inspect 32 Sepolia payouts across 15 registered Telegraph miners, Takar Dispute resolvers, and Devnode signals.</p>
+              <p>Search, sort, and inspect 32 Sepolia payouts across 15 registered Telegraph miners, PramanEscrow deals, and Devnode signals.</p>
             </div>
             <span class="mono" style="font-size:0.78rem;color:var(--brand)">Open Settlement Ledger -></span>
           </a>
@@ -772,7 +772,7 @@
           </p>
         </div>
 
-        <div class="table-wrapper">
+        <div class="table-wrapper" tabindex="0" role="region" aria-label="Counterfactual benchmark results">
           <table class="data-table stack-mobile" aria-label="Counterfactual benchmark results">
             <thead>
               <tr>
@@ -840,9 +840,9 @@
         </div>
 
         <div class="flowing-list">
-          <a class="flowing-row" href="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" target="_blank" rel="noopener">
-            <span class="flowing-row-title">01 / TakarSettle v4 Settlement Vault</span>
-            <span class="flowing-row-sub">0x310275e6D66818E068245326bB9e398822304248 · Sepolia</span>
+          <a class="flowing-row" href="https://sepolia.etherscan.io/address/0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c" target="_blank" rel="noopener">
+            <span class="flowing-row-title">01 / PramanEscrow Sovereign Vault</span>
+            <span class="flowing-row-sub">0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c · Sepolia</span>
           </a>
           <a class="flowing-row" href="/desks#settlement-ledger">
             <span class="flowing-row-title">02 / 32-Transaction Sepolia Settlement Ledger</span>
@@ -853,7 +853,7 @@
             <span class="flowing-row-sub">Schema #d84485... · Client-Side SHA-256 + Signer Recovery</span>
           </a>
           <a class="flowing-row" href="/docs#mcp-integration">
-            <span class="flowing-row-title">04 / Keyless 19-Tool Streamable MCP Server</span>
+            <span class="flowing-row-title">04 / Keyless 29-Tool Streamable MCP Server</span>
             <span class="flowing-row-sub">https://praman-desk.vercel.app/api/mcp · Zero Auth Gate</span>
           </a>
         </div>
@@ -895,7 +895,7 @@
           <details class="praman-accordion">
             <summary>Honest Testnet &amp; Mainnet-Path Boundaries <span class="kbd-pill">Expand</span></summary>
             <p style="margin:0">
-              All smart contracts currently live on <strong>Ethereum Sepolia</strong> (TakarSettle v4 &amp; v5) and <strong>Solana Devnet</strong>. No Ethereum Mainnet or Solana Mainnet-Beta real user funds move unless you deploy your own production signer keys and RPC endpoints.
+              All smart contracts currently live on <strong>Ethereum Sepolia</strong> (<strong>PramanEscrow</strong> at <span class="mono">0x202f...342c</span> &amp; Telegraph Diamond Port) and <strong>Solana Devnet</strong>. No Ethereum Mainnet or Solana Mainnet-Beta real user funds move unless you deploy your own production signer keys and RPC endpoints.
             </p>
           </details>
           <details class="praman-accordion">
@@ -997,7 +997,7 @@
             <li><a href="/">Company Overview</a></li>
             <li><a href="/desks">Operator Desks (5 Workflows)</a></li>
             <li><a href="/verify">Cryptographic Receipt Verifier</a></li>
-            <li><a href="/docs">Docs &amp; 19-Tool MCP</a></li>
+            <li><a href="/docs">Docs &amp; 29-Tool MCP</a></li>
             <li><a href="/roadmap">Roadmap &amp; Pilot Intake</a></li>
             <li><a href="/api/audit/case?case=po-ali-9021&format=html" target="_blank" rel="noopener">Sample Statutory Certificate</a></li>
           </ul>
@@ -1017,8 +1017,8 @@
         <nav class="footer-col" aria-label="Verified Contracts">
           <h3>Verified Roots</h3>
           <ul>
-            <li><a href="https://sepolia.etherscan.io/address/0x310275e6D66818E068245326bB9e398822304248" target="_blank" rel="noopener">TakarSettle v4 · Sepolia</a></li>
-            <li><a href="https://sepolia.etherscan.io/address/0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B" target="_blank" rel="noopener">TakarSettle5 · Sepolia</a></li>
+            <li><a href="https://sepolia.etherscan.io/address/0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c" target="_blank" rel="noopener">PramanEscrow · Sepolia</a></li>
+            <li><a href="https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b" target="_blank" rel="noopener">Telegraph Diamond #6201</a></li>
             <li><a href="https://sepolia.easscan.org/attestation/view/0x33d85bed90eb3164c5124a7c26ca79be386003205265044d1425cea9b714e115" target="_blank" rel="noopener">EAS Record #33d85bed</a></li>
             <li><a href="https://solscan.io/tx/E3qVPMwc?cluster=devnet" target="_blank" rel="noopener">Solana Devnet · E3qVPMwc</a></li>
             <li><a href="/api/mcp" target="_blank" rel="noopener">Keyless Streamable MCP</a></li>
@@ -1037,7 +1037,7 @@
   </footer>
 
   <!-- Shared Command Palette Dialog -->
-  <dialog id="cmd-palette" class="cmd-palette" aria-labelledby="cmd-title">
+  <dialog id="cmd-palette" class="cmd-palette" closedby="any" aria-labelledby="cmd-title">
     <h2 id="cmd-title" class="sr-only">Command Search</h2>
     <div class="cmd-input-wrap">
       <input id="cmd-search-input" type="search" placeholder="Jump to desk, receipt case, or documentation..." aria-label="Search routes and cases">

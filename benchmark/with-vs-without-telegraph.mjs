@@ -174,18 +174,19 @@ export async function runBenchmark() {
     console.log(`▶ Executing ${scenario.id}: ${scenario.name}...`);
     totalPotentialLoss += scenario.potentialLossUsd;
 
-    // 1. Without Telegraph (Simulated Raw LLM Baseline)
+    // 1. Without Telegraph (Documented Adversarial Reference Failure Vector — static counterfactual, not a live LLM API call)
     const withoutTelegraph = {
       scenarioId: scenario.id,
-      architecture: 'Raw LLM Baseline (No Telegraph)',
+      architecture: 'Adversarial Reference Baseline (Static Unguarded Spec)',
+      baselineComparisonType: 'adversarial_failure_reference',
       verdict: scenario.baselineFailureMode.verdict,
       errorDetected: false,
       financialLoss: scenario.baselineFailureMode.lossIncurred,
       auditReceipt: null,
       primaryReason: scenario.baselineFailureMode.reason,
       hallucinationType: scenario.baselineFailureMode.hallucinationType,
-      latencyMs: 1250,
-      costMicroUsdc: 0 // Free or generic API cost
+      latencyMs: null,
+      costMicroUsdc: 0
     };
     totalLossWithoutTelegraph += withoutTelegraph.financialLoss;
 

@@ -122,7 +122,7 @@ export async function generateRugReceiptProof({
       contractSanctionsMatch: isContractSanctioned,
       deployerScreened: Boolean(dAddr),
       deployerSanctionsMatch: isDeployerSanctioned,
-      ofacListVersion: 'US Treasury OFAC SDN & Consolidated RAM Index (19,565 entities)'
+      ofacListVersion: `US Treasury OFAC SDN & Consolidated RAM Index (${(contractSanctions?.sdn_list_size || deployerSanctions?.sdn_list_size || 19629).toLocaleString()} entities)`
     },
     attestation: {
       sha256Seal: attestationHash,

@@ -144,7 +144,7 @@
     },
     {
       id: "PO-7781",
-      verifyCase: "takar-case-2",
+      verifyCase: "praman-escrow-0",
       lane: "release",
       escrow: 12400,
       computed: 12400,
@@ -649,24 +649,24 @@
       }
 
       const wrap = $("#lg-escrow-wrap");
-      const takar = Array.isArray(d.takarResolvers) ? d.takarResolvers : [];
+      const escrows = Array.isArray(d.escrowResolvers) ? d.escrowResolvers : [];
       const escrow = Array.isArray(d.escrowPurchases) ? d.escrowPurchases : [];
-      if (wrap && (takar.length || escrow.length)) {
+      if (wrap && (escrows.length || escrow.length)) {
         wrap.hidden = false;
         wrap.innerHTML = `<div class="card card-pad">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.85rem;flex-wrap:wrap;gap:0.5rem">
-            <h3 style="margin:0;font-size:1.05rem">Takar Dispute Resolutions &amp; Devnode Signals</h3>
-            <span class="badge">${takar.length} Takar · ${escrow.length} Devnode Signals</span>
+            <h3 id="lg-escrow-caption" style="margin:0;font-size:1.05rem">Sovereign PramanEscrow Settlements &amp; Devnode Signals</h3>
+            <span class="badge">${escrows.length} PramanEscrow · ${escrow.length} Devnode Signals</span>
           </div>
-          <div class="table-wrapper"><table class="data-table stack-mobile">
+          <div class="table-wrapper" tabindex="0" role="region" aria-labelledby="lg-escrow-caption"><table class="data-table stack-mobile">
             <thead><tr><th>Miner / Source</th><th>Case / Intent</th><th>Contract / Receipt</th><th>Block / Amount</th><th>Proof</th></tr></thead>
             <tbody>
-              ${takar
+              ${escrows
                 .map(
                   (r) => `<tr>
-                    <th scope="row" data-label="Source" class="mono">TAKAR #${esc(r.minerId || "20261117")}</th>
-                    <td data-label="Case">${esc(r.caseName || "Takar Dispute Resolution")}</td>
-                    <td data-label="Contract" class="mono">${esc(r.contractName || r.contract || "-")}</td>
+                    <th scope="row" data-label="Source" class="mono">${esc(r.contractName || "PramanEscrow")} #${esc(r.dealId ?? 0)}</th>
+                    <td data-label="Case">${esc(r.caseName || r.caseId || "PramanEscrow Deal")}</td>
+                    <td data-label="Contract" class="mono">${formatMiddleHash(r.contractAddress || "-")}</td>
                     <td data-label="Block" class="mono tabular">Block ${esc(r.blockNumber ?? "-")}</td>
                     <td data-label="Proof"><a class="mono" href="${ETHERSCAN}${esc(r.txHash)}" target="_blank" rel="noopener">${formatMiddleHash(r.txHash)}</a></td>
                   </tr>`

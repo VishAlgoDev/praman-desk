@@ -16,9 +16,9 @@ const rootDir = path.resolve(__dirname, '..');
 const evidenceDir = path.join(rootDir, 'evidence');
 
 const RPC = process.env.SEPOLIA_RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com';
-const COMMIT_HASH = process.env.MINER_YAML_COMMIT || '09927be';
+const COMMIT_HASH = process.env.MINER_YAML_COMMIT || 'HEAD';
 const PINNED_URL = `https://raw.githubusercontent.com/VishAlgoDev/praman-desk/${COMMIT_HASH}/miner.yaml`;
-const PREVIOUS_REGISTRATION_ID = BigInt(process.env.MINER_REGISTRATION_ID || '6199');
+const PREVIOUS_REGISTRATION_ID = BigInt(process.env.MINER_REGISTRATION_ID || '6201');
 const DRY_RUN = process.argv.includes('--dry-run');
 
 const MACHINA = '0xd68305cA83C7AF42A4F720144E7416fB53F8AaF4';
@@ -42,8 +42,18 @@ const SUPPORTED_INTENTS = [
   'LIQUIDITY_DEPTH_VERIFY_GENERAL',
   'B2B_IDENTITY_ENRICHMENT_GENERAL',
   'FRAUD_RISK_GENERAL',
-  'PAYMENT_METHOD_VERIFY_GENERAL'
-  // MINING_INTELLIGENCE_GENERAL: served via HTTP/miner.yaml but not yet bondable on Diamond.
+  'PAYMENT_METHOD_VERIFY_GENERAL',
+  'URL_SCAN_VERDICT',
+  'THREAT_INTELLIGENCE_INDICATOR',
+  'TRANSACTION_RISK_GENERAL',
+  'SSL_VERIFICATION_CERT',
+  'CVE_LOOKUP_CVSS',
+  'SHIPMENT_DELAY_RISK_GENERAL',
+  'IP_GEOLOCATION_GENERAL',
+  'TOKEN_HOLDER_COUNT_GENERAL',
+  'WASH_TRADING_DETECTION_GENERAL',
+  'TELEGRAPH_KNOWLEDGE_GENERAL'
+  // MINING_INTELLIGENCE_GENERAL & MULTI_MINER_DISCREPANCY_ARBITRATION: served via HTTP/miner.yaml
 ];
 
 const erc20Abi = parseAbi([
@@ -102,7 +112,7 @@ async function main() {
     await client.waitForTransactionReceipt({ hash: approveTx });
   }
 
-  const neededUsdcAllowance = 3000000n; // 3.00 USDC allowance covers incremental +0.21 USDC delta cleanly
+  const neededUsdcAllowance = 5000000n; // 5.00 USDC allowance covers up to 28-30 bonded intents cleanly
   const currentUsdcAllowance = await client.readContract({
     address: TEST_USDC,
     abi: erc20Abi,

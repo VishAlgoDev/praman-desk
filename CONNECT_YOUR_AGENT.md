@@ -13,7 +13,7 @@ Frontier AI models hallucinate invoice arithmetic, miss newly sanctioned EVM wal
 
 Connecting your agent to Praman Desk equips it with a **pre-transaction spend gate** and **autonomous compliance auditor**:
 1. **Invoice 3-Way Reconciliation**: Bit-exact WASM arithmetic catching 1-cent rounding fraud and tax mismatches.
-2. **OFAC SDN Sanctions Screening**: Real-time screening across 19,565 entities and 127 EVM crypto addresses.
+2. **OFAC SDN Sanctions Screening**: Real-time screening across 19,629+ entities (daily auto-refreshed) and EVM/Solana digital currency addresses.
 3. **Statutory Corporate Verification**: GLEIF LEI checks across 200+ jurisdictions.
 4. **SEC EDGAR Regulatory Filing Checks**: CIK and filing window verification.
 5. **On-Chain Transaction & Token Verification**: Deterministic EVM block, transaction, and supply checks.

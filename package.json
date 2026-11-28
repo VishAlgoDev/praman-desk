@@ -21,7 +21,6 @@
     "alibaba:demo": "node examples/alibaba-trade-assurance/alibaba-trade-assurance-demo.mjs",
     "bytedance:demo": "node examples/bytedance-creative-qa/bytedance-qa-demo.mjs",
     "agent:demo": "node examples/minds-spend-guard/demo-minds-spend-guard.mjs",
-    "takar:demo": "node examples/takar-second-opinion/takar-praman-escrow-bridge.mjs",
     "mcp:start": "node mcp/server.mjs",
     "mcp:test": "node mcp/test-mcp.mjs",
     "comparator:test": "node comparator/test-comparator.mjs",
@@ -60,5 +59,8 @@
     "@x402/evm": "^2.30.0",
     "@x402/fetch": "^2.30.0",
     "viem": "^2.57.17"
+  },
+  "devDependencies": {
+    "solc": "^0.8.39"
   }
 }

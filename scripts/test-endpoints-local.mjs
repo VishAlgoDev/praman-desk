@@ -459,7 +459,7 @@ async function run() {
 
     // 18. Keyless Streamable HTTP & JSON-RPC 2.0 MCP endpoint (/api/mcp)
     const mcpMeta = await check('/api/mcp');
-    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 19) {
+    if (mcpMeta.status !== 200 || mcpMeta.json.ok !== true || mcpMeta.json.transport !== 'streamable-http' || mcpMeta.json.toolsCount !== 29) {
       throw new Error(`GET /api/mcp metadata failed: ${JSON.stringify(mcpMeta)}`);
     }
     const mcpInit = await check('/api/mcp', 'POST', {
@@ -483,7 +483,7 @@ async function run() {
       id: 2,
       method: 'tools/list'
     });
-    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 19) {
+    if (mcpList.status !== 200 || !Array.isArray(mcpList.json.result?.tools) || mcpList.json.result.tools.length !== 29) {
       throw new Error(`POST /api/mcp tools/list failed: ${JSON.stringify(mcpList)}`);
     }
     const mcpCall = await check('/api/mcp', 'POST', {
@@ -812,8 +812,12 @@ async function run() {
       throw new Error(`Evaluator sanctions-batch failed: ${JSON.stringify({ badStatus: batchBad.status, good: batchGood.json })}`);
     }
     const ledgerCheck = await check('/api/ledger');
-    if (!(ledgerCheck.json.totalPaidCalls >= 32) || !Array.isArray(ledgerCheck.json.escrowPurchases) || ledgerCheck.json.escrowPurchases.length < 4 || !Array.isArray(ledgerCheck.json.takarResolvers) || ledgerCheck.json.takarResolvers.length < 2) {
-      throw new Error(`Ledger escrow/Takar arrays failed: ${JSON.stringify({ total: ledgerCheck.json.totalPaidCalls, escrow: ledgerCheck.json.escrowPurchases?.length, takar: ledgerCheck.json.takarResolvers?.length })}`);
+    if (!(ledgerCheck.json.totalPaidCalls >= 32) || !Array.isArray(ledgerCheck.json.escrowPurchases) || ledgerCheck.json.escrowPurchases.length < 4 || !Array.isArray(ledgerCheck.json.escrowResolvers) || ledgerCheck.json.escrowResolvers.length < 2) {
+      throw new Error(`Ledger escrow/PramanEscrow arrays failed: ${JSON.stringify({ total: ledgerCheck.json.totalPaidCalls, escrow: ledgerCheck.json.escrowPurchases?.length, resolvers: ledgerCheck.json.escrowResolvers?.length })}`);
+    }
+    const mineUnknown = await check('/api/verify/mine-dossier?siteNo=999999');
+    if (mineUnknown.status !== 200 || mineUnknown.json.verified !== false || mineUnknown.json.verdict !== 'UNVERIFIED_PROSPECT' || mineUnknown.json.wasmScoreBps > 0 || mineUnknown.json.reconciliation?.reconciled !== false) {
+      throw new Error(`Fail-closed verifyMineDossier unknown ID guard failed: ${JSON.stringify(mineUnknown.json)}`);
     }
     const invTotalAlias = await check('/api/miner/invoice-reconcile?po_total=1000&invoice_total=1000.01');
     if (invTotalAlias.status !== 200 || invTotalAlias.json.reconciled !== false || invTotalAlias.json.discrepancy !== 0.01) {

@@ -9,10 +9,9 @@
  * 
  * Commands:
  *   demo                 Run a 5-second end-to-end evaluation benchmark (Approval, Sanctions Block, Phishing Shield, Math Discrepancy)
- *   solana-demo          Run the Solana pre-signature spend guard suite (VersionedTx, OFAC 19.5k SDN, drainers, spend caps)
+ *   solana-demo          Run the Solana pre-signature spend guard suite (VersionedTx, OFAC SDN RAM, drainers, spend caps)
  *   agent-demo           Run the Animoca Minds Agent spend guard demo (exploit drain vs circuit breaker vs clean settlement)
  *   alibaba              Run the Alibaba Trade Assurance B2B cross-border escrow arbitration demo (Discrepancy vs Reconciled)
- *   takar                Run the Bangdrop Takar cross-miner escrow clearing bridge (Two-Miner consensus)
  *   check "<prompt>"     Audit any payment prompt or transaction with Two-Mind synthesis & WASM comparator
  *   miner                Check live telemetry on Devnode Miner #6164 & active Sepolia Diamond registration
  *   evalpool             Check live Devnode consensus across all registered EvalPool intents
@@ -124,7 +123,7 @@ async function runSolanaDemo() {
   banner();
   console.log(`\n▶ Running 5-Scenario Solana Spend Guard & Pre-Signature Armoring Suite...\n`);
   console.log(`  🛡️ Engine: Praman Solana Spend Guard (VersionedTransaction + Legacy)`);
-  console.log(`  🔍 Database: In-Memory 19,565 US Treasury OFAC SDN Entities (<25ms RAM)`);
+  console.log(`  🔍 Database: In-Memory US Treasury OFAC SDN Entities (<25ms RAM)`);
   console.log(`  ⚠️ Defenses: Malicious Drainers, Supply Chain Hacks (@solana/web3.js 1.95.6/7), Spend Caps\n`);
 
   const guard = new SolanaSpendGuard({
@@ -440,18 +439,6 @@ async function main() {
       });
       break;
     }
-    case 'takar':
-    case 'bridge': {
-      const child = spawn(process.execPath, [path.join(rootDir, 'examples', 'takar-second-opinion', 'takar-praman-escrow-bridge.mjs')], {
-        stdio: 'inherit',
-        cwd: rootDir
-      });
-      await new Promise((resolve, reject) => {
-        child.on('close', code => (code === 0 ? resolve() : reject(new Error(`Takar bridge exited with code ${code}`))));
-        child.on('error', reject);
-      });
-      break;
-    }
     case 'check':
       await checkPrompt(args.slice(1).join(' '));
       break;
@@ -469,7 +456,7 @@ async function main() {
       break;
     default:
       banner();
-      console.log(`Commands:\n  demo\n  solana-demo\n  agent-demo\n  alibaba\n  takar\n  check "<prompt>"\n  miner\n  evalpool\n  health\n`);
+      console.log(`Commands:\n  demo\n  solana-demo\n  agent-demo\n  alibaba\n  check "<prompt>"\n  miner\n  evalpool\n  health\n`);
       break;
   }
 }

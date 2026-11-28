@@ -14,11 +14,11 @@
     { label: "Verify Receipt & EIP-191 Memos", meta: "/verify", href: "/verify" },
     { label: "Receipt: Alibaba PO-ALI-9021 ($80k/$20k)", meta: "/verify?case=po-ali-9021", href: "/verify?case=po-ali-9021" },
     { label: "Receipt: PO-ALI-9021 Halted Claim", meta: "/verify?case=po-ali-9021-halt", href: "/verify?case=po-ali-9021-halt" },
-    { label: "Receipt: Takar Case 1 & Case 2 (Sepolia)", meta: "/verify?case=takar-case-2", href: "/verify?case=takar-case-2" },
+    { label: "Receipt: PramanEscrow Deal #0 & #1 (Sepolia)", meta: "/verify?case=praman-escrow-0", href: "/verify?case=praman-escrow-0" },
     { label: "Receipt: Solana Token-2022 Halt", meta: "/verify?case=solana-token2022-halt", href: "/verify?case=solana-token2022-halt" },
     { label: "Receipt: Two-Mind FX Divergence", meta: "/verify?case=minds-fx-divergence", href: "/verify?case=minds-fx-divergence" },
     { label: "Receipt: Tencent #01 Hallucination Halt", meta: "/verify?case=tencent-01-halt", href: "/verify?case=tencent-01-halt" },
-    { label: "Documentation & 19-Tool MCP Reference", meta: "/docs", href: "/docs" },
+    { label: "Documentation & 29-Tool MCP Reference", meta: "/docs", href: "/docs" },
     { label: "Product Roadmap & Enterprise Pilot", meta: "/roadmap", href: "/roadmap" }
   ];
 

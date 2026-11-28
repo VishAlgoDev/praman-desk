@@ -33,3 +33,4 @@ public/benchmark-recording-shell.html
 examples/minds-spend-guard/test-bundles/
 .vercel
 .env*
+_archived/

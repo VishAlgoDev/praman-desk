@@ -54,10 +54,10 @@ const matrixPanelHtml = `
         </div>
         <div style="background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:10px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <strong style="color:#a78bfa; font-size:12px;">Takar (Bangdrop)</strong>
+            <strong style="color:#a78bfa; font-size:12px;">PramanEscrow (Sepolia)</strong>
             <span class="pill" style="color:#c084fc; font-size:10px;">EAS SCHEMA 0x351b</span>
           </div>
-          <div style="font-size:11px; color:#94a3b8;">Smart settlement &amp; Sepolia EAS attestation. Mutual cross-attestation live.</div>
+          <div style="font-size:11px; color:#94a3b8;">Sovereign USDC escrow &amp; Sepolia EAS attestation.</div>
         </div>
         <div style="background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:10px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
