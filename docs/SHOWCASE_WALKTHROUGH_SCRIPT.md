@@ -7,7 +7,7 @@
 
 **Core Verified Infrastructure Coordinates:**
 - **Sovereign Escrow (`PramanEscrow.sol`, Ethereum Sepolia):** `0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c` (`Deal #0` split: `0xbfc22464...`, `Deal #1` halt: `0xc69358c2...`)
-- **Telegraph Diamond Miner (`Route #6164` / `RegID #6216`, `28` bonded / `30` intents):** `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b` (`tx: 0x669772e6...`, Block `12227468`)
+- **Telegraph Diamond Miner (`Route #6164` / `RegID #6217`, `28` bonded / `30` intents):** `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b` (`tx: 0x38998dd4...`, Block `12227860`)
 - **Solana Devnet Settlement (`0.001 SOL` Spend-Guarded):** `E3qVPMwcssFhxQuZyCgJ47yzZAk7UAUUgtxRwUAYtyD8pFZjnRrHcC91MLwMWxLixhb3YRMjWB8ifkk4cJjNEQq`
 - **651-Byte WASM Comparator:** `https://praman-desk.vercel.app/comparator.wasm` (`1,043/1,043` deterministic test vectors)
 - **Keyless Streamable HTTP MCP (`29` Tools):** `https://praman-desk.vercel.app/api/mcp`

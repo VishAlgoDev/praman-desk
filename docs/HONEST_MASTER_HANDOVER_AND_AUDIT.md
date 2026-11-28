@@ -4,7 +4,7 @@
 > *Target Repository*: [`telegraph-h2`](https://github.com/VishAlgoDev/praman-desk) (`main`)  
 > *Live Production Mirror*: [`https://praman-desk.vercel.app`](https://praman-desk.vercel.app)  
 > *Updated Audit Timestamp*: `2026-11-28T09:30:00+05:30`  
-> *Active Telegraph Miner*: `Devnode Route #6164` / `Sepolia Diamond #6216` (`28 bonded intents / 30 capabilities`)  
+> *Active Telegraph Miner*: `Devnode Route #6164` / `Sepolia Diamond #6217` (`28 bonded intents / 30 capabilities`)  
 > *Sovereign Escrow Contract*: [`PramanEscrow.sol`](https://sepolia.etherscan.io/address/0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c) (`0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c`)  
 > *Signing Wallet*: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
 
@@ -62,9 +62,9 @@ To establish complete zero-trust clarity, here is the unvarnished breakdown of e
 | Component | Identifier / Address | Network | Purpose |
 | :--- | :--- | :--- | :--- |
 | **Live Portal** | `https://praman-desk.vercel.app` | Vercel Serverless | Production interface, API router, and interactive 6-desk terminal (`29` keyless MCP tools). |
-| **Miner Node** | `Route #6164` / `Sepolia Diamond #6216` | Telegraph Network | Active miner registered with `28` bonded intents (`30` `miner.yaml` capabilities). |
+| **Miner Node** | `Route #6164` / `Sepolia Diamond #6217` | Telegraph Network | Active miner registered with `28` bonded intents (`30` `miner.yaml` capabilities). |
 | **Contributor Wallet** | `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466` | Ethereum Sepolia | Signing wallet for all testnet transactions, escrow deals, and gas execution. |
-| **Diamond Settle** | `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b` | Ethereum Sepolia | ERC-2535 Diamond contract (Active Registration `#6216`, Block `12227468`). |
+| **Diamond Settle** | `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b` | Ethereum Sepolia | ERC-2535 Diamond contract (Active Registration `#6217`, Block `12227860`). |
 | **PramanEscrow (Sovereign)** | `0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c` | Ethereum Sepolia | Sovereign Praman USDC escrow contract supporting `settleSplit` & `haltAndRefund` (`Deal #0`: `0xbfc22464...`, `Deal #1`: `0xc69358c2...`). |
 | **EAS Schema Anchor** | `0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04` | Ethereum Sepolia | Ethereum Attestation Service schema UID (`EAS Record #33d85bed...`). |
 

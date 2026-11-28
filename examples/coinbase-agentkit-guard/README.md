@@ -10,7 +10,7 @@
 When autonomous agents are equipped with Coinbase AgentKit wallets, they hold real signing keys to clear treasury balances on Base, Ethereum, and Arbitrum. If an LLM is hijacked by an adversarial prompt injection, a spoofed vendor invoice, or floating-point rounding errors, the transaction executes irreversibly on-chain.
 
 **Praman Desk** acts as an on-chain pre-payment firewall:
-1. **Sanctions Interception**: Screens recipient EVM addresses against 19,565 US Treasury OFAC SDN entries (e.g. Lazarus Group).
+1. **Sanctions Interception**: Screens recipient EVM addresses against 19,629 US Treasury OFAC SDN entries (e.g. Lazarus Group).
 2. **Statutory LEI Resolution**: Verifies counterparty legal identity in the Global LEI Index (GLEIF) in real time.
 3. **Deterministic 651-byte WASM Math**: Bit-exact arithmetic engine catches single-cent discrepancies and phantom fee surcharges.
 4. **Policy Caps**: Enforces autonomous spend ceilings ($500 single-agent cap) requiring supervisor dual-signatures for larger allocations.

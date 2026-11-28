@@ -3,7 +3,7 @@
  * Unified 4-Act Production Walkthrough Builder (1080p H.264 + EBU R128 Narration + WebVTT)
  * Records live https://praman-desk.vercel.app across Overview, Trade Assurance,
  * Spend Guard, Settlement Ledger, Mining Registry, Desk 5, Docs (29-Tool MCP), & Roadmap.
- * Zero Takar references; 100% accurate live Sepolia PramanEscrow & Diamond #6216 coordinates.
+ * Zero Takar references; 100% accurate live Sepolia PramanEscrow & Diamond #6217 coordinates.
  */
 
 import { chromium } from 'playwright-core';

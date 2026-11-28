@@ -38,6 +38,6 @@ if (!verdict.cleared) {
 ---
 
 ## Benchmark & Performance Guarantee
-- **Praman Desk Latency**: <25ms (19,565 OFAC SDN entities + 127 EVM addresses loaded in RAM).
+- **Praman Desk Latency**: <25ms (19,629 OFAC SDN entities + EVM addresses loaded in RAM).
 - **On-Chain Diamond Registration**: ID `#6201` on contract `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`.
 - **Testnet Fallback Rail**: Pure JSON-RPC over HTTPS without requiring local private key for reading state.

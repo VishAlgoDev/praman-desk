@@ -4,7 +4,7 @@
  * Connects: Timidan/paysheet PR #1 (https://github.com/Timidan/paysheet/pull/1)
  * 
  * Provides sub-25ms 3-way consensus payroll verification across 3 independent miners:
- * 1. Miner #6164 / Sepolia Diamond #6216 (Praman Desk - in-memory OFAC SDN + EVM check)
+ * 1. Miner #6164 / Sepolia Diamond #6217 (Praman Desk - in-memory OFAC SDN + EVM check)
  * 2. Miner #731002 / #710637 (Counterproof / ZK Sanctions)
  * 3. Miner #64175 (Sanctions Name Evidence)
  */
@@ -47,9 +47,9 @@ export async function evaluatePaysheetConsensus({
 
   // 2. Quorum Synthesis (Live Telegraph peer calls when TELEGRAPH_LIVE_QUORUM=true, else explicit single-miner mode)
   const votePraman = {
-    miner: 'Praman Desk (Devnode #6164 / Diamond #6216)',
+    miner: 'Praman Desk (Devnode #6164 / Diamond #6217)',
     minerId: 6164,
-    diamondRegId: 6216,
+    diamondRegId: 6217,
     latencyMs: Number((performance.now() - tStart).toFixed(2)),
     status: pramanMatched ? 'SANCTIONED_HALT' : 'CLEARED',
     matched: pramanMatched,

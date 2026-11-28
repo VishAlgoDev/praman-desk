@@ -1864,6 +1864,7 @@ export async function arbitrateMultiMiner({ query, question, task, intent, miner
         m.id !== '6200' &&
         m.id !== '6201' &&
         m.id !== '6216' &&
+    m.id !== '6217' &&
         m.slug !== 'praman-compliance-miner' &&
         m.supported_intents?.includes(targetIntent) &&
         m.base_url &&

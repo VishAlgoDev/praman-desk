@@ -13,7 +13,7 @@ Architecture:
          │
          ▼
   [🛡️ PramanSpendGuard Middleware]
-     ├─ 1. 19,565 US Treasury OFAC SDN Sanctions Screening
+     ├─ 1. 19,629 US Treasury OFAC SDN Sanctions Screening
      ├─ 2. Global LEI Statutory Corporate Identity Verification
      ├─ 3. Bit-Exact 651-byte WASM Arithmetic Reconciliation
      └─ 4. Cryptographic Proof Attestation Seal

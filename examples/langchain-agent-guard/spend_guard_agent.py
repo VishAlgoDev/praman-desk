@@ -6,7 +6,7 @@ This example demonstrates how to integrate Praman Desk as a pre-payment firewall
 around any autonomous AI agent (LangChain, AutoGPT, CrewAI, or raw OpenAI/Anthropic).
 
 The guard intercepts outbound wallet transactions BEFORE private-key signing:
-1. Validates recipient address against 19,565 OFAC SDN entries.
+1. Validates recipient address against 19,629 OFAC SDN entries.
 2. Resolves vendor identity in the Global LEI Index (GLEIF).
 3. Executes bit-exact 651-byte WASM arithmetic reconciliation.
 4. Enforces single-agent and dual-authorization spending caps.

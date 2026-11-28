@@ -34,5 +34,5 @@
 - **Live Terminal Runner**: [demo-benchmark-presentation.mjs](file:///c:/Users/Public/My%20Agent/telegraph-h2/examples/minds-spend-guard/demo-benchmark-presentation.mjs)
 - **Offline Bundle Verifier**: [verify-bundle-offline.mjs](file:///c:/Users/Public/My%20Agent/telegraph-h2/examples/minds-spend-guard/verify-bundle-offline.mjs)
 - **Benchmark Suite**: [test-golden-challenge.mjs](file:///c:/Users/Public/My%20Agent/telegraph-h2/examples/minds-spend-guard/test-golden-challenge.mjs)
-- **On-Chain Diamond**: Sepolia Diamond Registration `#6216` (`0x72a7...aa08b`)
+- **On-Chain Diamond**: Sepolia Diamond Registration `#6217` (`0x72a7...aa08b`)
 - **Live Production URL**: `https://praman-desk.vercel.app`

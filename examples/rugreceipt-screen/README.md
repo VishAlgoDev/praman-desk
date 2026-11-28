@@ -8,7 +8,7 @@ Reciprocal smart contract safety screening integrating **RugReceipt (Issue #208)
 DeFi protocols and automated listing agents must verify that new token contracts and their deployers are not associated with known exploiters or sanctioned state actors.
 
 This adapter screens:
-1. **Contract Bytecode & Address:** Evaluated against 19,565 US Treasury OFAC SDN records (Remarks column digital currency entries).
+1. **Contract Bytecode & Address:** Evaluated against 19,629 US Treasury OFAC SDN records (Remarks column digital currency entries).
 2. **Deployer / Owner Address:** Checked against Lazarus Group, Ronin Bridge, and Tornado Cash sanctioned addresses.
 3. **Verdict & Score:** Generates a deterministic safety score (0 to 100) and actionable decision: `APPROVE_CONTRACT_INTERACTION` or `REJECT_AND_FREEZE`.
 

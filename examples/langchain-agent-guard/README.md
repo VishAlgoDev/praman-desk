@@ -51,7 +51,7 @@ except SpendGuardException as e:
 
 | Policy Check | Verification Authority | Outcome on Failure |
 | :--- | :--- | :--- |
-| **OFAC Sanctions Screening** | US Treasury SDN List (19,565 entities & crypto addresses) | **`HALT & FREEZE`** (Zero funds moved) |
+| **OFAC Sanctions Screening** | US Treasury SDN List (19,629 entities & crypto addresses) | **`HALT & FREEZE`** (Zero funds moved) |
 | **Legal Entity Identifier (LEI)** | Global LEI Foundation (GLEIF) Global LEI Index | **`HALT & FREEZE`** (Unregistered vendor) |
 | **Arithmetic Reconciliation** | 651-byte zero-import AssemblyScript WASM | **`HALT & FREEZE`** (Overcharge blocked) |
 | **Delegation Caps** | Single-agent limit ($500) & Dual-approval limit ($5,000) | **`HALT & FREEZE`** (Signature required) |

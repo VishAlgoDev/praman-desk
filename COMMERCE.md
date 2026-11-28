@@ -9,7 +9,7 @@
 | **Trade Assurance Clearing** (`PO-ALI-9021` / Alibaba & Cainiao) | `POST /api/trade-assurance/audit` · `POST /api/spend-guard/evaluate` | Cross-border marketplaces, ERP treasury bots, procurement agents | **$0.01 – $0.05 / clearance** + optional bps escrow resolution | Ethereum Sepolia (`0x72a70e...a08b`), Base USDC (`Virtuals ACP`) |
 | **Autonomous Pre-Signature Spend Guard** | `npm` / `Python` SDK · `POST /api/audit/solana-spend-guard` · MCP `clear_spend` | Autonomous treasury agents (Solana, EVM, OpenClaw/Hermes) | **$0.01 / evaluation** (keyless preview free; x402 / ACP metered) | Solana Devnet, Ethereum Sepolia EIP-3009 / Escrow |
 | **Independent Creative QA** (`ByteDance Use Case #5`) | `POST /api/creative-qa/audit` · MCP `audit_creative_qa` | Ad-tech buyers, creator marketplaces, DSP escrow vaults | **$0.02 / creative audit** (LEI + OFAC + URL + Policy + WASM IO math) | Ethereum Sepolia, Base USDC (`Virtuals ACP`) |
-| **Telegraph Specialist Miner (`#6164`)** | `/api/miner/*` (`30` live intents) · Slug: `praman-compliance-miner` | Telegraph Protocol buyers, evaluators, multi-miner routers | **$0.01 / ask** (`10000` uUSDC, `eip155:11155111`) | Telegraph Devnode + Sepolia Diamond `#6216` (`28` bonded) |
+| **Telegraph Specialist Miner (`#6164`)** | `/api/miner/*` (`30` live intents) · Slug: `praman-compliance-miner` | Telegraph Protocol buyers, evaluators, multi-miner routers | **$0.01 / ask** (`10000` uUSDC, `eip155:11155111`) | Telegraph Devnode + Sepolia Diamond `#6217` (`28` bonded) |
 
 ## 2. Live Cost & Margin Structure
 
