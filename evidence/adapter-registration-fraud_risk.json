@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-11-28T05:22:58.502Z",
+  "event": "registerWasm",
+  "intent": "FRAUD_RISK",
+  "wasmHash": "0x177c21ba1a84e7c0af82384383f3e75e1a660e448309900406bb2334a194f519",
+  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/FRAUD_RISK_v8.safetensors",
+  "wasmRunnableUrl": "https://karadakash1-praman-trainer-v7.hf.space/FRAUD_RISK",
+  "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "txHash": "0xa45ed59944922cc756c77fa5bdff07ad2f401e0625139c015dade0e1315edf36",
+  "blockNumber": "12228052",
+  "status": "success",
+  "predictedRegistrationId": "298",
+  "etherscanUrl": "https://sepolia.etherscan.io/tx/0xa45ed59944922cc756c77fa5bdff07ad2f401e0625139c015dade0e1315edf36"
+}

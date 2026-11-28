@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-11-28T05:24:00.585Z",
+  "event": "registerWasm",
+  "intent": "DOCUMENT_AUTHENTICITY",
+  "wasmHash": "0xd721298912fd87eaddaa2b4d0456fe8c45311f31b2dd827b65e2e31a2d76eb38",
+  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/DOCUMENT_AUTHENTICITY_v8.safetensors",
+  "wasmRunnableUrl": "https://karadakash1-praman-trainer-v7.hf.space/DOCUMENT_AUTHENTICITY",
+  "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "txHash": "0x1911a864d38788eb56b55f5c59749fc211a4cd5dde4b090c609e8d4b63ceb1cf",
+  "blockNumber": "12228056",
+  "status": "success",
+  "predictedRegistrationId": "299",
+  "etherscanUrl": "https://sepolia.etherscan.io/tx/0x1911a864d38788eb56b55f5c59749fc211a4cd5dde4b090c609e8d4b63ceb1cf"
+}

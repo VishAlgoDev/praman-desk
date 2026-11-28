@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-11-28T05:24:36.174Z",
+  "event": "registerWasm",
+  "intent": "URL_SAFE",
+  "wasmHash": "0x9c615c9b91382535c6858c306fb50a37e2fc2f10f7238a77c593e26a8878e688",
+  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/URL_SAFE_v8.safetensors",
+  "wasmRunnableUrl": "https://karadakash1-praman-trainer-v7.hf.space/URL_SAFE",
+  "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "txHash": "0x74d5d0b88da6cfac760bdcc0c691e896047e77deabd0e26650004201e89c44d0",
+  "blockNumber": "12228059",
+  "status": "success",
+  "predictedRegistrationId": "300",
+  "etherscanUrl": "https://sepolia.etherscan.io/tx/0x74d5d0b88da6cfac760bdcc0c691e896047e77deabd0e26650004201e89c44d0"
+}

@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-11-28T05:21:46.815Z",
+  "event": "registerWasm",
+  "intent": "INVOICE_LEDGER_RECONCILE",
+  "wasmHash": "0x40f97f1f6a083c8ebb1074cb3e6cbf86e1a59b12b242e28cbaee36839a216fc7",
+  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/INVOICE_LEDGER_RECONCILE_v8.safetensors",
+  "wasmRunnableUrl": "https://karadakash1-praman-trainer-v7.hf.space/INVOICE_LEDGER_RECONCILE",
+  "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "txHash": "0xc9e619d49fe7845befa9bcb08f21872869ec5c59af26cafc1d41f531dfd5f269",
+  "blockNumber": "12228046",
+  "status": "success",
+  "predictedRegistrationId": "296",
+  "etherscanUrl": "https://sepolia.etherscan.io/tx/0xc9e619d49fe7845befa9bcb08f21872869ec5c59af26cafc1d41f531dfd5f269"
+}

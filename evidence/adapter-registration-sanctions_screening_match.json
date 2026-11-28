@@ -1,0 +1,15 @@
+{
+  "timestamp": "2026-11-28T05:21:12.393Z",
+  "event": "registerWasm",
+  "intent": "SANCTIONS_SCREENING_MATCH",
+  "wasmHash": "0x99ec8a37bc581b563e7aef2a50742f8a02f9b57e9da7874645eddeaac3bbc17b",
+  "wasmUrl": "https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH_v8.safetensors",
+  "wasmRunnableUrl": "https://karadakash1-praman-trainer-v7.hf.space/SANCTIONS_SCREENING_MATCH",
+  "feeAddress": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "txHash": "0xa0edd0c74812df3032e3c3d19393bd541fa64a94429dd741c4a813a350667e10",
+  "blockNumber": "12228043",
+  "status": "success",
+  "predictedRegistrationId": "295",
+  "etherscanUrl": "https://sepolia.etherscan.io/tx/0xa0edd0c74812df3032e3c3d19393bd541fa64a94429dd741c4a813a350667e10"
+}
