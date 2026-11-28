@@ -42,18 +42,21 @@ const argVal = (flag) => {
   return idx !== -1 && idx + 1 < process.argv.length ? process.argv[idx + 1] : undefined;
 };
 
-// Registration Parameters (override via CLI flags or env for immutable pinned versions)
+// Registration Parameters for minicheck-deberta-v3-large-512-v1 (lora-v2)
 const INTENT = argVal('--intent') || process.env.WASM_INTENT || 'SANCTIONS_SCREENING_MATCH';
-const WASM_HASH = argVal('--hash') || process.env.WASM_HASH || '0x62db6aa4025553aa7e83e093eb2cb0349f00717abfa0de605e64150345a12ca4';
-const WASM_URL = argVal('--url') || process.env.WASM_URL || 'https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/SANCTIONS_SCREENING_MATCH.safetensors';
+const WASM_HASH = argVal('--hash') || process.env.WASM_HASH || '0x0000000000000000000000000000000000000000000000000000000000000000';
+const WASM_URL = argVal('--url') || process.env.WASM_URL || `https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/${INTENT}_v8.safetensors`;
 const WASM_FEE_ADDRESS = '0x98021b20Efdb7ae2C57366010a6E0fDE207b4466';
-const WASM_RUNNABLE_URL = argVal('--runnable') || process.env.WASM_RUNNABLE_URL || 'https://sport-mill-since-link.trycloudflare.com';
-const FOUNDATION_HASH = '0a49b325304bb4cf292e683929689d0457966be264f60bfc94d0072b614bf8e6';
-const TOKENIZER_HASH = '67bc76f8b9386efba1a761c1c8e5ad439fd0eaf1c2826e9dd1a205c7af4dc456';
+const WASM_RUNNABLE_URL = argVal('--runnable') || process.env.WASM_RUNNABLE_URL || `https://karadakash1-praman-trainer-v7.hf.space/${INTENT}`;
+const FOUNDATION_HASH = '675c4647469e021e184631ad5bf2b68ca518fcdc192100eee439a420a757300c';
+const TOKENIZER_HASH = '8bfb874b90f3b3ea9481289bf351eef77462f0935f526ea107f53789708cc5d4';
 
 async function main() {
+  if (/^0x0+$/.test(WASM_HASH)) {
+    throw new Error('Supply real keccak256 via --hash 0x... (from adapterbuild lora --score)');
+  }
   console.log('================================================================');
-  console.log('  Telegraph Protocol — Canonical Evaluator Adapter Registration ');
+  console.log('  Telegraph Protocol — MiniCheck LoRA-v2 Evaluator Registration ');
   console.log('================================================================');
   console.log(`Wallet Address:      ${address}`);
   console.log(`Diamond Address:     ${DIAMOND}`);
@@ -71,7 +74,7 @@ async function main() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        batch: [{ tokens: [50281, 4118, 17526, 50282] }],
+        batch: [{ tokens: [1, 4118, 17526, 2] }],
         foundation_hash: FOUNDATION_HASH,
         adapter_hash: expectedAdapterHash,
         tokenizer_hash: TOKENIZER_HASH
@@ -221,8 +224,18 @@ async function main() {
   };
 
   const receiptPath = path.join(evidenceDir, 'adapter-registration-receipt.json');
+  const perIntentPath = path.join(evidenceDir, `adapter-registration-${INTENT.toLowerCase()}.json`);
+  const listPath = path.join(evidenceDir, 'adapter-registrations-v8.json');
   fs.writeFileSync(receiptPath, JSON.stringify(evidenceRecord, null, 2), 'utf8');
-  console.log(`Saved registration receipt to: ${receiptPath}`);
+  fs.writeFileSync(perIntentPath, JSON.stringify(evidenceRecord, null, 2), 'utf8');
+  let list = [];
+  try {
+    if (fs.existsSync(listPath)) list = JSON.parse(fs.readFileSync(listPath, 'utf8'));
+  } catch {}
+  list = list.filter(item => item.intent !== INTENT);
+  list.push(evidenceRecord);
+  fs.writeFileSync(listPath, JSON.stringify(list, null, 2), 'utf8');
+  console.log(`Saved registration receipt to: ${perIntentPath}`);
   console.log('\n================================================================');
   console.log('  SUCCESSFULLY REGISTERED CANONICAL EVALUATOR ADAPTER ON-CHAIN! ');
   console.log('================================================================');
