@@ -18,7 +18,7 @@ const evidenceDir = path.join(rootDir, 'evidence');
 const RPC = process.env.SEPOLIA_RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com';
 const COMMIT_HASH = process.env.MINER_YAML_COMMIT || 'HEAD';
 const PINNED_URL = `https://raw.githubusercontent.com/VishAlgoDev/praman-desk/${COMMIT_HASH}/miner.yaml`;
-const PREVIOUS_REGISTRATION_ID = BigInt(process.env.MINER_REGISTRATION_ID || '6201');
+const PREVIOUS_REGISTRATION_ID = BigInt(process.env.MINER_REGISTRATION_ID || '6216');
 const DRY_RUN = process.argv.includes('--dry-run');
 
 const MACHINA = '0xd68305cA83C7AF42A4F720144E7416fB53F8AaF4';

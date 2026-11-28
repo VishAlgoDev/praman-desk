@@ -1,6 +1,6 @@
 version: "1"
 kind: miner
-id: 6164 # Devnode Miner #6164 / Sepolia Diamond Port Registration #6201
+id: 6164 # Devnode Miner #6164 / Sepolia Diamond Port Registration
 slug: praman-compliance-miner
 protocol: generic
 name: Praman Desk Sovereign Compliance & Spend Guard Miner
@@ -9,25 +9,12 @@ description: >-
   verification, US Treasury OFAC SDN screening (19,629 records), SEC/Federal
   Register monitoring, multi-chain token/liquidity/TX forensics, TLS/CVE/threat
   intelligence, maritime shipment delay modeling, and WASM contract auditing
-  without paid API keys.
+  without paid API keys. Fails closed with confidence 0.0 when an upstream feed
+  is unreachable. Standard response keys: verdict, confidence, summary, as_of.
 base_url: https://praman-desk.vercel.app
 
 auth:
   type: none
-
-input_schema:
-  content_type: application/json
-  query_aliases: [question, query, prompt, text, subject, token, pool, url, host, ip, cve_id, shipment, indicator, transaction, entity]
-  strict_required_fields: true
-
-output_schema:
-  content_type: application/json
-  standard_envelope: [verdict, confidence, summary, as_of]
-
-limitations:
-  - Deterministic mathematical, cryptographic, TLS, and on-chain RPC checks run live with zero paid keys; external feeds (NVD, Blockscout, ipwho.is, Open-Meteo, SEC EDGAR) depend on upstream availability and fail closed with confidence 0.0 when unreachable.
-  - Token holder counts on non-EVM chains (e.g. Solana) require an indexed RPC/Blockscout equivalent and return status unavailable rather than fabricating estimates.
-  - Maritime shipment delay risk combines live Open-Meteo port weather with historical choke-point heuristics rather than proprietary AIS satellite transponder feeds.
 
 endpoints:
   - path: /api/miner/po-verify
@@ -747,8 +734,6 @@ endpoints:
     intents:
       - URL_SCAN_VERDICT
     description: "Scans a URL across FakeWatch/ScamSniffer typosquatting heuristics and Abuse.ch URLhaus feeds."
-    query:
-      url: "{url}"
     params:
       query:
         optional:
@@ -756,6 +741,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Target URL to scan"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Evaluation question string"
 
   - path: /api/miner/threat-intel
     external_path: /api/miner/threat-intel
@@ -763,8 +752,6 @@ endpoints:
     intents:
       - THREAT_INTELLIGENCE_INDICATOR
     description: "Evaluates IP, domain, file hash, CVE, or wallet indicator against CISA KEV, URLhaus, FakeWatch, and OFAC SDN."
-    query:
-      indicator: "{indicator}"
     params:
       query:
         optional:
@@ -772,6 +759,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Threat indicator"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Evaluation question string"
 
   - path: /api/miner/transaction-risk
     external_path: /api/miner/transaction-risk
@@ -779,8 +770,6 @@ endpoints:
     intents:
       - TRANSACTION_RISK_GENERAL
     description: "Scores transaction calldata approvals, drainer vectors, and OFAC counterparty risk."
-    query:
-      transaction: "{transaction}"
     params:
       query:
         optional:
@@ -788,6 +777,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Transaction hash or details"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Evaluation question string"
 
   - path: /api/miner/ssl-verify
     external_path: /api/miner/ssl-verify
@@ -795,8 +788,6 @@ endpoints:
     intents:
       - SSL_VERIFICATION_CERT
     description: "Executes live TLS handshake on port 443 to verify certificate trust, issuer, and expiry."
-    query:
-      host: "{host}"
     params:
       query:
         optional:
@@ -804,6 +795,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Hostname to verify"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Evaluation question string"
 
   - path: /api/miner/cve-lookup
     external_path: /api/miner/cve-lookup
@@ -811,8 +806,6 @@ endpoints:
     intents:
       - CVE_LOOKUP_CVSS
     description: "Fetches official CVSS score, severity, description, and references from NIST NVD v2 / MITRE CVE AWG."
-    query:
-      cve_id: "{cve_id}"
     params:
       query:
         optional:
@@ -820,6 +813,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "CVE identifier"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Evaluation question string"
 
   - path: /api/miner/shipment-delay
     external_path: /api/miner/shipment-delay
@@ -827,8 +824,6 @@ endpoints:
     intents:
       - SHIPMENT_DELAY_RISK_GENERAL
     description: "Models shipment delay probability from live Open-Meteo port weather and maritime choke-point rules."
-    query:
-      shipment: "{shipment}"
     params:
       query:
         optional:
@@ -836,6 +831,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Shipment route or tracking reference"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Evaluation question string"
 
   - path: /api/miner/ip-geolocation
     external_path: /api/miner/ip-geolocation
@@ -843,8 +842,6 @@ endpoints:
     intents:
       - IP_GEOLOCATION_GENERAL
     description: "Resolves IPv4/IPv6 geolocation (country, city, latitude, longitude, ISP)."
-    query:
-      ip: "{ip}"
     params:
       query:
         optional:
@@ -852,6 +849,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "IP address"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Evaluation question string"
 
   - path: /api/miner/token-holders
     external_path: /api/miner/token-holders
@@ -859,9 +860,6 @@ endpoints:
     intents:
       - TOKEN_HOLDER_COUNT_GENERAL
     description: "Queries live EVM token holder counts via Blockscout v2 and Ethplorer."
-    query:
-      token: "{token}"
-      chain: "{chain}"
     params:
       query:
         optional:
@@ -873,6 +871,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Blockchain name"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Evaluation question string"
 
   - path: /api/miner/wash-trading
     external_path: /api/miner/wash-trading
@@ -880,8 +882,6 @@ endpoints:
     intents:
       - WASH_TRADING_DETECTION_GENERAL
     description: "Detects synthetic DEX volume churn and symmetric wash flow via DexScreener."
-    query:
-      subject: "{subject}"
     params:
       query:
         optional:
@@ -889,6 +889,10 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Token, pair, or pool"
+          - name: question
+            type: string
+            intents: ["*"]
+            description: "Evaluation question string"
 
   - path: /api/miner/telegraph-knowledge
     external_path: /api/miner/telegraph-knowledge
@@ -896,8 +900,6 @@ endpoints:
     intents:
       - TELEGRAPH_KNOWLEDGE_GENERAL
     description: "Answers Telegraph Protocol contract/WASM questions and general knowledge with <=80 char brief."
-    query:
-      question: "{question}"
     params:
       query:
         optional:
@@ -911,7 +913,6 @@ semantics:
     confidence_field: confidence
     label_field: summary
     reason_field: summary
-    verdict_field: verdict
   supported_intents:
     - PURCHASE_ORDER_VERIFY_GENERAL
     - INVOICE_LEDGER_RECONCILE_GENERAL

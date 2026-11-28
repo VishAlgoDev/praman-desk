@@ -64,9 +64,9 @@ def main():
         cls, tr, va = SPECS[intent_key]
         run_dir = BASE_DIR / "runs" / intent_key
         out_pkg = BASE_DIR / f"{intent_key}_v8.safetensors"
-        bs = "16" if intent_key == "SANCTIONS_SCREENING_MATCH" else "8"
-        ga = "2"
-        ep = "2" if intent_key == "SANCTIONS_SCREENING_MATCH" else "4"
+        bs = "4"
+        ga = "4"
+        ep = "1" if intent_key == "SANCTIONS_SCREENING_MATCH" else "4"
         if not (run_dir / "result.json").exists():
             sh(
                 f"TORCH_COMPILE_DISABLE=1 python -m float_runtime.train_adapter --intent {intent_key} "
