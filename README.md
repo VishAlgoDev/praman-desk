@@ -388,6 +388,10 @@ node examples/fakewatch-shield/fakewatch-praman-shield.mjs
 node examples/rugreceipt-screen/rugreceipt-praman-screen.mjs
 ```
 
+### 9. Sibling Standalone Telegraph Season II Apps (`Section 07` Portfolio)
+- **App #2 — Praman Solana & Token-2022 Guard**: [`VishAlgoDev/praman-solana-guard`](https://github.com/VishAlgoDev/praman-solana-guard) · Live: [`https://praman-solana-guard.vercel.app`](https://praman-solana-guard.vercel.app) (`30/30` unit tests + `7/7` Devnet + Token-2022 TLV + `20,022` OFAC SDN/CMIC records)
+- **App #3 — Praman Creative QA & ACP v2 Guard**: [`VishAlgoDev/praman-creative-acp`](https://github.com/VishAlgoDev/praman-creative-acp) · Live: [`https://praman-creative-acp.vercel.app`](https://praman-creative-acp.vercel.app) (ByteDance #5 Creative QA + Virtuals ACP v2 Base pre-settlement evaluator)
+
 ---
 
 ## Telegraph Protocol Closed-Loop Architecture
