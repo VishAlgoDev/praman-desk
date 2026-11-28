@@ -83,9 +83,9 @@ function initSdnFromSnapshot() {
       const aliases = new Map();
       const evmMap = new Map();
       for (const [uid, name, type, programs, aliasList] of data.entries) {
-        entries.set(uid, { name, type, programs });
+        entries.set(uid, { name, type, programs, prep: prepareSanctionsTarget(name) });
         if (aliasList && aliasList.length > 0) {
-          aliases.set(uid, aliasList);
+          aliases.set(uid, aliasList.map(a => ({ name: a, prep: prepareSanctionsTarget(a) })));
         }
       }
       if (Array.isArray(data.evm_addresses)) {
@@ -102,7 +102,6 @@ function initSdnFromSnapshot() {
     console.warn('[SDN] Failed to load local snapshot:', err.message);
   }
 }
-initSdnFromSnapshot();
 
 function parseCsvLine(line) {
   const fields = [];
@@ -145,7 +144,7 @@ function refreshSdnInBackground() {
         const sdnType = f[2] === '-0-' ? 'Entity' : f[2];
         const program = f[3] === '-0-' ? '' : (f[3] || '');
         if (uid && name) {
-          entries.set(uid, { name, type: sdnType, programs: program });
+          entries.set(uid, { name, type: sdnType, programs: program, prep: prepareSanctionsTarget(name) });
           const evmHits = line.match(/0x[0-9a-fA-F]{40}/g);
           if (evmHits) {
             for (const a of evmHits) evmMap.set(a.toLowerCase(), uid);
@@ -163,7 +162,7 @@ function refreshSdnInBackground() {
           const aliasName = f[3] || '';
           if (sdnUid && aliasName) {
             if (!aliases.has(sdnUid)) aliases.set(sdnUid, []);
-            aliases.get(sdnUid).push(aliasName);
+            aliases.get(sdnUid).push({ name: aliasName, prep: prepareSanctionsTarget(aliasName) });
           }
         }
       }
@@ -290,51 +289,73 @@ function phoneticTokenMatch(a, b) {
   return phoneticSkeleton(a) === phoneticSkeleton(b) && editDistanceRatio(a, b) >= 0.72;
 }
 
-function fuzzyNameMatchWithMeta(query, target) {
-  const qRaw = normalizeSanctionsText(query);
-  const tRaw = normalizeSanctionsText(target);
-  if (!qRaw || !tRaw) return { score: 0, phoneticNearMiss: false };
-  if (tRaw === qRaw) return { score: 1.0, phoneticNearMiss: false };
+function alphaNumBitMask(str) {
+  let mask = 0;
+  for (let i = 0; i < str.length; i++) {
+    const c = str.charCodeAt(i);
+    if (c >= 97 && c <= 122) mask |= (1 << (c - 97));
+    else if (c >= 48 && c <= 57) mask |= (1 << (26 + (c % 6)));
+  }
+  return mask;
+}
 
-  // Handle "LAST, First Middle" OFAC format by adding comma-swapped comparison
-  let tSwapped = tRaw;
-  if (String(target || '').includes(',')) {
-    const commaParts = String(target).split(',').map(p => normalizeSanctionsText(p)).filter(Boolean);
+function prepareSanctionsTarget(rawStr) {
+  const s = String(rawStr || '');
+  const norm = normalizeSanctionsText(s);
+  if (!norm) return { norm: '', swapped: '', rawTokens: [], core: [], coreStr: '', swappedCoreStr: '', firstMask: 0, charMask: 0 };
+  let swapped = norm;
+  if (s.includes(',')) {
+    const commaParts = s.split(',').map(p => normalizeSanctionsText(p)).filter(Boolean);
     if (commaParts.length >= 2) {
-      tSwapped = `${commaParts.slice(1).join(' ')} ${commaParts[0]}`.replace(/\s+/g, ' ').trim();
-      if (tSwapped === qRaw) return { score: 1.0, phoneticNearMiss: false };
+      swapped = `${commaParts.slice(1).join(' ')} ${commaParts[0]}`.replace(/\s+/g, ' ').trim();
     }
   }
-  if (String(query || '').includes(',')) {
-    const qParts = String(query).split(',').map(p => normalizeSanctionsText(p)).filter(Boolean);
-    if (qParts.length >= 2) {
-      const qSwapped = `${qParts.slice(1).join(' ')} ${qParts[0]}`.replace(/\s+/g, ' ').trim();
-      if (qSwapped === tRaw || qSwapped === tSwapped) return { score: 1.0, phoneticNearMiss: false };
-    }
+  const rawTokens = norm.split(' ').filter(Boolean);
+  const core = rawTokens.filter(w => !CORP_STOP_TOKENS.has(w));
+  const coreStr = core.join(' ');
+  const swappedCoreStr = swapped === norm
+    ? coreStr
+    : (swapped.split(' ').filter(w => w && !CORP_STOP_TOKENS.has(w)).join(' ') || coreStr);
+  let firstMask = 0;
+  for (const tok of core) {
+    const c = tok.charCodeAt(0);
+    if (c >= 97 && c <= 122) firstMask |= (1 << (c - 97));
+    else if (c >= 48 && c <= 57) firstMask |= (1 << (26 + (c % 6)));
+  }
+  const charMask = alphaNumBitMask(coreStr) | alphaNumBitMask(swappedCoreStr);
+  return { norm, swapped, rawTokens, core, coreStr, swappedCoreStr, firstMask, charMask };
+}
+initSdnFromSnapshot();
+
+function matchPreparedSanctions(qPrep, tPrep) {
+  if (!qPrep.norm || !tPrep.norm) return { score: 0, phoneticNearMiss: false };
+  if (tPrep.norm === qPrep.norm || tPrep.swapped === qPrep.norm) return { score: 1.0, phoneticNearMiss: false };
+  if (qPrep.swapped !== qPrep.norm && (qPrep.swapped === tPrep.norm || qPrep.swapped === tPrep.swapped)) {
+    return { score: 1.0, phoneticNearMiss: false };
   }
 
-  const qRawTokens = qRaw.split(' ').filter(Boolean);
-  const tRawTokens = tRaw.split(' ').filter(Boolean);
-  const qCore = qRawTokens.filter(w => !CORP_STOP_TOKENS.has(w));
-  const tCore = tRawTokens.filter(w => !CORP_STOP_TOKENS.has(w));
+  const qCore = qPrep.core;
+  const tCore = tPrep.core;
   if (!qCore.length || !tCore.length) return { score: 0, phoneticNearMiss: false };
 
-  const qCoreStr = qCore.join(' ');
-  const tCoreStr = tCore.join(' ');
+  const qCoreStr = qPrep.coreStr;
+  const tCoreStr = tPrep.coreStr;
   if (qCoreStr === tCoreStr) {
-    // Require substantive core token length so single short acronyms don't falsely collide
-    const s = qCoreStr.length >= 4 ? 0.97 : (qRawTokens.length === tRawTokens.length ? 0.96 : 0.62);
+    const s = qCoreStr.length >= 4 ? 0.97 : (qPrep.rawTokens.length === tPrep.rawTokens.length ? 0.96 : 0.62);
     return { score: s, phoneticNearMiss: false };
   }
 
-  // Guard short single-token queries (e.g. "Ali"): avoid substring floods inside unrelated words/names
   if (qCore.length === 1 && qCore[0].length < 5) {
     if (tCore.length === 1 && tCore[0] === qCore[0]) return { score: 0.95, phoneticNearMiss: false };
     return { score: 0, phoneticNearMiss: false };
   }
 
-  // Multi-token alignment with comma-order invariance and transliteration tolerance (e.g. Viktor Bout / Viktor But)
-  if (qCore.length >= 2) {
+  const minLen = Math.min(qCoreStr.length, tCoreStr.length);
+  const maxLen = Math.max(qCoreStr.length, tCoreStr.length);
+  const lenRatioOk = minLen >= 5 && (minLen / maxLen) >= 0.55;
+  const firstOverlap = (qPrep.firstMask & tPrep.firstMask) !== 0;
+
+  if (qCore.length >= 2 && firstOverlap) {
     let matchedQ = 0;
     let simSum = 0;
     let usedPhoneticNearMiss = false;
@@ -380,17 +401,18 @@ function fuzzyNameMatchWithMeta(query, target) {
     }
   }
 
-  // Bigram Jaccard on core tokens (never raw corporate suffixes like "GROUP LIMITED"), preventing false hits across shared suffixes
-  const minLen = Math.min(qCoreStr.length, tCoreStr.length);
-  const maxLen = Math.max(qCoreStr.length, tCoreStr.length);
-  if (minLen < 5 || minLen / maxLen < 0.55) return { score: 0, phoneticNearMiss: false };
+  if (!lenRatioOk || (qPrep.charMask & tPrep.charMask) === 0) return { score: 0, phoneticNearMiss: false };
 
   const bigrams = s => { const b = new Set(); for (let i = 0; i < s.length - 1; i++) b.add(s.slice(i, i + 2)); return b; };
-  const bq = bigrams(qCoreStr), bt = bigrams(tSwapped.split(' ').filter(w => !CORP_STOP_TOKENS.has(w)).join(' ') || tCoreStr);
+  const bq = bigrams(qCoreStr), bt = bigrams(tPrep.swappedCoreStr || tCoreStr);
   const inter = [...bq].filter(x => bt.has(x)).length;
   const union = new Set([...bq, ...bt]).size;
   const jaccard = union > 0 ? inter / union : 0;
   return { score: jaccard >= 0.65 ? Number(jaccard.toFixed(4)) : 0, phoneticNearMiss: false };
+}
+
+function fuzzyNameMatchWithMeta(query, target) {
+  return matchPreparedSanctions(prepareSanctionsTarget(query), prepareSanctionsTarget(target));
 }
 
 function fuzzyNameMatch(query, target) {
@@ -3633,14 +3655,16 @@ export async function screenSanctions({ name = '', threshold = 0.70, refresh = f
     };
   }
 
+  const preparedQueries = queryCandidates.map(q => prepareSanctionsTarget(q));
   const matches = [];
   const nearMisses = [];
 
   for (const [uid, entry] of sdnEntries) {
+    const entryPrep = entry.prep || prepareSanctionsTarget(entry.name);
     let bestPrimaryScore = 0;
     let bestPrimaryPhonetic = false;
-    for (const q of queryCandidates) {
-      const res = fuzzyNameMatchWithMeta(q, entry.name);
+    for (const qPrep of preparedQueries) {
+      const res = matchPreparedSanctions(qPrep, entryPrep);
       if (res.score > bestPrimaryScore) {
         bestPrimaryScore = res.score;
         bestPrimaryPhonetic = res.phoneticNearMiss;
@@ -3652,11 +3676,13 @@ export async function screenSanctions({ name = '', threshold = 0.70, refresh = f
     let bestAliasName = null;
     let bestAliasPhonetic = false;
     for (const a of entryAliases) {
-      for (const q of queryCandidates) {
-        const res = fuzzyNameMatchWithMeta(q, a);
+      const aName = typeof a === 'string' ? a : a.name;
+      const aPrep = (typeof a === 'object' && a.prep) ? a.prep : prepareSanctionsTarget(aName);
+      for (const qPrep of preparedQueries) {
+        const res = matchPreparedSanctions(qPrep, aPrep);
         if (res.score > bestAlias) {
           bestAlias = res.score;
-          bestAliasName = a;
+          bestAliasName = aName;
           bestAliasPhonetic = res.phoneticNearMiss;
         }
       }
@@ -9118,7 +9144,16 @@ export async function handleApiRequest(req, res) {
           });
         }
 
-        const chicagoMatch = poNumber && vendor ? await lookupChicagoPublicPo(poNumber, vendor) : null;
+        // Launch public PO lookup & corporate registry lookup in parallel to halve Epoch 68+ latency
+        const chicagoPromise = poNumber && vendor ? lookupChicagoPublicPo(poNumber, vendor).catch(() => null) : Promise.resolve(null);
+        const corpPromise = (vendor && !/^acme(?:\s+corp\.?)?$/i.test(vendor.trim()))
+          ? Promise.race([
+              lookupCorporateRegistry({ company: vendor }),
+              new Promise(resolve => setTimeout(() => resolve(null), 1200))
+            ]).catch(() => null)
+          : Promise.resolve(null);
+
+        const chicagoMatch = await chicagoPromise;
         if (chicagoMatch) {
           const ans = chicagoMatch.summary || chicagoMatch.explanation || '';
           return sendJson(res, 200, {
@@ -9188,16 +9223,9 @@ export async function handleApiRequest(req, res) {
         }
 
         let vendorContext = null;
-        if (vendor && !/^acme(?:\s+corp\.?)?$/i.test(vendor.trim())) {
-          try {
-            const corp = await Promise.race([
-              lookupCorporateRegistry({ company: vendor }),
-              new Promise(resolve => setTimeout(() => resolve(null), 1500))
-            ]);
-            if (corp?.found) {
-              vendorContext = { lei: corp.registration_id, legal_name: corp.legal_name, active: corp.active };
-            }
-          } catch {}
+        const corp = await corpPromise;
+        if (corp?.found) {
+          vendorContext = { lei: corp.registration_id, legal_name: corp.legal_name, active: corp.active };
         }
 
         const isExplicitQuestion = /\?\s*$/.test(rawText) || /^(?:does|is|was|has|can|verify\s+whether|check\s+whether)\b/i.test(rawText.trim());

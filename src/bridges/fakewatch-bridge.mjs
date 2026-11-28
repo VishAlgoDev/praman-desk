@@ -40,6 +40,26 @@ const PROTECTED_BRANDS = [
   'uniswap', 'metamask', 'opensea', 'binance', 'coinbase', 'stripe', 'paypal', 'ethereum', 'arbitrum', 'optimism', 'polygon'
 ];
 
+const FAKEWATCH_DOMAIN_CACHE = new Map();
+const FAKEWATCH_CACHE_TTL_MS = 60 * 1000;
+function getCachedFakeWatch(key) {
+  const entry = FAKEWATCH_DOMAIN_CACHE.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts >= FAKEWATCH_CACHE_TTL_MS) {
+    FAKEWATCH_DOMAIN_CACHE.delete(key);
+    return null;
+  }
+  return entry.val;
+}
+function setCachedFakeWatch(key, val) {
+  if (!key || !val) return val;
+  if (FAKEWATCH_DOMAIN_CACHE.size >= 200) {
+    FAKEWATCH_DOMAIN_CACHE.delete(FAKEWATCH_DOMAIN_CACHE.keys().next().value);
+  }
+  FAKEWATCH_DOMAIN_CACHE.set(key, { ts: Date.now(), val });
+  return val;
+}
+
 export async function checkFakeWatchDomain(urlOrDomain) {
   const tStart = performance.now();
   let domain = String(urlOrDomain || '').trim();
@@ -59,10 +79,15 @@ export async function checkFakeWatchDomain(urlOrDomain) {
     ? rawInput
     : `https://${domain}`;
 
+  const cacheHit = getCachedFakeWatch(targetUrl.toLowerCase());
+  if (cacheHit) {
+    return { ...cacheHit, latency_ms: 0, cached: true };
+  }
+
   // 1. Live FakeWatch API Query (Miner #42420 / https://fakewatch.pro/tools/url-check-api)
   try {
     const res = await fetch(`https://fakewatch.pro/api/v1/url-safe?url=${encodeURIComponent(targetUrl)}`, {
-      signal: AbortSignal.timeout(2500),
+      signal: AbortSignal.timeout(1500),
       headers: { 'Accept': 'application/json', 'User-Agent': 'PramanDesk-SpendGuard/2.0' }
     });
     if (res.ok) {
@@ -82,7 +107,7 @@ export async function checkFakeWatchDomain(urlOrDomain) {
         risk_score = Math.max(0, Math.round((1 - (data.confidence || 0.8)) * 10));
       }
 
-      return {
+      return setCachedFakeWatch(targetUrl.toLowerCase(), {
         domain,
         url: targetUrl,
         verdict,
@@ -96,7 +121,7 @@ export async function checkFakeWatchDomain(urlOrDomain) {
         source: 'FakeWatch Live Network (Miner #42420)',
         details: data,
         latency_ms: Math.round(performance.now() - tStart)
-      };
+      });
     }
   } catch {
     // fall through to deterministic offline heuristics
@@ -108,13 +133,13 @@ export async function checkFakeWatchDomain(urlOrDomain) {
     if (sld !== brand && Math.abs(sld.length - brand.length) <= 2) {
       const dist = levenshtein(sld, brand);
       if (dist === 1 || (dist === 2 && sld.length > 5)) {
-        return {
+        return setCachedFakeWatch(targetUrl.toLowerCase(), {
           domain,
           verdict: 'PHISHING',
           risk_score: 96,
           source: `FakeWatch Heuristic Typosquat Shield (Target: ${brand})`,
           latency_ms: Math.round(performance.now() - tStart)
-        };
+        });
       }
     }
   }
@@ -122,36 +147,36 @@ export async function checkFakeWatchDomain(urlOrDomain) {
   // 3. Offline / Fallback: Check deterministic local heuristic / blacklist
   for (const rx of KNOWN_PHISHING_REGEXES) {
     if (rx.test(domain)) {
-      return {
+      return setCachedFakeWatch(targetUrl.toLowerCase(), {
         domain,
         verdict: 'PHISHING',
         risk_score: 98,
         source: 'FakeWatch ScamSniffer Rulepack',
         latency_ms: Math.round(performance.now() - tStart)
-      };
+      });
     }
   }
 
   // 3. Fallback heuristic for unrecognized domains: triggers UNKNOWN
   const isTopTierSafe = /^(?:[a-z0-9-]+\.)*(?:stripe\.com|google\.com|microsoft\.com|github\.com|aws\.amazon\.com|apple\.com|etherscan\.io|uniswap\.org|circle\.com|coinbase\.com|siemens\.com|sap\.com|ibm\.com|oracle\.com|cisco\.com)$/i.test(domain);
   if (isTopTierSafe) {
-    return {
+    return setCachedFakeWatch(targetUrl.toLowerCase(), {
       domain,
       verdict: 'SAFE',
       risk_score: 2,
       source: 'FakeWatch Verified Whitelist',
       latency_ms: Math.round(performance.now() - tStart)
-    };
+    });
   }
 
-  return {
+  return setCachedFakeWatch(targetUrl.toLowerCase(), {
     domain,
     verdict: 'UNKNOWN',
     risk_score: 45,
     source: 'FakeWatch Heuristic Evaluator',
     note: 'Domain not present in high-reputation whitelist; triggers manual review under enterprise spend policy.',
     latency_ms: Math.round(performance.now() - tStart)
-  };
+  });
 }
 
 export async function evaluateCounterpartyShield({

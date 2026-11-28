@@ -65,6 +65,8 @@ const SOLANA_RPC_ENDPOINTS = {
   devnet: ['https://api.devnet.solana.com']
 };
 
+const TOKEN_DECIMALS_CACHE = new Map();
+
 const KNOWN_SOLANA_MINTS = {
   USDC: { mint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', decimals: 6 },
   USDT: { mint: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', decimals: 6 },
@@ -1400,44 +1402,36 @@ export async function verifyTokenTotalSupply({ token_address, address, token, ch
   }
 
   const rpcs = RPC_ENDPOINTS[targetChain] || RPC_ENDPOINTS.ethereum;
+  const decCacheKey = `${targetChain}:${targetAddress.toLowerCase()}`;
+  const cachedDecimals = TOKEN_DECIMALS_CACHE.get(decCacheKey);
+
+  const rpcEthCall = (rpcUrl, callData, timeoutMs = 2500) =>
+    fetch(rpcUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'eth_call',
+        params: [{ to: targetAddress, data: callData }, 'latest']
+      }),
+      signal: AbortSignal.timeout(timeoutMs)
+    }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+
   for (const rpc of rpcs) {
     try {
-      const res = await fetch(rpc, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: 'eth_call',
-          params: [{ to: targetAddress, data: '0x18160ddd' }, 'latest']
-        }),
-        signal: AbortSignal.timeout(4000)
-      });
-      if (!res.ok) continue;
-      const data = await res.json();
-      if (data.result && data.result !== '0x') {
+      const [data, decData] = await Promise.all([
+        rpcEthCall(rpc, '0x18160ddd', 2500),
+        cachedDecimals !== undefined ? Promise.resolve(null) : rpcEthCall(rpc, '0x313ce567', 2500)
+      ]);
+      if (data?.result && data.result !== '0x') {
         const rawSupplyBigInt = BigInt(data.result);
 
-        let decimals = 18;
-        try {
-          const decRes = await fetch(rpc, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              jsonrpc: '2.0',
-              id: 2,
-              method: 'eth_call',
-              params: [{ to: targetAddress, data: '0x313ce567' }, 'latest']
-            }),
-            signal: AbortSignal.timeout(3000)
-          });
-          if (decRes.ok) {
-            const decData = await decRes.json();
-            if (decData.result && decData.result !== '0x') {
-              decimals = Number(BigInt(decData.result));
-            }
-          }
-        } catch {}
+        let decimals = cachedDecimals !== undefined ? cachedDecimals : 18;
+        if (cachedDecimals === undefined && decData?.result && decData.result !== '0x') {
+          decimals = Number(BigInt(decData.result));
+          TOKEN_DECIMALS_CACHE.set(decCacheKey, decimals);
+        }
 
         const exactDecimalStr = formatUnits(rawSupplyBigInt, decimals);
         const [intPart, fracPart] = exactDecimalStr.split('.');
@@ -1871,28 +1865,28 @@ export async function arbitrateMultiMiner({ query, question, task, intent, miner
         /^https?:\/\//i.test(m.base_url)
       );
 
-      // Query up to 2 active peer miners with timeout
-      for (const peer of peers.slice(0, 2)) {
-        try {
+      // Query up to 2 active peer miners in parallel with tight timeout for Epoch 68+ latency
+      const peerSettled = await Promise.allSettled(
+        peers.slice(0, 2).map(async (peer) => {
           const peerUrl = `${peer.base_url.replace(/\/+$/, '')}/api/miner/ask?question=${encodeURIComponent(prompt)}`;
           const pRes = await fetch(peerUrl, {
-            signal: AbortSignal.timeout(2500),
+            signal: AbortSignal.timeout(1100),
             headers: { 'Accept': 'application/json' }
           });
-          if (pRes.ok) {
-            const pData = await pRes.json();
-            collectedResponses.push({
-              miner_id: peer.id || 'peer',
-              provider: peer.name || peer.slug || `Miner #${peer.id}`,
-              verified: pData.verified !== undefined ? pData.verified : pData.status === 'ok',
-              value: pData.value !== undefined ? pData.value : undefined,
-              data: pData,
-              status: 'ok'
-            });
-          }
-        } catch {
-          // Peer query timeout or network issue
-        }
+          if (!pRes.ok) return null;
+          const pData = await pRes.json();
+          return {
+            miner_id: peer.id || 'peer',
+            provider: peer.name || peer.slug || `Miner #${peer.id}`,
+            verified: pData.verified !== undefined ? pData.verified : pData.status === 'ok',
+            value: pData.value !== undefined ? pData.value : undefined,
+            data: pData,
+            status: 'ok'
+          };
+        })
+      );
+      for (const s of peerSettled) {
+        if (s.status === 'fulfilled' && s.value) collectedResponses.push(s.value);
       }
     } catch {
       // Devnode lookup fallback

@@ -124,25 +124,27 @@ export async function scanUrlVerdict(params = {}, { checkFakeWatchDomain } = {})
   }
 
   let fw = null;
-  if (typeof checkFakeWatchDomain === 'function') {
-    try {
-      fw = await checkFakeWatchDomain(normalizedUrl);
-      if (fw?.verdict === 'PHISHING' || fw?.verdict === 'MALICIOUS') {
-        malicious = true;
-        signals.push(`FAKEWATCH_${fw.verdict}`);
-      } else if (fw?.verdict === 'SUSPICIOUS') {
-        suspicious = true;
-        signals.push('FAKEWATCH_SUSPICIOUS');
-      } else if (fw?.verdict === 'SAFE') {
-        signals.push('FAKEWATCH_SAFE');
-      }
-    } catch {}
-  }
-
-  const [uhUrl, uhHost] = await Promise.all([
+  const [fwSettled, uhUrlSettled, uhHostSettled] = await Promise.allSettled([
+    typeof checkFakeWatchDomain === 'function' ? checkFakeWatchDomain(normalizedUrl) : Promise.resolve(null),
     checkUrlHaus('url', normalizedUrl),
     host ? checkUrlHaus('host', host) : Promise.resolve(null)
   ]);
+
+  if (fwSettled.status === 'fulfilled' && fwSettled.value) {
+    fw = fwSettled.value;
+    if (fw.verdict === 'PHISHING' || fw.verdict === 'MALICIOUS') {
+      malicious = true;
+      signals.push(`FAKEWATCH_${fw.verdict}`);
+    } else if (fw.verdict === 'SUSPICIOUS') {
+      suspicious = true;
+      signals.push('FAKEWATCH_SUSPICIOUS');
+    } else if (fw.verdict === 'SAFE') {
+      signals.push('FAKEWATCH_SAFE');
+    }
+  }
+
+  const uhUrl = uhUrlSettled.status === 'fulfilled' ? uhUrlSettled.value : null;
+  const uhHost = uhHostSettled.status === 'fulfilled' ? uhHostSettled.value : null;
 
   if (uhUrl?.query_status === 'ok' && uhUrl?.url_status === 'online') {
     malicious = true;
