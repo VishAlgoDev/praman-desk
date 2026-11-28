@@ -1097,6 +1097,40 @@ async function run() {
       throw new Error(`sanctions-batch snapshot & retention metadata check failed: ${JSON.stringify(sbBatch.json)}`);
     }
 
+    // 19. Regression guards for Devnode #6217 rejected intents (VENDOR_VERIFY, CVE_LOOKUP, WASH_TRADING) & canonical txHashes
+    const vNl = await check('/api/miner/vendor-verify', 'POST', { question: 'Verify vendor Siemens AG VAT DE129274202' });
+    if (vNl.status !== 200 || vNl.json.valid !== true || vNl.json.vat_valid !== true || vNl.json.vat_entity_match !== true) {
+      throw new Error(`VENDOR_VERIFY NL+VAT check failed: ${JSON.stringify(vNl.json)}`);
+    }
+    const vStruct = await check('/api/miner/vendor-verify', 'POST', { company_name: 'Siemens AG', vat_id: 'DE129274202' });
+    if (vStruct.status !== 200 || vStruct.json.valid !== true || !/Siemens/i.test(String(vStruct.json.vendor || ''))) {
+      throw new Error(`VENDOR_VERIFY structured company_name+vat_id check failed: ${JSON.stringify(vStruct.json)}`);
+    }
+    const vUs = await check('/api/miner/vendor-verify', 'POST', { vendor: 'Apple Inc.', vat_number: 'US942404110' });
+    if (vUs.status !== 200 || vUs.json.valid !== true || vUs.json.tax_id_valid !== true) {
+      throw new Error(`VENDOR_VERIFY US EIN prefix check failed: ${JSON.stringify(vUs.json)}`);
+    }
+    const cveNested = await check('/api/miner/cve-lookup', 'POST', { input: { cve_id: 'CVE-2023-4911' } });
+    if (cveNested.status !== 200 || cveNested.json.ok !== true || cveNested.json.cve_id !== 'CVE-2023-4911' || cveNested.json.cvss_score !== 7.8) {
+      throw new Error(`CVE_LOOKUP nested input check failed: ${JSON.stringify(cveNested.json)}`);
+    }
+    const washPool = await check('/api/miner/wash-trading', 'POST', { question: 'Is Uniswap pool 0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640 on Ethereum showing wash trading?' });
+    if (washPool.status !== 200 || washPool.json.ok !== true || washPool.json.chain !== 'ethereum' || !/USDC|WETH/i.test(String(washPool.json.pair || ''))) {
+      throw new Error(`WASH_TRADING Ethereum pool address check failed: ${JSON.stringify(washPool.json)}`);
+    }
+    const washSym = await check('/api/miner/wash-trading', 'POST', { question: 'Check wash trading for PEPE' });
+    if (washSym.status !== 200 || washSym.json.ok !== true || !/^PEPE\//i.test(String(washSym.json.pair || ''))) {
+      throw new Error(`WASH_TRADING PEPE NL symbol check failed: ${JSON.stringify(washSym.json)}`);
+    }
+    const solCase = await check('/api/audit/case?case=solana-devnet-release');
+    if (solCase.status !== 200 || String(solCase.json.txHash || '').includes('aBcDeFg') || String(solCase.json.txHash || '').length < 64) {
+      throw new Error(`Canonical solana-devnet-release txHash check failed: ${JSON.stringify(solCase.json)}`);
+    }
+    const tencCase = await check('/api/audit/case?case=tencent-01-halt');
+    if (tencCase.status !== 200 || String(tencCase.json.txHash || '').length < 64) {
+      throw new Error(`Canonical tencent-01-halt txHash check failed: ${JSON.stringify(tencCase.json)}`);
+    }
+
     console.log('\nALL SEASON II ADVERSARIAL REGRESSION GUARDS, SIGNED MEMO VERIFIER, PILOT INTAKE & LIVE VERIFICATION TESTS PASSED!');
   } finally {
     server.close();

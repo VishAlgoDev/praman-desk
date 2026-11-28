@@ -2,11 +2,11 @@
   "name": "praman-spend-guard",
   "version": "1.0.0",
   "spec": "openclaw-hermes-v1",
-  "description": "Autonomous Pre-Payment Spend Firewall & Counterparty Clearing Desk wrapping Praman Desk's 18-tool keyless Streamable HTTP MCP.",
+  "description": "Autonomous Pre-Payment Spend Firewall & Counterparty Clearing Desk wrapping Praman Desk's 29-tool keyless Streamable HTTP MCP.",
   "transport": "streamable-http",
   "mcpEndpoint": "https://praman-desk.vercel.app/api/mcp",
   "localMcpCommand": "node mcp/server.mjs",
-  "toolCount": 18,
+  "toolCount": 29,
   "tools": [
     "verify_counterparty",
     "reconcile_invoice",
@@ -25,7 +25,18 @@
     "audit_contract_obligation",
     "query_mining_intelligence",
     "arbitrate_mining_discrepancies",
-    "query_grid_power_price"
+    "query_grid_power_price",
+    "audit_creative_qa",
+    "scan_url_verdict",
+    "check_threat_indicator",
+    "assess_transaction_risk",
+    "verify_ssl_certificate",
+    "lookup_cve_cvss",
+    "assess_shipment_delay_risk",
+    "geolocate_ip",
+    "get_token_holder_count",
+    "detect_wash_trading",
+    "answer_telegraph_knowledge"
   ],
   "shareableCaseEndpoint": "https://praman-desk.vercel.app/api/audit/case"
 }

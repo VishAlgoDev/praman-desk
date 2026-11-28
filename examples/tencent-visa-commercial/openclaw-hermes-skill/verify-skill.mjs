@@ -1,6 +1,6 @@
 /**
  * Verification harness for OpenClaw & Hermes Skill manifest (#19 / #20)
- * Verifies exact 18-tool MCP schema alignment and exercises live composite clearance.
+ * Verifies exact 29-tool MCP schema alignment and exercises live composite clearance.
  */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -34,16 +34,16 @@ export async function verifyOpenClawHermesSkill() {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   const skillMd = fs.readFileSync(skillMdPath, 'utf8');
 
-  assert.equal(manifest.toolCount, 18);
-  assert.equal(manifest.tools.length, 18);
+  assert.equal(manifest.toolCount, TOOLS.length);
+  assert.equal(manifest.tools.length, TOOLS.length);
   assert.deepEqual(manifest.tools, TOOLS.map(t => t.name), 'Skill manifest tools must match mcp/server.mjs exactly');
   assert(skillMd.includes('https://praman-desk.vercel.app/api/mcp'));
 
-  // Verify live MCP HTTP handler registers all 18 tools
+  // Verify live MCP HTTP handler registers all 29 tools
   const toolsListRes = await invokeMcpMethod('tools/list');
   assert.equal(toolsListRes.statusCode, 200);
   const liveTools = toolsListRes.data?.result?.tools || [];
-  assert.equal(liveTools.length, 18, `Expected 18 MCP tools, got ${liveTools.length}`);
+  assert.equal(liveTools.length, TOOLS.length, `Expected ${TOOLS.length} MCP tools, got ${liveTools.length}`);
 
   // Verify composite spend clearance passes clean Siemens AG and blocks Lazarus Group
   const approved = await clearSpendComposite({

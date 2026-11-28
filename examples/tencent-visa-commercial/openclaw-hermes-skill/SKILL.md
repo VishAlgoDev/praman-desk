@@ -1,6 +1,6 @@
 ---
 name: praman-spend-guard
-description: Headless autonomous pre-payment spend firewall for OpenClaw, Hermes, Claude Code, and Cursor via keyless Streamable HTTP MCP (18 compliance & verification tools).
+description: Headless autonomous pre-payment spend firewall for OpenClaw, Hermes, Claude Code, and Cursor via keyless Streamable HTTP MCP (29 compliance & verification tools).
 homepage: https://praman-desk.vercel.app
 mcp_endpoint: https://praman-desk.vercel.app/api/mcp
 ---
@@ -13,7 +13,7 @@ Use this skill whenever an autonomous agent is about to transfer USDC, SOL, ETH,
 - **Streamable HTTP URL:** `https://praman-desk.vercel.app/api/mcp`
 - **Transport:** HTTP POST (JSON-RPC 2.0)
 - **Authentication:** None (keyless)
-- **Tools Exposed:** 18 deterministic compliance, sanctions, registry, WASM math, and cross-chain verification tools
+- **Tools Exposed:** 29 deterministic compliance, sanctions, registry, WASM math, and cross-chain verification tools
 
 ## Required Pre-Payment Workflow
 1. Always call `clear_spend` (or `screen_sanctions` + `verify_counterparty` + `reconcile_invoice`) before executing a wallet transfer or escrow release.

@@ -5,7 +5,7 @@
 
   const CMD_ITEMS = [
     { label: "Company Overview", meta: "/", href: "/" },
-    { label: "Operator Desks (5 Workflows)", meta: "/desks", href: "/desks" },
+    { label: "Operator Desks (6 Workflows)", meta: "/desks", href: "/desks" },
     { label: "Trade Assurance Escrow Desk", meta: "/desks#trade-assurance", href: "/desks#trade-assurance" },
     { label: "Autonomous Spend Guard (Solana + EVM)", meta: "/desks#spend-guard", href: "/desks#spend-guard" },
     { label: "Settlement Ledger (32 On-Chain Tx)", meta: "/desks#settlement-ledger", href: "/desks#settlement-ledger" },

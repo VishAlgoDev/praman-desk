@@ -3,7 +3,7 @@
  * Praman Desk — Autonomous Pre-Payment Spend Guard & Counterparty Clearing Desk
  * Model Context Protocol (MCP) Server (Stdio Transport)
  *
- * Implements 9 deterministic spend guard & verification tools for AI agents,
+ * Implements 29 deterministic spend guard & verification tools for AI agents,
  * DAOs, and ERP systems before releasing treasury funds.
  */
 

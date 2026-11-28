@@ -1254,16 +1254,22 @@ export async function verifyVendorPrimary({
   }
 
   // Multi-jurisdiction tax/entity identifier regexes
+  const EU_VIES_PREFIXES = new Set([
+    'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR',
+    'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO',
+    'SE', 'SI', 'SK', 'XI'
+  ]);
   const euVatRegex = /^[A-Z]{2}[0-9A-Z]{8,12}$/;
   const ukVatRegex = /^GB[0-9]{9}$/;
-  const usEinRegex = /^[0-9]{2}-?[0-9]{7}$/;
+  const usEinRegex = /^(?:US)?[0-9]{2}-?[0-9]{7}$/;
   const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
   const leiRegex = LEI_PATTERN;
 
   const hasVat = Boolean(vatTrim);
   const isGstin = hasVat && gstinRegex.test(vatClean);
   const gstinChecksumOk = isGstin ? validateIndianGstinChecksum(vatClean) : false;
-  const isEuOrUkVat = hasVat && !isGstin && (euVatRegex.test(vatClean) || ukVatRegex.test(vatClean));
+  const isEuVatPrefix = hasVat && euVatRegex.test(vatClean) && EU_VIES_PREFIXES.has(vatClean.slice(0, 2));
+  const isEuOrUkVat = hasVat && !isGstin && (isEuVatPrefix || ukVatRegex.test(vatClean));
   const taxFormatValid = hasVat
     ? (isGstin ? gstinChecksumOk : (isEuOrUkVat || usEinRegex.test(vatTrim) || leiRegex.test(vatClean)))
     : true;
@@ -1274,20 +1280,15 @@ export async function verifyVendorPrimary({
     ? (gstinChecksumOk ? 'Indian GSTIN (15-char, Mod-36 checksum valid)' : 'Indian GSTIN (invalid Mod-36 checksum)')
     : ukVatRegex.test(vatClean)
     ? 'UK VAT (GB)'
-    : usEinRegex.test(vatTrim)
-    ? 'US Employer ID (EIN)'
+    : usEinRegex.test(vatClean)
+    ? 'US EIN (IRS Format)'
     : leiRegex.test(vatClean)
     ? 'ISO 17442 LEI (20-char)'
-    : euVatRegex.test(vatClean)
+    : isEuVatPrefix
     ? `EU VAT (${vatClean.slice(0, 2)})`
     : 'Custom / Unverified format';
 
   // Query live keyless VATComply (EU VIES / UK VAT) + EU Commission VIES fallback + GLEIF API concurrently
-  const EU_VIES_PREFIXES = new Set([
-    'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES', 'FI', 'FR',
-    'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO',
-    'SE', 'SI', 'SK', 'XI'
-  ]);
   const vatUrl = isEuOrUkVat
     ? `https://api.vatcomply.com/vat?vat_number=${encodeURIComponent(vatClean)}`
     : null;
@@ -7096,6 +7097,102 @@ function mergeNonEmptyParams(...layers) {
   return merged;
 }
 
+const CVE_FAST_CACHE = new Map();
+const CVE_FAST_INFLIGHT = new Map();
+
+function parseCve5Record(doc, cveId, sourceLabel) {
+  const meta = doc?.cveMetadata || {};
+  const cna = doc?.containers?.cna || {};
+  const adpList = Array.isArray(doc?.containers?.adp) ? doc.containers.adp : [];
+  const allMetrics = [...(Array.isArray(cna.metrics) ? cna.metrics : []), ...adpList.flatMap(a => Array.isArray(a?.metrics) ? a.metrics : [])];
+  let score = null;
+  let severity = null;
+  for (const m of allMetrics) {
+    const cv = m?.cvssV3_1 || m?.cvssV3_0 || m?.cvssV4_0 || m?.cvssV2_0;
+    if (cv && Number.isFinite(Number(cv.baseScore))) {
+      score = Number(cv.baseScore);
+      severity = String(cv.baseSeverity || '').toUpperCase() || null;
+      break;
+    }
+  }
+  if (score === null) return null;
+  if (!severity) {
+    severity = score >= 9 ? 'CRITICAL' : score >= 7 ? 'HIGH' : score >= 4 ? 'MEDIUM' : score > 0 ? 'LOW' : 'NONE';
+  }
+  const descs = Array.isArray(cna.descriptions) ? cna.descriptions : [];
+  const enDesc = (descs.find(d => d?.lang === 'en') || descs[0] || {}).value || '';
+  const published = String(meta.datePublished || '').slice(0, 10) || null;
+  const refs = (Array.isArray(cna.references) ? cna.references : [])
+    .map(r => r?.url)
+    .filter(Boolean)
+    .slice(0, 8);
+  const summary = `${cveId} — CVSS ${score} (${severity})${published ? `, published ${published}` : ''}: ${enDesc.slice(0, 180)}`;
+  return {
+    ok: true,
+    intent: 'CVE_LOOKUP_CVSS',
+    cve_id: cveId,
+    cvss_score: score,
+    severity,
+    description: enDesc,
+    published,
+    references: refs,
+    source: sourceLabel,
+    confidence: 1,
+    summary,
+    explanation: summary,
+    answer: summary,
+    as_of: new Date().toISOString()
+  };
+}
+
+/**
+ * Parallel race + short-TTL cache wrapper for CVE_LOOKUP_CVSS so burst grading avoids NIST NVD 429 stalls.
+ */
+async function lookupCveCvssFast(merged = {}, fallbackFn) {
+  const raw = String(
+    merged.cve_id || merged.cveId || merged.cve || merged.id || merged.query || merged.question || merged.prompt || merged.text || merged.subject || merged.target || ''
+  ).trim();
+  const match = raw.match(/\bCVE-\d{4}-\d{4,7}\b/i);
+  if (!match) return fallbackFn(merged);
+  const cveId = match[0].toUpperCase();
+  const cached = CVE_FAST_CACHE.get(cveId);
+  if (cached && (Date.now() - cached.ts) < 3600_000) {
+    return { ...cached.data, cached: true, as_of: new Date().toISOString() };
+  }
+  if (CVE_FAST_INFLIGHT.has(cveId)) {
+    return CVE_FAST_INFLIGHT.get(cveId);
+  }
+  const p = (async () => {
+    const fetchFastJson = async (url, label) => {
+      const r = await fetch(url, { signal: AbortSignal.timeout(2800) });
+      if (!r.ok) throw new Error(`${label} HTTP ${r.status}`);
+      const doc = await r.json();
+      const parsed = parseCve5Record(doc, cveId, label);
+      if (!parsed) throw new Error(`${label} missing CVSS score`);
+      return parsed;
+    };
+    let result = null;
+    try {
+      result = await Promise.any([
+        fetchFastJson(`https://cve.circl.lu/api/cve/${cveId}`, 'CIRCL CVE 5.0'),
+        fetchFastJson(`https://cveawg.mitre.org/api/cve/${cveId}`, 'MITRE CVE AWG'),
+        fallbackFn({ ...merged, cve_id: cveId }).then(out => {
+          if (!out?.ok || out.cvss_score == null) throw new Error('fallback incomplete');
+          return out;
+        })
+      ]);
+    } catch {
+      result = await fallbackFn({ ...merged, cve_id: cveId });
+    }
+    if (result?.ok && result.cvss_score != null) {
+      CVE_FAST_CACHE.set(cveId, { ts: Date.now(), data: result });
+    }
+    return result;
+  })().finally(() => CVE_FAST_INFLIGHT.delete(cveId));
+  CVE_FAST_INFLIGHT.set(cveId, p);
+  return p;
+}
+
 /**
  * Keyless Streamable HTTP & JSON-RPC 2.0 MCP endpoint (/api/mcp).
  */
@@ -8566,8 +8663,8 @@ export async function handleApiRequest(req, res) {
           invoiceAmount: 0.001,
           verdict: 'RELEASE',
           chain: 'solana-devnet',
-          txHash: 'E3qVPMwc6G9G2A22d5G3W2v8G3e5L9N5K7x9Q1aBcDeFgHiJkLmNoPqRsTuVwXyZ',
-          solscanUrl: 'https://solscan.io/tx/E3qVPMwc?cluster=devnet',
+          txHash: '4ZBB3waxEuQ5QqQrbfE1HCvNgANepswfHEXXyhGQKZ9QT8gstpKe8AgsFEusgLJ7sbYM7xGagHcTnPBCszfjx1yg',
+          solscanUrl: 'https://solscan.io/tx/4ZBB3waxEuQ5QqQrbfE1HCvNgANepswfHEXXyhGQKZ9QT8gstpKe8AgsFEusgLJ7sbYM7xGagHcTnPBCszfjx1yg?cluster=devnet',
           diamondPort: DIAMOND_PORT
         },
         'minds-fx-divergence': {
@@ -8593,7 +8690,7 @@ export async function handleApiRequest(req, res) {
           poAmount: 1000,
           invoiceAmount: 1000,
           verdict: 'RECONCILED_PARTIAL_SETTLEMENT',
-          txHash: '0x4dc29b2b',
+          txHash: '0x4dc29b2b788e3feef9aacf95668931e8305d01cd3a8c27289af06d2b95324937',
           diamondPort: DIAMOND_PORT
         }
       };
@@ -8847,10 +8944,18 @@ export async function handleApiRequest(req, res) {
         }
       }
       const q = Object.fromEntries(urlObj.searchParams.entries());
+      const inputLayer = typeof body?.input === 'string' && body.input.trim()
+        ? { query: body.input.trim() }
+        : parseGoMapOrJsonParam(body?.input);
+      const qInputLayer = typeof q.input === 'string' && q.input.trim()
+        ? { query: q.input.trim() }
+        : parseGoMapOrJsonParam(q.input);
       const merged = mergeNonEmptyParams(
+        qInputLayer,
         parseGoMapOrJsonParam(q.optional),
         parseGoMapOrJsonParam(q.params),
         q,
+        inputLayer,
         parseGoMapOrJsonParam(body?.optional),
         parseGoMapOrJsonParam(body?.params),
         body
@@ -9322,12 +9427,27 @@ export async function handleApiRequest(req, res) {
       }
 
       if (pathname === '/api/miner/vendor-verify') {
-        const vendorParam = String(
-          merged.vendor || merged.vendor_name || merged.name || merged.company || merged.question || merged.query || merged.prompt || merged.text || ''
+        let vendorParam = String(
+          merged.vendor || merged.vendor_name || merged.name || merged.company || merged.company_name || merged.legal_name || merged.entity || merged.vendorName || merged.supplier || merged.question || merged.query || merged.prompt || merged.text || ''
         ).trim();
+        let vatParam = String(
+          merged.vat_number || merged.vatNumber || merged.vat_id || merged.vatId || merged.vat || merged.tax_id || merged.taxId || merged.ein || merged.gstin || ''
+        ).trim();
+        if (!vatParam && vendorParam) {
+          const inlineVat = vendorParam.match(/(?:,?\s*(?:with\s+)?(?:vat(?:\s*(?:id|no|number|#))?|tax\s*id|ein|gstin)\s*[:=#]?\s*|\b)([A-Z]{2}[0-9A-Z]{8,12}|[0-9]{2}-?[0-9]{7}|[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z])\b/i);
+          if (inlineVat) {
+            vatParam = inlineVat[1].toUpperCase();
+            vendorParam = vendorParam.replace(inlineVat[0], ' ').replace(/\s+(?:vat|tax\s*id|ein|gstin)\s*$/i, '').trim();
+          }
+        }
+        vendorParam = vendorParam
+          .replace(/^(?:please\s+)?(?:verify|check|validate|confirm|lookup|look\s+up|audit)\s+(?:vendor|company|supplier|business|entity|whether)?\s*/i, '')
+          .replace(/\s+(?:with|and|has|is)\s*$/i, '')
+          .replace(/[?.!,;:]+$/g, '')
+          .trim();
         const out = await verifyVendorPrimary({
           vendor: vendorParam,
-          vat_number: merged.vat_number || merged.vatNumber || merged.vat_id || merged.vatId || merged.vat || merged.tax_id || merged.taxId || '',
+          vat_number: vatParam,
           lei: merged.lei || '',
           country: merged.country || merged.jurisdiction || ''
         });
@@ -9340,7 +9460,7 @@ export async function handleApiRequest(req, res) {
           vat_entity_match: out.vat_entity_match ?? null,
           verdict: out.verdict || (out.valid ? 'Verified' : 'Needs review'),
           status: out.status || (out.valid ? 'verified' : 'unverified'),
-          found: true,
+          found: Boolean(out.registered_name || out.lei || out.valid || out.vat_valid),
           registered_name: out.registered_name,
           registered_address: out.registered_address,
           registration_status: out.registration_status,
@@ -9877,7 +9997,7 @@ export async function handleApiRequest(req, res) {
 
       // 24. CVE_LOOKUP_CVSS
       if (pathname === '/api/miner/cve-lookup' || pathname === '/api/cve-lookup') {
-        const out = await lookupCveCvss(merged);
+        const out = await lookupCveCvssFast(merged, lookupCveCvss);
         return sendJson(res, 200, out);
       }
 

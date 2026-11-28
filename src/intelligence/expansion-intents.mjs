@@ -952,22 +952,76 @@ export async function detectWashTrading(params = {}) {
     };
   }
 
-  let pairs = [];
+  // Extract pool/pair/token address, chain hint, or clean ticker from natural-language prompts
   const addrMatch = subject.match(/0x[a-fA-F0-9]{40}|[1-9A-HJ-NP-Za-km-z]{32,44}/);
+  const chainMatch = subject.match(/\b(?:on|chain|network)\s+(ethereum|eth|solana|sol|base|bsc|bnb|arbitrum|arb|polygon|matic|optimism|avalanche|avax)\b/i);
+  const CHAIN_ALIAS = { eth: 'ethereum', sol: 'solana', bnb: 'bsc', arb: 'arbitrum', matic: 'polygon', avax: 'avalanche' };
+  const preferredChain = chainMatch ? (CHAIN_ALIAS[chainMatch[1].toLowerCase()] || chainMatch[1].toLowerCase()) : null;
+
+  let cleanQuery = subject;
+  if (!addrMatch) {
+    // Extract explicit trading pair (e.g. WETH/USDC, PEPE/WETH) or token ticker
+    const slashPair = subject.match(/\b([A-Za-z0-9]{2,12})\s*\/\s*([A-Za-z0-9]{2,12})\b/);
+    if (slashPair) {
+      cleanQuery = `${slashPair[1]}/${slashPair[2]}`;
+    } else {
+      const stripped = subject
+        .replace(/^(?:please\s+)?(?:is|are|does|check|detect|analyze|analyse|audit|evaluate|verify|assess)\s+/gi, '')
+        .replace(/\b(?:is|are|showing|exhibiting|experiencing|having|wash[\s-]?trading|synthetic\s+volume|churn|fake\s+volume|volume\s+manipulation|on\s+(?:ethereum|eth|solana|sol|base|bsc|bnb|arbitrum|polygon|uniswap|raydium|pancakeswap|orca|aerodrome)|uniswap|pancakeswap|raydium|sushiswap|dex|pool|pair|token|for|the|any|of|in|on|at|with|and|or|\?)\b/gi, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (stripped) cleanQuery = stripped;
+    }
+  } else {
+    cleanQuery = addrMatch[0];
+  }
+
+  let pairs = [];
   try {
     if (addrMatch) {
-      const tRes = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${addrMatch[0]}`, { signal: AbortSignal.timeout(4000) });
-      if (tRes.ok) {
-        const tj = await tRes.json();
-        if (Array.isArray(tj?.pairs)) pairs.push(...tj.pairs);
+      const addr = addrMatch[0];
+      const chainsToTry = preferredChain
+        ? [preferredChain]
+        : (addr.startsWith('0x') ? ['ethereum', 'base', 'arbitrum', 'bsc', 'polygon'] : ['solana']);
+      const fetches = [
+        fetch(`https://api.dexscreener.com/latest/dex/tokens/${addr}`, { signal: AbortSignal.timeout(3500) }).then(r => r.ok ? r.json() : null).catch(() => null),
+        fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(addr)}`, { signal: AbortSignal.timeout(3500) }).then(r => r.ok ? r.json() : null).catch(() => null),
+        ...chainsToTry.slice(0, 3).map(ch =>
+          fetch(`https://api.dexscreener.com/latest/dex/pairs/${ch}/${addr}`, { signal: AbortSignal.timeout(3500) }).then(r => r.ok ? r.json() : null).catch(() => null)
+        )
+      ];
+      const settled = await Promise.all(fetches);
+      for (const resObj of settled) {
+        if (Array.isArray(resObj?.pairs)) pairs.push(...resObj.pairs);
       }
+      // Prefer exact pool address match first when an EVM/Solana pool address was queried
+      const exactAddrLower = addr.toLowerCase();
+      const exactPools = pairs.filter(p => String(p?.pairAddress || '').toLowerCase() === exactAddrLower);
+      if (exactPools.length) pairs = exactPools;
     }
     if (!pairs.length) {
-      const sRes = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(subject)}`, { signal: AbortSignal.timeout(4000) });
+      const sRes = await fetch(`https://api.dexscreener.com/latest/dex/search?q=${encodeURIComponent(cleanQuery)}`, { signal: AbortSignal.timeout(4000) });
       if (sRes.ok) {
         const sj = await sRes.json();
         if (Array.isArray(sj?.pairs)) pairs.push(...sj.pairs);
       }
+    }
+    if (pairs.length > 1) {
+      const queryUpper = cleanQuery.toUpperCase().trim();
+      const [baseTok, quoteTok] = queryUpper.split('/').map(s => s.trim());
+      if (!addrMatch && baseTok) {
+        const symMatched = pairs.filter(p => {
+          const b = String(p?.baseToken?.symbol || '').toUpperCase();
+          const q = String(p?.quoteToken?.symbol || '').toUpperCase();
+          return quoteTok ? (b === baseTok && q === quoteTok) : (b === baseTok);
+        });
+        if (symMatched.length) pairs = symMatched;
+      }
+      if (preferredChain) {
+        const chainMatched = pairs.filter(p => p?.chainId === preferredChain);
+        if (chainMatched.length) pairs = chainMatched;
+      }
+      pairs.sort((a, b) => (Number(b?.liquidity?.usd || 0) + Number(b?.volume?.h24 || 0)) - (Number(a?.liquidity?.usd || 0) + Number(a?.volume?.h24 || 0)));
     }
   } catch {}
 

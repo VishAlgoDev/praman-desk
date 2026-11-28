@@ -34,7 +34,7 @@ jobs:
       - name: Run 651B WASM Comparator Verification (1043 cases)
         run: npm run comparator:test
 
-      - name: Run MCP 19-Tool Protocol Suite
+      - name: Run MCP 29-Tool Protocol Suite
         run: npm run mcp:test
 
       - name: Run SDK & Solana Spend Guard Suite (JS + Devnet + Python)
