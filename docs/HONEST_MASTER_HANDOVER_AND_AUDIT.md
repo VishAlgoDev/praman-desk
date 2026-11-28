@@ -1,10 +1,11 @@
 # Honest Master Handover & Forensic System Audit (`Praman Desk`)
 
 > **HANDOVER STANDARD: ZERO TRUST • ZERO DEFECT • ZERO HALLUCINATIONS • 100% FACTUAL GROUND TRUTH**  
-> *Target Repository*: [`telegraph-h2`](https://github.com/VishAlgoDev/praman-desk) (`main`, Commit `0e8574b`)  
+> *Target Repository*: [`telegraph-h2`](https://github.com/VishAlgoDev/praman-desk) (`main`)  
 > *Live Production Mirror*: [`https://praman-desk.vercel.app`](https://praman-desk.vercel.app)  
-> *Audit Timestamp*: `2026-11-24T14:32:00+05:30`  
-> *Telegraph Miner ID*: `Node #5281` (Devnode EvalPool Scored Index: `6127`)  
+> *Updated Audit Timestamp*: `2026-11-28T09:30:00+05:30`  
+> *Active Telegraph Miner*: `Devnode Route #6164` / `Sepolia Diamond #6216` (`28 bonded intents / 30 capabilities`)  
+> *Sovereign Escrow Contract*: [`PramanEscrow.sol`](https://sepolia.etherscan.io/address/0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c) (`0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c`)  
 > *Signing Wallet*: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
 
 ---
@@ -60,13 +61,12 @@ To establish complete zero-trust clarity, here is the unvarnished breakdown of e
 ### B. Production Coordinates & Deployed Contracts
 | Component | Identifier / Address | Network | Purpose |
 | :--- | :--- | :--- | :--- |
-| **Live Portal** | `https://praman-desk.vercel.app` | Vercel Serverless | Production interface, API router, and interactive desk terminal. |
-| **Miner Node** | `Node #5281` (EvalPool index: `6127`) | Telegraph Network | Evaluator node registered with 15 bonded intents. |
-| **Contributor Wallet** | `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466` | Ethereum Sepolia | Signing wallet for all testnet transactions, disputes, and gas execution. |
-| **Diamond Settle** | `0x1D9BCe4ebD2f56F54d7E017ebD5F18Ea10B16164` | Ethereum Sepolia | ERC-2535 Diamond contract (Registrations #6164 and #6169). |
-| **TakarSettle v4** | `0x310275e6D66818E068245326bB9e398822304248` | Ethereum Sepolia | Counterparty escrow contract supporting dual-miner release and UCC Art. 2 arbitration. |
-| **TakarSettle5** | `0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B` | Ethereum Sepolia | Multi-case dispute resolution facet. |
-| **EAS Schema Anchor** | `0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04` | Ethereum Sepolia | Ethereum Attestation Service schema UID for on-chain statutory certificates. |
+| **Live Portal** | `https://praman-desk.vercel.app` | Vercel Serverless | Production interface, API router, and interactive 6-desk terminal (`29` keyless MCP tools). |
+| **Miner Node** | `Route #6164` / `Sepolia Diamond #6216` | Telegraph Network | Active miner registered with `28` bonded intents (`30` `miner.yaml` capabilities). |
+| **Contributor Wallet** | `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466` | Ethereum Sepolia | Signing wallet for all testnet transactions, escrow deals, and gas execution. |
+| **Diamond Settle** | `0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b` | Ethereum Sepolia | ERC-2535 Diamond contract (Active Registration `#6216`, Block `12227468`). |
+| **PramanEscrow (Sovereign)** | `0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c` | Ethereum Sepolia | Sovereign Praman USDC escrow contract supporting `settleSplit` & `haltAndRefund` (`Deal #0`: `0xbfc22464...`, `Deal #1`: `0xc69358c2...`). |
+| **EAS Schema Anchor** | `0xd84485ae5355ee2df17c1bf2361ef2f7b119ce0743b17cffb3687be65f80cc04` | Ethereum Sepolia | Ethereum Attestation Service schema UID (`EAS Record #33d85bed...`). |
 
 ### C. File Tree & Code Architecture (`telegraph-h2`)
 ```
@@ -77,7 +77,7 @@ telegraph-h2/
 │       └── mine-dossier.mjs     # Standalone endpoint for GSQ ML 4022 mine verification
 ├── data/
 │   ├── ledger-snapshot.json     # Pre-hydrated snapshot of 30 on-chain Sepolia transactions
-│   ├── ofac-sdn-raw.json        # 19,565 US Treasury SDN sanctioned entities
+│   ├── ofac-sdn-raw.json        # 19,629 US Treasury SDN sanctioned entities
 │   └── gsq-mining-truth.json    # Geological Survey of Queensland ground-truth baselines
 ├── docs/
 │   ├── SHOWCASE_WALKTHROUGH_SCRIPT.md   # 85-second 4-act showcase script (Ahmed Ali rubric)
@@ -157,7 +157,7 @@ To prove economic value to judges and enterprise buyers, we conducted a rigorous
 | **Vector 2: Lapsed Corporate Registration** | Expired German GLEIF LEI registration | Approved ($25,000 loss) | **HALTED** by GLEIF Statutory Registry | **$25,000.00** |
 | **Vector 3: Phishing Homoglyph Impersonation** | Lookalike vendor domain (`cl0udflare.com`) | Approved ($4,200 loss) | **HALTED** by FakeWatch #42420 Triangulation | **$4,200.00** |
 | **Vector 4: Sub-Cent Floating Point Drift** | 100,000 line-items with $0.0001 truncation | Approved ($13,800 loss) | **HALTED** by 651-byte WASM Comparator (0 bps drift) | **$13,800.00** |
-| **Vector 5: Sanctions Transliteration Collision** | Transliterated Russian OFAC SDN entity | Approved ($35,000 loss) | **HALTED** by In-Memory 19,565 OFAC SDN Trie | **$35,000.00** |
+| **Vector 5: Sanctions Transliteration Collision** | Transliterated Russian OFAC SDN entity | Approved ($35,000 loss) | **HALTED** by In-Memory 19,629 OFAC SDN Trie | **$35,000.00** |
 | **OVERALL TOTALS** | **5 High-Risk Vectors** | **0.0% Catch Rate ($79,373 Lost)** | **100.0% Catch Rate ($0 Loss)** | **$79,373.00 PRESERVED** |
 
 Full empirical evidence documented in [`docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md`](file:///c:/Users/Public/My%20Agent/telegraph-h2/docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md) and verifiable via `npm run benchmark`.
@@ -197,7 +197,7 @@ Located in [`packages/praman-sdk/solana.js`](file:///c:/Users/Public/My%20Agent/
 │   [ 1. Supply Chain Interceptor ]                                      │
 │        Checks @solana/web3.js (Halts compromised 1.95.6/1.95.7)        │
 │                                                                        │
-│   [ 2. In-Memory 19,565 OFAC SDN Trie ]                                │
+│   [ 2. In-Memory 19,629 OFAC SDN Trie ]                                │
 │        Zero-network RAM lookup (<25ms). Checks recipients & authorities│
 │                                                                        │
 │   [ 3. Malicious Drainer Blacklist ]                                   │
@@ -298,20 +298,14 @@ Following the directives for the Alibaba commercial use case, we have finalized 
 - Repository: https://github.com/VishAlgoDev/praman-desk
 - Miner Node: Node #5281 (EvalPool Index: #6127) | Contributor: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
 
-**2. Alibaba & Cainiao Trade Assurance Gateway (Desk 0)**:
-- Live commercial clearing between Siemens AG (`W38RGI023J3WT1HWRP32`) and Alibaba West Logistics (PO-ALI-9021 for $100k USDC).
-- Reconciles Cainiao Port of LA Pier 400 inward inspection (CN-LAX-88201: 80 conforming / 20 saltwater damaged).
-- Case A triggers a deterministic WASM circuit breaker halting full $100k release (<3ms latency).
-- Case B settles the conforming $80,000 disbursement to Siemens AG while refunding $20,000 to the buyer escrow, with on-chain EAS attestation on TakarSettle v4 (`0x310275e6D66818E068245326bB9e398822304248`).
-- Includes statutory UCC Article 2 & UN CISG compliance certificate generation.
-
-**3. Cross-Miner Dispute Resolutions on Sepolia**:
-- Collaborated with Takar (@hajislamet) to back and execute resolution on two live on-chain disputes:
-  • Case 2 (Quantity Variance): Tx `0x28d3ff9c941714af3f15ec1776dec0a218ba23f826359bea4636804035ea67de` on TakarSettle5 (`0xa6D0482cBF29FE43fB644F33f7a020766AF4A42B`, Block 12200597).
-  • Case 1 (Ferry Delivery): Tx `0x976d78bb84e2f9ff131ae137646f3faa2640a81b7b77c7829feb222f1eb27f13` on TakarSettle v4 (`0x310275e6D66818E068245326bB9e398822304248`, Block 12200598).
+- **2. Alibaba & Cainiao Trade Assurance Gateway (`PramanEscrow.sol`)**:
+  - Models PO-ALI-9021 (`$100k` USDC commitment vs Port of LA receipt `CN-LAX-88201`, 80 conforming / 20 damaged) verified against sovereign Sepolia `PramanEscrow` (`0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c`).
+  - Case A triggers a deterministic 651B WASM circuit breaker halting overbilling (`<3ms`) and refunding buyer escrow (`Deal #1`: `0xc69358c2...`).
+  - Case B splits payment on-chain (`Deal #0`: `0xbfc22464...`, `8000 bps` to seller / `2000 bps` refund to buyer) with EAS attestation (`0x33d85bed...`) and signed EIP-191 certificate.
+  - Historical archived partner resolver receipts on TakarSettle (`0x976d78bb...`, `0x28d3ff9c...`) are kept in `evidence/` purely as historical record; sovereign `PramanEscrow` operates with zero external dependency.
 
 **4. Pre-Signature Solana Spend Guard SDK**:
-- Shipped `@praman/sdk/solana` intercepting supply chain vulnerabilities (@solana/web3.js 1.95.6/7 backdoor hooks), malicious drainers, and scanning 19,565 OFAC SDN entries in-memory (<25ms) before signing.
+- Shipped `packages/praman-sdk/solana.js` intercepting supply chain vulnerabilities (`@solana/web3.js` 1.95.6/7 hooks), Token-2022 TLV traps, malicious drainers, and scanning 19,629 OFAC SDN entries in-memory (`<25ms`) before signing.
 
 **5. Empirical Benchmark ($79,373 Preserved)**:
 - Across 5 adversarial procurement vectors (inverted FX, lapsed LEI, typosquats, floating point drift, sanctions), standalone LLM agents allowed $79,373 in losses (0% catch rate). Praman halted 100% of attacks ($79,373 preserved). Full report in `docs/WITH_VS_WITHOUT_TELEGRAPH_REPORT.md`.

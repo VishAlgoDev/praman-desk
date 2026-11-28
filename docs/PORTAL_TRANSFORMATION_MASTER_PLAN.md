@@ -13,7 +13,7 @@
 | Purchase-order verification (dynamic generalized NLP + arithmetic) | `src/intelligence/dynamic-solver.mjs`, API routes | Partially — API only | Desk 4 "Procurement Verify" live form: real PO input → real verdict |
 | Invoice/ledger reconciliation (incl. `QTY x UNIT_PRICE` line items, EU decimals) | `dynamic-solver.mjs` | API only | Same desk, second mode |
 | Gold Rush / mining intelligence (GSQ ground truth, UNVERIFIED_PROSPECT fallback) | `src/intelligence/mining-intelligence.mjs` | Yes — Desk 3 (read-only dossier) | Keep Desk 3; add live query input |
-| Sanctions screening (19,565 OFAC SDN, <25ms) | `packages/praman-sdk`, `data/sdn-snapshot.json` | No | Desk 1 gains an interactive screening panel |
+| Sanctions screening (19,629 OFAC SDN, <25ms) | `packages/praman-sdk`, `data/sdn-snapshot.json` | No | Desk 2 gains an interactive screening panel |
 | Document authenticity / Fakewatch shield | `examples/fakewatch-shield` | No | Desk 4 or its own panel |
 | Corporate registry / LEI checks | `eval-data/corporate_registry_lookup_general.jsonl` path | No | Desk 4 |
 | WASM comparator (651-byte, 1,043 vectors) | `comparator/` | Cited but not interactive | Keep as backend; surface its verdicts on results |

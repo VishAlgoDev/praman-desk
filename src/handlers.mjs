@@ -5794,7 +5794,7 @@ export async function evaluateExchangeIntegrity(params = {}) {
     telegraphSettlement: {
       intent: 'CORPORATE_REGISTRY_LOOKUP',
       minerId: 6164,
-      diamondRegistration: 6201,
+      diamondRegistration: 6216,
       contractAddress: DIAMOND_PORT,
       status: 'VERIFIED_MICROSETTLEMENT'
     },
@@ -7249,14 +7249,14 @@ export async function verifyMineDossier(params = {}) {
         authority: 'Geological Survey Open Data (Unmatched)'
       },
       audit: {
-        engine: 'Praman Desk Independent Auditor (Devnode #6164 / Sepolia Diamond #6201)',
+        engine: 'Praman Desk Independent Auditor (Devnode #6164 / Sepolia Diamond #6216)',
         wasmScoreBps: 0,
         discrepancyReconciled: false,
         reconciliationNotes: 'Unverified external registry entry — no historical production or tenure record confirmed.'
       },
       attestation: {
         seal: failSeal,
-        auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6201)',
+        auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6216)',
         timestamp: new Date().toISOString()
       },
       summary: unverifiedSummary,
@@ -7321,7 +7321,7 @@ export async function verifyMineDossier(params = {}) {
 
   const canonicalPayload = JSON.stringify({
     service: 'praman-desk',
-    auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6201)',
+    auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6216)',
     siteNo,
     siteName,
     goldfield,
@@ -7372,7 +7372,7 @@ export async function verifyMineDossier(params = {}) {
       tenure_reference: tenure
     },
     audit: {
-      engine: 'Praman Desk Independent Multi-Miner Auditor (Devnode #6164 / Sepolia Diamond #6201)',
+      engine: 'Praman Desk Independent Multi-Miner Auditor (Devnode #6164 / Sepolia Diamond #6216)',
       wasmScoreBps,
       discrepancyReconciled: true,
       reconciliationNotes: varianceExplanation,
@@ -7398,7 +7398,7 @@ export async function verifyMineDossier(params = {}) {
     attestation: {
       seal: attestationSeal,
       easSchema: `0x${String(siteNo).padEnd(64, '0')}`,
-      auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6201)',
+      auditor: 'Praman Desk Compliance Auditor (Devnode #6164 / Sepolia Diamond #6216)',
       timestamp: new Date().toISOString()
     },
     summary,
@@ -7479,7 +7479,7 @@ export async function handleApiRequest(req, res) {
         ok: true,
         service: 'praman-desk',
         minerId: 6164,
-        diamondRegistration: 6201,
+        diamondRegistration: 6216,
         sdnEntriesLoaded: sdnEntries.size,
         sdnEvmAddressesLoaded: sdnEvmAddresses.size,
         wasmLoaded: Boolean(wasmEngine),
@@ -7508,7 +7508,17 @@ export async function handleApiRequest(req, res) {
         'LIQUIDITY_DEPTH_VERIFY_GENERAL',
         'B2B_IDENTITY_ENRICHMENT_GENERAL',
         'FRAUD_RISK_GENERAL',
-        'PAYMENT_METHOD_VERIFY_GENERAL'
+        'PAYMENT_METHOD_VERIFY_GENERAL',
+        'URL_SCAN_VERDICT',
+        'THREAT_INTELLIGENCE_INDICATOR',
+        'TRANSACTION_RISK_GENERAL',
+        'SSL_VERIFICATION_CERT',
+        'CVE_LOOKUP_CVSS',
+        'SHIPMENT_DELAY_RISK_GENERAL',
+        'IP_GEOLOCATION_GENERAL',
+        'TOKEN_HOLDER_COUNT_GENERAL',
+        'WASH_TRADING_DETECTION_GENERAL',
+        'TELEGRAPH_KNOWLEDGE_GENERAL'
       ];
       const devnodeMiner = {
         route_id: 6164,
@@ -7517,16 +7527,16 @@ export async function handleApiRequest(req, res) {
         name: 'Praman Desk Compliance & Procurement Auditor',
         capabilities_count: bondedIntents.length,
         supported_intents: bondedIntents,
-        http_only_intents: ['MINING_INTELLIGENCE_GENERAL'],
+        http_only_intents: ['MINING_INTELLIGENCE_GENERAL', 'CREATIVE_QUALITY_AUDIT_GENERAL'],
         status_note:
-          'Active Devnode miner #6164; Sepolia Diamond on-chain registration #6201.'
+          'Active Devnode miner #6164; Sepolia Diamond on-chain registration #6216 (28 bonded / 30 capabilities).'
       };
       const onchainDiamond = {
         diamond_address: DIAMOND_PORT,
-        active_registration_id: 6201,
-        tx_hash: '0x50b34afc2b4044ff23a67eebc7170e3aeb2c276fc3c54ee83edc10b438af9e65',
-        block_number: 12214472,
-        yaml_pin_commit: '8ee560bc',
+        active_registration_id: 6216,
+        tx_hash: '0x669772e6da7d28085ec48e3da808a038a011febcbf577f072d78f8c0921ba809',
+        block_number: 12227468,
+        yaml_pin_commit: 'e66f67dba',
         intents_count: bondedIntents.length,
         bonded_intents: bondedIntents
       };
@@ -7798,7 +7808,7 @@ export async function handleApiRequest(req, res) {
         service: 'Praman Desk Clearing & Autonomous Verification',
         minerId: 6164,
         minerSlug: 'praman-compliance-miner',
-        diamondRegistration: 6201,
+        diamondRegistration: 6216,
         unitPricingUsd: {
           tradeAssuranceClearing: 0.05,
           spendGuardPreSign: 0.01,
@@ -7844,7 +7854,7 @@ export async function handleApiRequest(req, res) {
             jobs: acpJobs.slice(0, 10)
           }
         },
-        honestRailNotice: 'Financial settlement receipts reflect live testnet/sandbox rails (Ethereum Sepolia Diamond #6201, Solana Devnet, Base Virtuals ACP Sandbox). Entity screening & registries run against live production APIs (OFAC SDN, GLEIF, SEC EDGAR, ECB, public RPCs).',
+        honestRailNotice: 'Financial settlement receipts reflect live testnet/sandbox rails (Ethereum Sepolia Diamond #6216, Solana Devnet, Base Virtuals ACP Sandbox). Entity screening & registries run against live production APIs (OFAC SDN, GLEIF, SEC EDGAR, ECB, public RPCs).',
         commerceSpecUrl: 'https://github.com/VishAlgoDev/praman-desk/blob/main/COMMERCE.md',
         as_of: new Date().toISOString()
       });
@@ -8596,7 +8606,7 @@ export async function handleApiRequest(req, res) {
         ofacStatus: cert.ofacSanctionsAudit?.status || 'CLEARED_ZERO_HIT',
         diamondRegistry: '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b',
         minerId: 6164,
-        diamondRegistration: 6201,
+        diamondRegistration: 6216,
         sealDigest: cert.cryptographicSeal?.sealDigest || null
       };
       const canonicalMessage = JSON.stringify(canonicalMemoObj, null, 2);

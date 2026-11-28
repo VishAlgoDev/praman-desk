@@ -300,7 +300,13 @@ def ensure_runner(intent_key: str):
     global RUNNER_PROC
     pkg_path = PKG_DIR / f"{intent_key}_v8.safetensors"
     if not pkg_path.exists():
-        raise FileNotFoundError(f"Package {pkg_path.name} not found yet")
+        raw_url = f"https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/{pkg_path.name}"
+        log(f"Downloading committed package {pkg_path.name} from GitHub...")
+        r = httpx.get(raw_url, timeout=120.0, follow_redirects=True)
+        if r.status_code == 200 and len(r.content) > 1000:
+            pkg_path.write_bytes(r.content)
+        else:
+            raise FileNotFoundError(f"Package {pkg_path.name} not found locally or on GitHub (HTTP {r.status_code})")
     ensure_tools_and_foundation()
     with EXEC_LOCK:
         if RUNNER_PROC is not None and RUNNER_PROC.poll() is None and STATE["runner_intent"] == intent_key:
