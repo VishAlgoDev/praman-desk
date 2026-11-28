@@ -30,7 +30,7 @@ TOKENIZER_HASH = "8bfb874b90f3b3ea9481289bf351eef77462f0935f526ea107f53789708cc5
 
 INTENT_SPECS = {
     "SANCTIONS_SCREENING_MATCH": {
-        "class": "judgment",
+        "class": "hybrid",
         "train_file": "pairs_sanctions_v7_train.jsonl",
         "val_file": "pairs_sanctions_v7_val.jsonl",
         "epochs": "1",
@@ -38,7 +38,7 @@ INTENT_SPECS = {
         "grad_accum": "1",
     },
     "INVOICE_LEDGER_RECONCILE": {
-        "class": "judgment",
+        "class": "hybrid",
         "train_file": "v8_invoice_reconcile_train.jsonl",
         "val_file": "v8_invoice_reconcile_val.jsonl",
         "epochs": "2",
@@ -62,14 +62,14 @@ INTENT_SPECS = {
         "grad_accum": "1",
     },
     "DOCUMENT_AUTHENTICITY": {
-        "class": "judgment",
+        "class": "hybrid",
         "train_file": "v8_document_authenticity_train.jsonl",
         "val_file": "v8_document_authenticity_val.jsonl",
         "epochs": "2",
         "batch_size": "16",
         "grad_accum": "1",
     },
-    "URL_SCAN": {
+    "URL_SAFE": {
         "class": "hybrid",
         "train_file": "v8_url_scan_train.jsonl",
         "val_file": "v8_url_scan_val.jsonl",

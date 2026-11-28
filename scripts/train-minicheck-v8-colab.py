@@ -15,12 +15,12 @@ FOUNDATION_BASE = "https://github.com/telegraphprotocol/telegraph-foundation/rel
 ENGINE_HASH = "7927d9c857e575ac21b3f2a7b6d5b2fa0d1af8f2c8dd68ef75078ff56ef9a5e8"
 
 SPECS = {
-    "SANCTIONS_SCREENING_MATCH": ("judgment", "pairs_sanctions_v7_train.jsonl", "pairs_sanctions_v7_val.jsonl"),
-    "INVOICE_LEDGER_RECONCILE": ("judgment", "v8_invoice_reconcile_train.jsonl", "v8_invoice_reconcile_val.jsonl"),
+    "SANCTIONS_SCREENING_MATCH": ("hybrid", "pairs_sanctions_v7_train.jsonl", "pairs_sanctions_v7_val.jsonl"),
+    "INVOICE_LEDGER_RECONCILE": ("hybrid", "v8_invoice_reconcile_train.jsonl", "v8_invoice_reconcile_val.jsonl"),
     "CONTRACT_OBLIGATION_AUDIT": ("judgment", "v8_contract_obligation_train.jsonl", "v8_contract_obligation_val.jsonl"),
     "FRAUD_RISK": ("judgment", "v8_fraud_risk_train.jsonl", "v8_fraud_risk_val.jsonl"),
-    "DOCUMENT_AUTHENTICITY": ("judgment", "v8_document_authenticity_train.jsonl", "v8_document_authenticity_val.jsonl"),
-    "URL_SCAN": ("hybrid", "v8_url_scan_train.jsonl", "v8_url_scan_val.jsonl"),
+    "DOCUMENT_AUTHENTICITY": ("hybrid", "v8_document_authenticity_train.jsonl", "v8_document_authenticity_val.jsonl"),
+    "URL_SAFE": ("hybrid", "v8_url_scan_train.jsonl", "v8_url_scan_val.jsonl"),
 }
 
 
@@ -67,12 +67,15 @@ def main():
         bs = "16" if intent_key == "SANCTIONS_SCREENING_MATCH" else "8"
         ga = "2"
         ep = "2" if intent_key == "SANCTIONS_SCREENING_MATCH" else "4"
-        sh(
-            f"TORCH_COMPILE_DISABLE=1 python -m float_runtime.train_adapter --intent {intent_key} "
-            f"--data '{DATA_DIR / tr}' --val-data '{DATA_DIR / va}' --out '{run_dir}' "
-            f"--no-grad-checkpointing --max-length 512 --batch-size {bs} --grad-accum {ga} --lora-rank 8 --lora-alpha 32 --epochs {ep} --lr 2e-4",
-            cwd=str(BASELINE_DIR),
-        )
+        if not (run_dir / "result.json").exists():
+            sh(
+                f"TORCH_COMPILE_DISABLE=1 python -m float_runtime.train_adapter --intent {intent_key} "
+                f"--data '{DATA_DIR / tr}' --val-data '{DATA_DIR / va}' --out '{run_dir}' "
+                f"--no-grad-checkpointing --max-length 512 --batch-size {bs} --grad-accum {ga} --lora-rank 8 --lora-alpha 32 --epochs {ep} --lr 2e-4",
+                cwd=str(BASELINE_DIR),
+            )
+        else:
+            print(f">>> Reusing existing trained adapter at {run_dir}", flush=True)
         shutil.copy2(fdir / "tokenizer.json", run_dir / "adapter" / "tokenizer.json")
         sh(
             f"python tools/minicheck/export_adapter.py --peft '{run_dir / 'adapter'}' "
