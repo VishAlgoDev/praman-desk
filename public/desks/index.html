@@ -787,7 +787,7 @@
               <label for="pv-sdn">Counterparty Name</label>
               <input id="pv-sdn" class="input" value="Banco Nacional de Cuba">
             </div>
-            <button type="button" class="btn btn-primary" id="pv-sdn-btn" style="margin-top:0.8rem;width:100%">Screen Name (19,629 RAM)</button>
+            <button type="button" class="btn btn-primary" id="pv-sdn-btn" style="margin-top:0.8rem;width:100%">Screen Name (20,022 SDN + CMIC RAM)</button>
             <pre id="pv-sdn-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
           </div>
 
@@ -857,6 +857,82 @@ Rosneft</textarea>
             </div>
             <button type="button" class="btn btn-primary" id="wasm-run" style="margin-top:0.8rem">Run 651B WASM in Browser</button>
             <pre id="wasm-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+        </div>
+
+        <div class="split-2" style="margin-top:1.25rem">
+          <div class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap">
+              <h3 style="margin:0;font-size:1.05rem">ByteDance #5 Independent Creative QA</h3>
+              <span class="mono" style="font-size:0.74rem;color:var(--ink-muted)">POST /api/creative-qa/audit</span>
+            </div>
+            <div class="split-2" style="margin-top:0.75rem">
+              <div class="field">
+                <label for="cqa-adv">Sponsor Entity</label>
+                <input id="cqa-adv" class="input" value="Siemens Aktiengesellschaft">
+              </div>
+              <div class="field">
+                <label for="cqa-mode">Scenario</label>
+                <select id="cqa-mode" class="select">
+                  <option value="clean">Verified Clean Campaign</option>
+                  <option value="risky">Adversarial Phishing / IO Drift</option>
+                </select>
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary" id="cqa-btn" style="margin-top:0.8rem">Run Creative QA Audit</button>
+            <pre id="cqa-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+
+          <div class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap">
+              <h3 style="margin:0;font-size:1.05rem">Multi-Miner Discrepancy Arbitration</h3>
+              <span class="mono" style="font-size:0.74rem;color:var(--ink-muted)">POST /api/miner/arbitrate</span>
+            </div>
+            <div class="field" style="margin-top:0.75rem">
+              <label for="arb-topic">Dispute / Audit Query</label>
+              <input id="arb-topic" class="input" value="Mount Morgan Mine historical gold production">
+            </div>
+            <button type="button" class="btn btn-primary" id="arb-btn" style="margin-top:0.8rem">Arbitrate Competing Miners</button>
+            <pre id="arb-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+        </div>
+
+        <div class="split-2" style="margin-top:1.25rem">
+          <div class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap">
+              <h3 style="margin:0;font-size:1.05rem">Live Market &amp; FX Comparator Endpoints</h3>
+              <span class="badge badge-ok">&lt;5ms SWR Cache</span>
+            </div>
+            <div class="split-2" style="margin-top:0.75rem">
+              <div class="field">
+                <label for="mkt-intent">Comparator Route</label>
+                <select id="mkt-intent" class="select">
+                  <option value="/api/miner/crypto-price">CRYPTO_PRICE_USD</option>
+                  <option value="/api/miner/currency-exchange">CURRENCY_EXCHANGE_CONVERT</option>
+                  <option value="/api/miner/fx-now">FX_NOW_CAD / EUR / SEK</option>
+                  <option value="/api/miner/stock-price">STOCK_PRICE_US_EQUITY</option>
+                  <option value="/api/miner/weather-check">WEATHER_CHECK_TEMPERATURE</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="mkt-query">Query</label>
+                <input id="mkt-query" class="input" value="What is Bitcoin worth?">
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary" id="mkt-btn" style="margin-top:0.8rem">Query Live Comparator</button>
+            <pre id="mkt-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
+          </div>
+
+          <div class="card card-pad">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;flex-wrap:wrap">
+              <h3 style="margin:0;font-size:1.05rem">Virtuals ACP v2 &amp; Live Unit Economics</h3>
+              <span class="mono" style="font-size:0.74rem;color:var(--ink-muted)">GET /api/business</span>
+            </div>
+            <p style="font-size:0.86rem;color:var(--ink-secondary);margin:0.55rem 0 0.85rem">
+              Reads live on-chain transaction counters, protocol spend, and Virtuals ACP Base commerce receipts directly from server state.
+            </p>
+            <button type="button" class="btn btn-primary" id="biz-btn">Fetch Live Unit Economics</button>
+            <pre id="biz-out" class="pre-out dark-island" aria-live="polite" hidden></pre>
           </div>
         </div>
       </section>

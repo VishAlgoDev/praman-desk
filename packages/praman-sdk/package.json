@@ -11,7 +11,7 @@
   "types": "index.d.ts",
   "type": "module",
   "scripts": {
-    "test": "node test.js"
+    "test": "node test-sdk.mjs && node test-solana.mjs"
   },
   "keywords": [
     "telegraph",

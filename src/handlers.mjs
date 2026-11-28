@@ -31,6 +31,14 @@ import {
   detectWashTrading,
   answerTelegraphKnowledge
 } from './intelligence/expansion-intents.mjs';
+import {
+  lookupCryptoPrice,
+  convertCurrencyExchange,
+  lookupFxNow,
+  lookupUsStockPrice,
+  checkWeatherTemperature,
+  marketSwrCache
+} from './intelligence/comparator-market-intents.mjs';
 
 const goldRushAggregator = new GoldRushAggregator();
 
@@ -71,6 +79,9 @@ const SDN_TTL_MS = 6 * 60 * 60 * 1000;
 const SDN_CSV_URL = 'https://www.treasury.gov/ofac/downloads/sdn.csv';
 const ALT_CSV_URL = 'https://www.treasury.gov/ofac/downloads/alt.csv';
 const SDN_COMMENTS_URL = 'https://www.treasury.gov/ofac/downloads/sdn_comments.csv';
+const CONS_PRIM_URL = 'https://www.treasury.gov/ofac/downloads/consolidated/cons_prim.csv';
+const CONS_ALT_URL = 'https://www.treasury.gov/ofac/downloads/consolidated/cons_alt.csv';
+const CONS_COMMENTS_URL = 'https://www.treasury.gov/ofac/downloads/consolidated/cons_comments.csv';
 const SNAPSHOT_PATH = path.join(rootDir, 'data', 'sdn-snapshot.json');
 
 function initSdnFromSnapshot() {
@@ -82,8 +93,15 @@ function initSdnFromSnapshot() {
       const entries = new Map();
       const aliases = new Map();
       const evmMap = new Map();
-      for (const [uid, name, type, programs, aliasList] of data.entries) {
-        entries.set(uid, { name, type, programs, prep: prepareSanctionsTarget(name) });
+      for (const row of data.entries) {
+        const [uid, name, type, programs, aliasList, listType] = row;
+        entries.set(uid, {
+          name,
+          type,
+          programs,
+          list: listType || 'SDN',
+          prep: prepareSanctionsTarget(name)
+        });
         if (aliasList && aliasList.length > 0) {
           aliases.set(uid, aliasList.map(a => ({ name: a, prep: prepareSanctionsTarget(a) })));
         }
@@ -117,6 +135,91 @@ function parseCsvLine(line) {
   return fields;
 }
 
+function ingestSanctionsPrimaryCsv(csvText, listTag, entries, aliases, evmMap) {
+  for (const line of String(csvText || '').split('\n')) {
+    if (!line.trim()) continue;
+    const f = parseCsvLine(line);
+    const uid = f[0];
+    const name = f[1] || '';
+    const sdnType = f[2] === '-0-' ? 'Entity' : (f[2] || 'Entity');
+    const program = (f[3] === '-0-' ? '' : (f[3] || '')).replace(/^\[|\]$/g, '').trim();
+    const remarks = f[11] === '-0-' ? '' : (f[11] || '');
+    if (!uid || !name) continue;
+
+    const existing = entries.get(uid);
+    if (existing) {
+      if (program && !existing.programs.includes(program)) {
+        existing.programs = existing.programs ? `${existing.programs}; ${program}` : program;
+      }
+      if (!existing.list.includes(listTag)) {
+        existing.list = `${existing.list}+${listTag}`;
+      }
+    } else {
+      entries.set(uid, {
+        name,
+        type: sdnType,
+        programs: program || listTag,
+        list: listTag,
+        prep: prepareSanctionsTarget(name)
+      });
+    }
+
+    if (remarks) {
+      for (const re of [/(?:a\.k\.a\.|f\.k\.a\.|n\.k\.a\.)\s*['"]([^'"]{2,100})['"]/gi, /(?:alt\.\s+)?Issuer Name\s+([^;\n"]{2,100})/gi]) {
+        let m;
+        while ((m = re.exec(remarks)) !== null) {
+          const aliasName = m[1].trim().replace(/[.;,]+$/, '').trim();
+          if (aliasName && aliasName.toLowerCase() !== name.toLowerCase()) {
+            if (!aliases.has(uid)) aliases.set(uid, []);
+            const arr = aliases.get(uid);
+            if (arr.length < 8 && !arr.some(x => x.name === aliasName)) {
+              arr.push({ name: aliasName, prep: prepareSanctionsTarget(aliasName) });
+            }
+          }
+        }
+      }
+    }
+
+    const evmHits = line.match(/0x[0-9a-fA-F]{40}/g);
+    if (evmHits) {
+      for (const a of evmHits) evmMap.set(a.toLowerCase(), uid);
+    }
+  }
+}
+
+function ingestSanctionsAltCsv(csvText, aliases) {
+  for (const line of String(csvText || '').split('\n')) {
+    if (!line.trim()) continue;
+    const f = parseCsvLine(line);
+    const sdnUid = f[0];
+    const aliasName = f[3] || '';
+    if (sdnUid && aliasName) {
+      if (!aliases.has(sdnUid)) aliases.set(sdnUid, []);
+      const arr = aliases.get(sdnUid);
+      if (arr.length < 8 && !arr.some(x => x.name === aliasName)) {
+        arr.push({ name: aliasName, prep: prepareSanctionsTarget(aliasName) });
+      }
+    }
+  }
+}
+
+function ingestSanctionsCommentsCsv(csvText, entries, evmMap) {
+  let currentUid = null;
+  for (const line of String(csvText || '').split('\n')) {
+    if (!line.trim()) continue;
+    const uidMatch = line.match(/^(\d+),/);
+    if (uidMatch && entries.has(uidMatch[1])) currentUid = uidMatch[1];
+    if (currentUid) {
+      const evmHits = line.match(/0x[0-9a-fA-F]{40}/g);
+      if (evmHits) {
+        for (const a of evmHits) {
+          if (!evmMap.has(a.toLowerCase())) evmMap.set(a.toLowerCase(), currentUid);
+        }
+      }
+    }
+  }
+}
+
 let sdnRefreshPromise = null;
 let sdnLastFailedAt = 0;
 const SDN_RETRY_BACKOFF_MS = 5 * 60 * 1000;
@@ -126,63 +229,28 @@ function refreshSdnInBackground() {
   const now = Date.now();
   sdnRefreshPromise = (async () => {
     try {
-      const [sdnRes, altRes, commentsRes] = await Promise.all([
+      const [sdnRes, altRes, commentsRes, consRes, consAltRes, consCommentsRes] = await Promise.all([
         fetch(SDN_CSV_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }),
         fetch(ALT_CSV_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }),
-        fetch(SDN_COMMENTS_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }).catch(() => null)
+        fetch(SDN_COMMENTS_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }).catch(() => null),
+        fetch(CONS_PRIM_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }).catch(() => null),
+        fetch(CONS_ALT_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }).catch(() => null),
+        fetch(CONS_COMMENTS_URL, { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(15000) }).catch(() => null)
       ]);
       if (!sdnRes.ok) throw new Error(`SDN fetch failed: ${sdnRes.status}`);
 
-      const sdnText = await sdnRes.text();
       const entries = new Map();
-      const evmMap = new Map();
-      for (const line of sdnText.split('\n')) {
-        if (!line.trim()) continue;
-        const f = parseCsvLine(line);
-        const uid = f[0];
-        const name = f[1] || '';
-        const sdnType = f[2] === '-0-' ? 'Entity' : f[2];
-        const program = f[3] === '-0-' ? '' : (f[3] || '');
-        if (uid && name) {
-          entries.set(uid, { name, type: sdnType, programs: program, prep: prepareSanctionsTarget(name) });
-          const evmHits = line.match(/0x[0-9a-fA-F]{40}/g);
-          if (evmHits) {
-            for (const a of evmHits) evmMap.set(a.toLowerCase(), uid);
-          }
-        }
-      }
-
       const aliases = new Map();
-      if (altRes.ok) {
-        const altText = await altRes.text();
-        for (const line of altText.split('\n')) {
-          if (!line.trim()) continue;
-          const f = parseCsvLine(line);
-          const sdnUid = f[0];
-          const aliasName = f[3] || '';
-          if (sdnUid && aliasName) {
-            if (!aliases.has(sdnUid)) aliases.set(sdnUid, []);
-            aliases.get(sdnUid).push({ name: aliasName, prep: prepareSanctionsTarget(aliasName) });
-          }
-        }
-      }
+      const evmMap = new Map();
 
-      if (commentsRes?.ok) {
-        const commentsText = await commentsRes.text();
-        let currentUid = null;
-        for (const line of commentsText.split('\n')) {
-          if (!line.trim()) continue;
-          const uidMatch = line.match(/^(\d+),/);
-          if (uidMatch && entries.has(uidMatch[1])) currentUid = uidMatch[1];
-          if (currentUid) {
-            const evmHits = line.match(/0x[0-9a-fA-F]{40}/g);
-            if (evmHits) {
-              for (const a of evmHits) {
-                if (!evmMap.has(a.toLowerCase())) evmMap.set(a.toLowerCase(), currentUid);
-              }
-            }
-          }
-        }
+      ingestSanctionsPrimaryCsv(await sdnRes.text(), 'SDN', entries, aliases, evmMap);
+      if (altRes.ok) ingestSanctionsAltCsv(await altRes.text(), aliases);
+      if (commentsRes?.ok) ingestSanctionsCommentsCsv(await commentsRes.text(), entries, evmMap);
+
+      if (consRes?.ok) {
+        ingestSanctionsPrimaryCsv(await consRes.text(), 'NON_SDN_CONSOLIDATED', entries, aliases, evmMap);
+        if (consAltRes?.ok) ingestSanctionsAltCsv(await consAltRes.text(), aliases);
+        if (consCommentsRes?.ok) ingestSanctionsCommentsCsv(await consCommentsRes.text(), entries, evmMap);
       }
 
       if (entries.size > 0) {
@@ -3699,6 +3767,7 @@ export async function screenSanctions({ name = '', threshold = 0.70, refresh = f
         matched_name: entry.name,
         match_type: entry.type,
         programs: entry.programs,
+        list: entry.list || 'SDN',
         similarity_score: Math.round(score * 10000) / 10000,
         matched_via: primaryWins ? 'primary_name' : 'alias',
         matched_alias: primaryWins ? null : bestAliasName,
@@ -3731,7 +3800,7 @@ export async function screenSanctions({ name = '', threshold = 0.70, refresh = f
     confidence: isNearMiss ? topScore : 1.0,
     matches: matches.slice(0, 10),
     potential_matches: nearMisses.slice(0, 10),
-    lists: ['US Treasury OFAC SDN'],
+    lists: ['US Treasury OFAC SDN', 'US Treasury Consolidated Non-SDN (incl. CMIC-EO13959)'],
     match_score: topScore,
     query_name: nameTrim,
     match_found: isMatched,
@@ -3739,13 +3808,13 @@ export async function screenSanctions({ name = '', threshold = 0.70, refresh = f
     near_miss_count: nearMisses.length,
     sdn_list_size: sdnEntries.size,
     ...getSdnFreshnessMeta(),
-    source: 'US Treasury OFAC SDN List (treasury.gov/ofac)',
+    source: 'US Treasury OFAC SDN & Consolidated Non-SDN Lists (treasury.gov/ofac)',
     source_url: 'https://sanctionssearch.ofac.treas.gov/',
     summary: isMatched
-      ? `VERDICT: SANCTIONS MATCH (${topScore === 1.0 ? 'PROHIBITED COUNTERPARTY' : 'FUZZY MATCH ' + Math.round(topScore * 100) + '%'}). ${matches.length} potential OFAC SDN match(es) for "${nameTrim}". Top: ${matches[0].matched_name} (UID ${matches[0].sdn_uid}, Program: ${matches[0].programs}, Score: ${matches[0].similarity_score}). Commercial transactions strictly prohibited under federal sanctions laws.`
+      ? `VERDICT: SANCTIONS MATCH (${topScore === 1.0 ? 'PROHIBITED COUNTERPARTY' : 'FUZZY MATCH ' + Math.round(topScore * 100) + '%'}). ${matches.length} potential US Treasury ${matches[0].list || 'OFAC SDN'} match(es) for "${nameTrim}". Top: ${matches[0].matched_name} (UID ${matches[0].sdn_uid}, Program: ${matches[0].programs}, Score: ${matches[0].similarity_score}). Commercial or securities transactions restricted/prohibited under US federal sanctions.`
       : isNearMiss
-      ? `VERDICT: NEAR-MISS REVIEW REQUIRED (${Math.round(topScore * 100)}% PHONETIC/TRANSLITERATION SIMILARITY). "${nameTrim}" closely aligns with OFAC SDN entry ${nearMisses[0].matched_name} (UID ${nearMisses[0].sdn_uid}, Program: ${nearMisses[0].programs}). Escalate to manual compliance review before releasing funds.`
-      : `VERDICT: NO SANCTIONS MATCH (CLEAN COUNTERPARTY). Screening of "${nameTrim}" against the US Treasury OFAC SDN list and Consolidated Sanctions List (${sdnEntries.size} indexed records) returned zero sanctions matches. Counterparty is clear for standard commercial transaction processing as of ${new Date().toISOString()}.`
+      ? `VERDICT: NEAR-MISS REVIEW REQUIRED (${Math.round(topScore * 100)}% PHONETIC/TRANSLITERATION SIMILARITY). "${nameTrim}" closely aligns with US Treasury entry ${nearMisses[0].matched_name} (UID ${nearMisses[0].sdn_uid}, Program: ${nearMisses[0].programs}). Escalate to manual compliance review before releasing funds.`
+      : `VERDICT: NO SANCTIONS MATCH (CLEAN COUNTERPARTY). Screening of "${nameTrim}" against the US Treasury OFAC SDN list and Consolidated Non-SDN Sanctions List (${sdnEntries.size} indexed records) returned zero sanctions matches. Counterparty is clear for standard commercial transaction processing as of ${new Date().toISOString()}.`
   };
   setCachedSanctions(cacheKey, result);
   return result;
@@ -8933,8 +9002,17 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, 200, dossierAudit);
     }
 
-    // 6. Replacement Compliance Miner & Gold Rush Endpoints (/api/miner/*, /api/gold-rush/*, /api/mission/contract-audit, /api/mission/grid-power, /api/mission/gold-rush)
-    if (pathname.startsWith('/api/miner/') || pathname.startsWith('/api/gold-rush/') || pathname === '/api/mission/contract-audit' || pathname === '/api/mission/grid-power' || pathname === '/api/mission/gold-rush') {
+    // 6. Replacement Compliance Miner, Gold Rush & Comparator Endpoints
+    const TOP_MINER_ALIASES = new Set([
+      '/api/mission/contract-audit', '/api/mission/grid-power', '/api/mission/gold-rush',
+      '/api/crypto-price', '/api/currency-exchange', '/api/fx-now', '/api/stock-price', '/api/weather-check',
+      '/api/ssl-verify', '/api/url-scan', '/api/threat-intel', '/api/transaction-risk', '/api/cve-lookup',
+      '/api/shipment-delay', '/api/ip-geolocation', '/api/token-holders', '/api/wash-trading',
+      '/api/telegraph-knowledge', '/api/web-search', '/api/onchain-tx', '/api/token-supply',
+      '/api/wallet-balance', '/api/research-query', '/api/arbitrate', '/api/liquidity-depth',
+      '/api/b2b-identity', '/api/fraud-risk', '/api/payment-method-verify'
+    ]);
+    if (pathname.startsWith('/api/miner/') || pathname.startsWith('/api/gold-rush/') || TOP_MINER_ALIASES.has(pathname)) {
       let body = {};
       if (req.method === 'POST') {
         try {
@@ -9989,9 +10067,17 @@ export async function handleApiRequest(req, res) {
         return sendJson(res, 200, out);
       }
 
-      // 23. SSL_VERIFICATION_CERT
+      // 23. SSL_VERIFICATION_CERT (cached 120s for <5ms repeat validator latency)
       if (pathname === '/api/miner/ssl-verify' || pathname === '/api/ssl-verify') {
-        const out = await verifySslCertificate(merged);
+        const sslKey = `ssl:${String(merged.host || merged.domain || merged.url || merged.query || merged.question || merged.prompt || '').trim().toLowerCase()}`;
+        const out = await marketSwrCache.swrFetch(
+          sslKey,
+          async () => {
+            const resObj = await verifySslCertificate(merged);
+            return resObj.ok ? { ...resObj, status: 'ok' } : resObj;
+          },
+          { ttlMs: 120000, staleWindowMs: 240000 }
+        );
         return sendJson(res, 200, out);
       }
 
@@ -10028,6 +10114,36 @@ export async function handleApiRequest(req, res) {
       // 29. TELEGRAPH_KNOWLEDGE_GENERAL
       if (pathname === '/api/miner/telegraph-knowledge' || pathname === '/api/telegraph-knowledge') {
         const out = await answerTelegraphKnowledge(merged, { executeWebSearch });
+        return sendJson(res, 200, out);
+      }
+
+      // 30. CRYPTO_PRICE_USD
+      if (pathname === '/api/miner/crypto-price' || pathname === '/api/crypto-price') {
+        const out = await lookupCryptoPrice(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 31. CURRENCY_EXCHANGE_CONVERT
+      if (pathname === '/api/miner/currency-exchange' || pathname === '/api/currency-exchange') {
+        const out = await convertCurrencyExchange(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 32. FX_NOW_CAD / FX_NOW_EUR / FX_NOW_SEK
+      if (pathname === '/api/miner/fx-now' || pathname === '/api/fx-now') {
+        const out = await lookupFxNow(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 33. STOCK_PRICE_US_EQUITY
+      if (pathname === '/api/miner/stock-price' || pathname === '/api/stock-price') {
+        const out = await lookupUsStockPrice(merged);
+        return sendJson(res, 200, out);
+      }
+
+      // 34. WEATHER_CHECK_TEMPERATURE
+      if (pathname === '/api/miner/weather-check' || pathname === '/api/weather-check') {
+        const out = await checkWeatherTemperature(merged);
         return sendJson(res, 200, out);
       }
     }

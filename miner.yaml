@@ -1,14 +1,14 @@
 version: "1"
 kind: miner
-id: 6164 # Devnode Miner #6164 / Sepolia Diamond Port Registration
+id: 6217 # Sepolia Diamond RegID #6217 (legacy directory alias #6164)
 slug: praman-compliance-miner
 protocol: generic
 name: Praman Desk Sovereign Compliance & Spend Guard Miner
 description: >-
   Deterministic B2B spend guard, invoice/PO reconciliation, KYB/GLEIF entity
-  verification, US Treasury OFAC SDN screening (19,629 records), SEC/Federal
-  Register monitoring, multi-chain token/liquidity/TX forensics, TLS/CVE/threat
-  intelligence, maritime shipment delay modeling, and WASM contract auditing
+  verification, US Treasury OFAC SDN & Consolidated Non-SDN/CMIC screening (20,000+ records),
+  SEC/Federal Register monitoring, multi-chain token/liquidity/TX forensics, live crypto/FX/US equity/weather comparators,
+  TLS/CVE/threat intelligence, maritime shipment delay modeling, and WASM contract auditing
   without paid API keys. Fails closed with confidence 0.0 when an upstream feed
   is unreachable. Standard response keys: verdict, confidence, summary, as_of.
 base_url: https://praman-desk.vercel.app
@@ -907,6 +907,73 @@ endpoints:
             type: string
             intents: ["*"]
             description: "Question text"
+  - path: /api/miner/crypto-price
+    external_path: /api/miner/crypto-price
+    method: GET
+    intents:
+      - CRYPTO_PRICE_USD
+    description: "Returns multi-source verified spot USD price, 24h change, and market cap for crypto symbols or token addresses."
+    params:
+      query:
+        optional:
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Plain-language question or asset symbol/address"
+  - path: /api/miner/currency-exchange
+    external_path: /api/miner/currency-exchange
+    method: GET
+    intents:
+      - CURRENCY_EXCHANGE_CONVERT
+    description: "Converts fiat currency amounts using live ECB reference rates (Frankfurter) with mid-market fallback."
+    params:
+      query:
+        optional:
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Currency conversion question or parameters (from, to, amount)"
+  - path: /api/miner/fx-now
+    external_path: /api/miner/fx-now
+    method: GET
+    intents:
+      - FX_NOW_CAD
+      - FX_NOW_EUR
+      - FX_NOW_SEK
+    description: "Returns live mid-market FX exchange rate across 166+ global currencies."
+    params:
+      query:
+        optional:
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "FX pair query or parameters (from, to, amount)"
+  - path: /api/miner/stock-price
+    external_path: /api/miner/stock-price
+    method: GET
+    intents:
+      - STOCK_PRICE_US_EQUITY
+    description: "Returns live spot or historical close USD price for US-listed equities and tickers."
+    params:
+      query:
+        optional:
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Equity price query or parameters (symbol, ticker, date)"
+  - path: /api/miner/weather-check
+    external_path: /api/miner/weather-check
+    method: GET
+    intents:
+      - WEATHER_CHECK_TEMPERATURE
+    description: "Returns live temperature, apparent temperature, humidity, wind, precipitation, and conditions via Open-Meteo."
+    params:
+      query:
+        optional:
+          - name: query
+            type: string
+            intents: ["*"]
+            description: "Location weather query or location name"
 
 semantics:
   signal_mapping:
@@ -944,6 +1011,13 @@ semantics:
     - TOKEN_HOLDER_COUNT_GENERAL
     - WASH_TRADING_DETECTION_GENERAL
     - TELEGRAPH_KNOWLEDGE_GENERAL
+    - CRYPTO_PRICE_USD
+    - CURRENCY_EXCHANGE_CONVERT
+    - FX_NOW_CAD
+    - FX_NOW_EUR
+    - FX_NOW_SEK
+    - STOCK_PRICE_US_EQUITY
+    - WEATHER_CHECK_TEMPERATURE
 
 docs:
   repository: https://github.com/VishAlgoDev/praman-desk

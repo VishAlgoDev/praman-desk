@@ -3,12 +3,12 @@
 Official zero-dependency SDKs (TypeScript / JavaScript and Python) for autonomous pre-payment compliance verification and spend guardrails on the **Telegraph Protocol Season II**.
 
 ## Features
-- **<25ms OFAC SDN Screening**: In-memory hash checking across 19,629 global sanctions entities and blacklisted EVM addresses (including Lazarus Group).
+- **<25ms OFAC SDN + Non-SDN/CMIC Screening**: In-memory hash checking across `20,022` US Treasury sanctions entities (including CMIC military-company designations) and blacklisted EVM addresses (including Lazarus Group).
 - **GLEIF LEI Registry**: Instant corporate registry verification.
 - **651-Byte WebAssembly Comparator**: Float-drift-free, bit-exact line item reconciliation.
 - **Wholesale Power Settlement**: CAISO / ERCOT Locational Marginal Pricing (LMP) breakdown via `getGridPowerPrice`.
 - **Universal Multi-Miner Arbitrator**: Dynamic discrepancy & contradiction arbitration across competing miners via `arbitrateMiningDiscrepancies`.
-- **On-Chain Settlement**: Anchored to Ethereum Sepolia Diamond proxy (`0x3624EB01...`) via x402 protocol.
+- **On-Chain Settlement**: Anchored to Ethereum Sepolia Diamond proxy (`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`) and `PramanEscrow` (`0x202f3a3ae0dfb60c11f81b6ca82a18a6bbc7342c`).
 - **Reciprocal Ecosystem Bridges**: Integrated with FakeWatch (`fakewatch.pro`) and RugReceipt.
 
 ---

@@ -37,15 +37,14 @@
   - **Upstream PR #220**: `CORPORATE_REGISTRY_LOOKUP` adapter (Mission 03 / #191, Mission 13 / #201)
   - **Upstream PR #221**: `REGULATORY_FILING_MONITOR` adapter (Mission 04 / #192, Mission 13 / #201)
   - **Upstream PR #222**: `GRID_POWER_PRICE` adapter (Mission 11 / #199, Mission 12 / #200)
-  *(Submitted as reference adapters; per upstream PR #229, deterministic intents use the node's shared comparator, making our 68 EvalPool ground-truth rows our primary Track 3 scoring contribution)*  
+  *(Historical PRs #217–#222 were superseded/closed post-PR #229; active Track 3 contributions are our batch sanctions evaluator, 651-byte `comparator.wasm`, EvalPool ground-truth submissions, and Track 3 MiniCheck LoRA-v2 modules)*  
 - **Benchmark & Policy Evaluation**: "With vs Without Telegraph" ($79,373 Capital Loss Averted across 5 Adversarial Scenarios, 100% Catch Rate vs 0% Ungrounded Baseline)  
 - **Main Competition Deadline**: December 1, 2026, 23:59 UTC  
 - **GitHub Repository**: [https://github.com/VishAlgoDev/praman-desk](https://github.com/VishAlgoDev/praman-desk)  
 - **Live Application**: [https://praman-desk.vercel.app](https://praman-desk.vercel.app)  
-- **Multi-Miner Truth Matrix**: [https://praman-desk.vercel.app/#matrix](https://praman-desk.vercel.app/#matrix)  
-- **Official Master Walkthrough Video**: [https://praman-desk.vercel.app/praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4) (5.23m 1080p Screen Studio Master with Founder Audio)  
-- **Fast-Track Executive Demo (47s Video)**: [https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) (Immediate Visual Threat Interception Demo)  
-- **Starred Bounties Repo Account**: `VishAlgoDev` (Verified HTTP 204 Star on `telegraphprotocol/bounties`)
+- **Settlement Ledger & Desks**: [https://praman-desk.vercel.app/desks](https://praman-desk.vercel.app/desks)  
+- **Official Season II Walkthrough Video**: [https://praman-desk.vercel.app/praman-s2.mp4](https://praman-desk.vercel.app/praman-s2.mp4) (Studio-narrated 1080p walkthrough embedded on landing page)  
+- **Starred Bounties Repo Account**: `VishAlgoDev`
 
 ---
 
@@ -55,28 +54,22 @@
 - **Contact Email**: `vishalkarad98@gmail.com`
 - **GitHub Account**: [`https://github.com/VishAlgoDev`](https://github.com/VishAlgoDev)
 - **Primary Contributor & Fee Address**: `0x98021b20Efdb7ae2C57366010a6E0fDE207b4466`
-- **Network**: Ethereum Sepolia Testnet + Telegraph Protocol Devnode (`https://devnode.telegraphprotocol.com`)
-- **Sepolia Diamond Contract (registration #6164 / Devnode miner #6164 / route #5281)**: [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
+- **Network**: Ethereum Sepolia Testnet + Solana Devnet + Telegraph Protocol Devnode (`https://devnode.telegraphprotocol.com`)
+- **Sepolia Diamond Contract (`praman-compliance-miner`, Devnode directory #6164 / RegID #6217)**: [`0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b`](https://sepolia.etherscan.io/address/0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b)
 - **Test USDC Contract**: [`0xcc194e1a843B658526D0D5C431f670028582Ae17`](https://sepolia.etherscan.io/address/0xcc194e1a843B658526D0D5C431f670028582Ae17)
-- **Anjoman App Registry**: Submission ID `9ae7025e-65be-490b-8e59-2aa598f16992` (`In review`)
+- **Anjoman App Registry**: Primary `praman-desk` (`9ae7025e-65be-490b-8e59-2aa598f16992`)
 
 ---
 
 ## SECTION 02: Master Video Walkthrough & Demos
 
-- **Canonical Master Walkthrough (5.23 Minutes, 1080p 60fps HD)**:  
-  [https://praman-desk.vercel.app/praman-desk-walkthrough.mp4](https://praman-desk.vercel.app/praman-desk-walkthrough.mp4)  
-  *Audio*: Authentic Indian founder walkthrough narration by Prabhat  
+- **Canonical Season II Walkthrough (1080p HD):**  
+  [https://praman-desk.vercel.app/praman-s2.mp4](https://praman-desk.vercel.app/praman-s2.mp4)  
   *Coverage*:
-  1. Live Agent Interception: Real Cursor / Claude Code agent attempting payout to Lazarus Group OFAC-sanctioned address intercepted by Praman Spend Guard before `signer.sendTransaction()` can execute.
-  2. Two-Mind Collaborative Architecture: Diligence Investigator + Escrow Reviewer cross-corroborating statutory registers.
-  3. Interactive General-Purpose Mind Playground: Live in-browser arbitration fulfilling Ahmed Ali's Golden Challenge.
-  4. Public On-Chain Transparency Ledger (`/ledger`): 57+ on-chain Sepolia Diamond settlement receipts with direct Etherscan links.
-  5. Multi-Miner Discrepancy Arbitrator: Mathematical resolution of competing miner claims using the 651-byte WASM engine.
-
-- **Minds Two-Mind Highlight Excerpt (47 Seconds, 1080p HD)**:  
-  [https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4](https://praman-desk.vercel.app/praman_minds_benchmark_showcase.mp4) (~1.42 MB)  
-  *Flow*: Focused 47s Act 4 excerpt demonstrating the Animoca Brands Two-Mind collaborative spend guard (Investigator + Reviewer) intercepting arithmetic overcharge and authorizing escrow release.
+  1. Adversarial Policy Benchmark (`$79,373` baseline exposure halted at `100%` block rate) & Alibaba Trade Assurance (`PO-ALI-9021`, `PramanEscrow` Sepolia deals, EIP-191 memo verification).
+  2. Solana Spend Guard Pre-Signature Firewall (`web3.js` supply-chain hook block, drainer interception, Token-2022 TLV-12/14 traps, Devnet confirmation).
+  3. Public Settlement Ledger (`/desks#settlement-ledger`, `32` Sepolia calls across `15` miners) & GSQ Mining Registry (`Mount Morgan` reconciliation + fail-closed `20%` prospect gate).
+  4. Procurement & WASM Interactive Labs, 29-tool Keyless MCP, and Animoca Minds `Praman_Spend_Guard` skill.
 
 ## SECTION 03: How to Run & Reproduce (Beginner-Friendly Steps)
 
@@ -173,7 +166,7 @@ In 2026, autonomous AI agents are being granted keys to execute real financial t
 Praman Desk serves as an autonomous pre-payment spend firewall:
 1. **Pre-Payment Verification Gate**: Intercepts transactions before `signer.sendTransaction()` is invoked.
 2. **Primary Counterparty Registries**: Queries live statutory registers (GLEIF Global LEI) in real time with zero third-party API keys.
-3. **Exploit & Sanctions Defense (Mission 02)**: Screens recipient EVM addresses against 19,565 US Treasury OFAC SDN entries and known exploiters (including Lazarus Group).
+3. **Exploit & Sanctions Defense (Mission 02)**: Screens recipient EVM addresses and company names against `20,022` US Treasury OFAC SDN & Consolidated Non-SDN (incl. CMIC military-company) entries plus known exploiters (including Lazarus Group).
 4. **Deterministic WebAssembly Engine (Mission 11)**: A 651-byte zero-dependency WASM comparator performs bit-exact line-item summation, catching single-cent and overcharge discrepancies.
 5. **Telegraph x402 Micropayments**: Settles verification claims over x402 payment channels for $0.01 on Ethereum Sepolia.
 

@@ -34,3 +34,16 @@ examples/minds-spend-guard/test-bundles/
 .vercel
 .env*
 _archived/
+AGENTS.md
+GEMINI.md
+CLAUDE.md
+AGENT_HANDOFF_INSTRUCTIONS.md
+MASTER_OMNIBUS_COMPETITION_PLAN.md
+RECORD_YOUR_VOICE_NOW.bat
+run-paid-milestone.bat
+x_thread_final.txt
+.cursorrules
+.cursor/
+.mlai/
+audit/
+memory/

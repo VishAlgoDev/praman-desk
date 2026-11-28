@@ -62,7 +62,7 @@ INTENT_SPECS = {
         "grad_accum": "1",
     },
     "DOCUMENT_AUTHENTICITY": {
-        "class": "hybrid",
+        "class": "judgment",
         "train_file": "v8_document_authenticity_train.jsonl",
         "val_file": "v8_document_authenticity_val.jsonl",
         "epochs": "2",
@@ -70,7 +70,7 @@ INTENT_SPECS = {
         "grad_accum": "1",
     },
     "URL_SAFE": {
-        "class": "hybrid",
+        "class": "judgment",
         "train_file": "v8_url_scan_train.jsonl",
         "val_file": "v8_url_scan_val.jsonl",
         "epochs": "2",
@@ -79,18 +79,29 @@ INTENT_SPECS = {
     },
 }
 
+DEFAULT_ACTIVE = os.environ.get(
+    "ACTIVE_INTENTS",
+    "SANCTIONS_SCREENING_MATCH,INVOICE_LEDGER_RECONCILE"
+).strip()
+ACTIVE_INTENTS = [
+    x.strip().upper()
+    for x in (",".join(INTENT_SPECS.keys()) if DEFAULT_ACTIVE.upper() == "ALL" else DEFAULT_ACTIVE).split(",")
+    if x.strip() and x.strip().upper() in INTENT_SPECS
+]
+
 STATE = {
-    "stage": "idle",
+    "stage": "initializing",
     "prep_done": False,
-    "active_intent": None,
-    "runner_intent": None,
-    "runner_pid": None,
+    "ready": False,
+    "active_intents": ACTIVE_INTENTS,
+    "warm_intents": {},
+    "ports": {},
     "adapters": {},
     "log": [],
 }
 
-EXEC_LOCK = threading.Lock()
-RUNNER_PROC = None
+RUNNER_PROCS = {}
+INTENT_LOCKS = {k: threading.Lock() for k in INTENT_SPECS}
 
 
 def log(msg: str):
@@ -296,50 +307,105 @@ def train_and_validate_intent(intent_key: str):
         return entry
 
 
-def ensure_runner(intent_key: str):
-    global RUNNER_PROC
+def get_port_for_intent(intent_key: str) -> int:
+    if intent_key in ACTIVE_INTENTS:
+        return 8089 + ACTIVE_INTENTS.index(intent_key)
+    keys = list(INTENT_SPECS.keys())
+    return 8089 + keys.index(intent_key)
+
+
+def ensure_runner(intent_key: str) -> int:
     pkg_path = PKG_DIR / f"{intent_key}_v8.safetensors"
     if not pkg_path.exists():
-        raw_url = f"https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/{pkg_path.name}"
-        log(f"Downloading committed package {pkg_path.name} from GitHub...")
-        r = httpx.get(raw_url, timeout=120.0, follow_redirects=True)
-        if r.status_code == 200 and len(r.content) > 1000:
-            pkg_path.write_bytes(r.content)
-        else:
-            raise FileNotFoundError(f"Package {pkg_path.name} not found locally or on GitHub (HTTP {r.status_code})")
-    ensure_tools_and_foundation()
-    with EXEC_LOCK:
-        if RUNNER_PROC is not None and RUNNER_PROC.poll() is None and STATE["runner_intent"] == intent_key:
-            return
-        if RUNNER_PROC is not None and RUNNER_PROC.poll() is None:
-            RUNNER_PROC.terminate()
+        base_dl = os.environ.get(
+            "ADAPTER_RELEASE_BASE",
+            "https://github.com/VishAlgoDev/praman-desk/releases/download/track3-v8"
+        ).rstrip("/")
+        candidates = [
+            f"{base_dl}/{pkg_path.name}",
+            f"https://raw.githubusercontent.com/VishAlgoDev/praman-desk/main/packages/{pkg_path.name}",
+        ]
+        for raw_url in candidates:
+            log(f"Downloading package {pkg_path.name} from {raw_url}...")
             try:
-                RUNNER_PROC.wait(timeout=5)
+                r = httpx.get(raw_url, timeout=120.0, follow_redirects=True)
+                if r.status_code == 200 and len(r.content) > 1000:
+                    pkg_path.write_bytes(r.content)
+                    break
+            except Exception as exc:
+                log(f"Download attempt failed for {raw_url}: {exc}")
+        if not pkg_path.exists():
+            raise FileNotFoundError(f"Package {pkg_path.name} not found locally or at configured release URLs")
+
+    ensure_tools_and_foundation()
+    port = get_port_for_intent(intent_key)
+    lock = INTENT_LOCKS.setdefault(intent_key, threading.Lock())
+    with lock:
+        proc = RUNNER_PROCS.get(intent_key)
+        if proc is not None and proc.poll() is None and STATE["warm_intents"].get(intent_key):
+            return port
+        if proc is not None and proc.poll() is None:
+            proc.terminate()
+            try:
+                proc.wait(timeout=5)
             except Exception:
-                RUNNER_PROC.kill()
+                proc.kill()
         env = go_env()
         env["FOUNDATION_MODEL_PATH"] = str(FOUNDATION_DIR / "foundation.json")
         env["FOUNDATION_MODEL_HASH"] = FOUNDATION_HASH
         env["FOUNDATION_MODEL_VERSION"] = "minicheck-deberta-v3-large"
         env["FOUNDATION_ENGINE_WASM_PATH"] = str(FOUNDATION_DIR / "foundation_engine.wasm")
         env["FOUNDATION_ENGINE_WASM_HASH"] = ENGINE_HASH
-        RUNNER_PROC = subprocess.Popen(
-            [str(BASELINE / "adapterexec"), "--package", str(pkg_path), "--listen", "127.0.0.1:8089"],
+        proc = subprocess.Popen(
+            [str(BASELINE / "adapterexec"), "--package", str(pkg_path), "--listen", f"127.0.0.1:{port}"],
             cwd=str(BASELINE),
             env=env,
         )
-        STATE["runner_intent"] = intent_key
-        STATE["runner_pid"] = RUNNER_PROC.pid
+        RUNNER_PROCS[intent_key] = proc
+        STATE["ports"][intent_key] = port
         for _ in range(120):
-            if RUNNER_PROC.poll() is not None:
-                raise RuntimeError(f"adapterexec exited early rc={RUNNER_PROC.returncode}")
+            if proc.poll() is not None:
+                STATE["warm_intents"][intent_key] = False
+                raise RuntimeError(f"adapterexec ({intent_key}) exited early rc={proc.returncode}")
             try:
                 with httpx.Client(timeout=1.5) as cl:
-                    cl.get("http://127.0.0.1:8089/")
-                return
+                    cl.get(f"http://127.0.0.1:{port}/")
+                STATE["warm_intents"][intent_key] = True
+                return port
             except Exception:
                 time.sleep(1.0)
-        raise TimeoutError("adapterexec failed to bind 127.0.0.1:8089")
+        STATE["warm_intents"][intent_key] = False
+        raise TimeoutError(f"adapterexec ({intent_key}) failed to bind 127.0.0.1:{port}")
+
+
+def prewarm_active_intents():
+    try:
+        ensure_tools_and_foundation()
+        for intent_key in ACTIVE_INTENTS:
+            try:
+                ensure_runner(intent_key)
+                log(f"Pre-warmed persistent runner for {intent_key} on port {STATE['ports'].get(intent_key)}")
+            except Exception as exc:
+                log(f"Pre-warm warning for {intent_key}: {exc!r}")
+        STATE["ready"] = all(STATE["warm_intents"].get(i) for i in ACTIVE_INTENTS)
+        STATE["stage"] = "ready" if STATE["ready"] else "partial"
+    except Exception as exc:
+        STATE["stage"] = f"warmup_error:{exc!r}"
+
+
+async def ep_health():
+    ready = bool(STATE["ready"])
+    code = 200 if ready else 503
+    return JSONResponse(
+        {
+            "ok": ready,
+            "stage": STATE["stage"],
+            "active_intents": ACTIVE_INTENTS,
+            "warm_intents": STATE["warm_intents"],
+        },
+        status_code=code,
+        headers={} if ready else {"Retry-After": "5"},
+    )
 
 
 async def ep_status():
@@ -363,15 +429,26 @@ async def ep_download_meta(request: Request):
 
 
 async def ep_runnable(request: Request) -> Response:
-    raw_intent = request.path_params.get("intent") or "SANCTIONS_SCREENING_MATCH"
+    raw_intent = request.path_params.get("intent") or ACTIVE_INTENTS[0]
     intent_key = raw_intent.upper()
     if intent_key not in INTENT_SPECS:
         return JSONResponse({"error": f"Unknown intent {intent_key}"}, status_code=404)
     body = await request.body()
-    await asyncio.to_thread(ensure_runner, intent_key)
+    if not STATE["warm_intents"].get(intent_key):
+        try:
+            port = await asyncio.to_thread(ensure_runner, intent_key)
+        except Exception as exc:
+            return JSONResponse(
+                {"error": f"Runner warming for {intent_key}: {exc}"},
+                status_code=503,
+                headers={"Retry-After": "5"},
+            )
+    else:
+        port = get_port_for_intent(intent_key)
+
     async with httpx.AsyncClient(timeout=1800.0) as client:
         upstream = await client.post(
-            "http://127.0.0.1:8089/runnable",
+            f"http://127.0.0.1:{port}/runnable",
             content=body,
             headers={"Content-Type": "application/json"},
         )
@@ -385,23 +462,24 @@ async def ep_runnable(request: Request) -> Response:
 with gr.Blocks(title="Praman MiniCheck LoRA-v2 Evaluator Suite") as demo:
     gr.Markdown(
         "## Praman Desk — Telegraph Track 3 MiniCheck-DeBERTa-v3-Large (512-token LoRA-v2)\n"
-        f"- Foundation Hash: `{FOUNDATION_HASH}` | Tokenizer: `{TOKENIZER_HASH}`"
+        f"- Active Intents: `{', '.join(ACTIVE_INTENTS)}` | Foundation: `{FOUNDATION_HASH}`"
     )
-    intent_in = gr.Textbox(label="Intent Family", value="SANCTIONS_SCREENING_MATCH")
+    intent_in = gr.Textbox(label="Intent Family", value=ACTIVE_INTENTS[0] if ACTIVE_INTENTS else "SANCTIONS_SCREENING_MATCH")
     btn = gr.Button("Train & Validate MiniCheck LoRA-v2")
     out = gr.JSON(value=STATE)
     btn.click(fn=train_and_validate_intent, inputs=[intent_in], outputs=out, api_name="train_intent")
 
 
 if __name__ == "__main__":
-    threading.Thread(target=ensure_tools_and_foundation, daemon=True).start()
+    threading.Thread(target=prewarm_active_intents, daemon=True).start()
     fastapi_app, local_url, _ = demo.launch(server_name="0.0.0.0", ssr_mode=False, prevent_thread_lock=True)
+    fastapi_app.router.routes.insert(0, APIRoute("/health", ep_health, methods=["GET"]))
     fastapi_app.router.routes.insert(0, APIRoute("/status", ep_status, methods=["GET"]))
     fastapi_app.router.routes.insert(0, APIRoute("/download/{intent}.safetensors", ep_download_pkg, methods=["GET"]))
     fastapi_app.router.routes.insert(0, APIRoute("/download/{intent}.json", ep_download_meta, methods=["GET"]))
     fastapi_app.router.routes.insert(0, APIRoute("/{intent}/runnable", ep_runnable, methods=["POST"]))
     fastapi_app.router.routes.insert(0, APIRoute("/{intent}", ep_runnable, methods=["POST"]))
     fastapi_app.router.routes.insert(0, APIRoute("/runnable", ep_runnable, methods=["POST"]))
-    print("MiniCheck LoRA-v2 trainer + runner live on", local_url, flush=True)
+    print("MiniCheck LoRA-v2 multi-port persistent runner live on", local_url, flush=True)
     while True:
         time.sleep(3600)

@@ -350,32 +350,37 @@
   $("#ta-scenario")?.addEventListener("change", updateScenarioPreview);
   updateScenarioPreview();
 
-  let pipeTimer = null;
-  function runPipeline(haltAt) {
-    clearInterval(pipeTimer);
+  function beginPipelineWait() {
     $$(".stage-cell").forEach((el) => el.classList.remove("is-pass", "is-halted"));
     const prog = $("#pipe-progress");
-    if (prog) prog.value = 0;
-    $("#pipe-count").textContent = "RUNNING";
-    let i = 0;
-    pipeTimer = setInterval(() => {
-      if (i >= STAGES.length || i >= haltAt) {
-        clearInterval(pipeTimer);
-        if (i < STAGES.length) {
-          $("#stage-" + i)?.classList.add("is-halted");
-          $("#pipe-count").textContent = `HALT @ STAGE ${i + 1}`;
-          $("#pipe-left").textContent = `Halted: ${STAGES[i]}`;
-        } else {
-          $("#pipe-count").textContent = "15 / 15 PASS";
-          $("#pipe-left").textContent = "All 15 stages passed";
-        }
-        return;
-      }
+    if (prog) prog.removeAttribute("value");
+    if ($("#pipe-count")) $("#pipe-count").textContent = "AUDITING...";
+    if ($("#pipe-left")) $("#pipe-left").textContent = "Running WASM comparator, OFAC + Non-SDN screening & policy gates...";
+  }
+
+  function commitPipelineVerdict(d, scenario, ms) {
+    const settled = d.status === "APPROVED" || d.status === "REFUNDED";
+    const flags = Array.isArray(d.flags) ? d.flags : [];
+    let haltIdx = STAGES.length;
+    if (!settled) {
+      if (scenario === "alibaba_missing_evidence" || flags.some((f) => /MISSING|EVIDENCE|GRN/i.test(f))) haltIdx = 7;
+      else if (scenario === "alibaba_conflicting_reports" || flags.some((f) => /CONFLICT|DISPUTE/i.test(f))) haltIdx = 9;
+      else haltIdx = 11;
+    }
+    const passedCount = Math.min(STAGES.length, haltIdx);
+    for (let i = 0; i < passedCount; i++) {
       $("#stage-" + i)?.classList.add("is-pass");
-      if (prog) prog.value = i + 1;
-      $("#pipe-left").textContent = `Stage ${i + 1}: ${STAGES[i]}`;
-      i++;
-    }, 55);
+    }
+    const prog = $("#pipe-progress");
+    if (prog) prog.value = passedCount;
+    if (haltIdx < STAGES.length) {
+      $("#stage-" + haltIdx)?.classList.add("is-halted");
+      if ($("#pipe-count")) $("#pipe-count").textContent = `HALT @ STAGE ${haltIdx + 1}`;
+      if ($("#pipe-left")) $("#pipe-left").textContent = `Halted at ${STAGES[haltIdx]} (${ms} ms server telemetry)`;
+    } else {
+      if ($("#pipe-count")) $("#pipe-count").textContent = "15 / 15 PASS";
+      if ($("#pipe-left")) $("#pipe-left").textContent = `All 15 stages passed (${ms} ms server telemetry)`;
+    }
   }
 
   function openCertificate(d, payload) {
@@ -417,8 +422,7 @@
       disputeResolutionAuthorized: scenario === "alibaba_reconciled",
       reconciledDisbursementUsdc: scenario === "alibaba_reconciled" ? 80000 : usdc
     };
-    const halts = { alibaba_trade: 12, alibaba_reconciled: 15, alibaba_missing_evidence: 8, alibaba_conflicting_reports: 10, alibaba_refund: 15 };
-    runPipeline(halts[scenario] ?? 12);
+    beginPipelineWait();
 
     try {
       const t0 = performance.now();
@@ -429,6 +433,7 @@
       });
       const d = await res.json();
       const ms = (performance.now() - t0).toFixed(1);
+      commitPipelineVerdict(d, scenario, ms);
       const settled = d.status === "APPROVED" || d.status === "REFUNDED";
       const vb = $("#verdict-body");
       vb.className = "verdict-box " + (settled ? "is-approved" : "is-halt");
@@ -455,7 +460,10 @@
       $("#ta-status").textContent = `Completed in ${ms} ms · ${d.status}`;
     } catch (err) {
       $("#ta-status").textContent = "Audit request failed: " + err.message;
-      clearInterval(pipeTimer);
+      const prog = $("#pipe-progress");
+      if (prog) prog.value = 0;
+      if ($("#pipe-count")) $("#pipe-count").textContent = "ERROR";
+      if ($("#pipe-left")) $("#pipe-left").textContent = "Server request failed";
     } finally {
       btn.disabled = false;
     }
@@ -467,7 +475,7 @@
     const out = $("#sg-out");
     const scenario = $("#sg-scenario").value;
     btn.disabled = true;
-    out.innerHTML = `<div class="verdict-box">Evaluating SolanaSpendGuard &amp; 19,629 OFAC SDN RAM...</div>`;
+    out.innerHTML = `<div class="verdict-box">Evaluating SolanaSpendGuard &amp; 20,022 US Treasury SDN/CMIC RAM...</div>`;
     try {
       const r = await fetch("/api/audit/solana-spend-guard", {
         method: "POST",
@@ -911,5 +919,49 @@
     } catch (err) {
       out.textContent = "WASM execution failed: " + err.message;
     }
+  });
+
+  $("#cqa-btn")?.addEventListener("click", (e) => {
+    const mode = $("#cqa-mode")?.value || "clean";
+    const advertiser = $("#cqa-adv")?.value.trim() || "Siemens Aktiengesellschaft";
+    const payload = mode === "risky"
+      ? {
+          advertiserName: advertiser,
+          landingUrl: "https://unisvvap.org/airdrop-claim",
+          claimText: "Guaranteed 400% yield return — unverified promotional offer",
+          statedTotalUsd: 12000,
+          computedTotalUsd: 10000
+        }
+      : {
+          advertiserName: advertiser,
+          landingUrl: "https://siemens.com/enterprise",
+          claimText: "#ad Sponsored B2B hardware campaign — terms apply",
+          statedTotalUsd: 10000,
+          computedTotalUsd: 10000
+        };
+    pvCall(e.currentTarget, $("#cqa-out"), "/api/creative-qa/audit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  });
+
+  $("#arb-btn")?.addEventListener("click", (e) => {
+    const topic = $("#arb-topic")?.value.trim() || "Mount Morgan Mine historical gold production";
+    pvCall(e.currentTarget, $("#arb-out"), "/api/miner/arbitrate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: topic })
+    });
+  });
+
+  $("#mkt-btn")?.addEventListener("click", (e) => {
+    const route = $("#mkt-intent")?.value || "/api/miner/crypto-price";
+    const queryText = $("#mkt-query")?.value.trim() || "What is Bitcoin worth?";
+    pvCall(e.currentTarget, $("#mkt-out"), `${route}?query=${q(queryText)}`);
+  });
+
+  $("#biz-btn")?.addEventListener("click", (e) => {
+    pvCall(e.currentTarget, $("#biz-out"), "/api/business");
   });
 })();

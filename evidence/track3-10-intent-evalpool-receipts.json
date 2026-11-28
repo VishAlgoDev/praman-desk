@@ -1,0 +1,204 @@
+{
+  "timestamp": "2026-11-28T14:03:02.312Z",
+  "submitter": "0x98021b20Efdb7ae2C57366010a6E0fDE207b4466",
+  "nodeUrl": "https://devnode.telegraphprotocol.com",
+  "results": [
+    {
+      "intentId": "URL_SCAN_VERDICT",
+      "status": 200,
+      "rowCount": 4,
+      "response": {
+        "intent_id": "URL_SCAN_VERDICT",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 4,
+        "accepted": 4,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 4,
+        "state_counts": {
+          "admitted": 4,
+          "eligible": 65,
+          "rejected": 58
+        }
+      }
+    },
+    {
+      "intentId": "THREAT_INTELLIGENCE_INDICATOR",
+      "status": 200,
+      "rowCount": 4,
+      "response": {
+        "intent_id": "THREAT_INTELLIGENCE_INDICATOR",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 4,
+        "accepted": 4,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 4,
+        "state_counts": {
+          "admitted": 4,
+          "eligible": 230,
+          "superseded": 1
+        }
+      }
+    },
+    {
+      "intentId": "TRANSACTION_RISK_GENERAL",
+      "status": 200,
+      "rowCount": 4,
+      "response": {
+        "intent_id": "TRANSACTION_RISK_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 4,
+        "accepted": 4,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 4,
+        "state_counts": {
+          "admitted": 4,
+          "eligible": 99
+        }
+      }
+    },
+    {
+      "intentId": "SSL_VERIFICATION_CERT",
+      "status": 200,
+      "rowCount": 4,
+      "response": {
+        "intent_id": "SSL_VERIFICATION_CERT",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 4,
+        "accepted": 4,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 4,
+        "state_counts": {
+          "admitted": 4,
+          "eligible": 3,
+          "rejected": 2
+        }
+      }
+    },
+    {
+      "intentId": "CVE_LOOKUP_CVSS",
+      "status": 200,
+      "rowCount": 4,
+      "response": {
+        "intent_id": "CVE_LOOKUP_CVSS",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 4,
+        "accepted": 4,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 4,
+        "state_counts": {
+          "admitted": 4,
+          "eligible": 63,
+          "rejected": 48,
+          "superseded": 1
+        }
+      }
+    },
+    {
+      "intentId": "SHIPMENT_DELAY_RISK_GENERAL",
+      "status": 200,
+      "rowCount": 4,
+      "response": {
+        "intent_id": "SHIPMENT_DELAY_RISK_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 4,
+        "accepted": 4,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 4,
+        "state_counts": {
+          "admitted": 4,
+          "eligible": 52
+        }
+      }
+    },
+    {
+      "intentId": "IP_GEOLOCATION_GENERAL",
+      "status": 200,
+      "rowCount": 4,
+      "response": {
+        "intent_id": "IP_GEOLOCATION_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 4,
+        "accepted": 4,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 4,
+        "state_counts": {
+          "admitted": 4,
+          "eligible": 26
+        }
+      }
+    },
+    {
+      "intentId": "TOKEN_HOLDER_COUNT_GENERAL",
+      "status": 200,
+      "rowCount": 4,
+      "response": {
+        "intent_id": "TOKEN_HOLDER_COUNT_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 4,
+        "accepted": 4,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 4,
+        "state_counts": {
+          "admitted": 4,
+          "eligible": 206,
+          "rejected": 2
+        }
+      }
+    },
+    {
+      "intentId": "WASH_TRADING_DETECTION_GENERAL",
+      "status": 200,
+      "rowCount": 4,
+      "response": {
+        "intent_id": "WASH_TRADING_DETECTION_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 4,
+        "accepted": 4,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 4,
+        "state_counts": {
+          "admitted": 4,
+          "eligible": 840,
+          "rejected": 9
+        }
+      }
+    },
+    {
+      "intentId": "TELEGRAPH_KNOWLEDGE_GENERAL",
+      "status": 200,
+      "rowCount": 4,
+      "response": {
+        "intent_id": "TELEGRAPH_KNOWLEDGE_GENERAL",
+        "submitter": "0x98021b20efdb7ae2c57366010a6e0fde207b4466",
+        "signed": true,
+        "received": 4,
+        "accepted": 4,
+        "duplicate": 0,
+        "rejected": 0,
+        "curated": 4,
+        "state_counts": {
+          "admitted": 4,
+          "eligible": 84
+        }
+      }
+    }
+  ]
+}

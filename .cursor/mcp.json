@@ -1,7 +1,0 @@
-{
-  "mcpServers": {
-    "praman-desk": {
-      "url": "https://praman-desk.vercel.app/api/mcp"
-    }
-  }
-}

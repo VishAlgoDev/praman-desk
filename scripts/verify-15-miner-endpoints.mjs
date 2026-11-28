@@ -45,7 +45,13 @@ const TEST_QUERIES = [
   { intent: 'IP_GEOLOCATION_GENERAL', path: '/api/miner/ip-geolocation?ip=8.8.8.8', check: j => j.ok === true && /United States/i.test(String(j.country || '')) && typeof j.latitude === 'number' },
   { intent: 'TOKEN_HOLDER_COUNT_GENERAL', path: '/api/miner/token-holders?token=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&chain=ethereum', check: j => j.ok === true && Number(j.holders_count) > 100000 && j.token_symbol === 'USDC' },
   { intent: 'WASH_TRADING_DETECTION_GENERAL', path: '/api/miner/wash-trading?subject=WETH%2FUSDC', check: j => j.ok === true && ['wash_trading', 'likely_wash_trading', 'inconclusive', 'organic'].includes(j.verdict) && typeof j.wash_volume_pct === 'number' },
-  { intent: 'TELEGRAPH_KNOWLEDGE_GENERAL', path: '/api/miner/telegraph-knowledge?question=What%20is%20the%20Sepolia%20Diamond%20address%20for%20Telegraph%20Protocol%3F', check: j => j.ok === true && j.knowledge_topic === 'telegraph' && String(j.brief || '').length <= 80 && String(j.brief || '').length > 0 }
+  { intent: 'TELEGRAPH_KNOWLEDGE_GENERAL', path: '/api/miner/telegraph-knowledge?question=What%20is%20the%20Sepolia%20Diamond%20address%20for%20Telegraph%20Protocol%3F', check: j => j.ok === true && j.knowledge_topic === 'telegraph' && String(j.brief || '').length <= 80 && String(j.brief || '').length > 0 },
+  { intent: 'NON_SDN_CMIC_SANCTIONS', path: '/api/miner/sanctions-screen?name=China%20Telecom%20Corporation%20Limited', check: j => j.matched === true && /CMIC/i.test(String(j.matches?.[0]?.programs || '')) },
+  { intent: 'CRYPTO_PRICE_USD', path: '/api/miner/crypto-price?query=What%20is%20Bitcoin%20worth%3F', check: j => j.ok === true && Number(j.price_usd) > 1000 && j.symbol === 'BTC' },
+  { intent: 'CURRENCY_EXCHANGE_CONVERT', path: '/api/miner/currency-exchange?query=Convert%20100%20dollars%20to%20euros', check: j => j.ok === true && j.from === 'USD' && j.to === 'EUR' && Number(j.result) > 0 },
+  { intent: 'FX_NOW_CAD', path: '/api/miner/fx-now?query=What%20is%20the%20USD%20to%20CAD%20rate%20right%20now%3F', check: j => j.ok === true && j.base === 'USD' && j.quote === 'CAD' && Number(j.rate) > 0 },
+  { intent: 'STOCK_PRICE_US_EQUITY', path: '/api/miner/stock-price?query=What%20is%20Apple%20trading%20at%3F', check: j => j.ok === true && j.symbol === 'AAPL' && Number(j.price_usd) > 10 },
+  { intent: 'WEATHER_CHECK_TEMPERATURE', path: '/api/miner/weather-check?query=Current%20temperature%20in%20London', check: j => j.ok === true && typeof j.temperature_c === 'number' && /London/i.test(String(j.location || '')) }
 ];
 
 async function main() {

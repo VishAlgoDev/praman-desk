@@ -117,8 +117,8 @@ async function main() {
 
   // 3. OpenClaw / Hermes #19 / #20
   const skillRes = await verifyOpenClawHermesSkill();
-  assert.equal(skillRes.mcpToolCount, 18);
-  console.log('8. [PASS] OpenClaw & Hermes 18-tool skill verified end-to-end.');
+  assert.equal(skillRes.mcpToolCount, 29);
+  console.log('8. [PASS] OpenClaw & Hermes 29-tool skill verified end-to-end.');
 
   if (isLive) {
     const purchases = [

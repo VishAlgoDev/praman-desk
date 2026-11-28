@@ -28,11 +28,6 @@
     "minds:test": "node examples/minds-spend-guard/test-two-minds.mjs",
     "general-mind:test": "node examples/general-purpose-mind/test-general-purpose-mind.mjs",
     "benchmark": "node benchmark/with-vs-without-telegraph.mjs",
-    "video:render": "node scripts/render-minds-benchmark-video.mjs",
-    "video:postprocess": "node scripts/postprocess-walkthrough-prabhat.mjs",
-    "video:fix-act4": "node scripts/record-act4-two-minds-patch.mjs && node scripts/splice-walkthrough-act4.mjs",
-    "video:record-benchmark": "node scripts/excerpt-walkthrough-benchmark.mjs",
-    "video:publish": "node scripts/splice-walkthrough-act4.mjs && node scripts/excerpt-walkthrough-benchmark.mjs",
     "track3:submit": "node scripts/submit-track3-evaluator-dataset.mjs",
     "track3:pr229": "node scripts/submit-track3-pr229-evalpool.mjs",
     "acp:test": "node examples/virtuals-acp-commerce/test-acp-evaluator.mjs",
@@ -48,7 +43,6 @@
     "eval:submit": "node scripts/submit-eval.mjs",
     "app:demo": "node compliance-auditor-app/audit-demo.mjs",
     "web": "node web/server.mjs",
-    "bounty:claim-and-submit": "node scripts/bounty-submit-helper.mjs",
     "start": "node web/server.mjs"
   },
   "dependencies": {

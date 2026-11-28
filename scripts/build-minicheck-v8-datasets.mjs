@@ -178,30 +178,40 @@ function buildFraudPairs(goodDoms, badDoms, count, startIdx) {
 }
 
 // ---------------------------------------------------------------------------
-// 4. DOCUMENT_AUTHENTICITY (220 train / 56 val, balanced Authentic vs Tampered)
+// 4. DOCUMENT_AUTHENTICITY (260 train / 64 val, multi-format judgment pairs)
 // ---------------------------------------------------------------------------
+const DOC_TYPES = ['commercial invoice', 'bill of lading', 'certificate of origin', 'wire confirmation', 'e-Invoice IRN record', 'inspection report'];
+
 function buildDocAuthPairs(count, prefix) {
   const rows = [];
   for (let i = 0; i < count; i++) {
     const docId = `DOC-${prefix}-${2000 + i}`;
+    const docType = DOC_TYPES[i % DOC_TYPES.length];
     const expectedHash = hex64(`${docId}-expected`);
     const isAuthentic = i % 2 === 0;
     const faceAmt = (randInt(10, 250) * 100).toFixed(2);
     const qrAmt = isAuthentic ? faceAmt : (Number(faceAmt) + randInt(500, 9000)).toFixed(2);
     const observedHash = isAuthentic ? expectedHash : hex64(`${docId}-tampered`);
+    const issuerDate = isAuthentic ? '2026-11-18' : pick(['2026-11-02', '2025-10-14', '2026-09-29']);
 
-    const prompt = `Verify cryptographic authenticity of e-Invoice ${docId}: stated total USD ${faceAmt}, signed QR payload amount USD ${qrAmt}, PDF digest ${observedHash.slice(0, 16)}... vs IRN anchor ${expectedHash.slice(0, 16)}...`;
+    const templates = [
+      `Is this ${docType} (${docId}) authentic? Document states USD ${faceAmt} dated 2026-11-18 with SHA-256 ${observedHash.slice(0, 16)}; registry record holds USD ${qrAmt} dated ${issuerDate} with SHA-256 ${expectedHash.slice(0, 16)}.`,
+      `Evaluate document integrity for ${docId} (${docType}): submitted hash ${observedHash.slice(0, 14)} vs canonical anchor ${expectedHash.slice(0, 14)}; amount billed USD ${faceAmt} vs signed total USD ${qrAmt}.`,
+      `Verify cryptographic authenticity of ${docType} ${docId}: stated total USD ${faceAmt}, signed QR payload USD ${qrAmt}, issuer date ${issuerDate} (expected 2026-11-18), PDF digest ${observedHash.slice(0, 16)} vs anchor ${expectedHash.slice(0, 16)}.`
+    ];
+    const prompt = templates[i % templates.length];
+
     const authObj = {
       authentic: true,
       verdict: 'Authentic',
       discrepancy: 0,
-      summary: `AUTHENTIC (${docId}): Document SHA-256 digest and signed QR payload (USD ${faceAmt}) match registered IRN cryptographic anchor cleanly.`
+      summary: `Authentic (${docId}): SHA-256 digest ${observedHash.slice(0, 12)}, date 2026-11-18, and USD ${faceAmt} total match the registered ${docType} anchor.`
     };
     const tampObj = {
       authentic: false,
       verdict: 'Tampered',
       discrepancy: Number(Math.abs(Number(qrAmt) - Number(faceAmt)).toFixed(2)) || 1000,
-      summary: `TAMPERED (${docId}): PDF digest and face amount USD ${faceAmt} conflict with signed IRN payload (USD ${qrAmt}) cryptographic hash.`
+      summary: `Tampered (${docId}): submitted ${docType} digest ${observedHash.slice(0, 12)} or USD ${faceAmt} conflicts with anchor hash ${expectedHash.slice(0, 12)} (USD ${qrAmt}).`
     };
     rows.push(isAuthentic ? formatPair(prompt, authObj, tampObj, i) : formatPair(prompt, tampObj, authObj, i));
   }
@@ -209,28 +219,43 @@ function buildDocAuthPairs(count, prefix) {
 }
 
 // ---------------------------------------------------------------------------
-// 5. URL_SCAN (220 train / 56 val, balanced safe=true vs safe=false)
+// 5. URL_SAFE (260 train / 64 val, multi-format judgment pairs)
 // ---------------------------------------------------------------------------
-const SAFE_URLS_TRAIN = ['https://uniswap.org/swap', 'https://app.aave.com/markets', 'https://stripe.com/docs', 'https://github.com/ethereum', 'https://etherscan.io/txs', 'https://docs.solana.com/cli', 'https://ethereum.org/en/developers', 'https://lido.fi/ethereum'];
-const SAFE_URLS_VAL = ['https://base.org/ecosystem', 'https://arbitrum.io/bridge', 'https://docs.cdp.coinbase.com/', 'https://praman-desk.vercel.app/verify'];
+const SAFE_URLS_TRAIN = [
+  'https://uniswap.org/swap', 'https://app.aave.com/markets', 'https://stripe.com/docs',
+  'https://github.com/ethereum', 'https://etherscan.io/txs', 'https://docs.solana.com/cli',
+  'https://ethereum.org/en/developers', 'https://lido.fi/ethereum', 'https://anjoman.ai/dashboard',
+  'https://www.treasury.gov/ofac', 'https://api.gleif.org/api/v1/lei-records'
+];
+const SAFE_URLS_VAL = [
+  'https://base.org/ecosystem', 'https://arbitrum.io/bridge', 'https://docs.cdp.coinbase.com/',
+  'https://praman-desk.vercel.app/verify', 'https://sepolia.etherscan.io/', 'https://docs.telegraphprotocol.com/'
+];
 
 function buildUrlPairs(safeUrls, badDoms, count, tag) {
   const rows = [];
   for (let i = 0; i < count; i++) {
     const isSafe = i % 2 === 0;
+    const baseSafe = safeUrls[i % safeUrls.length];
+    const badDom = badDoms[i % badDoms.length];
     const url = isSafe
-      ? `${safeUrls[i % safeUrls.length]}?ref=${tag}${i}`
-      : `https://${badDoms[i % badDoms.length]}/claim-airdrop?id=${tag}${i}`;
-    const prompt = `Scan URL safety verdict for: ${url}`;
+      ? `${baseSafe}${baseSafe.includes('?') ? '&' : '?'}ref=${tag}${i}`
+      : `https://${badDom}/${pick(['claim-airdrop', 'wallet-sync', 'verify-kyc', 'unlock-bonus'])}?id=${tag}${i}`;
+    const prompts = [
+      `Is ${url} safe to visit or a phishing/drainer domain?`,
+      `Evaluate URL security verdict for ${url}: check homoglyph/typosquat patterns and drainer risk.`,
+      `Should an autonomous wallet agent trust ${url}? Return SAFE or MALICIOUS with reasoning.`
+    ];
+    const prompt = prompts[i % prompts.length];
     const safeObj = {
       safe: true,
       verdict: 'SAFE',
-      summary: `SAFE URL (${url}): Verified official host with clean threat feed record.`
+      summary: `SAFE (${url}): Verified official TLS domain with valid DNS and zero phishing or drainer indicators.`
     };
     const badObj = {
       safe: false,
       verdict: 'MALICIOUS',
-      summary: `UNSAFE URL (${url}): Phishing typosquat lure and drainer feed flag.`
+      summary: `MALICIOUS (${url}): Flagged typosquat/phishing domain and wallet-drainer lure; block navigation immediately.`
     };
     rows.push(isSafe ? formatPair(prompt, safeObj, badObj, i) : formatPair(prompt, badObj, safeObj, i));
   }
@@ -258,5 +283,5 @@ console.log('Generating balanced MiniCheck LoRA-v2 datasets into:', outDir);
 writeSplit('v8_invoice_reconcile', buildInvoicePairs(VENDORS_TRAIN, 240, 'TR'), buildInvoicePairs(VENDORS_VAL, 60, 'VA'));
 writeSplit('v8_contract_obligation', buildContractPairs(PARTIES_TRAIN, 220), buildContractPairs(PARTIES_VAL, 56));
 writeSplit('v8_fraud_risk', buildFraudPairs(GOOD_DOMAINS_TRAIN, BAD_DOMAINS_TRAIN, 220, 100), buildFraudPairs(GOOD_DOMAINS_VAL, BAD_DOMAINS_VAL, 56, 900));
-writeSplit('v8_document_authenticity', buildDocAuthPairs(220, 'TR'), buildDocAuthPairs(56, 'VA'));
-writeSplit('v8_url_scan', buildUrlPairs(SAFE_URLS_TRAIN, BAD_DOMAINS_TRAIN, 220, 'tr'), buildUrlPairs(SAFE_URLS_VAL, BAD_DOMAINS_VAL, 56, 'va'));
+writeSplit('v8_document_authenticity', buildDocAuthPairs(260, 'TR'), buildDocAuthPairs(64, 'VA'));
+writeSplit('v8_url_scan', buildUrlPairs(SAFE_URLS_TRAIN, BAD_DOMAINS_TRAIN, 260, 'tr'), buildUrlPairs(SAFE_URLS_VAL, BAD_DOMAINS_VAL, 64, 'va'));

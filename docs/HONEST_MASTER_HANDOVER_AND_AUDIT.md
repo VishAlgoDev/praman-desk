@@ -97,16 +97,15 @@ telegraph-h2/
 │       ├── praman_sdk.py        # Python client library
 │       └── test_sdk.py          # 9 Python unit tests
 ├── public/
-│   ├── index.html               # 2026 Tier-1 Obsidian FinTech Portal (Linear/Mercury standard)
+│   ├── index.html               # Interactive verification portal
+│   ├── desks/index.html         # 6 Specialized Operator Desks
 │   ├── favicon.svg              # Monochrome vector brand favicon
-│   └── praman_minds_benchmark_showcase.mp4 # Video asset
+│   └── praman-s2.mp4            # Studio-narrated Season II walkthrough video
 ├── scripts/
-│   ├── generate_portal_html.py  # Master generator for public/index.html
-│   ├── build_fintech_portal.py  # Script generating pre-hydrated FinTech index.html
-│   ├── test-endpoints-local.mjs # Test runner for all 28 API routes & regression guards
-│   ├── verify-15-miner-endpoints.mjs # Verification of 17 miner endpoints
-│   ├── sign-takar-disputes.mjs  # Automated on-chain signer for Takar Sepolia disputes
-│   └── generate-dual-video-audio.py # Audio generator for showcase narration
+│   ├── test-endpoints-local.mjs # Regression test runner for API routes
+│   ├── verify-15-miner-endpoints.mjs # End-to-end miner capability verifier
+│   ├── build-sdn-snapshot.mjs   # US Treasury OFAC SDN + Consolidated Non-SDN/CMIC snapshot builder
+│   └── update-miner-onchain-live.mjs # Sepolia Diamond batched miner registration updater
 ├── src/
 │   ├── handlers.mjs             # Monolithic API router and business logic handlers
 │   ├── universal-intents.mjs    # Specification and bindings for all 15 miner intents
